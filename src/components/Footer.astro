@@ -28,8 +28,8 @@ function routeLink(entity: string): { label: string; href: string } | null {
   return { label: r.labels[uiLang], href: `${prefix}/${r.segments[uiLang]}/` }
 }
 
-const exploreLinks = ['attraction', 'experience', 'event', 'tour'].map(routeLink).filter(Boolean) as { label: string; href: string }[]
-const serviceLinks = ['hotel', 'resort', 'restaurant', 'specialty'].map(routeLink).filter(Boolean) as { label: string; href: string }[]
+const exploreLinks = ['attraction', 'experience', 'tour'].map(routeLink).filter(Boolean) as { label: string; href: string }[]
+const serviceLinks = ['hotel', 'resort'].map(routeLink).filter(Boolean) as { label: string; href: string }[]
 const exploreHeading = ROUTE_MAP.find(e => e.entity === 'hub-kham-pha')?.labels[uiLang] ?? ''
 const guidesLink = routeLink('article')
 ---

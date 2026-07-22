@@ -33,7 +33,6 @@ export const HOME_COPY: Record<Lang, {
     quickLinks: [
       { label: 'Khám phá', entity: 'hub-kham-pha' },
       { label: 'Lưu trú', entity: 'hub-luu-tru' },
-      { label: 'Ẩm thực', entity: 'hub-am-thuc' },
       { label: 'Tour', entity: 'tour' },
     ],
     hubsHeading: 'Bắt đầu từ đâu?',
@@ -41,7 +40,6 @@ export const HOME_COPY: Record<Lang, {
     hubDescriptions: {
       'hub-kham-pha': 'Địa điểm, di tích, thiên nhiên, đảo biển',
       'hub-luu-tru': 'Khách sạn, resort, homestay ở mọi mức giá',
-      'hub-am-thuc': 'Nhà hàng, quán ăn, đặc sản địa phương',
       'hub-di-lai': 'Sân bay, xe bus, taxi, thuê xe máy',
     },
     trustItems: [
@@ -74,7 +72,6 @@ export const HOME_COPY: Record<Lang, {
     quickLinks: [
       { label: 'Things to do', entity: 'hub-kham-pha' },
       { label: 'Where to stay', entity: 'hub-luu-tru' },
-      { label: 'Food', entity: 'hub-am-thuc' },
       { label: 'Tours', entity: 'tour' },
     ],
     hubsHeading: 'Where to start?',
@@ -82,7 +79,6 @@ export const HOME_COPY: Record<Lang, {
     hubDescriptions: {
       'hub-kham-pha': 'Places and experiences in Nha Trang',
       'hub-luu-tru': 'Hotels and resorts for different budgets',
-      'hub-am-thuc': 'Restaurants and local specialties',
       'hub-di-lai': 'Transport guides and practical routes',
     },
     trustItems: [
@@ -115,7 +111,6 @@ export const HOME_COPY: Record<Lang, {
     quickLinks: [
       { label: '玩乐', entity: 'hub-kham-pha' },
       { label: '住宿', entity: 'hub-luu-tru' },
-      { label: '美食', entity: 'hub-am-thuc' },
       { label: '旅行团', entity: 'tour' },
     ],
     hubsHeading: '从哪里开始？',
@@ -123,7 +118,6 @@ export const HOME_COPY: Record<Lang, {
     hubDescriptions: {
       'hub-kham-pha': '芽庄的地点和体验',
       'hub-luu-tru': '酒店和度假村选择',
-      'hub-am-thuc': '餐厅和本地特产',
       'hub-di-lai': '交通指南和实用路线',
     },
     trustItems: [
@@ -156,7 +150,6 @@ export const HOME_COPY: Record<Lang, {
     quickLinks: [
       { label: '즐길거리', entity: 'hub-kham-pha' },
       { label: '숙소', entity: 'hub-luu-tru' },
-      { label: '먹거리', entity: 'hub-am-thuc' },
       { label: '투어', entity: 'tour' },
     ],
     hubsHeading: '어디서 시작할까요?',
@@ -164,7 +157,6 @@ export const HOME_COPY: Record<Lang, {
     hubDescriptions: {
       'hub-kham-pha': '나트랑의 장소와 체험',
       'hub-luu-tru': '호텔과 리조트 선택지',
-      'hub-am-thuc': '맛집과 지역 특산품',
       'hub-di-lai': '교통 가이드와 이동 팁',
     },
     trustItems: [
@@ -197,7 +189,6 @@ export const HOME_COPY: Record<Lang, {
     quickLinks: [
       { label: 'Развлечения', entity: 'hub-kham-pha' },
       { label: 'Проживание', entity: 'hub-luu-tru' },
-      { label: 'Еда', entity: 'hub-am-thuc' },
       { label: 'Туры', entity: 'tour' },
     ],
     hubsHeading: 'С чего начать?',
@@ -205,7 +196,6 @@ export const HOME_COPY: Record<Lang, {
     hubDescriptions: {
       'hub-kham-pha': 'Места и впечатления в Нячанге',
       'hub-luu-tru': 'Отели и курорты для разных бюджетов',
-      'hub-am-thuc': 'Рестораны и местные деликатесы',
       'hub-di-lai': 'Транспортные советы и маршруты',
     },
     trustItems: [
@@ -274,7 +264,6 @@ export function homeQuickLinks(lang: Lang) {
 }
 
 export function homeHubEntries(lang: Lang) {
-  const hubEntities = ['hub-kham-pha', 'hub-luu-tru', 'hub-am-thuc', 'hub-di-lai']
   return hubEntities
     .map(entity => {
       const route = routeForEntity(entity)

@@ -20,7 +20,7 @@ const prefix = uiLang === 'vi' ? '' : `/${uiLang}`
 const homeHref = uiLang === 'vi' ? '/' : `/${uiLang}/`
 
 // Nav từ ROUTE_MAP — nguồn duy nhất cho segment + nhãn hub theo ngôn ngữ (R3)
-const navItems = ['hub-kham-pha', 'hub-luu-tru', 'hub-am-thuc', 'hub-di-lai']
+const navItems = ['hub-kham-pha', 'hub-luu-tru', 'hub-di-lai']
   .map(id => ROUTE_MAP.find(r => r.entity === id))
   .filter(Boolean)
   .map(r => ({ label: r!.labels[uiLang], href: `${prefix}/${r!.segments[uiLang]}/` }));
