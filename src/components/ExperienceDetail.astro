@@ -1,0 +1,142 @@
+---
+import type { ExperienceResult, Lang, SiteContact } from '../lib/types'
+import { uiCopy } from '../lib/uiCopy'
+import DetailLayout from './DetailLayout.astro'
+import FAQ from './FAQ.astro'
+import Section from './Section.astro'
+import BookingCTA from './BookingCTA.astro'
+import ContactChannels from './ContactChannels.astro'
+import InfoCard from './InfoCard.astro'
+import Body from './Body.astro'
+import MapView from './MapView.astro'
+import { applyPriceToJsonLd, entityPageGraphToLd, experienceToJsonLd, jsonLdScriptContent } from '../lib/serialize'
+import { loadPrices } from '../lib/prices'
+import { resolvePrice } from '../lib/resolver'
+
+export interface Props {
+  data: ExperienceResult
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+  contact?: SiteContact | null
+}
+
+const { data, lang, nearby = [], contact = null } = Astro.props
+
+const t = uiCopy(lang)
+
+function hasPtContent(blocks: unknown[] | undefined): boolean {
+  if (!blocks || blocks.length === 0) return false
+  return blocks.some((b: any) => b._type === 'block' && b.children?.some((c: any) => (c.text || '').trim()))
+}
+
+const prices = loadPrices('data/prices.yaml')
+const priceView = resolvePrice(data.bookingRef?.key, 'experience', data.isAccessibleForFree, prices, lang)
+const siteBase = Astro.site?.toString() || 'https://tourdaovn.vn'
+const entityJsonLd = applyPriceToJsonLd(
+  experienceToJsonLd(data, siteBase, lang),
+  priceView, data.bookingRef?.key,
+)
+const jsonLd = entityPageGraphToLd(entityJsonLd, data, siteBase, lang)
+const hasContactChannel = !!(contact?.zaloUrl || contact?.hotline || contact?.whatsapp)
+
+const infoBarItems = [
+  { icon: '⏱️', label: t('duration'), value: data.duration || '', visible: !!data.duration },
+  { icon: '👤', label: t('suitableFor'), value: data.touristType?.[0] || '', visible: !!(data.touristType && data.touristType.length > 0) },
+  { icon: '🎫', label: t('price'), value: data.isAccessibleForFree ? t('free') : priceView?.label || '', visible: !!(data.isAccessibleForFree || priceView?.label) },
+  { icon: '📋', label: t('includes'), value: data.includes?.slice(0, 2).join(', ') || '', visible: !!(data.includes && data.includes.length > 0) },
+]
+
+const sidebarRows = [
+  { icon: '🏷️', label: t('type'), value: data.experienceType?.name || '', visible: !!data.experienceType?.name },
+  { icon: '📍', label: t('venue'), value: data.venue?.title || '', visible: !!data.venue?.title },
+  { icon: '⏱️', label: t('duration'), value: data.duration || '', visible: !!data.duration },
+  { icon: '👤', label: t('suitableFor'), value: data.touristType?.join(', ') || '', visible: !!(data.touristType && data.touristType.length > 0) },
+]
+---
+
+<DetailLayout
+  title={data.title}
+  lang={lang}
+  entityType="experience"
+  image={data.mainImage}
+  gallery={data.gallery}
+  infoBarItems={infoBarItems}
+  sidebarSlots={[
+    { name: 'booking', component: 'BookingCTA', visible: !!priceView?.label || hasContactChannel, props: {} },
+    { name: 'info', component: 'InfoCard', visible: sidebarRows.some(r => r.visible), props: { rows: sidebarRows } },
+    { name: 'map', component: 'Map', visible: !!(data.geo), props: {} },
+  ]}
+  nearbyTitle={t('similarExperiences')}
+  nearby={nearby}
+  updatedAt={data._updatedAt}
+>
+  <div slot="content">
+    <div class="summary-block">{data.summary}</div>
+
+    {data.highlights && data.highlights.length > 0 && (
+      <Section heading={t('highlights')} contained={false}>
+        <ul class="hl-list">
+          {data.highlights.map((h: string) => <li>{h}</li>)}
+        </ul>
+      </Section>
+    )}
+
+    {hasPtContent(data.body) && (
+      <Section heading={t('details')} contained={false}>
+        <Body blocks={data.body} />
+      </Section>
+    )}
+
+    {data.includes && data.includes.length > 0 && (
+      <Section heading={t('includes')} contained={false}>
+        <ul class="check-list">
+          {data.includes.map((item) => <li><span class="check-icon">&#10003;</span> {item}</li>)}
+        </ul>
+      </Section>
+    )}
+
+    {data.faq && data.faq.length > 0 && <FAQ faq={data.faq} lang={lang} contained={false} />}
+  </div>
+
+  {priceView?.label && <BookingCTA slot="booking" priceText={priceView.label} ctaLabel={t('bookNow')} />}
+  {hasContactChannel && <ContactChannels slot="booking" contact={contact} lang={lang} />}
+  {sidebarRows.some(r => r.visible) && <InfoCard slot="info" rows={sidebarRows} lang={lang} />}
+  {data.geo && <MapView slot="map" geo={data.geo} title={data.title} height={240} />}
+</DetailLayout>
+
+<script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
+
+<style>
+  .summary-block {
+    font-size: var(--fs-h5);
+    max-width: 70ch;
+    line-height: var(--lh-body);
+    font-weight: var(--fw-500);
+    font-family: var(--font-ui);
+    margin-bottom: var(--s6);
+  }
+
+  .check-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--s2);
+  }
+
+  .check-list li {
+    display: flex;
+    gap: var(--s2);
+    align-items: center;
+    font-size: var(--fs-sm);
+    color: var(--c-text);
+  }
+
+  .check-icon {
+    color: var(--c-green);
+    font-weight: var(--fw-700);
+  }
+
+  .hl-list { list-style: none; display: flex; flex-direction: column; gap: var(--s2); }
+  .hl-list li { font-size: var(--fs-sm); color: var(--c-text-muted); padding-left: var(--s5); position: relative; }
+  .hl-list li::before { content: "✦"; position: absolute; left: 0; color: var(--c-primary); font-size: var(--fs-xs); }
+</style>

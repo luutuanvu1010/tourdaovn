@@ -1,0 +1,68 @@
+---
+import type { PersonResult, Lang } from '../lib/types'
+import { uiCopy } from '../lib/uiCopy'
+import DetailLayout from './DetailLayout.astro'
+import Section from './Section.astro'
+import InfoCard from './InfoCard.astro'
+import Body from './Body.astro'
+import { entityPageGraphToLd, personToJsonLd, jsonLdScriptContent } from '../lib/serialize'
+
+export interface Props {
+  data: PersonResult
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+}
+
+const { data, lang, nearby = [] } = Astro.props
+
+const t = uiCopy(lang)
+
+const sidebarRows = [
+  { icon: '💼', label: t('role'), value: data.jobTitle || '', visible: !!data.jobTitle },
+  { icon: '📚', label: t('knowsAbout'), value: data.knowsAbout?.join(', ') || '', visible: !!(data.knowsAbout && data.knowsAbout.length > 0) },
+  { icon: '🌐', label: t('website'), value: t('view'), href: data.url || undefined, visible: !!data.url },
+  { icon: '🔗', label: t('verifyWikidata'), value: 'Wikidata', href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
+]
+
+const siteBase = Astro.site?.toString() || 'https://tourdaovn.vn'
+const jsonLd = entityPageGraphToLd(personToJsonLd(data, siteBase, lang), data, siteBase, lang)
+---
+
+<DetailLayout
+  title={data.title}
+  lang={lang}
+  entityType="person"
+  image={data.mainImage}
+  infoBarItems={[]}
+  sidebarSlots={[
+    { name: 'info', component: 'InfoCard', visible: sidebarRows.some(r => r.visible), props: { rows: sidebarRows } },
+  ]}
+  nearbyTitle={t('articlesBy')}
+  nearby={nearby}
+  updatedAt={data._updatedAt}
+>
+  <Fragment slot="content">
+    {data.summary && <div class="summary-block">{data.summary}</div>}
+
+    {data.bio && (
+      <Section contained={false}>
+        <Body blocks={data.bio} />
+      </Section>
+    )}
+  </Fragment>
+
+  {sidebarRows.some(r => r.visible) && <InfoCard slot="info" rows={sidebarRows} lang={lang} />}
+</DetailLayout>
+
+<script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
+
+<style>
+  .summary-block {
+    font-size: var(--fs-h5);
+    max-width: 70ch;
+    line-height: var(--lh-body);
+    font-weight: var(--fw-500);
+    font-family: var(--font-ui);
+    margin-bottom: var(--s6);
+  }
+</style>

@@ -1,0 +1,230 @@
+---
+// HomeGuideGrid — grid 4 card "Cẩm nang bản địa" (rollup Article)
+// Mockup V3 dòng 1188-1252, BINDING_MAP §4.1: tùy, tối đa 4 card
+// ⚠ PLACEHOLDER: rollup Article approved theo language, ưu tiên transport-guide/itinerary/guide
+// Hiện author label theo quyết định nền 5 của 06 — Article.author deref Person.title
+
+import { entityHref } from '../lib/homepage'
+import { imageUrl } from '../lib/sanity-image'
+import type { HomepageArticleCard, Lang } from '../lib/types'
+
+export interface Props {
+  articles?: HomepageArticleCard[]
+  lang: Lang
+  heading: string
+  viewAllLabel: string
+  viewAllHref?: string
+}
+
+const { articles = [], lang, heading, viewAllLabel, viewAllHref } = Astro.props
+
+const articleTypeLabels: Record<string, Record<Lang, string>> = {
+  'transport-guide': { vi: 'Đi lại', en: 'Getting around', zh: '交通', ko: '교통', ru: 'Транспорт' },
+  'itinerary': { vi: 'Lịch trình', en: 'Itinerary', zh: '行程', ko: '일정', ru: 'Маршрут' },
+  'guide': { vi: 'Cẩm nang', en: 'Guide', zh: '攻略', ko: '가이드', ru: 'Гайд' },
+  'list': { vi: 'Danh sách', en: 'List', zh: '列表', ko: '목록', ru: 'Список' },
+  'review': { vi: 'Đánh giá', en: 'Review', zh: '评价', ko: '리뷰', ru: 'Обзор' },
+  'news': { vi: 'Tin tức', en: 'News', zh: '新闻', ko: '뉴스', ru: 'Новости' },
+}
+
+const cards = articles
+  .map(a => ({
+    ...a,
+    href: entityHref('article', a.slug, lang),
+    image: imageUrl(a.mainImage, { width: 400 }),
+    badgeLabel: articleTypeLabels[a.articleType]?.[lang] || a.articleType,
+  }))
+  .filter(c => c.href && c.title && c.summary)
+  .slice(0, 4)
+---
+
+{cards.length > 0 && (
+  <section class="guide-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-header-left">
+          <h2 class="section-title">{heading}</h2>
+          <span class="section-underline" aria-hidden="true"></span>
+        </div>
+        {viewAllHref && <a href={viewAllHref} class="see-all">{viewAllLabel} ›</a>}
+      </div>
+      <div class="guide-grid">
+        {cards.map(card => (
+          <a href={card.href!} class="guide-card">
+            <div class="guide-img-wrap">
+              {card.image ? (
+                <img src={card.image} alt={card.mainImage?.alt || card.title} loading="lazy" class="guide-img" />
+              ) : (
+                <div class="guide-img-fallback" aria-hidden="true"></div>
+              )}
+            </div>
+            <div class="guide-body">
+              <div class="guide-type">
+                <span class="badge">{card.badgeLabel}</span>
+              </div>
+              <h3 class="guide-title-text">{card.title}</h3>
+              {card.author?.title && <p class="guide-author">{card.author.title}</p>}
+              <p class="guide-desc line-clamp-2">{card.summary}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  .guide-section {
+    padding: var(--s7) 0 var(--s8);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: var(--s5);
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-section);
+    font-weight: var(--fw-700);
+    color: var(--c-primary);
+    line-height: 1.2;
+    margin-bottom: var(--s2);
+  }
+
+  .section-underline {
+    display: block;
+    width: var(--underline-width);
+    height: var(--underline-height);
+    background: var(--c-sand);
+    border-radius: 2px;
+  }
+
+  .see-all {
+    font-weight: var(--fw-600);
+    font-size: var(--fs-label);
+    color: var(--c-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--s1);
+    transition: opacity var(--m-fast) var(--m-ease);
+  }
+
+  .see-all:hover {
+    opacity: 0.7;
+  }
+
+  .guide-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--s4);
+  }
+
+  .guide-card {
+    background: var(--c-card);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--c-border);
+    box-shadow: var(--shadow-card);
+    transition: box-shadow var(--m-fast) var(--m-ease);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .guide-card:hover {
+    box-shadow: var(--shadow-raised);
+  }
+
+  .guide-img-wrap {
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    background: var(--c-primary-soft);
+  }
+
+  .guide-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--m-base) var(--m-ease);
+  }
+
+  .guide-card:hover .guide-img {
+    transform: scale(1.05);
+  }
+
+  .guide-img-fallback {
+    width: 100%;
+    height: 100%;
+  }
+
+  .guide-body {
+    padding: var(--s4) var(--s4) var(--s4);
+  }
+
+  .guide-type {
+    margin-bottom: var(--s2);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-ui);
+    font-size: var(--fs-badge);
+    font-weight: var(--fw-600);
+    padding: var(--badge-py) var(--badge-px);
+    border-radius: var(--radius-pill);
+    background: var(--c-primary-soft);
+    color: var(--c-primary);
+    line-height: 1.35;
+  }
+
+  .guide-title-text {
+    font-family: var(--font-display);
+    font-weight: var(--fw-700);
+    font-size: var(--fs-sm);
+    color: var(--c-text);
+    line-height: 1.4;
+    margin: var(--s2) 0 var(--s2);
+  }
+
+  .guide-author {
+    font-weight: var(--fw-500);
+    font-size: var(--fs-badge);
+    color: var(--c-text-muted);
+    margin-bottom: var(--s1);
+  }
+
+  .guide-desc {
+    font-weight: var(--fw-500);
+    font-size: var(--fs-label);
+    color: var(--c-text-muted);
+    line-height: 1.55;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @media (max-width: 1024px) {
+    .guide-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .guide-section {
+      padding: var(--s6) 0 var(--s7);
+    }
+    .guide-grid {
+      grid-template-columns: 1fr;
+    }
+    .section-title {
+      font-size: var(--fs-h4);
+    }
+  }
+</style>

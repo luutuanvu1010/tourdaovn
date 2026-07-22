@@ -1,0 +1,143 @@
+---
+// MapView — OpenStreetMap qua Leaflet, thay cho placeholder gradient cũ
+// Dữ liệu: geo từ entity query, chỉ render khi entity có tọa độ.
+// Load: requestIdleCallback, không chặn LCP. Tile: OSM miễn phí, không cần key.
+// DESIGN.md §5.9: height 320px, radius md
+export interface Props {
+  geo: { lat: number; lng: number }
+  title: string
+  height?: number
+  markers?: { lat: number; lng: number; title: string }[]
+}
+
+const { geo, title, height = 320, markers } = Astro.props
+
+// Guard tọa độ: tọa độ hỏng (mất dấu thập phân, ngoài phạm vi, không hữu hạn) không
+// bao giờ được render → Leaflet không treo. Đây là điều kiện bật lại map (thay flag
+// MAP_ENABLED cũ). Không hợp lệ → không render gì.
+const MAP_OK =
+  !!geo &&
+  Number.isFinite(geo.lat) &&
+  Number.isFinite(geo.lng) &&
+  Math.abs(geo.lat) <= 90 &&
+  Math.abs(geo.lng) <= 180
+
+const mapId = `osm-${Math.random().toString(36).slice(2, 9)}`
+const markersJson = markers && markers.length > 0
+  ? JSON.stringify(markers)
+  : null
+---
+
+{MAP_OK && (
+<Fragment>
+<div
+  class="map-view"
+  id={mapId}
+  style={`height:${height}px`}
+  data-lat={geo.lat}
+  data-lng={geo.lng}
+  data-title={title}
+  data-markers={markersJson}
+  data-zoom="15"
+></div>
+
+<script define:vars={{ mapId }}>
+  function initMap(container) {
+    var lat = parseFloat(container.dataset.lat || '0')
+    var lng = parseFloat(container.dataset.lng || '0')
+    var title = container.dataset.title || ''
+    var zoom = parseInt(container.dataset.zoom || '15', 10)
+    var L = window.L
+
+    var map = L.map(container.id, {
+      center: [lat, lng],
+      zoom: zoom,
+      scrollWheelZoom: true,
+      zoomControl: true,
+    })
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 19,
+    }).addTo(map)
+
+    var markersRaw = container.dataset.markers
+    if (markersRaw) {
+      try {
+        var markers = JSON.parse(markersRaw)
+        var latLngs = []
+        markers.forEach(function (m, i) {
+          var mk = L.marker([m.lat, m.lng])
+          mk.addTo(map)
+          mk.bindPopup('<strong>' + (i + 1) + '.</strong> ' + m.title)
+          latLngs.push([m.lat, m.lng])
+        })
+        if (latLngs.length > 1) {
+          map.fitBounds(L.latLngBounds(latLngs).pad(0.15))
+        }
+      } catch (_) {
+        L.marker([lat, lng]).addTo(map).bindPopup(title)
+      }
+    } else {
+      L.marker([lat, lng]).addTo(map).bindPopup(title)
+    }
+  }
+
+  function loadLeafletStyle() {
+    if (document.querySelector('link[href*="leaflet.css"]')) return
+    var link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
+    document.head.appendChild(link)
+  }
+
+  function loadLeafletJS(cb) {
+    if (window.L) { cb(); return }
+    var script = document.createElement('script')
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+    script.onload = cb
+    document.head.appendChild(script)
+  }
+
+  var container = document.getElementById(mapId)
+  if (!container) return
+
+  var boot = function () {
+    loadLeafletStyle()
+    loadLeafletJS(function () { initMap(container) })
+  }
+
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(boot, { timeout: 3000 })
+  } else {
+    setTimeout(boot, 200)
+  }
+</script>
+</Fragment>
+)}
+
+<style>
+  .map-view {
+    width: 100%;
+    background: var(--c-primary-soft);
+    border-radius: inherit;
+    overflow: hidden;
+    /* Leaflet container cần height xác định, truyền qua style inline */
+  }
+
+  /* Ghi đè Leaflet mặc định để khớp design token */
+  .map-view :global(.leaflet-control-zoom a) {
+    color: var(--c-primary);
+  }
+
+  .map-view :global(.leaflet-popup-content) {
+    font-family: var(--font-ui);
+    font-size: var(--fs-sm);
+    color: var(--c-text);
+  }
+
+  .map-view :global(.leaflet-container) {
+    background: var(--c-primary-soft);
+  }
+</style>

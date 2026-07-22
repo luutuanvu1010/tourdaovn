@@ -1,0 +1,31 @@
+{
+  "name": "nhatrang-travel-validators",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate": "node --import ./node_modules/tsx/dist/esm/index.mjs validate-constraints.ts",
+    "validate:post": "node --import ./node_modules/tsx/dist/esm/index.mjs validators/jsonld-post.ts && node --import ./node_modules/tsx/dist/esm/index.mjs validators/r3-r4-post.ts && node --import ./node_modules/tsx/dist/esm/index.mjs validators/governance-post.ts && node --import ./node_modules/tsx/dist/esm/index.mjs validators/geo-knowledge-post.ts && node --import ./node_modules/tsx/dist/esm/index.mjs validators/entity-layout-post.ts && node --import ./node_modules/tsx/dist/esm/index.mjs validators/control-registry-gate.ts && node --import ./node_modules/tsx/dist/esm/index.mjs validators/deferred-gate.ts",
+    "validate:git-governance": "node --import ./node_modules/tsx/dist/esm/index.mjs validators/git-governance.ts",
+    "precheck": "node --import ./node_modules/tsx/dist/esm/index.mjs precheck-drafts.ts",
+    "precheck:batch": "node --import ./node_modules/tsx/dist/esm/index.mjs precheck-batch.ts",
+    "patch:n5": "node --import ./node_modules/tsx/dist/esm/index.mjs patch-n5-drafts.ts",
+    "patch:n5:live-vi": "node --import ./node_modules/tsx/dist/esm/index.mjs patch-n5-live-vi.ts",
+    "patch:n5:s25": "node --import ./node_modules/tsx/dist/esm/index.mjs patch-n5-s25.ts",
+    "backfill:seo-meta": "node --import ./node_modules/tsx/dist/esm/index.mjs backfill-seo-meta.ts",
+    "publish:drafts": "node --import ./node_modules/tsx/dist/esm/index.mjs publish-drafts.ts",
+    "translate": "node --import ./node_modules/tsx/dist/esm/index.mjs translate/index.ts",
+    "snapshot:slugs": "node --import ./node_modules/tsx/dist/esm/index.mjs tools/snapshot-slugs.ts",
+    "gen:slug-redirects": "node --import ./node_modules/tsx/dist/esm/index.mjs tools/gen-slug-redirects.ts",
+    "test": "tsx --test synthesis/__tests__/*.test.ts",
+    "audit:spec": "node --import ./node_modules/tsx/dist/esm/index.mjs meta-validators/g1-content-model-vs-schema.ts && node --import ./node_modules/tsx/dist/esm/index.mjs meta-validators/g2-content-model-vs-gatefields.ts && node --import ./node_modules/tsx/dist/esm/index.mjs meta-validators/g3-binding-map-vs-template.ts && node --import ./node_modules/tsx/dist/esm/index.mjs meta-validators/g4-groq-field-validity.ts"
+  },
+  "dependencies": {
+    "@sanity/client": "^6.28.0",
+    "dotenv": "^17.4.2",
+    "yaml": "^2.7.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}

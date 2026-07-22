@@ -1,0 +1,98 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { ROUTE_MAP } from '../lib/routes'
+import type { Lang } from '../lib/types'
+
+const lang: Lang = 'vi'
+
+const hubEntries = ROUTE_MAP.filter(r => r.entity.startsWith('hub-'))
+
+export async function getStaticPaths() {
+  return []
+}
+---
+
+<BaseLayout title="Không tìm thấy trang — Nha Trang Travel" lang="vi">
+  <section class="not-found">
+    <div class="container">
+      <h1 class="nf-code">404</h1>
+      <p class="nf-message">Trang bạn tìm không tồn tại hoặc đã được di chuyển.</p>
+      <div class="nf-links">
+        <a href="/" class="nf-link-primary">Về trang chủ</a>
+        {hubEntries.map(hub => (
+          <a href={`/${hub.segments[lang]}/`} class="nf-link">
+            {hub.segments[lang]}
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .not-found {
+    padding: var(--s9) 0;
+    text-align: center;
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+  }
+
+  .nf-code {
+    font-family: var(--font-display);
+    font-size: clamp(4rem, 10vw, 8rem);
+    font-weight: var(--fw-900);
+    color: var(--c-primary);
+    line-height: 1;
+    margin-bottom: var(--s4);
+    letter-spacing: 0;
+  }
+
+  .nf-message {
+    font-size: var(--fs-h5);
+    color: var(--c-text-muted);
+    max-width: 44ch;
+    margin: 0 auto var(--s7);
+    line-height: var(--lh-body);
+  }
+
+  .nf-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--s3);
+  }
+
+  .nf-link-primary {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--s3) var(--s5);
+    background: var(--c-accent);
+    color: var(--c-text-inverse);
+    font-weight: var(--fw-600);
+    font-size: var(--fs-base);
+    border-radius: var(--radius-pill);
+    transition: background var(--m-fast) var(--m-ease);
+  }
+
+  .nf-link-primary:hover {
+    background: var(--c-accent-strong);
+  }
+
+  .nf-link {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--s3) var(--s5);
+    border: 1px solid var(--c-border);
+    color: var(--c-text);
+    font-weight: var(--fw-500);
+    font-size: var(--fs-base);
+    border-radius: var(--radius-pill);
+    transition: border-color var(--m-fast) var(--m-ease), color var(--m-fast) var(--m-ease);
+  }
+
+  .nf-link:hover {
+    border-color: var(--c-primary);
+    color: var(--c-primary);
+  }
+</style>

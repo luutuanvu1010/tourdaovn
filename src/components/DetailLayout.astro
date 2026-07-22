@@ -1,0 +1,106 @@
+---
+import type { Lang, EntityRef, ImageAsset, NearbyEntity } from '../lib/types'
+import { uiCopy } from '../lib/uiCopy'
+import { formatDate } from '../lib/dates'
+import Breadcrumb from './Breadcrumb.astro'
+import Hero from './Hero.astro'
+import InfoBar from './InfoBar.astro'
+import type { InfoBarItem } from './InfoBar.astro'
+import Sidebar from './Sidebar.astro'
+import type { Slot } from './Sidebar.astro'
+import NearbySection from './NearbySection.astro'
+
+export interface Props {
+  title: string
+  lang: Lang
+  entityType: string
+  image?: string | ImageAsset
+  gallery?: ImageAsset[]
+  containedInPlace?: EntityRef
+  infoBarItems?: InfoBarItem[]
+  sidebarSlots: Slot[]
+  nearbyTitle: string
+  nearby: NearbyEntity[]
+  updatedAt: string
+}
+
+const { title, lang, entityType, image, gallery, containedInPlace, infoBarItems, sidebarSlots, nearbyTitle, nearby, updatedAt } = Astro.props
+
+const t = uiCopy(lang)
+---
+
+<div class="container">
+  <Hero image={image} gallery={gallery}>
+    <h1 slot="overlay" class="detail-title">{title}</h1>
+    <Breadcrumb slot="overlay" containedInPlace={containedInPlace} entityType={entityType} lang={lang} currentTitle={title} inverse />
+  </Hero>
+</div>
+
+{infoBarItems && infoBarItems.length > 0 && <InfoBar items={infoBarItems} />}
+
+<div class="container two-col">
+  <div class="content-main">
+    <slot name="content" />
+
+    <div class="updated-section">
+      <div class="updated">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        {t('updated')} {formatDate(updatedAt, lang)}
+      </div>
+    </div>
+  </div>
+
+  <Sidebar slots={sidebarSlots}>
+    <slot name="booking" slot="booking" />
+    <slot name="info" slot="info" />
+    <slot name="map" slot="map" />
+    <slot name="about" slot="about" />
+  </Sidebar>
+</div>
+
+{nearby.length > 0 && <NearbySection title={nearbyTitle} entities={nearby} lang={lang} />}
+
+<style>
+  .detail-title {
+    font-family: var(--font-display);
+    font-size: clamp(var(--fs-h3), 4.2vw, var(--fs-hero));
+    font-weight: var(--fw-900);
+    color: var(--c-text-inverse);
+    line-height: 1.06;
+    padding-bottom: var(--s2);
+    margin: 0;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: var(--s7);
+    align-items: start;
+    padding-top: var(--s6);
+    padding-bottom: var(--s7);
+  }
+
+  .updated-section {
+    padding-top: var(--s4);
+  }
+
+  .updated {
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+    padding: var(--s4) 0;
+    border-top: 1px solid var(--c-border);
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+  }
+
+  .updated svg {
+    color: var(--c-primary);
+  }
+
+  @media (max-width: 1023px) {
+    .two-col {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

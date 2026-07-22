@@ -1,0 +1,20 @@
+{
+  "name": "nhatrang-travel-studio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "sanity dev --port 3333",
+    "build": "sanity build",
+    "deploy": "sanity deploy"
+  },
+  "dependencies": {
+    "sanity": "^6.0.0",
+    "@sanity/ui": "^3.2.0",
+    "@sanity/document-internationalization": "^6.2.5",
+    "@sanity/language-filter": "^5.0.4",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "styled-components": "^6.1.15"
+  }
+}

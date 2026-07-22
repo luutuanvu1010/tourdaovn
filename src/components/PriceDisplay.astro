@@ -1,0 +1,99 @@
+---
+import type { Lang } from '../lib/types'
+import { uiCopy, PRICE_CTA_LABELS } from '../lib/uiCopy'
+import { resolvePrice } from '../lib/resolver'
+import { loadPrices } from '../lib/prices'
+import { ROUTE_MAP } from '../lib/routes'
+
+export interface Props {
+  bookingRef?: { key?: string }
+  isAccessibleForFree?: boolean
+  entityType: string
+  lang: Lang
+}
+
+const { bookingRef, isAccessibleForFree, entityType, lang } = Astro.props
+const t = uiCopy(lang)
+
+const prices = loadPrices('data/prices.yaml')
+const priceView = resolvePrice(
+  bookingRef?.key,
+  entityType,
+  isAccessibleForFree,
+  prices,
+  lang
+)
+
+const langLabels = PRICE_CTA_LABELS[lang] || PRICE_CTA_LABELS.en
+const ctaLabel = langLabels[entityType] || langLabels.default
+---
+
+{priceView && (
+  <div class="price-area">
+    <div class="price-info">
+      {priceView.isFree ? (
+        <span class="price-free">{t('free')}</span>
+      ) : (
+        <span class="price-value">{priceView.label}</span>
+      )}
+    </div>
+    {!priceView.isFree && bookingRef?.key && (
+      <a href={`#booking-${bookingRef.key}`} class="cta-btn">
+        {ctaLabel}
+      </a>
+    )}
+  </div>
+)}
+
+<style>
+  .price-area {
+    background: var(--c-accent-soft);
+    border-radius: var(--radius-md);
+    padding: var(--s5);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s4);
+    flex-wrap: wrap;
+  }
+
+  .price-value {
+    font-family: var(--font-display);
+    font-size: var(--fs-h4);
+    font-weight: var(--fw-700);
+    color: var(--c-accent-strong);
+  }
+
+  .price-free {
+    font-size: var(--fs-h5);
+    font-weight: var(--fw-600);
+    color: var(--c-green-text);
+    background: var(--c-green-soft);
+    padding: var(--s2) var(--s4);
+    border-radius: var(--radius-pill);
+  }
+
+  .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--s3) var(--s5);
+    background: var(--c-accent);
+    color: var(--c-text-inverse);
+    font-weight: var(--fw-600);
+    font-size: var(--fs-base);
+    border-radius: var(--radius-pill);
+    transition: background var(--m-fast) var(--m-ease);
+    white-space: nowrap;
+  }
+
+  .cta-btn:hover {
+    background: var(--c-accent-strong);
+  }
+
+  @media (max-width: 640px) {
+    .price-area {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>

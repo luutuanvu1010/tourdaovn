@@ -1,0 +1,15 @@
+---
+import type { ResortResult, Lang, SiteContact } from '../lib/types'
+import LodgingDetail from './LodgingDetail.astro'
+
+export interface Props {
+  data: ResortResult
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+  contact?: SiteContact | null
+}
+
+const { data, lang, nearby, contact } = Astro.props
+---
+
+<LodgingDetail data={data} entityType="resort" lang={lang} nearby={nearby} contact={contact} />

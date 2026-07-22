@@ -1,0 +1,229 @@
+---
+import type { HotelResult, ResortResult, Lang, SiteContact } from '../lib/types'
+import { uiCopy } from '../lib/uiCopy'
+import DetailLayout from './DetailLayout.astro'
+import FAQ from './FAQ.astro'
+import Section from './Section.astro'
+import BookingCTA from './BookingCTA.astro'
+import ContactChannels from './ContactChannels.astro'
+import InfoCard from './InfoCard.astro'
+import { resolvePrice } from '../lib/resolver'
+import { formatNumber } from '../lib/dates'
+import { loadPrices } from '../lib/prices'
+import { applyPriceToJsonLd, entityPageGraphToLd, hotelToJsonLd, resortToJsonLd, jsonLdScriptContent } from '../lib/serialize'
+import MapView from './MapView.astro'
+
+export interface Props {
+  data: HotelResult | ResortResult
+  entityType: 'hotel' | 'resort'
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+  contact?: SiteContact | null
+}
+
+const { data, entityType, lang, nearby = [], contact = null } = Astro.props
+
+const t = uiCopy(lang)
+const isResort = entityType === 'resort'
+const isHotel = entityType === 'hotel'
+
+function hasPtContent(blocks: unknown[] | undefined): boolean {
+  if (!blocks || blocks.length === 0) return false
+  return blocks.some((b: any) => b._type === 'block' && b.children?.some((c: any) => (c.text || '').trim()))
+}
+
+function starEmoji(n: number): string { return '★'.repeat(n) }
+
+function computeAirportDist(_geo: { lat: number; lng: number } | undefined): number | null {
+  if (!_geo) return null
+  const CXR = { lat: 11.9981, lng: 109.2195 }
+  const R = 6371
+  const dLat = (CXR.lat - _geo.lat) * Math.PI / 180
+  const dLng = (CXR.lng - _geo.lng) * Math.PI / 180
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(_geo.lat * Math.PI / 180) * Math.cos(CXR.lat * Math.PI / 180) * Math.sin(dLng / 2) ** 2
+  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)))
+}
+
+const prices = loadPrices('data/prices.yaml')
+const priceView = resolvePrice(data.bookingRef?.key, entityType, (data as any).isAccessibleForFree, prices, lang)
+const hasBooking = priceView && !priceView.isFree
+const hasContactChannel = !!(contact?.zaloUrl || contact?.hotline || contact?.whatsapp)
+
+const siteBase = Astro.site?.toString() || 'https://tourdaovn.vn'
+const entityJsonLd = applyPriceToJsonLd(
+  isResort
+    ? resortToJsonLd(data as ResortResult, siteBase, lang)
+    : hotelToJsonLd(data as HotelResult, siteBase, lang),
+  priceView, data.bookingRef?.key,
+)
+const jsonLd = entityPageGraphToLd(entityJsonLd, data, siteBase, lang)
+
+const airportDist = computeAirportDist(data.geo)
+
+const beachfront = isResort ? (data as ResortResult).beachfront : undefined
+const landArea = isResort ? (data as ResortResult).landArea : undefined
+const onSiteActivities = isResort ? (data as ResortResult).onSiteActivities : undefined
+
+const infoBarItems = isHotel ? [
+  { icon: '⭐', label: t('stars'), value: data.starRating != null ? `${starEmoji(data.starRating)} ${data.starRating}★` : '', visible: data.starRating != null },
+  { icon: '🎫', label: t('priceFrom'), value: priceView?.label || '', visible: !!priceView?.label },
+  { icon: '🏖️', label: t('beach'), value: data.beachAccess || '', visible: !!data.beachAccess },
+  { icon: '🕐', label: t('checkin'), value: data.checkinTime || '', visible: !!data.checkinTime },
+] : [
+  { icon: '⭐', label: t('stars'), value: data.starRating != null ? `${starEmoji(data.starRating)} ${data.starRating}★` : '', visible: data.starRating != null },
+  { icon: '🎫', label: t('priceFrom'), value: priceView?.label || '', visible: !!priceView?.label },
+  { icon: '🏖️', label: t('beachfront'), value: beachfront === true ? t('beachfront') : (data.beachAccess || ''), visible: !!(beachfront === true || data.beachAccess) },
+  { icon: '🕐', label: t('checkin'), value: data.checkinTime || '', visible: !!data.checkinTime },
+]
+
+const sidebarRows: { icon: string; label: string; value: string; href?: string; visible: boolean }[] = [
+  { icon: '⭐', label: t('starRating'), value: data.starRating != null ? `${data.starRating}★` : '', visible: data.starRating != null },
+  { icon: '📍', label: t('address'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
+  { icon: '🕐', label: t('checkin'), value: data.checkinTime || '', visible: !!data.checkinTime },
+  { icon: '🕐', label: t('checkout'), value: data.checkoutTime || '', visible: !!data.checkoutTime },
+  { icon: '🛏️', label: t('rooms'), value: data.numberOfRooms != null ? `${data.numberOfRooms} ${t('roomsUnit')}` : '', visible: data.numberOfRooms != null },
+  { icon: '🐾', label: t('pets'), value: data.petsAllowed ? t('allowed') : t('no'), visible: data.petsAllowed !== undefined },
+  { icon: '🏖️', label: t('beach'), value: data.beachAccess || '', visible: !!data.beachAccess },
+  { icon: '✈️', label: t('airport'), value: airportDist != null ? `~${airportDist} km` : '', visible: airportDist != null },
+  { icon: '🔗', label: t('officialWebsite'), value: t('view'), href: data.officialSource || undefined, visible: !!data.officialSource },
+  { icon: '🔗', label: t('verifyWikidata'), value: 'Wikidata', href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
+]
+if (isResort) {
+  if (beachfront !== undefined) sidebarRows.push({ icon: '🏖️', label: t('beachfront'), value: beachfront ? t('yes') : t('no'), visible: true })
+  if (landArea != null) sidebarRows.push({ icon: '📐', label: t('area'), value: `${formatNumber(landArea, lang)} m²`, visible: true })
+  if (onSiteActivities && onSiteActivities.length > 0) sidebarRows.push({ icon: '🎯', label: t('activities'), value: onSiteActivities.join(', '), visible: true })
+}
+---
+
+<DetailLayout
+  title={data.title}
+  lang={lang}
+  entityType={entityType}
+  image={data.mainImage}
+  gallery={data.gallery}
+  containedInPlace={data.containedInPlace}
+  infoBarItems={infoBarItems}
+  sidebarSlots={[
+    { name: 'booking', component: 'BookingCTA', visible: !!hasBooking || hasContactChannel, props: {} },
+    { name: 'info', component: 'InfoCard', visible: sidebarRows.some(r => r.visible), props: { rows: sidebarRows } },
+    { name: 'map', component: 'Map', visible: !!(data.geo), props: {} },
+  ]}
+  nearbyTitle={t('similarStays')}
+  nearby={nearby}
+  updatedAt={data._updatedAt}
+>
+  <Fragment slot="content">
+    {data.summary && <div class="summary-block">{data.summary}</div>}
+
+    {data.amenityFeature && data.amenityFeature.length > 0 && (
+      <Section heading={t('amenities')} contained={false}>
+        <div class="amenity-grid">
+          {data.amenityFeature.map((a) => <div class="amenity"><span class="aicn">✓</span> {a}</div>)}
+          {data.petsAllowed === true && <div class="amenity chk"><span class="aicn">🐾</span> {t('petsAllowed')}</div>}
+        </div>
+      </Section>
+    )}
+
+    {data.highlights && data.highlights.length > 0 && (
+      <Section heading={t('highlights')} contained={false}>
+        <ul class="hl-list">
+          {data.highlights.map((h: string) => <li>{h}</li>)}
+        </ul>
+      </Section>
+    )}
+
+    {hasPtContent(data.body) && (
+      <Section heading={t('overview')} contained={false}>
+        {data.body!.map((block: any) => {
+          if (block._type === 'block' && block.style === 'normal') {
+            return <p>{block.children?.map((c: any) => c.text).join('')}</p>
+          }
+          return null
+        })}
+      </Section>
+    )}
+
+    {hasPtContent(data.accessInfo) && (
+      <Section heading={t('howToGetThere')} contained={false}>
+        <div class="info-callout">
+          {data.accessInfo!.map((block: any) => {
+            if (block._type === 'block') return <p>{block.children?.map((c: any) => c.text).join('')}</p>
+            return null
+          })}
+        </div>
+      </Section>
+    )}
+
+    {isResort && onSiteActivities && onSiteActivities.length > 0 && (
+      <Section heading={t('onSiteActivities')} contained={false}>
+        <ul class="onsite-list">
+          {onSiteActivities.map((a) => <li>{a}</li>)}
+        </ul>
+      </Section>
+    )}
+
+    {data.faq && data.faq.length > 0 && <FAQ faq={data.faq} lang={lang} contained={false} />}
+  </Fragment>
+
+  {hasBooking && priceView && <BookingCTA slot="booking" priceText={priceView.label} ctaLabel={t('checkAvailability')} asOf={priceView.asOf} />}
+  {hasContactChannel && <ContactChannels slot="booking" contact={contact} lang={lang} />}
+  {sidebarRows.some(r => r.visible) && <InfoCard slot="info" rows={sidebarRows} lang={lang} />}
+  {data.geo && <MapView slot="map" geo={data.geo} title={data.title} height={240} />}
+</DetailLayout>
+
+<script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
+
+<style>
+  .summary-block {
+    font-size: var(--fs-h5);
+    max-width: 70ch;
+    line-height: var(--lh-body);
+    font-weight: var(--fw-500);
+    font-family: var(--font-ui);
+    margin-bottom: var(--s6);
+  }
+
+  .amenity-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--s2);
+  }
+
+  .amenity {
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+    padding: var(--s3) var(--s4);
+    background: var(--c-card);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-500);
+    color: var(--c-text);
+  }
+
+  .amenity .aicn { color: var(--c-green); font-weight: var(--fw-700); }
+  .amenity.chk { background: var(--c-green-soft); border-color: var(--c-green-soft); }
+
+  .info-callout {
+    background: var(--c-sand-paper);
+    border: 1px solid var(--c-sand-border);
+    border-radius: var(--radius-lg);
+    padding: var(--s4) var(--s5);
+    font-size: var(--fs-sm);
+    color: var(--c-sand-text);
+  }
+  .info-callout p { margin-bottom: var(--s2); }
+
+  .onsite-list { list-style: none; display: flex; flex-direction: column; gap: var(--s2); }
+  .onsite-list li { font-size: var(--fs-sm); color: var(--c-text-muted); padding-left: var(--s4); position: relative; }
+  .onsite-list li::before { content: "•"; position: absolute; left: 0; color: var(--c-sand); font-weight: var(--fw-700); }
+
+  .hl-list { list-style: none; display: flex; flex-direction: column; gap: var(--s2); }
+  .hl-list li { font-size: var(--fs-sm); color: var(--c-text-muted); padding-left: var(--s5); position: relative; }
+  .hl-list li::before { content: "✦"; position: absolute; left: 0; color: var(--c-primary); font-size: var(--fs-xs); }
+
+  @media (max-width: 1023px) {
+    .amenity-grid { grid-template-columns: 1fr; }
+  }
+</style>

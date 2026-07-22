@@ -1,0 +1,175 @@
+---
+import type { Lang } from '../lib/types'
+import { ROUTE_MAP } from '../lib/routes'
+import { uiCopy } from '../lib/uiCopy'
+import { fetchSiteContact } from '../lib/siteContact'
+
+export interface Props {
+  lang?: string
+}
+
+const { lang = 'vi' } = Astro.props
+const uiLang = (['vi', 'en', 'zh', 'ko', 'ru'].includes(lang) ? lang : 'vi') as Lang
+const t = uiCopy(uiLang)
+const prefix = uiLang === 'vi' ? '' : `/${uiLang}`
+const homeHref = uiLang === 'vi' ? '/' : `/${uiLang}/`
+
+const contact = await fetchSiteContact()
+const footerChannels = [
+  contact?.hotline ? { href: `tel:${contact.hotline.replace(/\s+/g, '')}`, label: contact.hotline } : null,
+  contact?.zaloUrl ? { href: contact.zaloUrl, label: t('contactZalo'), external: true } : null,
+  contact?.email ? { href: `mailto:${contact.email}`, label: contact.email } : null,
+].filter(Boolean) as { href: string; label: string; external?: boolean }[]
+
+// Link entity qua ROUTE_MAP — nguồn duy nhất cho segment + nhãn theo ngôn ngữ (R3)
+function routeLink(entity: string): { label: string; href: string } | null {
+  const r = ROUTE_MAP.find(e => e.entity === entity)
+  if (!r) return null
+  return { label: r.labels[uiLang], href: `${prefix}/${r.segments[uiLang]}/` }
+}
+
+const exploreLinks = ['attraction', 'experience', 'event', 'tour'].map(routeLink).filter(Boolean) as { label: string; href: string }[]
+const serviceLinks = ['hotel', 'resort', 'restaurant', 'specialty'].map(routeLink).filter(Boolean) as { label: string; href: string }[]
+const exploreHeading = ROUTE_MAP.find(e => e.entity === 'hub-kham-pha')?.labels[uiLang] ?? ''
+const guidesLink = routeLink('article')
+---
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href={homeHref} class="logo" aria-label={t('homeAria')}>
+          <svg class="logo-svg" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+            <circle cx="20" cy="20" r="19" fill="var(--c-primary)"/>
+            <path d="M14 26 L20 9 L20 26 Z" fill="var(--c-sand)"/>
+            <path d="M20 9 L26 26 L20 26 Z" fill="var(--c-sand-soft)"/>
+            <path d="M8 30 Q 12 27 16 30 T 24 30 T 32 30" stroke="var(--c-surface)" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+          </svg>
+          <span>Nha Trang Travel</span>
+        </a>
+        <p>{t('footerTagline')}</p>
+      </div>
+
+      <div class="foot-col">
+        <h4>{exploreHeading}</h4>
+        <ul>
+          {exploreLinks.map(link => <li><a href={link.href}>{link.label}</a></li>)}
+        </ul>
+      </div>
+
+      <div class="foot-col">
+        <h4>{t('footerServices')}</h4>
+        <ul>
+          {serviceLinks.map(link => <li><a href={link.href}>{link.label}</a></li>)}
+        </ul>
+      </div>
+
+      <div class="foot-col">
+        <h4>{t('footerAboutUs')}</h4>
+        <ul>
+          {guidesLink && <li><a href={guidesLink.href}>{t('footerGuides')}</a></li>}
+          {footerChannels.map(ch => (
+            <li><a href={ch.href} target={ch.external ? '_blank' : undefined} rel={ch.external ? 'noopener' : undefined}>{ch.label}</a></li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <div class="foot-bottom">
+      <span>&copy; 2026 Nha Trang Travel</span>
+      <span>{t('footerDisclaimer')}</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--c-footer-bg);
+    color: var(--c-footer-text);
+    padding: var(--s7) 0 var(--s5);
+    font-size: var(--fs-sm);
+  }
+
+  .foot-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
+    gap: var(--s6);
+    margin-bottom: var(--s6);
+  }
+
+  .foot-brand .logo {
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+    font-family: var(--font-display);
+    font-weight: var(--fw-800);
+    font-size: var(--fs-nav);
+    color: var(--c-text-inverse);
+    letter-spacing: 0;
+    margin-bottom: var(--s3);
+  }
+
+  .logo-svg {
+    width: 34px;
+    height: 34px;
+    flex: none;
+  }
+
+  .foot-brand p {
+    font-size: var(--fs-sm);
+    max-width: 36ch;
+    line-height: 1.6;
+    color: var(--c-footer-text);
+  }
+
+  .foot-col h4 {
+    color: var(--c-text-inverse);
+    font-size: var(--fs-label);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: var(--s3);
+    font-family: var(--font-ui);
+    font-weight: var(--fw-600);
+  }
+
+  .foot-col ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--s2);
+  }
+
+  .foot-col a {
+    color: var(--c-footer-text);
+    transition: color var(--m-fast) var(--m-ease);
+  }
+
+  .foot-col a:hover {
+    color: var(--c-sand);
+  }
+
+  .foot-bottom {
+    border-top: 1px solid var(--c-footer-border);
+    padding-top: var(--s4);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--s3);
+    flex-wrap: wrap;
+    font-size: var(--fs-badge);
+    color: var(--c-footer-muted);
+  }
+
+  @media (max-width: 768px) {
+    .foot-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--s5);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .foot-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

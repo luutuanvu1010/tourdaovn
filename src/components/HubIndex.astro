@@ -1,0 +1,208 @@
+---
+import type { Lang, PriceEntry } from '../lib/types'
+import { ATTRACTION_TYPE_LABELS, SPECIALTY_TYPE_LABELS, ARTICLE_TYPE_LABELS, TOUR_FORMAT_BADGES } from '../lib/uiCopy'
+import { resolvePrice } from '../lib/resolver'
+import { ROUTE_MAP } from '../lib/routes'
+import { collectionPageToJsonLd, jsonLdScriptContent } from '../lib/serialize'
+import Card from './Card.astro'
+import Section from './Section.astro'
+import EmptyState from './EmptyState.astro'
+
+interface ListingEntity {
+  title: string
+  summary: string
+  slug: string
+  image?: string
+  imageAlt?: string
+  attractionType?: string
+  experienceType?: string
+  servesCuisine?: string[]
+  specialtyType?: string
+  starRating?: number
+  tourFormat?: string
+  articleType?: string
+  bookingRef?: { key?: string }
+  author?: { title: string }
+}
+
+interface HubSection {
+  title: string
+  description?: string
+  entityType: string
+  entities: ListingEntity[]
+  href?: string
+}
+
+export interface Props {
+  sections: HubSection[]
+  lang: Lang
+  prices?: Map<string, PriceEntry>
+}
+
+const { sections, lang, prices } = Astro.props
+
+// Segment lookup
+const SEGMENT_CACHE: Record<string, string> = {}
+function getSegment(entityType: string, lang: Lang): string {
+  const key = `${entityType}:${lang}`
+  if (SEGMENT_CACHE[key]) return SEGMENT_CACHE[key]
+  const entry = ROUTE_MAP.find(r => r.entity === entityType)
+  const seg = entry?.segments[lang] ?? entityType
+  SEGMENT_CACHE[key] = seg
+  return seg
+}
+
+function entityHref(entityType: string, slug: string): string {
+  const seg = getSegment(entityType, lang)
+  const prefix = lang === 'vi' ? '' : `/${lang}`
+  return `${prefix}/${seg}/${slug}/`
+}
+
+// Badge label — nguồn duy nhất uiCopy, đủ 5 ngôn ngữ
+const attractionTypeLabel = ATTRACTION_TYPE_LABELS[lang] ?? ATTRACTION_TYPE_LABELS.en
+const specialtyTypeLabel = SPECIALTY_TYPE_LABELS[lang] ?? SPECIALTY_TYPE_LABELS.en
+const articleTypeLabel = ARTICLE_TYPE_LABELS[lang] ?? ARTICLE_TYPE_LABELS.en
+const tourFormatLabel = TOUR_FORMAT_BADGES[lang] ?? TOUR_FORMAT_BADGES.en
+
+function getBadge(entity: ListingEntity, entityType: string): { label: string; variant?: 'default' | 'author' } | null {
+  switch (entityType) {
+    case 'attraction':
+      return entity.attractionType
+        ? { label: attractionTypeLabel[entity.attractionType] || entity.attractionType }
+        : null
+    case 'experience':
+      return entity.experienceType ? { label: entity.experienceType } : null
+    case 'restaurant':
+      return entity.servesCuisine?.[0] ? { label: entity.servesCuisine[0] } : null
+    case 'specialty':
+      return entity.specialtyType
+        ? { label: specialtyTypeLabel[entity.specialtyType] || entity.specialtyType }
+        : null
+    case 'hotel':
+    case 'resort':
+      return entity.starRating ? { label: '★'.repeat(entity.starRating) } : null
+    case 'article':
+      return entity.articleType
+        ? { label: articleTypeLabel[entity.articleType] || entity.articleType }
+        : null
+    case 'tour':
+      return entity.tourFormat
+        ? { label: tourFormatLabel[entity.tourFormat] || entity.tourFormat }
+        : null
+    default:
+      return null
+  }
+}
+
+function getPriceLabel(entity: ListingEntity, entityType: string): string | undefined {
+  if (!entity.bookingRef?.key || !prices) return undefined
+  const pv = resolvePrice(entity.bookingRef.key, entityType, undefined, prices, lang)
+  return pv?.label
+}
+
+const hasAny = sections.some(s => s.entities.length > 0)
+---
+
+{/* 06 §5.3 — 4 hub rollup */}
+<div class="hub-index">
+  {hasAny ? (
+    <>
+      {sections.map(section => {
+        if (section.entities.length === 0) return null
+        return (
+          <div class="hub-section">
+            <Section heading={section.title}>
+              {section.description && (
+                <p class="hub-desc">{section.description}</p>
+              )}
+            </Section>
+            <div class="container">
+              <div class="card-grid">
+                {section.entities.map(entity => {
+                  const badge = getBadge(entity, section.entityType)
+                  return (
+                    <Card
+                      title={entity.title}
+                      summary={entity.summary}
+                      href={entityHref(section.entityType, entity.slug)}
+                      image={entity.image}
+                      imageAlt={entity.imageAlt}
+                      badge={badge?.label}
+                      badgeVariant={badge?.variant ?? 'default'}
+                      priceLabel={getPriceLabel(entity, section.entityType)}
+                      authorLabel={section.entityType === 'article' ? entity.author?.title : undefined}
+                    />
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        )
+      })}
+    </>
+  ) : (
+    <EmptyState entityType="hub" lang={lang} />
+  )}
+
+  {/* Vùng 4: JSON-LD */}
+  {
+    sections.map(section => (
+      <script type="application/ld+json" set:html={jsonLdScriptContent(
+        collectionPageToJsonLd(
+          {
+            title: section.title,
+            description: section.description,
+            entityType: section.entityType,
+            entities: section.entities.map(e => ({ ...e, _type: section.entityType })),
+            lang,
+            // Mỗi section một node @id riêng qua fragment — trang hub phát
+            // nhiều CollectionPage, @id trùng nhau sẽ đè node
+            pagePath: `${Astro.url.pathname}#${section.entityType}`,
+          },
+          Astro.site?.toString() || 'https://tourdaovn.vn'
+        )
+      )} />
+    ))
+  }
+</div>
+
+<style>
+  .hub-index {
+    padding-top: var(--s7);
+  }
+
+  .hub-section {
+    margin-bottom: var(--s9);
+  }
+
+  .hub-desc {
+    font-size: var(--fs-base);
+    color: var(--c-text-muted);
+    max-width: 70ch;
+    margin-top: var(--s2);
+  }
+
+  .container {
+    max-width: var(--container);
+    margin: 0 auto;
+    padding: 0 var(--container-padding);
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--s5);
+  }
+
+  @media (max-width: 1023px) {
+    .card-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .card-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

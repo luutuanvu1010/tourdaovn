@@ -1,0 +1,66 @@
+---
+import type { Lang } from '../lib/types'
+
+export interface Props {
+  telephone: string
+  lang: Lang
+}
+
+const { telephone, lang } = Astro.props
+
+const labels: Record<string, string> = {
+  vi: 'Gọi ngay',
+  en: 'Call now',
+  zh: '立即拨打',
+  ko: '전화하기',
+  ru: 'Позвонить',
+}
+---
+
+{telephone && (
+  <a href={`tel:${telephone}`} class="contact-cta">
+    <span class="contact-icon">📞</span>
+    <span class="contact-label">{labels[lang] || labels.en}</span>
+    <span class="contact-number">{telephone}</span>
+  </a>
+)}
+
+<style>
+  .contact-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s3);
+    padding: var(--s3) var(--s5);
+    border: 2px solid var(--c-accent);
+    border-radius: var(--radius-pill);
+    background: var(--c-accent-soft);
+    color: var(--c-text);
+    font-family: var(--font-ui);
+    font-weight: var(--fw-600);
+    font-size: var(--fs-base);
+    transition: background var(--m-fast) var(--m-ease),
+                border-color var(--m-fast) var(--m-ease);
+  }
+
+  .contact-cta:hover {
+    background: var(--c-accent);
+    color: var(--c-text-inverse);
+  }
+
+  .contact-icon {
+    font-size: var(--fs-h5);
+  }
+
+  .contact-label {
+    font-weight: var(--fw-700);
+  }
+
+  .contact-number {
+    font-weight: var(--fw-500);
+    color: var(--c-text-muted);
+  }
+
+  .contact-cta:hover .contact-number {
+    color: var(--c-text-inverse);
+  }
+</style>

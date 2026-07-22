@@ -1,0 +1,73 @@
+---
+export interface Props {
+  /** Nhãn giá; bỏ trống ở variant fallback (chỉ có nút trỏ nguồn chính thức). */
+  priceText?: string
+  ctaUrl?: string
+  ctaLabel: string
+  asOf?: string
+}
+
+const { priceText, ctaUrl, ctaLabel, asOf } = Astro.props
+---
+
+<div class="booking-cta">
+  {priceText && (
+    <div class="booking-price">
+      <span class="booking-price-value">{priceText}</span>
+      {asOf && <span class="booking-asof">{asOf}</span>}
+    </div>
+  )}
+  {ctaUrl && (
+    <a href={ctaUrl} class="booking-btn btn-primary">{ctaLabel}</a>
+  )}
+</div>
+
+<style>
+  .booking-cta {
+    background: var(--c-accent-soft);
+    border: 1px solid var(--c-accent);
+    border-radius: var(--radius-md);
+    padding: var(--s5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s4);
+  }
+
+  .booking-price {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s2);
+  }
+
+  .booking-price-value {
+    font-family: var(--font-display);
+    font-size: var(--fs-h4);
+    font-weight: var(--fw-700);
+    color: var(--c-accent-strong);
+  }
+
+  .booking-asof {
+    font-family: var(--font-ui);
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+  }
+
+  .booking-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--c-accent);
+    color: var(--c-text-inverse);
+    font-family: var(--font-ui);
+    font-size: var(--fs-base);
+    font-weight: var(--fw-600);
+    padding: var(--s3) var(--s5);
+    border-radius: var(--radius-pill);
+    text-decoration: none;
+    transition: background var(--m-fast) var(--m-ease);
+  }
+
+  .booking-btn:hover {
+    background: var(--c-accent-strong);
+  }
+</style>

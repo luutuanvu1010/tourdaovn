@@ -1,0 +1,98 @@
+---
+import Card from './Card.astro'
+import Section from './Section.astro'
+import { entityHref } from '../lib/homepage'
+import { imageUrl } from '../lib/sanity-image'
+import type { EntityRef, HomepageArticleCard, HomepagePlaceCard, Lang } from '../lib/types'
+
+type HomeCard = EntityRef | HomepagePlaceCard | HomepageArticleCard
+
+export interface Props {
+  heading: string
+  items?: HomeCard[]
+  lang: Lang
+  viewAllLabel: string
+  viewAllHref?: string
+  badgeLabel?: string
+}
+
+const {
+  heading,
+  lang,
+  viewAllLabel,
+  viewAllHref,
+  badgeLabel,
+} = Astro.props
+const items = Array.isArray(Astro.props.items) ? Astro.props.items : []
+
+const cards = items
+  .map(item => ({
+    item,
+    href: entityHref(item._type, item.slug, lang),
+    image: imageUrl(item.mainImage, { width: 520 }),
+  }))
+  .filter(card => card.href && card.item.title && card.item.summary)
+---
+
+{cards.length > 0 && (
+  <Section heading={heading}>
+    <div class="home-card-grid">
+      {cards.map(({ item, href, image }) => (
+        <Card
+          title={item.title}
+          summary={item.summary || ''}
+          href={href!}
+          image={image}
+          imageAlt={item.mainImage?.alt || item.title}
+          badge={badgeLabel}
+          authorLabel={'author' in item && item.author?.title ? item.author.title : undefined}
+        />
+      ))}
+    </div>
+    {viewAllHref && (
+      <a class="home-view-all" href={viewAllHref}>{viewAllLabel}</a>
+    )}
+  </Section>
+)}
+
+<style>
+  .home-card-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--s4);
+  }
+
+  .home-view-all {
+    display: inline-flex;
+    margin-top: var(--s5);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-600);
+    color: var(--c-primary);
+    transition: color var(--m-fast) var(--m-ease);
+  }
+
+  .home-view-all:hover {
+    color: var(--c-primary-strong);
+  }
+
+  @media (max-width: 1024px) {
+    /* --bp-lg */
+    .home-card-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    /* --bp-md */
+    .home-card-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    /* --bp-sm */
+    .home-card-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

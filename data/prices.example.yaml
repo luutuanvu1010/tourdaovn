@@ -1,0 +1,7 @@
+# Seam giá (một chiều). Giá KHÔNG nhập vào Sanity; entity giữ priceKey, build tra ở đây.
+# Đổi tên thành prices.yaml khi dùng. Nguồn thật có thể là file này hoặc API booking.
+# Ví dụ:
+# tour-dao-binh-ba:
+#   currency: VND
+#   amount: 550000
+#   asOf: 2026-07-01

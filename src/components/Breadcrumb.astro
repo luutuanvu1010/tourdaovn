@@ -1,0 +1,162 @@
+---
+import type { Lang, EntityRef } from '../lib/types'
+import { ROUTE_MAP } from '../lib/routes'
+import { uiCopy } from '../lib/uiCopy'
+import { entityHref } from '../lib/homepage'
+import { jsonLdScriptContent } from '../lib/serialize/utils'
+
+export interface Props {
+  containedInPlace?: EntityRef
+  entityType: string
+  lang: Lang
+  hubEntity?: string
+  currentTitle?: string
+  inverse?: boolean
+}
+
+const { containedInPlace, entityType, lang, hubEntity, currentTitle, inverse = false } = Astro.props
+
+const siteBase = (Astro.site?.toString() ?? 'https://tourdaovn.vn').replace(/\/$/, '')
+
+interface Crumb {
+  label: string
+  href?: string
+}
+
+const crumbs: Crumb[] = []
+
+crumbs.push({ label: uiCopy(lang)('breadcrumbHome'), href: lang === 'vi' ? '/' : `/${lang}/` })
+
+if (hubEntity) {
+  const hubRoute = ROUTE_MAP.find(r => r.entity === hubEntity)
+  const hubSegment = hubRoute?.segments[lang]
+  const hubLabel = hubRoute?.labels[lang]
+  if (hubSegment) {
+    const hubHref = lang === 'vi'
+      ? `/${hubSegment}/`
+      : `/${lang}/${hubSegment}/`
+    crumbs.push({ label: hubLabel || hubSegment, href: hubHref })
+  }
+}
+
+if (entityType !== 'touristDestination') {
+  const route = ROUTE_MAP.find(r => r.entity === entityType)
+  const branchLabel = route?.labels[lang]
+  if (branchLabel) {
+    const branchSegment = route!.segments[lang]
+    const branchHref = lang === 'vi'
+      ? `/${branchSegment}/`
+      : `/${lang}/${branchSegment}/`
+    crumbs.push({ label: branchLabel, href: branchHref })
+  }
+}
+
+if (containedInPlace?.title) {
+  const parentHref = containedInPlace.slug
+    ? entityHref(containedInPlace._type, containedInPlace.slug, lang)
+    : undefined
+  crumbs.push({ label: containedInPlace.title, href: parentHref })
+}
+
+if (currentTitle) {
+  crumbs.push({ label: currentTitle, href: undefined })
+}
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: crumbs.map((crumb, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: crumb.label,
+    ...(crumb.href ? { item: `${siteBase}${crumb.href}` } : {}),
+  })),
+}
+---
+
+<div class="container">
+  <nav class:list={['breadcrumb', { inverse }]} aria-label={uiCopy(lang)('breadcrumbAria')}>
+    <ol class="breadcrumb-list">
+    {crumbs.map((crumb, i) => (
+      <li class="breadcrumb-item">
+        {crumb.href ? (
+          <a href={crumb.href}>{crumb.label}</a>
+        ) : (
+          <span aria-current={i === crumbs.length - 1 ? 'page' : undefined}>
+            {crumb.label}
+          </span>
+        )}
+      </li>
+    ))}
+    </ol>
+  </nav>
+</div>
+
+<script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
+
+<style>
+  .breadcrumb {
+    padding: var(--s4) 0;
+  }
+
+  .breadcrumb-list {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    list-style: none;
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+    flex-wrap: wrap;
+  }
+
+  .breadcrumb-item {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+  }
+
+  .breadcrumb-item + .breadcrumb-item::before {
+    content: '/';
+    color: var(--c-border);
+    font-size: var(--fs-sm);
+  }
+
+  .breadcrumb-item a {
+    color: var(--c-text-muted);
+    transition: color var(--m-fast) var(--m-ease);
+  }
+
+  .breadcrumb-item a:hover {
+    color: var(--c-primary);
+  }
+
+  .breadcrumb-item [aria-current='page'] {
+    color: var(--c-primary);
+    font-weight: var(--fw-600);
+  }
+
+  .breadcrumb.inverse .breadcrumb-list {
+    color: var(--c-text-inverse);
+    opacity: 0.85;
+  }
+
+  .breadcrumb.inverse .breadcrumb-item + .breadcrumb-item::before {
+    color: var(--c-text-inverse);
+    opacity: 0.55;
+  }
+
+  .breadcrumb.inverse .breadcrumb-item a {
+    color: var(--c-text-inverse);
+    opacity: 0.85;
+  }
+
+  .breadcrumb.inverse .breadcrumb-item a:hover {
+    color: var(--c-text-inverse);
+    opacity: 1;
+  }
+
+  .breadcrumb.inverse .breadcrumb-item [aria-current='page'] {
+    color: var(--c-text-inverse);
+    font-weight: var(--fw-600);
+  }
+</style>

@@ -1,0 +1,197 @@
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN TOKENS — từ DESIGN.md §1-4
+   Nguồn token duy nhất cho mọi component. 0 hardcoded value bên ngoài file này.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* §1 Color — landscape-aware token set */
+  --c-primary:        #0C4A6E;
+  --c-primary-strong: #082F49;
+  --c-primary-soft:   #F0F7FC;
+  --c-accent:         #C2410C;
+  --c-accent-strong:  #9A3412;
+  --c-accent-soft:    #FFF7ED;
+  --c-sand:           #F5A623;
+  --c-sand-soft:      #FBE3B3;
+  --c-sand-paper:     #FAF1DE;
+  --c-surface:        #FBF8F3;
+  --c-surface-alt:    #F5F1EA;
+  --c-card:           #FFFFFF;
+  --c-text:           #0F172A;
+  --c-text-muted:     #475569;
+  --c-text-inverse:   #F8FAFC;
+  --c-border:         #E2E8F0;
+  --c-coral:          #E8654E;
+  --c-green:          #3FA796;
+  --c-green-soft:     #DCFCE7;
+  --c-green-text:     #166534;
+  --c-sand-border:    #e9d3a4;
+  --c-sand-text:      #5a4109;
+  --c-sand-text-strong: #3d2a05;
+  --c-footer-bg:      #0E1A23;
+  --c-footer-text:    #9aa9b2;
+  --c-footer-border:  #233642;
+  --c-footer-muted:   #7d8b95;
+  /* Hero fallback + overlay */
+  --c-hero-fallback-top:    #d4d9ce;
+  --c-hero-fallback-bottom: #b8c4b0;
+  --c-hero-fallback-top-teal:    #ceddd9;
+  --c-hero-fallback-bottom-teal: #a8c8b8;
+  --c-hero-overlay-light:   rgba(255,255,255,.18);
+  --c-land-rice:      color-mix(in srgb, var(--c-sand) 18%, var(--c-surface));
+  --c-land-forest:    color-mix(in srgb, var(--c-green) 16%, var(--c-primary-soft));
+  --c-land-mist:      color-mix(in srgb, var(--c-primary-soft) 78%, var(--c-surface));
+  --landscape-page-bg:
+    radial-gradient(900px 420px at 8% -8%, color-mix(in srgb, var(--c-primary-soft) 72%, transparent), transparent 70%),
+    radial-gradient(720px 360px at 92% 12%, color-mix(in srgb, var(--c-land-rice) 58%, transparent), transparent 68%),
+    linear-gradient(180deg, var(--c-surface) 0%, color-mix(in srgb, var(--c-surface) 84%, var(--c-land-mist)) 52%, var(--c-surface) 100%);
+  --pattern-rice-lines:
+    repeating-linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--c-sand) 18%, transparent) 0 1px,
+      transparent 1px 13px
+    );
+  --pattern-contour-lines:
+    radial-gradient(ellipse at 12% 100%, transparent 0 46%, color-mix(in srgb, var(--c-primary) 10%, transparent) 47% 48%, transparent 49%),
+    radial-gradient(ellipse at 84% 0%, transparent 0 54%, color-mix(in srgb, var(--c-green) 12%, transparent) 55% 56%, transparent 57%);
+
+  /* §2 Typography — Vietnamese-readable, token-first */
+  --font-display: "Be Vietnam Pro", system-ui, sans-serif;
+  --font-ui:      "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --fw-500: 500; --fw-600: 600; --fw-700: 700; --fw-800: 800; --fw-900: 900;
+  --fs-badge: 0.6875rem;  /* 11px */
+  --fs-xs:   0.75rem;     /* 12px */
+  --fs-label: 0.875rem;   /* 14px */
+  --fs-sm:    0.9375rem;  /* 15px */
+  --fs-base:  1.0625rem;  /* 17px */
+  --fs-card-title: 1.125rem; /* 18px — card title, nav link */
+  --fs-nav:   1.125rem;   /* 18px — nav link, footer heading */
+  --fs-h5:    1.25rem;    /* 20px — được đẩy lên từ 22px, khớp hub name */
+  /* ── Shared component tokens (trích từ DESIGN.md §5) ── */
+  --underline-width: 28px;
+  --underline-height: 3px;
+  --badge-py: 2px;
+  --badge-px: 10px;
+  --card-lift: -3px;
+  --fs-h4:    1.625rem;   /* 26px */
+  --fs-section: 1.75rem;  /* 28px — section heading trong multi-section layout */
+  --fs-h3:    2rem;       /* 32px */
+  --fs-h2:    2.5rem;     /* 40px */
+  --fs-h1:    2.625rem;   /* 42px */
+  --fs-hero:  2.875rem;   /* 46px — override hero homepage */
+  --lh-heading: 1.16;
+  --lh-body:    1.68;
+
+  /* §3 Spacing */
+  --s1: 4px;   --s2: 8px;   --s3: 12px;
+  --s4: 16px;  --s5: 24px;  --s6: 32px;
+  --s7: 48px;  --s8: 64px;  --s9: 96px;
+
+  /* §3.2 Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+
+  /* §3.3 Shadow */
+  --shadow-card:    0 1px 3px rgba(15,23,42,0.08);
+  --shadow-raised:  0 6px 24px -8px rgba(0,91,150,.15), 0 2px 6px rgba(26,32,44,.05);
+  --shadow-lg:      0 16px 48px -12px rgba(0,91,150,.22), 0 4px 12px rgba(26,32,44,.06);
+  --shadow-overlay: 0 12px 32px rgba(15,23,42,0.16);
+
+  /* §4 Layout */
+  --container: 1200px;
+  --container-editorial: 800px;
+  --container-padding: 24px;
+  --bp-sm: 640px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+
+  /* §6 Motion */
+  --m-fast:  180ms;
+  --m-base:  300ms;
+  --m-ease:  ease;
+
+  /* Component token */
+  --header-h: 68px;
+  --hero-min-h: 480px;
+  --hero-min-h-mobile: 360px;
+  --card-img-h: 200px;
+}
+
+/* ── Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: var(--fs-base);
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-ui);
+  font-weight: var(--fw-500);
+  line-height: var(--lh-body);
+  color: var(--c-text);
+  background: var(--landscape-page-bg);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+main {
+  position: relative;
+  isolation: isolate;
+}
+
+main::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    var(--pattern-contour-lines),
+    linear-gradient(90deg, transparent, color-mix(in srgb, var(--c-sand) 5%, transparent), transparent);
+  opacity: .46;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-700);
+  line-height: var(--lh-heading);
+  margin: 0;
+  letter-spacing: 0;
+}
+
+h4 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-700);
+  line-height: 1.15;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0ms !important;
+    transition-duration: 0ms !important;
+  }
+}

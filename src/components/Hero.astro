@@ -1,0 +1,235 @@
+---
+import { imageUrl } from '../lib/sanity-image'
+import type { ImageAsset } from '../lib/types'
+
+export interface Props {
+  image?: string | ImageAsset
+  gallery?: ImageAsset[]
+  imageAlt?: string
+}
+
+const { image, gallery = [], imageAlt } = Astro.props
+const src = typeof image === 'string' ? image : imageUrl(image, { width: 1200 })
+const alt = imageAlt || (typeof image === 'object' ? image?.alt : undefined) || ''
+const mainImageKey = typeof image === 'object' ? (image?.asset?._id || image?.asset?.url) : src
+const galleryItems = (gallery ?? [])
+  .filter(item => {
+    const itemKey = item?.asset?._id || item?.asset?.url
+    return Boolean(itemKey && itemKey !== mainImageKey)
+  })
+  .map(item => ({
+    src: imageUrl(item, { width: 640 }),
+    alt: item.alt || '',
+  }))
+  .filter(item => item.src)
+  .slice(0, 4)
+const hasMedia = !!src
+const hasGallery = galleryItems.length === 4
+---
+
+<section class="hero-shell">
+  {hasMedia ? (
+    <div class={hasGallery ? 'hero-block hero-block--mosaic' : 'hero-block'}>
+      <div class="hero-media-grid">
+        <div class="hero-main">
+          <figure class="hero-main-figure">
+            <img src={src} alt={alt} loading="eager" fetchpriority="high" />
+          </figure>
+          <div class="hero-gradient-overlay" aria-hidden="true"></div>
+          <div class="hero-overlay">
+            <slot name="overlay" />
+          </div>
+        </div>
+        {hasGallery && (
+          <div class="hero-gallery-grid">
+            {galleryItems.map((item) => (
+              <figure class="hero-gallery-item">
+                <img src={item.src} alt={item.alt} loading="lazy" decoding="async" />
+              </figure>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  ) : (
+    <div class="hero-gradient">
+      <div class="hero-landscape" aria-hidden="true"></div>
+      <div class="container hero-gradient-inner">
+        <slot name="overlay" />
+      </div>
+    </div>
+  )}
+</section>
+
+<style>
+  .hero-shell {
+    /* no margin — InfoBar sits tight against hero bottom */
+  }
+
+  .hero-block {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--c-primary-soft);
+  }
+
+  .hero-media-grid {
+    display: grid;
+  }
+
+  .hero-block--mosaic .hero-media-grid {
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
+    gap: var(--s1);
+    height: clamp(320px, 34vw, 430px);
+    background: var(--c-card);
+  }
+
+  /* ── Main image ── */
+  .hero-main {
+    position: relative;
+    height: 400px;
+    overflow: hidden;
+  }
+
+  .hero-block--mosaic .hero-main {
+    height: 100%;
+  }
+
+  .hero-main-figure {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+  }
+
+  .hero-main-figure img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .hero-gradient-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, var(--c-primary-strong) 0%, transparent 55%);
+    pointer-events: none;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--s7) var(--s5) var(--s5);
+    z-index: 2;
+  }
+
+  /* ── Booking-style gallery mosaic ── */
+  .hero-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: var(--s1);
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .hero-gallery-item {
+    margin: 0;
+    min-width: 0;
+    min-height: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--c-primary-soft);
+  }
+
+  .hero-gallery-item img {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    object-fit: cover;
+    display: block;
+    transition: transform var(--m-base) var(--m-ease);
+  }
+
+  .hero-gallery-item:hover img {
+    transform: scale(1.05);
+  }
+
+  /* ── No-image variant ── */
+  .hero-gradient {
+    position: relative;
+    min-height: clamp(280px, 36vw, 420px);
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background:
+      radial-gradient(720px 300px at 92% 0%, color-mix(in srgb, var(--c-green) 20%, transparent), transparent 62%),
+      radial-gradient(620px 260px at 10% 8%, color-mix(in srgb, var(--c-sand) 18%, transparent), transparent 62%),
+      linear-gradient(135deg, var(--c-primary-strong), var(--c-primary) 52%, color-mix(in srgb, var(--c-primary) 80%, var(--c-green) 20%));
+  }
+
+  .hero-landscape {
+    position: absolute;
+    inset: auto 0 0;
+    height: 46%;
+    background:
+      var(--pattern-rice-lines),
+      linear-gradient(180deg, color-mix(in srgb, var(--c-green) 18%, transparent), color-mix(in srgb, var(--c-primary-strong) 72%, transparent));
+    clip-path: polygon(0 42%, 13% 32%, 28% 40%, 43% 28%, 58% 39%, 75% 29%, 100% 40%, 100% 100%, 0 100%);
+    opacity: .72;
+  }
+
+  .hero-gradient-inner {
+    position: relative;
+    z-index: 2;
+    padding: var(--s7) var(--s6);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .hero-block--mosaic .hero-media-grid {
+      grid-template-columns: 1fr;
+      height: auto;
+    }
+
+    .hero-main {
+      height: 280px;
+    }
+
+    .hero-block--mosaic .hero-main {
+      height: 280px;
+    }
+
+    .hero-gallery-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-rows: 1fr;
+      height: 84px;
+    }
+
+    .hero-overlay {
+      padding: var(--s5) var(--s4) var(--s4);
+    }
+
+    .hero-gradient-inner {
+      padding: var(--s5) var(--s4);
+    }
+  }
+
+  @media (min-width: 769px) and (max-width: 1023px) {
+    .hero-main {
+      height: 340px;
+    }
+
+    .hero-block--mosaic .hero-media-grid {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
+      height: 340px;
+    }
+
+    .hero-block--mosaic .hero-main {
+      height: 100%;
+    }
+  }
+</style>

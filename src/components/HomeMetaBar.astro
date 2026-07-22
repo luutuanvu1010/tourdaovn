@@ -1,0 +1,65 @@
+---
+import type { Lang } from '../lib/types'
+
+export interface Props {
+  sameAs?: string[]
+  updatedLabel?: string
+  lang: Lang
+}
+
+const { sameAs = [], updatedLabel, lang } = Astro.props
+
+const localeLabels: Record<Lang, { wikidata: string; updated: string }> = {
+  vi: { wikidata: 'Xác minh dữ liệu: Wikidata', updated: 'Cập nhật lần cuối' },
+  en: { wikidata: 'Verify data: Wikidata', updated: 'Last updated' },
+  zh: { wikidata: '验证数据：Wikidata', updated: '最后更新' },
+  ko: { wikidata: '데이터 확인: Wikidata', updated: '마지막 업데이트' },
+  ru: { wikidata: 'Проверить данные: Wikidata', updated: 'Последнее обновление' },
+}
+
+const labels = localeLabels[lang]
+
+const wikiUrl = sameAs.find(u => u.includes('wikidata.org') || u.includes('wikipedia.org'))
+const wikiId = wikiUrl ? wikiUrl.split('/').pop()?.replace(/^Q/, 'Q') : null
+---
+
+{wikiUrl && (
+  <div class="meta-bar">
+    <a href={wikiUrl} target="_blank" rel="noopener noreferrer">
+      ↗ {labels.wikidata}{wikiId ? ` ${wikiId}` : ''}
+    </a>
+    {updatedLabel && (
+      <>
+        <span class="meta-sep" aria-hidden="true">|</span>
+        <span>{labels.updated}: {updatedLabel}</span>
+      </>
+    )}
+  </div>
+)}
+
+<style>
+  .meta-bar {
+    display: flex;
+    gap: var(--s4);
+    align-items: center;
+    flex-wrap: wrap;
+    font-family: var(--font-ui);
+    font-size: var(--fs-label);
+    font-weight: var(--fw-500);
+    color: var(--c-text-muted);
+  }
+
+  .meta-bar a {
+    color: var(--c-text-muted);
+    font-weight: var(--fw-600);
+    transition: color var(--m-fast) var(--m-ease);
+  }
+
+  .meta-bar a:hover {
+    color: var(--c-primary);
+  }
+
+  .meta-sep {
+    color: color-mix(in srgb, var(--c-primary) 20%, transparent);
+  }
+</style>

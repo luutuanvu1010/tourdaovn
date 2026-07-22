@@ -1,0 +1,193 @@
+---
+import type { TourResult, Lang, SiteContact } from '../lib/types'
+import { uiCopy, typeLabel as lookupLabel, TOUR_FORMAT_LABELS } from '../lib/uiCopy'
+import DetailLayout from './DetailLayout.astro'
+import FAQ from './FAQ.astro'
+import Section from './Section.astro'
+import BookingCTA from './BookingCTA.astro'
+import ContactChannels from './ContactChannels.astro'
+import InfoCard from './InfoCard.astro'
+import Body from './Body.astro'
+import { applyPriceToJsonLd, entityPageGraphToLd, tourToJsonLd, jsonLdScriptContent } from '../lib/serialize'
+import { loadPrices } from '../lib/prices'
+import { resolvePrice } from '../lib/resolver'
+
+export interface Props {
+  data: TourResult
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+  contact?: SiteContact | null
+}
+
+const { data, lang, nearby = [], contact = null } = Astro.props
+
+const t = uiCopy(lang)
+
+const formatLabel = lookupLabel(TOUR_FORMAT_LABELS, lang, data.tourFormat)
+
+function hasPtContent(blocks: unknown[] | undefined): boolean {
+  if (!blocks || blocks.length === 0) return false
+  return blocks.some((b: any) => b._type === 'block' && b.children?.some((c: any) => (c.text || '').trim()))
+}
+
+const prices = loadPrices('data/prices.yaml')
+const priceView = resolvePrice(data.bookingRef?.key, 'tour', undefined, prices, lang)
+
+// CTA fallback khi tour chưa có giá (nợ PY8): trỏ website chính thức của operator.
+// url là website chính thức, officialSource là bằng chứng đăng ký (§2.9) — ưu tiên url.
+// Không có URL nào thì không render nút (cấm nút không hoạt động).
+const operatorUrl = data.operator?.url || data.operator?.officialSource || ''
+const showFallbackCta = !priceView?.label && !!operatorUrl
+const hasContactChannel = !!(contact?.zaloUrl || contact?.hotline || contact?.whatsapp)
+
+const siteBase = Astro.site?.toString() || 'https://tourdaovn.vn'
+const entityJsonLd = applyPriceToJsonLd(
+  tourToJsonLd(data, siteBase, lang),
+  priceView, data.bookingRef?.key,
+)
+const jsonLd = entityPageGraphToLd(entityJsonLd, data, siteBase, lang)
+
+const infoBarItems = [
+  { icon: '⏱️', label: t('duration'), value: data.duration || '', visible: !!data.duration },
+  { icon: '👥', label: t('format'), value: formatLabel, visible: true },
+  { icon: '🎫', label: t('priceFrom'), value: priceView?.label || '', visible: !!priceView?.label },
+  { icon: '🚐', label: t('departure'), value: data.departureNote || '', visible: !!data.departureNote },
+]
+
+const sidebarRows = [
+  { icon: '🏢', label: t('operator'), value: data.operator?.title || '', visible: !!data.operator?.title },
+  { icon: '👥', label: t('format'), value: formatLabel, visible: true },
+  { icon: '📍', label: t('tripOrigin'), value: data.tripOrigin?.title || '', visible: !!data.tripOrigin?.title },
+  { icon: '⏱️', label: t('duration'), value: data.duration || '', visible: !!data.duration },
+  { icon: '👤', label: t('suitableFor'), value: data.touristType?.join(', ') || '', visible: !!(data.touristType && data.touristType.length > 0) },
+  { icon: '📅', label: t('season'), value: data.seasonNote || '', visible: !!data.seasonNote },
+]
+---
+
+<DetailLayout
+  title={data.title}
+  lang={lang}
+  entityType="tour"
+  image={data.mainImage}
+  gallery={data.gallery}
+  infoBarItems={infoBarItems}
+  sidebarSlots={[
+    { name: 'booking', component: 'BookingCTA', visible: !!priceView?.label || showFallbackCta || hasContactChannel, props: {} },
+    { name: 'info', component: 'InfoCard', visible: sidebarRows.some(r => r.visible), props: { rows: sidebarRows } },
+  ]}
+  nearbyTitle={t('similarTours')}
+  nearby={nearby}
+  updatedAt={data._updatedAt}
+>
+  <div slot="content">
+    <div class="summary-block">{data.summary}</div>
+
+    {data.itinerary && data.itinerary.length > 0 && (
+      <Section heading={t('itinerary')} contained={false}>
+        <div class="timeline">
+          {data.itinerary.map((stop) => (
+            <div class="tl-stop">
+              <div class="tl-dot"></div>
+              <div class="tl-line"></div>
+              <div class="tl-content">
+                <strong>{stop.place?.title || stop.externalStop?.name || ''}</strong>
+                {stop.note && <p>{stop.note}</p>}
+                {stop.durationAtStop && <span class="tl-dur">{stop.durationAtStop}</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Section>
+    )}
+
+    {((data.includes && data.includes.length > 0) || (data.excludes && data.excludes.length > 0)) && (
+      <Section heading={t('includesExcludes')} contained={false}>
+        <div class="inc-ex-grid">
+          {data.includes && data.includes.length > 0 && (
+            <div>
+              <h5>{t('includes')}</h5>
+              <ul class="check-list">
+                {data.includes.map((item) => <li><span class="check-icon">&#10003;</span> {item}</li>)}
+              </ul>
+            </div>
+          )}
+          {data.excludes && data.excludes.length > 0 && (
+            <div>
+              <h5>{t('excludes')}</h5>
+              <ul class="cross-list">
+                {data.excludes.map((item) => <li><span class="cross-icon">&#10007;</span> {item}</li>)}
+              </ul>
+            </div>
+          )}
+        </div>
+      </Section>
+    )}
+
+    {data.highlights && data.highlights.length > 0 && (
+      <Section heading={t('highlights')} contained={false}>
+        <ul class="hl-list">
+          {data.highlights.map((h: string) => <li>{h}</li>)}
+        </ul>
+      </Section>
+    )}
+
+    {hasPtContent(data.body) && (
+      <Section heading={t('details')} contained={false}>
+        <Body blocks={data.body} />
+      </Section>
+    )}
+
+    {data.seasonNote && (
+      <Section heading={t('bestSeason')} contained={false}>
+        <div class="info-callout">{data.seasonNote}</div>
+      </Section>
+    )}
+
+    {data.faq && data.faq.length > 0 && <FAQ faq={data.faq} lang={lang} contained={false} />}
+  </div>
+
+  {priceView?.label && <BookingCTA slot="booking" priceText={priceView.label} ctaLabel={t('bookTour')} />}
+  {showFallbackCta && <BookingCTA slot="booking" ctaUrl={operatorUrl} ctaLabel={t('officialWebsite')} />}
+  {hasContactChannel && <ContactChannels slot="booking" contact={contact} lang={lang} />}
+  {sidebarRows.some(r => r.visible) && <InfoCard slot="info" rows={sidebarRows} lang={lang} />}
+</DetailLayout>
+
+<script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
+
+<style>
+  .summary-block {
+    font-size: var(--fs-h5);
+    max-width: 70ch;
+    line-height: var(--lh-body);
+    font-weight: var(--fw-500);
+    font-family: var(--font-ui);
+    margin-bottom: var(--s6);
+  }
+
+  .timeline { position: relative; padding-left: var(--s5); }
+  .tl-stop { position: relative; padding-bottom: var(--s5); }
+  .tl-stop:last-child { padding-bottom: 0; }
+  .tl-dot { position: absolute; left: calc(-1 * var(--s5) + 4px); top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--c-primary); border: 2px solid var(--c-card); z-index: 1; }
+  .tl-line { position: absolute; left: calc(-1 * var(--s5) + 8px); top: 18px; bottom: 0; width: 2px; background: var(--c-border); }
+  .tl-stop:last-child .tl-line { display: none; }
+  .tl-content strong { display: block; font-size: var(--fs-base); font-weight: var(--fw-700); color: var(--c-text); }
+  .tl-content p { font-size: var(--fs-sm); color: var(--c-text-muted); margin: var(--s1) 0; }
+  .tl-dur { font-size: var(--fs-badge); color: var(--c-text-muted); background: var(--c-surface-alt); padding: 2px 8px; border-radius: var(--radius-pill); }
+
+  .inc-ex-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s5); }
+  .inc-ex-grid h5 { font-family: var(--font-display); font-size: var(--fs-base); font-weight: var(--fw-700); margin-bottom: var(--s3); }
+  .check-list, .cross-list { list-style: none; display: flex; flex-direction: column; gap: var(--s2); }
+  .check-list li, .cross-list li { display: flex; gap: var(--s2); align-items: center; font-size: var(--fs-sm); }
+  .check-icon { color: var(--c-green); font-weight: var(--fw-700); }
+  .cross-icon { color: var(--c-text-muted); font-weight: var(--fw-700); }
+
+  .info-callout { background: var(--c-sand-paper); border: 1px solid var(--c-sand-border); border-radius: var(--radius-lg); padding: var(--s4) var(--s5); font-size: var(--fs-sm); color: var(--c-sand-text); }
+
+  .hl-list { list-style: none; display: flex; flex-direction: column; gap: var(--s2); }
+  .hl-list li { font-size: var(--fs-sm); color: var(--c-text-muted); padding-left: var(--s5); position: relative; }
+  .hl-list li::before { content: "✦"; position: absolute; left: 0; color: var(--c-primary); font-size: var(--fs-xs); }
+
+  @media (max-width: 1023px) {
+    .inc-ex-grid { grid-template-columns: 1fr; }
+  }
+</style>

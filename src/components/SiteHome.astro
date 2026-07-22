@@ -1,0 +1,397 @@
+---
+import { HOME_COPY, indexHref } from '../lib/homepage'
+import { imageUrl } from '../lib/sanity-image'
+import type { Lang, TouristDestinationResult, SiteSettingsResult } from '../lib/types'
+import Body from './Body.astro'
+import HomeTrustBar from './HomeTrustBar.astro'
+import HomeBannerGrid from './HomeBannerGrid.astro'
+import HomeHubGrid from './HomeHubGrid.astro'
+import HomeRollupSection from './HomeRollupSection.astro'
+import HomeFacts from './HomeFacts.astro'
+import HomeAreaGrid from './HomeAreaGrid.astro'
+import HomeGuideGrid from './HomeGuideGrid.astro'
+export interface Props {
+  td: TouristDestinationResult | null
+  lang: Lang
+  destinationHref: string
+  config: SiteSettingsResult | null
+}
+
+const { td, lang, destinationHref, config } = Astro.props
+const copy = HOME_COPY[lang]
+
+const SITE_COPY: Record<Lang, {
+  eyebrow: string
+  title: string
+  summary: string
+  destinationLabel: string
+  destinationCta: string
+  hubHeading: string
+  hubSub: string
+}> = {
+  vi: {
+    eyebrow: 'Cẩm nang du lịch địa phương',
+    title: 'Nha Trang Travel',
+    summary: 'Cổng thông tin du lịch Nha Trang với điểm đến, trải nghiệm, lưu trú, ẩm thực và hướng dẫn thực tế được tổ chức cho khách du lịch, đối tác địa phương và công cụ tìm kiếm AI.',
+    destinationLabel: 'Điểm đến chính',
+    destinationCta: 'Xem trang điểm đến',
+    hubHeading: 'Đi thẳng tới nhu cầu của bạn',
+    hubSub: 'Các hub bên dưới là lối vào chính của dữ liệu du lịch, tách riêng khỏi trang điểm đến Nha Trang.',
+  },
+  en: {
+    eyebrow: 'Local travel guide',
+    title: 'Nha Trang Travel',
+    summary: 'A structured Nha Trang travel portal for destinations, experiences, stays, food and practical guides, built for travelers, local partners and AI search engines.',
+    destinationLabel: 'Primary destination',
+    destinationCta: 'Open destination page',
+    hubHeading: 'Jump to what you need',
+    hubSub: 'These hubs are the main entry points into the travel database, separate from the Nha Trang destination page.',
+  },
+  zh: {
+    eyebrow: '本地旅行指南',
+    title: 'Nha Trang Travel',
+    summary: '一个结构化的芽庄旅行入口，涵盖目的地、体验、住宿、美食和实用攻略，面向游客、本地伙伴和 AI 搜索引擎。',
+    destinationLabel: '主要目的地',
+    destinationCta: '查看目的地页面',
+    hubHeading: '直接进入所需内容',
+    hubSub: '以下 hub 是旅行数据库的主要入口，与芽庄目的地页面分开。',
+  },
+  ko: {
+    eyebrow: '현지 여행 가이드',
+    title: 'Nha Trang Travel',
+    summary: '나트랑의 목적지, 체험, 숙소, 음식과 실용 가이드를 정리한 여행 포털입니다. 여행자, 현지 파트너, AI 검색 엔진을 위해 구성했습니다.',
+    destinationLabel: '대표 목적지',
+    destinationCta: '목적지 페이지 보기',
+    hubHeading: '필요한 정보로 바로 이동',
+    hubSub: '아래 허브는 여행 데이터베이스의 주요 입구이며 나트랑 목적지 페이지와 분리되어 있습니다.',
+  },
+  ru: {
+    eyebrow: 'Местный путеводитель',
+    title: 'Nha Trang Travel',
+    summary: 'Структурированный туристический портал о Нячанге: направления, впечатления, проживание, еда и практичные гиды для путешественников, местных партнеров и AI-поиска.',
+    destinationLabel: 'Главное направление',
+    destinationCta: 'Открыть страницу направления',
+    hubHeading: 'Перейдите к нужному разделу',
+    hubSub: 'Эти хабы являются основными входами в туристическую базу и отделены от страницы направления Нячанг.',
+  },
+}
+
+const siteCopy = SITE_COPY[lang]
+const heroEyebrow = config?.heroText?.[lang] || siteCopy.eyebrow
+const heroImage = imageUrl(td?.mainImage, { width: 1800 })
+
+const DEFAULT_SECTIONS = [
+  { key: 'hero', hidden: false },
+  { key: 'trustBar', hidden: false },
+  { key: 'editorialBody', hidden: false },
+  { key: 'banners', hidden: false },
+  { key: 'hubGrid', hidden: false },
+  { key: 'areas', hidden: false },
+  { key: 'attractions', hidden: false },
+  { key: 'experiences', hidden: false },
+  { key: 'guides', hidden: false },
+  { key: 'stays', hidden: false },
+  { key: 'specialties', hidden: false },
+  { key: 'tours', hidden: false },
+  { key: 'faq', hidden: false },
+  { key: 'safety', hidden: false },
+]
+
+const rawSections = config?.sections?.length ? config.sections : DEFAULT_SECTIONS
+const activeSections = rawSections.filter((s) => !s.hidden)
+---
+
+<section class="site-home-hero">
+  {heroImage && <img class="site-home-bg" src={heroImage} alt="" fetchpriority="high" />}
+  <div class="site-home-gradient" aria-hidden="true"></div>
+  <div class="container site-home-inner">
+    <p class="site-home-eyebrow">{heroEyebrow}</p>
+    <h1 class="site-home-title">{siteCopy.title}</h1>
+    <p class="site-home-summary">{siteCopy.summary}</p>
+    <div class="site-home-actions">
+      <a href={destinationHref} class="primary-action">{siteCopy.destinationCta}</a>
+      {indexHref('hub-kham-pha', lang) && <a href={indexHref('hub-kham-pha', lang)} class="secondary-action">{copy.quickLinks[0]?.label}</a>}
+    </div>
+  </div>
+</section>
+
+{
+  activeSections.map((section) => {
+    switch (section.key) {
+      case 'hero':
+        return null
+      case 'trustBar':
+        return <HomeTrustBar items={copy.trustItems} />
+      case 'editorialBody': {
+        if (!td) return null
+        const hasBody = Boolean(td.body)
+        const hasHighlights = Boolean(td.highlights?.length)
+        const hasFacts = Boolean(td.keyFacts?.length)
+        if (!hasBody && !hasHighlights && !hasFacts) return null
+        return (
+          <section class="container editorial-section">
+            <h2 class="editorial-section-heading">{copy.sections.overview}</h2>
+            {hasBody && td.body && <Body blocks={td.body} />}
+            {hasHighlights && td.highlights && (
+              <ul class="home-highlights">
+                {td.highlights.map((h) => <li>{h}</li>)}
+              </ul>
+            )}
+            {hasFacts && td.keyFacts && <HomeFacts facts={td.keyFacts} />}
+          </section>
+        )
+      }
+      case 'banners':
+        return td?.homepageBanners?.length ? <HomeBannerGrid banners={td.homepageBanners} lang={lang} /> : null
+      case 'hubGrid':
+        return <HomeHubGrid lang={lang} />
+      case 'areas':
+        return td?.homepagePlaces?.length ? (
+          <HomeAreaGrid places={td.homepagePlaces} lang={lang} heading={copy.sections.areas} viewAllLabel={copy.viewAll} viewAllHref={indexHref('place', lang)} />
+        ) : null
+      case 'attractions':
+        return td?.featuredAttractions?.length ? (
+          <HomeRollupSection heading={copy.sections.attractions} items={td.featuredAttractions} lang={lang} viewAllLabel={copy.viewAll} viewAllHref={indexHref('attraction', lang)} />
+        ) : null
+      case 'experiences':
+        return td?.featuredExperiences?.length ? (
+          <HomeRollupSection heading={copy.sections.experiences} items={td.featuredExperiences} lang={lang} viewAllLabel={copy.viewAll} viewAllHref={indexHref('experience', lang)} />
+        ) : null
+      case 'guides':
+        return td?.homepageArticles?.length ? (
+          <HomeGuideGrid articles={td.homepageArticles} lang={lang} heading={copy.sections.articles} viewAllLabel={copy.viewAll} viewAllHref={indexHref('article', lang)} />
+        ) : null
+      case 'stays':
+        return td?.featuredStays?.length ? (
+          <HomeRollupSection heading={copy.sections.stays} items={td.featuredStays} lang={lang} viewAllLabel={copy.viewAll} viewAllHref={indexHref('hotel', lang)} />
+        ) : null
+      case 'specialties':
+        return td?.featuredSpecialties?.length ? (
+          <HomeRollupSection heading={copy.sections.specialties} items={td.featuredSpecialties} lang={lang} viewAllLabel={copy.viewAll} viewAllHref={indexHref('specialty', lang)} />
+        ) : null
+      case 'tours':
+        return td?.featuredTours?.length ? (
+          <HomeRollupSection heading={copy.sections.tours} items={td.featuredTours} lang={lang} viewAllLabel={copy.viewAll} viewAllHref={indexHref('tour', lang)} />
+        ) : null
+      case 'faq':
+        return td?.faq?.length ? (
+          <section class="container home-faq-section">
+            <h2>{copy.sections.faq}</h2>
+            {td.faq.map((item) => (
+              <details>
+                <summary>{item.question}</summary>
+                <p>{item.answer}</p>
+              </details>
+            ))}
+          </section>
+        ) : null
+      case 'safety':
+        return td?.safetyNote ? (
+          <section class="container home-safety-section">
+            <h2>{copy.safety}</h2>
+            <p>{td.safetyNote}</p>
+          </section>
+        ) : null
+      default:
+        return null
+    }
+  })
+}
+
+<style>
+  .site-home-hero {
+    position: relative;
+    min-height: 560px;
+    background: var(--c-primary);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
+
+  .site-home-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .site-home-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, var(--c-primary-strong) 0%, color-mix(in srgb, var(--c-primary) 42%, transparent) 58%, color-mix(in srgb, var(--c-primary) 12%, transparent) 100%);
+  }
+
+  .site-home-inner {
+    position: relative;
+    z-index: 2;
+    padding-block: var(--s9);
+  }
+
+  .site-home-eyebrow {
+    color: var(--c-text-inverse);
+    font-size: var(--fs-label);
+    font-weight: var(--fw-700);
+    letter-spacing: 0;
+    text-transform: uppercase;
+    opacity: .72;
+    margin-bottom: var(--s3);
+  }
+
+  .site-home-title {
+    color: var(--c-text-inverse);
+    font-family: var(--font-display);
+    font-size: clamp(var(--fs-h1), 5vw, var(--fs-hero));
+    line-height: 1.05;
+    font-weight: var(--fw-800);
+    margin-bottom: var(--s4);
+  }
+
+  .site-home-summary {
+    color: var(--c-text-inverse);
+    font-size: var(--fs-base);
+    line-height: var(--lh-body);
+    opacity: .84;
+  }
+
+  .site-home-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s3);
+    margin-top: var(--s6);
+  }
+
+  .primary-action,
+  .secondary-action {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    border-radius: var(--radius-pill);
+    padding: var(--s3) var(--s5);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-700);
+  }
+
+  .primary-action {
+    background: var(--c-accent);
+    color: var(--c-text-inverse);
+  }
+
+  .secondary-action {
+    background: color-mix(in srgb, var(--c-surface) 16%, transparent);
+    color: var(--c-text-inverse);
+    border: 1px solid color-mix(in srgb, var(--c-surface) 36%, transparent);
+  }
+
+  /*** Editorial body section ***/
+
+  .editorial-section {
+    padding-block: var(--s8);
+  }
+
+  .editorial-section-heading {
+    color: var(--c-primary);
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    font-weight: var(--fw-800);
+    margin-bottom: var(--s5);
+  }
+
+  .home-body {
+    color: var(--c-text);
+    font-size: var(--fs-base);
+    line-height: var(--lh-body);
+    max-width: 70ch;
+    margin-bottom: var(--s5);
+  }
+
+  /*** Highlights inline list ***/
+
+  .home-highlights {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s3);
+    margin-bottom: var(--s5);
+  }
+
+  .home-highlights li {
+    background: var(--c-primary-soft);
+    color: var(--c-primary);
+    padding: var(--s2) var(--s4);
+    border-radius: var(--radius-pill);
+    font-size: var(--fs-label);
+    font-weight: var(--fw-600);
+  }
+
+  /*** FAQ ***/
+
+  .home-faq-section {
+    padding-block: var(--s8);
+  }
+
+  .home-faq-section h2 {
+    color: var(--c-primary);
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    font-weight: var(--fw-800);
+    margin-bottom: var(--s5);
+  }
+
+  .home-faq-section details {
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-sm);
+    background: var(--c-card);
+    padding: var(--s4);
+    margin-bottom: var(--s3);
+  }
+
+  .home-faq-section summary {
+    color: var(--c-text);
+    font-weight: var(--fw-600);
+    cursor: pointer;
+  }
+
+  .home-faq-section details p {
+    color: var(--c-text-muted);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-body);
+    margin-top: var(--s3);
+  }
+
+  /*** Safety note ***/
+
+  .home-safety-section {
+    padding-block: var(--s8);
+  }
+
+  .home-safety-section h2 {
+    color: var(--c-primary);
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    font-weight: var(--fw-800);
+    margin-bottom: var(--s4);
+  }
+
+  .home-safety-section p {
+    color: var(--c-text-muted);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-body);
+    border-left: 3px solid var(--c-sand-border);
+    padding-left: var(--s4);
+    background: color-mix(in srgb, var(--c-sand) 8%, var(--c-surface));
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: var(--s4) var(--s4) var(--s4) var(--s5);
+  }
+
+  @media (max-width: 640px) {
+    .site-home-hero {
+      min-height: 520px;
+    }
+
+    .site-home-inner {
+      padding-bottom: var(--s7);
+    }
+  }
+</style>

@@ -1,0 +1,83 @@
+---
+import type { KeyFact } from '../lib/types'
+
+export interface Props {
+  facts?: KeyFact[]
+}
+
+const facts = Array.isArray(Astro.props.facts) ? Astro.props.facts : []
+---
+
+{facts.length > 0 && (
+  <div class="facts-section">
+    <div class="container">
+      <div class="facts-grid">
+        {facts.map(fact => (
+          <div class="fact-card">
+            <span class="fact-label">{fact.label}</span>
+            <span class="fact-value">{fact.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+)}
+
+<style>
+  .facts-section {
+    background: var(--c-primary-soft);
+    border-top: 1px solid var(--c-border);
+    border-bottom: 1px solid var(--c-border);
+    padding: var(--s7) 0;
+  }
+
+  .facts-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--s4);
+  }
+
+  .fact-card {
+    background: var(--c-card);
+    border-radius: var(--radius-md);
+    padding: var(--s5);
+    text-align: center;
+    border: 1px solid var(--c-border);
+    box-shadow: var(--shadow-card);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s2);
+  }
+
+  .fact-label {
+    font-weight: var(--fw-600);
+    font-size: var(--fs-label);
+    color: var(--c-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: var(--lh-heading);
+  }
+
+  .fact-value {
+    font-weight: var(--fw-500);
+    font-size: var(--fs-base);
+    color: var(--c-text);
+    line-height: var(--lh-body);
+  }
+
+  @media (max-width: 1024px) {
+    .facts-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .facts-section {
+      padding: var(--s6) 0;
+    }
+
+    .facts-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

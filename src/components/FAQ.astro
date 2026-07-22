@@ -1,0 +1,116 @@
+---
+import type { FAQItem, Lang } from '../lib/types'
+import { uiCopy } from '../lib/uiCopy'
+
+export interface Props {
+  faq: FAQItem[]
+  heading?: string
+  lang?: Lang
+  contained?: boolean
+}
+
+const { faq, heading, lang = 'vi', contained = true } = Astro.props
+const headingText = heading ?? uiCopy(lang)('faqHeading')
+---
+
+{faq.length > 0 && (
+  <section class="faq-section">
+    <div class:list={{ container: contained }}>
+      <h2 class="faq-heading">{headingText}</h2>
+      <div class="faq-list" role="list">
+        {faq.map(item => (
+          <details class="faq-item" role="listitem">
+            <summary class="faq-question">
+              <span>{item.question}</span>
+              <svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </summary>
+            {/* data-speakable: target của SpeakableSpecification trong JSON-LD FAQPage (serialize/utils.ts faqPageToLd) */}
+            <div class="faq-answer" data-speakable>
+              <p>{item.answer}</p>
+            </div>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  .faq-section {
+    padding: var(--s7) 0;
+  }
+
+  .faq-heading {
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    font-weight: var(--fw-800);
+    color: var(--c-text);
+    line-height: var(--lh-heading);
+    margin-bottom: var(--s5);
+  }
+
+  .faq-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .faq-item {
+    border-bottom: 1px solid var(--c-border);
+  }
+
+  .faq-item:first-child {
+    border-top: 1px solid var(--c-border);
+  }
+
+  .faq-question {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--s4);
+    padding: var(--s4) 0;
+    font-weight: var(--fw-600);
+    font-size: var(--fs-base);
+    color: var(--c-text);
+    cursor: pointer;
+    list-style: none;
+    transition: color var(--m-fast) var(--m-ease);
+  }
+
+  .faq-question::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-question:hover {
+    color: var(--c-primary);
+  }
+
+  .faq-chevron {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--c-text-muted);
+    transition: transform var(--m-base) var(--m-ease);
+  }
+
+  .faq-item[open] .faq-chevron {
+    transform: rotate(180deg);
+  }
+
+  .faq-item[open] .faq-question {
+    color: var(--c-primary);
+  }
+
+  .faq-answer {
+    padding: 0 0 var(--s4);
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+    line-height: var(--lh-body);
+  }
+
+  @media (max-width: 768px) {
+    .faq-section {
+      padding: var(--s5) 0;
+    }
+  }
+</style>

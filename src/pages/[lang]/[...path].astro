@@ -1,0 +1,81 @@
+---
+import RouteDispatch from '../../components/RouteDispatch.astro'
+import { fetchAllSlugs, fetchAllTerms, fetchAllDestinationSlugs } from '../../lib/sanity'
+import { ROUTE_MAP } from '../../lib/routes'
+import type { Lang } from '../../lib/types'
+
+// Bản đa ngôn ngữ — cùng logic dispatch như [...path].astro (VI). Disambiguation ở props.kind.
+export async function getStaticPaths() {
+  const langs: Lang[] = [] // vi-only: tắt route đa ngôn ngữ
+
+  const allPaths: { params: { lang: string; path: string }; props: { kind: string; entity: string; slug?: string } }[] = []
+
+  const destinations = await fetchAllDestinationSlugs()
+  const allSegments = new Set(ROUTE_MAP.flatMap(r => Object.values(r.segments)))
+
+  for (const lang of langs) {
+    const [slugs, terms] = await Promise.all([
+      fetchAllSlugs(lang),
+      fetchAllTerms(lang),
+    ])
+
+    // Slug collision detection — M11: entity khác type cùng slug+segment → 404 âm thầm
+    const seen = new Map<string, { entity: string; slug: string }>()
+    function checkCollision(path: string, entity: string, slug: string) {
+      const prev = seen.get(path)
+      if (prev) {
+        console.warn(`[M11] Slug collision: "${lang}/${path}" — ${prev.entity}/${prev.slug} bị ghi đè bởi ${entity}/${slug}`)
+      }
+      seen.set(path, { entity, slug })
+    }
+
+    for (const entry of ROUTE_MAP.filter(r => r.hasIndex || r.entity.startsWith('hub-'))) {
+      allPaths.push({
+        params: { lang, path: entry.segments[lang] },
+        props: { kind: entry.entity.startsWith('hub-') ? 'hub' : 'index', entity: entry.entity },
+      })
+    }
+
+    for (const s of slugs) {
+      const entry = ROUTE_MAP.find(r => r.entity === s._type)
+      if (!entry) continue
+      const path = `${entry.segments[lang]}/${s.slug}`
+      checkCollision(path, s._type, s.slug)
+      allPaths.push({
+        params: { lang, path },
+        props: { kind: 'detail', entity: s._type, slug: s.slug },
+      })
+    }
+
+    for (const t of terms) {
+      const entityType = t.inDefinedTermSet === 'experience-type' ? 'experience' : 'tour'
+      const entry = ROUTE_MAP.find(r => r.entity === entityType)
+      if (!entry) continue
+      const path = `${entry.segments[lang]}/${t.slug}`
+      checkCollision(path, entityType, t.slug)
+      allPaths.push({
+        params: { lang, path },
+        props: { kind: 'term', entity: entityType, slug: t.slug },
+      })
+    }
+
+    for (const destSlug of destinations) {
+      if (allSegments.has(destSlug)) {
+        console.warn(`[B11] Destination slug "${destSlug}" trùng — bỏ qua`)
+        continue
+      }
+      allPaths.push({
+        params: { lang, path: destSlug },
+        props: { kind: 'destination', entity: 'touristDestination', slug: destSlug },
+      })
+    }
+  }
+
+  return allPaths
+}
+
+const lang = Astro.params.lang as Lang
+const { kind, entity, slug } = Astro.props as { kind: any; entity: string; slug?: string }
+---
+
+<RouteDispatch kind={kind} entity={entity} slug={slug} lang={lang} />

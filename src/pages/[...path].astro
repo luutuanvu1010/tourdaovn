@@ -1,0 +1,82 @@
+---
+import RouteDispatch from '../components/RouteDispatch.astro'
+import { fetchAllSlugs, fetchAllTerms, fetchAllDestinationSlugs } from '../lib/sanity'
+import { ROUTE_MAP } from '../lib/routes'
+import type { Lang } from '../lib/types'
+
+// Disambiguation term vs detail: quyết ngay tại đây qua props.kind, không đoán ở render.
+// Detail path sinh từ fetchAllSlugs (entity), term path sinh từ fetchAllTerms (Category).
+// R1 (04 §1c) bảo đảm không trùng slug trong cùng nhánh; term hiện hoãn (B8.6.5 phiếu nợ).
+export async function getStaticPaths() {
+  const lang: Lang = 'vi'
+
+  const [slugs, terms] = await Promise.all([
+    fetchAllSlugs(lang),
+    fetchAllTerms(lang),
+  ])
+
+  const paths: { params: { path: string }; props: { kind: string; entity: string; slug?: string } }[] = []
+
+  // Slug collision detection — M11: entity khác type cùng slug+segment → 404 âm thầm
+  const seen = new Map<string, { entity: string; slug: string }>()
+  function checkCollision(path: string, entity: string, slug: string) {
+    const prev = seen.get(path)
+    if (prev) {
+      console.warn(`[M11] Slug collision: "${path}" — ${prev.entity}/${prev.slug} bị ghi đè bởi ${entity}/${slug}`)
+    }
+    seen.set(path, { entity, slug })
+  }
+
+  for (const entry of ROUTE_MAP.filter(r => r.hasIndex || r.entity.startsWith('hub-'))) {
+    paths.push({
+      params: { path: entry.segments[lang] },
+      props: { kind: entry.entity.startsWith('hub-') ? 'hub' : 'index', entity: entry.entity },
+    })
+  }
+
+  for (const s of slugs) {
+    const entry = ROUTE_MAP.find(r => r.entity === s._type)
+    if (!entry) continue
+    const path = `${entry.segments[lang]}/${s.slug}`
+    checkCollision(path, s._type, s.slug)
+    paths.push({
+      params: { path },
+      props: { kind: 'detail', entity: s._type, slug: s.slug },
+    })
+  }
+
+  for (const t of terms) {
+    const entityType = t.inDefinedTermSet === 'experience-type' ? 'experience' : 'tour'
+    const entry = ROUTE_MAP.find(r => r.entity === entityType)
+    if (!entry) continue
+    const path = `${entry.segments[lang]}/${t.slug}`
+    checkCollision(path, entityType, t.slug)
+    paths.push({
+      params: { path },
+      props: { kind: 'term', entity: entityType, slug: t.slug },
+    })
+  }
+
+  // Destination paths — multi-destination routing (B11-DOT2)
+  const destinations = await fetchAllDestinationSlugs()
+  const allSegments = new Set(ROUTE_MAP.flatMap(r => Object.values(r.segments)))
+
+  for (const destSlug of destinations) {
+    if (allSegments.has(destSlug)) {
+      console.warn(`[B11] Destination slug "${destSlug}" trùng với ROUTE_MAP segment — bỏ qua`)
+      continue
+    }
+    paths.push({
+      params: { path: destSlug },
+      props: { kind: 'destination', entity: 'touristDestination', slug: destSlug },
+    })
+  }
+
+  return paths
+}
+
+const lang: Lang = 'vi'
+const { kind, entity, slug } = Astro.props as { kind: any; entity: string; slug?: string }
+---
+
+<RouteDispatch kind={kind} entity={entity} slug={slug} lang={lang} />

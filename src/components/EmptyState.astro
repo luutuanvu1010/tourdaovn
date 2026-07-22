@@ -1,0 +1,110 @@
+---
+import type { Lang } from '../lib/types'
+import { ROUTE_MAP } from '../lib/routes'
+import { uiCopy, EMPTY_STATE_MESSAGES } from '../lib/uiCopy'
+
+export interface Props {
+  entityType: string
+  lang: Lang
+  message?: string
+}
+
+const { entityType, lang, message } = Astro.props
+
+const t = uiCopy(lang)
+
+const msg =
+  message ||
+  EMPTY_STATE_MESSAGES[lang]?.[entityType] ||
+  EMPTY_STATE_MESSAGES.en?.[entityType] ||
+  t('emptyDefault')
+
+function hubSeg(hubId: string): string {
+  const entry = ROUTE_MAP.find(r => r.entity === hubId)
+  return entry?.segments[lang] ?? hubId
+}
+
+// Nhãn hub lấy từ ROUTE_MAP.labels — nguồn duy nhất cho tên hub theo ngôn ngữ
+function hubLabel(hubId: string): string {
+  const entry = ROUTE_MAP.find(r => r.entity === hubId)
+  return entry?.labels[lang] ?? entry?.labels.en ?? hubId
+}
+
+const prefix = lang === 'vi' ? '' : `/${lang}`
+
+const hubLinks = [
+  { label: t('goHome'), href: lang === 'vi' ? '/' : `/${lang}/` },
+  { label: hubLabel('hub-kham-pha'), href: `${prefix}/${hubSeg('hub-kham-pha')}/` },
+  { label: hubLabel('hub-luu-tru'), href: `${prefix}/${hubSeg('hub-luu-tru')}/` },
+  { label: hubLabel('hub-am-thuc'), href: `${prefix}/${hubSeg('hub-am-thuc')}/` },
+  { label: hubLabel('hub-di-lai'), href: `${prefix}/${hubSeg('hub-di-lai')}/` },
+]
+---
+
+{/* 06 §5.2 — Empty state dùng chung mọi listing */}
+<div class="empty-state">
+  <svg
+    class="empty-icon"
+    viewBox="0 0 64 64"
+    width="64"
+    height="64"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.5"
+    aria-hidden="true"
+  >
+    <circle cx="32" cy="32" r="28" />
+    <circle cx="32" cy="32" r="3" />
+    <path d="M32 4v10M32 50v10M4 32h10M50 32h10" />
+    <path d="M18.4 18.4l7 7M38.6 38.6l7 7M45.6 18.4l-7 7M25.4 38.6l-7 7" />
+    <path d="M32 8l6 16l-6 4l-6-4z" fill="currentColor" stroke="none" opacity="0.6" />
+  </svg>
+  <p class="empty-message">{msg}</p>
+  <nav class="empty-links" aria-label={t('secondaryNavAria')}>
+    {hubLinks.map(link => (
+      <a href={link.href} class="empty-link">{link.label}</a>
+    ))}
+  </nav>
+</div>
+
+<style>
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--s9) var(--container-padding);
+    background: var(--c-surface-alt);
+  }
+
+  .empty-icon {
+    color: var(--c-text-muted);
+    opacity: 0.4;
+    margin-bottom: var(--s5);
+  }
+
+  .empty-message {
+    font-size: var(--fs-h5);
+    color: var(--c-text-muted);
+    margin-bottom: var(--s6);
+    max-width: 32ch;
+  }
+
+  .empty-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s3) var(--s5);
+    justify-content: center;
+  }
+
+  .empty-link {
+    font-size: var(--fs-sm);
+    color: var(--c-primary);
+    text-decoration: none;
+    font-weight: var(--fw-500);
+  }
+
+  .empty-link:hover {
+    text-decoration: underline;
+  }
+</style>

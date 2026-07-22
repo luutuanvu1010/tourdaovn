@@ -1,0 +1,88 @@
+---
+import { imageUrl } from '../lib/sanity-image'
+
+export interface Props {
+  blocks: any[] | undefined
+  class?: string
+}
+
+const { blocks, class: className } = Astro.props
+
+function renderInline(children: any[]): string {
+  return children.map((c: any) => {
+    if (!c || typeof c !== 'object') return ''
+    const text = c.text || ''
+    if (!text) return ''
+    if (!c.marks || c.marks.length === 0) return text
+    let out = text
+    for (const mark of c.marks) {
+      if (mark === 'strong') out = `<strong>${out}</strong>`
+      else if (mark === 'em') out = `<em>${out}</em>`
+    }
+    return out
+  }).join('')
+}
+---
+
+{blocks && blocks.length > 0 && (
+  <div class:list={['body-block', className]}>
+    {blocks.map((block: any) => {
+      if (!block || typeof block !== 'object') return null
+
+      if (block._type === 'image') {
+        const src = imageUrl(block, { width: 800 }) || block.asset?.url
+        if (!src) return null
+        return (
+          <figure>
+            <img src={src} alt={block.alt || ''} loading="lazy" />
+          </figure>
+        )
+      }
+
+      if (block._type === 'block' && block.children) {
+        const html = renderInline(block.children)
+        const text = block.children.map((c: any) => c.text || '').join('')
+        if (!text.trim()) return null
+
+        const style = block.style || 'normal'
+        if (style === 'h2') return <h2 set:html={html} />
+        if (style === 'h3') return <h3 set:html={html} />
+        if (style === 'h4') return <h4 set:html={html} />
+        return <p set:html={html} />
+      }
+
+      return null
+    })}
+  </div>
+)}
+
+<style>
+  .body-block {
+    max-width: var(--measure, 70ch);
+    line-height: var(--lh-body);
+    font-size: var(--fs-base);
+  }
+
+  .body-block p {
+    margin-bottom: var(--s4);
+  }
+
+  .body-block h2,
+  .body-block h3,
+  .body-block h4 {
+    margin-top: var(--s6);
+    margin-bottom: var(--s3);
+    font-family: var(--font-display);
+    font-weight: var(--fw-700);
+    line-height: var(--lh-heading);
+  }
+
+  .body-block figure {
+    margin: var(--s5) 0;
+  }
+
+  .body-block figure img {
+    max-width: 100%;
+    border-radius: var(--radius-md);
+  }
+</style>

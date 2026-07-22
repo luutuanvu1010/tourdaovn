@@ -1,0 +1,47 @@
+---
+// WaveDivider — SVG wave dùng chung cho homepage
+// Mockup V3: dùng giữa các section lớn, giữa hero và trust bar, trên/dưới hubs
+export interface Props {
+  fill?: string     // CSS color value, mặc định --c-primary
+  flip?: boolean    // lật ngược wave (dùng cho top của hubs section)
+  opacity?: number  // opacity của wave, mặc định 0.08
+  noSecond?: boolean // bỏ wave thứ hai (đường mờ hơn)
+}
+
+const {
+  fill = 'var(--c-primary)',
+  flip = false,
+  opacity = 0.08,
+  noSecond = false,
+} = Astro.props
+---
+
+<div class="wave" class:list={{ 'wave--flip': flip }} aria-hidden="true">
+  <svg viewBox="0 0 1440 48" preserveAspectRatio="none">
+    <path
+      d="M0,24 C180,48 360,0 540,24 C720,48 900,0 1080,24 C1260,48 1380,12 1440,24 L1440,48 L0,48 Z"
+      fill={fill}
+      opacity={opacity}
+    />
+    {!noSecond && (
+      <path
+        d="M0,32 C200,8 400,48 600,32 C800,16 1000,48 1200,32 C1320,24 1400,36 1440,32 L1440,48 L0,48 Z"
+        fill={fill}
+        opacity={opacity * 0.6}
+      />
+    )}
+  </svg>
+</div>
+
+<style>
+  .wave {
+    line-height: 0;
+  }
+  .wave svg {
+    display: block;
+    width: 100%;
+  }
+  .wave--flip svg {
+    transform: scaleY(-1);
+  }
+</style>

@@ -1,0 +1,110 @@
+---
+import type { SpecialtyResult, Lang } from '../lib/types'
+import { uiCopy, typeLabel as lookupLabel, SPECIALTY_TYPE_LABELS } from '../lib/uiCopy'
+import { entityPageGraphToLd, specialtyToJsonLd, jsonLdScriptContent } from '../lib/serialize'
+import DetailLayout from './DetailLayout.astro'
+import FAQ from './FAQ.astro'
+import Section from './Section.astro'
+import InfoCard from './InfoCard.astro'
+import Body from './Body.astro'
+import { ROUTE_MAP } from '../lib/routes'
+
+export interface Props {
+  data: SpecialtyResult
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+}
+
+const { data, lang, nearby = [] } = Astro.props
+
+const t = uiCopy(lang)
+
+const typeLabel = lookupLabel(SPECIALTY_TYPE_LABELS, lang, data.specialtyType)
+
+function hasPtContent(blocks: unknown[] | undefined): boolean {
+  if (!blocks || blocks.length === 0) return false
+  return blocks.some((b: any) => b._type === 'block' && b.children?.some((c: any) => (c.text || '').trim()))
+}
+
+const infoBarItems = [
+  { icon: '🏷️', label: t('type'), value: typeLabel, visible: true },
+  { icon: '📍', label: t('origin'), value: data.originNote || '', visible: !!data.originNote },
+  { icon: '📅', label: t('season'), value: data.season || '', visible: !!data.season },
+  { icon: '', label: '', value: '', visible: false },
+]
+
+const sidebarRows = [
+  { icon: '🏷️', label: t('type'), value: typeLabel, visible: true },
+  { icon: '📍', label: t('origin'), value: data.originNote || '', visible: !!data.originNote },
+  { icon: '📅', label: t('season'), value: data.season || '', visible: !!data.season },
+  { icon: '🔗', label: t('verifyWikidata'), value: 'Wikidata', href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
+]
+
+const siteBase = Astro.site?.toString() || 'https://tourdaovn.vn'
+const jsonLd = entityPageGraphToLd(specialtyToJsonLd(data, siteBase, lang), data, siteBase, lang)
+---
+
+<DetailLayout
+  title={data.title}
+  lang={lang}
+  entityType="specialty"
+  image={data.mainImage}
+  gallery={data.gallery}
+  infoBarItems={infoBarItems}
+  sidebarSlots={[
+    { name: 'info', component: 'InfoCard', visible: sidebarRows.some(r => r.visible), props: { rows: sidebarRows } },
+  ]}
+  nearbyTitle={t('whereToEat')}
+  nearby={nearby}
+  updatedAt={data._updatedAt}
+>
+  <Fragment slot="content">
+    <div class="summary-block">{data.summary}</div>
+
+    {hasPtContent(data.body) && (
+      <Section heading={t('details')} contained={false}>
+        <Body blocks={data.body} />
+      </Section>
+    )}
+
+    {data.whereToTry && data.whereToTry.length > 0 && (
+      <Section heading={t('whereToTry')} contained={false}>
+        <div class="try-grid">
+          {data.whereToTry.map((r) => (
+            <a href={`/${ROUTE_MAP.find(rt => rt.entity === 'restaurant')?.segments[lang] || 'nha-hang'}/${r.slug}`} class="try-card">
+              <strong>{r.title}</strong>
+              {r.summary && <p>{r.summary}</p>}
+            </a>
+          ))}
+        </div>
+      </Section>
+    )}
+
+    {data.faq && data.faq.length > 0 && <FAQ faq={data.faq} lang={lang} contained={false} />}
+  </Fragment>
+
+  {sidebarRows.some(r => r.visible) && <InfoCard slot="info" rows={sidebarRows} lang={lang} />}
+</DetailLayout>
+
+<script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
+
+<style>
+  .summary-block {
+    font-size: var(--fs-h5);
+    max-width: 70ch;
+    line-height: var(--lh-body);
+    font-weight: var(--fw-500);
+    font-family: var(--font-ui);
+    margin-bottom: var(--s6);
+  }
+
+  .try-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s3); }
+  .try-card { display: block; padding: var(--s4); background: var(--c-card); border: 1px solid var(--c-border); border-radius: var(--radius-md); text-decoration: none; color: inherit; transition: box-shadow var(--m-fast) var(--m-ease); }
+  .try-card:hover { box-shadow: var(--shadow-raised); }
+  .try-card strong { display: block; font-size: var(--fs-base); font-weight: var(--fw-700); color: var(--c-text); margin-bottom: var(--s1); }
+  .try-card p { font-size: var(--fs-sm); color: var(--c-text-muted); margin: 0; }
+
+  @media (max-width: 1023px) {
+    .try-grid { grid-template-columns: 1fr; }
+  }
+</style>

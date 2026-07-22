@@ -1,0 +1,62 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import SiteHome from '../components/SiteHome.astro'
+import { getClient } from '../lib/sanity'
+import { touristDestinationBySlugQuery, siteSettingsQuery } from '../lib/queries'
+import { homeAlternates } from '../lib/sitemap'
+import { destinationHref } from '../lib/homepage'
+import { jsonLdScriptContent } from '../lib/serialize/utils'
+import type { TouristDestinationResult, SiteSettingsResult, Lang } from '../lib/types'
+
+export async function getStaticPaths() {
+  return [{ params: {} }]
+}
+
+const lang: Lang = 'vi'
+
+const client = getClient()
+const query = touristDestinationBySlugQuery(lang)
+const td: TouristDestinationResult | null = await client.fetch(query, { slug: 'nha-trang' })
+
+const config: SiteSettingsResult | null = await client.fetch(siteSettingsQuery())
+
+const siteBase = Astro.site?.toString() || 'https://tourdaovn.vn'
+
+const metaTitle = 'Nha Trang Travel'
+const metaDescription = 'Cổng thông tin du lịch Nha Trang với điểm đến, trải nghiệm, lưu trú, ẩm thực và hướng dẫn thực tế được tuyển chọn.'
+const alternates = homeAlternates()
+const destinationUrl = destinationHref('nha-trang', lang) || '/nha-trang/'
+// WebSite + Organization (site identity theo khuyến nghị Google):
+// Organization là node neo @id #organization, WebSite trỏ về qua publisher.
+const siteUrl = siteBase.replace(/\/$/, '') + '/'
+const destinationLdId = new URL(destinationUrl, siteUrl).toString()
+const orgId = `${siteUrl}#organization`
+const orgNode: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  '@id': orgId,
+  name: 'Nha Trang Travel',
+  url: siteUrl,
+}
+if (config?.contact?.hotline) orgNode.telephone = config.contact.hotline
+if (config?.contact?.email) orgNode.email = config.contact.email
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${siteUrl}#website`,
+    name: 'Nha Trang Travel',
+    url: siteUrl,
+    description: metaDescription,
+    inLanguage: 'vi',
+    publisher: { '@id': orgId },
+    about: { '@id': destinationLdId },
+  },
+  orgNode,
+]
+---
+
+<BaseLayout title={metaTitle} description={metaDescription} lang="vi" currentPath="/" alternates={alternates}>
+  {jsonLd && <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)} />}
+  <SiteHome td={td} lang={lang} destinationHref={destinationUrl} config={config} />
+</BaseLayout>

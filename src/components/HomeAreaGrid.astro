@@ -1,0 +1,191 @@
+---
+// HomeAreaGrid — grid 4 card "Các khu vực nên biết" (rollup Place)
+// Mockup V3 dòng 1126-1179, BINDING_MAP §4.1: tùy, tối đa 4 card
+// ⚠ PLACEHOLDER: dữ liệu từ GROQ rollup Place approved, ưu tiên area/beach/island/landform/ward
+
+import { entityHref } from '../lib/homepage'
+import { imageUrl } from '../lib/sanity-image'
+import type { HomepagePlaceCard, Lang } from '../lib/types'
+
+export interface Props {
+  places?: HomepagePlaceCard[]
+  lang: Lang
+  heading: string
+  viewAllLabel: string
+  viewAllHref?: string
+}
+
+const { places = [], lang, heading, viewAllLabel, viewAllHref } = Astro.props
+
+const cards = places
+  .map(p => ({
+    ...p,
+    href: entityHref('place', p.slug, lang),
+    image: imageUrl(p.mainImage, { width: 400 }),
+  }))
+  .filter(c => c.href && c.title && c.summary)
+  .slice(0, 4)
+---
+
+{cards.length > 0 && (
+  <section class="area-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-header-left">
+          <h2 class="section-title">{heading}</h2>
+          <span class="section-underline" aria-hidden="true"></span>
+        </div>
+        {viewAllHref && <a href={viewAllHref} class="see-all">{viewAllLabel} ›</a>}
+      </div>
+      <div class="area-grid">
+        {cards.map(card => (
+          <a href={card.href!} class="area-card">
+            <div class="area-img-wrap">
+              {card.image ? (
+                <img src={card.image} alt={card.mainImage?.alt || card.title} loading="lazy" class="area-img" />
+              ) : (
+                <div class="area-img-fallback" aria-hidden="true"></div>
+              )}
+            </div>
+            <div class="area-body">
+              <h3 class="area-name">{card.title}</h3>
+              <p class="area-desc line-clamp-2">{card.summary}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  .area-section {
+    padding: var(--s8) 0 var(--s7);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: var(--s5);
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-section);
+    font-weight: var(--fw-700);
+    color: var(--c-primary);
+    line-height: 1.2;
+    margin-bottom: var(--s2);
+  }
+
+  .section-underline {
+    display: block;
+    width: var(--underline-width);
+    height: var(--underline-height);
+    background: var(--c-sand);
+    border-radius: 2px;
+  }
+
+  .see-all {
+    font-weight: var(--fw-600);
+    font-size: var(--fs-label);
+    color: var(--c-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--s1);
+    transition: opacity var(--m-fast) var(--m-ease);
+  }
+
+  .see-all:hover {
+    opacity: 0.7;
+  }
+
+  .area-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--s4);
+  }
+
+  .area-card {
+    background: var(--c-card);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--c-border);
+    box-shadow: var(--shadow-card);
+    transition: box-shadow var(--m-fast) var(--m-ease);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .area-card:hover {
+    box-shadow: var(--shadow-raised);
+  }
+
+  .area-img-wrap {
+    aspect-ratio: 3/2;
+    overflow: hidden;
+    background: var(--c-primary-soft);
+  }
+
+  .area-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--m-base) var(--m-ease);
+  }
+
+  .area-card:hover .area-img {
+    transform: scale(1.05);
+  }
+
+  .area-img-fallback {
+    width: 100%;
+    height: 100%;
+  }
+
+  .area-body {
+    padding: var(--s4) var(--s4) var(--s4);
+  }
+
+  .area-name {
+    font-family: var(--font-display);
+    font-weight: var(--fw-700);
+    font-size: var(--fs-sm);
+    color: var(--c-text);
+    margin-bottom: var(--s1);
+    line-height: 1.3;
+  }
+
+  .area-desc {
+    font-weight: var(--fw-500);
+    font-size: var(--fs-label);
+    color: var(--c-text-muted);
+    line-height: 1.55;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @media (max-width: 1024px) {
+    .area-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .area-section {
+      padding: var(--s7) 0 var(--s6);
+    }
+    .area-grid {
+      grid-template-columns: 1fr;
+    }
+    .section-title {
+      font-size: var(--fs-h4);
+    }
+  }
+</style>

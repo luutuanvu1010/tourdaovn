@@ -1,0 +1,54 @@
+---
+export interface Slot {
+  name: string
+  component: 'BookingCTA' | 'InfoCard' | 'Map' | 'Article' | 'custom'
+  visible: boolean
+  props: Record<string, any>
+}
+
+export interface Props {
+  slots: Slot[]
+}
+
+const { slots } = Astro.props
+const anyVisible = slots.some(s => s.visible)
+---
+
+{anyVisible && (
+  <aside class="sidebar">
+    {slots.filter(s => s.visible).map((s) => (
+      <div class="sidebar-card">
+        {s.name === 'booking' && <slot name="booking" />}
+        {s.name === 'info' && <slot name="info" />}
+        {s.name === 'map' && <slot name="map" />}
+        {s.name === 'about' && <slot name="about" />}
+      </div>
+    ))}
+  </aside>
+)}
+
+<style>
+  .sidebar {
+    width: 340px;
+    position: sticky;
+    top: 16px;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    gap: var(--s4);
+  }
+
+  .sidebar-card {
+    background: var(--c-card);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    padding: var(--s4);
+  }
+
+  @media (max-width: 1023px) {
+    .sidebar {
+      width: 100%;
+      position: static;
+    }
+  }
+</style>

@@ -1,0 +1,8 @@
+#!/bin/sh
+# Cổng sớm ở máy: chạy cổng tối thiểu trước khi push. Fail thì chặn push.
+# Cài bằng: bash scripts/install-hooks.sh
+echo "[pre-push] chạy npm run gate..."
+npm run gate || {
+  echo "[pre-push] gate FAIL — huỷ push. Sửa lỗi rồi push lại."
+  exit 1
+}

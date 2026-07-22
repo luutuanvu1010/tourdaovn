@@ -1,0 +1,116 @@
+---
+import { imageUrl } from '../lib/sanity-image'
+import { uiCopy } from '../lib/uiCopy'
+import type { ImageAsset, Lang } from '../lib/types'
+
+export interface Props {
+  images: ImageAsset[]
+  lang?: Lang
+}
+
+const { images, lang = 'vi' } = Astro.props
+const t = uiCopy(lang)
+const count = images.length
+---
+
+{count > 0 && (
+  <section class="gallery-section">
+    <div class="container">
+      {count === 1 ? (
+        <figure class="gallery-single">
+          <img
+            src={imageUrl(images[0], { width: 1200 })}
+            alt={images[0].alt || ''}
+            class="gallery-img"
+            loading="lazy"
+          />
+        </figure>
+      ) : (
+        <div class="gallery-scroll" role="region" aria-label={t('galleryAria')} tabindex="0">
+          {images.map((img, i) => (
+            <figure class="gallery-slide">
+              <img
+                src={imageUrl(img, { width: i === 0 ? 1200 : 400 })}
+                alt={img.alt || ''}
+                class="gallery-img"
+                loading={i === 0 ? 'eager' : 'lazy'}
+              />
+            </figure>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+)}
+
+<style>
+  .gallery-section {
+    padding: var(--s7) 0;
+  }
+
+  .gallery-single {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .gallery-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+  }
+
+  .gallery-single .gallery-img {
+    border-radius: var(--radius-md);
+  }
+
+  .gallery-scroll {
+    display: flex;
+    gap: var(--s4);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: var(--s2);
+  }
+
+  .gallery-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .gallery-slide {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .gallery-slide:first-child {
+    width: 100%;
+    max-width: 820px;
+  }
+
+  .gallery-slide:not(:first-child) {
+    width: 240px;
+  }
+
+  .gallery-slide .gallery-img {
+    height: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-md);
+  }
+
+  @media (max-width: 768px) {
+    .gallery-section {
+      padding: var(--s5) 0;
+    }
+
+    .gallery-slide:first-child {
+      width: 85vw;
+    }
+
+    .gallery-slide:not(:first-child) {
+      width: 180px;
+    }
+  }
+</style>

@@ -1,0 +1,36 @@
+---
+import type { Lang } from '../lib/types'
+import { uiCopy } from '../lib/uiCopy'
+
+export interface Props {
+  data: {
+    _updatedAt?: string
+    updatedAt?: string
+    approvedBy?: string
+    contentProvenance?: 'human' | 'ai-t1' | 'mixed'
+    officialSource?: string
+    sameAs?: string[]
+    author?: { title?: string; url?: string; sameAs?: string[] }
+  }
+  lang: Lang
+}
+
+const { data, lang } = Astro.props
+
+const referenceUrl = data.officialSource || data.sameAs?.[0] || data.author?.url || data.author?.sameAs?.[0]
+---
+
+<div class="container">
+<section
+  class="authority-meta"
+  hidden
+  aria-hidden="true"
+  aria-label={uiCopy(lang)('authorityAria')}
+  data-authority-meta
+  data-approved-by={data.approvedBy || undefined}
+  data-content-provenance={data.contentProvenance || undefined}
+  data-source-url={referenceUrl || undefined}
+  data-author-name={data.author?.title || data.approvedBy || undefined}
+>
+</section>
+</div>

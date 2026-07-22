@@ -1,0 +1,192 @@
+---
+import { imageUrl } from '../lib/sanity-image'
+import { uiCopy } from '../lib/uiCopy'
+import type { HomepageBanner, Lang } from '../lib/types'
+
+export interface Props {
+  banners?: HomepageBanner[]
+  lang: Lang
+}
+
+const { lang } = Astro.props
+const t = uiCopy(lang)
+const banners = Array.isArray(Astro.props.banners) ? Astro.props.banners : []
+const safePrefixes = ['/', 'https://', 'http://', 'tel:', 'mailto:']
+
+const variantBadge: Record<string, { bg: string; fg: string }> = {
+  'first-time': { bg: 'var(--c-primary-soft)', fg: 'var(--c-primary)' },
+  'guide':      { bg: 'var(--c-primary-soft)', fg: 'var(--c-primary)' },
+  'island-tour':{ bg: 'var(--c-green-soft)', fg: 'var(--c-green-text)' },
+  'vinpearl':   { bg: 'var(--c-accent-soft)', fg: 'var(--c-accent-strong)' },
+  'custom':     { bg: 'var(--c-accent-soft)', fg: 'var(--c-accent-strong)' },
+}
+
+const visibleBanners = banners
+  .filter(b => b.title)
+  .map(banner => ({
+    ...banner,
+    safeLink: banner.linkUrl && safePrefixes.some(p => banner.linkUrl!.startsWith(p))
+      ? banner.linkUrl
+      : undefined,
+    imageSrc: imageUrl(banner.image, { width: 400 }),
+    badgeStyle: variantBadge[banner.variant] || variantBadge['guide'],
+  }))
+---
+
+{visibleBanners.length > 0 && (
+  <section class="banner-section">
+    <div class="container">
+      <div class="banner-list">
+        {visibleBanners.map(banner => (
+          banner.safeLink ? (
+            <a href={banner.safeLink} class="banner-card">
+              <div class="banner-img">
+                {banner.imageSrc ? (
+                  <img src={banner.imageSrc} alt={banner.image?.alt || banner.title} loading="lazy" />
+                ) : (
+                  <div class="banner-img-fb" aria-hidden="true"></div>
+                )}
+              </div>
+              <div class="banner-body">
+                {banner.variant && (
+                  <span class="badge" style={`background:${banner.badgeStyle.bg};color:${banner.badgeStyle.fg}`}>
+                    {banner.linkLabel || banner.variant}
+                  </span>
+                )}
+                <div class="banner-title">{banner.title}</div>
+                {banner.description && <div class="banner-desc">{banner.description}</div>}
+                <span class="banner-link">{t('readMore')} ›</span>
+              </div>
+            </a>
+          ) : (
+            <article class="banner-card">
+              <div class="banner-img">
+                {banner.imageSrc ? (
+                  <img src={banner.imageSrc} alt={banner.image?.alt || banner.title} loading="lazy" />
+                ) : (
+                  <div class="banner-img-fb" aria-hidden="true"></div>
+                )}
+              </div>
+              <div class="banner-body">
+                {banner.variant && (
+                  <span class="badge" style={`background:${banner.badgeStyle.bg};color:${banner.badgeStyle.fg}`}>
+                    {banner.linkLabel || banner.variant}
+                  </span>
+                )}
+                <div class="banner-title">{banner.title}</div>
+                {banner.description && <div class="banner-desc">{banner.description}</div>}
+              </div>
+            </article>
+          )
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  .banner-section {
+    padding-block: var(--s8);
+  }
+
+  .banner-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s4);
+  }
+
+  .banner-card {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    background: var(--c-card);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--c-border);
+    transition: box-shadow var(--m-fast) var(--m-ease);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .banner-card:hover {
+    box-shadow: var(--shadow-raised);
+  }
+
+  .banner-img {
+    overflow: hidden;
+    background: var(--c-primary-soft);
+  }
+
+  .banner-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--m-base) var(--m-ease);
+  }
+
+  .banner-card:hover .banner-img img {
+    transform: scale(1.05);
+  }
+
+  .banner-img-fb {
+    width: 100%;
+    height: 100%;
+  }
+
+  .banner-body {
+    padding: var(--s5) var(--s5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--s2);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-ui);
+    font-size: var(--fs-badge);
+    font-weight: var(--fw-600);
+    padding: var(--badge-py) var(--badge-px);
+    border-radius: var(--radius-pill);
+    line-height: 1.35;
+    align-self: flex-start;
+  }
+
+  .banner-title {
+    font-family: var(--font-display);
+    font-weight: var(--fw-700);
+    font-size: var(--fs-card-title);
+    color: var(--c-text);
+    line-height: 1.35;
+  }
+
+  .banner-desc {
+    font-weight: var(--fw-500);
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+    line-height: 1.55;
+  }
+
+  .banner-link {
+    font-weight: var(--fw-700);
+    font-size: var(--fs-label);
+    color: var(--c-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--s1);
+  }
+
+  @media (max-width: 640px) {
+    .banner-card {
+      grid-template-columns: 100px 1fr;
+    }
+
+    .banner-body {
+      padding: var(--s4);
+    }
+
+    .banner-title {
+      font-size: var(--fs-base);
+    }
+  }
+</style>

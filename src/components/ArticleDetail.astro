@@ -1,0 +1,186 @@
+---
+import type { ArticleResult, Lang } from '../lib/types'
+import { uiCopy, typeLabel as lookupLabel, ARTICLE_TYPE_LABELS } from '../lib/uiCopy'
+import DetailLayout from './DetailLayout.astro'
+import FAQ from './FAQ.astro'
+import Section from './Section.astro'
+import InfoCard from './InfoCard.astro'
+import Body from './Body.astro'
+import { articleToJsonLd, jsonLdScriptContent } from '../lib/serialize'
+import { formatDate } from '../lib/dates'
+import { ROUTE_MAP } from '../lib/routes'
+
+export interface Props {
+  data: ArticleResult
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+}
+
+const { data, lang, nearby = [] } = Astro.props
+
+const t = uiCopy(lang)
+
+function entityHref(entityType: string, slug: string): string {
+  const seg = ROUTE_MAP.find(r => r.entity === entityType)?.segments[lang] || entityType
+  return `/${seg}/${slug}`
+}
+
+const typeLabel = lookupLabel(ARTICLE_TYPE_LABELS, lang, data.articleType)
+
+function hasBlocksContent(blocks: unknown[] | undefined): boolean {
+  if (!blocks || blocks.length === 0) return false
+  return blocks.some((b: any) => b._type === 'block' && b.children?.some((c: any) => (c.text || '').trim()))
+}
+
+const sidebarRows = [
+  { icon: '👤', label: t('author'), value: data.author?.title || '', visible: !!data.author?.title },
+  { icon: '📂', label: t('category'), value: typeLabel, visible: true },
+  { icon: '📅', label: t('published'), value: formatDate(data.publishedAt, lang), visible: !!data.publishedAt },
+  { icon: '🔄', label: t('articleUpdated'), value: formatDate(data.updatedAt, lang), visible: !!data.updatedAt },
+]
+---
+
+<DetailLayout
+  title={data.title}
+  lang={lang}
+  entityType="article"
+  image={data.mainImage}
+  infoBarItems={[]}
+  sidebarSlots={[
+    { name: 'info', component: 'InfoCard', visible: sidebarRows.some(r => r.visible), props: { rows: sidebarRows } },
+    { name: 'about', component: 'Article', visible: !!(data.about && data.about.length > 0), props: {} },
+  ]}
+  nearbyTitle={t('relatedArticles')}
+  nearby={nearby}
+  updatedAt={data._updatedAt}
+>
+  <Fragment slot="content">
+    {data.author && (
+      <div class="author-box">
+        <div class="author-info">
+          <strong>{data.author.title}</strong>
+          {data.author.jobTitle && <span>{data.author.jobTitle}</span>}
+        </div>
+      </div>
+    )}
+
+    <div class="cat-row">
+      <span class="badge badge-default">{typeLabel}</span>
+    </div>
+
+    {/* data-speakable: target của speakable trong JSON-LD Article (serialize/article.ts) */}
+    <div class="summary-block" data-speakable>{data.summary}</div>
+
+    {hasBlocksContent(data.body) && (
+      <Section contained={false}>
+        <Body blocks={data.body} />
+      </Section>
+    )}
+
+    {data.howTo && data.howTo.length > 0 && (
+      <Section heading={t('howTo')} contained={false}>
+        <div class="howto-steps">
+          {data.howTo.map((s) => (
+            <div class="howto-step">
+              <strong>{s.step}</strong>
+              <p>{s.text}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+    )}
+
+    {data.about && data.about.length > 0 && (
+      <Section heading={t('aboutEntity')} contained={false}>
+        <div class="about-grid">
+          {data.about.map((e) => (
+            <a href={entityHref(e._type, e.slug)} class="about-card">
+              <strong>{e.title}</strong>
+              {e.summary && <p>{e.summary}</p>}
+            </a>
+          ))}
+        </div>
+      </Section>
+    )}
+
+    {data.mentions && data.mentions.length > 0 && (
+      <Section heading={t('mentions')} contained={false}>
+        <div class="about-grid">
+          {data.mentions.map((e) => (
+            <a href={entityHref(e._type, e.slug)} class="about-card">
+              <strong>{e.title}</strong>
+              {e.summary && <p>{e.summary}</p>}
+            </a>
+          ))}
+        </div>
+      </Section>
+    )}
+
+    {data.faq && data.faq.length > 0 && <FAQ faq={data.faq} lang={lang} contained={false} />}
+  </Fragment>
+
+  {sidebarRows.some(r => r.visible) && <InfoCard slot="info" rows={sidebarRows} lang={lang} />}
+  {data.about && data.about.length > 0 && (
+    <div slot="about" class="about-links">
+      <h5>{t('aboutEntity')}</h5>
+      {data.about.map((e) => <a href={entityHref(e._type, e.slug)}>{e.title}</a>)}
+    </div>
+  )}
+</DetailLayout>
+
+<script type="application/ld+json" set:html={jsonLdScriptContent(articleToJsonLd(data, Astro.site?.toString() || 'https://tourdaovn.vn'))}></script>
+
+<style>
+  .author-box {
+    display: flex;
+    align-items: center;
+    gap: var(--s4);
+    padding: var(--s4);
+    background: var(--c-surface-alt);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--s4);
+  }
+
+  .author-info strong { display: block; font-size: var(--fs-base); font-weight: var(--fw-700); color: var(--c-text); }
+  .author-info span { font-size: var(--fs-sm); color: var(--c-text-muted); }
+
+  .cat-row { margin-bottom: var(--s4); }
+
+  .badge {
+    display: inline-flex;
+    padding: var(--s1) var(--s3);
+    border-radius: var(--radius-pill);
+    font-size: var(--fs-badge);
+    font-weight: var(--fw-600);
+    font-family: var(--font-ui);
+  }
+  .badge-default { background: var(--c-primary-soft); color: var(--c-primary); }
+
+  .summary-block {
+    font-size: var(--fs-h5);
+    max-width: 70ch;
+    line-height: var(--lh-body);
+    font-weight: var(--fw-500);
+    font-family: var(--font-ui);
+    margin-bottom: var(--s6);
+  }
+
+  .howto-steps { display: flex; flex-direction: column; gap: var(--s4); }
+  .howto-step strong { display: block; font-size: var(--fs-base); font-weight: var(--fw-700); color: var(--c-text); margin-bottom: var(--s1); }
+  .howto-step p { font-size: var(--fs-sm); color: var(--c-text-muted); margin: 0; }
+
+  .about-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s3); }
+  .about-card { display: block; padding: var(--s4); background: var(--c-card); border: 1px solid var(--c-border); border-radius: var(--radius-md); text-decoration: none; color: inherit; transition: box-shadow var(--m-fast) var(--m-ease); }
+  .about-card:hover { box-shadow: var(--shadow-raised); }
+  .about-card strong { display: block; font-size: var(--fs-base); font-weight: var(--fw-700); margin-bottom: var(--s1); }
+  .about-card p { font-size: var(--fs-sm); color: var(--c-text-muted); margin: 0; }
+
+  .about-links h5 { font-family: var(--font-display); font-size: var(--fs-base); font-weight: var(--fw-700); margin-bottom: var(--s3); color: var(--c-text); }
+  .about-links a { display: block; font-size: var(--fs-sm); color: var(--c-primary); text-decoration: none; padding: var(--s2) 0; border-bottom: 1px solid var(--c-border); }
+  .about-links a:last-child { border-bottom: none; }
+  .about-links a:hover { text-decoration: underline; }
+
+  @media (max-width: 1023px) {
+    .about-grid { grid-template-columns: 1fr; }
+  }
+</style>

@@ -1,0 +1,76 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import SiteHome from '../../components/SiteHome.astro'
+import { getClient } from '../../lib/sanity'
+import { touristDestinationBySlugQuery, siteSettingsQuery } from '../../lib/queries'
+import { homeAlternates } from '../../lib/sitemap'
+import { destinationHref } from '../../lib/homepage'
+import { jsonLdScriptContent } from '../../lib/serialize/utils'
+import type { TouristDestinationResult, SiteSettingsResult, Lang } from '../../lib/types'
+
+export async function getStaticPaths() {
+  const langs: Lang[] = [] // vi-only: tắt route đa ngôn ngữ
+  return langs.map(lang => ({ params: { lang } }))
+}
+
+const { lang } = Astro.params as { lang: Lang }
+
+const VALID_LANGS: Lang[] = ['en', 'zh', 'ko', 'ru']
+if (!VALID_LANGS.includes(lang)) {
+  return new Response('Not found', { status: 404 })
+}
+
+const client = getClient()
+const query = touristDestinationBySlugQuery(lang)
+const td: TouristDestinationResult | null = await client.fetch(query, { slug: 'nha-trang' })
+
+const config: SiteSettingsResult | null = await client.fetch(siteSettingsQuery())
+
+const siteBase = Astro.site?.toString() || 'https://tourdaovn.vn'
+
+const fallbackSummary: Record<Lang, string> = {
+  vi: 'Cẩm nang du lịch Nha Trang với điểm đến, trải nghiệm, ẩm thực, lưu trú và thông tin thực tế được tuyển chọn.',
+  en: 'Nha Trang travel guide with selected places, experiences, food, stays and practical tips.',
+  zh: '芽庄旅行指南，涵盖精选地点、体验、美食、住宿和实用信息。',
+  ko: '나트랑의 장소, 체험, 음식, 숙소와 실용 정보를 정리한 여행 가이드입니다.',
+  ru: 'Путеводитель по Нячангу с подборкой мест, впечатлений, еды, проживания и практичных советов.',
+}
+
+const metaTitle = 'Nha Trang Travel'
+const metaDescription = fallbackSummary[lang]
+const alternates = homeAlternates()
+const langHomeUrl = `${siteBase.replace(/\/$/, '')}/${lang}/`
+const destinationUrl = destinationHref('nha-trang', lang) || `/${lang}/nha-trang/`
+const destinationLdId = new URL(destinationUrl, `${siteBase.replace(/\/$/, '')}/`).toString()
+// WebSite per-locale + Organization gốc duy nhất (@id root #organization —
+// một thương hiệu, các bản ngôn ngữ WebSite đều publisher về cùng node).
+const orgId = `${siteBase.replace(/\/$/, '')}/#organization`
+const orgNode: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  '@id': orgId,
+  name: 'Nha Trang Travel',
+  url: siteBase.replace(/\/$/, '') + '/',
+}
+if (config?.contact?.hotline) orgNode.telephone = config.contact.hotline
+if (config?.contact?.email) orgNode.email = config.contact.email
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${langHomeUrl}#website`,
+    name: 'Nha Trang Travel',
+    url: langHomeUrl,
+    description: metaDescription,
+    inLanguage: lang,
+    publisher: { '@id': orgId },
+    about: { '@id': destinationLdId },
+  },
+  orgNode,
+]
+---
+
+<BaseLayout title={metaTitle} description={metaDescription} lang={lang} currentPath={`/${lang}/`} alternates={alternates}>
+  {jsonLd && <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)} />}
+  <SiteHome td={td} lang={lang} destinationHref={destinationUrl} config={config} />
+</BaseLayout>

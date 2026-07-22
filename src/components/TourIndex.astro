@@ -1,0 +1,231 @@
+---
+import type { Lang, PriceEntry } from '../lib/types'
+import { uiCopy, TOUR_FORMAT_BADGES } from '../lib/uiCopy'
+import { resolvePrice } from '../lib/resolver'
+import { ROUTE_MAP } from '../lib/routes'
+import { collectionPageToJsonLd, jsonLdScriptContent } from '../lib/serialize'
+import Card from './Card.astro'
+import EmptyState from './EmptyState.astro'
+
+interface TourEntity {
+  title: string
+  summary: string
+  slug: string
+  image?: string
+  imageAlt?: string
+  tourFormat?: string
+  bookingRef?: { key?: string }
+}
+
+export interface Props {
+  tours: TourEntity[]
+  terms: { name: string; slug: string }[]
+  lang: Lang
+  title?: string
+  description?: string
+  prices?: Map<string, PriceEntry>
+}
+
+const {
+  tours,
+  terms,
+  lang,
+  title = 'Tour',
+  description,
+  prices,
+} = Astro.props
+const t = uiCopy(lang)
+
+const tourFormatLabel = TOUR_FORMAT_BADGES[lang] ?? TOUR_FORMAT_BADGES.en
+
+function getSegment(lang: Lang): string {
+  const entry = ROUTE_MAP.find(r => r.entity === 'tour')
+  return entry?.segments[lang] ?? 'tour'
+}
+
+function entityHref(slug: string): string {
+  const seg = getSegment(lang)
+  const prefix = lang === 'vi' ? '' : `/${lang}`
+  return `${prefix}/${seg}/${slug}/`
+}
+
+function getBadge(entity: TourEntity): string | undefined {
+  if (!entity.tourFormat) return undefined
+  return tourFormatLabel[entity.tourFormat] || entity.tourFormat
+}
+
+function getPriceLabel(entity: TourEntity): string | undefined {
+  if (!entity.bookingRef?.key || !prices) return undefined
+  const pv = resolvePrice(entity.bookingRef.key, 'tour', undefined, prices, lang)
+  return pv?.label
+}
+
+const hasTours = tours.length > 0
+const hasTerms = terms.length > 0
+const seg = getSegment(lang)
+const prefix = lang === 'vi' ? '' : `/${lang}`
+---
+
+{/* 06 §5.2+5.1 — Tour index (index chính + term filter) */}
+<div class="tour-index">
+  {/* Vùng 1: Tiêu đề + description — h1 là heading chính */}
+  <div class="tour-header">
+    <div class="container">
+      <h1 class="tour-title">{title}</h1>
+      <span class="tour-underline" aria-hidden="true"></span>
+      {description && <p class="tour-desc">{description}</p>}
+    </div>
+  </div>
+
+  {/* Vùng 2: Lối lọc term */}
+  {
+    hasTerms && (
+      <div class="tour-term-filter">
+        <div class="container">
+          <div class="term-pills">
+            {terms.map(t => (
+              <a
+                href={`${prefix}/${seg}/${t.slug}/`}
+                class="term-pill"
+              >
+                {t.name}
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  {/* Vùng 3+4: Lưới card hoặc EmptyState */}
+  <div class="tour-body">
+    <div class="container">
+      {hasTours ? (
+        <>
+          <div class="card-grid">
+            {tours.map(entity => (
+              <Card
+                title={entity.title}
+                summary={entity.summary}
+                href={entityHref(entity.slug)}
+                image={entity.image}
+                imageAlt={entity.imageAlt}
+                badge={getBadge(entity)}
+                badgeVariant="default"
+                priceLabel={getPriceLabel(entity)}
+              />
+            ))}
+          </div>
+
+          <p class="tour-count">{tours.length} {t('results')}</p>
+        </>
+      ) : (
+        <EmptyState entityType="tour" lang={lang} />
+      )}
+    </div>
+  </div>
+
+  {/* Vùng 5: JSON-LD */}
+  <script type="application/ld+json" set:html={jsonLdScriptContent(
+    collectionPageToJsonLd(
+      { title, description, entityType: 'tour', entities: tours.map(e => ({ ...e, _type: 'tour' })), lang, pagePath: Astro.url.pathname },
+      Astro.site?.toString() || 'https://tourdaovn.vn'
+    )
+  )} />
+</div>
+
+<style>
+  .tour-header {
+    padding: var(--s7) 0 var(--s5);
+  }
+
+  .tour-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-h1);
+    font-weight: var(--fw-800);
+    color: var(--c-text);
+    line-height: var(--lh-heading);
+    letter-spacing: 0;
+    margin-bottom: var(--s3);
+  }
+
+  .tour-underline {
+    display: block;
+    width: 28px;
+    height: 3px;
+    background: var(--c-sand);
+    border-radius: 2px;
+    margin-bottom: var(--s4);
+  }
+
+  .tour-desc {
+    font-size: var(--fs-h5);
+    color: var(--c-text-muted);
+    max-width: 70ch;
+    margin-top: var(--s2);
+  }
+
+  .tour-term-filter {
+    padding: var(--s5) 0 0;
+  }
+
+  .container {
+    max-width: var(--container);
+    margin: 0 auto;
+    padding: 0 var(--container-padding);
+  }
+
+  .term-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s2);
+  }
+
+  .term-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--s2) var(--s4);
+    background: var(--c-primary-soft);
+    color: var(--c-primary);
+    border-radius: var(--radius-pill);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-600);
+    font-family: var(--font-ui);
+    text-decoration: none;
+    transition: background var(--m-fast) var(--m-ease),
+                color var(--m-fast) var(--m-ease);
+  }
+
+  .term-pill:hover {
+    background: var(--c-primary);
+    color: var(--c-text-inverse);
+  }
+
+  .tour-body {
+    padding: var(--s7) 0;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--s5);
+  }
+
+  .tour-count {
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+    margin-top: var(--s6);
+  }
+
+  @media (max-width: 1023px) {
+    .card-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .card-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

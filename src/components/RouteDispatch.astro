@@ -1,0 +1,447 @@
+---
+// RouteDispatch.astro — dispatch URL catch-all sang component detail/index/hub thật
+// Nối route, không sửa component/query/serialize (B8.6.5 R1).
+// kind quyết định ở getStaticPaths của route (detail từ slug, term từ fetchAllTerms),
+// component này chỉ fetch theo type rồi render. Detail component tự phát JSON-LD;
+// destination hub phát tại dispatch vì TouristDestinationHub là layout dùng lại.
+import type { Lang } from '../lib/types'
+import { getClient, fetchAlternateSlugs, fetchArticleAlternateSlugs } from '../lib/sanity'
+import { fetchSiteContact } from '../lib/siteContact'
+import { ROUTE_MAP } from '../lib/routes'
+import { destinationAlternates, routeAlternates, LANGS, langPrefix } from '../lib/sitemap'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Section from './Section.astro'
+import AuthorityMeta from './AuthorityMeta.astro'
+import { uiCopy, INDEX_COPY, HUB_COPY, HUB_PART_COPY, fallbackDescription } from '../lib/uiCopy'
+
+// Detail components (props đồng nhất { data, lang }, tự phát JSON-LD)
+import PlaceDetail from './PlaceDetail.astro'
+import AttractionDetail from './AttractionDetail.astro'
+import ExperienceDetail from './ExperienceDetail.astro'
+import RestaurantDetail from './RestaurantDetail.astro'
+import SpecialtyDetail from './SpecialtyDetail.astro'
+import HotelDetail from './HotelDetail.astro'
+import ResortDetail from './ResortDetail.astro'
+import TourDetail from './TourDetail.astro'
+import EventDetail from './EventDetail.astro'
+import ArticleDetail from './ArticleDetail.astro'
+import PersonDetail from './PersonDetail.astro'
+import OrganizationDetail from './OrganizationDetail.astro'
+
+// Listing components
+import EntityIndex from './EntityIndex.astro'
+import EventIndex from './EventIndex.astro'
+import TourIndex from './TourIndex.astro'
+import HubIndex from './HubIndex.astro'
+import TermIndex from './TermIndex.astro'
+
+// Destination hub
+import TouristDestinationHub from './TouristDestinationHub.astro'
+import { touristDestinationBySlugQuery } from '../lib/queries'
+import { touristDestinationToJsonLd } from '../lib/serialize/touristDestination'
+import { entityPageGraphToLd, jsonLdScriptContent } from '../lib/serialize/utils'
+import type { TouristDestinationResult } from '../lib/types'
+
+import {
+  placeBySlugQuery, attractionBySlugQuery, experienceBySlugQuery,
+  restaurantBySlugQuery, specialtyBySlugQuery, hotelBySlugQuery,
+  resortBySlugQuery, tourBySlugQuery, eventBySlugQuery, articleBySlugQuery,
+  personBySlugQuery, organizationBySlugQuery,
+  allPlacesQuery, allAttractionsQuery, allRestaurantsQuery, allSpecialtiesQuery,
+  allHotelsQuery, allResortsQuery, allToursQuery, allEventsQuery, allArticlesQuery,
+  allPersonsQuery, allOrganizationsQuery,
+  allExperiencesQuery, categoriesBySetQuery, categoryBySlugQuery,
+  experiencesByTypeQuery, toursByTypeQuery,
+  nearbyForPlaceQuery, nearbyAttractionsQuery, nearbyExperiencesQuery,
+  nearbyRestaurantsQuery, nearbyHotelsQuery, nearbyResortsQuery,
+  nearbyToursQuery, nearbyEventsQuery, nearbyArticlesQuery,
+  nearbyForOrganizationQuery,
+} from '../lib/queries'
+
+export interface Props {
+  kind: 'detail' | 'index' | 'hub' | 'term' | 'destination' | 'notfound'
+  entity: string
+  slug?: string
+  lang: Lang
+}
+
+const { kind, entity, slug, lang } = Astro.props
+const t = uiCopy(lang)
+const client = getClient()
+const seg = (e: string): string => ROUTE_MAP.find(r => r.entity === e)?.segments[lang] ?? e
+const localizedHref = (targetLang: Lang, path: string): string => `${langPrefix(targetLang)}${path}`
+
+// Map kết quả query -> shape ListingEntity dùng chung của EntityIndex/HubIndex/TourIndex/EventIndex
+function textOrEmpty(value: unknown): string {
+  return typeof value === 'string' ? value.trim() : ''
+}
+
+function toListing(e: any): any | null {
+  const title = textOrEmpty(e.title)
+  const slug = textOrEmpty(e.slug)
+  if (!title || !slug) return null
+  return {
+    ...e,
+    title,
+    slug,
+    summary: textOrEmpty(e.summary),
+    image: e.mainImage?.asset?.url, imageAlt: e.mainImage?.alt ?? '',
+    attractionType: e.attractionType, experienceType: e.experienceType,
+    servesCuisine: e.servesCuisine, specialtyType: e.specialtyType,
+    starRating: e.starRating, tourFormat: e.tourFormat, articleType: e.articleType,
+    eventType: e.eventType, startDate: e.startDate,
+    bookingRef: e.bookingRef, author: e.author,
+  }
+}
+
+function toListings(items: any[]): any[] {
+  return items.map(toListing).filter(Boolean)
+}
+
+function firstText(...values: unknown[]): string | undefined {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim()) return value.trim()
+  }
+  return undefined
+}
+
+
+async function fetchNearby(entity: string, data: any): Promise<any[]> {
+  if (!data?._id) return []
+
+  if (entity === 'place') {
+    const result = await client.fetch(nearbyForPlaceQuery(lang), {
+      id: data._id,
+      placeRef: data._id,
+      parentRef: data.containedInPlace?._id ?? null,
+    })
+    return [...(result?.attractions ?? []), ...(result?.places ?? [])].slice(0, 4)
+  }
+
+  if (entity === 'attraction') {
+    return await client.fetch(nearbyAttractionsQuery(lang), {
+      id: data._id,
+      placeRef: data.containedInPlace?._id ?? null,
+    }) ?? []
+  }
+
+  if (entity === 'experience') {
+    return await client.fetch(nearbyExperiencesQuery(lang), {
+      id: data._id,
+      typeRef: data.experienceType?._id ?? null,
+      venueRef: data.venue?._id ?? null,
+    }) ?? []
+  }
+
+  if (entity === 'restaurant') {
+    return await client.fetch(nearbyRestaurantsQuery(lang), {
+      id: data._id,
+      placeRef: data.containedInPlace?._id ?? null,
+      cuisines: data.servesCuisine ?? [],
+    }) ?? []
+  }
+
+  if (entity === 'specialty') return data.whereToTry ?? []
+
+  if (entity === 'hotel') {
+    return await client.fetch(nearbyHotelsQuery(lang), {
+      id: data._id,
+      placeRef: data.containedInPlace?._id ?? null,
+    }) ?? []
+  }
+
+  if (entity === 'resort') {
+    return await client.fetch(nearbyResortsQuery(lang), {
+      id: data._id,
+      placeRef: data.containedInPlace?._id ?? null,
+    }) ?? []
+  }
+
+  if (entity === 'tour') {
+    return await client.fetch(nearbyToursQuery(lang), {
+      id: data._id,
+      // operator có thể null (deref lọc reviewStatus approved) — GROQ không
+      // nhận param undefined, phải là null tường minh
+      operatorRef: data.operator?._id ?? null,
+      categoryRefs: (data.category ?? []).map((c: any) => c._id).filter(Boolean),
+    }) ?? []
+  }
+
+  if (entity === 'event') {
+    return await client.fetch(nearbyEventsQuery(lang), {
+      id: data._id,
+      locationRef: data.location?._id ?? null,
+      eventType: data.eventType,
+    }) ?? []
+  }
+
+  if (entity === 'article') {
+    return await client.fetch(nearbyArticlesQuery(), {
+      slug: data.slug,
+      lang,
+      aboutRefs: (data.about ?? []).map((item: any) => item._id).filter(Boolean),
+      articleType: data.articleType,
+    }) ?? []
+  }
+
+  if (entity === 'organization') {
+    const result = await client.fetch(nearbyForOrganizationQuery(lang), { orgId: data._id })
+    return [...(result?.tours ?? []), ...(result?.events ?? [])].slice(0, 4)
+  }
+
+  return []
+}
+
+const DETAIL: Record<string, { q: (l: Lang) => string; C: any }> = {
+  place:        { q: placeBySlugQuery,           C: PlaceDetail },
+  attraction:   { q: attractionBySlugQuery,      C: AttractionDetail },
+  experience:   { q: experienceBySlugQuery,      C: ExperienceDetail },
+  restaurant:   { q: restaurantBySlugQuery,      C: RestaurantDetail },
+  specialty:    { q: specialtyBySlugQuery,       C: SpecialtyDetail },
+  hotel:        { q: hotelBySlugQuery,           C: HotelDetail },
+  resort:       { q: resortBySlugQuery,          C: ResortDetail },
+  tour:         { q: tourBySlugQuery,            C: TourDetail },
+  event:        { q: eventBySlugQuery,           C: EventDetail },
+  article:      { q: () => articleBySlugQuery(), C: ArticleDetail },
+  person:       { q: personBySlugQuery,          C: PersonDetail },
+  organization: { q: organizationBySlugQuery,    C: OrganizationDetail },
+}
+
+// Nhãn trang index theo ngôn ngữ — nguồn duy nhất là uiCopy (INDEX_COPY)
+const INDEX_LABEL: Record<string, { title: string; desc: string }> = INDEX_COPY[lang] ?? INDEX_COPY.en
+
+// allXQuery cho index thường (trừ event/tour/experience xử lý riêng)
+const INDEX_QUERY: Record<string, (l: Lang) => string> = {
+  place: allPlacesQuery, attraction: allAttractionsQuery,
+  restaurant: allRestaurantsQuery, specialty: allSpecialtiesQuery,
+  hotel: allHotelsQuery, resort: allResortsQuery,
+  article: () => allArticlesQuery(),
+  person: allPersonsQuery, organization: allOrganizationsQuery,
+}
+
+// Cấu hình hub: gom nhiều entity theo lối vào điều hướng công khai.
+// Copy (title/desc) theo ngôn ngữ lấy từ uiCopy (HUB_COPY + HUB_PART_COPY); ở đây chỉ giữ cấu trúc + query.
+const HUB_PARTS_CONFIG: Record<string, { entity: string; q: ((l: Lang) => string) | null }[]> = {
+  'hub-kham-pha': [
+    { entity: 'attraction', q: allAttractionsQuery },
+    { entity: 'experience', q: allExperiencesQuery },
+  ],
+  'hub-luu-tru': [
+    { entity: 'hotel', q: allHotelsQuery },
+    { entity: 'resort', q: allResortsQuery },
+  ],
+  'hub-am-thuc': [
+    { entity: 'restaurant', q: allRestaurantsQuery },
+    { entity: 'specialty', q: allSpecialtiesQuery },
+  ],
+  'hub-di-lai': [
+    { entity: 'article', q: () => allArticlesQuery() },
+  ],
+  'hub-all': [
+    { entity: 'place', q: allPlacesQuery },
+    { entity: 'attraction', q: allAttractionsQuery },
+    { entity: 'experience', q: allExperiencesQuery },
+    { entity: 'restaurant', q: allRestaurantsQuery },
+    { entity: 'specialty', q: allSpecialtiesQuery },
+    { entity: 'hotel', q: allHotelsQuery },
+    { entity: 'resort', q: allResortsQuery },
+    { entity: 'tour', q: allToursQuery },
+    { entity: 'event', q: allEventsQuery },
+    { entity: 'article', q: () => allArticlesQuery() },
+    { entity: 'organization', q: allOrganizationsQuery },
+    { entity: 'person', q: allPersonsQuery },
+  ],
+}
+
+const hubCopyForLang = HUB_COPY[lang] ?? HUB_COPY.en
+const hubPartCopyForLang = HUB_PART_COPY[lang] ?? HUB_PART_COPY.en
+const HUB: Record<string, { title: string; desc: string; parts: { entity: string; q: ((l: Lang) => string) | null; title: string; description: string }[] }> =
+  Object.fromEntries(Object.entries(HUB_PARTS_CONFIG).map(([hubId, parts]) => [hubId, {
+    title: hubCopyForLang[hubId]?.title ?? hubId,
+    desc: hubCopyForLang[hubId]?.desc ?? '',
+    parts: parts.map(p => ({
+      ...p,
+      title: hubPartCopyForLang[`${hubId}|${p.entity}`]?.title ?? INDEX_LABEL[p.entity]?.title ?? p.entity,
+      description: hubPartCopyForLang[`${hubId}|${p.entity}`]?.desc ?? '',
+    })),
+  }]))
+
+let detailData: any = null
+let DetailComp: any = null
+let detailNearby: any[] = []
+let indexEntities: any[] = []
+let eventUpcoming: any[] = []
+let eventPast: any[] = []
+let tourList: any[] = []
+let indexTerms: any[] = []
+let hubSections: any[] = []
+let termData: any = null
+let termEntities: any[] = []
+let notFound = false
+let alternates: Record<string, string> | undefined
+let contact: import('../lib/types').SiteContact | null = null
+
+if (kind === 'detail') {
+  const cfg = DETAIL[entity]
+  if (cfg && slug) {
+    detailData = await client.fetch(cfg.q(lang), { slug, lang })
+    DetailComp = cfg.C
+    if (['tour', 'hotel', 'resort', 'experience'].includes(entity)) {
+      contact = await fetchSiteContact()
+    }
+  }
+  if (!detailData) {
+    notFound = true
+  } else if (detailData._id) {
+    detailNearby = await fetchNearby(entity, detailData)
+    const alt = entity === 'article'
+      ? await fetchArticleAlternateSlugs(detailData._id)
+      : await fetchAlternateSlugs(detailData._id)
+    const route = ROUTE_MAP.find(r => r.entity === entity)
+    if (alt && alt.reviewStatus === 'approved' && route) {
+      const built: Record<string, string> = {}
+      for (const l of LANGS) {
+        const s = alt[l]
+        if (s) built[l] = localizedHref(l, `/${route.segments[l]}/${s}/`)
+      }
+      if (Object.keys(built).length > 0) alternates = built
+    }
+  }
+} else if (kind === 'index') {
+  alternates = routeAlternates(entity)
+  if (entity === 'event') {
+    const all = (await client.fetch<any[]>(allEventsQuery(lang), { lang })) ?? []
+    const today = new Date().toISOString().slice(0, 10)
+    const mapped = toListings(all)
+    function validDate(d: any): boolean { return typeof d === 'string' && d.length >= 10 && !Number.isNaN(new Date(d).getTime()) }
+    eventUpcoming = mapped.filter(e => validDate(e.startDate) ? e.startDate >= today : true)
+    eventPast = mapped.filter(e => validDate(e.startDate) ? e.startDate < today : false)
+  } else if (entity === 'tour') {
+    const [all, terms] = await Promise.all([
+      client.fetch<any[]>(allToursQuery(lang), { lang }),
+      client.fetch<any[]>(categoriesBySetQuery('$setName', lang), { setName: 'tour-type' }),
+    ])
+    tourList = toListings(all ?? [])
+    indexTerms = (terms ?? []).map(t => ({ name: t.name, slug: t.slug }))
+  } else if (entity === 'experience') {
+    const [all, terms] = await Promise.all([
+      client.fetch<any[]>(allExperiencesQuery(lang), { lang }),
+      client.fetch<any[]>(categoriesBySetQuery('$setName', lang), { setName: 'experience-type' }),
+    ])
+    indexEntities = toListings(all ?? [])
+    indexTerms = (terms ?? []).map(t => ({ name: t.name, slug: t.slug }))
+  } else {
+    const qf = INDEX_QUERY[entity]
+    if (qf) {
+      const all = (await client.fetch<any[]>(qf(lang), { lang })) ?? []
+      indexEntities = toListings(all)
+    } else {
+      notFound = true
+    }
+  }
+} else if (kind === 'hub') {
+  alternates = routeAlternates(entity)
+  const cfg = HUB[entity]
+  if (cfg) {
+    hubSections = await Promise.all(cfg.parts.map(async (part) => {
+      let ents: any[] = []
+      if (part.q) {
+        const all = (await client.fetch<any[]>(part.q(lang), { lang })) ?? []
+        ents = toListings(all)
+      }
+      return { title: part.title, description: part.description, entityType: part.entity, entities: ents, href: `/${seg(part.entity)}/` }
+    }))
+  } else {
+    notFound = true
+  }
+} else if (kind === 'term' && slug && (entity === 'experience' || entity === 'tour')) {
+  alternates = routeAlternates(entity, slug)
+  termData = await client.fetch(categoryBySlugQuery(lang), { slug })
+  if (!termData) {
+    notFound = true
+  } else {
+    const q = entity === 'experience' ? experiencesByTypeQuery(lang) : toursByTypeQuery(lang)
+    const all = (await client.fetch<any[]>(q, { slug, lang })) ?? []
+    termEntities = toListings(all)
+  }
+} else if (kind === 'destination' && slug) {
+  alternates = destinationAlternates(slug)
+  const td = await client.fetch<TouristDestinationResult | null>(
+    touristDestinationBySlugQuery(lang), { slug }
+  )
+  if (!td) {
+    notFound = true
+  } else {
+    detailData = td
+  }
+} else {
+  // kind === 'notfound'
+  notFound = true
+}
+
+const indexInfo = INDEX_LABEL[entity] ?? { title: entity, desc: '' }
+
+let pageTitle = t('notFoundTitle')
+let pageDesc = ''
+if (kind === 'detail' && detailData) {
+  pageTitle = firstText(detailData.seo?.metaTitle, detailData.title, pageTitle) ?? pageTitle
+  pageDesc = firstText(detailData.seo?.metaDescription, detailData.summary) ?? fallbackDescription(pageTitle, lang)
+} else if (kind === 'index' && !notFound) {
+  pageTitle = indexInfo.title
+  pageDesc = indexInfo.desc
+} else if (kind === 'hub' && !notFound) {
+  pageTitle = HUB[entity]?.title ?? pageTitle
+  pageDesc = HUB[entity]?.desc ?? ''
+} else if (kind === 'term' && termData && !notFound) {
+  const parent = INDEX_LABEL[entity]?.title ?? entity
+  pageTitle = `${termData.name} — ${parent}`
+  pageDesc = termData.description || fallbackDescription(pageTitle, lang)
+} else if (kind === 'destination' && detailData && !notFound) {
+  pageTitle = firstText(detailData.seo?.metaTitle, detailData.title) ?? pageTitle
+  pageDesc = firstText(detailData.seo?.metaDescription, detailData.summary) ?? fallbackDescription(detailData.title || slug, lang)
+}
+
+const siteBase = Astro.site?.toString() || 'https://tourdaovn.vn'
+const destinationJsonLd = kind === 'destination' && detailData && !notFound
+  ? entityPageGraphToLd(
+      touristDestinationToJsonLd(detailData as TouristDestinationResult, siteBase, lang),
+      detailData as TouristDestinationResult,
+      siteBase,
+      lang,
+    )
+  : null
+---
+
+<BaseLayout title={pageTitle} description={pageDesc} lang={lang} currentPath={Astro.url.pathname} alternates={alternates}>
+  {kind === 'detail' && DetailComp && detailData && <DetailComp data={detailData} lang={lang} nearby={detailNearby} contact={contact} />}
+  {kind === 'detail' && detailData && <AuthorityMeta data={detailData} lang={lang} />}
+
+  {kind === 'index' && !notFound && entity === 'event' && (
+    <EventIndex upcoming={eventUpcoming} past={eventPast} lang={lang} />
+  )}
+  {kind === 'index' && !notFound && entity === 'tour' && (
+    <TourIndex tours={tourList} terms={indexTerms} lang={lang} />
+  )}
+  {kind === 'index' && !notFound && entity !== 'event' && entity !== 'tour' && (
+    <EntityIndex entities={indexEntities} entityType={entity} lang={lang} title={indexInfo.title} description={indexInfo.desc} terms={indexTerms} />
+  )}
+
+  {kind === 'hub' && !notFound && <HubIndex sections={hubSections} lang={lang} />}
+
+  {kind === 'term' && !notFound && termData && (
+    <TermIndex term={termData} entities={termEntities} entityType={entity as 'experience' | 'tour'} lang={lang} />
+  )}
+
+  {kind === 'destination' && !notFound && detailData && (
+    <>
+      {destinationJsonLd && <script is:inline type="application/ld+json" set:html={jsonLdScriptContent(destinationJsonLd)} />}
+      <TouristDestinationHub td={detailData} lang={lang} stampText={detailData.title || slug || ''} areaPlaces={detailData.homepagePlaces} guideArticles={detailData.homepageArticles} />
+    </>
+  )}
+
+  {notFound && (
+    <Section heading={t('notFoundHeading')}>
+      <p>{t('notFoundBody')}</p>
+    </Section>
+  )}
+</BaseLayout>

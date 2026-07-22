@@ -1,0 +1,199 @@
+---
+import type { AttractionResult, Lang } from '../lib/types'
+import { uiCopy, typeLabel as lookupLabel, ATTRACTION_TYPE_LABELS } from '../lib/uiCopy'
+import DetailLayout from './DetailLayout.astro'
+import Section from './Section.astro'
+
+import FAQ from './FAQ.astro'
+import BookingCTA from './BookingCTA.astro'
+import InfoCard from './InfoCard.astro'
+import Body from './Body.astro'
+import MapView from './MapView.astro'
+import Card from './Card.astro'
+import { applyPriceToJsonLd, attractionToJsonLd, entityPageGraphToLd, jsonLdScriptContent } from '../lib/serialize'
+import { loadPrices } from '../lib/prices'
+import { resolvePrice } from '../lib/resolver'
+import { entityHref } from '../lib/homepage'
+
+export interface Props {
+  data: AttractionResult
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+}
+
+const { data, lang, nearby = [] } = Astro.props
+
+const t = uiCopy(lang)
+
+const typeLabel = lookupLabel(ATTRACTION_TYPE_LABELS, lang, data.attractionType)
+
+function hasPtContent(blocks: unknown[] | undefined): boolean {
+  if (!blocks || blocks.length === 0) return false
+  return blocks.some((b: any) => b._type === 'block' && b.children?.some((c: any) => (c.text || '').trim()))
+}
+
+const prices = loadPrices('data/prices.yaml')
+const priceView = resolvePrice(data.bookingRef?.key, 'attraction', data.isAccessibleForFree, prices, lang)
+const siteBase = Astro.site?.toString() || 'https://tourdaovn.vn'
+const entityJsonLd = applyPriceToJsonLd(
+  attractionToJsonLd(data, siteBase, lang),
+  priceView, data.bookingRef?.key,
+)
+const jsonLd = entityPageGraphToLd(entityJsonLd, data, siteBase, lang)
+
+const infoBarItems = [
+  { icon: '🕐', label: t('hours'), value: data.openingHours ? `${data.openingHours.open || ''} - ${data.openingHours.close || ''}` : t('notAvailable'), visible: !!data.openingHours },
+  { icon: '🎫', label: t('ticketPrice'), value: priceView?.label || t('notAvailable'), visible: !!(priceView?.label) },
+  { icon: '📍', label: t('distance'), value: '', visible: false },
+  { icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
+]
+
+const sidebarRows = [
+  { icon: '📍', label: t('address'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
+  { icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : '', visible: !!data.openingHours },
+  { icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
+  { icon: '🔗', label: t('officialWebsite'), value: t('view'), href: data.officialSource || undefined, visible: !!data.officialSource },
+  { icon: '🎫', label: t('admission'), value: data.isAccessibleForFree ? t('free') : t('paid'), visible: data.isAccessibleForFree !== undefined },
+  { icon: '🗺️', label: t('map'), value: t('view'), href: data.hasMap, visible: !!data.hasMap },
+  { icon: '🔗', label: t('verifyWikidata'), value: 'Wikidata', href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
+]
+---
+
+<DetailLayout
+  title={data.title}
+  lang={lang}
+  entityType="attraction"
+  image={data.mainImage}
+  gallery={data.gallery}
+  containedInPlace={data.containedInPlace}
+  infoBarItems={infoBarItems}
+  sidebarSlots={[
+    { name: 'booking', component: 'BookingCTA', visible: !!priceView?.label, props: { priceText: priceView?.label || '', ctaLabel: t('bookTicket'), ctaUrl: data.bookingRef?.key ? `#booking-${data.bookingRef.key}` : undefined } },
+    { name: 'info', component: 'InfoCard', visible: sidebarRows.some(r => r.visible), props: { rows: sidebarRows } },
+    { name: 'map', component: 'Map', visible: !!(data.geo), props: { geo: data.geo, title: data.title } },
+  ]}
+  nearbyTitle={t('nearby')}
+  nearby={nearby}
+  updatedAt={data._updatedAt}
+>
+  <Fragment slot="content">
+    <div class="cat-row">
+      <span class="badge badge-default">{typeLabel}</span>
+    </div>
+
+    <div class="summary-block">{data.summary}</div>
+
+    {data.highlights && data.highlights.length > 0 && (
+      <Section heading={t('highlights')} contained={false}>
+        <ul class="hl-list">
+          {data.highlights.map((h: string) => <li>{h}</li>)}
+        </ul>
+      </Section>
+    )}
+
+    {hasPtContent(data.body) && (
+      <Section heading={t('overview')} contained={false}>
+        <Body blocks={data.body} />
+      </Section>
+    )}
+
+    {hasPtContent(data.accessInfo) && (
+      <Section heading={t('howToGetThere')} contained={false}>
+        <div class="info-callout">
+          {data.accessInfo!.map((block: any) => {
+            if (block._type === 'block' && block.children) {
+              const text = block.children.map((c: any) => c.text || '').join('')
+              if (text.trim()) {
+                if (block.style === 'normal') return <p>{text}</p>
+                return <p><strong>{text}</strong></p>
+              }
+            }
+            return null
+          })}
+        </div>
+      </Section>
+    )}
+
+    {data.faq && data.faq.length > 0 && <FAQ faq={data.faq} lang={lang} contained={false} />}
+
+    {data.experiences && data.experiences.length > 0 && (
+      <Section heading={t('experiencesHere')} contained={false}>
+        <div class="card-grid">
+          {data.experiences.map(exp => (
+            <Card
+              title={exp.title}
+              summary={exp.summary}
+              href={entityHref('experience', exp.slug, lang)!}
+              image={exp.mainImage?.asset?.url}
+              imageAlt={exp.mainImage?.alt || exp.title}
+              badge={exp.experienceType}
+            />
+          ))}
+        </div>
+      </Section>
+    )}
+  </Fragment>
+
+  {priceView?.label && (
+    <BookingCTA slot="booking" priceText={priceView.label} ctaLabel={t('bookTicket')} ctaUrl={data.bookingRef?.key ? `#booking-${data.bookingRef.key}` : undefined} />
+  )}
+  {sidebarRows.some(r => r.visible) && <InfoCard slot="info" rows={sidebarRows} lang={lang} />}
+  {data.geo && <MapView slot="map" geo={data.geo} title={data.title} height={240} />}
+</DetailLayout>
+
+<script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
+
+<style>
+  .cat-row { margin-bottom: var(--s4); }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--s1) var(--s3);
+    border-radius: var(--radius-pill);
+    font-size: var(--fs-badge);
+    font-weight: var(--fw-600);
+    font-family: var(--font-ui);
+  }
+
+  .badge-default { background: var(--c-primary-soft); color: var(--c-primary); }
+
+  .summary-block {
+    font-size: var(--fs-h5);
+    max-width: 70ch;
+    line-height: var(--lh-body);
+    font-weight: var(--fw-500);
+    font-family: var(--font-ui);
+    margin-bottom: var(--s6);
+  }
+
+  .info-callout {
+    background: var(--c-sand-paper);
+    border: 1px solid var(--c-sand-border);
+    border-radius: var(--radius-lg);
+    padding: var(--s4) var(--s5);
+    font-size: var(--fs-sm);
+    line-height: 1.6;
+    color: var(--c-sand-text);
+  }
+  .info-callout strong { color: var(--c-sand-text-strong); }
+  .info-callout p { margin-bottom: var(--s2); }
+
+  .hl-list { list-style: none; display: flex; flex-direction: column; gap: var(--s2); }
+  .hl-list li { font-size: var(--fs-sm); color: var(--c-text-muted); padding-left: var(--s5); position: relative; }
+  .hl-list li::before { content: "✦"; position: absolute; left: 0; color: var(--c-primary); font-size: var(--fs-xs); }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--s5);
+  }
+
+  @media (max-width: 1023px) {
+    .card-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 640px) {
+    .card-grid { grid-template-columns: 1fr; }
+  }
+</style>

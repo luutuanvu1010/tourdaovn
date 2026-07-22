@@ -1,0 +1,90 @@
+---
+import type { OrganizationResult, Lang } from '../lib/types'
+import { uiCopy, typeLabel as lookupLabel, ORG_TYPE_LABELS } from '../lib/uiCopy'
+import DetailLayout from './DetailLayout.astro'
+import Section from './Section.astro'
+import InfoCard from './InfoCard.astro'
+import Body from './Body.astro'
+import MapView from './MapView.astro'
+import { entityPageGraphToLd, organizationToJsonLd, jsonLdScriptContent } from '../lib/serialize'
+
+export interface Props {
+  data: OrganizationResult
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+}
+
+const { data, lang, nearby = [] } = Astro.props
+
+const t = uiCopy(lang)
+
+const typeLabel = lookupLabel(ORG_TYPE_LABELS, lang, data.orgType)
+
+function hasPtContent(blocks: unknown[] | undefined): boolean {
+  if (!blocks || blocks.length === 0) return false
+  return blocks.some((b: any) => b._type === 'block' && b.children?.some((c: any) => (c.text || '').trim()))
+}
+
+const sidebarRows = [
+  { icon: '🏢', label: t('type'), value: typeLabel, visible: true },
+  { icon: '📍', label: t('office'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
+  { icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
+  { icon: '🌐', label: t('website'), value: data.url || '', visible: !!data.url, href: data.url || undefined },
+  { icon: '🔗', label: t('officialSource'), value: data.officialSource || '', visible: !!data.officialSource, href: data.officialSource || undefined },
+  { icon: '📋', label: t('license'), value: data.licenseInfo || '', visible: !!data.licenseInfo },
+  { icon: '🔗', label: t('verifyWikidata'), value: 'Wikidata', href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
+]
+
+const siteBase = Astro.site?.toString() || 'https://tourdaovn.vn'
+const jsonLd = entityPageGraphToLd(organizationToJsonLd(data, siteBase, lang), data, siteBase, lang)
+---
+
+<DetailLayout
+  title={data.title}
+  lang={lang}
+  entityType="organization"
+  image={data.mainImage}
+  infoBarItems={[]}
+  sidebarSlots={[
+    { name: 'info', component: 'InfoCard', visible: sidebarRows.some(r => r.visible), props: { rows: sidebarRows } },
+    { name: 'map', component: 'Map', visible: !!(data.geo), props: {} },
+  ]}
+  nearbyTitle={t('toursAndEvents')}
+  nearby={nearby}
+  updatedAt={data._updatedAt}
+>
+  <Fragment slot="content">
+    {data.logo && (
+      <div class="logo-box">
+        <img src={data.logo.asset?.url || ''} alt={data.logo.alt || data.title} class="org-logo" />
+      </div>
+    )}
+
+    <div class="summary-block">{data.summary}</div>
+
+    {hasPtContent(data.body) && (
+      <Section contained={false}>
+        <Body blocks={data.body} />
+      </Section>
+    )}
+  </Fragment>
+
+  {sidebarRows.some(r => r.visible) && <InfoCard slot="info" rows={sidebarRows} lang={lang} />}
+  {data.geo && <MapView slot="map" geo={data.geo} title={data.title} height={240} />}
+</DetailLayout>
+
+<script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
+
+<style>
+  .logo-box { margin-bottom: var(--s4); }
+  .org-logo { max-width: 200px; max-height: 80px; object-fit: contain; }
+
+  .summary-block {
+    font-size: var(--fs-h5);
+    max-width: 70ch;
+    line-height: var(--lh-body);
+    font-weight: var(--fw-500);
+    font-family: var(--font-ui);
+    margin-bottom: var(--s6);
+  }
+</style>

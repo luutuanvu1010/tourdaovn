@@ -1,0 +1,116 @@
+---
+import type { EventResult, Lang } from '../lib/types'
+import { uiCopy, typeLabel as lookupLabel, EVENT_TYPE_LABELS, EVENT_STATUS_LABELS } from '../lib/uiCopy'
+import DetailLayout from './DetailLayout.astro'
+import FAQ from './FAQ.astro'
+import Section from './Section.astro'
+import BookingCTA from './BookingCTA.astro'
+import InfoCard from './InfoCard.astro'
+import Body from './Body.astro'
+import MapView from './MapView.astro'
+import { applyPriceToJsonLd, entityPageGraphToLd, eventToJsonLd, jsonLdScriptContent } from '../lib/serialize'
+import { loadPrices } from '../lib/prices'
+import { resolvePrice } from '../lib/resolver'
+import { formatDate, formatDateShort } from '../lib/dates'
+
+export interface Props {
+  data: EventResult
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+}
+
+const { data, lang, nearby = [] } = Astro.props
+
+const t = uiCopy(lang)
+
+const statusLabel = lookupLabel(EVENT_STATUS_LABELS, lang, data.eventStatus || 'EventScheduled')
+
+const eventTypeLabel = lookupLabel(EVENT_TYPE_LABELS, lang, data.eventType)
+
+function hasPtContent(blocks: unknown[] | undefined): boolean {
+  if (!blocks || blocks.length === 0) return false
+  return blocks.some((b: any) => b._type === 'block' && b.children?.some((c: any) => (c.text || '').trim()))
+}
+
+const now = new Date()
+// EventPostponed/EventRescheduled chưa chắc đã qua dù ngày cũ trong quá khứ
+const isPast = data.eventStatus === 'EventCancelled' ? true
+  : data.eventStatus === 'EventPostponed' ? false
+  : data.endDate ? new Date(data.endDate) < now
+  : new Date(data.startDate) < now
+
+const prices = loadPrices('data/prices.yaml')
+const priceView = resolvePrice(data.bookingRef?.key, 'event', data.isAccessibleForFree, prices, lang)
+const siteBase = Astro.site?.toString() || 'https://tourdaovn.vn'
+const entityJsonLd = applyPriceToJsonLd(
+  eventToJsonLd(data, siteBase, lang),
+  priceView, data.bookingRef?.key,
+)
+const jsonLd = entityPageGraphToLd(entityJsonLd, data, siteBase, lang)
+
+const ticketLabel = priceView?.label || (data.ticketUrl ? t('viewTickets') : data.isAccessibleForFree ? t('free') : '')
+
+const infoBarItems: { icon: string; label: string; value: string; visible: boolean }[] = [
+  { icon: '📅', label: t('date'), value: formatDateShort(data.startDate, lang), visible: true },
+  { icon: '🏷️', label: t('status'), value: isPast ? t('past') : (data.eventStatus && data.eventStatus !== 'EventScheduled' ? (statusLabel || '') : ''), visible: isPast || (!!data.eventStatus && data.eventStatus !== 'EventScheduled') },
+  { icon: '🎫', label: t('tickets'), value: ticketLabel || '', visible: !!ticketLabel },
+  { icon: '📍', label: t('locationAt'), value: data.location?.title || '', visible: !!data.location?.title },
+]
+
+const sidebarRows: { icon: string; label: string; value: string; href?: string; visible: boolean }[] = [
+  { icon: '📅', label: t('start'), value: formatDate(data.startDate, lang), visible: true },
+  { icon: '📅', label: t('end'), value: data.endDate ? formatDate(data.endDate, lang) : '', visible: !!data.endDate },
+  { icon: '🏷️', label: t('status'), value: statusLabel || '', visible: !!data.eventStatus },
+  { icon: '📍', label: t('locationAt'), value: data.location?.title || '', visible: !!data.location?.title },
+  { icon: '🏢', label: t('organizer'), value: data.organizer?.title || '', visible: !!data.organizer?.title },
+  { icon: '🏷️', label: t('eventType'), value: eventTypeLabel, visible: true },
+]
+---
+
+<DetailLayout
+  title={data.title}
+  lang={lang}
+  entityType="event"
+  image={data.mainImage}
+  gallery={data.gallery}
+  infoBarItems={infoBarItems}
+  sidebarSlots={[
+    { name: 'booking', component: 'BookingCTA', visible: !isPast && !!ticketLabel, props: {} },
+    { name: 'info', component: 'InfoCard', visible: sidebarRows.some(r => r.visible), props: { rows: sidebarRows } },
+    { name: 'map', component: 'Map', visible: !!((data.location as any)?.geo || (data as any).geo), props: {} },
+  ]}
+  nearbyTitle={t('otherEvents')}
+  nearby={nearby}
+  updatedAt={data._updatedAt}
+>
+  <div slot="content">
+    <div class="summary-block">{data.summary}</div>
+
+    {hasPtContent(data.body) && (
+      <Section heading={t('details')} contained={false}>
+        <Body blocks={data.body} />
+      </Section>
+    )}
+
+    {data.faq && data.faq.length > 0 && <FAQ faq={data.faq} lang={lang} contained={false} />}
+  </div>
+
+  {!isPast && priceView?.label && <BookingCTA slot="booking" priceText={priceView.label} ctaLabel={t('bookTicket')} />}
+  {!isPast && !priceView?.label && data.ticketUrl && <BookingCTA slot="booking" priceText={data.ticketUrl} ctaLabel={t('viewTickets')} ctaUrl={data.ticketUrl} />}
+  {!isPast && data.isAccessibleForFree && <BookingCTA slot="booking" priceText={t('freeAdmission')} ctaLabel={t('info')} />}
+  {sidebarRows.some(r => r.visible) && <InfoCard slot="info" rows={sidebarRows} lang={lang} />}
+  {((data.location as any)?.geo || (data as any).geo) && <MapView slot="map" geo={((data.location as any)?.geo || (data as any).geo) as any} title={data.location?.title || data.title} height={240} />}
+</DetailLayout>
+
+<script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
+
+<style>
+  .summary-block {
+    font-size: var(--fs-h5);
+    max-width: 70ch;
+    line-height: var(--lh-body);
+    font-weight: var(--fw-500);
+    font-family: var(--font-ui);
+    margin-bottom: var(--s6);
+  }
+</style>

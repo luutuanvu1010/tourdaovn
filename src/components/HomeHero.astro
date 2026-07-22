@@ -1,0 +1,226 @@
+---
+import { imageUrl } from '../lib/sanity-image'
+import type { ImageAsset } from '../lib/types'
+
+export interface Props {
+  title: string
+  summary?: string
+  image?: string | ImageAsset
+  imageAlt?: string
+  eyebrow?: string
+  imageCredit?: string
+  stampText?: string
+  stampYear?: string
+}
+
+const {
+  title,
+  summary,
+  image,
+  imageAlt,
+  eyebrow,
+  imageCredit,
+  stampText,
+  stampYear,
+} = Astro.props
+
+const src = typeof image === 'string' ? image : imageUrl(image, { width: 1800 })
+const alt = imageAlt || (typeof image === 'object' ? image?.alt : undefined) || ''
+const hasImage = Boolean(src)
+const cleanStampText = stampText?.trim()
+---
+
+<section class="hero">
+  {hasImage && (
+    <img class="hero-img" src={src} alt={alt} fetchpriority="high" />
+  )}
+  <div class="hero-gradient" aria-hidden="true"></div>
+
+  {cleanStampText && (
+    <div class="hero-stamp" aria-hidden="true">
+      <span class="stamp-text">{cleanStampText}</span>
+      <div class="stamp-line"></div>
+      {stampYear && <span class="stamp-year">{stampYear}</span>}
+    </div>
+  )}
+
+  <div class="container hero-content">
+    <div class="hero-text-wrap">
+      {eyebrow && <p class="hero-eyebrow">{eyebrow}</p>}
+      <h1 class="hero-title">{title}</h1>
+      {summary && <p class="hero-summary">{summary}</p>}
+    </div>
+  </div>
+
+  {imageCredit && (
+    <div class="hero-credit">{imageCredit}</div>
+  )}
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: var(--hero-min-h);
+    overflow: hidden;
+    background: var(--c-primary);
+    display: flex;
+    align-items: flex-end;
+  }
+
+  .hero-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hero-gradient {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: linear-gradient(to top, var(--c-primary-strong) 0%, color-mix(in srgb, var(--c-primary) 28%, transparent) 55%, transparent 100%);
+  }
+
+  .hero-stamp {
+    position: absolute;
+    top: 28px;
+    right: 28px;
+    z-index: 10;
+    width: 100px;
+    height: 100px;
+    border: 3px solid var(--c-coral);
+    border-radius: 50%;
+    color: var(--c-coral);
+    transform: rotate(12deg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: var(--s1);
+  }
+
+  .stamp-text {
+    font-family: var(--font-ui);
+    font-size: var(--fs-badge);
+    font-weight: var(--fw-700);
+    letter-spacing: 0;
+    text-transform: uppercase;
+    line-height: 1.4;
+    white-space: pre-line;
+  }
+
+  .stamp-line {
+    width: 40px;
+    height: 1px;
+    background: var(--c-coral);
+  }
+
+  .stamp-year {
+    font-family: var(--font-ui);
+    font-size: var(--fs-badge);
+    font-weight: var(--fw-700);
+    letter-spacing: 0;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 3;
+    padding-bottom: 72px;
+    padding-top: 80px;
+  }
+
+  .hero-text-wrap {
+    max-width: 700px;
+  }
+
+  .hero-eyebrow {
+    font-weight: var(--fw-600);
+    font-size: var(--fs-label);
+    letter-spacing: 0;
+    text-transform: uppercase;
+    color: var(--c-text-inverse);
+    opacity: 0.65;
+    margin-bottom: var(--s3);
+  }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-weight: var(--fw-800);
+    font-size: clamp(var(--fs-h2), 5vw, var(--fs-hero));
+    color: var(--c-text-inverse);
+    line-height: 1.1;
+    margin-bottom: var(--s4);
+    text-wrap: pretty;
+  }
+
+  .hero-summary {
+    font-weight: var(--fw-500);
+    font-size: var(--fs-base);
+    color: var(--c-text-inverse);
+    opacity: 0.82;
+    line-height: var(--lh-body);
+    max-width: 540px;
+  }
+
+  .hero-credit {
+    position: absolute;
+    bottom: var(--s4);
+    right: var(--s5);
+    z-index: 4;
+    font-family: var(--font-ui);
+    font-size: var(--fs-badge);
+    font-style: italic;
+    color: var(--c-text-inverse);
+    opacity: 0.45;
+  }
+
+  @media (max-width: 1024px) {
+    .hero {
+      min-height: 440px;
+    }
+
+    .hero-stamp {
+      top: 20px;
+      right: 20px;
+      width: 80px;
+      height: 80px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .hero {
+      min-height: var(--hero-min-h-mobile);
+    }
+
+    .hero-content {
+      padding-bottom: var(--s7);
+      padding-top: var(--s7);
+    }
+
+    .hero-title {
+      font-size: clamp(var(--fs-h3), 6vw, var(--fs-h2));
+    }
+
+    .hero-stamp {
+      top: var(--s4);
+      right: var(--s4);
+      width: 72px;
+      height: 72px;
+    }
+
+    .hero-credit {
+      bottom: var(--s2);
+      right: var(--s4);
+      font-size: var(--fs-badge);
+    }
+  }
+
+  @media (max-width: 640px) {
+    /* --bp-sm */
+    .hero-stamp {
+      display: none;
+    }
+  }
+</style>

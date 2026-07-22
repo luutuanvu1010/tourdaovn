@@ -1,0 +1,297 @@
+---
+import type { Lang } from '../lib/types'
+import { ROUTE_MAP } from '../lib/routes'
+import { uiCopy } from '../lib/uiCopy'
+
+export interface Props {
+  currentPath?: string;
+  lang?: string;
+  /**
+   * Map ngôn ngữ → URL bản dịch CÓ THẬT cho trang hiện tại. Ngôn ngữ vắng trong map =
+   * chưa có bản dịch (track QĐ3) → render disable, KHÔNG link chết (audit G5, prompt R5).
+   */
+  alternates?: Record<string, string>;
+}
+
+const { currentPath = '/', lang = 'vi', alternates } = Astro.props;
+const uiLang = (['vi', 'en', 'zh', 'ko', 'ru'].includes(lang) ? lang : 'vi') as Lang
+const t = uiCopy(uiLang)
+const prefix = uiLang === 'vi' ? '' : `/${uiLang}`
+const homeHref = uiLang === 'vi' ? '/' : `/${uiLang}/`
+
+// Nav từ ROUTE_MAP — nguồn duy nhất cho segment + nhãn hub theo ngôn ngữ (R3)
+const navItems = ['hub-kham-pha', 'hub-luu-tru', 'hub-am-thuc', 'hub-di-lai']
+  .map(id => ROUTE_MAP.find(r => r.entity === id))
+  .filter(Boolean)
+  .map(r => ({ label: r!.labels[uiLang], href: `${prefix}/${r!.segments[uiLang]}/` }));
+
+const languages = [
+  { code: 'vi', label: 'VI' },
+  { code: 'en', label: 'EN' },
+  { code: 'zh', label: 'ZH' },
+  { code: 'ko', label: 'KO' },
+  { code: 'ru', label: 'RU' },
+];
+---
+
+<header class="site-header">
+  <a href="#main-content" class="skip-link">{t('skipNav')}</a>
+
+  <div class="container header-inner">
+    <a href={homeHref} class="logo" aria-label={t('homeAria')}>
+      <svg class="logo-svg" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+        <circle cx="20" cy="20" r="19" fill="var(--c-primary)"/>
+        <path d="M14 26 L20 9 L20 26 Z" fill="var(--c-sand)"/>
+        <path d="M20 9 L26 26 L20 26 Z" fill="var(--c-sand-soft)"/>
+        <path d="M8 30 Q 12 27 16 30 T 24 30 T 32 30" stroke="var(--c-surface)" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+      </svg>
+      <span>Nha Trang Travel</span>
+    </a>
+
+    <nav class="nav-main" aria-label={t('mainNavAria')}>
+      {navItems.map(item => (
+        <a
+          href={item.href}
+          class={currentPath.startsWith(item.href) ? 'active' : ''}
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
+
+    <div class="nav-actions">
+      <div class="lang-switch" aria-label={t('chooseLangAria')}>
+        {languages.map((l, i) => {
+          const href = alternates?.[l.code];
+          return (
+            <>
+              {i > 0 && <span class="lang-sep">·</span>}
+              {l.code === lang ? (
+                <span class="active" aria-current="true">{l.label}</span>
+              ) : href ? (
+                <a href={href} hreflang={l.code}>{l.label}</a>
+              ) : (
+                <span class="disabled" aria-disabled="true" title={t('translationPending')}>{l.label}</span>
+              )}
+            </>
+          );
+        })}
+      </div>
+
+      <button class="hamburger" aria-label={t('openMenu')} data-close-label={t('closeMenu')} aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <line x1="4" y1="6" x2="20" y2="6"/>
+          <line x1="4" y1="12" x2="20" y2="12"/>
+          <line x1="4" y1="18" x2="20" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<script>
+  const btn = document.querySelector('.hamburger') as HTMLElement | null;
+  const nav = document.querySelector('.nav-main') as HTMLElement | null;
+  const lang = document.querySelector('.lang-switch') as HTMLElement | null;
+  if (!btn || !nav || !lang) throw new Error('Header: missing required elements');
+
+  let open = false;
+  const openLabel = btn.getAttribute('aria-label') || 'Menu';
+  const closeLabel = btn.getAttribute('data-close-label') || openLabel;
+
+  function show() {
+    nav!.style.display = 'flex';
+    nav!.style.flexDirection = 'column';
+    nav!.style.position = 'absolute';
+    nav!.style.top = 'var(--header-h)';
+    nav!.style.left = '0';
+    nav!.style.right = '0';
+    nav!.style.background = 'var(--c-surface)';
+    nav!.style.padding = 'var(--s4)';
+    nav!.style.borderBottom = '1px solid var(--c-border)';
+    nav!.style.zIndex = '99';
+    lang!.style.display = 'flex';
+    lang!.style.padding = '0 var(--s4) var(--s4)';
+    lang!.style.justifyContent = 'center';
+    btn!.setAttribute('aria-label', closeLabel);
+    btn!.setAttribute('aria-expanded', 'true');
+    open = true;
+  }
+
+  function hide() {
+    nav!.style.display = '';
+    nav!.style.flexDirection = '';
+    nav!.style.position = '';
+    nav!.style.background = '';
+    nav!.style.padding = '';
+    nav!.style.borderBottom = '';
+    nav!.style.zIndex = '';
+    lang!.style.display = '';
+    lang!.style.padding = '';
+    lang!.style.justifyContent = '';
+    btn!.setAttribute('aria-label', openLabel);
+    btn!.setAttribute('aria-expanded', 'false');
+    open = false;
+  }
+
+  btn!.addEventListener('click', () => {
+    open ? hide() : show();
+  });
+
+  // Close when clicking any nav link
+  nav!.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => { if (open) hide(); });
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && open) {
+      hide();
+      btn!.focus();
+    }
+  });
+
+  // Reset on resize to desktop
+  window.addEventListener('resize', () => {
+    if (open && window.innerWidth >= 1024) hide();
+  });
+</script>
+
+<style>
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: var(--s4);
+    padding: var(--s2) var(--s4);
+    background: var(--c-primary);
+    color: var(--c-text-inverse);
+    border-radius: var(--radius-sm);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-600);
+    z-index: 200;
+  }
+  .skip-link:focus {
+    top: var(--s2);
+  }
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--c-surface);
+    border-bottom: 1px solid var(--c-border);
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    gap: var(--s6);
+    height: var(--header-h);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+    font-family: var(--font-display);
+    font-weight: var(--fw-800);
+    font-size: var(--fs-nav);
+    color: var(--c-primary-strong);
+    letter-spacing: 0;
+    flex-shrink: 0;
+  }
+
+  .logo-svg {
+    width: 34px;
+    height: 34px;
+    flex: none;
+  }
+
+  .nav-main {
+    display: flex;
+    gap: var(--s2);
+    flex: 1;
+  }
+
+  .nav-main a {
+    padding: var(--s3) var(--s3);
+    border-radius: var(--radius-sm);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-600);
+    color: var(--c-text-muted);
+    transition: all var(--m-fast) var(--m-ease);
+  }
+
+  .nav-main a:hover {
+    color: var(--c-primary);
+    background: var(--c-primary-soft);
+  }
+
+  .nav-main a.active {
+    color: var(--c-primary);
+    background: var(--c-primary-soft);
+  }
+
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+  }
+
+  .lang-switch {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--s1);
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+    font-weight: var(--fw-500);
+  }
+
+  .lang-sep {
+    color: var(--c-border);
+  }
+
+  .lang-switch .active {
+    color: var(--c-primary);
+    font-weight: var(--fw-700);
+  }
+
+  .lang-switch a {
+    color: var(--c-text-muted);
+    font-weight: var(--fw-500);
+    transition: color var(--m-fast) var(--m-ease);
+  }
+
+  .lang-switch a:hover {
+    color: var(--c-primary);
+  }
+
+  .lang-switch .disabled {
+    color: var(--c-border);
+    cursor: not-allowed;
+  }
+
+  .hamburger {
+    display: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    background: var(--c-primary-soft);
+    color: var(--c-primary);
+    border: none;
+    cursor: pointer;
+  }
+
+  @media (max-width: 1023px) {
+    .nav-main,
+    .lang-switch {
+      display: none;
+    }
+    .hamburger {
+      display: inline-flex;
+    }
+  }
+</style>

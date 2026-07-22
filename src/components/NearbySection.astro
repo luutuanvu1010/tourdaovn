@@ -1,0 +1,170 @@
+---
+import { imageUrl } from '../lib/sanity-image'
+import type { NearbyEntity, Lang } from '../lib/types'
+import { ROUTE_MAP } from '../lib/routes'
+import { uiCopy } from '../lib/uiCopy'
+
+export interface Props {
+  title: string
+  entities: NearbyEntity[]
+  viewAllUrl?: string
+  lang?: Lang
+}
+
+const { title, entities, viewAllUrl, lang = 'vi' } = Astro.props
+const t = uiCopy(lang)
+
+function entitySegment(entityType: string): string {
+  return ROUTE_MAP.find(r => r.entity === entityType)?.segments[lang] || entityType
+}
+---
+
+{entities.length > 0 && (
+  <section class="nearby">
+    <div class="container">
+      <div class="nearby-head">
+        <h2 class="nearby-title">{title}</h2>
+        {viewAllUrl && (
+          <a href={viewAllUrl} class="nearby-all">{t('viewAll')} &rarr;</a>
+        )}
+      </div>
+      <div class="nearby-grid">
+        {entities.map((e) => (
+          <a href={`/${entitySegment(e._type)}/${e.slug}`} class="nearby-card">
+            <div class="nearby-card-img">
+              {(() => { const src = imageUrl(e.mainImage, { width: 400 }); return src ? (
+                <img src={src} alt={e.mainImage?.alt || e.title} loading="lazy" />
+              ) : (
+                <div class="nearby-placeholder"></div>
+              ) })()}
+            </div>
+            <div class="nearby-card-body">
+              <h5 class="nearby-card-title">{e.title}</h5>
+              {e.categoryBadge && <span class="nearby-badge">{e.categoryBadge}</span>}
+              {e.distance && <span class="nearby-distance">{e.distance}</span>}
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  .nearby {
+    background: var(--c-surface-alt);
+    padding: var(--s7) 0;
+  }
+
+  .nearby-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: var(--s6);
+  }
+
+  .nearby-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    font-weight: var(--fw-700);
+    color: var(--c-text);
+    line-height: var(--lh-heading);
+  }
+
+  .nearby-all {
+    font-family: var(--font-ui);
+    font-size: var(--fs-sm);
+    color: var(--c-primary);
+    text-decoration: none;
+    font-weight: var(--fw-600);
+  }
+
+  .nearby-all:hover {
+    text-decoration: underline;
+  }
+
+  .nearby-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--s5);
+  }
+
+  .nearby-card {
+    background: var(--c-card);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+    transition: box-shadow var(--m-fast) var(--m-ease), transform var(--m-fast) var(--m-ease);
+  }
+
+  .nearby-card:hover {
+    box-shadow: var(--shadow-raised);
+    transform: translateY(-3px);
+  }
+
+  .nearby-card-img {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+  }
+
+  .nearby-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .nearby-placeholder {
+    width: 100%;
+    height: 100%;
+    background: var(--c-primary-soft);
+  }
+
+  .nearby-card-body {
+    padding: var(--s3);
+  }
+
+  .nearby-card-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-base);
+    font-weight: var(--fw-700);
+    color: var(--c-text);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: var(--s2);
+  }
+
+  .nearby-badge {
+    display: inline-block;
+    font-family: var(--font-ui);
+    font-size: var(--fs-badge);
+    font-weight: var(--fw-600);
+    background: var(--c-primary-soft);
+    color: var(--c-primary);
+    padding: 2px 10px;
+    border-radius: var(--radius-pill);
+  }
+
+  .nearby-distance {
+    display: block;
+    font-family: var(--font-ui);
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+    margin-top: var(--s1);
+  }
+
+  @media (max-width: 1023px) {
+    .nearby-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .nearby-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

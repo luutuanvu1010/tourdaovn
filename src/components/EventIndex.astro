@@ -1,0 +1,167 @@
+---
+import type { Lang, PriceEntry } from '../lib/types'
+import { uiCopy, EVENT_TYPE_LABELS } from '../lib/uiCopy'
+import { resolvePrice } from '../lib/resolver'
+import { formatDate } from '../lib/dates'
+import { ROUTE_MAP } from '../lib/routes'
+import { collectionPageToJsonLd, jsonLdScriptContent } from '../lib/serialize'
+import Card from './Card.astro'
+import Section from './Section.astro'
+import EmptyState from './EmptyState.astro'
+
+interface EventEntity {
+  title: string
+  summary: string
+  slug: string
+  image?: string
+  imageAlt?: string
+  eventType: string
+  startDate: string
+  bookingRef?: { key?: string }
+}
+
+export interface Props {
+  upcoming: EventEntity[]
+  past: EventEntity[]
+  lang: Lang
+  prices?: Map<string, PriceEntry>
+}
+
+const { upcoming, past, lang, prices } = Astro.props
+const t = uiCopy(lang)
+
+const eventTypeLabel = EVENT_TYPE_LABELS[lang] ?? EVENT_TYPE_LABELS.en
+
+function getSegment(lang: Lang): string {
+  const entry = ROUTE_MAP.find(r => r.entity === 'event')
+  return entry?.segments[lang] ?? 'event'
+}
+
+function entityHref(slug: string): string {
+  const seg = getSegment(lang)
+  const prefix = lang === 'vi' ? '' : `/${lang}`
+  return `${prefix}/${seg}/${slug}/`
+}
+
+function getBadge(entity: EventEntity, isPast: boolean): { label: string; variant?: 'past' } {
+  const typePart = eventTypeLabel[entity.eventType] || entity.eventType
+  if (isPast) return { label: `${typePart} · ${t('past')}`, variant: 'past' }
+  return { label: `${typePart} · ${formatDate(entity.startDate, lang)}` }
+}
+
+function getPriceLabel(entity: EventEntity): string | undefined {
+  if (!entity.bookingRef?.key || !prices) return undefined
+  const pv = resolvePrice(entity.bookingRef.key, 'event', undefined, prices, lang)
+  return pv?.label
+}
+
+const hasUpcoming = upcoming.length > 0
+const hasPast = past.length > 0
+const hasAny = hasUpcoming || hasPast
+
+const sectionLabels = {
+  upcoming: t('upcomingEvents'),
+  past: t('pastEvents'),
+}
+---
+
+{/* 06 §5.5 — Event index, hai khối riêng */}
+<div class="event-index">
+  {hasAny ? (
+    <>
+      {/* Vùng 1: Khối sắp diễn ra */}
+      <Section heading={sectionLabels.upcoming}>
+        {hasUpcoming ? (
+          <div class="card-grid">
+            {upcoming.map(entity => {
+              const badge = getBadge(entity, false)
+              return (
+                <Card
+                  title={entity.title}
+                  summary={entity.summary}
+                  href={entityHref(entity.slug)}
+                  image={entity.image}
+                  imageAlt={entity.imageAlt}
+                  badge={badge.label}
+                  badgeVariant="default"
+                  priceLabel={getPriceLabel(entity)}
+                />
+              )
+            })}
+          </div>
+        ) : (
+          <p class="event-empty-note">
+            {t('noUpcomingEvents')}
+          </p>
+        )}
+      </Section>
+
+      {/* Vùng 2: Khối đã diễn ra */}
+      {hasPast && (
+        <Section heading={sectionLabels.past}>
+          <div class="card-grid">
+            {past.map(entity => {
+              const badge = getBadge(entity, true)
+              return (
+                <Card
+                  title={entity.title}
+                  summary={entity.summary}
+                  href={entityHref(entity.slug)}
+                  image={entity.image}
+                  imageAlt={entity.imageAlt}
+                  badge={badge.label}
+                  badgeVariant="past"
+                  priceLabel={getPriceLabel(entity)}
+                />
+              )
+            })}
+          </div>
+        </Section>
+      )}
+
+    </>
+  ) : (
+    <EmptyState entityType="event" lang={lang} />
+  )}
+
+  {/* Vùng 4: JSON-LD */}
+  <script type="application/ld+json" set:html={jsonLdScriptContent(
+    collectionPageToJsonLd(
+      { title: sectionLabels.upcoming, entityType: 'event', entities: upcoming.map(e => ({ ...e, _type: 'event' })), lang, pagePath: Astro.url.pathname },
+      Astro.site?.toString() || 'https://tourdaovn.vn'
+    )
+  )} />
+  {hasPast && (
+    <script type="application/ld+json" set:html={jsonLdScriptContent(
+      collectionPageToJsonLd(
+        { title: sectionLabels.past, entityType: 'event', entities: past.map(e => ({ ...e, _type: 'event' })), lang, pagePath: `${Astro.url.pathname}#past` },
+        Astro.site?.toString() || 'https://tourdaovn.vn'
+      )
+    )} />
+  )}
+</div>
+
+<style>
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--s5);
+  }
+
+  .event-empty-note {
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+  }
+
+  @media (max-width: 1023px) {
+    .card-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .card-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

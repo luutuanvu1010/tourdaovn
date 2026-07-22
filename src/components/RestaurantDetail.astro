@@ -1,0 +1,128 @@
+---
+import type { RestaurantResult, Lang } from '../lib/types'
+import { uiCopy } from '../lib/uiCopy'
+import { entityPageGraphToLd, restaurantToJsonLd, jsonLdScriptContent } from '../lib/serialize'
+import DetailLayout from './DetailLayout.astro'
+import Section from './Section.astro'
+import FAQ from './FAQ.astro'
+import InfoCard from './InfoCard.astro'
+import Body from './Body.astro'
+import MapView from './MapView.astro'
+import { ROUTE_MAP } from '../lib/routes'
+
+export interface Props {
+  data: RestaurantResult
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+}
+
+const { data, lang, nearby = [] } = Astro.props
+
+const t = uiCopy(lang)
+
+function hasPtContent(blocks: unknown[] | undefined): boolean {
+  if (!blocks || blocks.length === 0) return false
+  return blocks.some((b: any) => b._type === 'block' && b.children?.some((c: any) => (c.text || '').trim()))
+}
+
+const infoBarItems = [
+  { icon: '🍽️', label: t('cuisine'), value: data.servesCuisine?.[0] || '', visible: !!(data.servesCuisine && data.servesCuisine.length > 0) },
+  { icon: '🕐', label: t('hours'), value: data.openingHours ? `${data.openingHours.open || ''} - ${data.openingHours.close || ''}` : '', visible: !!data.openingHours },
+  { icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
+  { icon: '📍', label: t('distance'), value: '', visible: false },
+]
+
+const sidebarRows = [
+  { icon: '📍', label: t('address'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
+  { icon: '🍽️', label: t('cuisine'), value: data.servesCuisine?.join(', ') || '', visible: !!(data.servesCuisine && data.servesCuisine.length > 0) },
+  { icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : '', visible: !!data.openingHours },
+  { icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
+  { icon: '📅', label: t('reservations'), value: data.acceptsReservations ? t('acceptsReservations') : t('no'), visible: data.acceptsReservations !== undefined },
+  { icon: '📋', label: t('menu'), value: t('view'), href: data.hasMenu, visible: !!data.hasMenu },
+  { icon: '🔗', label: t('officialWebsite'), value: t('view'), href: data.officialSource || undefined, visible: !!data.officialSource },
+  { icon: '🔗', label: t('verifyWikidata'), value: 'Wikidata', href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
+]
+
+const siteBase = Astro.site?.toString() || 'https://tourdaovn.vn'
+const jsonLd = entityPageGraphToLd(restaurantToJsonLd(data, siteBase, lang), data, siteBase, lang)
+---
+
+<DetailLayout
+  title={data.title}
+  lang={lang}
+  entityType="restaurant"
+  image={data.mainImage}
+  gallery={data.gallery}
+  containedInPlace={data.containedInPlace}
+  infoBarItems={infoBarItems}
+  sidebarSlots={[
+    { name: 'info', component: 'InfoCard', visible: sidebarRows.some(r => r.visible), props: { rows: sidebarRows } },
+    { name: 'map', component: 'Map', visible: !!(data.geo), props: {} },
+  ]}
+  nearbyTitle={t('nearby')}
+  nearby={nearby}
+  updatedAt={data._updatedAt}
+>
+  <Fragment slot="content">
+    <div class="summary-block">{data.summary}</div>
+
+    {data.highlights && data.highlights.length > 0 && (
+      <Section heading={t('highlights')} contained={false}>
+        <ul class="hl-list">
+          {data.highlights.map((h: string) => <li>{h}</li>)}
+        </ul>
+      </Section>
+    )}
+
+    {hasPtContent(data.body) && (
+      <Section heading={t('aboutRestaurant')} contained={false}>
+        <Body blocks={data.body} />
+      </Section>
+    )}
+
+    {data.servesSpecialty && data.servesSpecialty.length > 0 && (
+      <Section heading={t('signatureDishes')} contained={false}>
+        <div class="specialty-grid">
+          {data.servesSpecialty.map((s) => (
+            <a href={`/${ROUTE_MAP.find(rt => rt.entity === 'specialty')?.segments[lang] || 'dac-san'}/${s.slug}`} class="specialty-card">
+              <strong>{s.title}</strong>
+              {s.summary && <p>{s.summary}</p>}
+            </a>
+          ))}
+        </div>
+      </Section>
+    )}
+
+    {data.faq && data.faq.length > 0 && <FAQ faq={data.faq} lang={lang} contained={false} />}
+  </Fragment>
+
+  {sidebarRows.some(r => r.visible) && <InfoCard slot="info" rows={sidebarRows} lang={lang} />}
+  {data.geo && <MapView slot="map" geo={data.geo} title={data.title} height={240} />}
+</DetailLayout>
+
+<script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
+
+<style>
+  .summary-block {
+    font-size: var(--fs-h5);
+    max-width: 70ch;
+    line-height: var(--lh-body);
+    font-weight: var(--fw-500);
+    font-family: var(--font-ui);
+    margin-bottom: var(--s6);
+  }
+
+  .specialty-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s3); }
+  .specialty-card { display: block; padding: var(--s4); background: var(--c-card); border: 1px solid var(--c-border); border-radius: var(--radius-md); text-decoration: none; color: inherit; transition: box-shadow var(--m-fast) var(--m-ease); }
+  .specialty-card:hover { box-shadow: var(--shadow-raised); }
+  .specialty-card strong { display: block; font-size: var(--fs-base); font-weight: var(--fw-700); color: var(--c-text); margin-bottom: var(--s1); }
+  .specialty-card p { font-size: var(--fs-sm); color: var(--c-text-muted); margin: 0; }
+
+  .hl-list { list-style: none; display: flex; flex-direction: column; gap: var(--s2); }
+  .hl-list li { font-size: var(--fs-sm); color: var(--c-text-muted); padding-left: var(--s5); position: relative; }
+  .hl-list li::before { content: "✦"; position: absolute; left: 0; color: var(--c-primary); font-size: var(--fs-xs); }
+
+  @media (max-width: 1023px) {
+    .specialty-grid { grid-template-columns: 1fr; }
+  }
+</style>

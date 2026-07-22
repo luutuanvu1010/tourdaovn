@@ -1,0 +1,67 @@
+---
+import type { SiteContact, Lang } from '../lib/types'
+import { uiCopy } from '../lib/uiCopy'
+
+export interface Props {
+  contact?: SiteContact | null
+  lang: Lang
+}
+
+const { contact, lang } = Astro.props
+const t = uiCopy(lang)
+
+const zaloUrl = contact?.zaloUrl || ''
+const telHref = contact?.hotline ? `tel:${contact.hotline.replace(/\s+/g, '')}` : ''
+const waHref = contact?.whatsapp ? `https://wa.me/${contact.whatsapp.replace(/\s+/g, '')}` : ''
+
+const hasAny = !!zaloUrl || !!telHref || !!waHref
+---
+
+{hasAny && (
+  <div class="contact-channels">
+    {zaloUrl && (
+      <a href={zaloUrl} class="contact-btn contact-zalo" target="_blank" rel="noopener">
+        {t('contactZalo')}
+      </a>
+    )}
+    {telHref && (
+      <a href={telHref} class="contact-btn contact-call">
+        {t('contactCall')}
+      </a>
+    )}
+    {waHref && (
+      <a href={waHref} class="contact-btn contact-whatsapp" target="_blank" rel="noopener">
+        {t('contactWhatsApp')}
+      </a>
+    )}
+  </div>
+)}
+
+<style>
+  .contact-channels {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s2);
+  }
+
+  .contact-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-ui);
+    font-size: var(--fs-base);
+    font-weight: var(--fw-600);
+    padding: var(--s3) var(--s5);
+    border-radius: var(--radius-pill);
+    text-decoration: none;
+    border: 1px solid var(--c-border);
+    background: var(--c-card);
+    color: var(--c-text);
+    transition: background var(--m-fast) var(--m-ease), border-color var(--m-fast) var(--m-ease);
+  }
+
+  .contact-btn:hover {
+    background: var(--c-surface-alt);
+    border-color: var(--c-primary);
+  }
+</style>
