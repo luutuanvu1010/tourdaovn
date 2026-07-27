@@ -8,7 +8,7 @@ export default defineCliConfig({
     projectId,
     dataset
   },
-  studioHost: 'nhatrang-travel',
+  studioHost: 'tourdaovn',
   deployment: {
     appId: 'woiwn9qefw8gdirvjgavvfcs'
   }
