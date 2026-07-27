@@ -6,9 +6,11 @@ let client: SanityClient | null = null
 export function getClient(): SanityClient {
   if (client) return client
 
-  const projectId = import.meta.env.SANITY_STUDIO_PROJECT_ID
-  const dataset = import.meta.env.SANITY_STUDIO_DATASET || 'production'
-  const token = import.meta.env.SANITY_READ_TOKEN
+  // Đọc biến từ cả import.meta.env (.env local) và process.env (Cloudflare/CI build)
+  const penv = (typeof process !== 'undefined' ? process.env : {}) as Record<string, string | undefined>
+  const projectId = import.meta.env.SANITY_STUDIO_PROJECT_ID || penv.SANITY_STUDIO_PROJECT_ID
+  const dataset = import.meta.env.SANITY_STUDIO_DATASET || penv.SANITY_STUDIO_DATASET || 'production'
+  const token = import.meta.env.SANITY_READ_TOKEN || penv.SANITY_READ_TOKEN
 
   if (!projectId) {
     throw new Error('SANITY_STUDIO_PROJECT_ID is required')
