@@ -1,4 +1,4 @@
-import type { JsonLd } from './types'
+import type { JsonLdObject as JsonLd } from './types'
 
 // Gán property JSON-LD an toàn: bỏ qua string rỗng, mảng rỗng, null/undefined.
 // Mảng rỗng và string rỗng trong JSON-LD gây invalid schema.org.

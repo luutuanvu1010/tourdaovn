@@ -263,17 +263,6 @@ export function homeQuickLinks(lang: Lang) {
     .filter(Boolean) as Array<{ label: string; href: string }>
 }
 
-export function homeHubEntries(lang: Lang) {
-  return hubEntities
-    .map(entity => {
-      const route = routeForEntity(entity)
-      const href = indexHref(entity, lang)
-      if (!route || !href) return null
-      return { entity, href, label: route.labels[lang] }
-    })
-    .filter(Boolean) as Array<{ entity: string; href: string; label: string }>
-}
-
 const COUNT_LABELS: Record<Lang, (n: number) => string> = {
   vi: (n) => `${n} địa điểm`,
   en: (n) => `${n} ${n === 1 ? 'place' : 'places'}`,
