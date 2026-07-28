@@ -5,12 +5,13 @@ import { config as dotenvConfig } from 'dotenv'
 import { fetchAllDocs } from '../lib/sanity-client.js'
 import { loadNodeDotEnv } from '../synthesis/config.js'
 import { ROUTE_MAP } from '../../src/lib/routes.js'
+import { site } from '../../src/site.config.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..', '..')
 const DIST = resolve(REPO_ROOT, 'dist')
 const REPORT_PATH = resolve(REPO_ROOT, 'scripts', 'reports', 'geo-knowledge-status.json')
-const SITE = 'https://nhatrangtravel.net'
+const SITE = site.url
 const LANGS = ['vi', 'en', 'zh', 'ko', 'ru'] as const
 type Lang = typeof LANGS[number]
 

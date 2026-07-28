@@ -9,12 +9,13 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { ROUTE_MAP } from '../../src/lib/routes'
+import { site } from '../../src/site.config'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..', '..')
 const DIST = resolve(REPO_ROOT, 'dist')
 const REPORT_DIR = resolve(REPO_ROOT, 'scripts', 'reports')
-const SITE = 'https://nhatrangtravel.net'
+const SITE = site.url
 
 type PostItem = {
   id: 'I6' | 'PY8' | 'SEO'

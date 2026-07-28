@@ -6,12 +6,13 @@
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
 import { resolve, join, relative, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { site } from '../../src/site.config'
 
 // Repo root = scripts/validators/ → ../../
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..', '..')
 const DIST = resolve(REPO_ROOT, 'dist')
-const SITE = 'https://nhatrangtravel.net'
+const SITE = site.url
 const LANGS = ['vi', 'en', 'zh', 'ko', 'ru'] as const
 type Lang = typeof LANGS[number]
 const LANG_PREFIXES: Record<Lang, string> = { vi: '', en: '/en', zh: '/zh', ko: '/ko', ru: '/ru' }
