@@ -8,6 +8,7 @@ import { destinationHref } from '../../lib/homepage'
 import { jsonLdScriptContent } from '../../lib/serialize/utils'
 import type { TouristDestinationResult, SiteSettingsResult, Lang } from '../../lib/types'
 import { brand } from '../../site.config'
+import { siteBaseUrl } from '../../lib/siteUrl'
 
 export async function getStaticPaths() {
   const langs: Lang[] = [] // vi-only: tắt route đa ngôn ngữ
@@ -27,7 +28,7 @@ const td: TouristDestinationResult | null = await client.fetch(query, { slug: 'n
 
 const config: SiteSettingsResult | null = await client.fetch(siteSettingsQuery())
 
-const siteBase = Astro.site?.toString() || 'https://tourdaovn.vn'
+const siteBase = siteBaseUrl(Astro.site)
 
 const fallbackSummary: Record<Lang, string> = {
   vi: 'Cẩm nang du lịch Nha Trang với điểm đến, trải nghiệm, ẩm thực, lưu trú và thông tin thực tế được tuyển chọn.',

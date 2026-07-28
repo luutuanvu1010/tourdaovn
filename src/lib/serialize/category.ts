@@ -8,7 +8,7 @@ import { ldRoot, urlForEntity, sanitizeLd } from './utils'
  * Serialize Category → JSON-LD DefinedTerm.
  *
  * @param category Kết quả GROQ query
- * @param baseUrl Base URL của site (vd "https://nhatrangtravel.com")
+ * @param baseUrl Base URL của site (vd "https://tourdao.vn")
  */
 export function categoryToJsonLd(
   category: CategoryResult,

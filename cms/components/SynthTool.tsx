@@ -60,7 +60,7 @@ interface DashboardStats {
 // Helpers
 // ============================================================
 
-const HISTORY_KEY = 'nhatrangtravel_synth_history'
+const HISTORY_KEY = 'synth_history'
 const MAX_HISTORY = 100
 
 function loadHistory(): RunRecord[] {

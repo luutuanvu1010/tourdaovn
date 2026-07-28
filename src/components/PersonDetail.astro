@@ -1,5 +1,6 @@
 ---
 import type { PersonResult, Lang } from '../lib/types'
+import { siteBaseUrl } from '../lib/siteUrl'
 import { uiCopy } from '../lib/uiCopy'
 import DetailLayout from './DetailLayout.astro'
 import Section from './Section.astro'
@@ -24,7 +25,7 @@ const sidebarRows = [
   { icon: '🔗', label: t('verifyWikidata'), value: 'Wikidata', href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
 ]
 
-const siteBase = Astro.site?.toString() || 'https://tourdaovn.vn'
+const siteBase = siteBaseUrl(Astro.site)
 const jsonLd = entityPageGraphToLd(personToJsonLd(data, siteBase, lang), data, siteBase, lang)
 ---
 

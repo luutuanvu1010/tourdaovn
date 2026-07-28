@@ -1,5 +1,6 @@
 ---
 import type { AttractionResult, Lang } from '../lib/types'
+import { siteBaseUrl } from '../lib/siteUrl'
 import { uiCopy, typeLabel as lookupLabel, ATTRACTION_TYPE_LABELS } from '../lib/uiCopy'
 import DetailLayout from './DetailLayout.astro'
 import Section from './Section.astro'
@@ -34,7 +35,7 @@ function hasPtContent(blocks: unknown[] | undefined): boolean {
 
 const prices = loadPrices('data/prices.yaml')
 const priceView = resolvePrice(data.bookingRef?.key, 'attraction', data.isAccessibleForFree, prices, lang)
-const siteBase = Astro.site?.toString() || 'https://tourdaovn.vn'
+const siteBase = siteBaseUrl(Astro.site)
 const entityJsonLd = applyPriceToJsonLd(
   attractionToJsonLd(data, siteBase, lang),
   priceView, data.bookingRef?.key,

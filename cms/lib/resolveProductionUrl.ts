@@ -1,4 +1,6 @@
-const BASE_URL = 'https://nhatrangtravel.net'
+import { site } from '../../src/site.config'
+
+const BASE_URL = site.url
 
 const SEGMENT_MAP: Record<string, string> = {
   place: 'dia-danh',

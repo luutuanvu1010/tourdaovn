@@ -1,5 +1,6 @@
 ---
 import type { Lang, EntityRef } from '../lib/types'
+import { siteBaseUrl } from '../lib/siteUrl'
 import { ROUTE_MAP } from '../lib/routes'
 import { uiCopy } from '../lib/uiCopy'
 import { entityHref } from '../lib/homepage'
@@ -16,7 +17,7 @@ export interface Props {
 
 const { containedInPlace, entityType, lang, hubEntity, currentTitle, inverse = false } = Astro.props
 
-const siteBase = (Astro.site?.toString() ?? 'https://tourdaovn.vn').replace(/\/$/, '')
+const siteBase = siteBaseUrl(Astro.site)
 
 interface Crumb {
   label: string

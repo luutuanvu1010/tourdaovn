@@ -1,5 +1,6 @@
 ---
 import type { Lang, PriceEntry } from '../lib/types'
+import { siteBaseUrl } from '../lib/siteUrl'
 import { uiCopy, EVENT_TYPE_LABELS } from '../lib/uiCopy'
 import { resolvePrice } from '../lib/resolver'
 import { formatDate } from '../lib/dates'
@@ -128,14 +129,14 @@ const sectionLabels = {
   <script type="application/ld+json" set:html={jsonLdScriptContent(
     collectionPageToJsonLd(
       { title: sectionLabels.upcoming, entityType: 'event', entities: upcoming.map(e => ({ ...e, _type: 'event' })), lang, pagePath: Astro.url.pathname },
-      Astro.site?.toString() || 'https://tourdaovn.vn'
+      siteBaseUrl(Astro.site)
     )
   )} />
   {hasPast && (
     <script type="application/ld+json" set:html={jsonLdScriptContent(
       collectionPageToJsonLd(
         { title: sectionLabels.past, entityType: 'event', entities: past.map(e => ({ ...e, _type: 'event' })), lang, pagePath: `${Astro.url.pathname}#past` },
-        Astro.site?.toString() || 'https://tourdaovn.vn'
+        siteBaseUrl(Astro.site)
       )
     )} />
   )}

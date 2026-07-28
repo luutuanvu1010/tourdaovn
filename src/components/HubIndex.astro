@@ -1,5 +1,6 @@
 ---
 import type { Lang, PriceEntry } from '../lib/types'
+import { siteBaseUrl } from '../lib/siteUrl'
 import { ATTRACTION_TYPE_LABELS, SPECIALTY_TYPE_LABELS, ARTICLE_TYPE_LABELS, TOUR_FORMAT_BADGES } from '../lib/uiCopy'
 import { resolvePrice } from '../lib/resolver'
 import { ROUTE_MAP } from '../lib/routes'
@@ -159,7 +160,7 @@ const hasAny = sections.some(s => s.entities.length > 0)
             // nhiều CollectionPage, @id trùng nhau sẽ đè node
             pagePath: `${Astro.url.pathname}#${section.entityType}`,
           },
-          Astro.site?.toString() || 'https://tourdaovn.vn'
+          siteBaseUrl(Astro.site)
         )
       )} />
     ))

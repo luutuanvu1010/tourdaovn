@@ -1,5 +1,6 @@
 ---
 import type { SpecialtyResult, Lang } from '../lib/types'
+import { siteBaseUrl } from '../lib/siteUrl'
 import { uiCopy, typeLabel as lookupLabel, SPECIALTY_TYPE_LABELS } from '../lib/uiCopy'
 import { entityPageGraphToLd, specialtyToJsonLd, jsonLdScriptContent } from '../lib/serialize'
 import DetailLayout from './DetailLayout.astro'
@@ -40,7 +41,7 @@ const sidebarRows = [
   { icon: '🔗', label: t('verifyWikidata'), value: 'Wikidata', href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
 ]
 
-const siteBase = Astro.site?.toString() || 'https://tourdaovn.vn'
+const siteBase = siteBaseUrl(Astro.site)
 const jsonLd = entityPageGraphToLd(specialtyToJsonLd(data, siteBase, lang), data, siteBase, lang)
 ---
 

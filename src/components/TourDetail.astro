@@ -1,5 +1,6 @@
 ---
 import type { TourResult, Lang, SiteContact } from '../lib/types'
+import { siteBaseUrl } from '../lib/siteUrl'
 import { uiCopy, typeLabel as lookupLabel, TOUR_FORMAT_LABELS } from '../lib/uiCopy'
 import DetailLayout from './DetailLayout.astro'
 import FAQ from './FAQ.astro'
@@ -40,7 +41,7 @@ const operatorUrl = data.operator?.url || data.operator?.officialSource || ''
 const showFallbackCta = !priceView?.label && !!operatorUrl
 const hasContactChannel = !!(contact?.zaloUrl || contact?.hotline || contact?.whatsapp)
 
-const siteBase = Astro.site?.toString() || 'https://tourdaovn.vn'
+const siteBase = siteBaseUrl(Astro.site)
 const entityJsonLd = applyPriceToJsonLd(
   tourToJsonLd(data, siteBase, lang),
   priceView, data.bookingRef?.key,

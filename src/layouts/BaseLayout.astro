@@ -3,6 +3,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import '../styles/tokens.css';
 import { brand } from '../site.config';
+import { siteBaseUrl } from '../lib/siteUrl';
 
 export interface Props {
   title: string;
@@ -20,7 +21,7 @@ const { title, description, lang = 'vi', currentPath = '/', alternates, ogImage,
 // có bản dịch thật, track QĐ3), phát reciprocal cho từng lang có mặt trong alternates +
 // x-default trỏ bản vi. Không có alternates (index/hub hoặc chưa có bản dịch) → giữ
 // self-referential tối thiểu cho trang vi như cũ, không phát hreflang trỏ trang không tồn tại.
-const siteBase = (Astro.site?.toString() ?? 'https://tourdaovn.vn').replace(/\/$/, '');
+const siteBase = siteBaseUrl(Astro.site);
 const pathWithSlash = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`;
 const selfUrl = siteBase + pathWithSlash;
 ---

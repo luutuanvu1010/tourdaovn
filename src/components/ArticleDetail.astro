@@ -1,5 +1,6 @@
 ---
 import type { ArticleResult, Lang } from '../lib/types'
+import { siteBaseUrl } from '../lib/siteUrl'
 import { uiCopy, typeLabel as lookupLabel, ARTICLE_TYPE_LABELS } from '../lib/uiCopy'
 import DetailLayout from './DetailLayout.astro'
 import FAQ from './FAQ.astro'
@@ -128,7 +129,7 @@ const sidebarRows = [
   )}
 </DetailLayout>
 
-<script type="application/ld+json" set:html={jsonLdScriptContent(articleToJsonLd(data, Astro.site?.toString() || 'https://tourdaovn.vn'))}></script>
+<script type="application/ld+json" set:html={jsonLdScriptContent(articleToJsonLd(data, siteBaseUrl(Astro.site)))}></script>
 
 <style>
   .author-box {

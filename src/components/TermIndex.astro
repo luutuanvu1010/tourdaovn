@@ -1,5 +1,6 @@
 ---
 import type { Lang, PriceEntry } from '../lib/types'
+import { siteBaseUrl } from '../lib/siteUrl'
 import { uiCopy, TOUR_FORMAT_BADGES } from '../lib/uiCopy'
 import { resolvePrice } from '../lib/resolver'
 import { ROUTE_MAP } from '../lib/routes'
@@ -118,7 +119,7 @@ const parentHref = `${prefix}/${seg}/`
         lang,
         pagePath: Astro.url.pathname,
       },
-      Astro.site?.toString() || 'https://tourdaovn.vn'
+      siteBaseUrl(Astro.site)
     )
   )} />
 </div>

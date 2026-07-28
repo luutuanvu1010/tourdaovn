@@ -1,5 +1,6 @@
 ---
 import type { Lang, PriceEntry } from '../lib/types'
+import { siteBaseUrl } from '../lib/siteUrl'
 import { uiCopy, TOUR_FORMAT_BADGES } from '../lib/uiCopy'
 import { resolvePrice } from '../lib/resolver'
 import { ROUTE_MAP } from '../lib/routes'
@@ -129,7 +130,7 @@ const prefix = lang === 'vi' ? '' : `/${lang}`
   <script type="application/ld+json" set:html={jsonLdScriptContent(
     collectionPageToJsonLd(
       { title, description, entityType: 'tour', entities: tours.map(e => ({ ...e, _type: 'tour' })), lang, pagePath: Astro.url.pathname },
-      Astro.site?.toString() || 'https://tourdaovn.vn'
+      siteBaseUrl(Astro.site)
     )
   )} />
 </div>

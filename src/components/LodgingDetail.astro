@@ -1,5 +1,6 @@
 ---
 import type { HotelResult, ResortResult, Lang, SiteContact } from '../lib/types'
+import { siteBaseUrl } from '../lib/siteUrl'
 import { uiCopy } from '../lib/uiCopy'
 import DetailLayout from './DetailLayout.astro'
 import FAQ from './FAQ.astro'
@@ -49,7 +50,7 @@ const priceView = resolvePrice(data.bookingRef?.key, entityType, (data as any).i
 const hasBooking = priceView && !priceView.isFree
 const hasContactChannel = !!(contact?.zaloUrl || contact?.hotline || contact?.whatsapp)
 
-const siteBase = Astro.site?.toString() || 'https://tourdaovn.vn'
+const siteBase = siteBaseUrl(Astro.site)
 const entityJsonLd = applyPriceToJsonLd(
   isResort
     ? resortToJsonLd(data as ResortResult, siteBase, lang)

@@ -1,5 +1,6 @@
 ---
 import type { EventResult, Lang } from '../lib/types'
+import { siteBaseUrl } from '../lib/siteUrl'
 import { uiCopy, typeLabel as lookupLabel, EVENT_TYPE_LABELS, EVENT_STATUS_LABELS } from '../lib/uiCopy'
 import DetailLayout from './DetailLayout.astro'
 import FAQ from './FAQ.astro'
@@ -41,7 +42,7 @@ const isPast = data.eventStatus === 'EventCancelled' ? true
 
 const prices = loadPrices('data/prices.yaml')
 const priceView = resolvePrice(data.bookingRef?.key, 'event', data.isAccessibleForFree, prices, lang)
-const siteBase = Astro.site?.toString() || 'https://tourdaovn.vn'
+const siteBase = siteBaseUrl(Astro.site)
 const entityJsonLd = applyPriceToJsonLd(
   eventToJsonLd(data, siteBase, lang),
   priceView, data.bookingRef?.key,

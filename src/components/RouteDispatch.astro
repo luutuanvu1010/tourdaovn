@@ -5,6 +5,7 @@
 // component này chỉ fetch theo type rồi render. Detail component tự phát JSON-LD;
 // destination hub phát tại dispatch vì TouristDestinationHub là layout dùng lại.
 import type { Lang } from '../lib/types'
+import { siteBaseUrl } from '../lib/siteUrl'
 import { getClient, fetchAlternateSlugs, fetchArticleAlternateSlugs } from '../lib/sanity'
 import { fetchSiteContact } from '../lib/siteContact'
 import { ROUTE_MAP } from '../lib/routes'
@@ -402,7 +403,7 @@ if (kind === 'detail' && detailData) {
   pageDesc = firstText(detailData.seo?.metaDescription, detailData.summary) ?? fallbackDescription(detailData.title || slug, lang)
 }
 
-const siteBase = Astro.site?.toString() || 'https://tourdaovn.vn'
+const siteBase = siteBaseUrl(Astro.site)
 const destinationJsonLd = kind === 'destination' && detailData && !notFound
   ? entityPageGraphToLd(
       touristDestinationToJsonLd(detailData as TouristDestinationResult, siteBase, lang),

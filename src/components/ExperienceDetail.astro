@@ -1,5 +1,6 @@
 ---
 import type { ExperienceResult, Lang, SiteContact } from '../lib/types'
+import { siteBaseUrl } from '../lib/siteUrl'
 import { uiCopy } from '../lib/uiCopy'
 import DetailLayout from './DetailLayout.astro'
 import FAQ from './FAQ.astro'
@@ -31,7 +32,7 @@ function hasPtContent(blocks: unknown[] | undefined): boolean {
 
 const prices = loadPrices('data/prices.yaml')
 const priceView = resolvePrice(data.bookingRef?.key, 'experience', data.isAccessibleForFree, prices, lang)
-const siteBase = Astro.site?.toString() || 'https://tourdaovn.vn'
+const siteBase = siteBaseUrl(Astro.site)
 const entityJsonLd = applyPriceToJsonLd(
   experienceToJsonLd(data, siteBase, lang),
   priceView, data.bookingRef?.key,

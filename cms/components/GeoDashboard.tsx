@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Box, Button, Card, Container, Flex, Grid, Heading, Stack, Text } from '@sanity/ui'
+import { site } from '../../src/site.config'
 
-const SITE = 'https://nhatrangtravel.net'
+const SITE = site.url
 const AI_FILES = ['/llms.txt', '/robots.txt', '/ai/index.json', '/ai/entities.json', '/ai/graph.json', '/ai/reading-guide.json']
 const EMPTY_REPORT = {
   status: 'warn',

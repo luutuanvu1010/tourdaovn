@@ -4,9 +4,10 @@ import { getClient } from './sanity'
 import { ROUTE_MAP } from './routes'
 import { LANGS, langPrefix, withTrailingSlash } from './sitemap'
 import type { Lang, PriceEntry } from './types'
+import { site } from '../site.config'
 
 export const GEO_SCHEMA_VERSION = '1.0.0'
-export const SITE_URL = 'https://tourdaovn.vn'
+export const SITE_URL = site.url
 
 export const GEO_ENTITY_TYPES = [
   'touristDestination',
@@ -301,7 +302,7 @@ function entityFromRaw(doc: RawDoc, prices: Record<string, PriceEntry>): AiEntit
     ticketUrl: doc.ticketUrl,
     mainImage: doc.mainImage?.asset?.url ? { url: doc.mainImage.asset.url, alt: doc.mainImage.alt } : undefined,
     topics: doc.category?.map((item) => item.termCode).filter((item): item is string => Boolean(item)),
-    studioUrl: `https://nhatrang-travel.sanity.studio/desk/${doc._type};${cleanId(doc._id)}`,
+    studioUrl: `https://${site.studioHost}.sanity.studio/desk/${doc._type};${cleanId(doc._id)}`,
   })
 }
 
