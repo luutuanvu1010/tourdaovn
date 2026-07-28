@@ -1,5 +1,6 @@
 import { createClient, type SanityClient } from '@sanity/client'
 import { allDestinationSlugsQuery } from './queries/touristDestination'
+import { fieldLevelEntities } from '../site.config'
 
 let client: SanityClient | null = null
 
@@ -28,10 +29,9 @@ export function getClient(): SanityClient {
   return client
 }
 
-const FIELD_LEVEL_TYPES = [
-  'place', 'attraction', 'experience', 'restaurant', 'specialty',
-  'hotel', 'resort', 'tour', 'event', 'person', 'organization',
-]
+// Danh mục cần hỏi Sanity lúc build. Lấy từ site.config nên khi tắt một danh
+// mục, site thôi luôn việc truy vấn nó — không còn tải dữ liệu chết.
+const FIELD_LEVEL_TYPES = fieldLevelEntities
 
 export interface SlugEntry {
   _type: string

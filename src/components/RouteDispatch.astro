@@ -8,6 +8,7 @@ import type { Lang } from '../lib/types'
 import { getClient, fetchAlternateSlugs, fetchArticleAlternateSlugs } from '../lib/sanity'
 import { fetchSiteContact } from '../lib/siteContact'
 import { ROUTE_MAP } from '../lib/routes'
+import { isEntityEnabled, isHubEnabled } from '../site.config'
 import { destinationAlternates, routeAlternates, LANGS, langPrefix } from '../lib/sitemap'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Section from './Section.astro'
@@ -230,10 +231,6 @@ const HUB_PARTS_CONFIG: Record<string, { entity: string; q: ((l: Lang) => string
     { entity: 'hotel', q: allHotelsQuery },
     { entity: 'resort', q: allResortsQuery },
   ],
-  'hub-am-thuc': [
-    { entity: 'restaurant', q: allRestaurantsQuery },
-    { entity: 'specialty', q: allSpecialtiesQuery },
-  ],
   'hub-di-lai': [
     { entity: 'article', q: () => allArticlesQuery() },
   ],
@@ -256,10 +253,14 @@ const HUB_PARTS_CONFIG: Record<string, { entity: string; q: ((l: Lang) => string
 const hubCopyForLang = HUB_COPY[lang] ?? HUB_COPY.en
 const hubPartCopyForLang = HUB_PART_COPY[lang] ?? HUB_PART_COPY.en
 const HUB: Record<string, { title: string; desc: string; parts: { entity: string; q: ((l: Lang) => string) | null; title: string; description: string }[] }> =
-  Object.fromEntries(Object.entries(HUB_PARTS_CONFIG).map(([hubId, parts]) => [hubId, {
+  // Lọc theo công tắc ở src/site.config.ts: hub tắt thì bỏ hẳn, và trong hub
+  // còn lại chỉ giữ những danh mục đang bật — tránh hiện mục rỗng trên site.
+  Object.fromEntries(Object.entries(HUB_PARTS_CONFIG)
+    .filter(([hubId]) => isHubEnabled(hubId))
+    .map(([hubId, parts]) => [hubId, {
     title: hubCopyForLang[hubId]?.title ?? hubId,
     desc: hubCopyForLang[hubId]?.desc ?? '',
-    parts: parts.map(p => ({
+    parts: parts.filter(p => isEntityEnabled(p.entity)).map(p => ({
       ...p,
       title: hubPartCopyForLang[`${hubId}|${p.entity}`]?.title ?? INDEX_LABEL[p.entity]?.title ?? p.entity,
       description: hubPartCopyForLang[`${hubId}|${p.entity}`]?.desc ?? '',

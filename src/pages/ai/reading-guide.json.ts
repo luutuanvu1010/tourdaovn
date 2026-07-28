@@ -35,9 +35,9 @@ export const GET: APIRoute = async () => {
         id: 'what_to_eat',
         label: 'An gi',
         readFirst: ['/ai/entities.json', '/ai/graph.json'],
-        priorityEntityTypes: ['specialty', 'restaurant'],
-        preferredPaths: ['/am-thuc/', '/dac-san/', '/nha-hang/'],
-        cautions: ['Use servesSpecialty and whereToTry edges only when present.'],
+        priorityEntityTypes: ['article'],
+        preferredPaths: ['/cam-nang/'],
+        cautions: ['Food coverage lives in guide articles; this site has no restaurant or dish entities.'],
       },
       {
         id: 'which_tour',

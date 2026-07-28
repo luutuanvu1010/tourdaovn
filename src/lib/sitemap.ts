@@ -1,8 +1,10 @@
 import { ROUTE_MAP } from './routes'
 import { fetchAllDestinationSlugs, fetchAllSlugs, fetchAllTerms } from './sanity'
 import type { Lang } from './types'
+import { langs } from '../site.config'
 
-export const LANGS: Lang[] = ['vi']
+/** Ngôn ngữ site đang chạy. Nguồn sự thật: src/site.config.ts */
+export const LANGS: Lang[] = langs
 
 export function langPrefix(lang: Lang): string {
   return lang === 'vi' ? '' : `/${lang}`

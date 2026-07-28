@@ -37,8 +37,6 @@ export interface EntityTypeMeta {
   icon: ComponentType
   /** Có phải là entity có thể cào nội dung không */
   scrapable: boolean
-  /** Slug segment trong URL front-end (đồng bộ với ROUTE_MAP) */
-  routeSegment?: string
 }
 
 /**
@@ -64,7 +62,6 @@ export const ENTITY_TYPE_REGISTRY: EntityTypeMeta[] = [
     group: 'destination',
     icon: EarthGlobeIcon,
     scrapable: false,
-    routeSegment: 'nha-trang',
   },
 
   // === ĐỊA DANH & THAM QUAN ===
@@ -75,7 +72,6 @@ export const ENTITY_TYPE_REGISTRY: EntityTypeMeta[] = [
     group: 'place',
     icon: PinIcon,
     scrapable: true,
-    routeSegment: 'dia-danh',
   },
   {
     schemaType: 'attraction',
@@ -84,7 +80,6 @@ export const ENTITY_TYPE_REGISTRY: EntityTypeMeta[] = [
     group: 'place',
     icon: TagIcon,
     scrapable: true,
-    routeSegment: 'diem-tham-quan',
   },
 
   // === LƯU TRÚ ===
@@ -95,7 +90,6 @@ export const ENTITY_TYPE_REGISTRY: EntityTypeMeta[] = [
     group: 'stay',
     icon: HomeIcon,
     scrapable: true,
-    routeSegment: 'khach-san',
   },
   {
     schemaType: 'resort',
@@ -104,7 +98,6 @@ export const ENTITY_TYPE_REGISTRY: EntityTypeMeta[] = [
     group: 'stay',
     icon: SunIcon,
     scrapable: true,
-    routeSegment: 'resort',
   },
 
   // === ẨM THỰC ===
@@ -115,7 +108,6 @@ export const ENTITY_TYPE_REGISTRY: EntityTypeMeta[] = [
     group: 'dining',
     icon: BasketIcon,
     scrapable: true,
-    routeSegment: 'nha-hang',
   },
   {
     schemaType: 'specialty',
@@ -124,7 +116,6 @@ export const ENTITY_TYPE_REGISTRY: EntityTypeMeta[] = [
     group: 'dining',
     icon: StarIcon,
     scrapable: true,
-    routeSegment: 'dac-san',
   },
 
   // === HOẠT ĐỘNG ===
@@ -135,7 +126,6 @@ export const ENTITY_TYPE_REGISTRY: EntityTypeMeta[] = [
     group: 'activity',
     icon: RocketIcon,
     scrapable: false,
-    routeSegment: 'trai-nghiem',
   },
   {
     schemaType: 'tour',
@@ -144,7 +134,6 @@ export const ENTITY_TYPE_REGISTRY: EntityTypeMeta[] = [
     group: 'activity',
     icon: BoltIcon,
     scrapable: true,
-    routeSegment: 'tour',
   },
 
   // === SỰ KIỆN & TỔ CHỨC ===
@@ -155,7 +144,6 @@ export const ENTITY_TYPE_REGISTRY: EntityTypeMeta[] = [
     group: 'event',
     icon: CalendarIcon,
     scrapable: false,
-    routeSegment: 'su-kien',
   },
   {
     schemaType: 'organization',
@@ -174,7 +162,6 @@ export const ENTITY_TYPE_REGISTRY: EntityTypeMeta[] = [
     group: 'content',
     icon: DocumentTextIcon,
     scrapable: false,
-    routeSegment: 'bai-viet',
   },
   {
     schemaType: 'person',

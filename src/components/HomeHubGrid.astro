@@ -2,6 +2,7 @@
 import WaveDivider from './WaveDivider.astro'
 import { HOME_COPY, indexHref, routeForEntity, hubCountLabel } from '../lib/homepage'
 import type { Lang } from '../lib/types'
+import { navHubs } from '../site.config'
 
 export interface Props {
   lang: Lang
@@ -10,19 +11,18 @@ export interface Props {
 
 const { lang, hubCounts = {} } = Astro.props
 const copy = HOME_COPY[lang]
-const hubEntities = ['hub-kham-pha', 'hub-luu-tru', 'hub-di-lai']
+// Hub nào hiện ở đây do src/site.config.ts quyết định, không khai lại tại chỗ.
+const hubEntities = navHubs
 
 const iconBg: Record<string, string> = {
   'hub-kham-pha': 'var(--c-primary-soft)',
   'hub-luu-tru':  'var(--c-green-soft)',
-  'hub-am-thuc':  'var(--c-accent-soft)',
   'hub-di-lai':   'var(--c-sand-soft)',
 }
 
 const iconEmoji: Record<string, string> = {
   'hub-kham-pha': '🏛️',
   'hub-luu-tru':  '🛏️',
-  'hub-am-thuc':  '🍜',
   'hub-di-lai':   '🚌',
 }
 

@@ -7,6 +7,7 @@ import type {
 } from '../types'
 import { imageUrl } from '../sanity-image'
 import { ROUTE_MAP } from '../routes'
+import { defaultLang } from '../../site.config'
 
 export interface EntityPageMeta {
   _type: string
@@ -23,22 +24,19 @@ export interface EntityPageMeta {
 
 // ---------- URL helpers ----------
 
-/** Map entity _type → path segment theo 05-URL_MAP. */
-const TYPE_PATH_MAP: Record<string, string> = {
+/**
+ * Đường dẫn của các entity KHÔNG nằm trong bảng route (`src/lib/routes.ts`).
+ *
+ * Trước 2026-07-27 chỗ này chép lại toàn bộ bảng đường dẫn, và bản chép đã lệch
+ * với bản gốc. Nay chỉ giữ đúng hai mục mà bảng route không có, mọi mục còn lại
+ * tra thẳng từ ROUTE_MAP (ADR-0021, trả nợ EXC-2026-001).
+ *
+ *  - touristDestination: nằm ngay gốc site, không có tiền tố → chuỗi rỗng
+ *  - category: trang listing theo thẻ, không phải một danh mục nội dung
+ */
+const OFF_ROUTE_PATHS: Record<string, string> = {
   touristDestination: '',
-  place: 'dia-danh',
-  attraction: 'diem-tham-quan',
-  experience: 'trai-nghiem',
-  restaurant: 'nha-hang',
-  specialty: 'dac-san',
-  hotel: 'khach-san',
-  resort: 'resort',
-  tour: 'tour',
-  organization: 'cong-ty',
-  event: 'su-kien',
-  article: 'cam-nang',
-  person: 'tac-gia',
-  category: 'the-loai'
+  category: 'the-loai',
 }
 
 /**
@@ -66,8 +64,8 @@ export const TYPE_LD_MAP: Record<string, string> = {
 
 function pathForEntity(entityType: string, lang?: Lang): string {
   const route = ROUTE_MAP.find(r => r.entity === entityType)
-  if (route && lang) return route.segments[lang]
-  return TYPE_PATH_MAP[entityType] ?? entityType
+  if (route) return route.segments[lang ?? defaultLang]
+  return OFF_ROUTE_PATHS[entityType] ?? entityType
 }
 
 /** Sinh URL đầy đủ cho một entity, dùng cho @id trong JSON-LD. */

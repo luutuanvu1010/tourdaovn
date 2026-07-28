@@ -1,4 +1,16 @@
 import type { Lang } from './types'
+import {
+  enabledRoutes,
+  isRouteEnabled,
+  entities as ENTITY_FLAGS,
+  hubs as HUB_FLAGS,
+} from '../site.config'
+
+/** Mọi mục ĐÃ ĐƯỢC KHAI trong site.config, kể cả mục đang để false. */
+const DECLARED_KEYS = new Set<string>([
+  ...Object.keys(ENTITY_FLAGS),
+  ...Object.keys(HUB_FLAGS),
+])
 
 export interface RouteEntry {
   entity: string
@@ -8,7 +20,15 @@ export interface RouteEntry {
   hasTerm: boolean
 }
 
-export const ROUTE_MAP: RouteEntry[] = [
+/**
+ * BẢNG ĐỊA CHỈ URL — chỉ trả lời "mục này nằm ở đường dẫn nào".
+ *
+ * Việc BẬT/TẮT một mục KHÔNG nằm ở đây, mà ở `src/site.config.ts`.
+ * Bảng này chỉ là danh mục địa chỉ; `ROUTE_MAP` bên dưới đã được lọc theo
+ * công tắc trong site.config, nên phần còn lại của code không cần biết
+ * mục nào đang bật hay tắt.
+ */
+const ROUTE_TABLE: RouteEntry[] = [
   { entity: 'place',            segments: { vi:'dia-danh',         en:'places',          zh:'地点',       ko:'장소',       ru:'места' },                  labels: { vi:'Địa danh',      en:'Places',          zh:'地点',       ko:'장소',       ru:'Места' },                  hasIndex: true,  hasTerm: false },
   { entity: 'attraction',       segments: { vi:'diem-tham-quan',   en:'attractions',     zh:'景点',       ko:'명소',       ru:'достопримечательности' }, labels: { vi:'Điểm tham quan', en:'Attractions',     zh:'景点',       ko:'명소',       ru:'Достопримечательности' }, hasIndex: true,  hasTerm: false },
   { entity: 'experience',       segments: { vi:'trai-nghiem',      en:'experiences',     zh:'体验',       ko:'체험',       ru:'впечатления' },            labels: { vi:'Trải nghiệm',    en:'Experiences',     zh:'体验',       ko:'체험',       ru:'Впечатления' },            hasIndex: true,  hasTerm: true },
@@ -23,6 +43,53 @@ export const ROUTE_MAP: RouteEntry[] = [
   { entity: 'hub-di-lai',       segments: { vi:'di-lai',           en:'getting-around',  zh:'交通',       ko:'교통',       ru:'транспорт' },              labels: { vi:'Đi lại',         en:'Getting around',  zh:'交通',       ko:'교통',       ru:'Транспорт' },              hasIndex: false, hasTerm: false },
   { entity: 'hub-all',          segments: { vi:'tat-ca',           en:'all',             zh:'all',        ko:'all',        ru:'all' },                    labels: { vi:'Tất cả',         en:'All',             zh:'全部',       ko:'전체',       ru:'Все' },                    hasIndex: false, hasTerm: false },
 ]
+
+// ───────────────────────────────────────────────────────────────────────────
+//  BỘ KIỂM CHỐNG LỆCH — chạy lúc build, mặc định TỪ CHỐI
+//  (Hiến pháp Điều 8.5: không có bằng chứng đạt thì coi như chưa đạt.)
+//
+//  Bắt hai kiểu sai:
+//   (a) Bật một mục trong site.config nhưng quên khai địa chỉ URL cho nó
+//       → mục đó sẽ im lặng biến mất khỏi site. Nay build DỪNG.
+//   (b) Khai địa chỉ URL cho một mục chưa hề có trong site.config
+//       → không ai biết mục đó đang bật hay tắt. Nay build DỪNG.
+// ───────────────────────────────────────────────────────────────────────────
+function assertRouteConfigConsistency(): void {
+  const tableKeys = new Set(ROUTE_TABLE.map(r => r.entity))
+  const problems: string[] = []
+
+  for (const key of enabledRoutes) {
+    if (!tableKeys.has(key)) {
+      problems.push(
+        `  • "${key}" đang BẬT trong site.config.ts nhưng chưa có địa chỉ URL trong routes.ts`,
+      )
+    }
+  }
+
+  for (const key of tableKeys) {
+    if (!DECLARED_KEYS.has(key)) {
+      problems.push(
+        `  • "${key}" có địa chỉ URL trong routes.ts nhưng chưa được khai trong site.config.ts`,
+      )
+    }
+  }
+
+  if (problems.length > 0) {
+    throw new Error(
+      '\n\n[site.config] Cấu hình site không khớp bảng địa chỉ URL:\n' +
+        problems.join('\n') +
+        '\n\nSửa src/site.config.ts hoặc src/lib/routes.ts cho khớp rồi build lại.\n',
+    )
+  }
+}
+
+assertRouteConfigConsistency()
+
+/**
+ * Bảng địa chỉ THỰC TẾ của site — đã lọc theo công tắc trong site.config.ts.
+ * Đây là thứ mọi nơi khác trong code phải dùng.
+ */
+export const ROUTE_MAP: RouteEntry[] = ROUTE_TABLE.filter(r => isRouteEnabled(r.entity))
 
 export function lookupRoute(segment: string, lang: Lang): RouteEntry | null {
   return ROUTE_MAP.find(r => r.segments[lang] === segment) ?? null

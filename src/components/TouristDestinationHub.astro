@@ -6,6 +6,7 @@ import HomeHero from './HomeHero.astro'
 import HomeMetaBar from './HomeMetaBar.astro'
 import { HOME_COPY, entityHref, indexHref, routeForEntity } from '../lib/homepage'
 import { imageUrl } from '../lib/sanity-image'
+import { navHubs } from '../site.config'
 import type {
   EntityRef,
   HomepageArticleCard,
@@ -81,18 +82,17 @@ const banners = (td?.homepageBanners || [])
   }))
   .slice(0, 3)
 
-const hubEntities = ['hub-kham-pha', 'hub-luu-tru', 'hub-di-lai']
+// Hub nào hiện ở đây do src/site.config.ts quyết định, không khai lại tại chỗ.
+const hubEntities = navHubs
 const hubIcons: Record<string, string> = {
   'hub-kham-pha': '🏛️',
   'hub-luu-tru': '🛏️',
-  'hub-am-thuc': '🍜',
   'hub-di-lai': '🚌',
 }
 
 const hubIconBg: Record<string, string> = {
   'hub-kham-pha': 'var(--c-primary-soft)',
   'hub-luu-tru': 'var(--c-green-soft)',
-  'hub-am-thuc': 'var(--c-accent-soft)',
   'hub-di-lai': 'var(--c-sand-soft)',
 }
 
