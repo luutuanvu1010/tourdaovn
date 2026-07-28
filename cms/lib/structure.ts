@@ -62,8 +62,9 @@ export const structure: StructureResolver = (S) => {
   ]
 
   for (const { group, divider } of menuOrder) {
-    if (divider) items.push(S.divider())
     const entries = grouped.get(group) || []
+    if (entries.length === 0) continue // nhóm rỗng (vd 'dining' sau PHA 5) → bỏ, khỏi thừa divider
+    if (divider) items.push(S.divider())
     for (const entity of entries) {
       const item = S.documentTypeListItem(entity.schemaType)
         .title(entity.labelVi)

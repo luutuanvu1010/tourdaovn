@@ -11,8 +11,6 @@ import {
   TagIcon,
   HomeIcon,
   SunIcon,
-  BasketIcon,
-  StarIcon,
   RocketIcon,
   BoltIcon,
   CalendarIcon,
@@ -97,24 +95,6 @@ export const ENTITY_TYPE_REGISTRY: EntityTypeMeta[] = [
     entityTypeEn: 'Resort',
     group: 'stay',
     icon: SunIcon,
-    scrapable: true,
-  },
-
-  // === ẨM THỰC ===
-  {
-    schemaType: 'restaurant',
-    labelVi: 'Nhà hàng',
-    entityTypeEn: 'Restaurant',
-    group: 'dining',
-    icon: BasketIcon,
-    scrapable: true,
-  },
-  {
-    schemaType: 'specialty',
-    labelVi: 'Đặc sản',
-    entityTypeEn: 'Specialty',
-    group: 'dining',
-    icon: StarIcon,
     scrapable: true,
   },
 
