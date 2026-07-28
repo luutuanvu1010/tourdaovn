@@ -109,20 +109,38 @@ Commit: `pha1: ten site doc tu brand.name`.
 
 # PHA 2 — Tên miền đọc từ `site.url`
 
-**25 file** đang có mẫu `Astro.site?.toString() || 'https://tourdaovn.vn'`. Tên miền bị chép
-25 lần; đổi tên miền là phải sửa 25 chỗ.
+> ⚠️ **Cập nhật sau phiên 1 — đọc kỹ, tình hình đã đổi.**
+>
+> Phiên 1 phát hiện tên miền ghi trong kế hoạch ban đầu là **SAI**: `tourdaovn.vn`
+> không tồn tại. Tên miền thật là **`tourdao.vn`** (đã trỏ Cloudflare). Commit `00bacf3`
+> đã sửa ở `site.config.ts` và `astro.config.mjs` — nhưng **chỉ hai file đó**.
+>
+> Hệ quả: **25 chỗ trong 24 file** vẫn giữ fallback `|| 'https://tourdaovn.vn'`. Trước đây
+> chúng chỉ là bản chép thừa; nay chúng vừa thừa **vừa sai**. Rủi ro thực tế hiện thấp
+> (vì `astro.config.mjs` luôn đặt `site` nên `Astro.site` không bao giờ undefined, fallback
+> là mã chết) — nhưng đây đúng là kiểu lỗi ngủ đông mà gói này tồn tại để dọn.
 
 **Việc:**
 
-1. `grep -rn "tourdaovn.vn" src/ cms/`.
+1. `grep -rn "tourdaovn.vn" src/ cms/ scripts/` — phải ra 25 kết quả, **tất cả đều là tên
+   miền sai**. Không chỗ nào được giữ lại.
 2. Thay mọi fallback bằng `site.url` từ `site.config.ts`.
-   Cân nhắc tạo một helper nhỏ (ví dụ `siteBaseUrl(Astro)`) để 25 chỗ dùng chung một dòng,
-   thay vì 25 lần lặp cùng một biểu thức. Nếu làm vậy, đặt helper ở `src/lib/`.
-3. `astro.config.mjs` có `site: 'https://tourdaovn.vn'`. Astro đọc file này ở tầng ngoài
-   nên có thể không import được `site.config.ts` vào đó. **Kiểm tra thực tế**, đừng đoán:
-   - Nếu import được → import.
+   Tạo một helper nhỏ (ví dụ `siteBaseUrl(Astro)`) đặt ở `src/lib/` để 24 file dùng chung
+   một dòng, thay vì lặp cùng một biểu thức 25 lần. Mẫu tham chiếu có sẵn: phiên 1 đã làm
+   đúng việc này cho 3 file trong `scripts/validators/` (commit `a193bd3`) — đọc
+   `scripts/validators/jsonld-post.ts:12,18` để thấy cách import.
+3. `astro.config.mjs` nay là `site: 'https://tourdao.vn'`, trùng giá trị với `site.url`.
+   Astro đọc file này ở tầng ngoài nên có thể không import được `site.config.ts`.
+   **Kiểm tra thực tế**, đừng đoán:
+   - Nếu import được → import, hết trùng.
    - Nếu không → để nguyên và thêm chú thích ở **cả hai file** trỏ về nhau, rồi thêm một
-     dòng kiểm lúc build cảnh báo nếu hai giá trị lệch nhau. Báo cáo cách anh chọn.
+     dòng kiểm lúc build **chặn build** nếu hai giá trị lệch nhau. Đây đúng chỗ áp
+     Điều 8.5 (mặc định từ chối), giống `assertRouteConfigConsistency()` trong `routes.ts`.
+     Báo cáo cách anh chọn.
+3b. **Tin tốt cho các điểm dừng khác:** phiên 1 đã chứng minh `scripts/` import được
+   `src/site.config.ts` bình thường. Điều này **không** tự động đúng cho `cms/` (Studio là
+   tiến trình Sanity riêng, `tsconfig` riêng) — vẫn phải kiểm riêng, nhưng khả năng thành
+   công cao hơn dự kiến ban đầu.
 4. Sửa 3 chỗ trong `cms/` còn trỏ sang website khác:
    - `cms/lib/resolveProductionUrl.ts:1` — `nhatrangtravel.net`. Nút "Xem live" trong Sanity
      đang dẫn khách sang site của người khác.
@@ -133,9 +151,10 @@ Commit: `pha1: ten site doc tu brand.name`.
    - `src/lib/geoKnowledge.ts:304` — link studio trỏ `nhatrang-travel.sanity.studio`,
      phải là `site.studioHost`.
 
-**Cổng ra pha 2:** `grep -rn "tourdaovn.vn\|nhatrangtravel" src/ cms/` chỉ còn kết quả ở
-`site.config.ts` (và `astro.config.mjs` nếu đã báo cáo lý do). `npm run build` xanh.
-Commit: `pha2: ten mien doc tu site.url`.
+**Cổng ra pha 2:** `grep -rn "tourdaovn.vn" src/ cms/ scripts/` trả về **0 kết quả** — tên
+miền sai phải biến mất hoàn toàn. `grep -rn "tourdao.vn\|nhatrangtravel" src/ cms/ scripts/`
+chỉ còn kết quả ở `site.config.ts` (và `astro.config.mjs` nếu đã báo cáo lý do).
+`npm run build` xanh. Commit: `pha2: ten mien doc tu site.url`.
 
 ---
 
