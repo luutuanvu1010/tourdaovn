@@ -6,7 +6,7 @@ export default defineConfig({
   adapter: cloudflare({
     imageService: 'compile',
   }),
-  site: 'https://tourdaovn.vn',
+  site: 'https://tourdao.vn',
   i18n: {
     defaultLocale: 'vi',
     locales: ['vi'],

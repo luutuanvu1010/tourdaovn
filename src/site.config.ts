@@ -85,7 +85,7 @@ export const brand = {
 
 export const site = {
   /** Địa chỉ site khi chạy thật. Phải khớp `site:` trong astro.config.mjs */
-  url: 'https://tourdaovn.vn',
+  url: 'https://tourdao.vn',
 
   /** Tên Sanity Studio (phần đầu của <ten>.sanity.studio) */
   studioHost: 'tourdaovn',
