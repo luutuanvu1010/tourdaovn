@@ -7,6 +7,7 @@ import { homeAlternates } from '../../lib/sitemap'
 import { destinationHref } from '../../lib/homepage'
 import { jsonLdScriptContent } from '../../lib/serialize/utils'
 import type { TouristDestinationResult, SiteSettingsResult, Lang } from '../../lib/types'
+import { brand } from '../../site.config'
 
 export async function getStaticPaths() {
   const langs: Lang[] = [] // vi-only: tắt route đa ngôn ngữ
@@ -36,7 +37,7 @@ const fallbackSummary: Record<Lang, string> = {
   ru: 'Путеводитель по Нячангу с подборкой мест, впечатлений, еды, проживания и практичных советов.',
 }
 
-const metaTitle = 'Nha Trang Travel'
+const metaTitle = brand.name
 const metaDescription = fallbackSummary[lang]
 const alternates = homeAlternates()
 const langHomeUrl = `${siteBase.replace(/\/$/, '')}/${lang}/`
@@ -49,7 +50,7 @@ const orgNode: Record<string, unknown> = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   '@id': orgId,
-  name: 'Nha Trang Travel',
+  name: brand.legalName,
   url: siteBase.replace(/\/$/, '') + '/',
 }
 if (config?.contact?.hotline) orgNode.telephone = config.contact.hotline
@@ -59,7 +60,7 @@ const jsonLd = [
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     '@id': `${langHomeUrl}#website`,
-    name: 'Nha Trang Travel',
+    name: brand.name,
     url: langHomeUrl,
     description: metaDescription,
     inLanguage: lang,

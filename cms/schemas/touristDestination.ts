@@ -2,6 +2,7 @@ import { defineType, defineField } from 'sanity'
 import { EarthGlobeIcon } from '@sanity/icons'
 import { baseFieldsAfterGallery, baseFieldsBeforeGallery, baseGroups } from './baseFields'
 import { BulkGalleryInput } from '../components/BulkGalleryInput'
+import { brand } from '../../src/site.config'
 
 const LANGUAGES = ['vi', 'en', 'zh', 'ko', 'ru'] as const
 const HOMEPAGE_BANNER_LINK_PREFIXES = ['/', 'https://', 'http://', 'tel:', 'mailto:']
@@ -46,7 +47,7 @@ export default defineType({
             name: 'alt', type: 'string',
             validation: Rule => Rule.required(),
             initialValue: (_value: unknown, context: Record<string, unknown>) =>
-              ((context.document as Record<string,unknown>)?.title?.vi || (context.document as Record<string,unknown>)?.title || '')  + ' — Ảnh Nha Trang Travel'
+              ((context.document as Record<string,unknown>)?.title?.vi || (context.document as Record<string,unknown>)?.title || '')  + ' — Ảnh ' + brand.name
           })
         ]
       }]

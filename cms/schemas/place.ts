@@ -3,6 +3,7 @@ import { PinIcon } from '@sanity/icons'
 import { baseFieldsAfterGallery, baseFieldsBeforeGallery, baseGroups } from './baseFields'
 import { BulkGalleryInput } from '../components/BulkGalleryInput'
 import { IncomingExperiences } from '../components/IncomingExperiences'
+import { brand } from '../../src/site.config'
 
 export default defineType({
   name: 'place',
@@ -26,7 +27,7 @@ export default defineType({
             name: 'alt', type: 'string',
             validation: Rule => Rule.required(),
             initialValue: (_value: unknown, context: Record<string, unknown>) =>
-              ((context.document as Record<string,unknown>)?.title?.vi || (context.document as Record<string,unknown>)?.title || '')  + ' — Ảnh Nha Trang Travel'
+              ((context.document as Record<string,unknown>)?.title?.vi || (context.document as Record<string,unknown>)?.title || '')  + ' — Ảnh ' + brand.name
           })
         ]
       }]

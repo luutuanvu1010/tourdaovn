@@ -12,13 +12,14 @@ import { SynthTool } from './components/SynthTool'
 import { GeoDashboard } from './components/GeoDashboard'
 import { TranslateFieldControl } from './components/TranslateFieldControl'
 import { getDocI18nTypes, getFieldI18nTypes } from './lib/entityTypes'
+import { brand } from '../src/site.config'
 
 const projectId = process.env.SANITY_STUDIO_PROJECT_ID || 'lmgxynxp'
 const dataset = process.env.SANITY_STUDIO_DATASET || 'production'
 
 export default defineConfig({
   name: 'nhatrang-travel',
-  title: 'Nha Trang Travel Hub',
+  title: `${brand.name} Hub`,
   projectId,
   dataset,
   plugins: [

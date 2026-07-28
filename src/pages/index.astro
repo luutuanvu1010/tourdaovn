@@ -7,6 +7,7 @@ import { homeAlternates } from '../lib/sitemap'
 import { destinationHref } from '../lib/homepage'
 import { jsonLdScriptContent } from '../lib/serialize/utils'
 import type { TouristDestinationResult, SiteSettingsResult, Lang } from '../lib/types'
+import { brand } from '../site.config'
 
 export async function getStaticPaths() {
   return [{ params: {} }]
@@ -22,7 +23,7 @@ const config: SiteSettingsResult | null = await client.fetch(siteSettingsQuery()
 
 const siteBase = Astro.site?.toString() || 'https://tourdaovn.vn'
 
-const metaTitle = 'Nha Trang Travel'
+const metaTitle = brand.name
 const metaDescription = 'Cổng thông tin du lịch Nha Trang với điểm đến, trải nghiệm, lưu trú, ẩm thực và hướng dẫn thực tế được tuyển chọn.'
 const alternates = homeAlternates()
 const destinationUrl = destinationHref('nha-trang', lang) || '/nha-trang/'
@@ -35,7 +36,7 @@ const orgNode: Record<string, unknown> = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   '@id': orgId,
-  name: 'Nha Trang Travel',
+  name: brand.legalName,
   url: siteUrl,
 }
 if (config?.contact?.hotline) orgNode.telephone = config.contact.hotline
@@ -45,7 +46,7 @@ const jsonLd = [
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     '@id': `${siteUrl}#website`,
-    name: 'Nha Trang Travel',
+    name: brand.name,
     url: siteUrl,
     description: metaDescription,
     inLanguage: 'vi',

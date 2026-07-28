@@ -5,6 +5,7 @@
 // dùng ROUTE_MAP.labels (routes.ts) làm nguồn duy nhất cho tên entity theo ngôn ngữ.
 
 import type { Lang } from './types'
+import { brand } from '../site.config'
 
 const vi = {
   // Nhãn chung
@@ -132,7 +133,7 @@ const vi = {
   office: 'Văn phòng',
   // Header / Footer / điều hướng
   skipNav: 'Bỏ qua điều hướng',
-  homeAria: 'Nha Trang Travel — Trang chủ',
+  homeAria: `${brand.name} — Trang chủ`,
   mainNavAria: 'Điều hướng chính',
   secondaryNavAria: 'Điều hướng phụ',
   chooseLangAria: 'Chọn ngôn ngữ',
@@ -153,7 +154,7 @@ const vi = {
   footerContact: 'Liên hệ',
   footerDisclaimer: 'Thông tin chỉ mang tính tham khảo. Vui lòng kiểm tra giá và tình trạng trước khi đặt dịch vụ.',
   // Trang không tìm thấy
-  notFoundTitle: 'Không tìm thấy trang — Nha Trang Travel',
+  notFoundTitle: `Không tìm thấy trang — ${brand.name}`,
   notFoundHeading: 'Không tìm thấy trang',
   notFoundBody: 'Nội dung bạn tìm chưa tồn tại hoặc chưa được phát hành.',
   emptyDefault: 'Chưa có nội dung nào',
@@ -277,7 +278,7 @@ const en: Record<UIKey, string> = {
   license: 'License',
   office: 'Office',
   skipNav: 'Skip navigation',
-  homeAria: 'Nha Trang Travel — Home',
+  homeAria: `${brand.name} — Home`,
   mainNavAria: 'Main navigation',
   secondaryNavAria: 'Secondary navigation',
   chooseLangAria: 'Choose language',
@@ -297,7 +298,7 @@ const en: Record<UIKey, string> = {
   footerIntro: 'About',
   footerContact: 'Contact',
   footerDisclaimer: 'Information is for reference only. Please check prices and availability before booking.',
-  notFoundTitle: 'Page not found — Nha Trang Travel',
+  notFoundTitle: `Page not found — ${brand.name}`,
   notFoundHeading: 'Page not found',
   notFoundBody: 'The content you are looking for does not exist or has not been published.',
   emptyDefault: 'No content yet',
@@ -419,7 +420,7 @@ const zh: Record<UIKey, string> = {
   license: '执照',
   office: '办公室',
   skipNav: '跳过导航',
-  homeAria: 'Nha Trang Travel — 首页',
+  homeAria: `${brand.name} — 首页`,
   mainNavAria: '主导航',
   secondaryNavAria: '次导航',
   chooseLangAria: '选择语言',
@@ -439,7 +440,7 @@ const zh: Record<UIKey, string> = {
   footerIntro: '简介',
   footerContact: '联系我们',
   footerDisclaimer: '信息仅供参考。预订前请核实价格与情况。',
-  notFoundTitle: '页面未找到 — Nha Trang Travel',
+  notFoundTitle: `页面未找到 — ${brand.name}`,
   notFoundHeading: '页面未找到',
   notFoundBody: '您查找的内容不存在或尚未发布。',
   emptyDefault: '暂无内容',
@@ -561,7 +562,7 @@ const ko: Record<UIKey, string> = {
   license: '라이선스',
   office: '사무실',
   skipNav: '내비게이션 건너뛰기',
-  homeAria: 'Nha Trang Travel — 홈',
+  homeAria: `${brand.name} — 홈`,
   mainNavAria: '주 메뉴',
   secondaryNavAria: '보조 메뉴',
   chooseLangAria: '언어 선택',
@@ -581,7 +582,7 @@ const ko: Record<UIKey, string> = {
   footerIntro: '사이트 소개',
   footerContact: '문의',
   footerDisclaimer: '정보는 참고용입니다. 예약 전 가격과 상태를 확인하세요.',
-  notFoundTitle: '페이지를 찾을 수 없음 — Nha Trang Travel',
+  notFoundTitle: `페이지를 찾을 수 없음 — ${brand.name}`,
   notFoundHeading: '페이지를 찾을 수 없습니다',
   notFoundBody: '찾으시는 콘텐츠가 없거나 아직 게시되지 않았습니다.',
   emptyDefault: '아직 콘텐츠가 없습니다',
@@ -703,7 +704,7 @@ const ru: Record<UIKey, string> = {
   license: 'Лицензия',
   office: 'Офис',
   skipNav: 'Пропустить навигацию',
-  homeAria: 'Nha Trang Travel — Главная',
+  homeAria: `${brand.name} — Главная`,
   mainNavAria: 'Основная навигация',
   secondaryNavAria: 'Дополнительная навигация',
   chooseLangAria: 'Выбор языка',
@@ -723,7 +724,7 @@ const ru: Record<UIKey, string> = {
   footerIntro: 'О сайте',
   footerContact: 'Контакты',
   footerDisclaimer: 'Информация носит справочный характер. Проверяйте цены и условия перед бронированием.',
-  notFoundTitle: 'Страница не найдена — Nha Trang Travel',
+  notFoundTitle: `Страница не найдена — ${brand.name}`,
   notFoundHeading: 'Страница не найдена',
   notFoundBody: 'Искомый контент не существует или ещё не опубликован.',
   emptyDefault: 'Пока нет контента',
@@ -898,7 +899,7 @@ export const INDEX_COPY: Record<Lang, Record<string, PageCopy>> = {
     article:      { title: 'Cẩm nang', desc: 'Cẩm nang và hướng dẫn du lịch Nha Trang.' },
     tour:         { title: 'Tour', desc: 'Tour và hành trình tại Nha Trang.' },
     event:        { title: 'Sự kiện', desc: 'Sự kiện và lễ hội ở Nha Trang.' },
-    person:       { title: 'Tác giả', desc: 'Tác giả và chuyên gia nội dung của Nha Trang Travel.' },
+    person:       { title: 'Tác giả', desc: `Tác giả và chuyên gia nội dung của ${brand.name}.` },
     organization: { title: 'Công ty', desc: 'Đơn vị vận hành tour, sự kiện và dịch vụ liên quan.' },
   },
   en: {
@@ -912,7 +913,7 @@ export const INDEX_COPY: Record<Lang, Record<string, PageCopy>> = {
     article:      { title: 'Guides', desc: 'Nha Trang travel guides and how-tos.' },
     tour:         { title: 'Tours', desc: 'Tours and itineraries in Nha Trang.' },
     event:        { title: 'Events', desc: 'Events and festivals in Nha Trang.' },
-    person:       { title: 'Authors', desc: 'Authors and content experts of Nha Trang Travel.' },
+    person:       { title: 'Authors', desc: `Authors and content experts of ${brand.name}.` },
     organization: { title: 'Companies', desc: 'Operators of tours, events and related services.' },
   },
   zh: {
@@ -926,7 +927,7 @@ export const INDEX_COPY: Record<Lang, Record<string, PageCopy>> = {
     article:      { title: '攻略', desc: '芽庄旅行攻略与指南。' },
     tour:         { title: '旅行团', desc: '芽庄的行程与线路。' },
     event:        { title: '活动', desc: '芽庄的活动与节庆。' },
-    person:       { title: '作者', desc: 'Nha Trang Travel 的作者与内容专家。' },
+    person:       { title: '作者', desc: `${brand.name} 的作者与内容专家。` },
     organization: { title: '公司', desc: '运营行程、活动及相关服务的机构。' },
   },
   ko: {
@@ -940,7 +941,7 @@ export const INDEX_COPY: Record<Lang, Record<string, PageCopy>> = {
     article:      { title: '가이드', desc: '나트랑 여행 가이드와 팁.' },
     tour:         { title: '투어', desc: '나트랑의 투어와 여정.' },
     event:        { title: '이벤트', desc: '나트랑의 이벤트와 축제.' },
-    person:       { title: '작가', desc: 'Nha Trang Travel의 작가와 콘텐츠 전문가.' },
+    person:       { title: '작가', desc: `${brand.name}의 작가와 콘텐츠 전문가.` },
     organization: { title: '회사', desc: '투어, 이벤트 및 관련 서비스 운영사.' },
   },
   ru: {
@@ -954,7 +955,7 @@ export const INDEX_COPY: Record<Lang, Record<string, PageCopy>> = {
     article:      { title: 'Гайды', desc: 'Путеводители и советы по Нячангу.' },
     tour:         { title: 'Туры', desc: 'Туры и маршруты в Нячанге.' },
     event:        { title: 'События', desc: 'События и фестивали Нячанга.' },
-    person:       { title: 'Авторы', desc: 'Авторы и эксперты Nha Trang Travel.' },
+    person:       { title: 'Авторы', desc: `Авторы и эксперты ${brand.name}.` },
     organization: { title: 'Компании', desc: 'Операторы туров, событий и сопутствующих услуг.' },
   },
 }
@@ -964,31 +965,31 @@ export const HUB_COPY: Record<Lang, Record<string, PageCopy>> = {
     'hub-kham-pha': { title: 'Khám phá Nha Trang', desc: 'Điểm tham quan và trải nghiệm nổi bật tại Nha Trang.' },
     'hub-luu-tru':  { title: 'Lưu trú', desc: 'Khách sạn và resort tại Nha Trang cho nhiều nhu cầu lưu trú.' },
     'hub-di-lai':   { title: 'Đi lại', desc: 'Hướng dẫn di chuyển và kinh nghiệm đi lại ở Nha Trang.' },
-    'hub-all':      { title: 'Tất cả chuyên mục', desc: 'Danh mục đầy đủ các lớp nội dung và entity công khai của Nha Trang Travel.' },
+    'hub-all':      { title: 'Tất cả chuyên mục', desc: `Danh mục đầy đủ các lớp nội dung và entity công khai của ${brand.name}.` },
   },
   en: {
     'hub-kham-pha': { title: 'Explore Nha Trang', desc: 'Notable attractions and experiences in Nha Trang.' },
     'hub-luu-tru':  { title: 'Where to stay', desc: 'Hotels and resorts in Nha Trang for every need.' },
     'hub-di-lai':   { title: 'Getting around', desc: 'Transport guides and travel tips for Nha Trang.' },
-    'hub-all':      { title: 'All sections', desc: 'The full catalogue of public content layers and entities of Nha Trang Travel.' },
+    'hub-all':      { title: 'All sections', desc: `The full catalogue of public content layers and entities of ${brand.name}.` },
   },
   zh: {
     'hub-kham-pha': { title: '探索芽庄', desc: '芽庄的著名景点与体验。' },
     'hub-luu-tru':  { title: '住宿', desc: '满足不同需求的芽庄酒店与度假村。' },
     'hub-di-lai':   { title: '交通', desc: '芽庄的交通指南与出行经验。' },
-    'hub-all':      { title: '全部栏目', desc: 'Nha Trang Travel 公开内容与条目的完整目录。' },
+    'hub-all':      { title: '全部栏目', desc: `${brand.name} 公开内容与条目的完整目录。` },
   },
   ko: {
     'hub-kham-pha': { title: '나트랑 즐길거리', desc: '나트랑의 주요 명소와 체험.' },
     'hub-luu-tru':  { title: '숙소', desc: '다양한 니즈에 맞는 나트랑 호텔과 리조트.' },
     'hub-di-lai':   { title: '교통', desc: '나트랑 이동 가이드와 팁.' },
-    'hub-all':      { title: '전체 카테고리', desc: 'Nha Trang Travel의 공개 콘텐츠와 엔티티 전체 목록.' },
+    'hub-all':      { title: '전체 카테고리', desc: `${brand.name}의 공개 콘텐츠와 엔티티 전체 목록.` },
   },
   ru: {
     'hub-kham-pha': { title: 'Развлечения в Нячанге', desc: 'Известные достопримечательности и впечатления Нячанга.' },
     'hub-luu-tru':  { title: 'Проживание', desc: 'Отели и курорты Нячанга на любой запрос.' },
     'hub-di-lai':   { title: 'Транспорт', desc: 'Транспортные гайды и советы по Нячангу.' },
-    'hub-all':      { title: 'Все разделы', desc: 'Полный каталог открытого контента и сущностей Nha Trang Travel.' },
+    'hub-all':      { title: 'Все разделы', desc: `Полный каталог открытого контента и сущностей ${brand.name}.` },
   },
 }
 

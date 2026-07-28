@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { ROUTE_MAP } from '../lib/routes'
 import type { Lang } from '../lib/types'
+import { brand } from '../site.config'
 
 const lang: Lang = 'vi'
 
@@ -12,7 +13,7 @@ export async function getStaticPaths() {
 }
 ---
 
-<BaseLayout title="Không tìm thấy trang — Nha Trang Travel" lang="vi">
+<BaseLayout title={`Không tìm thấy trang — ${brand.name}`} lang="vi">
   <section class="not-found">
     <div class="container">
       <h1 class="nf-code">404</h1>

@@ -2,6 +2,7 @@
 import type { Lang } from '../lib/types'
 import { ROUTE_MAP } from '../lib/routes'
 import { uiCopy } from '../lib/uiCopy'
+import { brand } from '../site.config'
 
 export interface Props {
   currentPath?: string;
@@ -45,7 +46,7 @@ const languages = [
         <path d="M20 9 L26 26 L20 26 Z" fill="var(--c-sand-soft)"/>
         <path d="M8 30 Q 12 27 16 30 T 24 30 T 32 30" stroke="var(--c-surface)" stroke-width="1.4" fill="none" stroke-linecap="round"/>
       </svg>
-      <span>Nha Trang Travel</span>
+      <span>{brand.name}</span>
     </a>
 
     <nav class="nav-main" aria-label={t('mainNavAria')}>

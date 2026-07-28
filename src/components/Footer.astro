@@ -3,6 +3,7 @@ import type { Lang } from '../lib/types'
 import { ROUTE_MAP } from '../lib/routes'
 import { uiCopy } from '../lib/uiCopy'
 import { fetchSiteContact } from '../lib/siteContact'
+import { brand } from '../site.config'
 
 export interface Props {
   lang?: string
@@ -32,6 +33,9 @@ const exploreLinks = ['attraction', 'experience', 'tour'].map(routeLink).filter(
 const serviceLinks = ['hotel', 'resort'].map(routeLink).filter(Boolean) as { label: string; href: string }[]
 const exploreHeading = ROUTE_MAP.find(e => e.entity === 'hub-kham-pha')?.labels[uiLang] ?? ''
 const guidesLink = routeLink('article')
+
+const currentYear = new Date().getFullYear()
+const copyrightYear = brand.foundedYear < currentYear ? `${brand.foundedYear}–${currentYear}` : `${currentYear}`
 ---
 
 <footer class="site-footer">
@@ -45,7 +49,7 @@ const guidesLink = routeLink('article')
             <path d="M20 9 L26 26 L20 26 Z" fill="var(--c-sand-soft)"/>
             <path d="M8 30 Q 12 27 16 30 T 24 30 T 32 30" stroke="var(--c-surface)" stroke-width="1.4" fill="none" stroke-linecap="round"/>
           </svg>
-          <span>Nha Trang Travel</span>
+          <span>{brand.name}</span>
         </a>
         <p>{t('footerTagline')}</p>
       </div>
@@ -76,7 +80,7 @@ const guidesLink = routeLink('article')
     </div>
 
     <div class="foot-bottom">
-      <span>&copy; 2026 Nha Trang Travel</span>
+      <span>&copy; {copyrightYear} {brand.legalName}</span>
       <span>{t('footerDisclaimer')}</span>
     </div>
   </div>

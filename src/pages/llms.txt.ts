@@ -6,6 +6,7 @@
 import type { APIRoute } from 'astro'
 import { buildGeoDataset, SITE_URL } from '../lib/geoKnowledge'
 import { ROUTE_MAP } from '../lib/routes'
+import { brand } from '../site.config'
 
 export const prerender = true
 
@@ -39,7 +40,7 @@ export const GET: APIRoute = async () => {
   }
 
   const lines: string[] = []
-  lines.push('# Nha Trang Travel')
+  lines.push(`# ${brand.name}`)
   lines.push('')
   lines.push('> Public travel knowledge base for Nha Trang and Khanh Hoa (Vietnam): places, attractions, experiences, restaurants, specialties, stays, tours, events and guides. Content is editorially reviewed and source-backed (Wikidata, official sources). Canonical language: Vietnamese (vi); translations: en, zh, ko, ru. Canonical site: ' + SITE_URL + '/')
   lines.push('')

@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react'
 import { Box, Button, Card, Flex, Stack, Text, useToast } from '@sanity/ui'
 import { ImagesIcon, UploadIcon } from '@sanity/icons'
 import { DEFAULT_STUDIO_CLIENT_OPTIONS, PatchEvent, insert, set, useClient, useFormValue } from 'sanity'
+import { brand } from '../../src/site.config'
 
 const MAX_GALLERY_IMAGES = 30
 
@@ -11,9 +12,9 @@ function newKey() {
 
 function baseAlt(title: unknown) {
   if (title && typeof title === 'object' && typeof (title as Record<string, unknown>).vi === 'string') {
-    return `${(title as Record<string, string>).vi} - Anh Nha Trang Travel`
+    return `${(title as Record<string, string>).vi} - Anh ${brand.name}`
   }
-  return 'Anh Nha Trang Travel'
+  return `Anh ${brand.name}`
 }
 
 export function BulkGalleryInput(props: any) {

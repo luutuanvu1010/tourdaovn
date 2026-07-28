@@ -2,6 +2,7 @@
 import { HOME_COPY, indexHref } from '../lib/homepage'
 import { imageUrl } from '../lib/sanity-image'
 import type { Lang, TouristDestinationResult, SiteSettingsResult } from '../lib/types'
+import { brand } from '../site.config'
 import Body from './Body.astro'
 import HomeTrustBar from './HomeTrustBar.astro'
 import HomeBannerGrid from './HomeBannerGrid.astro'
@@ -31,7 +32,7 @@ const SITE_COPY: Record<Lang, {
 }> = {
   vi: {
     eyebrow: 'Cẩm nang du lịch địa phương',
-    title: 'Nha Trang Travel',
+    title: brand.name,
     summary: 'Cổng thông tin du lịch Nha Trang với điểm đến, trải nghiệm, lưu trú, ẩm thực và hướng dẫn thực tế được tổ chức cho khách du lịch, đối tác địa phương và công cụ tìm kiếm AI.',
     destinationLabel: 'Điểm đến chính',
     destinationCta: 'Xem trang điểm đến',
@@ -40,7 +41,7 @@ const SITE_COPY: Record<Lang, {
   },
   en: {
     eyebrow: 'Local travel guide',
-    title: 'Nha Trang Travel',
+    title: brand.name,
     summary: 'A structured Nha Trang travel portal for destinations, experiences, stays, food and practical guides, built for travelers, local partners and AI search engines.',
     destinationLabel: 'Primary destination',
     destinationCta: 'Open destination page',
@@ -49,7 +50,7 @@ const SITE_COPY: Record<Lang, {
   },
   zh: {
     eyebrow: '本地旅行指南',
-    title: 'Nha Trang Travel',
+    title: brand.name,
     summary: '一个结构化的芽庄旅行入口，涵盖目的地、体验、住宿、美食和实用攻略，面向游客、本地伙伴和 AI 搜索引擎。',
     destinationLabel: '主要目的地',
     destinationCta: '查看目的地页面',
@@ -58,7 +59,7 @@ const SITE_COPY: Record<Lang, {
   },
   ko: {
     eyebrow: '현지 여행 가이드',
-    title: 'Nha Trang Travel',
+    title: brand.name,
     summary: '나트랑의 목적지, 체험, 숙소, 음식과 실용 가이드를 정리한 여행 포털입니다. 여행자, 현지 파트너, AI 검색 엔진을 위해 구성했습니다.',
     destinationLabel: '대표 목적지',
     destinationCta: '목적지 페이지 보기',
@@ -67,7 +68,7 @@ const SITE_COPY: Record<Lang, {
   },
   ru: {
     eyebrow: 'Местный путеводитель',
-    title: 'Nha Trang Travel',
+    title: brand.name,
     summary: 'Структурированный туристический портал о Нячанге: направления, впечатления, проживание, еда и практичные гиды для путешественников, местных партнеров и AI-поиска.',
     destinationLabel: 'Главное направление',
     destinationCta: 'Открыть страницу направления',

@@ -2,6 +2,7 @@
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import '../styles/tokens.css';
+import { brand } from '../site.config';
 
 export interface Props {
   title: string;
@@ -41,7 +42,7 @@ const selfUrl = siteBase + pathWithSlash;
     <meta property="og:url" content={selfUrl} />
     <meta property="og:type" content={ogType} />
     <meta property="og:locale" content={lang === 'vi' ? 'vi_VN' : lang === 'en' ? 'en_US' : lang === 'zh' ? 'zh_CN' : lang === 'ko' ? 'ko_KR' : 'ru_RU'} />
-    <meta property="og:site_name" content="Nha Trang Travel" />
+    <meta property="og:site_name" content={brand.name} />
     {ogImage && <meta property="og:image" content={ogImage.startsWith('http') ? ogImage : siteBase + ogImage} />}
 
     <!-- Twitter Card -->
