@@ -8,5 +8,8 @@ export default defineCliConfig({
     projectId,
     dataset
   },
-  studioHost: 'tourdaovn'
+  studioHost: 'tourdaovn',
+  deployment: {
+    appId: 'zqc68abdo2f3md7wchzgcwdb'
+  }
 })
