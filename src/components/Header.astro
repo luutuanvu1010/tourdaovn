@@ -2,7 +2,7 @@
 import type { Lang } from '../lib/types'
 import { ROUTE_MAP } from '../lib/routes'
 import { uiCopy } from '../lib/uiCopy'
-import { brand } from '../site.config'
+import { brand, langs } from '../site.config'
 
 export interface Props {
   currentPath?: string;
@@ -26,13 +26,11 @@ const navItems = ['hub-kham-pha', 'hub-luu-tru', 'hub-di-lai']
   .filter(Boolean)
   .map(r => ({ label: r!.labels[uiLang], href: `${prefix}/${r!.segments[uiLang]}/` }));
 
-const languages = [
-  { code: 'vi', label: 'VI' },
-  { code: 'en', label: 'EN' },
-  { code: 'zh', label: 'ZH' },
-  { code: 'ko', label: 'KO' },
-  { code: 'ru', label: 'RU' },
-];
+// Danh sách nút chuyển ngôn ngữ đọc từ `langs` trong site.config.ts (PHA 4, GÓI 2) —
+// không khai tay danh sách 5 ngôn ngữ ở đây nữa. Chỉ 1 ngôn ngữ → ẩn hẳn cụm, không xoá
+// code, để bật thêm ngôn ngữ vào `langs` là cụm tự hiện lại.
+const LANG_LABELS: Record<Lang, string> = { vi: 'VI', en: 'EN', zh: 'ZH', ko: 'KO', ru: 'RU' };
+const languages = langs.map(code => ({ code, label: LANG_LABELS[code] }));
 ---
 
 <header class="site-header">
@@ -61,23 +59,25 @@ const languages = [
     </nav>
 
     <div class="nav-actions">
-      <div class="lang-switch" aria-label={t('chooseLangAria')}>
-        {languages.map((l, i) => {
-          const href = alternates?.[l.code];
-          return (
-            <>
-              {i > 0 && <span class="lang-sep">·</span>}
-              {l.code === lang ? (
-                <span class="active" aria-current="true">{l.label}</span>
-              ) : href ? (
-                <a href={href} hreflang={l.code}>{l.label}</a>
-              ) : (
-                <span class="disabled" aria-disabled="true" title={t('translationPending')}>{l.label}</span>
-              )}
-            </>
-          );
-        })}
-      </div>
+      {languages.length > 1 && (
+        <div class="lang-switch" aria-label={t('chooseLangAria')}>
+          {languages.map((l, i) => {
+            const href = alternates?.[l.code];
+            return (
+              <>
+                {i > 0 && <span class="lang-sep">·</span>}
+                {l.code === lang ? (
+                  <span class="active" aria-current="true">{l.label}</span>
+                ) : href ? (
+                  <a href={href} hreflang={l.code}>{l.label}</a>
+                ) : (
+                  <span class="disabled" aria-disabled="true" title={t('translationPending')}>{l.label}</span>
+                )}
+              </>
+            );
+          })}
+        </div>
+      )}
 
       <button class="hamburger" aria-label={t('openMenu')} data-close-label={t('closeMenu')} aria-expanded="false">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
@@ -93,8 +93,9 @@ const languages = [
 <script>
   const btn = document.querySelector('.hamburger') as HTMLElement | null;
   const nav = document.querySelector('.nav-main') as HTMLElement | null;
+  // .lang-switch không render khi site chỉ có 1 ngôn ngữ (PHA 4, GÓI 2) — không bắt buộc.
   const lang = document.querySelector('.lang-switch') as HTMLElement | null;
-  if (!btn || !nav || !lang) throw new Error('Header: missing required elements');
+  if (!btn || !nav) throw new Error('Header: missing required elements');
 
   let open = false;
   const openLabel = btn.getAttribute('aria-label') || 'Menu';
@@ -111,9 +112,11 @@ const languages = [
     nav!.style.padding = 'var(--s4)';
     nav!.style.borderBottom = '1px solid var(--c-border)';
     nav!.style.zIndex = '99';
-    lang!.style.display = 'flex';
-    lang!.style.padding = '0 var(--s4) var(--s4)';
-    lang!.style.justifyContent = 'center';
+    if (lang) {
+      lang.style.display = 'flex';
+      lang.style.padding = '0 var(--s4) var(--s4)';
+      lang.style.justifyContent = 'center';
+    }
     btn!.setAttribute('aria-label', closeLabel);
     btn!.setAttribute('aria-expanded', 'true');
     open = true;
@@ -127,9 +130,11 @@ const languages = [
     nav!.style.padding = '';
     nav!.style.borderBottom = '';
     nav!.style.zIndex = '';
-    lang!.style.display = '';
-    lang!.style.padding = '';
-    lang!.style.justifyContent = '';
+    if (lang) {
+      lang.style.display = '';
+      lang.style.padding = '';
+      lang.style.justifyContent = '';
+    }
     btn!.setAttribute('aria-label', openLabel);
     btn!.setAttribute('aria-expanded', 'false');
     open = false;

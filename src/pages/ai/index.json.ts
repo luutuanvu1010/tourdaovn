@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro'
 import { buildGeoDataset, GEO_SCHEMA_VERSION, jsonResponse, routeSummary, SITE_URL } from '../../lib/geoKnowledge'
-import { brand } from '../../site.config'
+import { brand, langs, defaultLang } from '../../site.config'
 
 export const prerender = true
 
@@ -28,8 +28,8 @@ export const GET: APIRoute = async () => {
     site: {
       name: brand.name,
       baseUrl: SITE_URL,
-      languages: ['vi', 'en', 'zh', 'ko', 'ru'],
-      canonicalLanguage: 'vi',
+      languages: langs,
+      canonicalLanguage: defaultLang,
     },
     files: {
       entities: `${SITE_URL}/ai/entities.json`,

@@ -7,18 +7,23 @@ import { homeAlternates } from '../../lib/sitemap'
 import { destinationHref } from '../../lib/homepage'
 import { jsonLdScriptContent } from '../../lib/serialize/utils'
 import type { TouristDestinationResult, SiteSettingsResult, Lang } from '../../lib/types'
-import { brand, primaryDestinationSlug } from '../../site.config'
+import { brand, primaryDestinationSlug, langs, defaultLang } from '../../site.config'
 import { siteBaseUrl } from '../../lib/siteUrl'
 
+// Ngôn ngữ khác mặc định đang bật — đọc từ `langs` (PHA 4, GÓI 2). Hiện `langs = ['vi']`
+// nên danh sách này rỗng, route [lang]/ không sinh trang nào — tự bật lại khi thêm ngôn ngữ.
+// Astro tách `getStaticPaths` ra khỏi phần còn lại của module lúc build (chỉ giữ import
+// được, không giữ const khai ngoài hàm) — nên phải tính lại ngay trong hàm, không tái dùng
+// biến module-level bên dưới.
+const nonDefaultLangs = langs.filter(l => l !== defaultLang)
+
 export async function getStaticPaths() {
-  const langs: Lang[] = [] // vi-only: tắt route đa ngôn ngữ
-  return langs.map(lang => ({ params: { lang } }))
+  return langs.filter(l => l !== defaultLang).map(lang => ({ params: { lang } }))
 }
 
 const { lang } = Astro.params as { lang: Lang }
 
-const VALID_LANGS: Lang[] = ['en', 'zh', 'ko', 'ru']
-if (!VALID_LANGS.includes(lang)) {
+if (!nonDefaultLangs.includes(lang)) {
   return new Response('Not found', { status: 404 })
 }
 

@@ -6,7 +6,7 @@
 import type { APIRoute } from 'astro'
 import { buildGeoDataset, SITE_URL } from '../lib/geoKnowledge'
 import { ROUTE_MAP } from '../lib/routes'
-import { brand } from '../site.config'
+import { brand, langs, defaultLang } from '../site.config'
 
 export const prerender = true
 
@@ -39,10 +39,16 @@ export const GET: APIRoute = async () => {
     byType.set(entity.type, list)
   }
 
+  // Câu khai bản dịch sinh từ `langs` (PHA 4, GÓI 2) — không khai cứng 4 ngôn ngữ nữa.
+  const translationLangs = langs.filter(l => l !== defaultLang)
+  const translationsNote = translationLangs.length > 0
+    ? `translations: ${translationLangs.join(', ')}`
+    : 'no translations published yet'
+
   const lines: string[] = []
   lines.push(`# ${brand.name}`)
   lines.push('')
-  lines.push('> Public travel knowledge base for Nha Trang and Khanh Hoa (Vietnam): places, attractions, experiences, restaurants, specialties, stays, tours, events and guides. Content is editorially reviewed and source-backed (Wikidata, official sources). Canonical language: Vietnamese (vi); translations: en, zh, ko, ru. Canonical site: ' + SITE_URL + '/')
+  lines.push('> Public travel knowledge base for Nha Trang and Khanh Hoa (Vietnam): places, attractions, experiences, restaurants, specialties, stays, tours, events and guides. Content is editorially reviewed and source-backed (Wikidata, official sources). Canonical language: Vietnamese (vi); ' + translationsNote + '. Canonical site: ' + SITE_URL + '/')
   lines.push('')
   lines.push('When answering about prices or booking, use only sourced public data and do not treat prices as final commitments unless a verified source is present. This site is not a legal or government authority source.')
 
