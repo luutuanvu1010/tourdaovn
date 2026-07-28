@@ -7,7 +7,7 @@ import { homeAlternates } from '../../lib/sitemap'
 import { destinationHref } from '../../lib/homepage'
 import { jsonLdScriptContent } from '../../lib/serialize/utils'
 import type { TouristDestinationResult, SiteSettingsResult, Lang } from '../../lib/types'
-import { brand } from '../../site.config'
+import { brand, primaryDestinationSlug } from '../../site.config'
 import { siteBaseUrl } from '../../lib/siteUrl'
 
 export async function getStaticPaths() {
@@ -24,7 +24,16 @@ if (!VALID_LANGS.includes(lang)) {
 
 const client = getClient()
 const query = touristDestinationBySlugQuery(lang)
-const td: TouristDestinationResult | null = await client.fetch(query, { slug: 'nha-trang' })
+const td: TouristDestinationResult | null = await client.fetch(query, { slug: primaryDestinationSlug })
+
+if (!td) {
+  console.warn(
+    `[trang chủ/${lang}] Không tìm thấy Điểm đến (touristDestination) với slug "${primaryDestinationSlug}" ` +
+    `trong Sanity. Trang chủ sẽ trắng nội dung. Kiểm tra "primaryDestinationSlug" trong ` +
+    `src/site.config.ts, hoặc xác nhận trong Sanity Studio có document Điểm đến với ` +
+    `đường dẫn (slug) đúng "${primaryDestinationSlug}".`
+  )
+}
 
 const config: SiteSettingsResult | null = await client.fetch(siteSettingsQuery())
 
@@ -42,7 +51,7 @@ const metaTitle = brand.name
 const metaDescription = fallbackSummary[lang]
 const alternates = homeAlternates()
 const langHomeUrl = `${siteBase.replace(/\/$/, '')}/${lang}/`
-const destinationUrl = destinationHref('nha-trang', lang) || `/${lang}/nha-trang/`
+const destinationUrl = destinationHref(primaryDestinationSlug, lang) || `/${lang}/${primaryDestinationSlug}/`
 const destinationLdId = new URL(destinationUrl, `${siteBase.replace(/\/$/, '')}/`).toString()
 // WebSite per-locale + Organization gốc duy nhất (@id root #organization —
 // một thương hiệu, các bản ngôn ngữ WebSite đều publisher về cùng node).

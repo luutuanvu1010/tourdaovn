@@ -7,7 +7,7 @@ import { homeAlternates } from '../lib/sitemap'
 import { destinationHref } from '../lib/homepage'
 import { jsonLdScriptContent } from '../lib/serialize/utils'
 import type { TouristDestinationResult, SiteSettingsResult, Lang } from '../lib/types'
-import { brand } from '../site.config'
+import { brand, primaryDestinationSlug } from '../site.config'
 import { siteBaseUrl } from '../lib/siteUrl'
 
 export async function getStaticPaths() {
@@ -18,7 +18,16 @@ const lang: Lang = 'vi'
 
 const client = getClient()
 const query = touristDestinationBySlugQuery(lang)
-const td: TouristDestinationResult | null = await client.fetch(query, { slug: 'nha-trang' })
+const td: TouristDestinationResult | null = await client.fetch(query, { slug: primaryDestinationSlug })
+
+if (!td) {
+  console.warn(
+    `[trang chủ] Không tìm thấy Điểm đến (touristDestination) với slug "${primaryDestinationSlug}" ` +
+    `trong Sanity. Trang chủ sẽ trắng nội dung. Kiểm tra "primaryDestinationSlug" trong ` +
+    `src/site.config.ts, hoặc xác nhận trong Sanity Studio có document Điểm đến với ` +
+    `đường dẫn (slug) đúng "${primaryDestinationSlug}".`
+  )
+}
 
 const config: SiteSettingsResult | null = await client.fetch(siteSettingsQuery())
 
@@ -27,7 +36,7 @@ const siteBase = siteBaseUrl(Astro.site)
 const metaTitle = brand.name
 const metaDescription = 'Cổng thông tin du lịch Nha Trang với điểm đến, trải nghiệm, lưu trú, ẩm thực và hướng dẫn thực tế được tuyển chọn.'
 const alternates = homeAlternates()
-const destinationUrl = destinationHref('nha-trang', lang) || '/nha-trang/'
+const destinationUrl = destinationHref(primaryDestinationSlug, lang) || `/${primaryDestinationSlug}/`
 // WebSite + Organization (site identity theo khuyến nghị Google):
 // Organization là node neo @id #organization, WebSite trỏ về qua publisher.
 const siteUrl = siteBase.replace(/\/$/, '') + '/'
