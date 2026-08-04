@@ -65,15 +65,24 @@ Không có: entity cụ thể, schema entity, component chi tiết entity, i18n 
 
 Theo runbook [`SETUP-NEW-SITE.md`](SETUP-NEW-SITE.md) trong lõi. Tóm tắt: GitHub repo mới → Cloudflare Pages Import Git repo (build `npm run build:ci`, output `dist`, 4 biến env, `NODE_VERSION=20`) → Deploy Hook + Sanity webhook để auto-deploy khi publish → gắn custom domain.
 
-## Cổng (build:ci)
+## Cổng
 
-`build:ci` = `validate:min` → `astro check && astro build` → `validate:jsonld` (quét `dist/` sau build). Bất kỳ bước nào fail thì exit khác 0, Cloudflare không deploy (fail-closed). Đây là cổng phát hành thật — đừng gỡ. Xem `docs/adr/ADR-0002`.
+**Đường phát hành không có cổng validator** (chốt 2026-08-04, xem `docs/adr/ADR-0022`). `build:ci` = `npm run build` = `astro check && astro build`. Cổng duyệt nội dung tự động duy nhất là `reviewStatus == "approved"` trong Sanity (`docs/adr/ADR-0008`).
 
-Ba kiểm: V1 JSON-LD (quét `dist/` sau build — chạy ở bước `validate:jsonld`), V2 reference (deref được, đúng type đích), V3 governance (publish phải `reviewStatus == "approved"`, đủ field bắt buộc). V2/V3 chạy pre-build đọc Sanity; V1 chạy post-build nên nay được đưa vào chính `build:ci` để fail-closed đủ cả ba.
+Validator vẫn còn nguyên, chỉ là gọi tay:
+
+- `npm run gate` — astro check + `validate:post` + `audit:spec`
+- `npm run build:strict` — chuỗi đầy đủ: `check:cwd` → `validate` → build → `validate:post`
+- `npm --prefix scripts run validate:min` — V2 reference + V3 governance (đọc Sanity, cần `SANITY_STUDIO_PROJECT_ID`)
+- `npm --prefix scripts run validate:jsonld` — V1 JSON-LD, quét `dist/` sau build
+
+Ba kiểm: V1 JSON-LD (quét `dist/`), V2 reference (deref được, đúng type đích), V3 governance (publish phải `reviewStatus == "approved"`, đủ field bắt buộc theo `scripts/gate.config.ts`).
+
+Muốn bật lại fail-closed: đổi `build:ci` về chuỗi đầy đủ **và** đổi build command trên Cloudflare Pages về `npm run build:ci` — thiếu bước thứ hai thì chuỗi chỉ nằm trên giấy.
 
 ## Tài liệu quyết định (ADR)
 
-Các quyết định kiến trúc cốt lõi ghi ở [`docs/adr/`](docs/adr/): giá tách CMS (0001), cổng fail-closed (0002), mô hình hai tầng (0003), một ngôn ngữ mặc định (0004), priceKey tra lúc build (0007).
+Các quyết định kiến trúc cốt lõi ghi ở [`docs/adr/`](docs/adr/): giá tách CMS (0001), mô hình entity (0002), mô hình hai tầng (0003), một ngôn ngữ mặc định (0004), priceKey tra lúc build (0007), reviewStatus là cổng publish (0008), gỡ cổng validator khỏi đường phát hành (0022).
 
 ## Yêu cầu
 

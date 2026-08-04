@@ -22,6 +22,7 @@ Nhóm engine (giữ nguyên, tái dùng mọi site):
 - [ADR-0008](ADR-0008-reviewstatus-publish-gate.md) — reviewStatus là cổng publish
 - [ADR-0009](ADR-0009-autodeploy-git-build.md) — Auto-deploy git build + webhook
 - [ADR-0010](ADR-0010-release-gate-cloudflare-canonical.md) — Cổng phát hành Cloudflare canonical
+  — *mục 1–2 superseded by ADR-0022 ở tourdaovn; vẫn là mặc định của Core*
 - [ADR-0012](ADR-0012-pretooluse-hook.md) — PreToolUse hook machine-level
 - [ADR-0014](ADR-0014-translation-module.md) — Module dịch AI
 - [ADR-0015](ADR-0015-dashboard-control-plane.md) — Dashboard control plane
@@ -34,6 +35,7 @@ Nhóm cần tổng quát hóa (có GHI CHÚ CORE — nguyên tắc engine, hằn
 - [ADR-0007](ADR-0007-price-source-yaml.md) — prices.yaml (currency/unit → tham số)
 - [ADR-0013](ADR-0013-i18n-field-level-rich-fields.md) — i18n field rich (entity/ngôn ngữ → cấu hình)
 - [ADR-0018](ADR-0018-khoi-phuc-cong.md) — Khôi phục cổng fail-closed (ngưỡng → tham số)
+  — *mục 1–2 superseded by ADR-0022 ở tourdaovn; mục 3 (`checkBodyLength`) vẫn hiệu lực*
 
 ## ADR mới của Core
 
@@ -41,6 +43,13 @@ Nhóm cần tổng quát hóa (có GHI CHÚ CORE — nguyên tắc engine, hằn
   preset loại hình + tham số địa phương. **Hoãn (deferred)** — chủ dự án chọn đường A
   fork-and-edit (dùng lại code cũ, không viết cơ chế mới). ADR giữ làm hướng nâng cấp tương
   lai. Cách dựng site hiện hành: `SETUP-NEW-SITE.md`.
+
+## ADR riêng của tourdaovn (Core KHÔNG kế thừa)
+
+- [ADR-0022](ADR-0022-go-cong-phat-hanh.md) — **Gỡ cổng validator khỏi đường phát hành**,
+  supersede ADR-0010 mục 1–2 và ADR-0018 mục 1–2. Quyết định vận hành riêng, ngược triết lý
+  fail-closed của Core — cùng loại với ADR-0019 của nhatrangtravel. Site mới vẫn mặc định
+  fail-closed theo ADR-0010/0018.
 
 ## ADR gốc KHÔNG mang vào Core (và vì sao)
 
