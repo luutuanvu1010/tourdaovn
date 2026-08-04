@@ -88,8 +88,11 @@ interface RawDoc {
 export interface AiEntity {
   id: string
   type: GeoEntityType
-  title: Partial<Record<Lang, string>>
-  summary: Partial<Record<Lang, string>>
+  // compactObject() bỏ hẳn key khi object rỗng, nên hai field này CÓ THỂ vắng mặt
+  // (doc không có title/summary dùng được ở ngôn ngữ nào). Khai optional để trình
+  // biên dịch bắt lỗi thay vì để build vỡ lúc prerender (llms.txt, 2026-08-04).
+  title?: Partial<Record<Lang, string>>
+  summary?: Partial<Record<Lang, string>>
   canonicalUrl: string
   urls: Partial<Record<Lang, string>>
   languages: Lang[]
@@ -306,8 +309,17 @@ function entityFromRaw(doc: RawDoc, prices: Record<string, PriceEntry>): AiEntit
   })
 }
 
+/**
+ * Lấy chuỗi đầu tiên dùng được trong một field đa ngữ. Chịu được cả trường hợp
+ * field bị compactObject() bỏ đi (undefined) — xem ghi chú ở AiEntity.
+ */
+export function firstLangText(map: Partial<Record<Lang, string>> | undefined): string | undefined {
+  if (!map) return undefined
+  return map.vi ?? map.en ?? Object.values(map).find((value): value is string => Boolean(value))
+}
+
 function nodeTitle(entity: AiEntity): string {
-  return entity.title.vi ?? entity.title.en ?? Object.values(entity.title)[0] ?? entity.id
+  return firstLangText(entity.title) ?? entity.id
 }
 
 function targetId(ref: RefDoc | undefined): string | undefined {

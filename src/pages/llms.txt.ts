@@ -4,7 +4,7 @@
 // Thay thế public/llms.txt tĩnh (LOOP-FIX-2026-07-10 đợt V5).
 
 import type { APIRoute } from 'astro'
-import { buildGeoDataset, SITE_URL } from '../lib/geoKnowledge'
+import { buildGeoDataset, firstLangText, SITE_URL } from '../lib/geoKnowledge'
 import { ROUTE_MAP } from '../lib/routes'
 import { brand, langs, defaultLang } from '../site.config'
 
@@ -59,8 +59,8 @@ export const GET: APIRoute = async () => {
     lines.push(`## ${TYPE_HEADINGS[type] ?? type}`)
     lines.push('')
     for (const entity of entities) {
-      const title = entity.title.vi ?? entity.title.en ?? Object.values(entity.title)[0] ?? entity.id
-      const summary = entity.summary.vi ?? entity.summary.en ?? ''
+      const title = firstLangText(entity.title) ?? entity.id
+      const summary = entity.summary?.vi ?? entity.summary?.en ?? ''
       const langNote = entity.languages.length > 1 ? ` (languages: ${entity.languages.join(', ')})` : ''
       const summaryPart = summary ? `: ${summary}` : ''
       lines.push(`- [${title}](${entity.canonicalUrl})${summaryPart}${langNote}`)
