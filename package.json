@@ -8,7 +8,7 @@
     "build": "astro check && astro build",
     "check:cwd": "bash scripts/check-no-process-cwd.sh",
     "gen:design-context": "node scripts/gen-component-inventory.mjs",
-    "build:ci": "npm run build",
+    "build:ci": "npm --prefix scripts install --no-audit --no-fund && npm --prefix scripts run validate:min && npm run build && npm --prefix scripts run validate:jsonld",
     "build:strict": "npm run check:cwd && npm --prefix scripts install && npm --prefix scripts run validate && npm run build && npm --prefix scripts run validate:post",
     "validate:git-governance": "npm --prefix scripts run validate:git-governance",
     "preview": "astro preview",

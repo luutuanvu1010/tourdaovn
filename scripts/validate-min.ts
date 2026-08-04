@@ -32,6 +32,14 @@ async function validateData() {
     return
   }
 
+  // Cổng phải biết chắc mình đang soi project nào. synthesis/config.ts có default
+  // cứng 'lmgxynxp', nên thiếu biến môi trường thì cổng lặng lẽ soi nhầm project
+  // rồi báo PASS — PASS giả còn tệ hơn không có cổng. Fail-closed theo ADR-0002.
+  if (!process.env.SANITY_STUDIO_PROJECT_ID) {
+    fails.push('Thiếu SANITY_STUDIO_PROJECT_ID: cổng không xác định được project Sanity cần soi (không nhận default cứng).')
+    return
+  }
+
   const client = getClient()
   const docs: Doc[] = await client.fetch('*[_type in $types]', {
     types: GATE.publishableTypes,

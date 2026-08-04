@@ -4,6 +4,8 @@
   "type": "module",
   "scripts": {
     "validate": "node --import ./node_modules/tsx/dist/esm/index.mjs validate-constraints.ts",
+    "validate:min": "node --import ./node_modules/tsx/dist/esm/index.mjs validate-min.ts",
+    "validate:jsonld": "node --import ./node_modules/tsx/dist/esm/index.mjs validate-min.ts --jsonld-only",
     "validate:post": "node --import ./node_modules/tsx/dist/esm/index.mjs validators/jsonld-post.ts && node --import ./node_modules/tsx/dist/esm/index.mjs validators/r3-r4-post.ts && node --import ./node_modules/tsx/dist/esm/index.mjs validators/governance-post.ts && node --import ./node_modules/tsx/dist/esm/index.mjs validators/geo-knowledge-post.ts && node --import ./node_modules/tsx/dist/esm/index.mjs validators/entity-layout-post.ts && node --import ./node_modules/tsx/dist/esm/index.mjs validators/control-registry-gate.ts && node --import ./node_modules/tsx/dist/esm/index.mjs validators/deferred-gate.ts",
     "validate:git-governance": "node --import ./node_modules/tsx/dist/esm/index.mjs validators/git-governance.ts",
     "precheck": "node --import ./node_modules/tsx/dist/esm/index.mjs precheck-drafts.ts",
