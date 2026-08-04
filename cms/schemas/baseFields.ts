@@ -19,13 +19,19 @@ export const baseGroups = [
   { name: 'quanTri', title: 'Quản trị' }
 ]
 
+// QUY ƯỚC BẮT BUỘC (chốt 2026-08-04): mọi field của mọi entity là TUỲ CHỌN,
+// trừ đúng hai ngoại lệ dưới đây — title.vi và slug.vi. Lý do: hai field này là
+// định danh và URL của trang; thiếu chúng thì không render được trang, không sinh
+// được slug, và document trở thành rác không truy được. Mọi ràng buộc completeness
+// khác chuyển sang cổng publish (scripts/gate.config.ts), không chặn ở Studio —
+// biên tập viên lưu nháp dở dang thoải mái, chỉ bị chặn khi đưa lên trang.
 export const baseFieldsBeforeGallery = [
   defineField({
     name: 'title',
     type: 'object',
     group: 'coBan',
-    validation: Rule => Rule.required(),
     fields: [
+      // NGOẠI LỆ 1/2 — bắt buộc, xem quy ước ở đầu block.
       defineField({ name: 'vi', type: 'string', validation: Rule => Rule.required() }),
       defineField({ name: 'en', type: 'string' }),
       defineField({ name: 'zh', type: 'string' }),
@@ -37,8 +43,8 @@ export const baseFieldsBeforeGallery = [
     name: 'slug',
     type: 'object',
     group: 'seo',
-    validation: Rule => Rule.required(),
     fields: [
+      // NGOẠI LỆ 2/2 — bắt buộc, xem quy ước ở đầu file.
       defineField({
         name: 'vi', type: 'slug',
         options: slugOptions('vi'),
@@ -66,7 +72,6 @@ export const baseFieldsBeforeGallery = [
     name: 'summary',
     type: 'object',
     group: 'coBan',
-    validation: Rule => Rule.required(),
     fields: [
       defineField({ name: 'vi', type: 'text', rows: 3 }),
       defineField({ name: 'en', type: 'text', rows: 3 }),
@@ -82,7 +87,6 @@ export const baseFieldsBeforeGallery = [
     fields: [
       defineField({
         name: 'alt', type: 'string',
-        validation: Rule => Rule.required(),
         initialValue: (_value: unknown, context: Record<string, unknown>) =>
           (context.document as Record<string,unknown>)?.title?.vi || '',
         description: 'Alt tự điền từ tiêu đề — sửa lại cho đúng nội dung ảnh'

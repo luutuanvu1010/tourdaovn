@@ -27,7 +27,17 @@ export interface EntityTypeMeta {
   schemaType: string
   /** Tên tiếng Việt hiển thị ở menu và sidebar */
   labelVi: string
-  /** Entity type tiếng Anh (dùng cho SEO, JSON-LD) */
+  /**
+   * Tên Entity tiếng Anh theo 01-CONTENT_MODEL.md §2 — KHÔNG phải @type của
+   * schema.org. Hai thứ này khác nhau và không được lẫn: CONTENT_MODEL là nguồn
+   * sự thật về mô hình dữ liệu, schema.org chỉ là vocabulary đích lúc serialize
+   * (§5.1, P4). Ví dụ Entity `Attraction` serialize ra @type `TouristAttraction`,
+   * Entity `Place` với placeType=ward serialize ra @type `AdministrativeArea`.
+   * Bảng map Entity → @type nằm ở src/lib/serialize/, không nằm ở đây.
+   *
+   * Dùng để ghi chú tên Entity cạnh nhãn tiếng Việt trong menu, giúp biên tập
+   * viên đối chiếu thẳng với đặc tả khi đọc tài liệu dự án.
+   */
   entityTypeEn: string
   /** Phân nhóm để hiển thị có tổ chức trong menu */
   group: 'destination' | 'place' | 'stay' | 'dining' | 'activity' | 'event' | 'content' | 'system'
@@ -74,7 +84,9 @@ export const ENTITY_TYPE_REGISTRY: EntityTypeMeta[] = [
   {
     schemaType: 'attraction',
     labelVi: 'Điểm tham quan',
-    entityTypeEn: 'TouristAttraction',
+    // CONTENT_MODEL §2.3 gọi Entity này là `Attraction`. `TouristAttraction` là
+    // @type schema.org lúc serialize, không phải tên Entity — sửa 2026-08-04.
+    entityTypeEn: 'Attraction',
     group: 'place',
     icon: TagIcon,
     scrapable: true,
@@ -91,7 +103,9 @@ export const ENTITY_TYPE_REGISTRY: EntityTypeMeta[] = [
   },
   {
     schemaType: 'resort',
-    labelVi: 'Resort',
+    // Khớp với tiêu đề document trong schemas/resort.ts ('Khu nghỉ dưỡng (Resort)')
+    // — một entity một tên, menu và form không gọi khác nhau.
+    labelVi: 'Khu nghỉ dưỡng',
     entityTypeEn: 'Resort',
     group: 'stay',
     icon: SunIcon,
@@ -102,7 +116,9 @@ export const ENTITY_TYPE_REGISTRY: EntityTypeMeta[] = [
   {
     schemaType: 'experience',
     labelVi: 'Trải nghiệm',
-    entityTypeEn: 'TouristExperience',
+    // CONTENT_MODEL §2.4 gọi Entity này là `Experience`. `TouristExperience`
+    // thậm chí không phải type có thật của schema.org — sửa 2026-08-04.
+    entityTypeEn: 'Experience',
     group: 'activity',
     icon: RocketIcon,
     scrapable: false,
@@ -176,6 +192,23 @@ export function getEntityLabel(schemaType: string): string {
 
 export function getEntityTypeEn(schemaType: string): string {
   return ENTITY_MAP.get(schemaType)?.entityTypeEn ?? schemaType
+}
+
+/**
+ * Nhãn menu: "Tên tiếng Việt (EntityEn)" — vd "Điểm đến (TouristDestination)".
+ *
+ * Ghi kèm tên Entity tiếng Anh để biên tập viên đối chiếu thẳng với
+ * 01-CONTENT_MODEL.md §2 khi tra đặc tả, và để tên gọi trong menu khớp với tiêu đề
+ * document (`title` trong cms/schemas/*.ts vốn đã theo dạng này). Một entity một tên,
+ * không để menu gọi kiểu này còn form gọi kiểu khác.
+ */
+export function getEntityMenuLabel(schemaType: string): string {
+  const meta = ENTITY_MAP.get(schemaType)
+  if (!meta) return schemaType
+  // Nhãn tiếng Việt trùng luôn tên Entity (vd Tour) thì không ghi ngoặc — tránh
+  // "Tour (Tour)".
+  if (meta.labelVi.toLowerCase() === meta.entityTypeEn.toLowerCase()) return meta.labelVi
+  return `${meta.labelVi} (${meta.entityTypeEn})`
 }
 
 /** Danh sách schemaType có thể cào nội dung */

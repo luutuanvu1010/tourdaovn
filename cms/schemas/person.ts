@@ -14,7 +14,6 @@ export default defineType({
       name: 'sameAs', type: 'array',
       group: 'viTri',
       of: [{ type: 'url' }],
-      validation: Rule => Rule.required().min(1)
     }),
     defineField({
       name: 'jobTitle', type: 'object',
@@ -45,7 +44,6 @@ export default defineType({
     defineField({
       name: 'bio', type: 'object',
       group: 'noiDung',
-      validation: Rule => Rule.required(),
       fields: [
         defineField({ name: 'vi', type: 'array', of: [{ type: 'block' }] }),
         defineField({ name: 'en', type: 'array', of: [{ type: 'block' }] }),

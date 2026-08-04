@@ -44,5 +44,5 @@ export type {
   HotelResult, ResortResult, TourResult, OrganizationResult,
   EventResult, ArticleResult,
   TourStop, EntityRef, FAQItem, NearbyEntity, ImageAsset, GeoPoint,
-  SiteSettingsResult
+  SiteSettingsResult, PickupPoint
 } from '../types'

@@ -6,7 +6,7 @@ import { brand } from '../../src/site.config'
 
 export default defineType({
   name: 'tour',
-  title: 'Tour (Tour)',
+  title: 'Tour',
   type: 'document',
   icon: TransferIcon,
   groups: baseGroups,
@@ -24,7 +24,6 @@ export default defineType({
         fields: [
           defineField({
             name: 'alt', type: 'string',
-            validation: Rule => Rule.required(),
             initialValue: (_value: unknown, context: Record<string, unknown>) =>
               ((context.document as Record<string,unknown>)?.title?.vi || (context.document as Record<string,unknown>)?.title || '')  + ' — Ảnh ' + brand.name
           })
@@ -55,13 +54,11 @@ export default defineType({
           defineField({ name: 'durationAtStop', type: 'string', description: 'ISO 8601, vd PT1H30M' })
         ]
       }],
-      validation: Rule => Rule.required().min(1)
     }),
     defineField({
       name: 'operator', type: 'reference',
       group: 'viTri',
       to: [{ type: 'organization' }],
-      validation: Rule => Rule.required()
     }),
     defineField({
       name: 'tourFormat', type: 'string',
@@ -73,7 +70,6 @@ export default defineType({
           { title: 'Cả hai', value: 'both' }
         ]
       },
-      validation: Rule => Rule.required()
     }),
     defineField({
       name: 'tripOrigin', type: 'reference',

@@ -13,7 +13,6 @@ export const lodgingGalleryField = defineField({
     fields: [
       defineField({
         name: 'alt', type: 'string',
-        validation: Rule => Rule.required()
       })
     ]
   }]
@@ -38,7 +37,7 @@ export const lodgingBaseFields = [
   defineField({
     name: 'officialSource', type: 'url',
     group: 'viTri',
-    validation: Rule => Rule.required().uri()
+    validation: Rule => Rule.uri({ scheme: ['http', 'https'] })
   }),
   defineField({
     name: 'sameAs', type: 'array',
@@ -67,9 +66,10 @@ export const lodgingBaseFields = [
   defineField({ name: 'petsAllowed', type: 'boolean', group: 'noiDung' }),
   defineField({
     name: 'containedInPlace', type: 'reference',
+    title: 'Nằm trong (đơn vị chứa trực tiếp)',
+    description: 'Chọn Place cụ thể nhất chứa nó (thường là Phường hoặc Bãi biển), không nhảy thẳng lên cấp Tỉnh.',
     group: 'viTri',
     to: [{ type: 'place' }, { type: 'touristDestination' }],
-    validation: Rule => Rule.required()
   }),
   defineField({
     name: 'bookingRef', type: 'object',

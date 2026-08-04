@@ -63,6 +63,8 @@ const SUB_FIELD_IGNORE = new Set([
   'vi', 'en', 'zh', 'ko', 'ru',
   // siteSettings.contact sub-fields (CONTENT_MODEL §2.15 v1.0.11, CONV-01)
   'hotline', 'zaloUrl', 'whatsapp', 'email',
+  // siteSettings.pickupPoints[] sub-fields (CONTENT_MODEL §2.15 v1.0.13)
+  'stopName', 'stopAddress', 'pickupTime', 'pickupNote',
 ])
 
 // Fields that exist as both top-level and sub-field in different entities
@@ -76,16 +78,20 @@ const AMBIGUOUS_SUB_FIELDS: Record<string, string[]> = {
   // entity types where these are TRUE sub-fields (not top-level)
   touristDestination: ['name', 'url', 'image', 'description', 'value'],
   tour: ['name', 'geo', 'sameAs', 'note'],
-  // "hidden" là sub-field của sections[] (CONTENT_MODEL §2.15), không phải field top-level
-  siteSettings: ['hidden'],
+  // "hidden" là sub-field của sections[] và pickupPoints[] (CONTENT_MODEL §2.15),
+  // "geo" là sub-field của pickupPoints[] (v1.0.13) — cả hai không phải field top-level
+  siteSettings: ['hidden', 'geo'],
 }
 
 // Common fields from CONTENT_MODEL §2.0
 // "language" and "translationGroup" only apply to document-level i18n entities (Article, Category)
+// v1.0.12 (2026-08-04): mọi field là tuỳ chọn, trừ title và slug — xem
+// 01-CONTENT_MODEL.md §4 "Nới bắt buộc v1.0.12". Cột `required` dưới đây là
+// gương của spec; hiện G1 chỉ so khớp TÊN field, chưa dùng cột này để kiểm.
 const CONTENT_MODEL_COMMON_ALL: Record<string, { required: boolean }> = {
   title: { required: true },
   slug: { required: true },
-  summary: { required: true },
+  summary: { required: false },
   mainImage: { required: false },
   seo: { required: false },
   category: { required: false },
@@ -107,8 +113,8 @@ const DOCUMENT_LEVEL_ENTITIES = new Set(['article', 'category'])
 // Entity-specific fields from CONTENT_MODEL §2.1–2.14
 const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boolean }>> = {
   touristDestination: {
-    sameAs: { required: true }, containedInPlaceRef: { required: true },
-    body: { required: true }, keyFacts: { required: false },
+    sameAs: { required: false }, containedInPlaceRef: { required: false },
+    body: { required: false }, keyFacts: { required: false },
     homepageBanners: { required: false }, highlights: { required: false },
     faq: { required: false }, gallery: { required: false },
     featuredAttractions: { required: false }, featuredStays: { required: false },
@@ -118,10 +124,11 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
     geo: { required: false }, imageProvenance: { required: false },
   },
   place: {
-    placeType: { required: true }, sameAs: { required: true },
+    placeType: { required: false }, sameAs: { required: false },
     geo: { required: false }, address: { required: false },
-    containedInPlace: { required: true }, containsPlace: { required: false },
+    containedInPlace: { required: false }, containsPlace: { required: false },
     incomingExperiences: { required: false }, // §2.2 v1.0.9: Studio display-only, không serialize
+    placeHierarchy: { required: false }, // §2.2 v1.0.12: Studio display-only, hiển thị chuỗi phân cấp, không serialize
     hasMap: { required: false }, accessInfo: { required: false },
     openingHours: { required: false }, isAccessibleForFree: { required: false },
     body: { required: false }, gallery: { required: false },
@@ -129,9 +136,9 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
     imageProvenance: { required: false },
   },
   attraction: {
-    attractionType: { required: true }, sameAs: { required: false },
+    attractionType: { required: false }, sameAs: { required: false },
     officialSource: { required: false }, geo: { required: false },
-    address: { required: false }, containedInPlace: { required: true },
+    address: { required: false }, containedInPlace: { required: false },
     bookingRef: { required: false }, openingHours: { required: false },
     isAccessibleForFree: { required: false }, accessInfo: { required: false },
     hasMap: { required: false }, telephone: { required: false },
@@ -140,7 +147,7 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
     imageProvenance: { required: false },
   },
   experience: {
-    experienceType: { required: true }, venue: { required: true },
+    experienceType: { required: false }, venue: { required: false },
     isAccessibleForFree: { required: false }, duration: { required: false },
     includes: { required: false }, touristType: { required: false },
     geo: { required: false }, bookingRef: { required: false },
@@ -150,9 +157,9 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
   },
   restaurant: {
     geo: { required: false }, address: { required: false },
-    officialSource: { required: true }, sameAs: { required: false },
+    officialSource: { required: false }, sameAs: { required: false },
     servesCuisine: { required: false }, servesSpecialty: { required: false },
-    containedInPlace: { required: true }, openingHours: { required: false },
+    containedInPlace: { required: false }, openingHours: { required: false },
     acceptsReservations: { required: false }, hasMenu: { required: false },
     telephone: { required: false },
     body: { required: false }, gallery: { required: false },
@@ -160,7 +167,7 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
     imageProvenance: { required: false },
   },
   specialty: {
-    specialtyType: { required: true }, sameAs: { required: true },
+    specialtyType: { required: false }, sameAs: { required: false },
     originNote: { required: false }, season: { required: false },
     whereToTry: { required: false },
     body: { required: false }, gallery: { required: false },
@@ -168,11 +175,11 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
   },
   hotel: {
     geo: { required: false }, address: { required: false },
-    officialSource: { required: true }, sameAs: { required: false },
+    officialSource: { required: false }, sameAs: { required: false },
     starRating: { required: false }, amenityFeature: { required: false },
     checkinTime: { required: false }, checkoutTime: { required: false },
     numberOfRooms: { required: false }, petsAllowed: { required: false },
-    containedInPlace: { required: true }, bookingRef: { required: false },
+    containedInPlace: { required: false }, bookingRef: { required: false },
     beachAccess: { required: false }, accessInfo: { required: false },
     body: { required: false }, gallery: { required: false },
     highlights: { required: false }, faq: { required: false },
@@ -180,11 +187,11 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
   },
   resort: {
     geo: { required: false }, address: { required: false },
-    officialSource: { required: true }, sameAs: { required: false },
+    officialSource: { required: false }, sameAs: { required: false },
     starRating: { required: false }, amenityFeature: { required: false },
     checkinTime: { required: false }, checkoutTime: { required: false },
     numberOfRooms: { required: false }, petsAllowed: { required: false },
-    containedInPlace: { required: true }, bookingRef: { required: false },
+    containedInPlace: { required: false }, bookingRef: { required: false },
     beachAccess: { required: false }, accessInfo: { required: false },
     beachfront: { required: false }, onSiteActivities: { required: false },
     landArea: { required: false },
@@ -193,8 +200,8 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
     imageProvenance: { required: false },
   },
   tour: {
-    itinerary: { required: true }, operator: { required: true },
-    tourFormat: { required: true }, tripOrigin: { required: false },
+    itinerary: { required: false }, operator: { required: false },
+    tourFormat: { required: false }, tripOrigin: { required: false },
     departureNote: { required: false }, duration: { required: false },
     includes: { required: false }, excludes: { required: false },
     touristType: { required: false }, seasonNote: { required: false },
@@ -204,16 +211,16 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
     imageProvenance: { required: false },
   },
   organization: {
-    orgType: { required: true }, url: { required: true },
-    officialSource: { required: true }, sameAs: { required: false },
+    orgType: { required: false }, url: { required: false },
+    officialSource: { required: false }, sameAs: { required: false },
     logo: { required: false }, geo: { required: false },
     address: { required: false }, telephone: { required: false },
     licenseInfo: { required: false }, body: { required: false },
     imageProvenance: { required: false },
   },
   event: {
-    eventType: { required: true }, startDate: { required: true },
-    endDate: { required: false }, location: { required: true },
+    eventType: { required: false }, startDate: { required: false },
+    endDate: { required: false }, location: { required: false },
     organizer: { required: false }, eventStatus: { required: false },
     isAccessibleForFree: { required: false }, bookingRef: { required: false },
     ticketUrl: { required: false },
@@ -222,21 +229,21 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
     imageProvenance: { required: false },
   },
   article: {
-    articleType: { required: true }, author: { required: true },
-    body: { required: true }, about: { required: false },
+    articleType: { required: false }, author: { required: false },
+    body: { required: false }, about: { required: false },
     mentions: { required: false }, faq: { required: false },
-    howTo: { required: false }, language: { required: true },
+    howTo: { required: false }, language: { required: false },
     imageProvenance: { required: false },
   },
   person: {
-    sameAs: { required: true }, jobTitle: { required: false },
+    sameAs: { required: false }, jobTitle: { required: false },
     knowsAbout: { required: false }, url: { required: false },
-    bio: { required: true },
+    bio: { required: false },
     imageProvenance: { required: false },
   },
   category: {
-    name: { required: true }, description: { required: true },
-    inDefinedTermSet: { required: true }, termCode: { required: true },
+    name: { required: false }, description: { required: false },
+    inDefinedTermSet: { required: false }, termCode: { required: false },
     slug: { required: false }, sameAs: { required: false },
     imageProvenance: { required: false },
   },
@@ -246,6 +253,8 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
     sections: { required: false },
     heroText: { required: false },
     contact: { required: false },
+    // pickupPoints thêm v1.0.13 — lộ trình đón khách, nguồn cho /lo-trinh-don-khach
+    pickupPoints: { required: false },
   },
 }
 

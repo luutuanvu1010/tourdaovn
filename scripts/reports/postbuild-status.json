@@ -1,0 +1,22 @@
+{
+  "ranAt": "2026-08-04T08:34:10.601Z",
+  "items": [
+    {
+      "id": "I6",
+      "status": "fail",
+      "errors": [
+        "cong-ty/cong-ty-tnhh-tour-dao/index.html: thiếu top-level schema chính Organization"
+      ]
+    },
+    {
+      "id": "PY8",
+      "status": "pass",
+      "errors": []
+    },
+    {
+      "id": "SEO",
+      "status": "pass",
+      "errors": []
+    }
+  ]
+}

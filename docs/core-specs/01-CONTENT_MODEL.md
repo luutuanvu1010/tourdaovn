@@ -17,7 +17,7 @@ Phần KHÔNG nhãn (cơ chế field 2.0, ba họ gate, quy tắc giá, khối q
 > 🔧 **SITE-SPECIFIC:** danh mục 14 entity và mọi ví dụ (Specialty, TouristDestination, 5 ngôn ngữ) là của nhatrangtravel. Giữ *cơ chế* (field 2.0, ba họ gate, quy tắc bookingRef, khối quản trị); thay *danh mục entity* theo site.
 
 - **Trạng thái:** đã duyệt. Founder soát toàn văn theo cụm 2026-06-11 (rà phản biện độc lập, 7 vết chốt qua trắc nghiệm), bước 1 đóng.
-- **Phiên bản:** v1.0.11   **Ngày:** 2026-07-13   **Người soạn:** Cowork (tác nhân điều phối).
+- **Phiên bản:** v1.0.13   **Ngày:** 2026-08-04   **Người soạn:** Cowork (tác nhân điều phối).
 - **Nguồn quyết định:** brief mục 5-6 cộng các lựa chọn founder 2026-06-10 và 2026-06-11 (xem `DECISIONS.md` và `project/adr/` từ ADR-0002 đến ADR-0006).
 - **Kế thừa ràng buộc:** CONSTITUTION v2.2.0, PROJECT_OVERLAY v1.0.2 (S2.2 bất biến dữ liệu, S2.3 ngưỡng, S2.4 SEO/GEO, S2.5 đa ngôn ngữ).
 - **Override hiện hành:** từ 2026-06-30, `imageProvenance` là dữ liệu nội bộ tùy chọn, ẩn khỏi layout biên tập và không còn nằm trong gate publish I12. Từ 2026-07-02, `Attraction.containedInPlace` có thể trỏ `Place` hoặc `TouristDestination` khi Nha Trang là container thực tế; không khôi phục `seed.trung-tam-nha-trang`. Các dòng lịch sử bên dưới ghi "có khi có ảnh", "cộng imageProvenance khi có ảnh", hoặc "Attraction Place-only" chỉ còn là bối cảnh cũ, đã bị supersede bởi `DECISIONS.md`.
@@ -151,13 +151,14 @@ Field chung (2.0) vẫn áp dụng. Bảng dưới là field riêng cộng quy t
 
 | Field | Kiểu | Bắt buộc? | Dịch? | Bất biến / quy tắc | Ai cung cấp |
 |---|---|---|---|---|---|
-| placeType | string enum (beach, island, landform, ward, area) | có | không | quyết @type cụ thể theo bảng map đóng dưới, không tự chế | người |
+| placeType | string enum (province, ward, commune, island, beach, landform, area) | tùy | không | quyết @type cụ thể theo bảng map đóng dưới, không tự chế. Ba giá trị đầu là cấp hành chính, dùng làm khung chứa; province là gốc chuỗi (v1.0.11) | người |
 | sameAs | array url | có (gate I2) | không | Wikidata hoặc Wikipedia | người |
 | geo | geopoint | tùy | không | điểm đại diện của vùng | người |
 | address | object | nên có, trừ ward | một phần | addressLocality là phường hiện hành, I15; ward không có address vì chính nó là addressLocality | người |
-| containedInPlace | reference đến Place hoặc TouristDestination | có | không | I8; riêng ward xem quy tắc serialize dưới | người |
+| containedInPlace | reference đến Place hoặc TouristDestination | tùy | không | I8; trỏ đơn vị chứa TRỰC TIẾP, không nhảy cấp. Place cấp province là gốc, để trống. Riêng ward xem quy tắc serialize dưới | người |
 | containsPlace | không lưu | — | — | suy ở build bằng reverse GROQ (P6) | build |
-| incomingExperiences | string readOnly (Studio) | — | không | display-only trong Studio: custom input hiển thị rollup các Experience có venue trỏ tới place này; không lưu dữ liệu độc lập, không serialize, không nằm trong gate publish — cùng họ nguyên tắc "rollup suy ở build, không lưu" (P6), field này chỉ là bề mặt hiển thị cho biên tập viên | hệ thống |
+| incomingExperiences | string readOnly (Studio) | — | không | display-only trong Studio: custom input hiển thị rollup các Experience có venue trỏ tới place này; không lưu dữ liệu độc lập, không serialize, không nằm trong gate publish — cùng họ nguyên tắc "rollup suy ở build, không lưu" (P6), field này chỉ là bề mặt hiển thị cho biên tập viên. Từ v1.0.11 bị `placeHierarchy` thay thế và ẩn khỏi layout, giữ đăng ký để không mất dữ liệu | hệ thống |
+| placeHierarchy | string readOnly (Studio) | — | không | display-only trong Studio, cùng nguyên tắc với incomingExperiences (P6: không lưu, không serialize, không vào gate). Custom input đọc ngược `containedInPlace` lên gốc, rồi đọc xuôi các Place/Attraction/lưu trú trỏ vào và các Experience lấy nó làm venue — hiển thị trọn chuỗi thật cho biên tập viên: Tỉnh Khánh Hoà → Phường Nha Trang → Hòn Mun → Lặn biển. Có chặn vòng lặp (dừng ở 6 cấp hoặc khi gặp id đã đi qua) | hệ thống |
 | hasMap | url | tùy | không | — | người |
 | accessInfo | portable text | tùy | có | cách tới nơi (vd Hòn Mun đi tàu từ Cầu Đá); tầng 4, không có property schema.org, xem quy tắc serialize | người hoặc AI T1 |
 | openingHours, isAccessibleForFree | structured, boolean | tùy | không | chỉ nơi có quản lý giờ hoặc vé | người |
@@ -173,7 +174,9 @@ Bảng map placeType sang @type (đóng, thêm giá trị là cửa hai chiều 
 | beach | [Beach, TouristAttraction] | — |
 | island | [Landform, TouristAttraction] | https://www.wikidata.org/wiki/Q23442 (island) |
 | landform | [Landform, TouristAttraction] | Wikidata theo loại (vd Q39594 vịnh, Q191992 mũi đất) |
+| province | AdministrativeArea | Wikidata item của tỉnh, điền vào `sameAs` (cần tra và xác minh item đúng của tỉnh Khánh Hoà sau sáp nhập 2025, chưa chốt trong spec này) |
 | ward | AdministrativeArea | — |
+| commune | AdministrativeArea | — |
 | area | Place | tùy trường hợp, không bắt buộc |
 
 schema.org không có type Island (đã kiểm V30.0); đảo serialize Landform cộng additionalType. LandmarksOrHistoricalBuildings không thuộc Place, nó là @type của Attraction (công trình lịch sử), đã xử ở 2.3 (attractionType historic).
@@ -187,7 +190,7 @@ Quy tắc serialize riêng:
 - Loại có chủ ý: aggregateRating và review (không UGC phase 1), photo (dùng gallery), event và Experience tại đây (rollup suy ở build từ Experience.venue và Event.location, không lưu), maximumAttendeeCapacity, smokingAllowed (không liên quan).
 - Không kéo keyFacts, featured*, relatedDestinations từ TouristDestination: đó là vai điều phối của trang trụ, không phải của một bãi biển.
 
-Gate publish (I12): title, slug, placeType, sameAs (I2), containedInPlace, summary (I10); cộng imageProvenance khi có ảnh. geo/address tùy chọn. Thiếu sameAs thì tạo Wikidata item, không nới gate.
+Gate publish (I12): title, slug — xem "Nới bắt buộc v1.0.11" ở §4. placeType, sameAs (I2), containedInPlace, summary (I10) và imageProvenance chuyển từ điều kiện chặn sang khuyến nghị biên tập: thiếu thì trang vẫn lên được nhưng phần tương ứng ẩn khỏi layout, và JSON-LD bỏ qua property đó (5.1: cấm phát property rỗng hoặc tự chế). Thiếu sameAs thì vẫn nên tạo Wikidata item.
 
 ### 2.3 Attraction (đã audit chi tiết, founder duyệt 2026-06-11)
 
@@ -533,6 +536,7 @@ Cấu hình toàn site. Toàn bộ dataset chỉ có đúng 1 document. i18n fie
 | sections | array object | tùy | không | thứ tự render là thứ tự trong mảng; `key` là enum đóng 15 giá trị; `hidden` mặc định false. Thiếu field `sections` hoặc mảng rỗng → homepage dùng DEFAULT_SECTIONS. | founder |
 | heroText | object {vi,en,zh,ko,ru} | tùy | có (field-level) | ghi đè dòng eyebrow của hero; để trống → dùng SITE_COPY | founder |
 | contact | object | tùy | không | 4 field con, dữ liệu trung lập ngôn ngữ; field con nào trống thì kênh đó không render (guard rỗng, không nút chết) | founder |
+| pickupPoints | array object | tùy | không | lộ trình đón khách của công ty; thứ tự render là thứ tự trong mảng; mảng rỗng hoặc thiếu → trang lộ trình không render bản đồ (guard rỗng) | founder |
 
 Field `sections[]`:
 - `key`: string enum đóng 15 giá trị — hero | trustBar | editorialBody | banners | hubGrid | areas | attractions | experiences | guides | stays | specialties | tours | faq | safety | meta
@@ -550,6 +554,18 @@ Field `contact` (thêm v1.0.11 — kênh chốt khách, chuỗi CONV):
 
 Đây là nguồn duy nhất cho kênh liên hệ toàn site, cấm hardcode số/link liên hệ trong component hay copy tĩnh. Nơi render: component ContactChannels (slot booking của Tour, Hotel, Resort, Experience), cột liên hệ ở Footer, và `telephone`/`email` trên node Organization JSON-LD trang chủ (guard rỗng theo quy tắc §5.1).
 
+Field `pickupPoints[]` (thêm v1.0.13 — lộ trình đón khách, chuỗi CONV):
+- `stopName`: string — tên điểm đón hiển thị cho khách (ví dụ "Tháp Trầm Hương")
+- `stopAddress`: string — địa chỉ hoặc mô tả vị trí cụ thể để khách đứng chờ
+- `geo`: geopoint — toạ độ đặt marker trên bản đồ; thiếu toạ độ → điểm đó chỉ vào bảng, không lên bản đồ
+- `pickupTime`: string — giờ đón dạng `HH:MM` (ví dụ `07:30`); dữ liệu trung lập ngôn ngữ
+- `pickupNote`: string — ghi chú ngắn (ví dụ "đứng phía cổng chính")
+- `hidden`: boolean, mặc định false — tạm ẩn một điểm đón mà không xoá dữ liệu
+
+Đây là nguồn duy nhất cho lộ trình đón khách, cấm hardcode danh sách điểm đón trong component hay copy tĩnh. Nơi render: trang `/lo-trinh-don-khach` (bản đồ RouteMap + bảng giờ đón). Bản đồ vẽ đường nối các điểm theo đúng thứ tự mảng; điểm `hidden = true` bị loại khỏi cả bản đồ lẫn bảng.
+
+Có chủ ý KHÔNG lưu: vị trí xe theo thời gian thực (cần thiết bị GPS và hợp đồng nhà cung cấp, ngoài phạm vi CMS), và giá vé (I1 — giá không nằm trong CMS).
+
 Gate publish: không có gate publish — đây là config, không phải content entity. reviewStatus/approvedBy/contentProvenance không áp dụng.
 
 Thêm document type này là cửa một chiều (§5.3): sửa CONTENT_MODEL trước, ghi DECISIONS, founder duyệt, rồi code.
@@ -561,7 +577,7 @@ Mọi reference một chiều trong Sanity. Chiều ngược suy ở build bằn
 | Từ | Quan hệ | Đến | Qua field |
 |---|---|---|---|
 | Attraction | nằm trong | Place hoặc TouristDestination | containedInPlace |
-| Place | nằm trong | TouristDestination | containedInPlace |
+| Place | nằm trong | Place cấp trên hoặc TouristDestination | containedInPlace |
 | Restaurant, Hotel, Resort | nằm trong | Place hoặc TouristDestination | containedInPlace |
 | Experience | diễn ra tại | Attraction, Hotel, Resort hoặc Place | venue |
 | Experience | thuộc loại | Category (bộ experience-type) | experienceType |
@@ -578,6 +594,23 @@ Mọi reference một chiều trong Sanity. Chiều ngược suy ở build bằn
 | Mọi entity | phân loại bằng | Category | category |
 | Experience, Tour, Hotel, Resort, Attraction (vé vào cửa), Event (vé mình bán) | giá ở | nguồn giá ngoài Sanity | bookingRef |
 | TouristDestination | nằm trong | tỉnh Khánh Hòa (mới) | containedInPlaceRef (url, không entity) |
+
+**Chuỗi phân cấp địa lý (v1.0.11).** Từ 2026-08-04, tỉnh là một entity thật: một Place với `placeType=province`. Chuỗi chuẩn đi từ gốc xuống, mỗi mắt xích chỉ trỏ đơn vị chứa TRỰC TIẾP, không nhảy cấp:
+
+```
+Place(province)  Tỉnh Khánh Hoà        ← gốc, containedInPlace để trống
+  └─ Place(ward) Phường Nha Trang      ← containedInPlace → Tỉnh Khánh Hoà
+      └─ Place(island) Hòn Mun         ← containedInPlace → Phường Nha Trang
+          └─ Experience  Lặn biển      ← venue → Hòn Mun
+```
+
+Ba điểm cần nhớ khi nhập liệu:
+
+- **Không nhảy cấp.** Hòn Mun trỏ Phường Nha Trang, không trỏ thẳng tỉnh. Cấp trên suy ra tự động bằng cách đi ngược chuỗi, nên trỏ tắt chỉ làm mất một mắt xích chứ không nhanh hơn.
+- **Experience không chọn cấp hành chính.** `venue` là nơi cụ thể diễn ra hoạt động (Hòn Mun), không phải phường hay tỉnh.
+- **TouristDestination "Nha Trang" là thương hiệu du lịch, không phải một cấp trong chuỗi hành chính.** Nó vẫn là trang trụ điều phối (featured*, keyFacts, banner), và vẫn trỏ tỉnh qua `containedInPlaceRef` để xuất JSON-LD. Điều hướng theo địa lý đi bằng `Place.containedInPlace`; hai đường không mâu thuẫn vì phục vụ hai vai khác nhau (I15: phường thuộc tỉnh, không thuộc thực thể nào tên Nha Trang).
+
+Studio hiển thị trọn chuỗi này trong tab "Vị trí & liên kết" của Place, qua field display-only `placeHierarchy` (§2.2) — biên tập viên nhìn thấy ngay mình đang đứng ở đâu trong chuỗi, ai chứa mình và mình chứa những gì.
 
 Quan hệ nhiều-nhiều cốt lõi: một loại trải nghiệm có ở nhiều điểm đến, một điểm đến có nhiều trải nghiệm. Cấu trúc là join entity qua Experience với venue là single reference: mỗi Experience là một cặp (experienceType, venue) duy nhất, mang dữ liệu venue-specific (giá, thời lượng, bao gồm — khác nhau giữa các nơi). Category (experienceType) đóng vai trò trục liên kết: tất cả Experience cùng loại trỏ về một term, và term đó là cầu nối hiển thị quan hệ cho cả người và máy.
 
@@ -654,7 +687,7 @@ Mỗi bất biến kèm cách kiểm bằng máy (bằng chứng E1). Bản thi 
 | I9 | slug duy nhất: entity document-level theo (language, _type); entity field-level theo (_type, slug từng ngôn ngữ) | Uniqueness check theo kiểu i18n của entity | S2.5, ADR-0004 |
 | I10 | summary tự đứng được như câu trả lời hoàn chỉnh | QA2 AI-readability, bán tự động cộng người duyệt | S2.4 |
 | I11 | Category là từ vựng đóng; cấm tạo term tự do khi import | Term mới phải nằm trong DefinedTermSet đã duyệt | quyết định 1 |
-| I12 | Cấm publish doc thiếu field bắt buộc; cấm tạo entity rỗng để lấy số | Required-field validator cộng review | completeness over coverage, P10 |
+| I12 | Cấm publish doc thiếu field bắt buộc; cấm tạo entity rỗng để lấy số. **Từ v1.0.12 tập "field bắt buộc" của mọi entity thu về đúng `title.vi` và `slug.vi`** — xem "Nới bắt buộc v1.0.12" ngay dưới bảng | Required-field validator cộng review | completeness over coverage, P10; DECISIONS 2026-08-04 |
 | I13 | Experience phải có experienceType và venue tồn tại; không con số giá | Validator cộng ref integrity | quyết định 5 |
 | I14 | Tour phải có itinerary (≥1 stop), operator tồn tại và tourFormat; khi đã nối bookingRef, mọi Tour dùng đơn vị giá perPax bất kể tourFormat (tour riêng có thể có tiers theo cỡ nhóm); không con số giá | Validator cộng ref integrity cộng kiểm đơn vị giá perPax | quyết định 5, DECISIONS 2026-06-11 G4 và bước 2 SAD |
 | I15 | Cấm chuỗi "thành phố Nha Trang" trong address và containedInPlace; cấp địa lý theo đơn vị hành chính hiện hành | Audit grep cộng validator | quyết định 3, cải cách 2025 |
@@ -662,6 +695,21 @@ Mỗi bất biến kèm cách kiểm bằng máy (bằng chứng E1). Bản thi 
 | I17 | Specialty phải có specialtyType và sameAs mới publish; whereToTry chỉ trỏ Restaurant đã publish và Restaurant đó có servesSpecialty chứa chính Specialty này (tập con của chiều suy ngược) | Validator CI required-field cộng ref integrity cộng subset check | DECISIONS 2026-06-11 G3 |
 | I18 | Organization chỉ publish khi có ít nhất một quan hệ vào: Tour.operator, Event.organizer hoặc Article.about trỏ tới nó, kể cả từ draft (tránh vòng kẹt với I14) | Validator CI reverse reference quét cả draft | DECISIONS 2026-06-11 G4 |
 | I19 | Mọi entity chỉ publish khi reviewStatus = approved kèm approvedBy và contentProvenance; Category miễn (từ vựng đóng founder tuyển, việc tuyển chính là duyệt) | Validator CI required-field cộng kiểm giá trị enum đóng | DECISIONS 2026-06-11 G5 |
+
+### Nới bắt buộc v1.0.12 (chủ dự án chốt 2026-08-04)
+
+Mọi field của mọi entity là **tuỳ chọn**, trừ đúng hai ngoại lệ: `title.vi` và `slug.vi` (với Article là `title` và `slug` vì i18n document-level; với Category là `name.vi` và `termCode`). Hai field này giữ bắt buộc vì chúng là định danh và URL của trang — thiếu chúng thì không render được trang, không sinh được slug, document thành rác không truy được.
+
+Áp ở cả hai tầng, để hai tầng không lệch nhau (P6):
+
+- `cms/schemas/*.ts` — bỏ `Rule.required()`, Studio không chặn lưu nữa.
+- `scripts/gate.config.ts` — `requiredFields` thu về `['title', 'slug']` cho cả 9 type publishable.
+
+**Không đổi:** I19 vẫn nguyên (chỉ publish khi `reviewStatus = approved` kèm `approvedBy` và `contentProvenance`), và kiểm tính toàn vẹn reference vẫn nguyên (reference phải deref được, đúng type đích). Nới lỏng này chỉ chạm điều kiện *completeness*, không chạm điều kiện *đúng đắn*.
+
+**Đánh đổi đã biết, chấp nhận có ý thức.** Các dòng "Bắt buộc?" ghi "có" trong bảng field §2 giờ đọc là *khuyến nghị biên tập*, không phải điều kiện chặn. Hệ quả: nội dung mỏng có thể lên trang. Bù lại, biên tập viên lưu được bản dở dang và bổ sung dần thay vì bị chặn giữa chừng. Chất lượng chuyển từ ràng buộc cứng sang khâu duyệt (I19) — người duyệt là chốt chặn thật, không phải validator. Nếu về sau thấy nội dung mỏng lọt nhiều, siết lại bằng cách thêm field vào `gate.config.ts` (cửa hai chiều, không đụng dữ liệu), không phải bằng cách bật lại `Rule.required()` ở Studio.
+
+Field thiếu thì template ẩn phần tương ứng và JSON-LD bỏ qua property đó — cấm phát property rỗng hoặc tự chế (5.1, I6).
 
 ## 5. Nguyên tắc serialize và bài test entity
 
@@ -743,5 +791,8 @@ Lý do chi tiết và phương án đã loại của từng thay đổi nằm �
 - v1.0.9 (2026-07-10): backfill `place.incomingExperiences` vào §2.2 — field đã tồn tại trong schema (place.ts, readOnly, custom input) nhưng chưa có trong spec, vi phạm P4 mức FAIL của audit:spec. Ghi rõ display-only, không lưu dữ liệu độc lập, không serialize. Bản ghi DECISIONS cùng ngày (LOOP-FIX-2026-07-10 đợt V3).
 - v1.0.10 (2026-07-11): chốt quy tắc sinh slug đa ngôn ngữ (bảng field chung 2.0 và mục 2.2): slug.lang sinh từ title.lang bằng slugify giữ chữ bản địa, không copy hay dịch từ slug.vi; thiếu title.lang thì không sinh slug.lang. Supersede quy ước vận hành cũ "slug Latin theo vi xuyên ngôn ngữ" (backfill S25). Bản ghi DECISIONS cùng ngày. Đồng thời sửa header phiên bản (trước đó kẹt ở v1.0.8 dù changelog đã có v1.0.9).
 - v1.0.11 (2026-07-13): thêm field `contact` vào siteSettings (§2.15) — 4 kênh liên hệ (hotline, zaloUrl, whatsapp, email), nguồn duy nhất cho CTA liên hệ, footer và Organization JSON-LD trang chủ. Phục vụ chuỗi CONV (tầng chuyển đổi, ưu tiên 3 ROADMAP). Bản ghi DECISIONS cùng ngày.
+- v1.0.12 (2026-08-04): hai thay đổi do chủ dự án chốt. (1) **Chuỗi phân cấp địa lý thành entity thật** — thêm `province` và `commune` vào enum `placeType` (§2.2), tỉnh Khánh Hoà giờ là một Place cấp province làm gốc chuỗi: Tỉnh Khánh Hoà → Phường Nha Trang → Hòn Mun → Lặn biển (§3). Bảng quan hệ sửa "Place nằm trong TouristDestination" thành "Place nằm trong Place cấp trên hoặc TouristDestination". Thêm field display-only `placeHierarchy` (§2.2) hiển thị trọn chuỗi trong Studio, `incomingExperiences` bị nó thay thế và ẩn khỏi layout. Không thêm document type mới nên là cửa hai chiều theo §5.3. (2) **Nới bắt buộc** — mọi field tuỳ chọn trừ `title.vi` và `slug.vi`, áp ở cả `cms/schemas/*.ts` lẫn `scripts/gate.config.ts`; I19 và kiểm reference giữ nguyên. Xem "Nới bắt buộc v1.0.12" ở §4.
+
+- v1.0.13 (2026-08-04): thêm field `pickupPoints` vào siteSettings (§2.15) — danh sách điểm đón khách của công ty (tên, địa chỉ, toạ độ, giờ đón, ghi chú, cờ ẩn), nguồn duy nhất cho trang `/lo-trinh-don-khach`. Không thêm document type mới nên là cửa hai chiều theo §5.3. Chốt phạm vi: chỉ điểm đón tĩnh + đường nối, KHÔNG theo dõi xe thời gian thực (cần thiết bị GPS và hợp đồng nhà cung cấp, ngoài phạm vi CMS).
 
 Mỗi bảng field có cột "dịch được" để quyết i18n field-level, field bất biến không nhân bản (ADR-0004). Khi dựng một trang, tách rõ ba tầng: field của entity, rollup suy ở build từ entity liên quan, và trình bày của template. Đừng biến layout thành field (N1).

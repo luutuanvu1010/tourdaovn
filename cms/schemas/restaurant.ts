@@ -24,7 +24,6 @@ export default defineType({
         fields: [
           defineField({
             name: 'alt', type: 'string',
-            validation: Rule => Rule.required(),
             initialValue: (_value: unknown, context: Record<string, unknown>) =>
               ((context.document as Record<string,unknown>)?.title?.vi || (context.document as Record<string,unknown>)?.title || '')  + ' — Ảnh ' + brand.name
           })
@@ -50,7 +49,7 @@ export default defineType({
     defineField({
       name: 'officialSource', type: 'url',
       group: 'viTri',
-      validation: Rule => Rule.required().uri()
+      validation: Rule => Rule.uri({ scheme: ['http', 'https'] })
     }),
     defineField({
       name: 'sameAs', type: 'array',
@@ -77,7 +76,8 @@ export default defineType({
       name: 'containedInPlace', type: 'reference',
       group: 'viTri',
       to: [{ type: 'place' }, { type: 'touristDestination' }],
-      validation: Rule => Rule.required()
+      title: 'Nằm trong (đơn vị chứa trực tiếp)',
+      description: 'Chọn Place cụ thể nhất chứa nó (thường là Phường), không nhảy thẳng lên cấp Tỉnh.'
     }),
     defineField({
       name: 'openingHours', type: 'object',

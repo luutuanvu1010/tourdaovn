@@ -1,0 +1,244 @@
+---
+// Trang lộ trình đón khách — bản đồ + bảng giờ đón.
+//
+// Đây là trang TĨNH có địa chỉ cố định, KHÔNG đi qua ROUTE_MAP/[...path].astro: nội dung
+// của nó là config của công ty (siteSettings.pickupPoints), không phải một entity có slug.
+// Astro ưu tiên file route tĩnh hơn catch-all nên không xung đột với [...path].astro.
+//
+// Nguồn dữ liệu duy nhất: siteSettings.pickupPoints (CONTENT_MODEL §2.15 v1.0.13).
+// Cấm hardcode danh sách điểm đón tại đây.
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Section from '../components/Section.astro'
+import RouteMap from '../components/RouteMap.astro'
+import { getClient } from '../lib/sanity'
+import { siteSettingsQuery } from '../lib/queries'
+import { jsonLdScriptContent } from '../lib/serialize/utils'
+import { siteBaseUrl } from '../lib/siteUrl'
+import { brand } from '../site.config'
+import type { SiteSettingsResult, PickupPoint } from '../lib/types'
+
+const PATH = '/lo-trinh-don-khach/'
+
+const config: SiteSettingsResult | null = await getClient().fetch(siteSettingsQuery())
+
+// Guard rỗng là cổng cứng, cùng quy tắc với section trang chủ: điểm bị ẩn không render ở
+// bất kỳ đâu; không có điểm nào thì trang vẫn lên nhưng nói rõ đang cập nhật, không để
+// khung bản đồ trống gây hiểu nhầm là lỗi.
+const allPoints: PickupPoint[] = config?.pickupPoints ?? []
+const points = allPoints.filter((p) => !p.hidden)
+const hasPoints = points.length > 0
+const mappable = points.filter(
+  (p) => typeof p.geo?.lat === 'number' && typeof p.geo?.lng === 'number'
+)
+
+const contact = config?.contact ?? null
+const hotlineHref = contact?.hotline ? `tel:${contact.hotline.replace(/\s+/g, '')}` : null
+
+const metaTitle = `Lộ trình đón khách — ${brand.name}`
+const metaDescription = hasPoints
+  ? `Danh sách ${points.length} điểm đón khách và giờ đón của ${brand.legalName}, kèm bản đồ lộ trình xe đưa đón.`
+  : `Điểm đón khách và giờ đón của ${brand.legalName}.`
+
+const siteBase = siteBaseUrl(Astro.site)
+const pageUrl = siteBase.replace(/\/$/, '') + PATH
+
+// JSON-LD: mô tả trang, không mô tả chuyến đi. Không dùng @type Trip vì lộ trình đón
+// khách là khâu vận hành chung, không phải một tour bán được — gán Trip sẽ tạo thực thể
+// thương mại không có giá, sai vai (I1, I6).
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': `${pageUrl}#webpage`,
+    url: pageUrl,
+    name: metaTitle,
+    description: metaDescription,
+    inLanguage: 'vi',
+    isPartOf: { '@id': `${siteBase.replace(/\/$/, '')}/#website` },
+  },
+]
+---
+
+<BaseLayout
+  title={metaTitle}
+  description={metaDescription}
+  lang="vi"
+  currentPath={PATH}
+>
+  <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)} />
+
+  <Section heading="Lộ trình đón khách">
+    <p class="lead">
+      Xe đưa đón dừng lần lượt tại các điểm dưới đây. Bấm vào số trên bản đồ để xem
+      giờ đón và vị trí đứng chờ.
+    </p>
+
+    {mappable.length > 0 && <RouteMap points={points} height={440} />}
+
+    {hasPoints ? (
+      <div class="stops">
+        <h3 class="stops-title">Bảng giờ đón</h3>
+        <ol class="stop-list">
+          {points.map((p, i) => (
+            <li class="stop">
+              <span class="stop-num" aria-hidden="true">{i + 1}</span>
+              <div class="stop-body">
+                <p class="stop-name">{p.stopName || `Điểm đón ${i + 1}`}</p>
+                {p.stopAddress && <p class="stop-addr">{p.stopAddress}</p>}
+                {p.pickupNote && <p class="stop-note">{p.pickupNote}</p>}
+              </div>
+              {p.pickupTime && <span class="stop-time">{p.pickupTime}</span>}
+            </li>
+          ))}
+        </ol>
+        <p class="stops-hint">
+          Vui lòng có mặt trước giờ đón 5 phút. Giờ đón có thể thay đổi theo tình hình
+          giao thông{hotlineHref ? ' — gọi hotline để xác nhận trước khi khởi hành.' : '.'}
+        </p>
+        {hotlineHref && (
+          <a class="stops-cta" href={hotlineHref}>Gọi {contact?.hotline}</a>
+        )}
+      </div>
+    ) : (
+      <p class="empty">
+        Lộ trình đón khách đang được cập nhật.
+        {hotlineHref && (
+          <Fragment> Vui lòng <a href={hotlineHref}>gọi {contact?.hotline}</a> để được hướng dẫn điểm đón.</Fragment>
+        )}
+      </p>
+    )}
+  </Section>
+</BaseLayout>
+
+<style>
+  .lead {
+    max-width: 62ch;
+    margin: 0 0 var(--s5);
+    color: var(--c-text-muted);
+    font-size: var(--fs-base);
+    line-height: var(--lh-body);
+  }
+
+  .stops {
+    margin-top: var(--s6);
+  }
+
+  .stops-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-h5);
+    margin: 0 0 var(--s4);
+  }
+
+  .stop-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--c-card);
+  }
+
+  .stop {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--s3);
+    padding: var(--s4);
+    border-bottom: 1px solid var(--c-border);
+  }
+
+  .stop:last-child {
+    border-bottom: 0;
+  }
+
+  .stop-num {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-pill);
+    background: var(--c-accent);
+    color: var(--c-text-inverse);
+    font-size: var(--fs-label);
+    font-weight: 700;
+  }
+
+  .stop-body {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .stop-name {
+    margin: 0;
+    font-size: var(--fs-base);
+    font-weight: 600;
+    color: var(--c-text);
+  }
+
+  .stop-addr,
+  .stop-note {
+    margin: var(--s1) 0 0;
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+    line-height: var(--lh-body);
+  }
+
+  .stop-note {
+    font-style: italic;
+  }
+
+  .stop-time {
+    flex: 0 0 auto;
+    align-self: center;
+    padding: var(--s1) var(--s3);
+    border-radius: var(--radius-pill);
+    background: var(--c-primary-soft);
+    color: var(--c-primary);
+    font-size: var(--fs-label);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .stops-hint {
+    margin: var(--s4) 0 0;
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+    line-height: var(--lh-body);
+  }
+
+  .stops-cta {
+    display: inline-flex;
+    align-items: center;
+    margin-top: var(--s4);
+    padding: var(--s3) var(--s5);
+    background: var(--c-accent);
+    color: var(--c-text-inverse);
+    font-weight: 600;
+    border-radius: var(--radius-pill);
+    transition: background var(--m-fast) var(--m-ease);
+  }
+
+  .stops-cta:hover {
+    background: var(--c-accent-strong);
+  }
+
+  .empty {
+    margin: 0;
+    color: var(--c-text-muted);
+    font-size: var(--fs-base);
+    line-height: var(--lh-body);
+  }
+
+  @media (max-width: 640px) {
+    .stop {
+      flex-wrap: wrap;
+    }
+
+    .stop-time {
+      margin-left: calc(28px + var(--s3));
+      align-self: flex-start;
+    }
+  }
+</style>

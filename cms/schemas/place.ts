@@ -3,6 +3,7 @@ import { PinIcon } from '@sanity/icons'
 import { baseFieldsAfterGallery, baseFieldsBeforeGallery, baseGroups } from './baseFields'
 import { BulkGalleryInput } from '../components/BulkGalleryInput'
 import { IncomingExperiences } from '../components/IncomingExperiences'
+import { PlaceHierarchy } from '../components/PlaceHierarchy'
 import { brand } from '../../src/site.config'
 
 export default defineType({
@@ -25,7 +26,6 @@ export default defineType({
         fields: [
           defineField({
             name: 'alt', type: 'string',
-            validation: Rule => Rule.required(),
             initialValue: (_value: unknown, context: Record<string, unknown>) =>
               ((context.document as Record<string,unknown>)?.title?.vi || (context.document as Record<string,unknown>)?.title || '')  + ' — Ảnh ' + brand.name
           })
@@ -36,22 +36,28 @@ export default defineType({
     defineField({
       name: 'placeType', type: 'string',
       group: 'coBan',
+      description:
+        'Cấp hành chính đi trước (Tỉnh → Phường/Xã), rồi tới địa danh tự nhiên (Đảo, Bãi biển, Địa hình). ' +
+        '"Khu vực" là vùng du lịch không trùng ranh giới hành chính.',
       options: {
         list: [
-          { title: 'Bãi biển', value: 'beach' },
-          { title: 'Đảo', value: 'island' },
-          { title: 'Địa hình', value: 'landform' },
+          // ── Cấp hành chính (dùng làm khung chứa) ──
+          { title: 'Tỉnh', value: 'province' },
           { title: 'Phường', value: 'ward' },
+          { title: 'Xã', value: 'commune' },
+          // ── Địa danh tự nhiên / vùng du lịch ──
+          { title: 'Đảo', value: 'island' },
+          { title: 'Bãi biển', value: 'beach' },
+          { title: 'Địa hình', value: 'landform' },
           { title: 'Khu vực', value: 'area' }
         ]
-      },
-      validation: Rule => Rule.required()
+      }
     }),
     defineField({
       name: 'sameAs', type: 'array',
       group: 'viTri',
       of: [{ type: 'url' }],
-      validation: Rule => Rule.required().min(1)
+      description: 'Wikidata/Wikipedia. Với cấp hành chính (tỉnh, phường, xã) nên có để JSON-LD trỏ đúng thực thể chuẩn (I2).'
     }),
     defineField({
       name: 'geo', type: 'geopoint',
@@ -72,7 +78,20 @@ export default defineType({
       name: 'containedInPlace', type: 'reference',
       group: 'viTri',
       to: [{ type: 'place' }, { type: 'touristDestination' }],
-      validation: Rule => Rule.required()
+      title: 'Nằm trong (đơn vị chứa trực tiếp)',
+      description:
+        'Chọn đơn vị chứa TRỰC TIẾP, không nhảy cấp. Chuỗi mẫu: ' +
+        'Hòn Mun (Đảo) → Phường Nha Trang (Phường) → Tỉnh Khánh Hoà (Tỉnh). ' +
+        'Place cấp Tỉnh là gốc, để trống ô này. ' +
+        'Trỏ TouristDestination khi vùng chứa là thương hiệu du lịch chứ không phải đơn vị hành chính.',
+      validation: Rule => Rule.custom((value: any, context: any) => {
+        if (!value?._ref) return true
+        const selfId = String(context?.document?._id || '').replace(/^drafts\./, '')
+        if (selfId && value._ref.replace(/^drafts\./, '') === selfId) {
+          return 'Một địa danh không thể nằm trong chính nó (chu trình — I8)'
+        }
+        return true
+      })
     }),
     defineField({ name: 'hasMap', type: 'url', group: 'seo' }),
     defineField({
@@ -131,8 +150,19 @@ export default defineType({
       ]
     }),
     defineField({
+      name: 'placeHierarchy', type: 'string',
+      title: 'Chuỗi liên kết thực tế',
+      group: 'viTri',
+      readOnly: true,
+      components: { input: PlaceHierarchy },
+      description:
+        'Chỉ để xem — suy ngược từ dữ liệu, không lưu. ' +
+        'Chuỗi mẫu: Tỉnh Khánh Hoà → Phường Nha Trang → Hòn Mun → Lặn biển.'
+    }),
+    defineField({
       name: 'incomingExperiences', type: 'string',
       group: 'viTri',
+      hidden: true,
       readOnly: true,
       components: { input: IncomingExperiences },
       description: 'Trải nghiệm diễn ra tại địa danh này (tham chiếu từ Experience.venue)'

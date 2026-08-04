@@ -3,6 +3,7 @@ import { CogIcon } from '@sanity/icons'
 import {
   ENTITY_TYPE_REGISTRY,
   getEntityMeta,
+  getEntityMenuLabel,
   type EntityTypeMeta,
 } from './entityTypes'
 
@@ -24,7 +25,7 @@ export const structure: StructureResolver = (S) => {
   // Singleton: Trang chủ
   items.push(
     S.listItem()
-      .title('Trang chủ')
+      .title(getEntityMenuLabel('siteSettings'))
       .icon(CogIcon)
       .child(
         S.document()
@@ -39,7 +40,7 @@ export const structure: StructureResolver = (S) => {
   if (tdMeta) {
     items.push(
       S.listItem()
-        .title(tdMeta.labelVi)
+        .title(getEntityMenuLabel('touristDestination'))
         .icon(tdMeta.icon)
         .child(
           S.document()
@@ -67,7 +68,7 @@ export const structure: StructureResolver = (S) => {
     if (divider) items.push(S.divider())
     for (const entity of entries) {
       const item = S.documentTypeListItem(entity.schemaType)
-        .title(entity.labelVi)
+        .title(getEntityMenuLabel(entity.schemaType))
         .icon(entity.icon)
       items.push(item)
     }

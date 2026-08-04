@@ -19,20 +19,29 @@ import {
  * vực điều hướng, không phải attraction.
  */
 const PLACE_TYPE_MAP: Record<string, { type: string | string[]; additionalType?: string }> = {
+  // Cấp hành chính — khung chứa, không phải điểm du lịch (v1.0.12)
+  province: { type: 'AdministrativeArea' },
+  ward: { type: 'AdministrativeArea' },
+  commune: { type: 'AdministrativeArea' },
+  // Địa danh tự nhiên / vùng du lịch
   beach: { type: ['Beach', 'TouristAttraction'] },
   island: { type: ['Landform', 'TouristAttraction'], additionalType: 'https://www.wikidata.org/wiki/Q23442' },
   landform: { type: ['Landform', 'TouristAttraction'] },
-  ward: { type: 'AdministrativeArea' },
   area: { type: 'Place' }
 }
+
+// Cấp hành chính: JSON-LD chỉ trỏ tỉnh qua Wikidata URL khi CHƯA có Place cấp
+// province trong dataset (đường cũ, I15). Có rồi thì trỏ entity cha như bình thường.
+const ADMIN_LEVEL_TYPES = new Set(['province', 'ward', 'commune'])
 
 /**
  * Serialize Place → JSON-LD Place (với subtype theo placeType).
  *
  * Quy tắc đặc biệt:
- * - ward: containedInPlace nội bộ trỏ TouristDestination, nhưng JSON-LD
- *   xuất containedInPlace là tỉnh Khánh Hòa qua Wikidata URL (I15).
- *   Dùng containedInPlaceRef của TouristDestination cha.
+ * - Cấp hành chính (province/ward/commune) mà cha là TouristDestination: JSON-LD
+ *   xuất containedInPlace là tỉnh qua Wikidata URL lấy từ containedInPlaceRef của
+ *   cha, không trỏ thương hiệu du lịch (I15). Khi cha đã là Place cấp province thật
+ *   (v1.0.12) thì trỏ thẳng entity đó như mọi Place khác.
  * - accessInfo nhập description (5.1).
  * - isAccessibleForFree → boolean property thật.
  */
@@ -41,7 +50,9 @@ export function placeToJsonLd(
   baseUrl: string,
   lang?: Lang
 ): Record<string, unknown> {
-  const pm = PLACE_TYPE_MAP[place.placeType] ?? { type: 'Place' }
+  // placeType là tuỳ chọn từ v1.0.12 — thiếu thì lùi về Place chung, không đoán bừa.
+  const placeType = place.placeType ?? ''
+  const pm = PLACE_TYPE_MAP[placeType] ?? { type: 'Place' }
   const ld = ldRoot(baseUrl, pm.type, 'place', place.slug, lang)
   if (pm.additionalType) ld['additionalType'] = pm.additionalType
 
@@ -81,17 +92,17 @@ export function placeToJsonLd(
 
   // containedInPlace
   if (place.containedInPlace) {
-    if (place.placeType === 'ward') {
-      // Ward: JSON-LD xuất containedInPlace là tỉnh Khánh Hòa qua Wikidata URL (I15)
-      const parentRefs = place.containedInPlace.containedInPlaceRef
-      if (parentRefs && parentRefs.length > 0) {
-        ld['containedInPlace'] = {
-          '@type': 'AdministrativeArea',
-          '@id': parentRefs[0]
-        }
+    const parentRefs = place.containedInPlace.containedInPlaceRef
+    if (ADMIN_LEVEL_TYPES.has(placeType) && parentRefs && parentRefs.length > 0) {
+      // Cha là TouristDestination (không phải đơn vị hành chính): xuất tỉnh qua
+      // Wikidata URL thay vì trỏ thương hiệu du lịch — phường thuộc tỉnh, không
+      // thuộc thực thể nào tên Nha Trang (I15).
+      ld['containedInPlace'] = {
+        '@type': 'AdministrativeArea',
+        '@id': parentRefs[0]
       }
     } else {
-      // Place/Attraction thường: trỏ entity cha
+      // Cha là entity thật (kể cả Place cấp province): trỏ thẳng entity đó.
       const parent = refToLdRef(baseUrl, place.containedInPlace, lang)
       if (parent) ld['containedInPlace'] = parent
     }
@@ -100,11 +111,11 @@ export function placeToJsonLd(
   // hasMap
   if (place.hasMap) ld['hasMap'] = place.hasMap
 
-  // openingHours — chỉ hợp lệ cho venue có giờ mở cửa thật. Cả 5 placeType
-  // (beach, island, landform, ward, area) là địa hình tự nhiên hoặc đơn vị
-  // hành chính, không phải venue — không có khái niệm "giờ mở cửa" (A6).
-  const NO_OPENING_HOURS_TYPES = new Set(['ward', 'area', 'beach', 'island', 'landform'])
-  if (!NO_OPENING_HOURS_TYPES.has(place.placeType)) {
+  // openingHours — chỉ hợp lệ cho venue có giờ mở cửa thật. Cả 7 placeType
+  // (province, ward, commune, beach, island, landform, area) là địa hình tự nhiên
+  // hoặc đơn vị hành chính, không phải venue — không có khái niệm "giờ mở cửa" (A6).
+  const NO_OPENING_HOURS_TYPES = new Set(['province', 'ward', 'commune', 'area', 'beach', 'island', 'landform'])
+  if (placeType && !NO_OPENING_HOURS_TYPES.has(placeType)) {
     const oh = openingHoursToLd(place.openingHours)
     if (oh) {
       ld['openingHoursSpecification'] = oh

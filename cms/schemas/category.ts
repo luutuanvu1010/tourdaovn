@@ -4,7 +4,7 @@ import { baseGroups } from './baseFields'
 
 export default defineType({
   name: 'category',
-  title: 'Từ vựng (Category)',
+  title: 'Danh mục (Category)',
   type: 'document',
   icon: TagsIcon,
   groups: baseGroups,
@@ -12,7 +12,6 @@ export default defineType({
     defineField({
       name: 'name', type: 'object',
       group: 'coBan',
-      validation: Rule => Rule.required(),
       fields: [
         defineField({ name: 'vi', type: 'string', validation: Rule => Rule.required() }),
         defineField({ name: 'en', type: 'string' }),
@@ -24,7 +23,6 @@ export default defineType({
     defineField({
       name: 'description', type: 'object',
       group: 'coBan',
-      validation: Rule => Rule.required(),
       fields: [
         defineField({ name: 'vi', type: 'text', rows: 2 }),
         defineField({ name: 'en', type: 'text', rows: 2 }),
@@ -43,7 +41,6 @@ export default defineType({
           { title: 'Loại tour', value: 'tour-type' }
         ]
       },
-      validation: Rule => Rule.required()
     }),
     defineField({
       name: 'termCode', type: 'slug',

@@ -24,7 +24,6 @@ export default defineType({
         fields: [
           defineField({
             name: 'alt', type: 'string',
-            validation: Rule => Rule.required(),
             initialValue: (_value: unknown, context: Record<string, unknown>) =>
               ((context.document as Record<string,unknown>)?.title?.vi || (context.document as Record<string,unknown>)?.title || '')  + ' — Ảnh ' + brand.name
           })
@@ -48,7 +47,6 @@ export default defineType({
           { title: 'Công viên', value: 'park' }
         ]
       },
-      validation: Rule => Rule.required()
     }),
     defineField({
       name: 'sameAs', type: 'array',
@@ -97,8 +95,10 @@ export default defineType({
       name: 'containedInPlace', type: 'reference',
       group: 'viTri',
       to: [{ type: 'place' }, { type: 'touristDestination' }],
-      description: 'Place cụ thể hoặc TouristDestination Nha Trang khi đó là container đúng.',
-      validation: Rule => Rule.required()
+      title: 'Nằm trong (đơn vị chứa trực tiếp)',
+      description:
+        'Chọn Place cụ thể nhất chứa nó (vd một Phường hoặc một Đảo), không nhảy thẳng lên cấp Tỉnh. ' +
+        'Trỏ TouristDestination khi vùng chứa là thương hiệu du lịch chứ không phải đơn vị hành chính.'
     }),
     defineField({
       name: 'bookingRef', type: 'object',

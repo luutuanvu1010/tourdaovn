@@ -1,0 +1,253 @@
+---
+// RouteMap — bản đồ lộ trình đón khách (CONTENT_MODEL §2.15 v1.0.13).
+//
+// Khác MapView.astro: MapView chấm MỘT địa điểm (hoặc nhóm marker rời) của một entity;
+// RouteMap vẽ MỘT CHUỖI CÓ THỨ TỰ — marker đánh số 1..n theo đúng thứ tự mảng, cộng
+// đường nối giữa các điểm. Hai component không gộp được vì ngữ nghĩa dữ liệu khác nhau.
+//
+// Đường nối: hỏi OSRM public một lần để bám đường thật; hỏng hoặc quá hạn → tự rơi về
+// đường thẳng nét đứt. Không dùng leaflet-routing-machine: thư viện đó kéo thêm ~40KB
+// và một khối UI chỉ đường mà trang này không cần.
+//
+// Load: requestIdleCallback, không chặn LCP. Tile OSM miễn phí, không cần API key.
+import type { PickupPoint } from '../lib/types'
+
+export interface Props {
+  points: PickupPoint[]
+  height?: number
+}
+
+const { points, height = 420 } = Astro.props
+
+// Guard toạ độ giống MapView: toạ độ hỏng không bao giờ được render → Leaflet không treo.
+function hasValidGeo(p: PickupPoint): p is PickupPoint & { geo: { lat: number; lng: number } } {
+  const lat = p.geo?.lat
+  const lng = p.geo?.lng
+  return (
+    typeof lat === 'number' &&
+    typeof lng === 'number' &&
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    Math.abs(lat) <= 90 &&
+    Math.abs(lng) <= 180
+  )
+}
+
+const mapPoints = (points || [])
+  .map((p, i) => ({ p, order: i + 1 }))
+  .filter((entry): entry is { p: PickupPoint & { geo: { lat: number; lng: number } }; order: number } =>
+    hasValidGeo(entry.p)
+  )
+  .map(({ p, order }) => ({
+    order,
+    lat: p.geo.lat,
+    lng: p.geo.lng,
+    name: p.stopName || `Điểm đón ${order}`,
+    address: p.stopAddress || '',
+    time: p.pickupTime || '',
+    note: p.pickupNote || '',
+  }))
+
+const MAP_OK = mapPoints.length > 0
+const mapId = `route-${Math.random().toString(36).slice(2, 9)}`
+const pointsJson = JSON.stringify(mapPoints)
+---
+
+{MAP_OK && (
+<Fragment>
+<div
+  class="route-map"
+  id={mapId}
+  style={`height:${height}px`}
+  data-points={pointsJson}
+></div>
+
+<script define:vars={{ mapId }}>
+  var ROUTE_COLOR = '#0C4A6E'
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+  }
+
+  function numberedIcon(L, n) {
+    return L.divIcon({
+      className: 'route-pin-wrap',
+      html: '<span class="route-pin">' + n + '</span>',
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
+      popupAnchor: [0, -16],
+    })
+  }
+
+  function popupHtml(pt) {
+    var html = '<strong>' + pt.order + '. ' + escapeHtml(pt.name) + '</strong>'
+    if (pt.time) html += '<br><span class="route-pop-time">Đón lúc ' + escapeHtml(pt.time) + '</span>'
+    if (pt.address) html += '<br>' + escapeHtml(pt.address)
+    if (pt.note) html += '<br><em>' + escapeHtml(pt.note) + '</em>'
+    return html
+  }
+
+  // Đường nối theo đường thật. OSRM public giới hạn tần suất và có thể chậm — nên đặt
+  // timeout 6s và luôn có sẵn đường thẳng nét đứt làm phương án dự phòng.
+  function drawRoute(L, map, pts) {
+    var fallback = L.polyline(
+      pts.map(function (p) { return [p.lat, p.lng] }),
+      { color: ROUTE_COLOR, weight: 3, opacity: 0.55, dashArray: '6 8' }
+    ).addTo(map)
+
+    if (pts.length < 2 || pts.length > 25) return
+
+    var coords = pts.map(function (p) { return p.lng + ',' + p.lat }).join(';')
+    var url = 'https://router.project-osrm.org/route/v1/driving/' + coords + '?overview=full&geometries=geojson'
+
+    var controller = typeof AbortController !== 'undefined' ? new AbortController() : null
+    var timer = setTimeout(function () { if (controller) controller.abort() }, 6000)
+
+    fetch(url, controller ? { signal: controller.signal } : undefined)
+      .then(function (r) { return r.ok ? r.json() : null })
+      .then(function (data) {
+        clearTimeout(timer)
+        var line = data && data.routes && data.routes[0] && data.routes[0].geometry
+        if (!line || !line.coordinates || line.coordinates.length < 2) return
+        var latlngs = line.coordinates.map(function (c) { return [c[1], c[0]] })
+        map.removeLayer(fallback)
+        L.polyline(latlngs, { color: ROUTE_COLOR, weight: 4, opacity: 0.8 }).addTo(map)
+      })
+      .catch(function () {
+        clearTimeout(timer)
+        /* giữ nguyên đường thẳng nét đứt */
+      })
+  }
+
+  function initRouteMap(container) {
+    var pts
+    try {
+      pts = JSON.parse(container.dataset.points || '[]')
+    } catch (_) {
+      return
+    }
+    if (!pts.length) return
+
+    var L = window.L
+    var map = L.map(container.id, {
+      center: [pts[0].lat, pts[0].lng],
+      zoom: 13,
+      scrollWheelZoom: false,
+      zoomControl: true,
+    })
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 19,
+    }).addTo(map)
+
+    var bounds = []
+    pts.forEach(function (pt) {
+      L.marker([pt.lat, pt.lng], { icon: numberedIcon(L, pt.order), title: pt.name })
+        .addTo(map)
+        .bindPopup(popupHtml(pt))
+      bounds.push([pt.lat, pt.lng])
+    })
+
+    if (bounds.length > 1) {
+      map.fitBounds(L.latLngBounds(bounds).pad(0.18))
+    } else {
+      map.setView(bounds[0], 15)
+    }
+
+    // Cuộn trang không bị bản đồ "nuốt"; bấm vào bản đồ mới bật cuộn phóng to.
+    map.on('click', function () { map.scrollWheelZoom.enable() })
+    map.on('mouseout', function () { map.scrollWheelZoom.disable() })
+
+    drawRoute(L, map, pts)
+  }
+
+  function loadLeafletStyle() {
+    if (document.querySelector('link[href*="leaflet.css"]')) return
+    var link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
+    document.head.appendChild(link)
+  }
+
+  function loadLeafletJS(cb) {
+    if (window.L) { cb(); return }
+    var existing = document.querySelector('script[src*="leaflet.js"]')
+    if (existing) { existing.addEventListener('load', cb); return }
+    var script = document.createElement('script')
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+    script.onload = cb
+    document.head.appendChild(script)
+  }
+
+  var container = document.getElementById(mapId)
+  if (container) {
+    var boot = function () {
+      loadLeafletStyle()
+      loadLeafletJS(function () { initRouteMap(container) })
+    }
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(boot, { timeout: 3000 })
+    } else {
+      setTimeout(boot, 200)
+    }
+  }
+</script>
+</Fragment>
+)}
+
+<style>
+  .route-map {
+    width: 100%;
+    background: var(--c-primary-soft);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--c-border);
+  }
+
+  /* Marker đánh số — dựng bằng divIcon nên phải :global */
+  .route-map :global(.route-pin) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-pill);
+    background: var(--c-accent);
+    color: var(--c-text-inverse);
+    font-family: var(--font-ui);
+    font-size: var(--fs-label);
+    font-weight: var(--fw-700, 700);
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+  }
+
+  .route-map :global(.route-pin-wrap) {
+    background: transparent;
+    border: 0;
+  }
+
+  .route-map :global(.leaflet-control-zoom a) {
+    color: var(--c-primary);
+  }
+
+  .route-map :global(.leaflet-popup-content) {
+    font-family: var(--font-ui);
+    font-size: var(--fs-sm);
+    color: var(--c-text);
+    line-height: var(--lh-body, 1.6);
+  }
+
+  .route-map :global(.route-pop-time) {
+    color: var(--c-accent);
+    font-weight: 600;
+  }
+
+  .route-map :global(.leaflet-container) {
+    background: var(--c-primary-soft);
+  }
+</style>

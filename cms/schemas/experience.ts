@@ -24,7 +24,6 @@ export default defineType({
         fields: [
           defineField({
             name: 'alt', type: 'string',
-            validation: Rule => Rule.required(),
             initialValue: (_value: unknown, context: Record<string, unknown>) =>
               ((context.document as Record<string,unknown>)?.title?.vi || (context.document as Record<string,unknown>)?.title || '')  + ' — Ảnh ' + brand.name
           })
@@ -36,14 +35,16 @@ export default defineType({
       name: 'experienceType', type: 'reference',
       group: 'coBan',
       to: [{ type: 'category' }],
-      validation: Rule => Rule.required(),
       description: 'Trỏ bộ experience-type trong Category'
     }),
     defineField({
       name: 'venue', type: 'reference',
       group: 'viTri',
       to: [{ type: 'attraction' }, { type: 'hotel' }, { type: 'resort' }, { type: 'place' }],
-      validation: Rule => Rule.required()
+      title: 'Diễn ra tại (venue)',
+      description:
+        'Nơi cụ thể diễn ra hoạt động — mắt xích cuối của chuỗi. ' +
+        'Vd "Lặn biển" chọn venue là Place "Hòn Mun"; cấp trên (Phường Nha Trang, Tỉnh Khánh Hoà) suy ra tự động, không chọn ở đây.'
     }),
     defineField({ name: 'isAccessibleForFree', type: 'boolean', group: 'seo' }),
     defineField({ name: 'duration', type: 'string', group: 'seo', description: 'ISO 8601, vd PT2H' }),

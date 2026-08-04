@@ -108,7 +108,7 @@ export interface EntityRef {
 
 export interface HomepagePlaceCard extends EntityRef {
   _type: 'place'
-  placeType?: 'beach' | 'island' | 'landform' | 'ward' | 'area'
+  placeType?: 'province' | 'ward' | 'commune' | 'island' | 'beach' | 'landform' | 'area'
 }
 
 export interface HomepageArticleCard extends EntityRef {
@@ -224,7 +224,7 @@ export interface TouristDestinationHubProps {
 
 export interface PlaceResult extends BaseEntityFields {
   _type: 'place'
-  placeType: 'beach' | 'island' | 'landform' | 'ward' | 'area'
+  placeType?: 'province' | 'ward' | 'commune' | 'island' | 'beach' | 'landform' | 'area'
   sameAs: string[]
   geo?: GeoPoint
   address?: { street?: string; ward?: string }
@@ -451,11 +451,23 @@ export interface SiteContact {
   email?: string
 }
 
+// Điểm đón khách (CONTENT_MODEL §2.15 v1.0.13) — thứ tự trong mảng LÀ thứ tự lộ trình.
+export interface PickupPoint {
+  _key: string
+  stopName?: string
+  stopAddress?: string
+  geo?: GeoPoint
+  pickupTime?: string
+  pickupNote?: string
+  hidden?: boolean
+}
+
 export interface SiteSettingsResult {
   title: string
   sections: SiteSettingsSection[] | null
   heroText: Record<'vi' | 'en' | 'zh' | 'ko' | 'ru', string | undefined> | null
   contact: SiteContact | null
+  pickupPoints: PickupPoint[] | null
 }
 
 // ---------- JSON-LD ----------

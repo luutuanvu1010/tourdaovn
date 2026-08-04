@@ -47,22 +47,27 @@ export const GATE: GateConfig = {
     'person',
     'organization',
   ],
+  // ĐỒNG BỘ VỚI SCHEMA (chốt 2026-08-04): chủ dự án quyết định nới toàn bộ điều
+  // kiện bắt buộc sang tuỳ chọn, ở CẢ hai tầng — schema Sanity (Studio) và cổng
+  // publish (file này). Chỉ còn `title` và `slug` là bắt buộc, đúng bằng hai ngoại
+  // lệ `title.vi` / `slug.vi` còn giữ `Rule.required()` trong cms/schemas/baseFields.ts.
+  //
+  // Vẫn giữ nguyên P6 + N7: schema Sanity là nguồn sự thật duy nhất cho "field nào
+  // bắt buộc"; danh sách dưới đây chỉ chép lại, không tự thêm điều kiện nào.
+  //
+  // publishableTypes và references KHÔNG đổi: reviewStatus phải là "approved" mới
+  // publish (ADR-0008, I19) và reference bắt buộc deref được đúng type — đó là kiểm
+  // tính toàn vẹn, không phải kiểm completeness, nên nằm ngoài phạm vi nới lỏng này.
   requiredFields: {
-    // containedInPlace: reference đa-type (place | touristDestination) — xem ghi chú đầu file.
-    place: ['title', 'slug', 'summary', 'placeType', 'sameAs', 'containedInPlace'],
-    // sameAs/officialSource ở attraction chỉ bắt buộc CÓ ĐIỀU KIỆN theo attractionType
-    // (Rule.custom trong schema, không phải Rule.required() vô điều kiện) — không đưa
-    // vào đây vì gate hiện chỉ kiểm "có/không", không kiểm điều kiện theo field khác.
-    attraction: ['title', 'slug', 'summary', 'attractionType', 'containedInPlace'],
-    // venue: reference đa-type (attraction | hotel | resort | place) — xem ghi chú đầu file.
-    experience: ['title', 'slug', 'summary', 'experienceType', 'venue'],
-    // containedInPlace: reference đa-type (place | touristDestination) — xem ghi chú đầu file.
-    hotel: ['title', 'slug', 'summary', 'officialSource', 'containedInPlace'],
-    resort: ['title', 'slug', 'summary', 'officialSource', 'containedInPlace'],
-    tour: ['title', 'slug', 'summary', 'itinerary', 'operator', 'tourFormat'],
-    article: ['title', 'slug', 'language', 'summary', 'mainImage', 'articleType', 'author', 'body'],
-    person: ['title', 'slug', 'summary', 'sameAs', 'bio'],
-    organization: ['title', 'slug', 'summary', 'orgType', 'url', 'officialSource'],
+    place: ['title', 'slug'],
+    attraction: ['title', 'slug'],
+    experience: ['title', 'slug'],
+    hotel: ['title', 'slug'],
+    resort: ['title', 'slug'],
+    tour: ['title', 'slug'],
+    article: ['title', 'slug'],
+    person: ['title', 'slug'],
+    organization: ['title', 'slug'],
   },
   references: {
     // experienceType trỏ đúng một type đích (category) → kiểm được trọn vẹn.

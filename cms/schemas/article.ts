@@ -5,7 +5,7 @@ import { ApprovedByInput } from '../components/ApprovedByInput'
 
 export default defineType({
   name: 'article',
-  title: 'Cẩm nang (Article)',
+  title: 'Bài viết (Article)',
   type: 'document',
   icon: DocumentTextIcon,
   groups: baseGroups,
@@ -33,7 +33,6 @@ export default defineType({
           { title: 'Русский', value: 'ru' }
         ]
       },
-      validation: Rule => Rule.required(),
       initialValue: 'vi'
     }),
     defineField({
@@ -45,7 +44,6 @@ export default defineType({
     defineField({
       name: 'summary', type: 'text', rows: 3,
       group: 'coBan',
-      validation: Rule => Rule.required()
     }),
     defineField({
       name: 'mainImage', type: 'image',
@@ -54,10 +52,8 @@ export default defineType({
       fields: [
         defineField({
           name: 'alt', type: 'string',
-          validation: Rule => Rule.required()
         })
       ],
-      validation: Rule => Rule.required()
     }),
     defineField({
       name: 'articleType', type: 'string',
@@ -72,19 +68,16 @@ export default defineType({
           { title: 'Di chuyển', value: 'transport-guide' }
         ]
       },
-      validation: Rule => Rule.required()
     }),
     defineField({
       name: 'author', type: 'reference',
       group: 'viTri',
       to: [{ type: 'person' }],
-      validation: Rule => Rule.required()
     }),
     defineField({
       name: 'body', type: 'array',
       group: 'noiDung',
       of: [{ type: 'block' }, { type: 'image' }],
-      validation: Rule => Rule.required()
     }),
     defineField({
       name: 'about', type: 'array',

@@ -24,7 +24,6 @@ export default defineType({
         fields: [
           defineField({
             name: 'alt', type: 'string',
-            validation: Rule => Rule.required(),
             initialValue: (_value: unknown, context: Record<string, unknown>) =>
               ((context.document as Record<string,unknown>)?.title?.vi || (context.document as Record<string,unknown>)?.title || '')  + ' — Ảnh ' + brand.name
           })
@@ -41,13 +40,11 @@ export default defineType({
           { title: 'Sản vật', value: 'product' }
         ]
       },
-      validation: Rule => Rule.required()
     }),
     defineField({
       name: 'sameAs', type: 'array',
       group: 'viTri',
       of: [{ type: 'url' }],
-      validation: Rule => Rule.required().min(1)
     }),
     defineField({
       name: 'originNote', type: 'object',

@@ -37,9 +37,20 @@ export function routeAlternates(entity: string, slug?: string): Record<Lang, str
   ) as Record<Lang, string>
 }
 
+// Trang tĩnh có file route riêng trong src/pages, không đi qua ROUTE_MAP vì nội dung là
+// config của công ty chứ không phải entity có slug. Khai ở đây để sitemap không bỏ sót.
+// Hiện chỉ có bản tiếng Việt — thêm ngôn ngữ thì phải tạo file trang tương ứng trước.
+const STATIC_PAGES: Record<string, string[]> = {
+  vi: ['lo-trinh-don-khach'],
+}
+
 export async function buildSitemapPaths(lang: Lang): Promise<string[]> {
   const paths = new Set<string>()
   paths.add(withTrailingSlash(langPrefix(lang) || '/'))
+
+  for (const page of STATIC_PAGES[lang] ?? []) {
+    paths.add(withTrailingSlash(`${langPrefix(lang)}/${page}`))
+  }
 
   for (const route of ROUTE_MAP) {
     if (route.hasIndex || route.entity.startsWith('hub-')) {

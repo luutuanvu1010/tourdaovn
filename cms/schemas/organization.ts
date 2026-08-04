@@ -4,7 +4,7 @@ import { baseFields, baseGroups } from './baseFields'
 
 export default defineType({
   name: 'organization',
-  title: 'Đơn vị vận hành (Organization)',
+  title: 'Tổ chức (Organization)',
   type: 'document',
   icon: UsersIcon,
   groups: baseGroups,
@@ -22,17 +22,16 @@ export default defineType({
           { title: 'Tổ chức', value: 'organization' }
         ]
       },
-      validation: Rule => Rule.required()
     }),
     defineField({
       name: 'url', type: 'url',
       group: 'viTri',
-      validation: Rule => Rule.required().uri()
+      validation: Rule => Rule.uri({ scheme: ['http', 'https'] })
     }),
     defineField({
       name: 'officialSource', type: 'url',
       group: 'viTri',
-      validation: Rule => Rule.required().uri()
+      validation: Rule => Rule.uri({ scheme: ['http', 'https'] })
     }),
     defineField({
       name: 'sameAs', type: 'array',

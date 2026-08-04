@@ -118,6 +118,95 @@ export default defineType({
         }),
       ],
     }),
+    // CONTENT_MODEL §2.15 v1.0.13 — lộ trình đón khách. Nguồn duy nhất cho trang
+    // /lo-trinh-don-khach; cấm hardcode danh sách điểm đón trong component.
+    defineField({
+      name: 'pickupPoints',
+      title: 'Điểm đón khách (lộ trình xe đưa đón)',
+      description:
+        'Kéo thả để sắp thứ tự — bản đồ vẽ đường nối theo đúng thứ tự này. ' +
+        'Điểm thiếu toạ độ vẫn hiện trong bảng giờ đón nhưng không lên bản đồ. ' +
+        'Để trống toàn bộ → trang lộ trình không hiển thị bản đồ.',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            defineField({
+              name: 'stopName',
+              title: 'Tên điểm đón',
+              type: 'string',
+              description: 'Tên khách dễ nhận ra, ví dụ "Tháp Trầm Hương".',
+            }),
+            defineField({
+              name: 'stopAddress',
+              title: 'Địa chỉ / vị trí đứng chờ',
+              type: 'string',
+              description: 'Mô tả cụ thể để khách biết đứng ở đâu.',
+            }),
+            defineField({
+              name: 'geo',
+              title: 'Toạ độ trên bản đồ',
+              type: 'geopoint',
+              description: 'Bấm để chọn vị trí. Thiếu toạ độ thì điểm này không lên bản đồ.',
+            }),
+            defineField({
+              name: 'pickupTime',
+              title: 'Giờ đón',
+              type: 'string',
+              description: 'Dạng HH:MM, ví dụ 07:30. Để trống nếu chưa cố định giờ.',
+              validation: (Rule) =>
+                Rule.regex(/^([01]\d|2[0-3]):[0-5]\d$/, {
+                  name: 'giờ HH:MM',
+                  invert: false,
+                }).error('Nhập đúng dạng HH:MM, ví dụ 07:30'),
+            }),
+            defineField({
+              name: 'pickupNote',
+              title: 'Ghi chú',
+              type: 'string',
+              description: 'Ví dụ "đứng phía cổng chính", "gọi tài xế trước 5 phút".',
+            }),
+            defineField({
+              name: 'hidden',
+              title: 'Tạm ẩn điểm này',
+              type: 'boolean',
+              initialValue: false,
+              description: 'Bật để ẩn khỏi bản đồ và bảng mà không xoá dữ liệu.',
+            }),
+          ],
+          preview: {
+            select: {
+              stopName: 'stopName',
+              pickupTime: 'pickupTime',
+              hidden: 'hidden',
+              geo: 'geo',
+            },
+            prepare({
+              stopName,
+              pickupTime,
+              hidden,
+              geo,
+            }: {
+              stopName?: string
+              pickupTime?: string
+              hidden?: boolean
+              geo?: { lat?: number; lng?: number }
+            }) {
+              const parts = [
+                pickupTime || 'chưa có giờ',
+                geo?.lat ? 'có toạ độ' : 'thiếu toạ độ',
+                hidden ? 'ĐANG ẨN' : null,
+              ].filter(Boolean)
+              return {
+                title: stopName || '(chưa đặt tên)',
+                subtitle: parts.join(' · '),
+              }
+            },
+          },
+        },
+      ],
+    }),
   ],
   preview: {
     select: { title: 'title' },

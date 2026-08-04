@@ -12,8 +12,8 @@ export default defineType({
   type: 'object',
   icon: HelpCircleIcon,
   fields: [
-    defineField({ name: 'question', type: 'string', validation: Rule => Rule.required() }),
-    defineField({ name: 'answer', type: 'text', rows: 4, validation: Rule => Rule.required() })
+    defineField({ name: 'question', type: 'string' }),
+    defineField({ name: 'answer', type: 'text', rows: 4 })
   ],
   preview: { select: { title: 'question' } }
 })

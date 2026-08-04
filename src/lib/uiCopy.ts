@@ -756,11 +756,11 @@ export const ATTRACTION_TYPE_LABELS: LabelDict = {
 }
 
 export const PLACE_TYPE_LABELS: LabelDict = {
-  vi: { beach: 'Bãi biển', island: 'Đảo', landform: 'Địa hình', ward: 'Phường', area: 'Khu vực' },
-  en: { beach: 'Beach', island: 'Island', landform: 'Landform', ward: 'Ward', area: 'Area' },
-  zh: { beach: '海滩', island: '岛屿', landform: '地貌', ward: '坊', area: '区域' },
-  ko: { beach: '해변', island: '섬', landform: '지형', ward: '동', area: '지역' },
-  ru: { beach: 'Пляж', island: 'Остров', landform: 'Ландшафт', ward: 'Район', area: 'Зона' },
+  vi: { province: 'Tỉnh', ward: 'Phường', commune: 'Xã', beach: 'Bãi biển', island: 'Đảo', landform: 'Địa hình', area: 'Khu vực' },
+  en: { province: 'Province', ward: 'Ward', commune: 'Commune', beach: 'Beach', island: 'Island', landform: 'Landform', area: 'Area' },
+  zh: { province: '省', ward: '坊', commune: '社', beach: '海滩', island: '岛屿', landform: '地貌', area: '区域' },
+  ko: { province: '성', ward: '동', commune: '사', beach: '해변', island: '섬', landform: '지형', area: '지역' },
+  ru: { province: 'Провинция', ward: 'Район', commune: 'Община', beach: 'Пляж', island: 'Остров', landform: 'Ландшафт', area: 'Зона' },
 }
 
 export const SPECIALTY_TYPE_LABELS: LabelDict = {

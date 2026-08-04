@@ -23,6 +23,15 @@ export function siteSettingsQuery(): string {
       zaloUrl,
       whatsapp,
       email
+    },
+    pickupPoints[]{
+      _key,
+      stopName,
+      stopAddress,
+      geo,
+      pickupTime,
+      pickupNote,
+      hidden
     }
   }`
 }

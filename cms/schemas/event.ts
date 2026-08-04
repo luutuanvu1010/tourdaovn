@@ -24,7 +24,6 @@ export default defineType({
         fields: [
           defineField({
             name: 'alt', type: 'string',
-            validation: Rule => Rule.required(),
             initialValue: (_value: unknown, context: Record<string, unknown>) =>
               ((context.document as Record<string,unknown>)?.title?.vi || (context.document as Record<string,unknown>)?.title || '')  + ' — Ảnh ' + brand.name
           })
@@ -45,19 +44,16 @@ export default defineType({
           { title: 'Khác', value: 'other' }
         ]
       },
-      validation: Rule => Rule.required()
     }),
     defineField({
       name: 'startDate', type: 'datetime',
       group: 'seo',
-      validation: Rule => Rule.required()
     }),
     defineField({ name: 'endDate', type: 'datetime', group: 'seo' }),
     defineField({
       name: 'location', type: 'reference',
       group: 'viTri',
       to: [{ type: 'place' }, { type: 'attraction' }],
-      validation: Rule => Rule.required()
     }),
     defineField({
       name: 'organizer', type: 'reference',

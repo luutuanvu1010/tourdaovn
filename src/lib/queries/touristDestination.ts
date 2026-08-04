@@ -60,6 +60,8 @@ export function touristDestinationBySlugQuery(lang: string): string {
         placeType == "island" => 2,
         placeType == "landform" => 3,
         placeType == "ward" => 4,
+        placeType == "commune" => 5,
+        placeType == "province" => 6,
         9
       ),
       title.${lang} asc

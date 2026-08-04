@@ -7,6 +7,8 @@ import { brand } from '../../src/site.config'
 const LANGUAGES = ['vi', 'en', 'zh', 'ko', 'ru'] as const
 const HOMEPAGE_BANNER_LINK_PREFIXES = ['/', 'https://', 'http://', 'tel:', 'mailto:']
 
+// requiredVi giữ lại làm tham số để bật lại khi cần; mặc định tắt —
+// mọi field của entity là tuỳ chọn, trừ title.vi và slug.vi (xem baseFields.ts).
 function localizedStringFields(requiredVi = false) {
   return LANGUAGES.map(lang => defineField({
     name: lang,
@@ -45,7 +47,6 @@ export default defineType({
         fields: [
           defineField({
             name: 'alt', type: 'string',
-            validation: Rule => Rule.required(),
             initialValue: (_value: unknown, context: Record<string, unknown>) =>
               ((context.document as Record<string,unknown>)?.title?.vi || (context.document as Record<string,unknown>)?.title || '')  + ' — Ảnh ' + brand.name
           })
@@ -57,7 +58,6 @@ export default defineType({
       name: 'sameAs', type: 'array',
       group: 'viTri',
       of: [{ type: 'url' }],
-      validation: Rule => Rule.required().min(1)
     }),
     defineField({
       name: 'geo', type: 'geopoint',
@@ -67,13 +67,15 @@ export default defineType({
       name: 'containedInPlaceRef', type: 'array',
       group: 'viTri',
       of: [{ type: 'url' }],
-      validation: Rule => Rule.required().min(1),
-      description: 'Trỏ tỉnh Khánh Hòa qua Wikidata URL (I15)'
+      title: 'Nằm trong tỉnh (URL Wikidata)',
+      description:
+        'Trỏ tỉnh Khánh Hoà qua Wikidata URL (I15). ' +
+        'Nếu đã tạo Place cấp Tỉnh cho Khánh Hoà thì ô này chỉ còn để xuất JSON-LD; ' +
+        'chuỗi điều hướng đi theo Place.containedInPlace.'
     }),
     defineField({
       name: 'body', type: 'object',
       group: 'noiDung',
-      validation: Rule => Rule.required(),
       fields: [
         defineField({ name: 'vi', type: 'array', of: [{ type: 'block' }, { type: 'image' }] }),
         defineField({ name: 'en', type: 'array', of: [{ type: 'block' }, { type: 'image' }] }),
@@ -146,8 +148,7 @@ export default defineType({
             name: 'title',
             title: 'Tiêu đề',
             type: 'object',
-            validation: Rule => Rule.required(),
-            fields: localizedStringFields(true)
+            fields: localizedStringFields()
           }),
           defineField({
             name: 'description',
@@ -183,7 +184,6 @@ export default defineType({
               defineField({
                 name: 'alt',
                 type: 'string',
-                validation: Rule => Rule.required()
               })
             ]
           }),
@@ -201,7 +201,6 @@ export default defineType({
               ]
             },
             initialValue: 'custom',
-            validation: Rule => Rule.required()
           }),
           defineField({
             name: 'theme',
@@ -216,21 +215,19 @@ export default defineType({
               ]
             },
             initialValue: 'ocean',
-            validation: Rule => Rule.required()
           }),
           defineField({
             name: 'isActive',
             title: 'Đang hiện',
             type: 'boolean',
             initialValue: true,
-            validation: Rule => Rule.required()
           }),
           defineField({
             name: 'priority',
             title: 'Thứ tự',
             type: 'number',
             initialValue: 10,
-            validation: Rule => Rule.required().integer().min(0)
+            validation: Rule => Rule.integer().min(0)
           })
         ],
         preview: {
