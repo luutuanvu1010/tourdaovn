@@ -221,3 +221,116 @@ Error [ERR_MODULE_NOT_FOUND]: Cannot find module
 **Bằng chứng.** Trước: `npm run gate` in một dòng `thiếu validator-status.json` rồi thoát 1. Sau: bảng mười dòng, 9 xanh và 1 đỏ ở `deferred-gate`, và `audit:spec` thật sự chạy. Đã kiểm cả mã thoát: có cái đỏ trả 1, toàn xanh trả 0, tên nhóm sai trả 2.
 
 **Ai chốt.** Chủ dự án, 2026-08-05, sau `/code-review` trên sáu commit pha 0.
+
+---
+
+## QĐ-2026-08-05-12 — Điều hướng theo dòng dịch vụ, khai trong `site.config.ts`
+
+**Chốt.** Menu chính tổ chức theo dòng dịch vụ công ty bán, khai trong khối `nav` ở
+`src/site.config.ts`. Ba hub cũ (Khám phá / Lưu trú / Đi lại) rời khỏi menu, **giữ nguyên
+URL**. Chi tiết kiến trúc ở `ADR-0023`; spec thi hành ở
+`docs/specs/SPEC-pha-C-cay-url-theo-dich-vu.md`.
+
+**Menu chốt.** Tour & Vé (nhóm thả xuống: Tour đảo Nha Trang, Tour Hòn Tằm, Tour Mini
+Beach, Vé VinWonders, KongForest, Tắm bùn Tháp Bà, i-Resort) · Kinh nghiệm du lịch · Đặt vé
+trực tuyến · Hỗ trợ · Liên hệ.
+
+**Vì sao.** Site dựng từ engine `nhatrangtravel` nên điều hướng tổ chức theo chủ đề du
+lịch, trong khi chủ thể là một doanh nghiệp bán dịch vụ. `/tour/` — dòng sản phẩm chính —
+không có mặt trên menu và đứng thứ 12 trên 14 khối trang chủ, sau cả `specialties` là danh
+mục đã tắt.
+
+**Ba việc trả kèm.** DR-007 (điều hướng hardcode ba chỗ). Phiếu nợ "chỗ đặt link" mà
+`01-CONTENT_MODEL` §2.15 tự ghi nhận khi bàn trang lộ trình đón khách. Và hợp đồng
+`06-BINDING_MAP` §2 vốn khai "Header điều hướng | config (build)".
+
+**Giữ `/cam-nang/`.** Nhãn menu đổi thành "Kinh nghiệm du lịch", đường dẫn không đổi. Nhãn
+và đường dẫn không bắt buộc trùng nhau, mà `/cam-nang/` đã có bài lên Google; đổi segment là
+quyết định SEO một chiều, tách ra làm riêng nếu cần.
+
+**Ai chốt.** Chủ dự án, 2026-08-05.
+
+---
+
+## QĐ-2026-08-05-13 — Trang tĩnh sinh từ `siteSettings`, chưa mở entity `page`
+
+**Chốt.** `/lien-he/` và `/ho-tro/` sinh từ `siteSettings`, theo khuôn `/lo-trinh-don-khach/`
+đã có. Thêm đúng một field `support` (ba phần: `bookingGuide`, `cancellationPolicy`, `faq`).
+`/lien-he/` không cần field mới. **Không** mở entity `page` ở đợt này.
+
+**Vì sao không mở entity.** Thêm `_type` là cửa một chiều theo `01-CONTENT_MODEL` §5.3, chạm
+điều cấm `04-CONSTRAINTS` §2.1, kéo theo họ validator `I` phải sửa. Thêm field vào một
+singleton đã có chỉ cần thủ tục §2.2 và đảo ngược được. Với đúng hai trang, cái giá của
+entity không mua được gì.
+
+**Vì sao không mượn `article`.** JSON-LD sẽ phát `Article` cho một trang liên hệ, trong khi
+schema.org có `ContactPage`. Site này đầu tư vào dữ liệu có cấu trúc (I6 là cổng `fail`, có
+`llms.txt` và `/ai/*.json`); làm bẩn nó để tiết kiệm một field là đổi sai chiều.
+
+**Ngưỡng mở lại.** Tới trang tĩnh thứ ba thì dừng thêm field, xét entity `page` — lúc đó ADR
+sẽ có căn cứ thật thay vì suy đoán trước.
+
+**Thứ tự thao tác đã tuân.** `01-CONTENT_MODEL` §2.15 sửa trước (v1.0.14), rồi bản ghi này,
+rồi mới tới `cms/schemas/` và code. Đúng `04-CONSTRAINTS` §2.2 điều cấm 2.
+
+**Ai chốt.** Chủ dự án, 2026-08-05.
+
+---
+
+## QĐ-2026-08-05-14 — Mục điều hướng phải trỏ vào trang có thật, mức `fail`
+
+**Chốt.** Thêm phép kiểm lúc build: mọi `target` trong `nav` phải trỏ tới một trang mà lần
+build đó **thực sự sinh ra**. Vi phạm thì build dừng.
+
+**Đây là siết thêm, không phải nới**, nên tự do theo `04-CONSTRAINTS` §5. Không control nào
+bị hạ mức, không cổng nào bị bỏ.
+
+**Vì sao cần.** Sáu trên bảy sản phẩm trong menu chốt chưa có document trong Sanity. Không
+có phép kiểm này thì khai một mục menu quá sớm sẽ lên production rồi khách bấm vào trang
+trắng. Có nó, build dừng ngay trên máy. Cùng triết lý với gói dữ liệu thiếu (`114010a`): đẩy
+lỗi lên sớm nhất có thể, và biến lỗi im lặng thành lỗi ồn ào.
+
+**Hệ quả về thứ tự làm việc, đã cân và chấp nhận.** Menu **không thể khai trước nội dung**.
+Nhập liệu trước, khai menu sau. Đây là tính năng, không phải hạn chế.
+
+**Ai chốt.** Chủ dự án, 2026-08-05.
+
+---
+
+## ND-006 — Đưa đón sân bay chưa có chỗ trong mô hình dữ liệu
+
+**Trạng thái.** Mở, chờ chủ dự án.
+
+Đưa đón sân bay là một trong sáu dòng dịch vụ công ty bán, nhưng không có entity nào chứa
+được nó. `ADR-0002`, `ADR-0006` và `01-CONTENT_MODEL` dòng 57 đều chốt vận tải không phải
+entity ở phase 1, xử bằng `Article articleType=transport-guide`. `04-CONSTRAINTS` §2.1 thi
+hành ở mức `fail`.
+
+**Điều kiện kích hoạt đã đủ.** `01-CONTENT_MODEL` dòng 57 đặt điều kiện mở entity `Transfer`
+là "có booking cộng dữ liệu tuyến thật". Công ty nay bán đưa đón thật, và
+`siteSettings.pickupPoints` cùng trang `/lo-trinh-don-khach/` đã tồn tại trong repo (đang
+tắt ở `devPages`).
+
+**Điều kiện trả nợ.** Chủ dự án quyết một trong ba: mở entity `Transfer` (cửa một chiều,
+cần ADR); bật trang lộ trình đã có và coi đó là đủ; hoặc giữ dạng bài Cẩm nang. Chủ dự án
+chốt hoãn 2026-08-05, không thuộc phạm vi pha C.
+
+---
+
+## ND-007 — Khách sạn và resort không có lối vào từ menu
+
+**Trạng thái.** Mở, chờ có nội dung.
+
+Chủ dự án xác nhận vẫn bán phòng khách sạn 5 sao và resort, nhưng menu chốt ở
+`QĐ-2026-08-05-12` không có mục nào cho nó. Hiện chưa lộ ra vì `/khach-san/`, `/resort/` và
+`/luu-tru/` đều **0 document**, đang hiện khối "chưa có nội dung".
+
+**Vì sao không tự thêm.** Menu do chủ dự án chốt; thêm một mục không được yêu cầu là tác
+nhân tự mở rộng phạm vi (`GOVERNANCE` 3.6).
+
+**Ba đường khi có nội dung.** (1) Thêm mục "Khách sạn & Resort" → `/luu-tru/`, hub đã có sẵn
+và gom cả hai. (2) Đưa vào nhóm "Tour & Vé" — nhưng nhóm đó đang là danh sách sản phẩm cụ
+thể, thêm một mục dạng danh sách vào sẽ lệch khuôn. (3) Không lên menu chính, vào từ khối
+trang chủ và chân trang.
+
+Cho tới lúc đó `/luu-tru/` vẫn sống và vẫn trong sitemap, chỉ không có lối vào từ menu.
