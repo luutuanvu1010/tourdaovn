@@ -420,3 +420,36 @@ Không vỡ lúc chạy: giá trị là `undefined` và `resolvePrice` chịu đ
 **Vì sao lâu nay không ai thấy.** `g3` trước đây đối chiếu một bản chép tay và không đọc `06-BINDING_MAP.md` (DR-027), nên vùng này không nằm trong tầm kiểm. Bắt được ngay trong lần đầu `g3` đọc tài liệu thật.
 
 **Điều kiện xử.** Cần quyết ở tầng nội dung: lưu trú có khái niệm "miễn phí" không. Nếu không thì bỏ tham số đó khỏi lời gọi; nếu có thì thêm field vào `01-CONTENT_MODEL` §2.0b theo thủ tục §2.2. Không thuộc phạm vi pha E.
+
+---
+
+## DR-029 — Site chưa bao giờ hiện đúng font đã duyệt
+
+**Trạng thái:** mở. Phát hiện 2026-08-06 khi Claude Design dựng mockup pha F; Cowork đã kiểm chứng lại.
+
+`src/layouts/BaseLayout.astro` khai **10 khối `@font-face`** trỏ `/fonts/*.woff2`. Nhưng:
+
+- thư mục `public/fonts/` **không tồn tại**
+- bản build ra `dist/` có **0 file `.woff2`**
+
+Nên trình duyệt không tải được font nào và rơi thẳng về `system-ui`. `07-DESIGN_TOKENS` §2 khai `font.family.heading` là "Be Vietnam Pro" và `font.family.body` là "Plus Jakarta Sans" — **site chưa từng hiện bằng hai font đó**.
+
+Không ai thấy vì `@font-face` hỏng không gây lỗi build, không gây lỗi console đáng chú ý, và bản dự phòng `system-ui` trông vẫn chấp nhận được.
+
+**Hệ quả lên pha F:** mọi mockup và mọi ảnh chụp màn hình từ trước tới nay đều đang hiện bằng font hệ thống, không phải font trong spec. Duyệt thẩm mỹ trên bản đó là duyệt một thứ khác với thứ spec mô tả.
+
+**Điều kiện xử.** Chủ dự án chọn một: (a) đưa file `.woff2` vào `public/fonts/` — cần cân nhắc giấy phép và dung lượng, và ảnh hưởng ngưỡng Lighthouse ở `04-CONSTRAINTS` §3; (b) chính thức nhận `system-ui` là font của site và sửa `07-DESIGN_TOKENS` §2 cho khớp sự thật. Không thuộc phạm vi pha F.
+
+---
+
+## DR-030 — Trang lưu trú rỗng vẫn được sinh, trái quyết định nền 4
+
+**Trạng thái:** mở. Phát hiện 2026-08-06 cùng đợt với DR-029.
+
+`06-BINDING_MAP` quyết định nền 4 khai: *"Index nhánh có 0 entity publish không sinh trang; header gỡ link nhánh đó cho tới khi có entity đầu tiên."*
+
+Thực tế `/khach-san/`, `/resort/` và `/luu-tru/` đều có **0 document** nhưng vẫn được sinh, vẫn nằm trong sitemap, và vẫn hiện khối "chưa có nội dung".
+
+Đây là lệch giữa đặc tả và code, không phải lệch dữ liệu. Sửa thuộc bước 8 (pha G): `[...path].astro` phải bỏ qua nhánh có 0 entity, và `sitemap.ts` bỏ theo.
+
+Liên quan `ND-007` (khách sạn và resort chưa có lối vào từ menu) — cùng gốc là chưa có nội dung, nhưng ND-007 là quyết định điều hướng còn DR-030 là lỗi thi hành.
