@@ -39,17 +39,22 @@ type Registry = {
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..', '..')
 // 'project/governance/' là quy ước thư mục của nhatrangtravel, không tồn tại ở
-// tourdaovn. Sổ đăng ký của dự án này sống ở docs/governance/. Xem DR-015.
+// tourdaovn. Sổ đăng ký của dự án này sống ở docs/governance/, theo
+// QĐ-2026-08-05-07; họ lỗi đường dẫn 'project/' ghi ở DR-001.
 const REGISTRY_PATH = resolve(REPO_ROOT, 'docs', 'governance', 'control-registry.yaml')
 // CONTROL_GATES.md cấp dự án chưa được soạn; bản duy nhất trong repo là khuôn
 // rỗng ở playbook/governance/ không có dấu ✅ nào, nên documentedLiveIds() trả
 // tập rỗng và vòng đối chiếu chéo hiện là no-op. Ghi phiếu nợ ND-004.
 const CONTROL_GATES_PATH = resolve(REPO_ROOT, 'docs', 'governance', 'CONTROL_GATES.md')
 const POSTBUILD_STATUS = resolve(REPO_ROOT, 'scripts', 'reports', 'postbuild-status.json')
+// Từ vựng stage đóng. Vòng đối chiếu postbuild-status ở cuối file lọc theo
+// control.stage === 'post-build'; một cách viết khác ('postbuild') làm vòng đó
+// bỏ qua mọi control và cổng in [pass] trên một control đang đỏ. Xem DR-017.
+const VALID_STAGES = new Set(['pre-build', 'post-build'])
 
 function loadRegistry(): Registry {
   if (!existsSync(REGISTRY_PATH)) {
-    throw new Error('thiếu project/governance/control-registry.yaml')
+    throw new Error(`thiếu ${REGISTRY_PATH.replace(REPO_ROOT + '/', '')}`)
   }
   return parse(readFileSync(REGISTRY_PATH, 'utf-8')) as Registry
 }
@@ -102,11 +107,21 @@ function documentedLiveIds(): Set<string> {
   return ids
 }
 
-function validateRegistry(registry: Registry): string[] {
+function validateRegistry(registry: Registry): { errors: string[]; skipped: string[] } {
   const errors: string[] = []
+  // Những phép kiểm không thực hiện được vì thiếu đầu vào. Phải in ra, không được
+  // im lặng: một dòng [pass] trống đứng sau nó là lời khai vượt quá phần đã kiểm,
+  // trái CLAUDE.md §6 (cổng không bằng chứng thì mặc định là không đạt). Xem DR-021.
+  const skipped: string[] = []
   const controls = registry.controls ?? []
   const pipelines = registry.pipelines ?? {}
   const byId = new Map<string, Control>()
+
+  for (const [name, pipeline] of Object.entries(pipelines)) {
+    if (!VALID_STAGES.has(pipeline.stage)) {
+      errors.push(`pipeline ${name}: stage không hợp lệ "${pipeline.stage}" (chỉ nhận ${[...VALID_STAGES].join(', ')})`)
+    }
+  }
 
   for (const control of controls) {
     if (!control.id) errors.push('control thiếu id')
@@ -115,6 +130,9 @@ function validateRegistry(registry: Registry): string[] {
     if (!control.source) errors.push(`${control.id}: thiếu source`)
     if (!control.level) errors.push(`${control.id}: thiếu level`)
     if (!control.stage) errors.push(`${control.id}: thiếu stage`)
+    else if (!VALID_STAGES.has(control.stage)) {
+      errors.push(`${control.id}: stage không hợp lệ "${control.stage}" (chỉ nhận ${[...VALID_STAGES].join(', ')})`)
+    }
     if (!control.status) errors.push(`${control.id}: thiếu status`)
     if (!control.evidence) errors.push(`${control.id}: thiếu evidence`)
 
@@ -133,6 +151,15 @@ function validateRegistry(registry: Registry): string[] {
     if (control.status !== 'live') {
       errors.push(`${control.id}: status không hợp lệ "${String(control.status)}"`)
       continue
+    }
+
+    // Một control `live` phải chỉ ra được bằng chứng có thật. Trước đây trường
+    // evidence chỉ bị kiểm "không rỗng", nên R3/R4 khai trỏ vào các mục của
+    // postbuild-status.json suốt thời gian executor của chúng không ghi báo cáo
+    // nào. Xem docs/DRIFT_LOG.md DR-022.
+    const evidencePath = control.evidence?.trim().split(/\s+/)[0] ?? ''
+    if (evidencePath.includes('/') && !relExists(evidencePath)) {
+      errors.push(`${control.id}: live nhưng evidence trỏ vào file không tồn tại: ${evidencePath}`)
     }
 
     if (control.level === 'fail' && !control.executor) {
@@ -171,6 +198,9 @@ function validateRegistry(registry: Registry): string[] {
     }
   }
 
+  if (!existsSync(CONTROL_GATES_PATH)) {
+    skipped.push(`đối chiếu registry ↔ CONTROL_GATES.md — thiếu ${CONTROL_GATES_PATH.replace(REPO_ROOT + '/', '')} (ND-004)`)
+  }
   for (const id of documentedLiveIds()) {
     const control = byId.get(id)
     if (!control) {
@@ -185,23 +215,32 @@ function validateRegistry(registry: Registry): string[] {
   if (existsSync(POSTBUILD_STATUS)) {
     const post = readJson(POSTBUILD_STATUS)
     const postStatus = new Map<string, string>((post.items ?? []).map((item: any) => [item.id, item.status]))
-    for (const control of controls) {
-      if (control.status !== 'live' || control.stage !== 'post-build') continue
+    const livePostBuild = controls.filter((c) => c.status === 'live' && c.stage === 'post-build')
+    const unreported = livePostBuild.filter((c) => !postStatus.has(c.id)).map((c) => c.id)
+    if (unreported.length > 0) {
+      skipped.push(`đối chiếu post-build cho ${unreported.join(', ')} — executor không ghi mục nào vào postbuild-status.json`)
+    }
+    for (const control of livePostBuild) {
       if (!postStatus.has(control.id)) continue
       if (postStatus.get(control.id) !== 'pass') {
         errors.push(`${control.id}: post-build report tồn tại nhưng chưa pass`)
       }
     }
+  } else {
+    skipped.push('đối chiếu post-build — chưa có scripts/reports/postbuild-status.json')
   }
 
-  return errors
+  return { errors, skipped }
 }
 
 function main() {
   console.log('=== Control registry gate ===\n')
 
   const registry = loadRegistry()
-  const errors = validateRegistry(registry)
+  const { errors, skipped } = validateRegistry(registry)
+
+  for (const note of skipped) console.log(`[skip] ${note}`)
+  if (skipped.length > 0) console.log('')
 
   if (errors.length > 0) {
     console.log(`[FAIL] Control registry — ${errors.length} lỗi:`)
@@ -209,7 +248,10 @@ function main() {
     process.exit(1)
   }
 
-  console.log(`[pass] Registry coherent: ${registry.controls.length} controls`)
+  const scope = skipped.length === 0
+    ? 'toàn bộ phép kiểm đã chạy'
+    : `${skipped.length} phép kiểm KHÔNG chạy được, xem [skip] ở trên`
+  console.log(`[pass] Registry coherent: ${registry.controls.length} controls — ${scope}`)
 }
 
 main()

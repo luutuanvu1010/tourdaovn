@@ -32,7 +32,7 @@ function readJson(path: string): any {
 
 function readRegistry(): Map<string, Control> {
   if (!existsSync(REGISTRY_PATH)) {
-    console.error('[error] thiếu project/governance/control-registry.yaml — không thể chứng minh deferred hợp lệ.')
+    console.error('[error] thiếu docs/governance/control-registry.yaml — không thể chứng minh deferred hợp lệ.')
     process.exit(1)
   }
   const registry = parse(readFileSync(REGISTRY_PATH, 'utf-8'))

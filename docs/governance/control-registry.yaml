@@ -37,7 +37,7 @@
 
 pipelines:
   prebuild-validate:
-    stage: prebuild
+    stage: pre-build
     command: npm --prefix scripts run validate
     files:
       - scripts/validate-constraints.ts
@@ -46,7 +46,7 @@ pipelines:
       - scripts/validators/r1-r4.ts
 
   postbuild-validate:
-    stage: postbuild
+    stage: post-build
     command: npm --prefix scripts run validate:post
     files:
       - scripts/validators/jsonld-post.ts
@@ -65,52 +65,52 @@ controls:
   - id: I1
     source: docs/core-specs/04-CONSTRAINTS.md#I1
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/i1-i19.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục I1
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục I1 khi ND-005 trả xong"
 
   - id: I2
     source: docs/core-specs/04-CONSTRAINTS.md#I2
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/i1-i19.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục I2
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục I2 khi ND-005 trả xong"
 
   - id: I3
     source: docs/core-specs/04-CONSTRAINTS.md#I3
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/i1-i19.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục I3
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục I3 khi ND-005 trả xong"
 
   - id: I4
     source: docs/core-specs/04-CONSTRAINTS.md#I4
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/i1-i19.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục I4
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục I4 khi ND-005 trả xong"
 
   - id: I5
     source: docs/core-specs/04-CONSTRAINTS.md#I5
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/i1-i19.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục I5
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục I5 khi ND-005 trả xong"
 
   # I6 có validator ở CẢ HAI tầng: i1-i19.ts (pre-build, trên dataset) và
   # jsonld-post.ts (post-build, trên dist/). Khai bản post-build vì 04-CONSTRAINTS
@@ -118,7 +118,7 @@ controls:
   - id: I6
     source: docs/core-specs/04-CONSTRAINTS.md#I6
     level: fail
-    stage: postbuild
+    stage: post-build
     executor: scripts/validators/jsonld-post.ts
     pipeline: postbuild-validate
     status: live
@@ -127,84 +127,84 @@ controls:
   - id: I7
     source: docs/core-specs/04-CONSTRAINTS.md#I7
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/i1-i19.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục I7
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục I7 khi ND-005 trả xong"
 
   - id: I8
     source: docs/core-specs/04-CONSTRAINTS.md#I8
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/i1-i19.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục I8
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục I8 khi ND-005 trả xong"
 
   - id: I9
     source: docs/core-specs/04-CONSTRAINTS.md#I9
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/i1-i19.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục I9
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục I9 khi ND-005 trả xong"
 
   # I10 là warn có chủ ý: 04-CONSTRAINTS dòng 49 ghi "không giả vờ máy đo được
   # nghĩa". Máy kiểm độ dài và cấu trúc câu, người duyệt nghĩa khi review.
   - id: I10
     source: docs/core-specs/04-CONSTRAINTS.md#I10
     level: warn
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/i1-i19.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục I10
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục I10 khi ND-005 trả xong"
 
   - id: I11
     source: docs/core-specs/04-CONSTRAINTS.md#I11
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/i1-i19.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục I11
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục I11 khi ND-005 trả xong"
 
   - id: I12
     source: docs/core-specs/04-CONSTRAINTS.md#I12
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/i1-i19.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục I12
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục I12 khi ND-005 trả xong"
 
   - id: I13
     source: docs/core-specs/04-CONSTRAINTS.md#I13
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/i1-i19.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục I13
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục I13 khi ND-005 trả xong"
 
   - id: I14
     source: docs/core-specs/04-CONSTRAINTS.md#I14
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/i1-i19.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục I14
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục I14 khi ND-005 trả xong"
 
   # I15 là luật địa danh riêng của nhatrangtravel (04-CONSTRAINTS dòng 54 đánh
   # dấu 🔧 SITE-SPECIFIC). Nó ĐANG được thi hành thật ở tourdaovn, nên khai live
@@ -213,52 +213,52 @@ controls:
   - id: I15
     source: docs/core-specs/04-CONSTRAINTS.md#I15
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/i1-i19.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục I15
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục I15 khi ND-005 trả xong"
 
   - id: I16
     source: docs/core-specs/04-CONSTRAINTS.md#I16
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/i1-i19.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục I16
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục I16 khi ND-005 trả xong"
 
   - id: I17
     source: docs/core-specs/04-CONSTRAINTS.md#I17
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/i1-i19.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục I17
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục I17 khi ND-005 trả xong"
 
   - id: I18
     source: docs/core-specs/04-CONSTRAINTS.md#I18
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/i1-i19.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục I18
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục I18 khi ND-005 trả xong"
 
   - id: I19
     source: docs/core-specs/04-CONSTRAINTS.md#I19
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/i1-i19.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục I19
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục I19 khi ND-005 trả xong"
 
   # ── Toàn vẹn nguồn giá PY1–PY8 ─────────────────────────────────────────────
   # Nguồn: 04-CONSTRAINTS bảng PY, dòng 64–71. Thi hành: py1-py8.ts.
@@ -266,79 +266,79 @@ controls:
   - id: PY1
     source: docs/core-specs/04-CONSTRAINTS.md#PY1
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/py1-py8.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục PY1
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục PY1 khi ND-005 trả xong"
 
   - id: PY2
     source: docs/core-specs/04-CONSTRAINTS.md#PY2
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/py1-py8.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục PY2
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục PY2 khi ND-005 trả xong"
 
   - id: PY3
     source: docs/core-specs/04-CONSTRAINTS.md#PY3
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/py1-py8.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục PY3
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục PY3 khi ND-005 trả xong"
 
   - id: PY4
     source: docs/core-specs/04-CONSTRAINTS.md#PY4
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/py1-py8.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục PY4
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục PY4 khi ND-005 trả xong"
 
   - id: PY5
     source: docs/core-specs/04-CONSTRAINTS.md#PY5
     level: warn
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/py1-py8.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục PY5
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục PY5 khi ND-005 trả xong"
 
   - id: PY6
     source: docs/core-specs/04-CONSTRAINTS.md#PY6
     level: warn
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/py1-py8.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục PY6
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục PY6 khi ND-005 trả xong"
 
   - id: PY7
     source: docs/core-specs/04-CONSTRAINTS.md#PY7
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/py1-py8.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục PY7
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục PY7 khi ND-005 trả xong"
 
   # PY8 cũng có ở cả hai tầng. Khai bản post-build vì 04-CONSTRAINTS dòng 71
   # định nghĩa PY8 là "snapshot test trên output JSON-LD của build".
   - id: PY8
     source: docs/core-specs/04-CONSTRAINTS.md#PY8
     level: fail
-    stage: postbuild
+    stage: post-build
     executor: scripts/validators/jsonld-post.ts
     pipeline: postbuild-validate
     status: live
@@ -351,27 +351,27 @@ controls:
   - id: R1
     source: docs/core-specs/04-CONSTRAINTS.md#R1
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/r1-r4.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục R1
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục R1 khi ND-005 trả xong"
 
   - id: R2
     source: docs/core-specs/04-CONSTRAINTS.md#R2
     level: fail
-    stage: prebuild
+    stage: pre-build
     executor: scripts/validators/r1-r4.ts
     pipeline: prebuild-validate
     status: gap
     gap_id: ND-005
-    evidence: scripts/reports/validator-status.json mục R2
+    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục R2 khi ND-005 trả xong"
 
   - id: R3
     source: docs/core-specs/04-CONSTRAINTS.md#R3
     level: fail
-    stage: postbuild
+    stage: post-build
     executor: scripts/validators/r3-r4-post.ts
     pipeline: postbuild-validate
     status: live
@@ -380,7 +380,7 @@ controls:
   - id: R4
     source: docs/core-specs/04-CONSTRAINTS.md#R4
     level: fail
-    stage: postbuild
+    stage: post-build
     executor: scripts/validators/r3-r4-post.ts
     pipeline: postbuild-validate
     status: live

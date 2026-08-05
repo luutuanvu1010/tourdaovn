@@ -3,7 +3,7 @@
  * Chạy SAU astro build, kiểm output trong dist/.
  * Script riêng — không import vào runner pre-build.
  */
-import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
+import { readFileSync, existsSync, readdirSync, statSync, mkdirSync, writeFileSync } from 'node:fs'
 import { resolve, join, relative, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { site, langs } from '../../src/site.config'
@@ -394,6 +394,44 @@ function validateR4(): PostResult {
   return { id, passed: errors.length === 0, errors }
 }
 
+// ── Báo cáo ──
+
+/**
+ * Ghi kết quả R3/R4 vào scripts/reports/postbuild-status.json.
+ *
+ * Trước đây file này không ghi gì, trong khi control-registry.yaml khai R3/R4 là
+ * `live` với evidence trỏ đúng vào các mục R3/R4 của báo cáo — một bằng chứng
+ * không bao giờ tồn tại, và control-registry-gate thì lặng lẽ bỏ qua hai control
+ * không có mục. Xem docs/DRIFT_LOG.md DR-022.
+ *
+ * Ghi kiểu chèn-đè chứ không ghi đè cả file: jsonld-post.ts ghi I6/PY8/SEO vào
+ * cùng file này và chạy trước trong chuỗi. Đè cả file thì hai bên xoá lẫn nhau.
+ */
+function writeReport(results: PostResult[]) {
+  const REPORT_DIR = resolve(REPO_ROOT, 'scripts', 'reports')
+  const REPORT_PATH = resolve(REPORT_DIR, 'postbuild-status.json')
+
+  const items: Array<{ id: string; status: string; errors: string[] }> = existsSync(REPORT_PATH)
+    ? (JSON.parse(readFileSync(REPORT_PATH, 'utf-8')).items ?? [])
+    : []
+
+  for (const r of results) {
+    const status = r.skipped ? 'skip' : r.passed ? 'pass' : 'fail'
+    const entry = { id: r.id, status, errors: r.errors }
+    const at = items.findIndex((item) => item.id === r.id)
+    if (at >= 0) items[at] = entry
+    else items.push(entry)
+  }
+
+  mkdirSync(REPORT_DIR, { recursive: true })
+  writeFileSync(
+    REPORT_PATH,
+    JSON.stringify({ ranAt: new Date().toISOString(), items }, null, 2),
+    'utf-8',
+  )
+  console.log('[report] Ghi scripts/reports/postbuild-status.json')
+}
+
 // ── Main ──
 
 async function main() {
@@ -423,6 +461,8 @@ async function main() {
       failCount++
     }
   }
+
+  writeReport(results)
 
   console.log(`\n=== Kết quả post-build: ${failCount === 0 ? 'ĐẠT' : `${failCount} FAIL`} ===`)
 
