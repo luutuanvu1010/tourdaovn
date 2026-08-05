@@ -192,7 +192,7 @@ export function imageToLd(image: ImageAsset | undefined, lang?: Lang): Record<st
 }
 
 /** Gallery → mảng ImageObject. */
-export function galleryToLd(images: ImageAsset[] | undefined, lang?: Lang): Record<string, unknown>[] {
+export function galleryToLd(images: ImageAsset[] | undefined | null, lang?: Lang): Record<string, unknown>[] {
   if (!images || images.length === 0) return []
   return images.map(img => imageToLd(img, lang)).filter(Boolean) as Record<string, unknown>[]
 }
@@ -206,7 +206,7 @@ export function galleryToLd(images: ImageAsset[] | undefined, lang?: Lang): Reco
  */
 export function imagesToLd(
   main: ImageAsset | undefined,
-  gallery: ImageAsset[] | undefined,
+  gallery: ImageAsset[] | undefined | null,
   lang?: Lang
 ): Record<string, unknown> | Record<string, unknown>[] | null {
   const all: Record<string, unknown>[] = []
@@ -246,7 +246,7 @@ export function addressToLd(
 }
 
 /** FAQ → mảng Question (FAQPage render riêng). */
-export function faqToLd(faq: FAQItem[] | undefined): Record<string, unknown>[] {
+export function faqToLd(faq: FAQItem[] | undefined | null): Record<string, unknown>[] {
   if (!faq || faq.length === 0) return []
   return faq.map(item => ({
     '@type': 'Question',
@@ -260,7 +260,7 @@ export function faqToLd(faq: FAQItem[] | undefined): Record<string, unknown>[] {
 
 /** FAQ → FAQPage (wrapper schema.org). */
 export function faqPageToLd(
-  faq: FAQItem[] | undefined,
+  faq: FAQItem[] | undefined | null,
   baseUrl: string,
   entityType: string,
   slug: string,
@@ -327,7 +327,7 @@ export function openingHoursToLd(
 }
 
 /** KeyFacts → mảng PropertyValue (TouristDestination). */
-export function keyFactsToLd(kf: KeyFact[] | undefined): Record<string, unknown>[] {
+export function keyFactsToLd(kf: KeyFact[] | undefined | null): Record<string, unknown>[] {
   if (!kf || kf.length === 0) return []
   return kf.map(f => ({
     '@type': 'PropertyValue',
@@ -337,7 +337,7 @@ export function keyFactsToLd(kf: KeyFact[] | undefined): Record<string, unknown>
 }
 
 /** sameAs → mảng URL (giữ nguyên). */
-export function sameAsToLd(urls: string[] | undefined): string[] {
+export function sameAsToLd(urls: string[] | undefined | null): string[] {
   if (!urls || urls.length === 0) return []
   return urls.filter(u => u && u.startsWith('http'))
 }
@@ -418,7 +418,7 @@ export function sanitizeLd<T>(value: T): T {
  * thì nhập vào description hoặc bỏ.
  */
 export function portableTextToDescription(
-  blocks: unknown[] | undefined
+  blocks: unknown[] | undefined | null
 ): string | undefined {
   if (!blocks || blocks.length === 0) return undefined
   // Trích xuất text thô từ portable text — phiên bản đơn giản
@@ -444,7 +444,7 @@ export function portableTextToDescription(
  */
 export function speakableToLd(
   summary: string | undefined,
-  faq: FAQItem[] | undefined
+  faq: FAQItem[] | undefined | null
 ): Record<string, unknown> | null {
   const parts: string[] = []
   if (summary) parts.push(summary)

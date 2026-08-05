@@ -47,7 +47,7 @@ function formatDate(value?: string) {
 
 const updatedLabel = formatDate(td?.updatedAt || td?._updatedAt)
 
-function featuredCards(items: EntityRef[] | undefined, fallbackEntity: string, limit: number) {
+function featuredCards(items: EntityRef[] | undefined | null, fallbackEntity: string, limit: number) {
   if (!Array.isArray(items)) return []
   return items
     .map(item => {

@@ -28,7 +28,7 @@ const statusLabel = lookupLabel(EVENT_STATUS_LABELS, lang, data.eventStatus || '
 
 const eventTypeLabel = lookupLabel(EVENT_TYPE_LABELS, lang, data.eventType)
 
-function hasPtContent(blocks: unknown[] | undefined): boolean {
+function hasPtContent(blocks: unknown[] | undefined | null): boolean {
   if (!blocks || blocks.length === 0) return false
   return blocks.some((b: any) => b._type === 'block' && b.children?.some((c: any) => (c.text || '').trim()))
 }

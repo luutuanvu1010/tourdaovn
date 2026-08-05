@@ -28,6 +28,27 @@ export type PriceView = {
 // GROQ query result types & JSON-LD — B8.5
 // Nguồn: 01-CONTENT_MODEL.md §2, cms/schemas/
 // ============================================================
+//
+// QUY ƯỚC `| null` CHO FIELD MẢNG (SPEC-2026-08-05, hướng B)
+//
+// GROQ trả `null` — KHÔNG phải `undefined` — cho field không tồn tại trên document.
+// Khai `?: T[]` (tức `T[] | undefined`) là nói sai sự thật, và lời nói dối đó vô hiệu
+// hoá hai lớp phòng vệ cùng lúc: default của destructuring (`= []`) chỉ kích hoạt với
+// `undefined`, còn `astro check` thì tin kiểu nên báo xanh. Lỗi vì vậy chỉ nổ lúc
+// prerender, trên Cloudflare. Đã xảy ra ở `278b287` (HomeMetaBar, field `sameAs`).
+//
+// Ba hình dạng chiếu đều trả `null` khi field vắng mặt:
+//   - chiếu thẳng:        `sameAs,`
+//   - lọc/deref mảng:     `gallery[]{…}`, `about[]->{…}`
+//   - coalesce không nền: `coalesce(faq.en, faq.vi)` → null khi CẢ HAI vắng
+//
+// Ngoại lệ duy nhất là sub-query `*[…]{…}`: GROQ luôn trả mảng (có thể rỗng), không bao
+// giờ null. Các field đó cố ý KHÔNG mang `| null`, và có ghi chú tại chỗ.
+//
+// Cách xử lý ở nơi dùng: `?? []` hoặc phép kiểm chân trị. Cấm `!` và cấm `as` — hai thứ
+// đó chỉ chuyển lời nói dối sang chỗ khác.
+//
+// Phạm vi đợt này là field MẢNG. Field vô hướng và object lồng còn nợ, xem ND-006.
 
 // ---------- Shared primitives ----------
 
@@ -137,7 +158,7 @@ export interface BaseEntityFields {
   summary: string
   mainImage?: ImageAsset
   seo?: { metaTitle?: string; metaDescription?: string }
-  category?: Array<{ _id: string; name: string; termCode: string; _type: 'category' }>
+  category?: Array<{ _id: string; name: string; termCode: string; _type: 'category' }> | null
   reviewStatus?: 'draft' | 'inReview' | 'approved'
   approvedBy?: string
   contentProvenance?: 'human' | 'ai-t1' | 'mixed'
@@ -158,7 +179,7 @@ export interface BaseDocEntityFields {
   summary: string
   mainImage?: ImageAsset
   seo?: { metaTitle?: string; metaDescription?: string }
-  category?: Array<{ _id: string; name: string; termCode: string; _type: 'category' }>
+  category?: Array<{ _id: string; name: string; termCode: string; _type: 'category' }> | null
   reviewStatus?: 'draft' | 'inReview' | 'approved'
   approvedBy?: string
   contentProvenance?: 'human' | 'ai-t1' | 'mixed'
@@ -183,33 +204,34 @@ export interface CategoryResult {
 
 export interface PersonResult extends BaseEntityFields {
   _type: 'person'
-  sameAs: string[]
+  sameAs: string[] | null
   jobTitle?: string
-  knowsAbout?: string[]
+  knowsAbout?: string[] | null
   url?: string
-  bio?: unknown[]
+  bio?: unknown[] | null
   imageProvenance?: string
 }
 
 export interface TouristDestinationResult extends BaseEntityFields {
   _type: 'touristDestination'
-  sameAs: string[]
+  sameAs: string[] | null
   geo?: GeoPoint
-  containedInPlaceRef: string[]
-  body?: unknown[]
-  keyFacts?: KeyFact[]
-  homepageBanners?: HomepageBanner[]
+  containedInPlaceRef: string[] | null
+  body?: unknown[] | null
+  keyFacts?: KeyFact[] | null
+  homepageBanners?: HomepageBanner[] | null
+  // homepagePlaces/homepageArticles là sub-query `*[…]` → GROQ luôn trả mảng, không null.
   homepagePlaces?: HomepagePlaceCard[]
   homepageArticles?: HomepageArticleCard[]
-  highlights?: string[]
-  faq?: FAQItem[]
-  gallery?: ImageAsset[]
-  featuredAttractions?: EntityRef[]
-  featuredStays?: EntityRef[]
-  featuredExperiences?: EntityRef[]
-  featuredSpecialties?: EntityRef[]
-  featuredTours?: EntityRef[]
-  relatedDestinations?: RelatedDestination[]
+  highlights?: string[] | null
+  faq?: FAQItem[] | null
+  gallery?: ImageAsset[] | null
+  featuredAttractions?: EntityRef[] | null
+  featuredStays?: EntityRef[] | null
+  featuredExperiences?: EntityRef[] | null
+  featuredSpecialties?: EntityRef[] | null
+  featuredTours?: EntityRef[] | null
+  relatedDestinations?: RelatedDestination[] | null
   safetyNote?: string
   imageProvenance?: string
 }
@@ -225,19 +247,20 @@ export interface TouristDestinationHubProps {
 export interface PlaceResult extends BaseEntityFields {
   _type: 'place'
   placeType?: 'province' | 'ward' | 'commune' | 'island' | 'beach' | 'landform' | 'area'
-  sameAs: string[]
+  sameAs: string[] | null
   geo?: GeoPoint
   address?: { street?: string; ward?: string }
-  containedInPlace: EntityRef & { sameAs?: string[]; containedInPlaceRef?: string[] }
+  containedInPlace: EntityRef & { sameAs?: string[] | null; containedInPlaceRef?: string[] | null }
   hasMap?: string
-  accessInfo?: unknown[]
+  accessInfo?: unknown[] | null
   openingHours?: OpeningHours
   isAccessibleForFree?: boolean
-  body?: unknown[]
-  gallery?: ImageAsset[]
-  highlights?: string[]
-  faq?: FAQItem[]
+  body?: unknown[] | null
+  gallery?: ImageAsset[] | null
+  highlights?: string[] | null
+  faq?: FAQItem[] | null
   imageProvenance?: string
+  // sub-query `*[…]` → luôn là mảng.
   experiences?: { title: string; slug: string; summary: string; mainImage?: ImageAsset; experienceType?: string; isAccessibleForFree?: boolean }[]
 }
 
@@ -246,7 +269,7 @@ export interface PlaceResult extends BaseEntityFields {
 export interface AttractionResult extends BaseEntityFields {
   _type: 'attraction'
   attractionType: 'historic' | 'temple' | 'church' | 'museum' | 'theme-park' | 'aquarium' | 'mud-spa' | 'market' | 'park'
-  sameAs?: string[]
+  sameAs?: string[] | null
   officialSource?: string
   geo?: GeoPoint
   address?: { street?: string; ward?: string }
@@ -254,14 +277,15 @@ export interface AttractionResult extends BaseEntityFields {
   bookingRef?: { key?: string }
   openingHours?: OpeningHours
   isAccessibleForFree?: boolean
-  accessInfo?: unknown[]
+  accessInfo?: unknown[] | null
   hasMap?: string
   telephone?: string
-  body?: unknown[]
-  gallery?: ImageAsset[]
-  highlights?: string[]
-  faq?: FAQItem[]
+  body?: unknown[] | null
+  gallery?: ImageAsset[] | null
+  highlights?: string[] | null
+  faq?: FAQItem[] | null
   imageProvenance?: string
+  // sub-query `*[…]` → luôn là mảng.
   experiences?: { title: string; slug: string; summary: string; mainImage?: ImageAsset; experienceType?: string; isAccessibleForFree?: boolean }[]
 }
 
@@ -271,14 +295,14 @@ export interface ExperienceResult extends BaseEntityFields {
   venue: EntityRef
   isAccessibleForFree?: boolean
   duration?: string
-  includes?: string[]
-  touristType?: string[]
+  includes?: string[] | null
+  touristType?: string[] | null
   geo?: GeoPoint
   bookingRef?: { key?: string }
-  body?: unknown[]
-  gallery?: ImageAsset[]
-  highlights?: string[]
-  faq?: FAQItem[]
+  body?: unknown[] | null
+  gallery?: ImageAsset[] | null
+  highlights?: string[] | null
+  faq?: FAQItem[] | null
   imageProvenance?: string
 }
 
@@ -287,31 +311,31 @@ export interface RestaurantResult extends BaseEntityFields {
   geo?: GeoPoint
   address?: { street?: string; ward?: string }
   officialSource: string
-  sameAs?: string[]
-  servesCuisine?: string[]
-  servesSpecialty?: EntityRef[]
+  sameAs?: string[] | null
+  servesCuisine?: string[] | null
+  servesSpecialty?: EntityRef[] | null
   containedInPlace: EntityRef
   openingHours?: OpeningHours
   acceptsReservations?: boolean
   hasMenu?: string
   telephone?: string
-  body?: unknown[]
-  gallery?: ImageAsset[]
-  highlights?: string[]
-  faq?: FAQItem[]
+  body?: unknown[] | null
+  gallery?: ImageAsset[] | null
+  highlights?: string[] | null
+  faq?: FAQItem[] | null
   imageProvenance?: string
 }
 
 export interface SpecialtyResult extends BaseEntityFields {
   _type: 'specialty'
   specialtyType: 'dish' | 'product'
-  sameAs: string[]
+  sameAs: string[] | null
   originNote?: string
   season?: string
-  whereToTry?: EntityRef[]
-  body?: unknown[]
-  gallery?: ImageAsset[]
-  faq?: FAQItem[]
+  whereToTry?: EntityRef[] | null
+  body?: unknown[] | null
+  gallery?: ImageAsset[] | null
+  faq?: FAQItem[] | null
   imageProvenance?: string
 }
 // ---------- B8.5.3: Hotel, Resort, Tour, Organization, Event, Article ----------
@@ -321,9 +345,9 @@ export interface HotelResult extends BaseEntityFields {
   geo?: GeoPoint
   address?: { street?: string; ward?: string }
   officialSource: string
-  sameAs?: string[]
+  sameAs?: string[] | null
   starRating?: number
-  amenityFeature?: string[]
+  amenityFeature?: string[] | null
   checkinTime?: string
   checkoutTime?: string
   numberOfRooms?: number
@@ -331,11 +355,11 @@ export interface HotelResult extends BaseEntityFields {
   containedInPlace: EntityRef
   bookingRef?: { key?: string }
   beachAccess?: string
-  accessInfo?: unknown[]
-  body?: unknown[]
-  gallery?: ImageAsset[]
-  highlights?: string[]
-  faq?: FAQItem[]
+  accessInfo?: unknown[] | null
+  body?: unknown[] | null
+  gallery?: ImageAsset[] | null
+  highlights?: string[] | null
+  faq?: FAQItem[] | null
   imageProvenance?: string
 }
 
@@ -344,9 +368,9 @@ export interface ResortResult extends BaseEntityFields {
   geo?: GeoPoint
   address?: { street?: string; ward?: string }
   officialSource: string
-  sameAs?: string[]
+  sameAs?: string[] | null
   starRating?: number
-  amenityFeature?: string[]
+  amenityFeature?: string[] | null
   checkinTime?: string
   checkoutTime?: string
   numberOfRooms?: number
@@ -354,14 +378,14 @@ export interface ResortResult extends BaseEntityFields {
   containedInPlace: EntityRef
   bookingRef?: { key?: string }
   beachAccess?: string
-  accessInfo?: unknown[]
-  body?: unknown[]
-  gallery?: ImageAsset[]
-  highlights?: string[]
-  faq?: FAQItem[]
+  accessInfo?: unknown[] | null
+  body?: unknown[] | null
+  gallery?: ImageAsset[] | null
+  highlights?: string[] | null
+  faq?: FAQItem[] | null
   imageProvenance?: string
   beachfront?: boolean
-  onSiteActivities?: string[]
+  onSiteActivities?: string[] | null
   landArea?: number
 }
 
@@ -374,22 +398,22 @@ export interface TourStop {
 
 export interface TourResult extends BaseEntityFields {
   _type: 'tour'
-  itinerary: TourStop[]
+  itinerary: TourStop[] | null
   // url/officialSource của Organization (§2.9) cho CTA fallback khi tour chưa có giá
   operator: (EntityRef & { url?: string; officialSource?: string }) | null
   tourFormat: 'join-in' | 'private' | 'both'
   tripOrigin?: EntityRef & { geo?: GeoPoint }
   departureNote?: string
   duration?: string
-  includes?: string[]
-  excludes?: string[]
-  touristType?: string[]
+  includes?: string[] | null
+  excludes?: string[] | null
+  touristType?: string[] | null
   seasonNote?: string
   bookingRef?: { key?: string }
-  body?: unknown[]
-  gallery?: ImageAsset[]
-  highlights?: string[]
-  faq?: FAQItem[]
+  body?: unknown[] | null
+  gallery?: ImageAsset[] | null
+  highlights?: string[] | null
+  faq?: FAQItem[] | null
   imageProvenance?: string
 }
 
@@ -398,13 +422,13 @@ export interface OrganizationResult extends BaseEntityFields {
   orgType: 'travelAgency' | 'transportCompany' | 'diveOperator' | 'dmc' | 'organization'
   url: string
   officialSource: string
-  sameAs?: string[]
+  sameAs?: string[] | null
   logo?: ImageAsset
   geo?: GeoPoint
   address?: { street?: string; ward?: string }
   telephone?: string
   licenseInfo?: string
-  body?: unknown[]
+  body?: unknown[] | null
   imageProvenance?: string
 }
 
@@ -419,21 +443,21 @@ export interface EventResult extends BaseEntityFields {
   isAccessibleForFree?: boolean
   bookingRef?: { key?: string }
   ticketUrl?: string
-  body?: unknown[]
-  gallery?: ImageAsset[]
-  faq?: FAQItem[]
+  body?: unknown[] | null
+  gallery?: ImageAsset[] | null
+  faq?: FAQItem[] | null
   imageProvenance?: string
 }
 
 export interface ArticleResult extends BaseDocEntityFields {
   _type: 'article'
   articleType: 'guide' | 'list' | 'news' | 'review' | 'itinerary' | 'transport-guide'
-  author: EntityRef & { sameAs?: string[]; url?: string; jobTitle?: string }
-  body?: unknown[]
-  about?: EntityRef[]
-  mentions?: EntityRef[]
-  faq?: FAQItem[]
-  howTo?: Array<{ step: string; text: string }>
+  author: EntityRef & { sameAs?: string[] | null; url?: string; jobTitle?: string }
+  body?: unknown[] | null
+  about?: EntityRef[] | null
+  mentions?: EntityRef[] | null
+  faq?: FAQItem[] | null
+  howTo?: Array<{ step: string; text: string }> | null
   imageProvenance?: string
 }
 

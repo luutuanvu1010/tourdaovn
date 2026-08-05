@@ -28,7 +28,7 @@ function entityHref(entityType: string, slug: string): string {
 
 const typeLabel = lookupLabel(ARTICLE_TYPE_LABELS, lang, data.articleType)
 
-function hasBlocksContent(blocks: unknown[] | undefined): boolean {
+function hasBlocksContent(blocks: unknown[] | undefined | null): boolean {
   if (!blocks || blocks.length === 0) return false
   return blocks.some((b: any) => b._type === 'block' && b.children?.some((c: any) => (c.text || '').trim()))
 }

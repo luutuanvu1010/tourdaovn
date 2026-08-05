@@ -4,11 +4,13 @@ import type { ImageAsset } from '../lib/types'
 
 export interface Props {
   image?: string | ImageAsset
-  gallery?: ImageAsset[]
+  gallery?: ImageAsset[] | null
   imageAlt?: string
 }
 
-const { image, gallery = [], imageAlt } = Astro.props
+// Không dùng default `= []` ở đây: nó chỉ kích hoạt với `undefined`, mà caller
+// đưa `null` (GROQ). Chặn bằng `?? []` ở điểm dùng bên dưới.
+const { image, gallery, imageAlt } = Astro.props
 const src = typeof image === 'string' ? image : imageUrl(image, { width: 1200 })
 const alt = imageAlt || (typeof image === 'object' ? image?.alt : undefined) || ''
 const mainImageKey = typeof image === 'object' ? (image?.asset?._id || image?.asset?.url) : src

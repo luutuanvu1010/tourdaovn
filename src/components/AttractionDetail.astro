@@ -28,7 +28,7 @@ const t = uiCopy(lang)
 
 const typeLabel = lookupLabel(ATTRACTION_TYPE_LABELS, lang, data.attractionType)
 
-function hasPtContent(blocks: unknown[] | undefined): boolean {
+function hasPtContent(blocks: unknown[] | undefined | null): boolean {
   if (!blocks || blocks.length === 0) return false
   return blocks.some((b: any) => b._type === 'block' && b.children?.some((c: any) => (c.text || '').trim()))
 }

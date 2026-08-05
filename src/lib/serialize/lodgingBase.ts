@@ -14,23 +14,23 @@ interface LodgingData {
   slug: string
   summary: string
   mainImage?: ImageAsset
-  gallery?: ImageAsset[]
+  gallery?: ImageAsset[] | null
   geo?: GeoPoint
   address?: { street?: string; ward?: string }
   officialSource: string
-  sameAs?: string[]
+  sameAs?: string[] | null
   starRating?: number
-  amenityFeature?: string[]
+  amenityFeature?: string[] | null
   checkinTime?: string
   checkoutTime?: string
   numberOfRooms?: number
   petsAllowed?: boolean
   containedInPlace: EntityRef
   beachAccess?: string
-  accessInfo?: unknown[]
-  body?: unknown[]
-  highlights?: string[]
-  faq?: FAQItem[]
+  accessInfo?: unknown[] | null
+  body?: unknown[] | null
+  highlights?: string[] | null
+  faq?: FAQItem[] | null
   imageProvenance?: string
   publishedAt?: string
   updatedAt?: string
