@@ -32,7 +32,13 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..', '..')
-const CONTENT_MODEL_PATH = resolve(REPO_ROOT, 'project', '01-CONTENT_MODEL.md')
+// File này đang tắt (QĐ-2026-08-05-03, nợ ND-001). Vẫn sửa đường dẫn spec cho
+// đúng repo này, để lúc trả nợ ND-001 không phải dò lại cùng một lỗi: 'project/'
+// là quy ước của nhatrangtravel, tourdaovn để spec ở docs/core-specs/ (DR-001).
+const CONTENT_MODEL_PATH = resolve(REPO_ROOT, 'docs', 'core-specs', '01-CONTENT_MODEL.md')
+// Đường dẫn còn lại vẫn trỏ vào shared/gates/ — thư mục không tồn tại. Đây chính
+// là điều kiện trả nợ ND-001: hoặc khôi phục shared/gates (ND-005), hoặc trỏ về
+// scripts/gate.config.ts và chấp nhận phạm vi hẹp hơn. Không tự chọn ở đây.
 const GATE_FIELDS_PATH = resolve(REPO_ROOT, 'shared', 'gates', 'index.ts')
 const REPORT_DIR = resolve(REPO_ROOT, 'scripts', 'reports')
 

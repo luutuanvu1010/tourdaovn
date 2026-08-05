@@ -15,6 +15,12 @@
 import { readFileSync, writeFileSync, readdirSync, mkdirSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { resolve, join, relative } from 'node:path'
+// ADR-0021 QĐ8: site.config.ts là NƠI DUY NHẤT khai tên site, không nơi nào trong
+// code được viết lại. Script này trước đây hardcode 'Nha Trang Travel', nên bản
+// kiểm kê vừa commit mang nhầm thương hiệu — mà nó lại là đầu vào bắt buộc của
+// prompt giao cho Claude Design ở pha F. Vì import file .ts nên npm script phải
+// chạy qua tsx. Xem docs/DRIFT_LOG.md DR-025.
+import { brand } from '../src/site.config.ts'
 
 const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url))
 const COMPONENTS_DIR = resolve(REPO_ROOT, 'src/components')
@@ -213,7 +219,7 @@ for (const { name, file, props } of parsed) {
 // ── xuất markdown ─────────────────────────────────────────────────────────────
 
 const lines = []
-lines.push('# Danh mục component — Nha Trang Travel')
+lines.push(`# Danh mục component — ${brand.name}`)
 lines.push('')
 lines.push('> File sinh tự động bởi `scripts/gen-component-inventory.mjs`. Không sửa tay.')
 lines.push('> Sinh lại: `npm run gen:design-context`')

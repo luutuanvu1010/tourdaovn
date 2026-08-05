@@ -1,4 +1,4 @@
-# Danh mục component — Nha Trang Travel
+# Danh mục component — Tour Đảo
 
 > File sinh tự động bởi `scripts/gen-component-inventory.mjs`. Không sửa tay.
 > Sinh lại: `npm run gen:design-context`
