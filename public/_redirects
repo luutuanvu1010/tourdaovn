@@ -1,5 +1,6 @@
-# Chuyển hướng — Cloudflare Pages đọc file này.
+# Chuyển hướng — Cloudflare đọc file này (Workers Static Assets; cùng cú pháp với Pages).
 #
+# ── Phần 1. Dòng R3 ────────────────────────────────────────────────────
 # Luật R3 (04-CONSTRAINTS §1c): một URL đã từng tồn tại KHÔNG được biến mất câm.
 # Đổi đường dẫn hay gỡ trang thì phải có một dòng ở đây — 301 về nơi thay thế,
 # hoặc 410 khi gỡ hẳn. Validator so sitemap production với sitemap build mới và
@@ -7,6 +8,23 @@
 #
 # Dạng dòng:   <đường dẫn cũ>   <đường dẫn mới>   301
 #
-# Hiện chưa có dòng nào. Đợt điều hướng theo dòng dịch vụ (ADR-0023) không đổi
+# Hiện chưa có dòng R3 nào. Đợt điều hướng theo dòng dịch vụ (ADR-0023) không đổi
 # đường dẫn nào: ba hub Khám phá / Lưu trú / Đi lại chỉ rời khỏi menu, URL vẫn
 # sống và vẫn nằm trong sitemap.
+#
+# ── Phần 2. Điều hướng tạm thời — KHÔNG phải R3 ────────────────────────
+# Dòng dưới đây không phục vụ R3. Nó là điều hướng hạ tầng tạm thời trong lúc
+# tourdao.vn chưa công bố: trang chủ đưa khách sang tourdaonhatrang.com.
+# Căn cứ: QĐ-2026-08-06-02.
+#
+# Vì sao ở đây mà không phải Page Rules: tourdao.vn do Worker phục vụ, mà
+# Cloudflare vô hiệu hoá Page Rule "Forwarding URL" khi request khớp Worker route
+# (Client → Worker = Rule Ignored). File này nằm trong chính lớp phục vụ asset
+# nên không bị lớp Rules nào nuốt.
+#
+# 302 chứ không phải 301 — tạm thời, gỡ dòng là hoàn nguyên ngay, không đốt SEO.
+# Chỉ khớp đúng "/" nên trang con không bị đụng, sitemap không đổi, R3/R4 vẫn pass.
+#
+# GỠ KHI: site công bố. Mốc ra mắt 2026-08-09 theo QĐ-2026-08-06-01.
+
+/    https://tourdaonhatrang.com/    302
