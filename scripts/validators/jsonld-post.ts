@@ -55,7 +55,10 @@ const DETAIL_ENTITY_TYPES: Record<string, string[]> = {
   tour: ['TouristTrip'],
   // Đồng bộ EVENT_TYPE_MAP (src/lib/serialize/event.ts) — subtype thật theo eventType, CONTENT_MODEL §2.10
   event: ['Event', 'Festival', 'SportsEvent', 'MusicEvent', 'FoodEvent', 'ExhibitionEvent'],
-  article: ['Article'],
+  // Đồng bộ ARTICLE_TYPE_MAP (src/lib/serialize/article.ts) — articleType=news cho
+  // ra NewsArticle. 05-URL_MAP dòng 120 khai "NewsArticle khi news, còn lại Article".
+  // Cùng loại lệch với organization ngay dưới. Xem docs/DRIFT_LOG.md DR-018.
+  article: ['Article', 'NewsArticle'],
   person: ['Person'],
   // Đồng bộ ORG_TYPE_MAP (src/lib/serialize/organization.ts) — @type theo orgType.
   // CONTENT_MODEL §2.9 dòng 375 và 05-URL_MAP dòng 118 đều khai "TravelAgency hoặc

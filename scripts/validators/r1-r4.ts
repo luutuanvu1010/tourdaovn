@@ -1,5 +1,6 @@
 import type { ValidatorResult } from './i1-i19.js'
 import { ROUTE_MAP } from '../../src/lib/routes.js'
+import { langs as enabledLangs } from '../../src/site.config.js'
 
 // R1 + R2 chạy trên tập publishedDocs (approved + category) — dispatch ở validate-constraints.ts
 // đã lọc đúng tập này (không thuộc FULL_CORPUS_VALIDATORS, không prefix PY).
@@ -13,7 +14,14 @@ const TERM_BRANCHES: Record<string, { termSet: string; refField: string }> = {
   tour:       { termSet: 'tour-type',       refField: 'category' },
 }
 
-const LANGS = ['vi', 'en', 'zh', 'ko', 'ru'] as const
+// ALL_LANGS là tập khả dĩ của core; LANGS là tập ĐANG BẬT, đọc từ site.config
+// theo ADR-0021 (site.config.ts là nguồn sự thật duy nhất về phạm vi site, gồm
+// ngôn ngữ). DR-012 đã vá đúng chuyện này cho r3-r4-post.ts nhưng bỏ sót file
+// này, trong khi S25 ở đây là fail-level: trên site vi-only, bản hardcode đòi đủ
+// title/slug/summary cho en/zh/ko/ru và sẽ nổ hàng loạt ngay khi ND-005 trả
+// xong và bộ kiểm pre-build chạy lại. Xem docs/DRIFT_LOG.md DR-024.
+const ALL_LANGS = ['vi', 'en', 'zh', 'ko', 'ru'] as const
+const LANGS = ALL_LANGS.filter((l) => (enabledLangs as readonly string[]).includes(l))
 const FIELD_LEVEL_I18N_TYPES = new Set([
   'touristDestination', 'place', 'attraction', 'experience',
   'restaurant', 'specialty', 'hotel', 'resort', 'tour',

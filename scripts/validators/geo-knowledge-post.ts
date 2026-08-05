@@ -5,15 +5,20 @@ import { config as dotenvConfig } from 'dotenv'
 import { fetchAllDocs } from '../lib/sanity-client.js'
 import { loadNodeDotEnv } from '../synthesis/config.js'
 import { ROUTE_MAP } from '../../src/lib/routes.js'
-import { site } from '../../src/site.config.js'
+import { site, langs as enabledLangs } from '../../src/site.config.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..', '..')
 const DIST = resolve(REPO_ROOT, 'dist')
 const REPORT_PATH = resolve(REPO_ROOT, 'scripts', 'reports', 'geo-knowledge-status.json')
 const SITE = site.url
-const LANGS = ['vi', 'en', 'zh', 'ko', 'ru'] as const
-type Lang = typeof LANGS[number]
+// Cùng lý do với r1-r4.ts và r3-r4-post.ts: tập khả dĩ giữ đủ 5 để làm kiểu, còn
+// tập ĐANG BẬT đọc từ site.config (ADR-0021). File này đã import `site` sẵn nhưng
+// vẫn đếm theo 5 ngôn ngữ, nên mọi thống kê phủ ngôn ngữ trên site vi-only đều
+// sai mẫu số. Xem docs/DRIFT_LOG.md DR-024.
+const ALL_LANGS = ['vi', 'en', 'zh', 'ko', 'ru'] as const
+type Lang = typeof ALL_LANGS[number]
+const LANGS: readonly Lang[] = ALL_LANGS.filter((l) => (enabledLangs as readonly string[]).includes(l))
 
 const REQUIRED_JSON = ['index.json', 'entities.json', 'graph.json', 'reading-guide.json']
 const REQUIRED_PUBLIC = ['robots.txt', 'llms.txt', ...REQUIRED_JSON.map((file) => `ai/${file}`)]
