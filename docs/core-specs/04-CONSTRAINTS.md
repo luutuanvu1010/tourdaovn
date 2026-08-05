@@ -51,7 +51,7 @@ Nguồn sự thật của phát biểu bất biến là CONTENT_MODEL mục 4; f
 | I12 | Cấm publish thiếu field bắt buộc; cấm entity rỗng | required-field validator sinh từ 13 dòng gate publish ở CONTENT_MODEL mục 2, chạy trên mọi doc publish; gồm cả điều kiện kèm trong dòng gate: Article transport-guide cần ít nhất một trong howTo, faq; `imageProvenance` là dữ liệu nội bộ tùy chọn, không còn là điều kiện publish | fail | QA2 |
 | I13 | Experience đủ experienceType, venue tồn tại | required-field cộng ref integrity | fail | QA2 |
 | I14 | Tour đủ itinerary ≥ 1 stop, operator tồn tại, tourFormat; đơn vị giá perPax | required-field cộng ref integrity; phần đơn vị giá thi hành ở PY3 | fail | QA2 |
-| I15 | Cấm chuỗi "thành phố Nha Trang" trong address và containedInPlace; địa lý theo đơn vị hành chính hiện hành | grep dataset cộng output build | fail | QA2 cộng hook | <!-- 🔧 SITE-SPECIFIC: luật địa danh riêng của nhatrangtravel (cải cách hành chính). Site khác thay bằng luật địa danh của mình hoặc bỏ dòng này. -->
+| I15 | ~~Cấm chuỗi "thành phố Nha Trang"~~ **ĐÃ GỠ 2026-08-06** — không còn là luật của tourdaovn (chủ dự án chốt ở bước 0, `00-PROJECT_BRIEF` §7). Dòng này vốn tự đánh dấu 🔧 SITE-SPECIFIC là luật địa danh riêng của nhatrangtravel. | — | — | — |
 | I16 | Giá render một chiều qua bookingRef; đơn vị giá sống bên nguồn giá; lưu trú kèm ngày cập nhật | thi hành ở bảng PY (PY1, PY2, PY4) và mục 2 điều cấm 4, 5 | fail | QA2 |
 | I17 | Specialty đủ specialtyType, sameAs; whereToTry là tập con của chiều servesSpecialty suy ngược | required-field cộng subset check: mọi Restaurant trong whereToTry phải publish và có servesSpecialty chứa chính Specialty đó | fail | QA2 |
 | I18 | Organization chỉ publish khi có quan hệ vào | reverse reference quét cả draft: tồn tại Tour.operator, Event.organizer hoặc Article.about trỏ tới | fail | QA2 |
@@ -110,6 +110,8 @@ Kế thừa toàn bộ S2.8 của overlay (6 control của `playbook/governance/
 - Token Sanity cấp cho build chỉ quyền đọc dataset (đồng thời là cơ chế kiểm của điều cấm 2.4).
 - `prices.yaml` chỉ giá bán công khai (S2.8 ràng buộc 8), thi hành bằng PY7.
 - GROQ dùng tham số, cấm nối chuỗi từ đầu vào người dùng; chống XSS ở mọi điểm render nội dung động (S2.8). Kiểm: lint cộng review, artifact review là điều kiện cổng QA2.
+
+> **Nới ràng buộc — ghi theo §5.** Gỡ I15 là *nới*, nên cần chủ dự án phê chuẩn kèm lý do ghi vào `DECISIONS.md`. Đã có: chủ dự án chốt 2026-08-06, bản ghi QĐ-2026-08-06-01. Không control nào khác bị hạ mức.
 
 ## 5. Quy tắc sửa file này
 

@@ -356,3 +356,21 @@ Chủ dự án chọn hướng 1 trong ba hướng đã trình, 2026-08-05.
 **Kết quả.** 40 cảnh báo đo trên bản chép cũ → **15 cảnh báo đo trên tài liệu thật**, 0 lỗi. Baseline 15 ghi ở `06-BINDING_MAP` §7.1 để lần sau đo được tăng hay giảm.
 
 **Còn nợ.** `g1-content-model-vs-schema.ts` có đúng cùng khuôn — vẫn chép cứng bảng field thay vì đọc `01-CONTENT_MODEL.md`. Chưa xử trong đợt này.
+
+---
+
+## QĐ-2026-08-06-01 — Chốt bước 0, và gỡ luật I15
+
+**Chốt.** Chủ dự án trả lời trọn năm câu của `00-PROJECT_BRIEF` §8 ngày 2026-08-06. Bước 0 đóng.
+
+- **Nguồn tiền:** vừa tự vận hành tour, vừa bán lại hưởng hoa hồng. Hệ quả lên dữ liệu: `Tour.operator` của sản phẩm bán lại phải trỏ đơn vị vận hành thật, không trỏ về Tour Đảo.
+- **Khách:** khách lẻ và khách đoàn.
+- **Khác biệt:** xe đưa đón, hướng dẫn viên đi cùng, giá tốt, thanh toán linh hoạt.
+- **Mốc ra mắt:** 2026-08-09, cần 4 sản phẩm có trang đầy đủ.
+- **I15:** không còn là luật của tourdaovn.
+
+**Gỡ I15 là nới ràng buộc**, nên theo `04-CONSTRAINTS` §5 cần chủ dự án phê chuẩn kèm lý do ghi ở đây. Lý do: dòng đó tự đánh dấu 🔧 SITE-SPECIFIC là luật địa danh riêng của nhatrangtravel (cải cách hành chính), không áp cho site này. Không control nào khác bị hạ mức. Gỡ I15 cũng bỏ một trong hai câu hỏi mà `QĐ-2026-08-05-08` nêu là điều kiện trả nợ ND-005.
+
+**Một chỗ tác nhân không viết theo nguyên văn.** Chủ dự án nói "giá tốt nhất thị trường". Luật Quảng cáo 2012 Điều 8.11 cấm quảng cáo so sánh trực tiếp với sản phẩm cùng loại của đơn vị khác. Site viết "giá tốt", không dùng dạng so sánh tuyệt đối. Ghi ở `00-PROJECT_BRIEF` §3. Chủ dự án muốn giữ nguyên câu gốc thì cần chốt lại thành văn kèm chấp nhận rủi ro.
+
+**Hai ngưỡng chưa đặt.** Chuyển đổi và tìm kiếm — mốc 3 ngày quá ngắn để đo. Đặt lại sau khi site sống một tháng.

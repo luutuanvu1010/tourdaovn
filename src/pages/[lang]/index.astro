@@ -45,7 +45,7 @@ const config: SiteSettingsResult | null = await client.fetch(siteSettingsQuery()
 const siteBase = siteBaseUrl(Astro.site)
 
 const fallbackSummary: Record<Lang, string> = {
-  vi: 'Cẩm nang du lịch Nha Trang với điểm đến, trải nghiệm, ẩm thực, lưu trú và thông tin thực tế được tuyển chọn.',
+  vi: brand.description,
   en: 'Nha Trang travel guide with selected places, experiences, food, stays and practical tips.',
   zh: '芽庄旅行指南，涵盖精选地点、体验、美食、住宿和实用信息。',
   ko: '나트랑의 장소, 체험, 음식, 숙소와 실용 정보를 정리한 여행 가이드입니다.',

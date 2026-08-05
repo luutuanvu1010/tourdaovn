@@ -81,6 +81,22 @@ export const brand = {
 
   /** Năm thành lập — dòng bản quyền ở footer tự tính "© <năm nay> …" */
   foundedYear: 2026,
+
+  /**
+   * Mô tả site — dùng cho thẻ meta description, đoạn mở trang chủ và thẻ chia
+   * sẻ mạng xã hội. ĐÂY LÀ NƠI DUY NHẤT: trước đây câu này bị chép ở 3 file
+   * khác nhau và lệch nhau (DR-006).
+   *
+   * Nội dung theo `00-PROJECT_BRIEF` §1 và §3, chủ dự án chốt 2026-08-06.
+   * Cố ý KHÔNG viết "giá tốt nhất thị trường": Luật Quảng cáo 2012 Điều 8.11
+   * cấm quảng cáo so sánh trực tiếp với sản phẩm cùng loại của đơn vị khác.
+   */
+  description:
+    'Tour đảo Nha Trang, lặn biển, vé VinWonders, khách sạn và xe đưa đón sân bay. ' +
+    'Nhận khách lẻ và khách đoàn, có hướng dẫn viên đi cùng, đặt nhanh qua Zalo.',
+
+  /** Một dòng ngắn cho chân trang. */
+  tagline: 'Đầu mối trọn gói cho chuyến biển đảo Nha Trang — tour, vé, phòng, xe đưa đón.',
 } as const
 
 export const site = {

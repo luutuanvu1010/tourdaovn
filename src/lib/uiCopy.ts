@@ -146,7 +146,7 @@ const vi = {
   galleryAria: 'Thư viện ảnh',
   readMore: 'Đọc tiếp',
   authorityAria: 'Thông tin thẩm quyền nội dung',
-  footerTagline: 'Cẩm nang du lịch Nha Trang — thông tin điểm đến, trải nghiệm, ẩm thực và lưu trú được tuyển chọn bởi người bản địa.',
+  footerTagline: brand.tagline,
   footerServices: 'Dịch vụ',
   footerAboutUs: 'Về chúng tôi',
   footerGuides: 'Cẩm nang du lịch',
