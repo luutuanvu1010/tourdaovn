@@ -46,7 +46,7 @@ export default defineType({
           fields: [
             defineField({
               name: 'key',
-              title: 'Section',
+              title: 'Khối nội dung',
               type: 'string',
               options: { list: SECTION_KEYS },
               validation: (Rule) => Rule.required(),
@@ -76,10 +76,12 @@ export default defineType({
       title: 'Lời chào (Hero)',
       description: 'Bấm chọn ngôn ngữ ở trên để nhập cho từng ngôn ngữ. Để trống → dùng mặc định trong code.',
       type: 'object',
+      // Bỏ `title: lang.toUpperCase()` (sinh ra "VI", "EN"...) để từ điển nhãn ở
+      // cms/lib/fieldLabels.ts điền "Tiếng Việt", "Tiếng Anh"... — một nguồn tên
+      // ngôn ngữ duy nhất cho cả Studio.
       fields: LANGUAGES.map((lang) =>
         defineField({
           name: lang,
-          title: lang.toUpperCase(),
           type: 'string',
         })
       ),
@@ -98,7 +100,7 @@ export default defineType({
         }),
         defineField({
           name: 'zaloUrl',
-          title: 'Link Zalo',
+          title: 'Liên kết Zalo',
           type: 'url',
           description: 'Link zalo.me hoặc Zalo OA đầy đủ.',
           validation: (Rule) => Rule.uri({ scheme: ['http', 'https'] }),

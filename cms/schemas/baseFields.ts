@@ -145,7 +145,13 @@ export const baseFieldsAfterGallery = [
         { title: 'Đã duyệt', value: 'approved' }
       ]
     },
-    initialValue: 'draft'
+    // Mặc định 'approved' theo quyết định chủ dự án 2026-08-04 (trước đó là 'draft').
+    // Hệ quả cần biết: I19 dùng reviewStatus làm chốt chặn publish, nên mặc định này
+    // biến duyệt từ hành động chủ động thành mặc nhiên — document mới tạo là đã duyệt.
+    // `approvedBy` tự điền tên người đăng nhập (ApprovedByInput) nên vẫn có vết người
+    // duyệt; `contentProvenance` thì KHÔNG tự điền, thiếu nó là fail cổng
+    // S24-AUTHORITY-HTML dù trạng thái đã là 'approved'.
+    initialValue: 'approved'
   }),
   defineField({
     name: 'approvedBy', type: 'string',
@@ -161,7 +167,12 @@ export const baseFieldsAfterGallery = [
         { title: 'AI sinh, người duyệt', value: 'ai-t1' },
         { title: 'Trộn', value: 'mixed' }
       ]
-    }
+    },
+    // Mặc định 'human' theo quyết định chủ dự án 2026-08-04. Đi kèm với
+    // reviewStatus mặc định 'approved': cổng S24-AUTHORITY-HTML đòi đủ bộ
+    // approved + approvedBy + contentProvenance, thiếu trường này là trang fail
+    // cổng dù đã ghi 'đã duyệt'. Nội dung do AI soạn thì đổi tay sang 'ai-t1'.
+    initialValue: 'human'
   }),
   defineField({ name: 'publishedAt', type: 'datetime', group: 'quanTri', readOnly: true }),
   defineField({ name: 'updatedAt', type: 'datetime', group: 'quanTri', readOnly: true })

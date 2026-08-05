@@ -139,7 +139,9 @@ export default defineType({
           { title: 'Đã duyệt', value: 'approved' }
         ]
       },
-      initialValue: 'draft'
+      // Mặc định 'approved' — xem ghi chú ở cms/schemas/baseFields.ts (quyết định
+      // chủ dự án 2026-08-04). Article khai riêng vì dùng i18n document-level.
+      initialValue: 'approved'
     }),
     defineField({ name: 'approvedBy', type: 'string', group: 'quanTri', components: { input: ApprovedByInput } }),
     defineField({
@@ -151,7 +153,9 @@ export default defineType({
           { title: 'AI sinh, người duyệt', value: 'ai-t1' },
           { title: 'Trộn', value: 'mixed' }
         ]
-      }
+      },
+      // Mặc định 'human' — xem ghi chú ở cms/schemas/baseFields.ts.
+      initialValue: 'human'
     }),
     defineField({
       name: 'category', type: 'array',

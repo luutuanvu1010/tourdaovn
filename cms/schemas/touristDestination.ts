@@ -164,7 +164,7 @@ export default defineType({
           }),
           defineField({
             name: 'linkUrl',
-            title: 'Link',
+            title: 'Liên kết',
             type: 'string',
             description: 'Cho phép /, https://, http://, tel:, mailto:',
             validation: Rule => Rule.custom((value: unknown) => {
@@ -204,7 +204,7 @@ export default defineType({
           }),
           defineField({
             name: 'theme',
-            title: 'Theme',
+            title: 'Tông màu',
             type: 'string',
             options: {
               list: [

@@ -15,6 +15,7 @@ import tour from './tour'
 import article from './article'
 import faqItem from './objects/faqItem'
 import { enabledEntities } from '../../src/site.config'
+import { applyFieldLabelsAll } from '../lib/applyFieldLabels'
 
 // place, attraction, experience, hotel, resort, tour, article, person, organization: bật/tắt
 // đọc từ `enabledEntities` (site.config.ts) — một nguồn sự thật duy nhất (PHA 5, GÓI 2).
@@ -34,7 +35,11 @@ const ENTITY_SCHEMAS: Record<string, unknown> = {
 // featuredSpecialties vẫn khai `to: [{ type: 'restaurant' }]`/`{ type: 'specialty' }`. Đây
 // đúng là tình huống PHA 5 mục 3 lường trước — báo cáo, không tự xử lý. Chỉ mới ẩn khỏi
 // menu (biên tập viên không tạo mới được nữa), CHƯA gỡ đăng ký thật. Xem docs/GOI-2-KET-QUA.md.
-export const schemaTypes = [
+// applyFieldLabelsAll: gắn nhãn tiếng Việt cho mọi trường chưa tự khai `title`, đọc từ
+// cms/lib/fieldLabels.ts (chủ dự án chốt 2026-08-04 — giao diện Studio 100% tiếng Việt).
+// Đặt ở đây, sau khi đã lọc theo enabledEntities, để chỉ chạy đúng một lượt trên đúng
+// những type thật sự đăng ký. Trường nào đã có `title` riêng trong schema thì giữ nguyên.
+export const schemaTypes = applyFieldLabelsAll([
   siteSettings,
   faqItem,
   category,
@@ -43,4 +48,4 @@ export const schemaTypes = [
   event,
   restaurant,
   specialty,
-]
+] as Record<string, any>[])
