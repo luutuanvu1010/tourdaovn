@@ -261,6 +261,8 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
     contact: { required: false },
     // pickupPoints thêm v1.0.13 — lộ trình đón khách, nguồn cho /lo-trinh-don-khach
     pickupPoints: { required: false },
+    // theme thêm v1.0.15 — bộ giao diện chọn được (07-DESIGN_TOKENS §1b)
+    theme: { required: false },
     // support thêm v1.0.14 (ADR-0023) — nội dung trang /ho-tro
     support: { required: false },
   },

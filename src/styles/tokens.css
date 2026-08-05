@@ -111,6 +111,32 @@
   --card-img-h: 200px;
 }
 
+/* ═══ BỘ GIAO DIỆN CHỌN ĐƯỢC — 07-DESIGN_TOKENS §1b ═══
+   Chủ dự án chọn trong Sanity Studio (siteSettings.theme); BaseLayout gắn
+   data-theme lên <html>. Không có bộ nào thì :root ở trên là "bien-sau".
+   Mỗi bộ CHỈ đổi bốn token màu gốc — chữ, khoảng cách, bo góc giữ nguyên.
+   Mọi bộ phải qua WCAG AA: npm --prefix scripts run check:theme */
+
+:root[data-theme='cat-bien'] {
+  --c-surface:        #FDFAF5;
+  --c-primary:        #155E75;
+  --c-accent:         #B45309;
+  --c-text:           #1C1917;
+  --c-text-muted:     #57534E;
+  --c-primary-strong: #0E4A5C;
+  --c-accent-strong:  #92400E;
+}
+
+:root[data-theme='ngoc-lam'] {
+  --c-surface:        #FFFFFF;
+  --c-primary:        #0F766E;
+  --c-accent:         #BE123C;
+  --c-text:           #0F172A;
+  --c-text-muted:     #475569;
+  --c-primary-strong: #0B5A54;
+  --c-accent-strong:  #9F1239;
+}
+
 /* ── Reset ── */
 *, *::before, *::after {
   box-sizing: border-box;

@@ -58,6 +58,30 @@ Quy tắc dùng accent: accent chỉ xuất hiện ở vùng hành động và n
 
 **Nền trang là trắng thuần**, không gradient phủ toàn trang. Ảnh thật của biển và đảo là thứ mang màu; nền phải lùi lại để ảnh nổi lên.
 
+## 1b. Bộ giao diện chọn được (thêm 2026-08-06)
+
+Chủ dự án chọn bộ đang bật trong Sanity Studio (`siteSettings.theme`). **Studio chỉ chọn, không nhập giá trị màu** — nên đây vẫn là một nguồn sự thật: bảng dưới đây.
+
+Mỗi bộ chỉ đổi bốn token màu gốc; toàn bộ chữ, khoảng cách, bo góc, bóng giữ nguyên. Đổi bộ là đổi tông, không phải đổi hệ thống.
+
+| Bộ | `surface` | `primary` | `accent` | `text` | Cảm giác |
+|---|---|---|---|---|---|
+| `bien-sau` **(mặc định)** | #FFFFFF | #0C4A6E | #C0392B | #0F172A | biển sâu, trắng sạch |
+| `cat-bien` | #FDFAF5 | #155E75 | #B45309 | #1C1917 | cát ấm, nắng chiều |
+| `ngoc-lam` | #FFFFFF | #0F766E | #BE123C | #0F172A | nước nông, trong |
+
+**Ngưỡng bắt buộc.** Mọi bộ phải đạt WCAG AA ở bốn cặp: chữ chính trên nền, chữ mờ trên nền, chữ trắng trên `primary`, chữ trắng trên `accent` — tất cả ≥ 4.5.
+
+Đo được, không phải lời hứa: `npm --prefix scripts run check:theme` chạy lại bảng này và **thoát 1 nếu có cặp nào rớt**. Thêm bộ mới mà quên kiểm thì lệnh đó đỏ.
+
+| Bộ | chữ/nền | chữ mờ/nền | trắng/primary | trắng/accent |
+|---|---|---|---|---|
+| `bien-sau` | 17.85 | 7.58 | 9.46 | 5.44 |
+| `cat-bien` | 16.80 | 7.33 | 7.27 | 5.02 |
+| `ngoc-lam` | 17.85 | 7.58 | 5.47 | 6.29 |
+
+Thêm bộ mới: thêm một dòng ở đây, một khối `:root[data-theme="..."]` trong `tokens.css`, một giá trị vào enum ở `cms/schemas/siteSettings.ts`, rồi chạy `check:theme`.
+
 ## 2. Chữ
 
 | Token | Giá trị | Dùng cho |

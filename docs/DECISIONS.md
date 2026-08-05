@@ -524,3 +524,21 @@ Coral sáng #E8654E từng có trong runtime chỉ đạt **3.28 — rớt AA**,
 **Bảy chỗ trong component còn trỏ vào token đã gỡ** đã thay hết. CSS không báo lỗi khi biến không tồn tại — nó lặng lẽ mất nền, nên phải quét tay.
 
 **Chưa làm ở đợt này:** font vẫn là Be Vietnam Pro + Plus Jakarta Sans (chưa có lý do đổi), và bố cục chưa động tới. `08-QA_CHECKLIST` §B còn giá trị hardcode ở mục liệt kê, cần rà lại khi Design xuất mockup.
+
+---
+
+## QĐ-2026-08-06-05 — Bộ giao diện chọn được trong Sanity Studio
+
+**Chốt.** Chủ dự án 2026-08-06: muốn tự đổi giao diện theo các bộ đã thiết lập sẵn, không cần lập trình viên.
+
+**Cách làm giữ được một nguồn sự thật.** Studio **chỉ CHỌN** một bộ từ danh sách đóng (`siteSettings.theme`, 3 giá trị); **không nhập được giá trị màu**. Màu vẫn chỉ sống ở `src/styles/tokens.css`, khai ở `07-DESIGN_TOKENS` §1b. Nếu cho nhập màu tự do thì bộ token mất tác dụng và cổng QA không còn gì để đối chiếu — đó là ranh giới không vượt.
+
+**Ba bộ:** `bien-sau` (mặc định, nền trắng + biển sâu + san hô), `cat-bien` (nền kem ấm + cam nắng), `ngoc-lam` (nền trắng + xanh ngọc + hồng san hô). Mỗi bộ chỉ đổi bốn token màu gốc; chữ, khoảng cách, bo góc, bóng giữ nguyên — đổi tông chứ không đổi hệ thống.
+
+**Ngưỡng bắt buộc và cách kiểm.** Mọi bộ phải đạt WCAG AA ≥ 4.5 ở bốn cặp. `npm --prefix scripts run check:theme` đọc thẳng `tokens.css` (không giữ bản chép) và thoát 1 nếu có cặp rớt.
+
+Đã chứng minh **hai chiều**: thêm một bộ dùng coral sáng #E8654E → lệnh báo `3.28 ✗ RỚT AA` và thoát 1; gỡ bộ đó → `[pass] 3 bộ`.
+
+**Giá trị lạ không làm vỡ site.** `fetchSiteTheme()` chỉ nhận ba tên hợp lệ, còn lại rơi về mặc định.
+
+**Chưa làm:** nhóm "đưa thêm nội dung vào Studio" (mô tả site, thanh tin cậy, tiêu đề khối) — việc riêng, chưa chạm ở đợt này.

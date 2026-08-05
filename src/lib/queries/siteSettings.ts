@@ -6,6 +6,7 @@
 export function siteSettingsQuery(): string {
   return `*[_type == "siteSettings" && _id == "siteSettings"][0]{
     title,
+    theme,
     sections[]{
       _key,
       key,

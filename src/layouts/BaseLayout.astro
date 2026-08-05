@@ -4,6 +4,7 @@ import Footer from '../components/Footer.astro';
 import '../styles/tokens.css';
 import { brand } from '../site.config';
 import { siteBaseUrl } from '../lib/siteUrl';
+import { fetchSiteTheme } from '../lib/siteTheme';
 
 export interface Props {
   title: string;
@@ -24,10 +25,14 @@ const { title, description, lang = 'vi', currentPath = '/', alternates, ogImage,
 const siteBase = siteBaseUrl(Astro.site);
 const pathWithSlash = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`;
 const selfUrl = siteBase + pathWithSlash;
+
+// Bộ giao diện chọn trong Sanity Studio (siteSettings.theme). Giá trị lạ hoặc
+// trống → bộ mặc định, trang vẫn dựng. Xem 07-DESIGN_TOKENS §1b.
+const theme = await fetchSiteTheme();
 ---
 
 <!DOCTYPE html>
-<html lang={lang}>
+<html lang={lang} data-theme={theme}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

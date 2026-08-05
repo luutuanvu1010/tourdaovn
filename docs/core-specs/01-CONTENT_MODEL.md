@@ -17,7 +17,7 @@ Phần KHÔNG nhãn (cơ chế field 2.0, ba họ gate, quy tắc giá, khối q
 > 🔧 **SITE-SPECIFIC:** danh mục 14 entity và mọi ví dụ (Specialty, TouristDestination, 5 ngôn ngữ) là của nhatrangtravel. Giữ *cơ chế* (field 2.0, ba họ gate, quy tắc bookingRef, khối quản trị); thay *danh mục entity* theo site.
 
 - **Trạng thái:** đã duyệt. Founder soát toàn văn theo cụm 2026-06-11 (rà phản biện độc lập, 7 vết chốt qua trắc nghiệm), bước 1 đóng.
-- **Phiên bản:** v1.0.14   **Ngày:** 2026-08-05   **Người soạn:** Cowork (tác nhân điều phối).
+- **Phiên bản:** v1.0.15   **Ngày:** 2026-08-05   **Người soạn:** Cowork (tác nhân điều phối).
 - **Nguồn quyết định:** brief mục 5-6 cộng các lựa chọn founder 2026-06-10 và 2026-06-11 (xem `DECISIONS.md` và `project/adr/` từ ADR-0002 đến ADR-0006).
 - **Kế thừa ràng buộc:** CONSTITUTION v2.2.0, PROJECT_OVERLAY v1.0.2 (S2.2 bất biến dữ liệu, S2.3 ngưỡng, S2.4 SEO/GEO, S2.5 đa ngôn ngữ).
 - **Override hiện hành:** từ 2026-06-30, `imageProvenance` là dữ liệu nội bộ tùy chọn, ẩn khỏi layout biên tập và không còn nằm trong gate publish I12. Từ 2026-07-02, `Attraction.containedInPlace` có thể trỏ `Place` hoặc `TouristDestination` khi Nha Trang là container thực tế; không khôi phục `seed.trung-tam-nha-trang`. Các dòng lịch sử bên dưới ghi "có khi có ảnh", "cộng imageProvenance khi có ảnh", hoặc "Attraction Place-only" chỉ còn là bối cảnh cũ, đã bị supersede bởi `DECISIONS.md`.
@@ -537,6 +537,7 @@ Cấu hình toàn site. Toàn bộ dataset chỉ có đúng 1 document. i18n fie
 | heroText | object {vi,en,zh,ko,ru} | tùy | có (field-level) | ghi đè dòng eyebrow của hero; để trống → dùng SITE_COPY | founder |
 | contact | object | tùy | không | 4 field con, dữ liệu trung lập ngôn ngữ; field con nào trống thì kênh đó không render (guard rỗng, không nút chết) | founder |
 | pickupPoints | array object | tùy | không | lộ trình đón khách của công ty; thứ tự render là thứ tự trong mảng; mảng rỗng hoặc thiếu → trang lộ trình không render bản đồ (guard rỗng) | founder |
+| theme | string | tùy | không | bộ giao diện đang bật; enum đóng, giá trị hợp lệ khai ở `07-DESIGN_TOKENS` §1b; để trống → dùng bộ mặc định `bien-sau` | founder |
 | support | object | tùy | không | nội dung trang `/ho-tro/`; 3 phần con độc lập nhau, phần nào trống thì khối đó không render (guard rỗng); cả object trống hoặc thiếu → trang vẫn dựng, chỉ còn tiêu đề và kênh liên hệ | founder |
 
 Field `sections[]`:
@@ -568,6 +569,12 @@ Field `pickupPoints[]` (thêm v1.0.13 — lộ trình đón khách, chuỗi CONV
 **Trạng thái 2026-08-04 — ĐANG PHÁT TRIỂN, CHƯA LÊN PRODUCTION.** Chủ dự án chốt giữ tính năng ở chế độ phát triển. Cờ `devPages['lo-trinh-don-khach']` trong `src/site.config.ts` (mục 5) đang để `false`: trang chỉ xem được bằng `npm run dev`, bản `npm run build` không sinh trang và sitemap không liệt kê. Field trong Sanity Studio VẪN MỞ để nhập thử dữ liệu — dữ liệu nhập vào lúc này không hiện ra site thật. Khi chốt công bố: bật cờ sang `true`, và khai một dòng `kind: 'static'` trong `nav` ở `site.config.ts`. Phiếu nợ "chỗ đặt link" nêu ở đây đã được ADR-0023 trả: điều hướng nay khai một chỗ duy nhất, không còn phải thêm link cứng vào `Header.astro`.
 
 Có chủ ý KHÔNG lưu: vị trí xe theo thời gian thực (cần thiết bị GPS và hợp đồng nhà cung cấp, ngoài phạm vi CMS), và giá vé (I1 — giá không nằm trong CMS).
+
+Field `theme` (thêm v1.0.15 — chọn bộ giao diện, ADR-0023 mở rộng):
+- enum đóng: `bien-sau` (mặc định), `cat-bien`, `ngoc-lam`. Danh sách hợp lệ và giá trị token của từng bộ khai ở `07-DESIGN_TOKENS` §1b — **đây không phải nguồn sự thật thứ hai**: Studio chỉ CHỌN một bộ, không nhập được giá trị màu.
+- Thiếu hoặc giá trị lạ → site dùng bộ mặc định, không vỡ.
+- Nơi render: thuộc tính `data-theme` trên thẻ `<html>`; mỗi bộ là một khối biến CSS trong `src/styles/tokens.css`.
+- Mọi bộ phải qua ngưỡng tương phản WCAG AA. Có kiểm máy: `npm --prefix scripts run check:theme`.
 
 Field `support` (thêm v1.0.14 — nội dung trang Hỗ trợ, ADR-0023):
 - `bookingGuide`: array object `{step, text}` — hướng dẫn đặt tour theo bước; cùng hình dạng `article.howTo` và serialize ra `HowTo` + `HowToStep`
@@ -810,5 +817,6 @@ Lý do chi tiết và phương án đã loại của từng thay đổi nằm �
 - v1.0.13 (2026-08-04): thêm field `pickupPoints` vào siteSettings (§2.15) — danh sách điểm đón khách của công ty (tên, địa chỉ, toạ độ, giờ đón, ghi chú, cờ ẩn), nguồn duy nhất cho trang `/lo-trinh-don-khach`. Không thêm document type mới nên là cửa hai chiều theo §5.3. Chốt phạm vi: chỉ điểm đón tĩnh + đường nối, KHÔNG theo dõi xe thời gian thực (cần thiết bị GPS và hợp đồng nhà cung cấp, ngoài phạm vi CMS). Cùng ngày chủ dự án chốt GIỮ Ở CHẾ ĐỘ PHÁT TRIỂN, chưa công bố — thêm bảng `devPages` vào `src/site.config.ts` (mục 5) làm công tắc, cờ để `false`. Field trong Studio vẫn mở để nhập thử.
 
 - v1.0.14 (2026-08-05): thêm field `support` vào siteSettings (§2.15) — nội dung trang `/ho-tro/`, ba phần độc lập: `bookingGuide` (hướng dẫn đặt tour, cùng hình dạng `article.howTo`, ra `HowTo`), `cancellationPolicy` (chính sách huỷ/hoàn, portable text), `faq` (câu hỏi thường gặp, `faqItem`, ra `FAQPage`). Dữ liệu trung lập ngôn ngữ theo tiền lệ `contact` và `pickupPoints`. Không thêm document type mới nên là cửa hai chiều theo §5.3. Trang `/lien-he/` không cần field mới, đọc `contact` đã có và ra `ContactPage`. Phần điều hướng của cùng đợt ghi ở ADR-0023; phiếu nợ "chỗ đặt link menu" nêu trong §2.15 được ADR đó trả. Bản ghi DECISIONS cùng ngày.
+- v1.0.15 (2026-08-06): thêm field `theme` vào siteSettings (§2.15) — chọn bộ giao diện, enum đóng 3 giá trị khai ở `07-DESIGN_TOKENS` §1b. Studio CHỈ chọn, không nhập giá trị màu, nên không sinh nguồn sự thật thứ hai: màu vẫn chỉ sống ở `tokens.css`. Giá trị lạ hoặc trống → bộ mặc định, trang không vỡ. Mọi bộ phải qua WCAG AA, có kiểm máy `npm --prefix scripts run check:theme`. Không thêm document type mới nên là cửa hai chiều theo §5.3. Bản ghi DECISIONS cùng ngày.
 
 Mỗi bảng field có cột "dịch được" để quyết i18n field-level, field bất biến không nhân bản (ADR-0004). Khi dựng một trang, tách rõ ba tầng: field của entity, rollup suy ở build từ entity liên quan, và trình bày của template. Đừng biến layout thành field (N1).

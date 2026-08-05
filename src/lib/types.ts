@@ -495,8 +495,12 @@ export interface SiteSupport {
   faq: FAQItem[] | null
 }
 
+/** Bộ giao diện — enum đóng, xem 07-DESIGN_TOKENS §1b. */
+export type SiteTheme = 'bien-sau' | 'cat-bien' | 'ngoc-lam'
+
 export interface SiteSettingsResult {
   title: string
+  theme: SiteTheme | null
   sections: SiteSettingsSection[] | null
   heroText: Record<'vi' | 'en' | 'zh' | 'ko' | 'ru', string | undefined> | null
   contact: SiteContact | null

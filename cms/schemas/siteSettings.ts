@@ -209,6 +209,26 @@ export default defineType({
         },
       ],
     }),
+    // CONTENT_MODEL §2.15 v1.0.15 — chọn bộ giao diện.
+    // Danh sách đóng: Studio CHỌN một bộ, không nhập được giá trị màu, nên
+    // 07-DESIGN_TOKENS §1b vẫn là nguồn sự thật duy nhất cho màu.
+    defineField({
+      name: 'theme',
+      title: 'Bộ giao diện',
+      description:
+        'Đổi tông màu toàn site. Bố cục và chữ không đổi. ' +
+        'Để trống thì dùng bộ mặc định "Biển sâu".',
+      type: 'string',
+      initialValue: 'bien-sau',
+      options: {
+        list: [
+          { title: 'Biển sâu — nền trắng, xanh biển sâu, nhấn san hô (mặc định)', value: 'bien-sau' },
+          { title: 'Cát biển — nền kem ấm, nhấn cam nắng', value: 'cat-bien' },
+          { title: 'Ngọc lam — nền trắng, xanh ngọc, nhấn hồng san hô', value: 'ngoc-lam' },
+        ],
+        layout: 'radio',
+      },
+    }),
     // CONTENT_MODEL §2.15 v1.0.14 — nội dung trang /ho-tro (ADR-0023).
     // Ba phần độc lập: phần nào trống thì khối đó không hiện trên trang và node
     // JSON-LD tương ứng không phát. Cấm hardcode chính sách hay câu hỏi thường

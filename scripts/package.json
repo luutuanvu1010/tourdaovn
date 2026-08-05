@@ -20,7 +20,8 @@
     "snapshot:slugs": "node --import ./node_modules/tsx/dist/esm/index.mjs tools/snapshot-slugs.ts",
     "gen:slug-redirects": "node --import ./node_modules/tsx/dist/esm/index.mjs tools/gen-slug-redirects.ts",
     "test": "tsx --test synthesis/__tests__/*.test.ts",
-    "audit:spec": "node run-gates.mjs spec"
+    "audit:spec": "node run-gates.mjs spec",
+    "check:theme": "node ../scripts/check-theme-contrast.mjs"
   },
   "dependencies": {
     "@sanity/client": "^6.28.0",
