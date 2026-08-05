@@ -542,3 +542,26 @@ Coral sáng #E8654E từng có trong runtime chỉ đạt **3.28 — rớt AA**,
 **Giá trị lạ không làm vỡ site.** `fetchSiteTheme()` chỉ nhận ba tên hợp lệ, còn lại rơi về mặc định.
 
 **Chưa làm:** nhóm "đưa thêm nội dung vào Studio" (mô tả site, thanh tin cậy, tiêu đề khối) — việc riêng, chưa chạm ở đợt này.
+
+---
+
+## QĐ-2026-08-06-06 — Mở cổng bước 7, giao Claude Design
+
+**Chốt.** Chủ dự án mở cổng bước 7 ngày 2026-08-06 và giao việc cho Claude Design ngay trong phiên đang chạy, không tách phiên riêng.
+
+**Trạng thái cổng lúc mở, ghi thẳng để sau này truy được.** `06-BINDING_MAP` §7 có bảng bốn điều kiện:
+
+| # | Điều kiện | Lúc mở cổng |
+|---|---|---|
+| 1 | Mọi loại trang thật đều có bảng ánh xạ | ✅ 22 URL phủ bởi §2–§5.9 |
+| 2 | Không bảng nào mô tả loại trang không tồn tại | ✅ ba entity tắt đã sang §8 |
+| 3 | Mọi field template truy cập đều được khai | ◐ **15 cảnh báo, 0 lỗi** |
+| 4 | Bộ kiểm máy đọc đúng file này | ✅ đạt 2026-08-05, DR-027 đã xử |
+
+Chủ dự án **chấp nhận mở cổng với 15 cảnh báo ở điều kiện 3**. `GOVERNANCE` 4.1 để mặc định của cổng là chặn và mức bằng chứng thuộc quyền chủ dự án — nên đây là quyết định hợp lệ, không phải lách cổng. Chi tiết 15 cảnh báo chia ba nhóm ở `06-BINDING_MAP` §7.1; nhóm lớn nhất (9 cảnh báo, vùng "Phân loại") được nêu đích danh trong prompt để Design quyết dựng hay đề xuất bỏ.
+
+**Thứ tự ưu tiên chủ dự án chốt:** trang tour chi tiết → trang chủ → trang danh sách. Lý do: trang tour là trang chốt đơn, và mốc ra mắt 2026-08-09 chỉ còn ba ngày.
+
+**Ranh giới vai giữ nguyên** (`PLAYBOOK` Phần 2): Design ra mockup và đề xuất token, **không** sửa `src/`, `cms/`, `scripts/`. Dựng thật là bước 8.
+
+**Sản phẩm giao ở:** `docs/design/mockups/` và `docs/design/PHA-F-BAN-GIAO.md`.
