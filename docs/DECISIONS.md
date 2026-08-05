@@ -374,3 +374,59 @@ Chủ dự án chọn hướng 1 trong ba hướng đã trình, 2026-08-05.
 **Một chỗ tác nhân không viết theo nguyên văn.** Chủ dự án nói "giá tốt nhất thị trường". Luật Quảng cáo 2012 Điều 8.11 cấm quảng cáo so sánh trực tiếp với sản phẩm cùng loại của đơn vị khác. Site viết "giá tốt", không dùng dạng so sánh tuyệt đối. Ghi ở `00-PROJECT_BRIEF` §3. Chủ dự án muốn giữ nguyên câu gốc thì cần chốt lại thành văn kèm chấp nhận rủi ro.
 
 **Hai ngưỡng chưa đặt.** Chuyển đổi và tìm kiếm — mốc 3 ngày quá ngắn để đo. Đặt lại sau khi site sống một tháng.
+
+---
+
+## QĐ-2026-08-06-02 — Trang chủ tourdao.vn chuyển tạm sang tourdaonhatrang.com bằng `_redirects`
+
+**Bối cảnh.** Site chưa tới mốc ra mắt 2026-08-09 (`QĐ-2026-08-06-01`) nhưng `tourdao.vn` đã sống và phục vụ bản chưa hoàn thiện. Chủ dự án muốn khách vào trang chủ được đưa sang `tourdaonhatrang.com` cho tới khi công bố.
+
+**Đã thử và thất bại: Page Rules.** Hai lần cấu hình độc lập đều không kích hoạt. Nguyên nhân gốc có tài liệu Cloudflare chống lưng: `tourdao.vn` do Worker phục vụ, và khi request khớp Worker route thì Cloudflare **vô hiệu hoá** 18 Page Rules, trong đó có `Forwarding URL` và `Always Use HTTPS` — bảng hành vi ghi rõ `Client → Worker = Rule Ignored`. Luật không sai; nó không bao giờ được chạy. Bằng chứng độc lập: `http://tourdao.vn/` trả `200` không nâng HTTPS, đúng dự đoán của cùng cơ chế.
+
+**Chốt.** Dùng `public/_redirects`, một dòng, chỉ khớp `/`:
+
+```
+/    https://tourdaonhatrang.com/    302
+```
+
+File này nằm trong chính lớp phục vụ asset của Workers Static Assets nên không đi qua tầng Rules, không thể bị Worker nuốt. Tài liệu Cloudflare xác nhận *"Redirects are always followed, regardless of whether or not an asset matches the incoming request"* — nên nó thắng `index.html` đang tồn tại ở `/`.
+
+**Vì sao 302, không phải 301.** Đây là trạng thái tạm. 301 bị trình duyệt và Google cache dai, là cửa một chiều. 302 gỡ dòng là hoàn nguyên tức thì.
+
+**Vì sao chỉ trang chủ.** Giữ phạm vi hẹp nhất còn đạt mục tiêu. Trang con vẫn sống, sitemap không đổi.
+
+**Không vi phạm R3/R4.** Validator R3 chỉ fail khi một URL **biến mất khỏi sitemap** (`r3-r4-post.ts` dòng 219–220: `if (newSitemap.has(url)) continue`). Trang chủ vẫn build, vẫn nằm trong `sitemap-vi.xml`, nên vòng lặp bỏ qua. R4 cũng pass vì file `dist/index.html` vẫn tồn tại và hreflang vẫn phát. R3 fetch `/sitemap.xml` của production và fail-closed nếu hỏng — dòng redirect chỉ khớp `/` nên không đụng đường dẫn đó; đã kiểm `https://tourdao.vn/sitemap.xml` trả `200`.
+
+**Ghi drift có chủ đích.** `public/_redirects` cho tới nay là công cụ thi hành R3, header tự khai như vậy. Dòng này **không phải dòng R3** mà là điều hướng hạ tầng tạm thời. Trộn hai mục đích trong một file, nên tách phần trong header và ghi bản quyết định này để truy vết. Không mở nguồn sự thật thứ hai: đây vẫn là file duy nhất giữ mọi luật chuyển hướng của site.
+
+**Vì sao không cần ADR.** Không đổi kiến trúc, không đổi cái gì được kiểm, không đổi cây URL. Là một biện pháp vận hành tạm thời có ngày hết hạn.
+
+**GỠ KHI.** Site công bố, mốc 2026-08-09. Gỡ bằng cách xoá dòng và Phần 2 của header, rồi deploy. Không cần thao tác nào trên dashboard Cloudflare.
+
+**Còn nợ.** `package.json` khai `deploy` bằng `wrangler pages deploy --project-name tourdaovn` trong khi `wrangler.toml` là cấu hình Worker (`[assets]`, không có `pages_build_output_dir`) và `tourdaovn.pages.dev` không phân giải được. Chủ dự án xác nhận production là Worker và deploy hiện hành có cập nhật production. Hai khai báo này vẫn không khớp nhau trên giấy — cần rà riêng, không xử trong đợt này.
+
+---
+
+## QĐ-2026-08-06-03 — Nguồn duy nhất cho field bắt buộc, và trả nợ ND-005
+
+**Chốt (pha B, bước 1).** Chuỗi nguồn sự thật cho "field nào bắt buộc":
+
+`01-CONTENT_MODEL` §2 (đặc tả) → `cms/schemas/*.ts` (thi hành) → `scripts/gate.config.ts` (bản dẫn xuất cho validator).
+
+`shared/gates` **không** giữ bảng field bắt buộc riêng. Đây là câu hỏi mà `QĐ-2026-08-05-08` nêu là điều kiện trả nợ ND-005.
+
+**Vì sao không chép nguyên bảng `gateFields` từ nhatrangtravel.** Bảng đó đòi `sameAs`, `body`, `placeType`, `containedInPlace`… Chép sang là âm thầm áp lại luật chặt của site kia, trái quyết định của chủ dự án ngày 2026-08-04 nới toàn bộ điều kiện bắt buộc sang tuỳ chọn ở cả hai tầng (`01-CONTENT_MODEL` v1.0.12). Đúng cái bẫy mà `QĐ-2026-08-05-08` bảo phải trả lời trước khi chép.
+
+**Phần `conditional` cũng bỏ theo.** Nó mã hoá tính bắt buộc của nhatrangtravel, và những gì nó kiểm đã có validator riêng: sameAs theo nhóm attraction là I2, officialSource là I3, experienceType/venue là I13, itinerary/operator là I14.
+
+**`checkI15` gỡ hẳn** — I15 không còn là luật (`QĐ-2026-08-06-01`).
+
+**Kết quả — ND-005 trả xong.** `npm --prefix scripts run validate` chạy được **lần đầu trong đời repo**: 31 validator, **24 pass**, 2 fail, 2 warn, 3 defer. Trước đó toàn bộ chuỗi chết ngay lúc nhập module vì thiếu `shared/gates`, và 27 trên 31 control không có kiểm máy.
+
+Hai lỗi còn lại là **dữ liệu, không phải code**, chủ dự án sửa trong Studio:
+- một `organization` thiếu `summary.vi`
+- một `article` thiếu `translationGroup`/`language`
+
+**`deferred-gate` vẫn đỏ nhưng vì lý do khác.** Trước: "thiếu validator-status.json — pre-build validate chưa chạy". Nay: "I16 deferred nhưng registry không khai live post-build executor" — thuộc ND-004, không phải ND-005.
+
+**Không đụng đường phát hành.** `build:ci` vẫn là `npm run build`, không gọi `validate` (ADR-0022). Việc `validate` đỏ vì dữ liệu không chặn production.

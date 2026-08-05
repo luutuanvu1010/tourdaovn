@@ -188,7 +188,7 @@ I6 fail: cong-ty/cong-ty-tnhh-tour-dao/index.html: thiếu top-level schema chí
 
 ## DR-015 — `shared/gates` mất tích, kéo sập cả bộ kiểm ràng buộc
 
-**Trạng thái:** mở, phiếu nợ ND-005. Đây là drift nặng nhất phát hiện trong pha 0.
+**Trạng thái:** **đã xử 2026-08-06** ở pha B, xem `QĐ-2026-08-06-03`. Chép `shared/gates` từ nhatrangtravel, gỡ bảng `gateFields` trùng (chuyển sang đọc `gate.config.ts`), gỡ `checkI15`. `validate` chạy được lần đầu: 24/31 pass. Hai lỗi còn lại là dữ liệu, không phải code.
 
 `scripts/validators/i1-i19.ts` dòng 10 nhập `../../shared/gates/index.js`. Thư mục `shared/` không tồn tại. `validate-constraints.ts` dòng 8 nhập `i1-i19.js`, nên `npm --prefix scripts run validate` chết bằng `ERR_MODULE_NOT_FOUND` trước khi kiểm được gì.
 

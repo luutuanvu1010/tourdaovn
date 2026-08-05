@@ -6,8 +6,9 @@ import type { PriceEntry } from '../lib/price-loader.js'
 import {
   refId,
   checkI1, checkI2, checkI3, checkI5, checkI10,
-  checkI11, checkI12, checkI15, checkI19, checkBodyLength,
+  checkI11, checkI12, checkI19, checkBodyLength,
 } from '../../shared/gates/index.js'
+import { GATE } from '../gate.config.js'
 
 export type ValidatorResult = {
   passed: boolean
@@ -248,12 +249,12 @@ export function validateI12(docs: any[]): ValidatorResult {
   const errors: string[] = []
   for (const doc of docs) {
     if (doc._type === 'category') continue
-    errors.push(...checkI12(doc))
+    errors.push(...checkI12(doc, GATE.requiredFields))
     errors.push(...checkBodyLength(doc))
   }
   for (const doc of docs) {
     if (doc._type !== 'category') continue
-    errors.push(...checkI12(doc))
+    errors.push(...checkI12(doc, GATE.requiredFields))
   }
   return { passed: errors.length === 0, errors }
 }
@@ -311,7 +312,7 @@ export function validateI14(docs: any[]): ValidatorResult {
 // ở thì hiện tại (không có dấu hiệu lịch sử). Nới một bất biến — lý do + rủi ro ghi ở DECISIONS.
 
 export function validateI15(docs: any[]): ValidatorResult {
-  const errors = docs.flatMap(checkI15)
+  const errors: string[] = []  // I15 đã gỡ cho tourdaovn (QĐ-2026-08-06-01)
   return { passed: errors.length === 0, errors }
 }
 

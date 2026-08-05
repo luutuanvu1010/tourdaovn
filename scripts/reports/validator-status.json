@@ -1,0 +1,170 @@
+{
+  "ranAt": "2026-08-05T22:49:42.191Z",
+  "overall": "fail",
+  "totals": {
+    "total": 31,
+    "pass": 24,
+    "fail": 2,
+    "warn": 2,
+    "stub": 0,
+    "defer": 3
+  },
+  "items": [
+    {
+      "id": "I-FAQ-TYPE",
+      "status": "pass"
+    },
+    {
+      "id": "I1",
+      "status": "pass"
+    },
+    {
+      "id": "I10",
+      "status": "warn",
+      "level": "warn",
+      "errorCount": 4,
+      "errors": [
+        "5538a0f9-1129-418f-95d0-10c8d4541e99: summary.vi quá ngắn (14 ký tự, cần ≥50) (I10)",
+        "86591518-c3c1-4f78-895a-f247bad60131: summary.vi quá ngắn (48 ký tự, cần ≥50) (I10)",
+        "86591518-c3c1-4f78-895a-f247bad60131: summary.vi không bắt đầu bằng chữ hoa (I10)",
+        "f35240e1-d077-4ef5-bd5e-672b17825b75: thiếu summary (I10)"
+      ]
+    },
+    {
+      "id": "I11",
+      "status": "pass"
+    },
+    {
+      "id": "I12",
+      "status": "fail",
+      "level": "fail",
+      "errorCount": 1,
+      "errors": [
+        "3ed834c4-d700-497c-9bed-7d5e7905764e: body quá ngắn (0<400) (I12-body)"
+      ]
+    },
+    {
+      "id": "I13",
+      "status": "pass"
+    },
+    {
+      "id": "I14",
+      "status": "pass"
+    },
+    {
+      "id": "I15",
+      "status": "pass"
+    },
+    {
+      "id": "I16",
+      "status": "defer",
+      "level": "fail",
+      "deferred": "PY1/PY2/PY4 + điều cấm 2.4/2.5 (04-CONSTRAINTS I16)"
+    },
+    {
+      "id": "I17",
+      "status": "pass"
+    },
+    {
+      "id": "I18",
+      "status": "pass"
+    },
+    {
+      "id": "I19",
+      "status": "pass"
+    },
+    {
+      "id": "I2",
+      "status": "pass"
+    },
+    {
+      "id": "I3",
+      "status": "pass"
+    },
+    {
+      "id": "I4",
+      "status": "pass"
+    },
+    {
+      "id": "I5",
+      "status": "pass"
+    },
+    {
+      "id": "I6",
+      "status": "defer",
+      "level": "fail",
+      "deferred": "QA2 post-build — JSON-LD trên output build (04-CONSTRAINTS I6)"
+    },
+    {
+      "id": "I7",
+      "status": "pass"
+    },
+    {
+      "id": "I8",
+      "status": "pass"
+    },
+    {
+      "id": "I9",
+      "status": "pass"
+    },
+    {
+      "id": "PY1",
+      "status": "pass"
+    },
+    {
+      "id": "PY2",
+      "status": "pass"
+    },
+    {
+      "id": "PY3",
+      "status": "pass"
+    },
+    {
+      "id": "PY4",
+      "status": "pass"
+    },
+    {
+      "id": "PY5",
+      "status": "warn",
+      "level": "warn",
+      "errorCount": 3,
+      "errors": [
+        "3ed834c4-d700-497c-9bed-7d5e7905764e: attraction thiếu cả bookingRef lẫn isAccessibleForFree — có thể quên gắn giá (PY5)",
+        "86591518-c3c1-4f78-895a-f247bad60131: tour thiếu cả bookingRef lẫn isAccessibleForFree — có thể quên gắn giá (PY5)",
+        "e147cde5-7f08-40b0-8316-6b1c65af23d3: experience thiếu cả bookingRef lẫn isAccessibleForFree — có thể quên gắn giá (PY5)"
+      ]
+    },
+    {
+      "id": "PY6",
+      "status": "pass"
+    },
+    {
+      "id": "PY7",
+      "status": "pass"
+    },
+    {
+      "id": "PY8",
+      "status": "defer",
+      "level": "fail",
+      "deferred": "QA2 post-build sau task render giá→JSON-LD (nợ riêng); SAD §3.3"
+    },
+    {
+      "id": "R1",
+      "status": "pass"
+    },
+    {
+      "id": "R2",
+      "status": "pass"
+    },
+    {
+      "id": "S25-FIVE-LANGUAGE-COVERAGE",
+      "status": "fail",
+      "level": "fail",
+      "errorCount": 2,
+      "errors": [
+        "f35240e1-d077-4ef5-bd5e-672b17825b75: thiếu summary.vi cho strict 5-language coverage (S2.5)",
+        "63554352-9d73-466d-995c-01110a670098: Article thiếu translationGroup/language cho strict 5-language coverage (S2.5)"
+      ]
+    }
+  ]
+}
