@@ -1,89 +1,138 @@
 # 00 — PROJECT BRIEF (bước 0: định vị và ràng buộc)
 
 <!-- ═══════════════════════════════════════════════════════════════════
-CORE SPEC · Nguồn: nhatrangtravel/project/00-PROJECT_BRIEF.md · Nhóm B (khuôn + dữ liệu site)
-Khuôn PR-FAQ (Working Backwards): cấu trúc 7 mục, khái niệm structured-first/GEO-first/
-"completeness over coverage", ba tầng chặn rủi ro. Đây là mẫu đã điền — dùng làm gương.
-⚠️ Gần như TOÀN BỘ NỘI DUNG là của nhatrangtravel. Khi dựng site mới, giữ CẤU TRÚC, viết lại NỘI DUNG.
-Phần riêng site (tìm 🔧 SITE-SPECIFIC): tên site, domain, thị trường/ngôn ngữ, số entity, ngân sách, tên founder.
+CORE SPEC · Khuôn PR-FAQ (Working Backwards): cấu trúc 7 mục, ba tầng chặn rủi ro.
+Bản v2 viết lại toàn bộ NỘI DUNG cho tourdaovn; giữ nguyên CẤU TRÚC 7 mục.
+Bản v1 (nhatrangtravel) xem lịch sử git — không giữ song song để khỏi hai nguồn sự thật.
 ═══════════════════════════════════════════════════════════════════ -->
 
-> Working Backwards (PR-FAQ): hình dung sản phẩm đã ra mắt thành công, viết thông cáo trước, xây sau. DRI: Lưu Tuấn Vũ. Dựng từ ROADMAP, PROJECT_OVERLAY và 4 quyết định founder ngày 2026-06-10. Founder duyệt 2026-06-10: chốt con số mục 6 và ngân sách mục 7. Bước 0 hoàn tất.
+> Working Backwards (PR-FAQ): hình dung sản phẩm đã ra mắt thành công, viết thông cáo trước, xây sau. DRI: Lưu Tuấn Vũ.
 >
-> 🔧 **SITE-SPECIFIC:** đây là brief đã điền của nhatrangtravel. Toàn bộ nội dung (tên, domain, thị trường, ngôn ngữ, con số) là ví dụ. Giữ *cấu trúc PR-FAQ 7 mục*, viết lại *nội dung* cho site mới.
+> **Bước 0 là bước của chủ dự án.** `PLAYBOOK` Phần 2: *"quyết định chiến lược là của người"* — Cowork chỉ ghi chép. Mọi mục dưới đây hoặc truy được về một câu chủ dự án đã nói, hoặc được đánh dấu **[CHỜ QUYẾT]**. Không mục nào do tác nhân tự nghĩ ra.
+
+- **Phiên bản:** v2.0.0 (viết lại toàn bộ cho tourdaovn)   **Trạng thái:** nháp, chờ chủ dự án điền phần [CHỜ QUYẾT] và duyệt
+- **Ngày:** v1 (nhatrangtravel) 2026-06-10; v2 soạn 2026-08-06   **Người soạn:** Cowork   **Người duyệt:** Lưu Tuấn Vũ
+- **Nguồn dữ kiện v2:** phiên làm việc 2026-08-05 — chủ dự án khai sáu dòng dịch vụ và chốt menu; `src/site.config.ts` (thương hiệu, tên miền, ngôn ngữ, danh mục); `siteSettings` trong Sanity (kênh liên hệ); ADR-0021, ADR-0023.
+- **Đóng:** DR-006 phần đặc tả.
+
+---
 
 ## 1. Thông cáo ra mắt tưởng tượng (1 đoạn)
 
-Tháng 9/2026, Nha Trang Travel (nhatrangtravel.net) ra mắt bản canonical tiếng Việt: một hub du lịch lấy nội dung làm gốc, nơi mỗi địa điểm, điểm tham quan và bài viết về Nha Trang đều có dữ liệu structured sạch để cả người lẫn máy đọc được. Khác với thông tin phân mảnh trên OTA và group Facebook, mỗi entity ở đây gắn nguồn kiểm chứng (sameAs tới Wikidata hoặc Wikipedia), có tác giả thật và ngày cập nhật, xuất ra JSON-LD schema.org hợp lệ, nên search engine và AI engine như Claude, Gemini, OpenAI có thể trích dẫn trực tiếp. Giá phòng và tour không gõ tay mà đồng bộ một chiều từ hệ booking riêng, nên không bao giờ cũ. Lý do tin được: hub chọn đầy đủ thay vì phủ rộng, thà ít entity mà mỗi cái đứng vững còn hơn một graph rỗng chạy theo số lượng.
+**[CHỜ QUYẾT]** — cần chủ dự án viết hoặc duyệt. Bản nháp dưới đây dựng từ dữ kiện đã có, chưa phải quyết định:
+
+> *Công ty TNHH Tour Đảo (tourdao.vn) là nơi khách đặt trực tiếp tour biển đảo Nha Trang với một đầu mối duy nhất: tour đảo, lặn biển, vé vào cổng các khu vui chơi, phòng khách sạn và resort, và xe đưa đón sân bay. Khác với việc gom mảnh từ nhiều nơi rồi tự lo phần còn lại, mỗi sản phẩm ở đây có lịch trình rõ, giá rõ, điểm đón rõ, và một số Zalo trả lời thật. Nội dung cẩm nang trên site không phải để đọc cho vui mà để khách biết mình đang mua gì trước khi bấm đặt.*
+
+Ba chỗ trong đoạn trên cần chủ dự án xác nhận vì tôi đang suy: **"đặt trực tiếp"** (hay còn qua đại lý?), **"một đầu mối duy nhất"** (có phải điểm khác biệt anh muốn nhấn?), và **giọng** (đang viết trực diện, hướng khách lẻ).
 
 ## 2. Khách hàng và nỗi đau
 
-Người dùng chính, gồm cả máy:
+**[CHỜ QUYẾT]** — ba câu hỏi ở §8.
 
-- Khách du lịch (tiếng Việt trước, sau mở sang en, zh, ko, ru theo cơ cấu khách): cần thông tin Nha Trang đáng tin và cập nhật để quyết định đi, ăn, ở.
-- Chính quyền và đối tác địa phương: cần một nguồn có thẩm quyền để dẫn, thay cho thông tin trôi nổi.
-- Máy đọc: search engine crawler và AI engine (Claude, Gemini, OpenAI) cần nội dung structured để hiểu và trích dẫn đúng.
+Dữ kiện chắc chắn: site chỉ chạy **tiếng Việt** (`langs = ['vi']`), nên khách mục tiêu là người Việt hoặc người đọc được tiếng Việt.
 
-Hiện họ đau ở đâu:
+Nháp, chờ xác nhận:
 
-- Thông tin Nha Trang phân mảnh giữa OTA, blog cá nhân và group Facebook; chất lượng lẫn lộn, giá thường cũ.
-- Không có nguồn canonical tiếng Việt vừa đầy đủ, vừa có thẩm quyền, vừa máy đọc được; AI engine buộc phải ghép từ nguồn tạp nên dễ sai.
-- Người dùng tự chắp vá từ TripAdvisor, Google và Facebook, mất thời gian mà vẫn không chắc đúng.
+- **Khách lẻ và nhóm nhỏ đi Nha Trang**: cần biết tour nào đi những đảo nào, giá bao nhiêu, đón ở đâu, có đáng tin không — trước khi chuyển tiền cho một số điện thoại lạ.
+- **Máy đọc**: search engine và AI engine cần dữ liệu có cấu trúc để trả lời đúng khi khách hỏi "tour 3 đảo Nha Trang giá bao nhiêu". Site đã đầu tư sẵn lớp này (JSON-LD, `llms.txt`, `/ai/*.json`).
+
+Nỗi đau, nháp:
+
+- Thông tin tour đảo Nha Trang trôi nổi trên Facebook và các trang trung gian; giá mỗi nơi một kiểu, lịch trình mô tả sơ sài, không rõ ai chịu trách nhiệm.
+- Khách không phân biệt được đơn vị vận hành thật với người bán lại, nên ngại đặt trước.
 
 ## 3. Giải pháp và giá trị khác biệt
 
-Một câu định vị: Nha Trang Travel là nguồn sự thật structured-first và GEO-first về Nha Trang, phục vụ đồng thời người dùng, search engine và AI engine.
+**[CHỜ QUYẾT]** phần câu định vị.
 
-Ba giá trị cốt lõi:
+Dữ kiện chắc chắn — **sáu dòng dịch vụ** chủ dự án khai 2026-08-05:
 
-- Structured-first: mọi entity xuất JSON-LD schema.org sạch, máy trích dẫn được, không phải bãi chữ.
-- Thẩm quyền kiểm chứng được: sameAs tới Wikidata hoặc Wikipedia, tác giả thật, ngày cập nhật, giá đồng bộ một chiều từ booking.
-- Completeness over coverage: ưu tiên entity đầy đủ thay vì phủ số lượng; graph thưa bị coi là phản giá trị.
+1. Tham quan biển đảo
+2. Tour đảo Nha Trang
+3. Tour lặn biển
+4. Vé VinWonders Nha Trang
+5. Đặt phòng khách sạn 5 sao và resort
+6. Đưa đón sân bay
+
+Và **cách khách đặt**: nút "Đặt vé trực tuyến" dẫn thẳng sang Zalo, lấy từ `siteSettings.contact.zaloUrl`. Không có giỏ hàng, không thanh toán trên site.
+
+Nháp ba giá trị cốt lõi, chờ xác nhận:
+
+- **Một đầu mối cho cả chuyến**: tour, vé, phòng, xe đón — không phải ghép từ bốn nơi.
+- **Đặt qua Zalo, người thật trả lời**: hợp thói quen khách Việt, không bắt điền form dài.
+- **Nói rõ mình bán gì**: mỗi sản phẩm có trang riêng với lịch trình, giá và điểm đón, thay vì một bài quảng cáo chung.
 
 ## 4. FAQ khó nhất
 
-Tiền đến từ đâu? Hoa hồng từ hệ booking riêng qua đồng bộ một chiều. Đợt đầu không ép doanh thu; nội dung và độ phủ GEO là tài sản tích lũy, hoa hồng đến khi traffic và niềm tin đủ lớn. Rủi ro phụ thuộc một nguồn doanh thu là có thật, nhưng đa dạng hóa (hợp tác địa phương, lead) để sau, nằm ngoài phạm vi đợt đầu.
+**[CHỜ QUYẾT] — toàn bộ mục này.** Đây là chỗ chỉ chủ dự án trả lời được, và cũng là chỗ brief cũ sai nặng nhất (nó trả lời cho một dự án khác). Bốn câu cần trả lời:
 
-Làm sao cạnh tranh với TripAdvisor, Agoda, Google? Không thi độ phủ, sẽ thua. Thắng ở chỗ OTA lớn không tối ưu: nội dung structured-first, canonical tiếng Việt, có thẩm quyền địa phương, trả lời thẳng intent. Mục tiêu là được AI engine và search dẫn nguồn, không phải lớn hơn OTA.
-
-Nếu nội dung đầy đủ mà không người hay máy nào dẫn thì sao? Đây là rủi ro số một đã nhận diện. Chặn bằng ba lớp: một golden set truy vấn mẫu đo việc được AI dẫn nguồn ngay từ đầu, coi như tín hiệu sống; cổng QA2 AI-readability bắt đoạn mở đầu mỗi trang tự đứng được như một câu trả lời hoàn chỉnh; nếu sau mốc 6 tháng vẫn không có tín hiệu dẫn nguồn thì dừng mở rộng và soát lại giả định GEO trước khi đổ thêm công.
-
-Một người có giữ nổi nhịp không? Vì rủi ro này nên chọn completeness over coverage và mốc ra mắt hẹp, một số entity giới hạn đạt gate thay vì phủ rộng. Claude là đòn bẩy sinh nội dung ở tier T1 có người duyệt. Nếu nhịp đuối, thu hẹp số entity, không hạ chuẩn completeness.
+1. **Tiền đến từ đâu?** Bán tour do mình vận hành, hay ăn hoa hồng bán lại của đơn vị khác, hay cả hai? Câu này quyết cách viết trang sản phẩm và cả `Organization.orgType` trong dữ liệu.
+2. **Cạnh tranh với ai, thắng ở đâu?** Đối thủ thật là các trang tour Nha Trang khác, hay là Facebook, hay là OTA lớn?
+3. **Vì sao khách tin một công ty họ chưa nghe tên?** Hiện site có sẵn chỗ cho tín hiệu tin cậy — giấy phép (`licenseInfo`), tác giả thật, ngày cập nhật — nhưng chưa có nội dung.
+4. **Một người có giữ nổi nhịp không?** Hiện dataset có **9 document**; menu chốt cần ít nhất 7 sản phẩm. Nhịp nhập liệu là ràng buộc thật của đợt này.
 
 ## 5. Phạm vi
 
-Trong phạm vi (đợt đầu, mốc ~3 tháng):
+Dữ kiện chắc chắn, đọc từ `src/site.config.ts`.
 
-- Nội dung canonical tiếng Việt trên nền Sanity + Astro + Cloudflare (ADR-0001).
-- Các entity lõi đạt completeness gate: Place, Attraction, Article, đủ sameAs, author và JSON-LD hợp lệ.
-- Tối ưu GEO/SEO cho cả ba đối tượng đọc; 100% trang entity có JSON-LD qua validator.
+**Trong phạm vi:**
 
-Ngoài phạm vi (quan trọng không kém, đợt đầu):
+- Tiếng Việt, một ngôn ngữ (`langs = ['vi']`). Bộ khung đa ngữ còn trong code nhưng đã khoá.
+- Chín danh mục đang bật: `place`, `attraction`, `experience`, `hotel`, `resort`, `tour`, `article`, `person`, `organization`.
+- Bốn hub: `/kham-pha/`, `/luu-tru/`, `/di-lai/`, `/tat-ca/`.
+- Hai trang tĩnh: `/ho-tro/`, `/lien-he/` (ADR-0023).
+- Đặt chỗ qua Zalo; site không xử lý thanh toán.
+- Stack Sanity + Astro + Cloudflare (ADR-0001), không đổi.
 
-- Mở rộng đa ngôn ngữ en, zh, ko, ru, chỉ sau khi bản tiếng Việt vững (S2.5).
-- Chatbot tư vấn, thuộc T2, cần golden set trước khi public.
-- Tích hợp booking hiển thị giá, chỉ sau khi đồng bộ một chiều có spec. Sửa scope 2026-06-10 (founder): hiển thị giá read-only từ một nguồn giá một chiều được kéo vào phase 1; đặt phòng và tồn kho vẫn để sau. Sanity không lưu con số giá, chỉ trỏ qua bookingRef. Xem DECISIONS và ADR-0003.
-- Mọi nguồn doanh thu ngoài hoa hồng booking.
-- khanhhoatravel.com.vn và hệ booking là dự án độc lập (S2.7), không gộp chung.
+**Ngoài phạm vi:**
+
+- Ba danh mục đang tắt: `restaurant`, `specialty`, `event`. Schema và code còn, chỉ tắt cờ.
+- Mở thêm ngôn ngữ — chỉ sau khi bản tiếng Việt vững.
+- Thanh toán trực tuyến, giỏ hàng, quản lý chỗ trống.
+- Entity `Transfer` cho đưa đón sân bay — chủ dự án chốt hoãn 2026-08-05 (ND-006), dù đây là một trong sáu dịch vụ.
+- Trang lộ trình đón khách `/lo-trinh-don-khach/` — còn ở chế độ phát triển, cờ `devPages` để `false`.
 
 ## 6. Tiêu chí thành công đo được
 
-Founder chốt theo đề xuất ngày 2026-06-10 (Điều 6.2 yêu cầu số, không tính từ).
+**[CHỜ QUYẾT] — toàn bộ mục này cần con số của chủ dự án.**
 
-- Tại mốc ra mắt (~3 tháng): ≥ 30 entity canonical tiếng Việt đạt completeness gate, 100% JSON-LD hợp lệ qua validator (S2.3).
-- Được AI dẫn nguồn (6 tháng sau ra mắt): trong golden set 20 truy vấn mẫu về Nha Trang trên Claude, Gemini, ChatGPT, hub được trích dẫn ở ≥ 6 truy vấn.
-- Traffic organic (6 tháng sau ra mắt): ≥ 5.000 phiên organic mỗi tháng.
-- Thứ hạng search (6 tháng sau ra mắt): vào top 10 cho ≥ 10 cụm từ mục tiêu tiếng Việt, ví dụ "du lịch Nha Trang", "ăn gì ở Nha Trang".
-- Chất lượng kỹ thuật luôn giữ (S2.3): Lighthouse mobile ≥ 90, LCP ≤ 2500 ms, CLS ≤ 0,1, WCAG AA.
+`CONSTITUTION` Điều 6.2: ngưỡng phải là số kiểm được, không phải tính từ. *"Nhanh" không phải ngưỡng.* Tác nhân **không được** tự đặt mục tiêu kinh doanh, nên tôi để trống thay vì bịa.
+
+Bốn chiều cần một con số mỗi chiều:
+
+| Chiều | Câu hỏi | Giá trị |
+|---|---|---|
+| Nội dung | Bao nhiêu sản phẩm có trang đầy đủ tại mốc ra mắt? | **[CHỜ QUYẾT]** |
+| Chuyển đổi | Bao nhiêu lượt bấm sang Zalo mỗi tháng thì coi là đạt? | **[CHỜ QUYẾT]** |
+| Tìm kiếm | Bao nhiêu phiên organic mỗi tháng, sau bao lâu? | **[CHỜ QUYẾT]** |
+| Thời điểm | Mốc ra mắt là ngày nào? | **[CHỜ QUYẾT]** |
+
+Riêng chất lượng kỹ thuật **đã có ngưỡng số** ở `04-CONSTRAINTS` §3, không cần quyết lại: Lighthouse performance ≥ 90, accessibility ≥ 95, JSON-LD hợp lệ 100%.
 
 ## 7. Ràng buộc đầu vào
 
-- Thời gian: công khai bản đầu canonical tiếng Việt trong khoảng 3 tháng kể từ 2026-06-10, tức quanh tháng 9/2026.
-- Nguồn lực: một founder (Lưu Tuấn Vũ) cộng tác với Claude; ngân sách 500.000đ cho API key AI (Claude và/hoặc DeepSeek bản mới nhất) phục vụ pipeline sinh nội dung tier T1.
-- Pháp lý và bảo mật: theo SECURITY_BASELINE S2.8, cô lập chỉ dẫn AI khỏi dữ liệu; không đưa giá vốn, thông tin khách hay API key vào prompt gửi dịch vụ bên thứ ba khi chưa có ADR.
-- Thương hiệu và ngôn ngữ: domain nhatrangtravel.net; tiếng Việt canonical; viết sentence case, giọng trực diện theo CLAUDE.md mục 7.
-- Stack đã chốt: Sanity + Astro + Cloudflare (ADR-0001), không đổi trong đợt đầu.
-- Ranh giới dữ liệu: độc lập với khanhhoatravel.com.vn và hệ booking; giá đi một chiều từ booking về site (S2.7).
+Dữ kiện chắc chắn:
+
+- **Thương hiệu:** tên hiển thị "Tour Đảo", pháp nhân "Công ty TNHH Tour Đảo", thành lập 2026. Nguồn duy nhất: `src/site.config.ts` (ADR-0021).
+- **Tên miền:** `tourdao.vn`.
+- **Ngôn ngữ:** tiếng Việt, viết sentence case, giọng trực diện.
+- **Kênh liên hệ:** hotline, Zalo, WhatsApp, email — nguồn duy nhất là `siteSettings.contact` trong Sanity, biên tập viên tự sửa.
+- **Stack:** Sanity + Astro + Cloudflare (ADR-0001).
+- **Cổng phát hành:** validator đã gỡ khỏi đường tự động (ADR-0022); `reviewStatus == "approved"` trong Sanity là cổng duyệt nội dung tự động duy nhất còn hiệu lực.
+- **Ràng buộc dữ liệu:** Sanity không lưu con số giá (I1); giá đi một chiều từ `data/prices.yaml` qua `bookingRef` (ADR-0003, ADR-0007).
+
+**[CHỜ QUYẾT]:** nguồn lực và thời gian — vẫn một mình chủ dự án cộng Claude? Ngân sách API còn như cũ? Mốc thời gian nào?
+
+## 8. Việc cần chủ dự án làm để đóng bước 0
+
+1. **Duyệt hoặc viết lại §1** — thông cáo một đoạn. Xác nhận ba chỗ tôi đang suy.
+2. **Xác nhận §2** — khách lẻ hay đoàn, nội địa hay có cả khách nước ngoài đọc tiếng Việt.
+3. **Trả lời bốn câu ở §4** — đặc biệt câu 1 (nguồn tiền), vì nó quyết cách viết trang sản phẩm.
+4. **Cho bốn con số ở §6.**
+5. **Quyết `I15`** — luật "cấm chuỗi *thành phố Nha Trang*" trong `04-CONSTRAINTS` §1 còn là luật của tourdaovn không. Dòng đó tự đánh dấu 🔧 SITE-SPECIFIC. Câu này đang chặn việc trả nợ ND-005.
+
+Xong 5 mục trên thì bước 0 đóng, và pha B (`01-CONTENT_MODEL`) mở.
 
 ---
-Điều kiện sang bước 1: chủ dự án tự duyệt file này. Chưa xong bước 0 thì không đụng bước nào khác.
+
+Điều kiện sang bước 1: chủ dự án duyệt file này. Chưa xong bước 0 thì không đụng bước nào khác.
