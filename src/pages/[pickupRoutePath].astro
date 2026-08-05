@@ -1,9 +1,24 @@
 ---
-// Trang lộ trình đón khách — bản đồ + bảng giờ đón.
+// Trang lộ trình đón khách — bản đồ + bảng giờ đón.  URL: /lo-trinh-don-khach/
 //
-// Đây là trang TĨNH có địa chỉ cố định, KHÔNG đi qua ROUTE_MAP/[...path].astro: nội dung
-// của nó là config của công ty (siteSettings.pickupPoints), không phải một entity có slug.
-// Astro ưu tiên file route tĩnh hơn catch-all nên không xung đột với [...path].astro.
+// ─────────────────────────────────────────────────────────────────────────────
+// TẠI SAO TÊN FILE LẠI CÓ NGOẶC VUÔNG?
+// ─────────────────────────────────────────────────────────────────────────────
+// Vì trang này đang ở CHẾ ĐỘ PHÁT TRIỂN (site.config §5) — xem được bằng
+// `npm run dev` nhưng không được có mặt trong bản production.
+//
+// Astro chỉ cho phép quyết định "có sinh trang này không" ở route ĐỘNG, qua
+// getStaticPaths. Với file tĩnh tên `lo-trinh-don-khach.astro` thì trang LUÔN
+// được sinh, không có cách nào chặn — nên dù không ai link tới, địa chỉ vẫn tồn
+// tại trên site thật. Đặt tên động là cách duy nhất để cờ tắt có hiệu lực thật.
+//
+// Không đụng gì tới [...path].astro: ở chế độ static mỗi route tự sinh file từ
+// getStaticPaths của chính nó, mà 'lo-trinh-don-khach' không nằm trong danh sách
+// slug của [...path].astro, nên không có chuyện hai route ghi đè nhau.
+//
+// Khi chốt cho lên production: bật cờ trong site.config §5. Muốn dọn hẳn tên file
+// động thì đổi lại thành `lo-trinh-don-khach.astro` và bỏ getStaticPaths.
+// ─────────────────────────────────────────────────────────────────────────────
 //
 // Nguồn dữ liệu duy nhất: siteSettings.pickupPoints (CONTENT_MODEL §2.15 v1.0.13).
 // Cấm hardcode danh sách điểm đón tại đây.
@@ -14,10 +29,18 @@ import { getClient } from '../lib/sanity'
 import { siteSettingsQuery } from '../lib/queries'
 import { jsonLdScriptContent } from '../lib/serialize/utils'
 import { siteBaseUrl } from '../lib/siteUrl'
-import { brand } from '../site.config'
+import { brand, devPages, isDevPageBuilt } from '../site.config'
 import type { SiteSettingsResult, PickupPoint } from '../lib/types'
 
-const PATH = '/lo-trinh-don-khach/'
+const SLUG = 'lo-trinh-don-khach'
+
+export function getStaticPaths() {
+  // Cờ tắt và đang build production → mảng rỗng → Astro không sinh trang nào.
+  if (!isDevPageBuilt('lo-trinh-don-khach')) return []
+  return [{ params: { pickupRoutePath: 'lo-trinh-don-khach' } }]
+}
+
+const PATH = `/${SLUG}/`
 
 const config: SiteSettingsResult | null = await getClient().fetch(siteSettingsQuery())
 
@@ -41,6 +64,11 @@ const metaDescription = hasPoints
 
 const siteBase = siteBaseUrl(Astro.site)
 const pageUrl = siteBase.replace(/\/$/, '') + PATH
+
+// Dải cảnh báo "đang phát triển" chỉ hiện khi xem bằng `npm run dev` mà cờ còn tắt.
+// Không cần thẻ noindex: cờ tắt thì bản production không hề có trang này, còn cờ bật thì
+// ta muốn Google đánh chỉ mục.
+const isPreview = import.meta.env.DEV && !devPages['lo-trinh-don-khach']
 
 // JSON-LD: mô tả trang, không mô tả chuyến đi. Không dùng @type Trip vì lộ trình đón
 // khách là khâu vận hành chung, không phải một tour bán được — gán Trip sẽ tạo thực thể
@@ -68,6 +96,12 @@ const jsonLd = [
   <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)} />
 
   <Section heading="Lộ trình đón khách">
+    {isPreview && (
+      <p class="preview-flag">
+        Trang đang ở chế độ phát triển — chưa công bố. Bật ở <code>src/site.config.ts</code> mục 5.
+      </p>
+    )}
+
     <p class="lead">
       Xe đưa đón dừng lần lượt tại các điểm dưới đây. Bấm vào số trên bản đồ để xem
       giờ đón và vị trí đứng chờ.
@@ -111,6 +145,20 @@ const jsonLd = [
 </BaseLayout>
 
 <style>
+  .preview-flag {
+    margin: 0 0 var(--s5);
+    padding: var(--s3) var(--s4);
+    border: 1px dashed var(--c-accent);
+    border-radius: var(--radius-sm);
+    background: var(--c-accent-soft);
+    color: var(--c-accent-strong);
+    font-size: var(--fs-sm);
+  }
+
+  .preview-flag code {
+    font-size: 0.95em;
+  }
+
   .lead {
     max-width: 62ch;
     margin: 0 0 var(--s5);

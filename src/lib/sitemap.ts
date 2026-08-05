@@ -1,7 +1,7 @@
 import { ROUTE_MAP } from './routes'
 import { fetchAllDestinationSlugs, fetchAllSlugs, fetchAllTerms } from './sanity'
 import type { Lang } from './types'
-import { langs } from '../site.config'
+import { langs, publishedDevPages } from '../site.config'
 
 /** Ngôn ngữ site đang chạy. Nguồn sự thật: src/site.config.ts */
 export const LANGS: Lang[] = langs
@@ -37,19 +37,19 @@ export function routeAlternates(entity: string, slug?: string): Record<Lang, str
   ) as Record<Lang, string>
 }
 
-// Trang tĩnh có file route riêng trong src/pages, không đi qua ROUTE_MAP vì nội dung là
-// config của công ty chứ không phải entity có slug. Khai ở đây để sitemap không bỏ sót.
-// Hiện chỉ có bản tiếng Việt — thêm ngôn ngữ thì phải tạo file trang tương ứng trước.
-const STATIC_PAGES: Record<string, string[]> = {
-  vi: ['lo-trinh-don-khach'],
-}
-
 export async function buildSitemapPaths(lang: Lang): Promise<string[]> {
   const paths = new Set<string>()
   paths.add(withTrailingSlash(langPrefix(lang) || '/'))
 
-  for (const page of STATIC_PAGES[lang] ?? []) {
-    paths.add(withTrailingSlash(`${langPrefix(lang)}/${page}`))
+  // Trang tĩnh có file route riêng trong src/pages, không đi qua ROUTE_MAP vì nội dung là
+  // config của công ty chứ không phải entity có slug. Chỉ trang đã BẬT HẲN mới vào sitemap
+  // (site.config §5) — trang đang phát triển tuy xem được bằng `npm run dev` nhưng không
+  // có mặt trong bản production, khai vào sitemap sẽ thành URL chết. Hiện chỉ có bản
+  // tiếng Việt; thêm ngôn ngữ thì phải tạo file trang tương ứng trước.
+  if (lang === 'vi') {
+    for (const page of publishedDevPages) {
+      paths.add(withTrailingSlash(`${langPrefix(lang)}/${page}`))
+    }
   }
 
   for (const route of ROUTE_MAP) {

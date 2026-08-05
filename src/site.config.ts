@@ -164,7 +164,32 @@ export const hubs = {
 } as const
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  5. ĐIỂM ĐẾN CHÍNH CỦA TRANG CHỦ
+//  5. TRANG ĐANG PHÁT TRIỂN — BẬT/TẮT
+// ═══════════════════════════════════════════════════════════════════════════
+//
+//  Trang tĩnh đã viết xong code nhưng CHƯA muốn cho lên site thật.
+//
+//   false  → chỉ xem được khi chạy `npm run dev` trên máy bạn.
+//            Bản `npm run build` KHÔNG sinh ra trang, sitemap KHÔNG liệt kê,
+//            nên deploy lên Cloudflare cũng không có địa chỉ này.
+//   true   → trang lên site thật ở lần deploy kế tiếp.
+//
+//  Khác với `entities` và `hubs` ở trên: hai bảng đó khai "site này gồm những
+//  gì" lâu dài; bảng này chỉ là trạng thái tạm của một tính năng đang làm dở.
+//  Khi tính năng chốt xong, chuyển cờ sang true và xoá dòng ghi chú trạng thái.
+
+export const devPages = {
+  /**
+   * Lộ trình đón khách → /lo-trinh-don-khach/
+   * Dữ liệu: siteSettings.pickupPoints (CONTENT_MODEL §2.15 v1.0.13).
+   * Trạng thái 2026-08-04: chủ dự án chốt giữ ở chế độ phát triển, chưa lên
+   * production. Field trong Sanity Studio vẫn mở để nhập thử dữ liệu.
+   */
+  'lo-trinh-don-khach': false,
+} as const
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  6. ĐIỂM ĐẾN CHÍNH CỦA TRANG CHỦ
 // ═══════════════════════════════════════════════════════════════════════════
 //
 //  Trang chủ lấy nội dung từ một document "Điểm đến" trong Sanity.
@@ -185,6 +210,25 @@ export const primaryDestinationSlug = 'nha-trang'
 
 export type EntityKey = keyof typeof entities
 export type HubKey = keyof typeof hubs
+export type DevPageKey = keyof typeof devPages
+
+/**
+ * Trang đang phát triển có được sinh ra ở lần build này không.
+ *
+ * Cờ bật (true) → luôn sinh, kể cả bản production.
+ * Cờ tắt (false) → chỉ sinh khi đang chạy `npm run dev`.
+ *
+ * Dùng optional chaining vì file này còn được nạp bởi Sanity Studio và các
+ * script chạy bằng tsx — những môi trường đó không có `import.meta.env`.
+ */
+export function isDevPageBuilt(key: DevPageKey): boolean {
+  if (devPages[key]) return true
+  return import.meta.env?.DEV === true
+}
+
+/** Trang đang phát triển đã bật hẳn — chỉ những trang này mới vào sitemap. */
+export const publishedDevPages: string[] = (Object.keys(devPages) as DevPageKey[])
+  .filter((k) => devPages[k])
 
 /** Danh sách danh mục đang bật */
 export const enabledEntities = (Object.keys(entities) as EntityKey[])
