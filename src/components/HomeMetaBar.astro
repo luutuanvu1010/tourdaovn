@@ -2,12 +2,15 @@
 import type { Lang } from '../lib/types'
 
 export interface Props {
-  sameAs?: string[]
+  // Sanity trả null cho field mảng chưa đặt, không trả undefined, nên default
+  // của destructuring không đỡ được. Hợp đồng phải nói rõ là nhận cả null.
+  sameAs?: string[] | null
   updatedLabel?: string
   lang: Lang
 }
 
-const { sameAs = [], updatedLabel, lang } = Astro.props
+const { sameAs, updatedLabel, lang } = Astro.props
+const sameAsList = sameAs ?? []
 
 const localeLabels: Record<Lang, { wikidata: string; updated: string }> = {
   vi: { wikidata: 'Xác minh dữ liệu: Wikidata', updated: 'Cập nhật lần cuối' },
@@ -19,7 +22,7 @@ const localeLabels: Record<Lang, { wikidata: string; updated: string }> = {
 
 const labels = localeLabels[lang]
 
-const wikiUrl = sameAs.find(u => u.includes('wikidata.org') || u.includes('wikipedia.org'))
+const wikiUrl = sameAsList.find(u => u.includes('wikidata.org') || u.includes('wikipedia.org'))
 const wikiId = wikiUrl ? wikiUrl.split('/').pop()?.replace(/^Q/, 'Q') : null
 ---
 
