@@ -377,3 +377,26 @@ Commit `ae8db92` đổi đường đọc sổ đăng ký sang `docs/governance/`
 Đã sửa: `control-registry-gate` dựng câu báo từ chính `REGISTRY_PATH` nên không thể lệch lần nữa; `deferred-gate` sửa chuỗi. Kiểm chứng bằng cách giấu sổ đăng ký đi: thông báo ra đúng `thiếu docs/governance/control-registry.yaml`.
 
 Hai chú thích còn nhắc `project/governance/` thì giữ, vì chúng đang giải thích chính lịch sử này.
+
+---
+
+## DR-027 — `g3` chưa từng đọc `06-BINDING_MAP.md`
+
+**Trạng thái:** mở, phát hiện 2026-08-05 khi mở pha E.
+
+`g3-binding-map-vs-template.ts` là bộ kiểm máy duy nhất cho hợp đồng "code có khớp bản ánh xạ không". Nó khai `BINDING_MAP_PATH` ở dòng 17 — và **không dùng biến đó ở bất kỳ đâu**. `readFileSync` duy nhất trong file là để đọc template `.astro` (dòng 162).
+
+Thứ nó đối chiếu là một **bản chép tay** nằm trong chính mã validator, dòng 37–38 ghi rõ: *"BINDING_MAP data sources per entity — Manually extracted from BINDING_MAP §3 (common frame) + §4 (deltas)"*.
+
+Hệ quả, xếp theo độ nặng:
+
+1. `06-BINDING_MAP.md` và `g3` là **hai nguồn sự thật song song cho cùng một thứ** — vi phạm N7 và P6.
+2. Sửa bản ánh xạ không làm đổi bất kỳ điều gì máy kiểm. Pha E nếu chỉ sửa markdown thì cổng vẫn kiểm bảng cũ.
+3. Cổng cứng "chưa duyệt `06-BINDING_MAP` thì cấm vào bước 7" mất phần lớn hiệu lực máy: nó dựa vào một bộ kiểm không đọc tài liệu mà nó mang tên.
+4. Biến `BINDING_MAP_PATH` không dùng khiến người đọc mã tin rằng validator có đọc file.
+
+**Cùng họ với DR-016, DR-020, DR-021, DR-022** — một cổng tồn tại và trông như đang kiểm, nhưng kiểm thứ khác với thứ nó tuyên bố. Đây là lần thứ năm cùng một hình dạng.
+
+**Ghi chú đo được.** `g1-content-model-vs-schema.ts` có cùng khuôn: nó cũng chép cứng bảng field thay vì đọc `01-CONTENT_MODEL.md`. Đã lộ ra ngày 2026-08-05 khi thêm field `support` — sửa CONTENT_MODEL xong g1 vẫn đỏ cho tới khi sửa tay cả bản chép trong validator.
+
+**Điều kiện xử.** Cần chủ dự án quyết cơ chế: (a) chấp nhận hai bản, sửa tay cả hai mỗi lần — rẻ ngay, bảo đảm lệch về sau; (b) cho `g3` đọc thẳng bảng trong markdown, dùng dấu backtick quanh tên field làm tín hiệu máy đọc được, bản ánh xạ thành nguồn duy nhất; (c) tách dữ liệu ánh xạ ra một file cấu trúc mà cả tài liệu lẫn validator cùng đọc.
