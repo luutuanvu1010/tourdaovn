@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-08-05T02:39:22.220Z",
+  "ranAt": "2026-08-05T08:27:09.148Z",
   "items": [
     {
       "id": "I6",
@@ -13,6 +13,16 @@
     },
     {
       "id": "SEO",
+      "status": "pass",
+      "errors": []
+    },
+    {
+      "id": "R3",
+      "status": "pass",
+      "errors": []
+    },
+    {
+      "id": "R4",
       "status": "pass",
       "errors": []
     }

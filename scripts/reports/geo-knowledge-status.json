@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-08-05T02:15:17.315Z",
+  "generatedAt": "2026-08-05T08:27:09.429Z",
   "status": "pass",
   "summary": {
     "files": {
@@ -22,11 +22,7 @@
       "touristDestination": 1
     },
     "urlsByLanguage": {
-      "vi": 8,
-      "en": 0,
-      "zh": 0,
-      "ko": 0,
-      "ru": 0
+      "vi": 8
     },
     "aiCoverageRatio": 1,
     "sitemapCoverageRatio": 1,
@@ -48,7 +44,7 @@
       "missingSource": 5,
       "missingSameAs": 7,
       "commercialMissingBookingOrFreeFlag": 3,
-      "missingLanguages": 8,
+      "missingLanguages": 0,
       "staleFiles": []
     },
     "readingPaths": [

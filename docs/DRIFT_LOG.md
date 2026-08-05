@@ -235,3 +235,145 @@ Lần đầu chạy được `g3` sau khi sửa DR-001, nó báo:
 Đây đúng là loại drift mà `g3` sinh ra để bắt, và nó nằm im suốt thời gian validator không chạy được. Baseline đầy đủ: 0 dòng fail, 91 dòng cảnh báo, lưu ở `docs/evidence/2026-08-05-baseline/`.
 
 Ghi chú: cùng field `sameAs` đã làm gãy build ngày 2026-08-05 ở một chỗ khác (`HomeMetaBar` nhận `null`, xem commit `278b287`). Hai việc khác nhau, nhưng cùng cho thấy `sameAs` là chỗ đặc tả và code chưa gặp nhau.
+
+---
+
+## DR-017 — Sổ đăng ký viết `postbuild`, cổng đọc `post-build`
+
+**Trạng thái:** đã xử 2026-08-05 sau `/code-review`. Sửa 33 dòng `stage:` trong sổ, và đóng từ vựng `stage` ở `control-registry-gate.ts`.
+
+`docs/governance/control-registry.yaml` khai `stage: postbuild` (và `prebuild`); cả hai cổng tiêu thụ so với chuỗi có gạch nối. Hệ quả hai chiều:
+
+- `control-registry-gate.ts:189` lọc `control.stage !== 'post-build'` rồi `continue`, nên vòng đối chiếu với `postbuild-status.json` bỏ qua cả 31 control. Cổng in `[pass] Registry coherent` kể cả khi I6 đang `fail` trong báo cáo. Đã dựng lại đúng cảnh này để xác nhận: đổi I6 thành `fail`, cổng cũ vẫn xanh, cổng đã sửa đỏ với `I6: post-build report tồn tại nhưng chưa pass`.
+- `deferred-gate.ts:88` là mặt trái: một control khai đúng `live` post-build vẫn bị đẩy vào lỗi `deferred nhưng registry không khai live post-build executor`, tức chặn nhầm một build hợp lệ.
+
+Cách viết có gạch nối là bên đúng: `ADR-0018`, chú thích trong các validator, và cả hai cổng đều dùng nó. Sổ là bên mới soạn nên sổ đổi.
+
+Phần chống tái phát: chỉ đổi chính tả thì cái bẫy còn nguyên — một lần gõ sai nữa lại cho ra cổng xanh giả. Nên `control-registry-gate` bây giờ có `VALID_STAGES` và bắt cả `stage` của control lẫn của pipeline. Kiểm chứng: gõ lại `postbuild` vào một dòng, cổng đỏ ngay với `stage không hợp lệ`.
+
+Đây là cùng một họ với DR-016. Lần trước sổ khai `live` cho control không chạy được; lần này sổ khai đúng nhưng cổng không đọc nổi. Cả hai đều cho ra một dòng `[pass]` không có gì đứng sau. `CLAUDE.md` §6 nói cổng không bằng chứng thì mặc định là không đạt — một cổng in `pass` cho phép kiểm mà nó không thực hiện được là vi phạm điều đó, không phải chuyện nhỏ về chính tả.
+
+---
+
+## DR-018 — `jsonld-post` không biết `NewsArticle`
+
+**Trạng thái:** đã xử 2026-08-05 sau `/code-review`. `DETAIL_ENTITY_TYPES.article` thành `['Article', 'NewsArticle']`.
+
+`src/lib/serialize/article.ts:16` map `articleType: news → NewsArticle`, và `05-URL_MAP` dòng 120 khai đúng như vậy. Nhưng `DETAIL_ENTITY_TYPES.article` trong `scripts/validators/jsonld-post.ts` chỉ liệt kê `Article`, nên mọi bài `news` sẽ bị I6 báo `thiếu top-level schema chính Article`.
+
+Chưa có bài `news` nào trong dataset nên lỗi chưa nổ. Kiểm chứng bằng trang giả: chép một trang `/cam-nang/` có sẵn, đổi `@type` gốc thành `NewsArticle`, chạy `jsonld-post`. Danh sách cũ cho ra đúng dòng lỗi trên; danh sách mới không còn dòng nào thuộc loại đó. Đã xoá trang giả sau khi kiểm.
+
+Hai ghi chú:
+
+- Đây là cùng một lỗi vừa được vá cho `organization` ở commit `10d4ac8` (thiếu `TravelAgency`). Bảng `DETAIL_ENTITY_TYPES` là bản chép tay của các `*_TYPE_MAP` bên `src/lib/serialize/`, và chép tay thì lệch. Đã rà cả năm bảng còn lại: `attraction` an toàn nhờ serializer luôn phát kèm `TouristAttraction` và cổng chỉ đòi khớp một loại; `place` và `event` khớp đủ. Nhưng cơ chế thì vẫn là chép tay — nếu muốn hết hẳn họ lỗi này, `DETAIL_ENTITY_TYPES` phải sinh từ chính các `*_TYPE_MAP` chứ không chép. Chưa làm, ngoài phạm vi đợt vá này.
+- Vì `validate:post` nối bằng `&&` (DR-013), một bài `news` đủ để chặn toàn bộ sáu validator sau nó.
+
+---
+
+## DR-019 — Chuỗi `&&` làm cổng sau không bao giờ chạy
+
+**Trạng thái:** đã xử 2026-08-05 sau `/code-review`, theo QĐ-2026-08-05-11.
+
+`npm run gate` là `astro check && validate:post && audit:spec`. `deferred-gate` đứng cuối `validate:post` và luôn thoát 1 vì thiếu `validator-status.json` (ND-005). Hệ quả: `audit:spec` chưa từng chạy trong cổng, tức `g1`/`g3` vừa được sửa ở pha 0 không được cổng gọi tới lần nào. Lời trong commit `ae8db92` — "hạ tầng kiểm chứng từ chết thành chạy được" — đúng với việc gọi tay từng file, không đúng với `npm run gate`.
+
+Chuỗi `audit:spec` có cùng hình dạng: `g1` thoát 1 khi có drift mức `fail` thì `g3`/`g4` không chạy, mà `scripts/reports/g3-*.json` và `g4-*.json` vẫn giữ nội dung cũ nói "pass". Đây đúng là điều DR-001 mô tả cho `g2`, chỉ khác chỗ.
+
+Đã thay bằng `scripts/run-gates.mjs`. Phần chưa xử: `deferred-gate` vẫn đỏ, và sẽ còn đỏ tới khi ND-005 trả xong. Khác biệt là bây giờ nó đỏ một mình chứ không kéo theo chín cái kia.
+
+---
+
+## DR-020 — `check:cwd` chưa từng xanh, nên `build:strict` chưa từng chạy
+
+**Trạng thái:** đã xử 2026-08-05. Phát hiện ngoài danh sách của `/code-review`, lộ ra vì chạy thử cổng.
+
+`scripts/check-no-process-cwd.sh` cấm `process.cwd()` trong `scripts/`. `scripts/validate-min.ts:100` dùng đúng thứ bị cấm: `join(process.cwd(), '..', 'dist')`. Dòng này có từ commit fork `d7bac08`, tức cổng này đỏ suốt đời repo.
+
+Hệ quả nặng hơn vẻ ngoài: `build:strict` mở đầu bằng `npm run check:cwd`, nối bằng `&&`. Nên `build:strict` — chuỗi fail-closed mà `ADR-0018` mô tả là đường phát hành nghiêm ngặt — chưa từng đi qua nổi dòng đầu tiên. Không ai phát hiện vì `ADR-0022` đã chuyển đường phát hành thật sang `build:ci` = `npm run build`.
+
+Đã sửa: xác định `dist/` từ `import.meta.url`. Kiểm chứng: `npm run check:cwd` xanh lần đầu; `validate:jsonld` vẫn PASS khi gọi qua `npm --prefix scripts`, và cũng PASS khi gọi thẳng từ repo root — bản cũ ở CWD đó sẽ đi tìm `dist/` ở thư mục cha của repo.
+
+Ghi lại vì đây là bài học thứ ba cùng loại với DR-015 và DR-016: một cổng tồn tại trong `package.json` không có nghĩa là nó từng chạy. Muốn biết thì phải gọi nó.
+
+---
+
+## DR-021 — Cổng in `[pass]` cho phép kiểm nó không chạy được
+
+**Trạng thái:** đã xử 2026-08-05 sau `/code-review`.
+
+`control-registry-gate` có một vòng đối chiếu registry với `CONTROL_GATES.md`. File đó không tồn tại ở `docs/governance/`, nên `documentedLiveIds()` trả tập rỗng, vòng lặp chạy 0 lần, và cổng vẫn in `[pass] Registry coherent: 31 controls`. Khoản nợ đã có phiếu ND-004; cái chưa xử là **cổng không nói ra**.
+
+Vì sao không phải chuyện nhỏ: `CLAUDE.md` §6 nói mặc định của cổng là không đạt nếu không có bằng chứng. Một dòng `[pass]` trơn có thể bị trích làm bằng chứng QA2 cho một bất biến mà cổng chưa từng kiểm. Bản thân sổ đăng ký cũng ghi giới hạn này ở DR-015, nhưng ghi trong tài liệu thì người đọc output không thấy.
+
+Đã sửa: cổng gom danh sách phép kiểm bị bỏ, in từng dòng `[skip]` kèm lý do, và dòng kết thúc nói rõ có bao nhiêu phép kiểm không chạy được. `[pass]` bây giờ có phạm vi.
+
+Tác dụng phụ đáng kể: ngay lần chạy đầu sau khi sửa, cổng tự phơi ra DR-022 bằng dòng `[skip] đối chiếu post-build cho R3, R4`. Không ai phải đi tìm.
+
+---
+
+## DR-022 — `R3`/`R4` khai `live` bằng bằng chứng không tồn tại
+
+**Trạng thái:** đã xử 2026-08-05 sau `/code-review`.
+
+`control-registry.yaml` khai R3/R4 `status: live`, `evidence: scripts/reports/postbuild-status.json mục R3/R4`. Nhưng `r3-r4-post.ts` không ghi file báo cáo nào — chỉ `jsonld-post.ts` ghi, và nó chỉ ghi I6, PY8, SEO. Bằng chứng được trích dẫn không bao giờ tồn tại.
+
+Vòng đối chiếu trong cổng thì có dòng `if (!postStatus.has(control.id)) continue`, nên hai control này bị bỏ qua lặng lẽ: R3 hay R4 đỏ cũng không ai biết qua cổng.
+
+Đã sửa hai lớp:
+
+- `r3-r4-post.ts` ghi kết quả vào `postbuild-status.json`, kiểu chèn-đè theo `id` chứ không ghi đè cả file — vì `jsonld-post.ts` ghi cùng file và chạy trước trong chuỗi. Báo cáo bây giờ có đủ năm mục: I6, PY8, SEO, R3, R4. Kiểm chứng: đặt R3 thành `fail`, cổng đỏ đúng dòng `R3: post-build report tồn tại nhưng chưa pass`.
+- Cổng kiểm luôn `evidence` của mọi control `live`: nếu chuỗi đó trỏ vào một đường dẫn không tồn tại thì đỏ. Trước đây `evidence` chỉ bị kiểm "không rỗng". Kiểm chứng: giấu `postbuild-status.json` đi, cổng đỏ bốn dòng cho I6, PY8, R3, R4.
+
+Còn 27 control `gap` khai `evidence: scripts/reports/validator-status.json mục ...`, một file không tồn tại và sẽ không tồn tại tới khi ND-005 trả xong. Đã đổi thành `"chưa có — sẽ là ... khi ND-005 trả xong"` để câu chữ nói đúng thì hiện tại.
+
+---
+
+## DR-023 — Bất biến `g2` không có ai kiểm, và không ai nói ra
+
+**Trạng thái:** đã xử phần "nói ra" 2026-08-05. Bản thân khoảng trống vẫn mở, nợ ND-001.
+
+`g2` bị gỡ khỏi `audit:spec` theo QĐ-2026-08-05-03. Không validator nào khác so field bắt buộc trong `01-CONTENT_MODEL.md` §2 với bảng enforcement trong `scripts/gate.config.ts`: `g1` chỉ so content model với `cms/schemas`, `g4` không có đường thoát 1 nào. Nên một field khai bắt buộc trong content model mà vắng trong enforcement sẽ trôi qua mọi cổng.
+
+Khoảng trống này là quyết định đã chốt, không phải lỗi. Lỗi là `audit:spec` chạy xong in ba dòng `[pass]` rồi im, khiến người đọc output tin rằng bất biến kia đang được canh.
+
+Đã sửa: `run-gates.mjs` mang một danh sách `gaps` cho mỗi nhóm, in dòng `[gap]` sau bảng tổng kết, và dòng kết thúc nói rõ có bao nhiêu bất biến không ai kiểm. Cùng kỷ luật với các dòng `[skip]` ở DR-021.
+
+Cũng đã sửa đường dẫn spec trong `g2-content-model-vs-gatefields.ts` (`project/01-CONTENT_MODEL.md` → `docs/core-specs/`) dù file đang tắt, để lúc trả nợ ND-001 không phải dò lại đúng cái lỗi đã biết. Đường dẫn `shared/gates/index.ts` thì để nguyên, kèm chú thích: chọn giữa khôi phục `shared/gates` hay trỏ về `gate.config.ts` chính là nội dung của ND-001, không tự quyết ở trong file.
+
+---
+
+## DR-024 — Hai validator nữa còn hardcode 5 ngôn ngữ
+
+**Trạng thái:** đã xử 2026-08-05 sau `/code-review`.
+
+DR-012 vá `r3-r4-post.ts` cho đọc `langs` từ `site.config`, và QĐ-2026-08-05-05 ghi bất biến này là đã khôi phục. Nhưng cùng dòng hardcode còn ở hai chỗ khác:
+
+- `scripts/validators/r1-r4.ts:16` — nuôi `validateS25FiveLanguageCoverage`, đăng ký mức `fail`. Trên site vi-only, mỗi document field-level-i18n thiếu title/slug/summary cho bốn ngôn ngữ tắt, tức 15 lỗi mỗi doc, cộng 4 lỗi mỗi `translationGroup` của Article. Chưa nổ vì chuỗi pre-build đang chết theo ND-005; sẽ nổ hàng loạt ngay khi ND-005 trả xong.
+- `scripts/validators/geo-knowledge-post.ts:15` — file này đã `import { site }` sẵn mà vẫn đếm theo 5. Hệ quả nhẹ hơn nhưng vẫn sai: `urlsByLanguage` báo bốn ngôn ngữ với số 0, và `missingLanguages` đếm theo mẫu số 5.
+
+Đã sửa cả hai theo đúng khuôn của `r3-r4-post.ts`: giữ `ALL_LANGS` làm tập khả dĩ để dựng kiểu, lọc ra `LANGS` theo `langs` trong `site.config` (ADR-0021). Kiểm chứng: `geo-knowledge-status.json` đổi từ năm khoá ngôn ngữ xuống còn `{"vi": 8}`; `r1-r4.ts` biên dịch sạch, không chạy được là vì ND-005 chứ không phải vì bản vá.
+
+Bài học: QĐ-2026-08-05-05 khai một bất biến đã khôi phục trong khi mới vá một trong ba nơi. Khi vá loại lỗi "hardcode thứ đã có nguồn sự thật", phải grep hết mọi nơi khai lại giá trị đó rồi mới ghi vào sổ quyết định.
+
+---
+
+## DR-025 — Bản kiểm kê component mang nhầm thương hiệu
+
+**Trạng thái:** đã xử 2026-08-05 sau `/code-review`.
+
+`scripts/gen-component-inventory.mjs:216` hardcode `'# Danh mục component — Nha Trang Travel'`, nên file vừa commit ở `docs/design-context/COMPONENT_INVENTORY.md` mở đầu bằng tên công ty khác. `ADR-0021` QĐ8 nói thẳng: `site.config.ts` là nơi duy nhất khai tên site, không nơi nào trong code được viết lại. DR-006 vốn đã là drift mở về đúng chuyện rò tên nhatrangtravel ra sản phẩm.
+
+Nặng hơn vẻ ngoài vì DR-010 chỉ định file này là đầu vào bắt buộc của prompt giao cho Claude Design ở pha F — dòng ngữ cảnh đầu tiên mà tác nhân thiết kế đọc sẽ khai sai tên khách hàng.
+
+Đã sửa: script `import { brand } from '../src/site.config.ts'`, tiêu đề lấy `brand.name`. Vì nay nhập file `.ts`, npm script `gen:design-context` chạy qua tsx. Sinh lại: tiêu đề thành `# Danh mục component — Tour Đảo`, và diff toàn file đúng một dòng — cũng là bằng chứng script sinh ra kết quả ổn định.
+
+---
+
+## DR-026 — Thông báo lỗi chỉ sang thư mục không tồn tại
+
+**Trạng thái:** đã xử 2026-08-05 sau `/code-review`.
+
+Commit `ae8db92` đổi đường đọc sổ đăng ký sang `docs/governance/` nhưng để nguyên câu báo lỗi cũ: `control-registry-gate.ts:52` và `deferred-gate.ts:35` vẫn nói `thiếu project/governance/control-registry.yaml`. Ai gặp lỗi sẽ đi tạo file ở một thư mục mà repo này không có, rồi cổng vẫn đỏ.
+
+Đã sửa: `control-registry-gate` dựng câu báo từ chính `REGISTRY_PATH` nên không thể lệch lần nữa; `deferred-gate` sửa chuỗi. Kiểm chứng bằng cách giấu sổ đăng ký đi: thông báo ra đúng `thiếu docs/governance/control-registry.yaml`.
+
+Hai chú thích còn nhắc `project/governance/` thì giữ, vì chúng đang giải thích chính lịch sử này.
