@@ -10,6 +10,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { isEntityEnabled } from '../../src/site.config'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..', '..')
@@ -34,124 +35,133 @@ const ENTITY_TEMPLATES: Record<string, string> = {
   organization: 'OrganizationDetail.astro',
 }
 
-// ── BINDING_MAP data sources per entity ──
-// Manually extracted from BINDING_MAP §3 (common frame) + §4 (deltas).
-// Each entry: { zone: string, sources: string[], required: boolean }
-// "sources" are the Sanity field names (without "data." prefix)
+// ── BINDING_MAP: ĐỌC THẲNG TỪ MARKDOWN ──
+//
+// Trước 2026-08-05 chỗ này là một bảng CHÉP TAY từ 06-BINDING_MAP.md, và
+// `BINDING_MAP_PATH` khai ở đầu file không hề được dùng. Hệ quả: validator mang
+// tên bản ánh xạ nhưng chưa từng mở nó, nên tài liệu và bộ kiểm là hai nguồn sự
+// thật song song (N7, P6). Sửa bản ánh xạ không làm đổi gì máy kiểm — đã đo:
+// sau khi v2 khai bù đủ field, g3 vẫn ra đúng 40 cảnh báo như cũ. Ghi ở DR-027,
+// chủ dự án chốt hướng 1 ngày 2026-08-05.
+//
+// Nay bảng ở markdown là nguồn duy nhất. Quy ước máy đọc (06-BINDING_MAP §1):
+//   • tên field Sanity viết trong dấu backtick ở cột "Dữ liệu nuôi"
+//   • vùng không áp dụng cho entity nào ghi ở cột "Ghi chú" theo khuôn
+//     `không áp dụng: <entity>, <entity>`
+// Chữ ngoài backtick là văn xuôi, không phải tên field.
 
 interface ZoneDef {
   zone: string
   sources: string[]     // Sanity field names
   required: boolean
-  note?: string
+  excludes: Set<string> // entity không áp dụng vùng này
 }
 
-const COMMON_FRAME_ZONES: ZoneDef[] = [
-  { zone: 'Hero (title+image)', sources: ['title', 'mainImage'], required: true },
-  { zone: 'Summary', sources: ['summary'], required: true },
-  { zone: 'Body', sources: ['body'], required: false },
-  { zone: 'Gallery', sources: ['gallery'], required: false },
-  { zone: 'Highlights', sources: ['highlights'], required: false },
-  { zone: 'FAQ', sources: ['faq'], required: false },
-  { zone: 'Updated date', sources: ['_updatedAt'], required: true },
-]
-
-const ENTITY_DELTA_ZONES: Record<string, ZoneDef[]> = {
-  place: [
-    { zone: 'Map/Location', sources: ['geo', 'address', 'hasMap'], required: false },
-    { zone: 'Access info', sources: ['accessInfo'], required: false },
-    { zone: 'Hours & admission', sources: ['openingHours', 'isAccessibleForFree'], required: false },
-  ],
-  attraction: [
-    { zone: 'Map/Location', sources: ['geo', 'address', 'hasMap'], required: false },
-    { zone: 'Official source', sources: ['officialSource'], required: false },
-    { zone: 'Hours & admission', sources: ['openingHours', 'isAccessibleForFree'], required: false },
-    { zone: 'Access info', sources: ['accessInfo'], required: false },
-  ],
-  experience: [
-    { zone: 'Experience type', sources: ['experienceType'], required: true },
-    { zone: 'Venue', sources: ['venue'], required: true },
-    { zone: 'Duration', sources: ['duration'], required: false },
-    { zone: 'Includes', sources: ['includes'], required: false },
-    { zone: 'Tourist type', sources: ['touristType'], required: false },
-  ],
-  restaurant: [
-    { zone: 'Map/Location', sources: ['geo', 'address'], required: false },
-    { zone: 'Official source', sources: ['officialSource'], required: false },
-    { zone: 'Specialties served', sources: ['servesSpecialty'], required: false },
-    { zone: 'Cuisine', sources: ['servesCuisine'], required: false },
-    { zone: 'Hours', sources: ['openingHours'], required: false },
-    { zone: 'Phone CTA', sources: ['telephone'], required: false },
-    { zone: 'Reservations', sources: ['acceptsReservations'], required: false },
-    { zone: 'Menu', sources: ['hasMenu'], required: false },
-  ],
-  specialty: [
-    { zone: 'Type', sources: ['specialtyType'], required: true },
-    { zone: 'Origin note', sources: ['originNote'], required: false },
-    { zone: 'Season', sources: ['season'], required: false },
-    { zone: 'Where to try', sources: ['whereToTry'], required: false },
-  ],
-  hotel: [
-    { zone: 'Map/Location', sources: ['geo', 'address'], required: false },
-    { zone: 'Official source', sources: ['officialSource'], required: false },
-    { zone: 'Star rating', sources: ['starRating'], required: false },
-    { zone: 'Amenities', sources: ['amenityFeature'], required: false },
-    { zone: 'Check-in/out', sources: ['checkinTime', 'checkoutTime'], required: false },
-    { zone: 'Rooms & pets', sources: ['numberOfRooms', 'petsAllowed'], required: false },
-    { zone: 'Beach access', sources: ['beachAccess'], required: false },
-    { zone: 'Access info', sources: ['accessInfo'], required: false },
-  ],
-  resort: [
-    { zone: 'Map/Location', sources: ['geo', 'address'], required: false },
-    { zone: 'Official source', sources: ['officialSource'], required: false },
-    { zone: 'Star rating', sources: ['starRating'], required: false },
-    { zone: 'Amenities', sources: ['amenityFeature'], required: false },
-    { zone: 'Check-in/out', sources: ['checkinTime', 'checkoutTime'], required: false },
-    { zone: 'Rooms & pets', sources: ['numberOfRooms', 'petsAllowed'], required: false },
-    { zone: 'Beach access', sources: ['beachAccess'], required: false },
-    { zone: 'Access info', sources: ['accessInfo'], required: false },
-    { zone: 'Beachfront & land area', sources: ['beachfront', 'landArea'], required: false },
-    { zone: 'On-site activities', sources: ['onSiteActivities'], required: false },
-  ],
-  tour: [
-    { zone: 'Itinerary', sources: ['itinerary'], required: true },
-    { zone: 'Operator', sources: ['operator'], required: true },
-    { zone: 'Tour format', sources: ['tourFormat'], required: true },
-    { zone: 'Trip origin', sources: ['tripOrigin'], required: false },
-    { zone: 'Departure note', sources: ['departureNote'], required: false },
-    { zone: 'Duration', sources: ['duration'], required: false },
-    { zone: 'Includes/Excludes', sources: ['includes', 'excludes'], required: false },
-    { zone: 'Tourist type', sources: ['touristType'], required: false },
-    { zone: 'Season note', sources: ['seasonNote'], required: false },
-  ],
-  event: [
-    { zone: 'Time', sources: ['startDate', 'endDate'], required: true },
-    { zone: 'Event status', sources: ['eventStatus'], required: false },
-    { zone: 'Location', sources: ['location'], required: true },
-    { zone: 'Organizer', sources: ['organizer'], required: false },
-    { zone: 'Ticket (3 branches)', sources: ['bookingRef', 'ticketUrl', 'isAccessibleForFree'], required: false },
-  ],
-  article: [
-    { zone: 'Article type', sources: ['articleType'], required: true },
-    { zone: 'Author box', sources: ['author'], required: true },
-    { zone: 'Publish/update dates', sources: ['publishedAt', '_updatedAt'], required: true },
-    { zone: 'How-to steps', sources: ['howTo'], required: false },
-    { zone: 'About references', sources: ['about'], required: false },
-  ],
-  person: [
-    { zone: 'Bio', sources: ['bio'], required: true },
-    { zone: 'Role & expertise', sources: ['jobTitle', 'knowsAbout'], required: false },
-    { zone: 'External profiles', sources: ['sameAs', 'url'], required: false },
-  ],
-  organization: [
-    { zone: 'Logo', sources: ['logo'], required: false },
-    { zone: 'Org type', sources: ['orgType'], required: true },
-    { zone: 'Website/source', sources: ['url', 'officialSource'], required: true },
-    { zone: 'Office location', sources: ['geo', 'address'], required: false },
-    { zone: 'Phone CTA', sources: ['telephone'], required: false },
-    { zone: 'License info', sources: ['licenseInfo'], required: false },
-  ],
+/**
+ * Tên field hợp lệ: định danh camelCase, cho phép tiền tố `_` của field hệ
+ * thống Sanity (`_updatedAt`). Loại `prices.yaml`, `src/site.config.ts`...
+ */
+function isFieldName(token: string): boolean {
+  return /^_?[a-z][A-Za-z0-9]*$/.test(token)
 }
+
+function splitRow(line: string): string[] {
+  return line.replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim())
+}
+
+/**
+ * "có" và "có (gate…)" là bắt buộc; "nên có", "tùy", "chỉ …" thì không.
+ * Cố ý chặt: đánh nhầm thành bắt buộc sẽ sinh drift mức fail giả.
+ */
+function isRequired(cell: string): boolean {
+  const c = cell.trim().toLowerCase()
+  return c.startsWith('có') && !c.startsWith('nên')
+}
+
+function parseZoneTable(lines: string[]): ZoneDef[] {
+  const zones: ZoneDef[] = []
+  for (const line of lines) {
+    if (!line.trim().startsWith('|')) continue
+    const cells = splitRow(line)
+    if (cells.length < 3) continue
+    if (/^-+$/.test(cells[0].replace(/[\s-]/g, '-'))) continue   // dòng kẻ
+    if (cells[0] === 'Vùng giao diện' || cells[0] === 'Vùng trong card') continue
+    if (cells[0] === 'Trang' || cells[0] === 'Hub' || cells[0] === '#') continue
+
+    const sources = [...cells[1].matchAll(/`([^`]+)`/g)]
+      .map(m => m[1])
+      .filter(isFieldName)
+    if (sources.length === 0) continue   // vùng ăn config/rollup/decor — không phải field
+
+    // Tìm "không áp dụng:" ở BẤT KỲ cột nào sau cột "Bắt buộc?" — hàng có thể
+    // có số cột khác nhau, nên bám cột cuối là bám nhầm.
+    const tail = cells.slice(3).join(' ')
+    const ex = tail.match(/không áp dụng:\s*([^|]+)/i)
+    // Chỉ nhận định danh trần; dừng ở dấu ngoặc để văn xuôi giải thích trong
+    // ngoặc không lọt vào danh sách entity.
+    const excludes = new Set(
+      ex
+        ? ex[1]
+            .split(',')
+            .map(x => x.trim().toLowerCase().split(/[\s(]/)[0])
+            .filter(x => /^[a-z][a-zA-Z]*$/.test(x))
+        : [],
+    )
+
+    zones.push({ zone: cells[0], sources, required: isRequired(cells[2] ?? ''), excludes })
+  }
+  return zones
+}
+
+/** Tiêu đề §4.x → khoá entity. Một tiêu đề có thể mang hai entity (Hotel và Resort). */
+function entitiesInHeading(heading: string): string[] {
+  const found: string[] = []
+  for (const key of Object.keys(ENTITY_TEMPLATES)) {
+    const label = key === 'organization' ? 'Organization'
+      : key.charAt(0).toUpperCase() + key.slice(1)
+    if (new RegExp(`\\b${label}\\b`, 'i').test(heading)) found.push(key)
+  }
+  return found
+}
+
+function parseBindingMap(): { common: ZoneDef[]; perEntity: Record<string, ZoneDef[]> } {
+  const md = readFileSync(BINDING_MAP_PATH, 'utf-8').split('\n')
+
+  const common: ZoneDef[] = []
+  const perEntity: Record<string, ZoneDef[]> = {}
+
+  let mode: 'none' | 'common' | 'delta' = 'none'
+  let current: string[] = []
+  let buffer: string[] = []
+
+  const flush = () => {
+    if (mode === 'common') common.push(...parseZoneTable(buffer))
+    else if (mode === 'delta') {
+      const zones = parseZoneTable(buffer)
+      for (const e of current) (perEntity[e] ??= []).push(...zones)
+    }
+    buffer = []
+  }
+
+  for (const line of md) {
+    if (/^## 3\. /.test(line)) { flush(); mode = 'common'; current = []; continue }
+    if (/^## 4\. /.test(line)) { flush(); mode = 'none'; current = []; continue }
+    // §8 là phụ lục entity đang tắt — không tính vào hợp đồng đang hiệu lực
+    if (/^## (5|6|7|8)\. /.test(line)) { flush(); mode = 'none'; current = []; continue }
+    if (/^### 4\.\d+ /.test(line)) {
+      flush()
+      current = entitiesInHeading(line)
+      mode = current.length > 0 ? 'delta' : 'none'
+      continue
+    }
+    buffer.push(line)
+  }
+  flush()
+
+  return { common, perEntity }
+}
+
+const { common: COMMON_FRAME_ZONES, perEntity: ENTITY_DELTA_ZONES } = parseBindingMap()
 
 // ── Step 1: Extract data.xxx field accesses from an Astro template ──
 
@@ -164,8 +174,10 @@ function extractFieldAccesses(templatePath: string): Set<string> {
     return fields
   }
 
-  // Pattern 1: data.fieldName — direct access
-  const directPattern = /data\.(\w+)\b/g
+  // Pattern 1: data.fieldName — truy cập thẳng, cộng dạng ép kiểu
+  // `(data as ResortResult).beachfront` mà LodgingDetail dùng cho field riêng
+  // của Resort. Thiếu nhánh thứ hai thì g3 báo câm nhầm cho vùng có render thật.
+  const directPattern = /data(?:\s+as\s+\w+)?\)?\.(\w+)\b/g
   let m: RegExpExecArray | null
   while ((m = directPattern.exec(content)) !== null) {
     const name = m[1]
@@ -261,13 +273,21 @@ function main() {
   const allDrifts: DriftItem[] = []
 
   for (const [entityType, templateFile] of Object.entries(ENTITY_TEMPLATES)) {
+    // Entity tắt trong site.config.ts không có URL và không sinh trang; template
+    // của chúng còn trong repo để không gãy tham chiếu, nhưng không thuộc hợp
+    // đồng đang hiệu lực. Bảng ánh xạ của chúng cũng nằm ở phụ lục §8.
+    if (!isEntityEnabled(entityType)) {
+      console.log(`[${entityType}] bỏ qua — đang tắt trong site.config.ts`)
+      continue
+    }
     const templatePath = resolve(COMPONENTS_DIR, templateFile)
 
-    // Get zones: common frame + entity-specific delta
+    // Khung chung cộng delta, sau khi loại những vùng mà bản ánh xạ khai
+    // "không áp dụng" cho chính entity này (06-BINDING_MAP §1).
     const zones = [
       ...COMMON_FRAME_ZONES,
       ...(ENTITY_DELTA_ZONES[entityType] || []),
-    ]
+    ].filter(z => !z.excludes.has(entityType))
 
     const templateFields = extractFieldAccesses(templatePath)
 

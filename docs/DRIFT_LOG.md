@@ -400,3 +400,23 @@ Hệ quả, xếp theo độ nặng:
 **Ghi chú đo được.** `g1-content-model-vs-schema.ts` có cùng khuôn: nó cũng chép cứng bảng field thay vì đọc `01-CONTENT_MODEL.md`. Đã lộ ra ngày 2026-08-05 khi thêm field `support` — sửa CONTENT_MODEL xong g1 vẫn đỏ cho tới khi sửa tay cả bản chép trong validator.
 
 **Điều kiện xử.** Cần chủ dự án quyết cơ chế: (a) chấp nhận hai bản, sửa tay cả hai mỗi lần — rẻ ngay, bảo đảm lệch về sau; (b) cho `g3` đọc thẳng bảng trong markdown, dùng dấu backtick quanh tên field làm tín hiệu máy đọc được, bản ánh xạ thành nguồn duy nhất; (c) tách dữ liệu ánh xạ ra một file cấu trúc mà cả tài liệu lẫn validator cùng đọc.
+
+---
+
+## DR-028 — `LodgingDetail` đọc field không tồn tại, che bằng `as any`
+
+**Trạng thái:** mở, phát hiện 2026-08-05 bởi chính `g3` sau khi nó bắt đầu đọc bản ánh xạ thật.
+
+`src/components/LodgingDetail.astro:49`:
+
+```
+const priceView = resolvePrice(data.bookingRef?.key, entityType, (data as any).isAccessibleForFree, prices, lang)
+```
+
+`HotelResult` và `ResortResult` trong `src/lib/types.ts` **không khai** `isAccessibleForFree`, và `01-CONTENT_MODEL` §2.6, §2.7 cũng không có field đó cho lưu trú. Ép `as any` làm trình biên dịch im, nên `astro check` xanh trong khi template đọc một field không tồn tại.
+
+Không vỡ lúc chạy: giá trị là `undefined` và `resolvePrice` chịu được. Nhưng đây đúng hình dạng mà gói "build đừng vỡ vì dữ liệu thiếu" (`114010a`) đi xử — kiểu nói dối, chỉ khác là lần này nói dối bằng `as any` thay vì bằng `?:`.
+
+**Vì sao lâu nay không ai thấy.** `g3` trước đây đối chiếu một bản chép tay và không đọc `06-BINDING_MAP.md` (DR-027), nên vùng này không nằm trong tầm kiểm. Bắt được ngay trong lần đầu `g3` đọc tài liệu thật.
+
+**Điều kiện xử.** Cần quyết ở tầng nội dung: lưu trú có khái niệm "miễn phí" không. Nếu không thì bỏ tham số đó khỏi lời gọi; nếu có thì thêm field vào `01-CONTENT_MODEL` §2.0b theo thủ tục §2.2. Không thuộc phạm vi pha E.

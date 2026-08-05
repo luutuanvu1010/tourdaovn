@@ -62,18 +62,18 @@ Phần KHÔNG nhãn (triết lý binding, chính sách vùng rỗng, khung chung
 
 | Vùng giao diện | Dữ liệu nuôi (entity.field) | Bắt buộc? | Khi rỗng thì hiện gì | Ghi chú |
 |---|---|---|---|---|
-| Breadcrumb | `containedInPlace` deref thành chuỗi cha (build) | có với entity có `containedInPlace` | dùng nhánh URL: tên nhánh theo 05 mục 1.2 | quan hệ là dữ liệu, breadcrumb là trình bày (05 mục 1.1). không áp dụng: article, person, organization, experience, tour |
+| Breadcrumb | `containedInPlace` deref thành chuỗi cha (build) | có với entity có `containedInPlace` | dùng nhánh URL: tên nhánh theo 05 mục 1.2 | quan hệ là dữ liệu, breadcrumb là trình bày (05 mục 1.1). không áp dụng: article, person, organization, experience, tour, specialty, event |
 | Hero | `title` cộng `mainImage` (kèm alt); `gallery` đủ 4 ảnh sau khi loại trùng `mainImage` thì đi qua Hero mosaic | title có (gate); mainImage nên có | thiếu mainImage thì hero thuần chữ; gallery dưới 4 ảnh thì hero ảnh đơn; không ảnh placeholder | desktop đủ 4 gallery: ảnh chính bên trái, gallery 2x2 bên phải kiểu Hotel với 4 ô bằng nhau; mobile: ảnh chính trên, thumbnail strip 4 ô đều dưới; alt bắt buộc khi có ảnh (2.0) |
 | Đoạn mở | `summary` | có (gate, I10) | — | tự đứng được như câu trả lời hoàn chỉnh; nguồn speakable |
-| Thân bài | `body` (portable text) | nên có | ẩn (mặc định) | ảnh inline trong body với Article |
+| Thân bài | `body` (portable text) | nên có | ẩn (mặc định) | ảnh inline trong body với Article. không áp dụng: person (dùng `bio` thay vai, xem §4.11) |
 | Gallery | `gallery` (kèm alt từng ảnh) | nên có với entity có field | ẩn | Không render gallery section rời trên detail; gallery detail phải đi qua Hero mosaic. không áp dụng: article, person, organization |
 | Điểm nổi bật | `highlights` | tùy | ẩn | không áp dụng: organization, person, article |
 | Hỏi đáp | `faq` | tùy | ẩn | nuôi FAQPage trong JSON-LD. không áp dụng: person, organization |
 | Phân loại | `category` deref Category | tùy | ẩn | chỉ term thuộc bộ có trang công khai render thành link tới trang term; general-category không render (2.13) |
-| Nhãn loại entity | `placeType`, `attractionType`, `experienceType`, `specialtyType`, `orgType`, `articleType`, `tourFormat` — mỗi entity đúng một field | có với entity có field | ẩn | nhãn ngắn cạnh tiêu đề hoặc trong InfoBar; cùng field nuôi nhãn phụ của card 5.1, không khai lại |
-| Xác minh dữ liệu | `sameAs` | tùy | ẩn cả dòng, không hiện nhãn trống | link hồ sơ Wikidata/Wikipedia đầu tiên trong mảng; tín hiệu E-E-A-T. Là nguồn `sameAs` trong JSON-LD. không áp dụng: article |
-| Điện thoại | `telephone` | tùy | ẩn, không CTA giả | không áp dụng: place, experience, tour, article, person, touristDestination |
-| Ngày cập nhật | `updatedAt` | có | — | S2.4, hiện cả HTML |
+| Nhãn loại entity | `placeType`, `attractionType`, `experienceType`, `specialtyType`, `orgType`, `articleType`, `tourFormat` — mỗi entity nhiều nhất một field | tùy | ẩn | không áp dụng: hotel, resort, person, touristDestination | nhãn ngắn cạnh tiêu đề hoặc trong InfoBar; cùng field nuôi nhãn phụ của card 5.1, không khai lại |
+| Xác minh dữ liệu | `sameAs` | tùy | ẩn cả dòng, không hiện nhãn trống | link hồ sơ Wikidata/Wikipedia đầu tiên trong mảng; tín hiệu E-E-A-T. Là nguồn `sameAs` trong JSON-LD. không áp dụng: article, experience, tour |
+| Điện thoại | `telephone` | tùy | ẩn, không CTA giả | không áp dụng: place, experience, tour, article, person, touristDestination, hotel, resort |
+| Ngày cập nhật | `updatedAt`, `_updatedAt` | có | — | S2.4, hiện cả HTML. `_updatedAt` là dấu thời gian hệ thống của Sanity, dùng khi `updatedAt` biên tập chưa đặt |
 | Vùng giá cộng CTA đặt | `prices.yaml` qua khóa `bookingRef` | chỉ entity thương mại | ẩn cả vùng, không CTA giả (quyết định nền 3) | hình dạng nhãn theo entity, xem delta. không áp dụng: place, article, person, organization |
 
 ## 4. Delta từng loại trang chi tiết
@@ -85,50 +85,50 @@ Trang TouristDestination giữ vai điều phối điểm đến, nhưng không 
 | Vùng giao diện | Dữ liệu nuôi | Bắt buộc? | Khi rỗng thì hiện gì | Ghi chú |
 |---|---|---|---|---|
 | Trust bar | config (build) | có | luôn hiện | cam kết hệ thống về nội dung duyệt, dữ liệu có nguồn, cập nhật rõ; không phải CTA marketing |
-| Số liệu nhanh | keyFacts | nên có | ẩn | cho người và máy |
-| Custom banners | homepageBanners active | tùy | ẩn | tối đa 3 banner, xếp theo priority; toàn card click nếu có linkUrl; không render Offer JSON-LD |
-| Khối featured (5 khối) | featuredAttractions, featuredStays, featuredExperiences, featuredSpecialties, featuredTours deref | tùy | khối nào rỗng ẩn khối đó | chỉ trỏ entity đã publish (2.1) |
+| Số liệu nhanh | `keyFacts` | nên có | ẩn | cho người và máy |
+| Custom banners | `homepageBanners` active | tùy | ẩn | tối đa 3 banner, xếp theo priority; toàn card click nếu có linkUrl; không render Offer JSON-LD |
+| Khối featured (5 khối) | `featuredAttractions`, `featuredStays`, `featuredExperiences`, `featuredSpecialties`, `featuredTours` deref | tùy | khối nào rỗng ẩn khối đó | chỉ trỏ entity đã publish (2.1) |
 | Lối vào 4 hub | config (build): 4 hub 05 mục 1.3 | có | — | rollup đếm số entity mỗi hub là tùy chọn Design, dữ liệu sẵn từ build |
 | Các khu vực nên biết | rollup (build): Place approved, ưu tiên area, beach, island, landform, ward | tùy | ẩn | tối đa 4 card, URL từ ROUTE_MAP |
-| Cẩm nang bản địa | rollup (build): Article approved theo language, ưu tiên transport-guide, itinerary, guide | tùy | ẩn | tối đa 4 card; Article dùng document-level i18n |
-| Điểm đến liên quan | relatedDestinations | tùy | ẩn | |
-| Lưu ý an toàn | safetyNote | tùy | ẩn | theo mùa |
-| Ngày cập nhật nhẹ | updatedAt | có nếu có | ẩn nếu thiếu | trust signal S2.4, hiển thị gần cuối trang, không biến thành banner cảnh báo |
-| speakable | build từ summary và faq | có | — | vùng vô hình, S2.4 |
+| Cẩm nang bản địa | rollup (build): Article approved theo `language`, ưu tiên transport-guide, `itinerary`, guide | tùy | ẩn | tối đa 4 card; Article dùng document-level i18n |
+| Điểm đến liên quan | `relatedDestinations` | tùy | ẩn | |
+| Lưu ý an toàn | `safetyNote` | tùy | ẩn | theo mùa |
+| Ngày cập nhật nhẹ | `updatedAt` | có nếu có | ẩn nếu thiếu | trust signal S2.4, hiển thị gần cuối trang, không biến thành banner cảnh báo |
+| speakable | build từ `summary` và `faq` | có | — | vùng vô hình, S2.4 |
 
 ### 4.2 Place `/dia-danh/{slug}`
 
 | Vùng giao diện | Dữ liệu nuôi | Bắt buộc? | Khi rỗng thì hiện gì | Ghi chú |
 |---|---|---|---|---|
-| Bản đồ, vị trí | geo cộng address; hasMap link ngoài | tùy | ẩn khi thiếu geo/address/hasMap | addressLocality là phường hiện hành (I15) |
-| Cách tới nơi | accessInfo | tùy | ẩn | |
-| Giờ và vé | openingHours, isAccessibleForFree | tùy | ẩn | chỉ nơi có quản lý; Place không có vùng giá |
+| Bản đồ, vị trí | `geo` cộng `address`; `hasMap` link ngoài | tùy | ẩn khi thiếu geo/address/hasMap | addressLocality là phường hiện hành (I15) |
+| Cách tới nơi | `accessInfo` | tùy | ẩn | |
+| Giờ và vé | `openingHours`, `isAccessibleForFree` | tùy | ẩn | chỉ nơi có quản lý; Place không có vùng giá |
 | Vùng con | containsPlace rollup (build) | — | ẩn | reverse containedInPlace |
-| Trải nghiệm tại đây | rollup (build) từ Experience.venue ngược | — | ẩn | |
+| Trải nghiệm tại đây | rollup (build) từ `Experience.venue` ngược, GROQ chiếu ra `experiences` | — | ẩn | |
 
 ### 4.3 Attraction `/diem-tham-quan/{slug}`
 
 | Vùng giao diện | Dữ liệu nuôi | Bắt buộc? | Khi rỗng thì hiện gì | Ghi chú |
 |---|---|---|---|---|
-| Bản đồ, vị trí | geo cộng address; hasMap | tùy | ẩn khi thiếu geo/address/hasMap | I2 rẽ nhánh theo attractionType; geo/address không phải gate |
-| Nguồn chính thức | officialSource | gate với nhóm venue | ẩn với nhóm bách khoa không điền | |
-| Giờ và miễn phí | openingHours, isAccessibleForFree | nên có với nơi bán vé | ẩn | |
-| Cách tới nơi | accessInfo | tùy | ẩn | |
-| Vùng vé vào cửa | prices.yaml qua bookingRef | nên có với nơi bán vé | ẩn cả vùng | giá trực tiếp kèm đơn vị; giá gói hoạt động đi qua Experience (2.3). **Ngoại lệ (chốt 2026-06-12):** venue thương mại có nhiều gói vé (như I-Resort: tắm bùn, tắm thảo dược, spa) dùng dạng "từ X₫" thay giá trực tiếp. |
-| Trải nghiệm tại đây | rollup (build) từ Experience.venue ngược | — | ẩn | |
-| Sự kiện tại đây | rollup (build) từ Event.location ngược | — | ẩn | |
+| Bản đồ, vị trí | `geo` cộng `address`; `hasMap` | tùy | ẩn khi thiếu geo/address/hasMap | I2 rẽ nhánh theo attractionType; geo/address không phải gate |
+| Nguồn chính thức | `officialSource` | gate với nhóm venue | ẩn với nhóm bách khoa không điền | |
+| Giờ và miễn phí | `openingHours`, `isAccessibleForFree` | nên có với nơi bán vé | ẩn | |
+| Cách tới nơi | `accessInfo` | tùy | ẩn | |
+| Vùng vé vào cửa | prices.yaml qua `bookingRef` | nên có với nơi bán vé | ẩn cả vùng | giá trực tiếp kèm đơn vị; giá gói hoạt động đi qua Experience (2.3). **Ngoại lệ (chốt 2026-06-12):** venue thương mại có nhiều gói vé (như I-Resort: tắm bùn, tắm thảo dược, spa) dùng dạng "từ X₫" thay giá trực tiếp. |
+| Trải nghiệm tại đây | rollup (build) từ `Experience.venue` ngược, GROQ chiếu ra `experiences` | — | ẩn | |
+| Sự kiện tại đây | rollup (build) từ Event.`location` ngược | — | ẩn | |
 
 ### 4.4 Experience `/trai-nghiem/{slug}`
 
 | Vùng giao diện | Dữ liệu nuôi | Bắt buộc? | Khi rỗng thì hiện gì | Ghi chú |
 |---|---|---|---|---|
-| Loại trải nghiệm | experienceType deref Category | có (gate I13) | — | link tới trang term khi term đã có trang (R2); chưa có trang thì hiện chữ không link |
-| Diễn ra tại | venue deref | có (gate I13) | — | link trang Attraction, Hotel, Resort hoặc Place |
+| Loại trải nghiệm | `experienceType` deref Category | có (gate I13) | — | link tới trang term khi term đã có trang (R2); chưa có trang thì hiện chữ không link |
+| Diễn ra tại | `venue` deref | có (gate I13) | — | link trang Attraction, Hotel, Resort hoặc Place |
 | Thời lượng | `duration` | tùy | ẩn | render theo locale ở build |
 | Gồm những gì | `includes` | tùy | ẩn | |
 | Phù hợp với | `touristType` | tùy | ẩn | |
 | Vị trí trên bản đồ | `geo` | tùy | ẩn | Experience không có `address`; chỉ toạ độ, dùng cho bản đồ nhỏ và JSON-LD |
-| Vùng giá cộng CTA | prices.yaml qua bookingRef | nên có với trải nghiệm trả phí | ẩn cả vùng; isAccessibleForFree = true hiện nhãn miễn phí thay vùng giá | giá trực tiếp kèm đơn vị kiểu "120k/người" (I16) |
+| Vùng giá cộng CTA | `prices.yaml` qua `bookingRef`; `isAccessibleForFree` | nên có với trải nghiệm trả phí | ẩn cả vùng; isAccessibleForFree = true hiện nhãn miễn phí thay vùng giá | giá trực tiếp kèm đơn vị kiểu "120k/người" (I16) |
 
 ### 4.7 Hotel `/khach-san/{slug}` và Resort `/resort/{slug}` (LodgingBase)
 
@@ -136,33 +136,33 @@ Một delta chung, khớp 2.0b. Khác nhau chỉ ở ba vùng cuối.
 
 | Vùng giao diện | Dữ liệu nuôi | Bắt buộc? | Khi rỗng thì hiện gì | Ghi chú |
 |---|---|---|---|---|
-| Bản đồ, vị trí | geo cộng address | tùy | ẩn khi thiếu geo/address | |
-| Nguồn chính thức | officialSource | có (gate I3) | — | |
-| Hạng sao | starRating | tùy | ẩn | |
-| Tiện ích | amenityFeature | tùy | ẩn | |
-| Giờ nhận trả phòng | checkinTime, checkoutTime | tùy | ẩn | |
-| Số phòng, thú cưng | numberOfRooms, petsAllowed | tùy | ẩn | |
-| Ra biển | beachAccess | nên có | ẩn | không suy được từ geo (2.0b) |
-| Cách tới nơi | accessInfo | tùy | ẩn | resort đảo, khu xa trung tâm |
-| Cách sân bay | suy (build) từ geo | — | ẩn khi thiếu geo | "cách sân bay ~X km", không phải field (2.0b) |
-| Vùng giá cộng CTA | prices.yaml qua bookingRef | nên có | ẩn cả vùng | dạng "từ X, cập nhật [ngày]" lấy asOf từ nguồn giá (I16, quyết định nền 9 của 01) |
-| Riêng Resort: sát biển, diện tích | beachfront, landArea | tùy | ẩn | |
-| Riêng Resort: hoạt động tại chỗ | onSiteActivities | tùy | ẩn | có thể trỏ Experience, render link |
+| Bản đồ, vị trí | `geo` cộng `address` | tùy | ẩn khi thiếu geo/address | |
+| Nguồn chính thức | `officialSource` | có (gate I3) | — | |
+| Hạng sao | `starRating` | tùy | ẩn | |
+| Tiện ích | `amenityFeature` | tùy | ẩn | |
+| Giờ nhận trả phòng | `checkinTime`, `checkoutTime` | tùy | ẩn | |
+| Số phòng, thú cưng | `numberOfRooms`, `petsAllowed` | tùy | ẩn | |
+| Ra biển | `beachAccess` | nên có | ẩn | không suy được từ geo (2.0b) |
+| Cách tới nơi | `accessInfo` | tùy | ẩn | resort đảo, khu xa trung tâm |
+| Cách sân bay | suy (build) từ `geo` | — | ẩn khi thiếu geo | "cách sân bay ~X km", không phải field (2.0b) |
+| Vùng giá cộng CTA | `prices.yaml` qua `bookingRef` | nên có | ẩn cả vùng | dạng "từ X, cập nhật [ngày]" lấy asOf từ nguồn giá (I16, quyết định nền 9 của 01) |
+| Riêng Resort: sát biển, diện tích | `beachfront`, `landArea` | tùy | ẩn | chỉ Resort có field; `LodgingDetail` chặn bằng `isResort` lúc chạy |
+| Riêng Resort: hoạt động tại chỗ | `onSiteActivities` | tùy | ẩn | có thể trỏ Experience, render link; `LodgingDetail` chặn bằng `isResort` lúc chạy |
 
 ### 4.8 Tour `/tour/{slug}`
 
 | Vùng giao diện | Dữ liệu nuôi | Bắt buộc? | Khi rỗng thì hiện gì | Ghi chú |
 |---|---|---|---|---|
-| Hành trình (timeline có thứ tự) | itinerary: mỗi stop deref Attraction hoặc Place, hoặc externalStop {name, geo, sameAs}; note; durationAtStop | có ≥1 stop (gate I14) | — | serialize ItemList giữ thứ tự; stop nội vùng link trang entity, externalStop chữ không link |
-| Đơn vị vận hành | operator deref Organization | có (gate I14) | — | link `/cong-ty/{slug}`; serialize provider |
-| Hình thức tour | tourFormat | có (gate I14) | — | join-in, private hoặc both; nhãn hiển thị cho khách |
-| Xuất phát từ | tripOrigin deref | nên có | ẩn | |
-| Ngày điển hình | departureNote | tùy | ẩn | không phải lịch chỗ trống (I1) |
-| Thời lượng | duration | nên có | ẩn | render theo locale |
-| Gồm gì, không gồm gì | includes, excludes | nên có | ẩn từng khối riêng | chỗ phát sinh hiểu lầm nhiều nhất (2.8) |
-| Phù hợp với | touristType | tùy | ẩn | |
-| Lưu ý mùa | seasonNote | tùy | ẩn | |
-| Vùng giá cộng CTA | prices.yaml qua bookingRef | nên có | ẩn cả vùng | perPax mọi hình thức (I14); tour riêng hiện tiers theo cỡ nhóm từ nguồn giá |
+| Hành trình (timeline có thứ tự) | `itinerary`: mỗi stop deref Attraction hoặc Place, hoặc `externalStop` {name, `geo`, `sameAs`}; note; `durationAtStop` | có ≥1 stop (gate I14) | — | serialize ItemList giữ thứ tự; stop nội vùng link trang entity, externalStop chữ không link |
+| Đơn vị vận hành | `operator` deref Organization | có (gate I14) | — | link `/cong-ty/{slug}`; serialize provider |
+| Hình thức tour | `tourFormat` | có (gate I14) | — | join-in, private hoặc both; nhãn hiển thị cho khách |
+| Xuất phát từ | `tripOrigin` deref | nên có | ẩn | |
+| Ngày điển hình | `departureNote` | tùy | ẩn | không phải lịch chỗ trống (I1) |
+| Thời lượng | `duration` | nên có | ẩn | render theo locale |
+| Gồm gì, không gồm gì | `includes`, `excludes` | nên có | ẩn từng khối riêng | chỗ phát sinh hiểu lầm nhiều nhất (2.8) |
+| Phù hợp với | `touristType` | tùy | ẩn | |
+| Lưu ý mùa | `seasonNote` | tùy | ẩn | |
+| Vùng giá cộng CTA | `prices.yaml` qua `bookingRef` | nên có | ẩn cả vùng | perPax mọi hình thức (I14); tour riêng hiện tiers theo cỡ nhóm từ nguồn giá |
 
 ### 4.10 Article `/cam-nang/{slug}`
 
@@ -170,11 +170,11 @@ Không gallery (ảnh inline trong body, 2.11). Document-level: mỗi ngôn ng�
 
 | Vùng giao diện | Dữ liệu nuôi | Bắt buộc? | Khi rỗng thì hiện gì | Ghi chú |
 |---|---|---|---|---|
-| Nhãn chuyên mục | articleType | có (gate) | — | xuất articleSection trong JSON-LD |
-| Hộp tác giả | author deref Person: title, mainImage, summary | có (gate I4) | — | link `/tac-gia/{slug}`, tín hiệu E-E-A-T |
-| Ngày đăng, ngày sửa | publishedAt, updatedAt | có | — | datePublished, dateModified |
-| Mục lục, thời gian đọc | suy (build) từ body | tùy Design | ẩn với bài ngắn | không phải field (N1, P6) |
-| Hướng dẫn từng bước | howTo | gate transport-guide: ít nhất một trong howTo, faq | ẩn | serialize HowTo |
+| Nhãn chuyên mục | `articleType` | có (gate) | — | xuất articleSection trong JSON-LD |
+| Hộp tác giả | `author` deref Person: title, `mainImage`, `summary` | có (gate I4) | — | link `/tac-gia/{slug}`, tín hiệu E-E-A-T |
+| Ngày đăng, ngày sửa | `publishedAt`, `updatedAt` | có | — | datePublished, dateModified |
+| Mục lục, thời gian đọc | suy (build) từ `body` | tùy Design | ẩn với bài ngắn | không phải field (N1, P6) |
+| Hướng dẫn từng bước | `howTo` | gate transport-guide: ít nhất một trong howTo, faq | ẩn | serialize HowTo |
 | Nói về | `about` deref | nên có | ẩn | card link tới entity được nói tới |
 | Có nhắc tới | `mentions` deref | tùy | ẩn | nhẹ hơn `about`: entity được nhắc nhưng không phải chủ đề bài |
 | Bài liên quan | rollup (build) từ `about` và `category` chung | — | ẩn | 2.11 loại có chủ ý relatedArticles field |
@@ -185,10 +185,10 @@ Không có index `/tac-gia/` trong cây 05; trang chỉ đến từ hộp tác g
 
 | Vùng giao diện | Dữ liệu nuôi | Bắt buộc? | Khi rỗng thì hiện gì | Ghi chú |
 |---|---|---|---|---|
-| Giới thiệu | bio (portable text) | có (gate) | — | thay vai body |
-| Vai trò, am hiểu | jobTitle, knowsAbout | nên có | ẩn | topical authority |
-| Hồ sơ bên ngoài | sameAs ≥1, url | sameAs có (gate) | url rỗng ẩn | link hồ sơ thật, E-E-A-T |
-| Bài đã viết | rollup (build) từ Article.author ngược | — | ẩn (không xảy ra trên trang sống: Person tồn tại vì Article cần) | |
+| Giới thiệu | `bio` (portable text) | có (gate) | — | thay vai body |
+| Vai trò, am hiểu | `jobTitle`, `knowsAbout` | nên có | ẩn | topical authority |
+| Hồ sơ bên ngoài | `sameAs` ≥1, url | sameAs có (gate) | url rỗng ẩn | link hồ sơ thật, E-E-A-T |
+| Bài đã viết | rollup (build) từ Article.`author` ngược | — | ẩn (không xảy ra trên trang sống: Person tồn tại vì Article cần) | |
 
 ### 4.12 Organization `/cong-ty/{slug}`
 
@@ -196,14 +196,14 @@ Không gallery, highlights, faq (2.9). Không vùng giá (cấm mọi field giá
 
 | Vùng giao diện | Dữ liệu nuôi | Bắt buộc? | Khi rỗng thì hiện gì | Ghi chú |
 |---|---|---|---|---|
-| Logo | logo | nên có | ẩn, hero dùng mainImage hoặc thuần chữ | tách khỏi mainImage (2.9) |
-| Loại đơn vị | orgType | có | — | nhãn theo enum |
-| Website, nguồn xác minh | url, officialSource | có (gate I3) | — | |
-| Văn phòng | geo, address | tùy | ẩn | chỉ khi có văn phòng đón khách thật |
-| CTA gọi điện | telephone | tùy | ẩn | |
-| Giấy phép | licenseInfo | tùy | ẩn | tín hiệu trust đặc thù VN |
-| Tour vận hành | rollup (build) từ Tour.operator ngược | — | ẩn | I18 bảo đảm có ít nhất một quan hệ vào |
-| Sự kiện tổ chức | rollup (build) từ Event.organizer ngược | — | ẩn | |
+| Logo | `logo` | nên có | ẩn, hero dùng mainImage hoặc thuần chữ | tách khỏi mainImage (2.9) |
+| Loại đơn vị | `orgType` | có | — | nhãn theo enum |
+| Website, nguồn xác minh | url, `officialSource` | có (gate I3) | — | |
+| Văn phòng | `geo`, `address` | tùy | ẩn | chỉ khi có văn phòng đón khách thật |
+| CTA gọi điện | `telephone` | tùy | ẩn | |
+| Giấy phép | `licenseInfo` | tùy | ẩn | tín hiệu trust đặc thù VN |
+| Tour vận hành | rollup (build) từ Tour.`operator` ngược | — | ẩn | I18 bảo đảm có ít nhất một quan hệ vào |
+| Sự kiện tổ chức | rollup (build) từ Event.`organizer` ngược | — | ẩn | |
 
 ## 5. Trang danh sách
 
@@ -311,10 +311,20 @@ Cổng bước 7 chỉ mở khi **cả bốn** điều kiện dưới đây đú
 |---|---|---|
 | 1 | Mọi loại trang site **thực sự sinh ra** đều có bảng ánh xạ | ✅ 22 URL của build hiện tại phủ bởi §2–§5.9 |
 | 2 | Không bảng nào mô tả loại trang không tồn tại | ✅ `restaurant`, `specialty`, `event` chuyển xuống §8 |
-| 3 | Mọi field template truy cập đều được khai ở đây | ⬜ **chờ**: `g3` báo 40 cảnh báo lúc soạn v2; v2 đã khai bù nhưng chưa đo lại được vì DR-027 |
-| 4 | Bộ kiểm máy của cổng đọc đúng file này | 🛑 **chưa đạt** — DR-027: `g3` đối chiếu bản chép trong mã, không mở file này |
+| 3 | Mọi field template truy cập đều được khai ở đây | ◐ **15 cảnh báo còn lại**, 0 lỗi — xem §7.1 |
+| 4 | Bộ kiểm máy của cổng đọc đúng file này | ✅ **đạt 2026-08-05** — `g3` nay parse thẳng bảng ở đây; DR-027 đã xử |
 
-**Điều kiện 4 chưa đạt.** Cho tới khi xử xong, "g3 xanh" không phải bằng chứng cho điều kiện 3, và cổng bước 7 dựa một phần vào rà tay. Chủ dự án chốt có mở cổng với trạng thái này hay không — đây là quyết định về mức bằng chứng, thuộc quyền chủ dự án, không phải quyền tác nhân (`GOVERNANCE` 4.1: mặc định của cổng là chặn).
+### 7.1 Baseline 15 cảnh báo còn lại (đo 2026-08-05)
+
+Không cảnh báo nào ở mức `fail`. Ghi ra đây để lần sau đo được là tăng hay giảm, thay vì mỗi lần lại đếm từ đầu.
+
+| Nhóm | Số | Bản chất |
+|---|---|---|
+| Vùng "Phân loại" (`category`) câm ở cả 9 entity | 9 | Bản ánh xạ khai vùng phân loại trên mọi trang chi tiết, **không template nào render `data.category`**. Hoặc Design dựng vùng này ở bước 7, hoặc bỏ hàng đó khỏi §3. Là quyết định bề mặt, để pha F. |
+| Vùng rollup câm: "Sự kiện tại đây", "Tour vận hành", "Sự kiện tổ chức", "Bài đã viết" | 4 | Dữ liệu vào template qua prop `nearby` của `RouteDispatch` chứ không qua `data.<field>`, nên bộ dò tĩnh của `g3` không thấy. Giới hạn công cụ, không phải vùng thiếu. Hai trong bốn thuộc `event` đang tắt. |
+| `isAccessibleForFree` trên hotel và resort | 2 | Phát hiện thật — xem DR-028: template đọc field không tồn tại, che bằng `as any`. Cần quyết ở tầng nội dung. |
+
+**Điều kiện 4 đã đạt**, nên từ nay "g3 xanh" là bằng chứng thật cho điều kiện 3 — trong giới hạn ghi ở bảng trên. Chủ dự án chốt có mở cổng bước 7 với 15 cảnh báo này hay không; `GOVERNANCE` 4.1 để mặc định của cổng là chặn, và mức bằng chứng thuộc quyền chủ dự án.
 
 ## 8. Phụ lục — entity đang tắt
 

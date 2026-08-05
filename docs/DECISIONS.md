@@ -334,3 +334,25 @@ thể, thêm một mục dạng danh sách vào sẽ lệch khuôn. (3) Không l
 trang chủ và chân trang.
 
 Cho tới lúc đó `/luu-tru/` vẫn sống và vẫn trong sitemap, chỉ không có lối vào từ menu.
+
+---
+
+## QĐ-2026-08-05-15 — `g3` đọc thẳng `06-BINDING_MAP.md`, đóng DR-027
+
+**Chốt.** `g3-binding-map-vs-template.ts` parse thẳng bảng trong `06-BINDING_MAP.md` thay vì giữ bản chép tay trong mã. Bản ánh xạ thành nguồn duy nhất cho hợp đồng "code khớp đặc tả bề mặt".
+
+Chủ dự án chọn hướng 1 trong ba hướng đã trình, 2026-08-05.
+
+**Hai quy ước máy đọc được**, khai ở `06-BINDING_MAP` §1:
+- tên field Sanity viết trong dấu backtick ở cột "Dữ liệu nuôi"; chữ ngoài backtick là văn xuôi
+- vùng không áp dụng cho entity nào ghi theo khuôn `không áp dụng: <entity>, <entity>`
+
+**Kèm theo.** `g3` bỏ qua entity đang tắt trong `site.config.ts` — template của chúng còn trong repo để không gãy tham chiếu, nhưng không thuộc hợp đồng đang hiệu lực; bảng ánh xạ của chúng cũng nằm ở phụ lục §8. Bộ dò field mở rộng để thấy dạng ép kiểu `(data as ResortResult).beachfront`, nếu không sẽ báo câm nhầm cho vùng có render thật.
+
+**Vì sao không cần ADR.** Quyết định này không đổi **cái gì được kiểm**, chỉ làm cho phép kiểm đọc đúng tài liệu mà nó vốn mang tên. Là sửa một khiếm khuyết, không phải chọn kiến trúc mới, và theo `04-CONSTRAINTS` §5 thì siết thêm là tự do. Bản ghi này đủ để truy vết.
+
+**Bằng chứng hai chiều.** Bỏ một dòng khai báo khỏi bảng markdown → `g3` sinh thêm 6 cảnh báo (15 lên 21). Trả lại → về đúng 15. Trước khi sửa, thí nghiệm ngược đã chứng minh chiều còn lại: khai bù đủ field vào markdown mà `g3` vẫn ra đúng 40 cảnh báo không đổi.
+
+**Kết quả.** 40 cảnh báo đo trên bản chép cũ → **15 cảnh báo đo trên tài liệu thật**, 0 lỗi. Baseline 15 ghi ở `06-BINDING_MAP` §7.1 để lần sau đo được tăng hay giảm.
+
+**Còn nợ.** `g1-content-model-vs-schema.ts` có đúng cùng khuôn — vẫn chép cứng bảng field thay vì đọc `01-CONTENT_MODEL.md`. Chưa xử trong đợt này.
