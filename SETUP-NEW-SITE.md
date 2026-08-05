@@ -111,6 +111,63 @@ biến env `SANITY_STUDIO_PROJECT_ID`, `SANITY_STUDIO_DATASET=production`, `SANI
 `NODE_VERSION=20`. Thêm Deploy Hook + Sanity webhook để auto-deploy khi publish. Gắn custom domain,
 cập nhật `site` trong `astro.config.mjs` cho khớp.
 
+## 10. Chuyển hướng URL — làm trong repo, KHÔNG làm trên dashboard
+
+Mọi luật chuyển hướng của site nằm ở `public/_redirects`. Cú pháp một dòng ba trường:
+
+```
+<đường dẫn cũ>    <đích>    <mã>
+```
+
+- Đích được phép là URL tuyệt đối sang domain khác.
+- Mã hợp lệ: `301`, `302`, `303`, `307`, `308`. Mặc định `302` nếu bỏ trống.
+- `/` khớp **đúng** trang chủ. Muốn toàn site thì dùng `/*`.
+- Query string **luôn được giữ nguyên**, không có tuỳ chọn tắt.
+- Luật thắng cả file tĩnh đang tồn tại ở cùng đường dẫn: *"Redirects are always followed,
+  regardless of whether or not an asset matches the incoming request"*.
+
+### Gai lớn nhất: Page Rules KHÔNG chạy nếu host là Worker
+
+Nếu hostname được phục vụ bởi **Worker** (không phải Pages), Cloudflare **vô hiệu hoá 18 Page
+Rules** cho request đó, gồm `Forwarding URL` và `Always Use HTTPS`. Tài liệu ghi bảng
+`Client → Worker = Rule Ignored`. Luật cấu hình xong trông vẫn "Active" trên dashboard nhưng
+không bao giờ chạy — rất tốn thời gian dò.
+
+Hệ quả:
+- Đừng cấu hình chuyển hướng bằng Page Rules cho site chạy trên Worker.
+- `Always Use HTTPS` bật hay tắt cũng vô nghĩa trên host đó.
+- `_redirects` không dính vấn đề này vì nó nằm **bên trong** lớp phục vụ asset, không đi qua
+  tầng Rules.
+
+Dấu hiệu nhận biết host là Worker: `curl -sI <domain>/index.html` trả `307` về `/`, và mọi
+đường dẫn kể cả đường dẫn không tồn tại đều trả `cf-cache-status: HIT` (đó là asset store của
+Worker, không phải cache edge — nên **purge cache không giải quyết được gì**).
+
+### Deploy sau khi sửa `_redirects`
+
+Lệnh phụ thuộc site chạy trên gì. Kiểm bằng `npx wrangler pages project list`:
+
+| Host | Lệnh |
+|---|---|
+| Cloudflare Pages | `npm run build && npx wrangler pages deploy dist --project-name <ten>` |
+| Worker (`[assets]` trong `wrangler.toml`) | `npm run build && npx wrangler deploy` |
+
+Nếu `wrangler` hỏi *"The project you specified does not exist. Would you like to create it?"* →
+**không chọn Create**. Đó là dấu hiệu lệnh deploy trỏ sai loại host; tạo mới sẽ dựng ra một đích
+rỗng không phục vụ domain thật.
+
+### Kiểm chứng
+
+```
+curl -sI https://<domain>/ | head -1
+curl -sI https://<domain>/sitemap.xml | head -1
+```
+
+`/sitemap.xml` **phải** trả `200`. Nếu nó bị nuốt vào luật chuyển hướng thì validator R3
+fail-closed ở mọi build sau (R3 fetch sitemap production để so sánh).
+
+Đừng dùng trình duyệt để kiểm — dùng `curl`, tránh cache máy.
+
 ## Tóm tắt: dựng site khách sạn Đà Lạt cần đụng đâu
 
 Định danh (mục 2, 4 chỗ) → ngôn ngữ vi+en + tiền tệ VND (mục 3) → xóa 9 module không dùng

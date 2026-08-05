@@ -38,3 +38,47 @@ build-verify được trong sandbox.
 
 `RouteDispatch` HUB_PARTS_CONFIG `hub-am-thuc` + `hub-all` liệt kê restaurant/specialty/event;
 `uiCopy.ts` giữ copy các entity đã gỡ. Không route nên không render, không gãy build.
+
+## ĐANG BẬT: trang chủ chuyển hướng sang tourdaonhatrang.com
+
+**Trạng thái: đang chạy trên production** từ 2026-08-06. Căn cứ `QĐ-2026-08-06-02` và
+`QĐ-2026-08-06-04` trong `docs/DECISIONS.md`.
+
+Vào `https://tourdao.vn/` sẽ bị đưa sang `https://tourdaonhatrang.com/` bằng `302`. Trang con
+(`/nha-trang/`, `/lien-he/`...) và `/sitemap.xml` **không** bị đụng, vẫn trả `200`.
+
+Luật nằm ở dòng cuối `public/_redirects`:
+
+```
+/    https://tourdaonhatrang.com/    302
+```
+
+### Cách gỡ
+
+**1.** Xoá dòng trên trong `public/_redirects`, xoá luôn khối chú thích "Phần 2. Điều hướng tạm
+thời" ngay phía trên nó. Giữ nguyên Phần 1 — đó là phần R3, không liên quan.
+
+**2.** Deploy:
+
+```
+npm run build && npx wrangler deploy
+```
+
+⚠️ **Phải là `npx wrangler deploy`.** Không dùng `npm run deploy` — script đó trỏ vào Pages
+project `tourdaovn` không tồn tại, sẽ hỏi "Would you like to create it?"; chọn Create là sai.
+Site này chạy trên **Worker** tên `tourdaovn`, không phải Pages.
+
+**3.** Kiểm:
+
+```
+curl -sI https://tourdao.vn/ | head -1
+```
+
+Gỡ xong khi trả `200` thay vì `302`. Không cần purge cache, không cần đụng dashboard Cloudflare.
+
+**4.** Ghi một mục mới trong `docs/DECISIONS.md` để đóng `QĐ-2026-08-06-02`. Không sửa mục cũ.
+
+### Vì sao không làm bằng Page Rules
+
+Đã thử hai lần, thất bại cả hai. `tourdao.vn` do Worker phục vụ nên Cloudflare vô hiệu hoá
+`Forwarding URL` (`Client → Worker = Rule Ignored`). Chi tiết cơ chế ở `SETUP-NEW-SITE.md` mục 10.
