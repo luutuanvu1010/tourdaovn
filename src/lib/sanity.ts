@@ -4,6 +4,112 @@ import { fieldLevelEntities } from '../site.config'
 
 let client: SanityClient | null = null
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Lớp quan sát field thiếu (SPEC-2026-08-05, bước 3)
+//
+// Kiểu dữ liệu đã khai thật (`| null` trong types.ts) nên build không còn vỡ vì
+// field trống. Nhưng "không vỡ" mà im lặng thì chủ dự án không biết có ô nào
+// đang bỏ trống. Lớp này CHỈ QUAN SÁT: nó đếm và in, không sửa một giá trị nào.
+// Sửa ở đây sẽ che mất chính tín hiệu nó sinh ra để báo.
+//
+// Mức `warn` theo đúng định nghĩa sẵn có ở 04-CONSTRAINTS §0: build chạy tiếp,
+// vi phạm in thành báo cáo cuối log build để founder rà. Không thêm cổng mới,
+// không đụng VALIDATOR_LEVELS, không đụng control-registry.yaml.
+//
+// Đây là báo cáo MÔ TẢ ("field này đang trống"), không phải QUY ĐỊNH ("field này
+// bắt buộc"). Nguồn sự thật về field bắt buộc vẫn là 01-CONTENT_MODEL §2 và
+// scripts/gate.config.ts — xem chú thích cuối báo cáo.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// docKey ("attraction / hon-mun") → những field trả null trên document đó.
+const nullsByDoc = new Map<string, Set<string>>()
+
+/**
+ * Truy vấn gộp nhiều loại entity (`_type in [...]`) chiếu chung một bộ field
+ * cho mọi loại, nên nó trả null cho những field mà loại đó vốn không có —
+ * "article thiếu itinerary", "place thiếu venue". Đó là hình dạng truy vấn,
+ * không phải ô bỏ trống. Bỏ qua chúng; các document ấy vẫn được truy vấn riêng
+ * theo từng loại ở nơi khác, và bản riêng mới nói đúng loại đó có field gì.
+ */
+function isUnionQuery(query: string): boolean {
+  return /_type\s+in\s/.test(query)
+}
+
+/**
+ * Duyệt kết quả GROQ, ghi lại field nào trả null. Không đổi giá trị.
+ *
+ * Chỉ tính những object có CẢ `_type` lẫn `_id` là document. Object lồng như
+ * ảnh hay kết quả `select()` theo ngôn ngữ cũng mang `_type` nhưng không có
+ * `_id`; đếm chúng chỉ sinh nhiễu chứ không cho biết ô nào đang bỏ trống.
+ */
+function scanForMissing(node: unknown, depth = 0): void {
+  if (depth > 6 || node === null || typeof node !== 'object') return
+
+  if (Array.isArray(node)) {
+    for (const item of node) scanForMissing(item, depth + 1)
+    return
+  }
+
+  const obj = node as Record<string, unknown>
+  const type = typeof obj._type === 'string' ? obj._type : null
+
+  if (type !== null && typeof obj._id === 'string') {
+    const slug = typeof obj.slug === 'string' ? obj.slug : obj._id
+    const docKey = `${type} / ${slug}`
+    let fields = nullsByDoc.get(docKey)
+    if (!fields) {
+      fields = new Set()
+      nullsByDoc.set(docKey, fields)
+    }
+    for (const [key, value] of Object.entries(obj)) {
+      if (!key.startsWith('_') && value === null) fields.add(key)
+    }
+  }
+
+  for (const [key, value] of Object.entries(obj)) {
+    if (key.startsWith('_') || value === null) continue
+    if (typeof value === 'object') scanForMissing(value, depth + 1)
+  }
+}
+
+let reported = false
+
+function reportMissing(): void {
+  if (reported) return
+  reported = true
+
+  const rows: Array<[string, string[]]> = []
+  for (const [docKey, fields] of [...nullsByDoc].sort()) {
+    if (fields.size > 0) rows.push([docKey, [...fields].sort()])
+  }
+  if (rows.length === 0) return
+
+  const fieldCount = rows.reduce((n, [, fields]) => n + fields.length, 0)
+  const width = Math.min(46, Math.max(...rows.map(([doc]) => doc.length)))
+
+  const lines = [
+    '',
+    `[dữ liệu thiếu] ${fieldCount} field trống trên ${rows.length} document — ` +
+    'trang vẫn dựng, phần liên quan không hiển thị',
+    '',
+  ]
+  for (const [doc, fields] of rows) lines.push(`  ${doc.padEnd(width)}  ${fields.join(', ')}`)
+  lines.push('')
+  lines.push('  Đây là báo cáo mô tả, không phải danh sách field bắt buộc.')
+  lines.push('  Field nào bắt buộc: xem 01-CONTENT_MODEL §2 và scripts/gate.config.ts.')
+  lines.push('')
+
+  console.warn(lines.join('\n'))
+}
+
+// Chỉ gắn khi đang chạy trong Node lúc build. File này cũng bị gói vào
+// `_worker.js`, mà runtime Workers không có `process.on` — gọi thẳng sẽ nổ trên
+// production. Cùng cách phòng thủ mà `getClient()` bên dưới đã dùng cho
+// `process.env`.
+if (typeof process !== 'undefined' && typeof process.on === 'function') {
+  process.on('exit', reportMissing)
+}
+
 export function getClient(): SanityClient {
   if (client) return client
 
@@ -25,6 +131,19 @@ export function getClient(): SanityClient {
     useCdn: false,
     perspective: 'published',
   })
+
+  // Gắn lớp quan sát vào chính client singleton. Làm ở đây vì đây là nơi duy
+  // nhất `createClient` được gọi, nên mọi đường đọc dữ liệu — 6 file gọi thẳng
+  // `getClient().fetch(...)` lẫn các helper bên dưới — đều được phủ, không cần
+  // sửa 17 lời gọi rải rác.
+  const originalFetch = client.fetch.bind(client)
+  client.fetch = (async (query: string, params?: unknown, options?: unknown) => {
+    const result = await (originalFetch as (...args: unknown[]) => Promise<unknown>)(
+      query, params, options
+    )
+    if (!isUnionQuery(query)) scanForMissing(result)
+    return result
+  }) as typeof client.fetch
 
   return client
 }
