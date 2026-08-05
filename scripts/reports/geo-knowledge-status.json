@@ -1,0 +1,194 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-08-05T02:15:17.315Z",
+  "status": "pass",
+  "summary": {
+    "files": {
+      "/robots.txt": "present",
+      "/llms.txt": "present",
+      "/ai/index.json": "present",
+      "/ai/entities.json": "present",
+      "/ai/graph.json": "present",
+      "/ai/reading-guide.json": "present"
+    },
+    "totalEntities": 8,
+    "entityTypes": {
+      "article": 1,
+      "attraction": 1,
+      "experience": 1,
+      "organization": 2,
+      "place": 1,
+      "tour": 1,
+      "touristDestination": 1
+    },
+    "urlsByLanguage": {
+      "vi": 8,
+      "en": 0,
+      "zh": 0,
+      "ko": 0,
+      "ru": 0
+    },
+    "aiCoverageRatio": 1,
+    "sitemapCoverageRatio": 1,
+    "graph": {
+      "nodes": 8,
+      "edges": 7,
+      "danglingEdges": 0,
+      "orphanNodes": 0,
+      "relations": {
+        "about": 1,
+        "mentions": 1,
+        "containedInPlace": 2,
+        "venue": 1,
+        "operator": 1,
+        "itineraryStop": 1
+      }
+    },
+    "readiness": {
+      "missingSource": 5,
+      "missingSameAs": 7,
+      "commercialMissingBookingOrFreeFlag": 3,
+      "missingLanguages": 8,
+      "staleFiles": []
+    },
+    "readingPaths": [
+      "where_to_go",
+      "where_to_stay",
+      "what_to_eat",
+      "which_tour",
+      "event_or_season",
+      "trust_check"
+    ]
+  },
+  "issues": [],
+  "entities": [
+    {
+      "id": "63554352-9d73-466d-995c-01110a670098",
+      "type": "article",
+      "title": "Tour 3 Đảo Nha Trang: Lịch Trình Chi Tiết, Giá Vé & Kinh Nghiệm Đi Mới Nhất",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/tour-3-dao-nha-trang-lich-trinh-chi-tiet/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;63554352-9d73-466d-995c-01110a670098"
+    },
+    {
+      "id": "3ed834c4-d700-497c-9bed-7d5e7905764e",
+      "type": "attraction",
+      "title": "Khu du lịch Hòn Tằm",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/khu-du-lich-hon-tam/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": false,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;3ed834c4-d700-497c-9bed-7d5e7905764e"
+    },
+    {
+      "id": "e147cde5-7f08-40b0-8316-6b1c65af23d3",
+      "type": "experience",
+      "title": "Lặn biển",
+      "canonicalUrl": "https://tourdao.vn/trai-nghiem/lan-bien/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": false,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/experience;e147cde5-7f08-40b0-8316-6b1c65af23d3"
+    },
+    {
+      "id": "5538a0f9-1129-418f-95d0-10c8d4541e99",
+      "type": "organization",
+      "title": "Công ty TNHH Tour Đảo",
+      "canonicalUrl": "https://tourdao.vn/cong-ty/cong-ty-tnhh-tour-dao/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/organization;5538a0f9-1129-418f-95d0-10c8d4541e99"
+    },
+    {
+      "id": "f35240e1-d077-4ef5-bd5e-672b17825b75",
+      "type": "organization",
+      "title": "TNHH Tour đảo Nha Trang",
+      "canonicalUrl": "https://tourdao.vn/cong-ty/tour-3-dao-nha-trang-review-chi-tiet/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/organization;f35240e1-d077-4ef5-bd5e-672b17825b75"
+    },
+    {
+      "id": "e6fa6edd-ec90-4d9f-8f23-e529dbbccdd9",
+      "type": "place",
+      "title": "Hòn Mun",
+      "canonicalUrl": "https://tourdao.vn/dia-danh/hon-mun/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/place;e6fa6edd-ec90-4d9f-8f23-e529dbbccdd9"
+    },
+    {
+      "id": "86591518-c3c1-4f78-895a-f247bad60131",
+      "type": "tour",
+      "title": "Tour 3 Đảo Nha Trang: Lịch Trình Chi Tiết, Giá Vé & Kinh Nghiệm Đi Mới Nhất",
+      "canonicalUrl": "https://tourdao.vn/tour/tour-3-dao-nha-trang-review-chi-tiet/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": false,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/tour;86591518-c3c1-4f78-895a-f247bad60131"
+    },
+    {
+      "id": "seed.nha-trang",
+      "type": "touristDestination",
+      "title": "Nha Trang",
+      "canonicalUrl": "https://tourdao.vn/nha-trang/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/touristDestination;seed.nha-trang"
+    }
+  ]
+}

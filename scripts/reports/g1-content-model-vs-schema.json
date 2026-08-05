@@ -1,0 +1,108 @@
+{
+  "ranAt": "2026-08-05T01:57:48.130Z",
+  "summary": {
+    "total": 14,
+    "fail": 0,
+    "warn": 14
+  },
+  "drifts": [
+    {
+      "entityType": "category",
+      "field": "language",
+      "diff": "in_content_model_not_in_schema",
+      "severity": "warn",
+      "detail": "Field \"language\" có trong CONTENT_MODEL §2 cho category nhưng KHÔNG có trong schema — có thể chưa implement"
+    },
+    {
+      "entityType": "category",
+      "field": "translationGroup",
+      "diff": "in_content_model_not_in_schema",
+      "severity": "warn",
+      "detail": "Field \"translationGroup\" có trong CONTENT_MODEL §2 cho category nhưng KHÔNG có trong schema — có thể chưa implement"
+    },
+    {
+      "entityType": "place",
+      "field": "containsPlace",
+      "diff": "in_content_model_not_in_schema",
+      "severity": "warn",
+      "detail": "Field \"containsPlace\" có trong CONTENT_MODEL §2 cho place nhưng KHÔNG có trong schema — có thể chưa implement"
+    },
+    {
+      "entityType": "siteSettings",
+      "field": "slug",
+      "diff": "in_content_model_not_in_schema",
+      "severity": "warn",
+      "detail": "Field \"slug\" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement"
+    },
+    {
+      "entityType": "siteSettings",
+      "field": "summary",
+      "diff": "in_content_model_not_in_schema",
+      "severity": "warn",
+      "detail": "Field \"summary\" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement"
+    },
+    {
+      "entityType": "siteSettings",
+      "field": "mainImage",
+      "diff": "in_content_model_not_in_schema",
+      "severity": "warn",
+      "detail": "Field \"mainImage\" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement"
+    },
+    {
+      "entityType": "siteSettings",
+      "field": "seo",
+      "diff": "in_content_model_not_in_schema",
+      "severity": "warn",
+      "detail": "Field \"seo\" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement"
+    },
+    {
+      "entityType": "siteSettings",
+      "field": "category",
+      "diff": "in_content_model_not_in_schema",
+      "severity": "warn",
+      "detail": "Field \"category\" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement"
+    },
+    {
+      "entityType": "siteSettings",
+      "field": "publishedAt",
+      "diff": "in_content_model_not_in_schema",
+      "severity": "warn",
+      "detail": "Field \"publishedAt\" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement"
+    },
+    {
+      "entityType": "siteSettings",
+      "field": "updatedAt",
+      "diff": "in_content_model_not_in_schema",
+      "severity": "warn",
+      "detail": "Field \"updatedAt\" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement"
+    },
+    {
+      "entityType": "siteSettings",
+      "field": "reviewStatus",
+      "diff": "in_content_model_not_in_schema",
+      "severity": "warn",
+      "detail": "Field \"reviewStatus\" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement"
+    },
+    {
+      "entityType": "siteSettings",
+      "field": "approvedBy",
+      "diff": "in_content_model_not_in_schema",
+      "severity": "warn",
+      "detail": "Field \"approvedBy\" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement"
+    },
+    {
+      "entityType": "siteSettings",
+      "field": "contentProvenance",
+      "diff": "in_content_model_not_in_schema",
+      "severity": "warn",
+      "detail": "Field \"contentProvenance\" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement"
+    },
+    {
+      "entityType": "touristDestination",
+      "field": "speakable",
+      "diff": "in_content_model_not_in_schema",
+      "severity": "warn",
+      "detail": "Field \"speakable\" có trong CONTENT_MODEL §2 cho touristDestination nhưng KHÔNG có trong schema — có thể chưa implement"
+    }
+  ]
+}

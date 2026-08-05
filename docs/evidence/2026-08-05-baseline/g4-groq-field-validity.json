@@ -1,0 +1,267 @@
+{
+  "ranAt": "2026-08-05T01:57:48.258Z",
+  "summary": {
+    "total": 37
+  },
+  "drifts": [
+    {
+      "entityType": "touristDestination",
+      "file": "touristDestination.ts",
+      "field": "linkUrl",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong touristDestination.ts gọi field \"linkUrl\" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null"
+    },
+    {
+      "entityType": "touristDestination",
+      "file": "touristDestination.ts",
+      "field": "image",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong touristDestination.ts gọi field \"image\" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null"
+    },
+    {
+      "entityType": "touristDestination",
+      "file": "touristDestination.ts",
+      "field": "hotspot",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong touristDestination.ts gọi field \"hotspot\" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null"
+    },
+    {
+      "entityType": "touristDestination",
+      "file": "touristDestination.ts",
+      "field": "alt",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong touristDestination.ts gọi field \"alt\" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null"
+    },
+    {
+      "entityType": "touristDestination",
+      "file": "touristDestination.ts",
+      "field": "variant",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong touristDestination.ts gọi field \"variant\" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null"
+    },
+    {
+      "entityType": "touristDestination",
+      "file": "touristDestination.ts",
+      "field": "theme",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong touristDestination.ts gọi field \"theme\" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null"
+    },
+    {
+      "entityType": "touristDestination",
+      "file": "touristDestination.ts",
+      "field": "isActive",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong touristDestination.ts gọi field \"isActive\" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null"
+    },
+    {
+      "entityType": "touristDestination",
+      "file": "touristDestination.ts",
+      "field": "priority",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong touristDestination.ts gọi field \"priority\" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null"
+    },
+    {
+      "entityType": "touristDestination",
+      "file": "touristDestination.ts",
+      "field": "placeType",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong touristDestination.ts gọi field \"placeType\" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null"
+    },
+    {
+      "entityType": "touristDestination",
+      "file": "touristDestination.ts",
+      "field": "articleType",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong touristDestination.ts gọi field \"articleType\" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null"
+    },
+    {
+      "entityType": "touristDestination",
+      "file": "touristDestination.ts",
+      "field": "author",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong touristDestination.ts gọi field \"author\" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null"
+    },
+    {
+      "entityType": "place",
+      "file": "place.ts",
+      "field": "containedInPlaceRef",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong place.ts gọi field \"containedInPlaceRef\" nhưng field này không có trong CONTENT_MODEL cho place — có thể trả null"
+    },
+    {
+      "entityType": "place",
+      "file": "place.ts",
+      "field": "attractionType",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong place.ts gọi field \"attractionType\" nhưng field này không có trong CONTENT_MODEL cho place — có thể trả null"
+    },
+    {
+      "entityType": "experience",
+      "file": "experience.ts",
+      "field": "termCode",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong experience.ts gọi field \"termCode\" nhưng field này không có trong CONTENT_MODEL cho experience — có thể trả null"
+    },
+    {
+      "entityType": "specialty",
+      "file": "specialty.ts",
+      "field": "geo",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong specialty.ts gọi field \"geo\" nhưng field này không có trong CONTENT_MODEL cho specialty — có thể trả null"
+    },
+    {
+      "entityType": "tour",
+      "file": "tour.ts",
+      "field": "place",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong tour.ts gọi field \"place\" nhưng field này không có trong CONTENT_MODEL cho tour — có thể trả null"
+    },
+    {
+      "entityType": "tour",
+      "file": "tour.ts",
+      "field": "geo",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong tour.ts gọi field \"geo\" nhưng field này không có trong CONTENT_MODEL cho tour — có thể trả null"
+    },
+    {
+      "entityType": "tour",
+      "file": "tour.ts",
+      "field": "externalStop",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong tour.ts gọi field \"externalStop\" nhưng field này không có trong CONTENT_MODEL cho tour — có thể trả null"
+    },
+    {
+      "entityType": "tour",
+      "file": "tour.ts",
+      "field": "note",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong tour.ts gọi field \"note\" nhưng field này không có trong CONTENT_MODEL cho tour — có thể trả null"
+    },
+    {
+      "entityType": "tour",
+      "file": "tour.ts",
+      "field": "durationAtStop",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong tour.ts gọi field \"durationAtStop\" nhưng field này không có trong CONTENT_MODEL cho tour — có thể trả null"
+    },
+    {
+      "entityType": "tour",
+      "file": "tour.ts",
+      "field": "select",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong tour.ts gọi field \"select\" nhưng field này không có trong CONTENT_MODEL cho tour — có thể trả null"
+    },
+    {
+      "entityType": "tour",
+      "file": "tour.ts",
+      "field": "url",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong tour.ts gọi field \"url\" nhưng field này không có trong CONTENT_MODEL cho tour — có thể trả null"
+    },
+    {
+      "entityType": "organization",
+      "file": "organization.ts",
+      "field": "alt",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong organization.ts gọi field \"alt\" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null"
+    },
+    {
+      "entityType": "organization",
+      "file": "organization.ts",
+      "field": "tourFormat",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong organization.ts gọi field \"tourFormat\" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null"
+    },
+    {
+      "entityType": "organization",
+      "file": "organization.ts",
+      "field": "duration",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong organization.ts gọi field \"duration\" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null"
+    },
+    {
+      "entityType": "organization",
+      "file": "organization.ts",
+      "field": "bookingRef",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong organization.ts gọi field \"bookingRef\" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null"
+    },
+    {
+      "entityType": "organization",
+      "file": "organization.ts",
+      "field": "eventType",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong organization.ts gọi field \"eventType\" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null"
+    },
+    {
+      "entityType": "organization",
+      "file": "organization.ts",
+      "field": "startDate",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong organization.ts gọi field \"startDate\" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null"
+    },
+    {
+      "entityType": "organization",
+      "file": "organization.ts",
+      "field": "endDate",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong organization.ts gọi field \"endDate\" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null"
+    },
+    {
+      "entityType": "organization",
+      "file": "organization.ts",
+      "field": "eventStatus",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong organization.ts gọi field \"eventStatus\" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null"
+    },
+    {
+      "entityType": "event",
+      "file": "event.ts",
+      "field": "select",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong event.ts gọi field \"select\" nhưng field này không có trong CONTENT_MODEL cho event — có thể trả null"
+    },
+    {
+      "entityType": "article",
+      "file": "article.ts",
+      "field": "sameAs",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong article.ts gọi field \"sameAs\" nhưng field này không có trong CONTENT_MODEL cho article — có thể trả null"
+    },
+    {
+      "entityType": "article",
+      "file": "article.ts",
+      "field": "url",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong article.ts gọi field \"url\" nhưng field này không có trong CONTENT_MODEL cho article — có thể trả null"
+    },
+    {
+      "entityType": "article",
+      "file": "article.ts",
+      "field": "jobTitle",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong article.ts gọi field \"jobTitle\" nhưng field này không có trong CONTENT_MODEL cho article — có thể trả null"
+    },
+    {
+      "entityType": "person",
+      "file": "person.ts",
+      "field": "name",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong person.ts gọi field \"name\" nhưng field này không có trong CONTENT_MODEL cho person — có thể trả null"
+    },
+    {
+      "entityType": "person",
+      "file": "person.ts",
+      "field": "articleType",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong person.ts gọi field \"articleType\" nhưng field này không có trong CONTENT_MODEL cho person — có thể trả null"
+    },
+    {
+      "entityType": "person",
+      "file": "person.ts",
+      "field": "author",
+      "diff": "field_not_in_content_model",
+      "detail": "GROQ query trong person.ts gọi field \"author\" nhưng field này không có trong CONTENT_MODEL cho person — có thể trả null"
+    }
+  ]
+}

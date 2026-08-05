@@ -1,0 +1,290 @@
+{
+  "ranAt": "2026-08-05T01:57:48.194Z",
+  "summary": {
+    "total": 40,
+    "fail": 0,
+    "warn": 40
+  },
+  "drifts": [
+    {
+      "entityType": "place",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.placeType nhưng field này không có trong BINDING_MAP cho place — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "place",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.containedInPlace nhưng field này không có trong BINDING_MAP cho place — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "place",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.sameAs nhưng field này không có trong BINDING_MAP cho place — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "place",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.experiences nhưng field này không có trong BINDING_MAP cho place — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "attraction",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.attractionType nhưng field này không có trong BINDING_MAP cho attraction — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "attraction",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.bookingRef nhưng field này không có trong BINDING_MAP cho attraction — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "attraction",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.telephone nhưng field này không có trong BINDING_MAP cho attraction — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "attraction",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.sameAs nhưng field này không có trong BINDING_MAP cho attraction — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "attraction",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.containedInPlace nhưng field này không có trong BINDING_MAP cho attraction — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "attraction",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.experiences nhưng field này không có trong BINDING_MAP cho attraction — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "experience",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.bookingRef nhưng field này không có trong BINDING_MAP cho experience — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "experience",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.isAccessibleForFree nhưng field này không có trong BINDING_MAP cho experience — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "experience",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.geo nhưng field này không có trong BINDING_MAP cho experience — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "restaurant",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.sameAs nhưng field này không có trong BINDING_MAP cho restaurant — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "restaurant",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.containedInPlace nhưng field này không có trong BINDING_MAP cho restaurant — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "specialty",
+      "zone": "Highlights",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"Highlights\" (source=[highlights]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
+      "entityType": "specialty",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.sameAs nhưng field này không có trong BINDING_MAP cho specialty — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "hotel",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.bookingRef nhưng field này không có trong BINDING_MAP cho hotel — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "hotel",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.sameAs nhưng field này không có trong BINDING_MAP cho hotel — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "hotel",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.containedInPlace nhưng field này không có trong BINDING_MAP cho hotel — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "resort",
+      "zone": "Beachfront & land area",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"Beachfront & land area\" (source=[beachfront, landArea]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
+      "entityType": "resort",
+      "zone": "On-site activities",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"On-site activities\" (source=[onSiteActivities]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
+      "entityType": "resort",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.bookingRef nhưng field này không có trong BINDING_MAP cho resort — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "resort",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.sameAs nhưng field này không có trong BINDING_MAP cho resort — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "resort",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.containedInPlace nhưng field này không có trong BINDING_MAP cho resort — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "tour",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.bookingRef nhưng field này không có trong BINDING_MAP cho tour — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "event",
+      "zone": "Highlights",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"Highlights\" (source=[highlights]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
+      "entityType": "event",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.eventType nhưng field này không có trong BINDING_MAP cho event — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "article",
+      "zone": "Gallery",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"Gallery\" (source=[gallery]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
+      "entityType": "article",
+      "zone": "Highlights",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"Highlights\" (source=[highlights]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
+      "entityType": "article",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.updatedAt nhưng field này không có trong BINDING_MAP cho article — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "article",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.mentions nhưng field này không có trong BINDING_MAP cho article — dữ liệu không được đặc tả"
+    },
+    {
+      "entityType": "person",
+      "zone": "Body",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"Body\" (source=[body]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
+      "entityType": "person",
+      "zone": "Gallery",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"Gallery\" (source=[gallery]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
+      "entityType": "person",
+      "zone": "Highlights",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"Highlights\" (source=[highlights]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
+      "entityType": "person",
+      "zone": "FAQ",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"FAQ\" (source=[faq]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
+      "entityType": "organization",
+      "zone": "Gallery",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"Gallery\" (source=[gallery]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
+      "entityType": "organization",
+      "zone": "Highlights",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"Highlights\" (source=[highlights]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
+      "entityType": "organization",
+      "zone": "FAQ",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"FAQ\" (source=[faq]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
+      "entityType": "organization",
+      "zone": "—",
+      "diff": "template_field_not_in_map",
+      "severity": "warn",
+      "detail": "Template truy cập data.sameAs nhưng field này không có trong BINDING_MAP cho organization — dữ liệu không được đặc tả"
+    }
+  ]
+}

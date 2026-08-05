@@ -1,0 +1,214 @@
+
+> audit:spec
+> npm --prefix scripts run audit:spec
+
+
+> audit:spec
+> node --import ./node_modules/tsx/dist/esm/index.mjs meta-validators/g1-content-model-vs-schema.ts && node --import ./node_modules/tsx/dist/esm/index.mjs meta-validators/g3-binding-map-vs-template.ts && node --import ./node_modules/tsx/dist/esm/index.mjs meta-validators/g4-groq-field-validity.ts
+
+=== Meta-validator G1: CONTENT_MODEL vs Sanity schema ===
+
+[article] schema: 21 fields, CONTENT_MODEL: 21 fields
+  [pass] Khớp hoàn toàn
+[attraction] schema: 28 fields, CONTENT_MODEL: 28 fields
+  [pass] Khớp hoàn toàn
+[category] schema: 17 fields, CONTENT_MODEL: 19 fields
+[event] schema: 24 fields, CONTENT_MODEL: 24 fields
+  [pass] Khớp hoàn toàn
+[experience] schema: 24 fields, CONTENT_MODEL: 24 fields
+  [pass] Khớp hoàn toàn
+[hotel] schema: 30 fields, CONTENT_MODEL: 30 fields
+  [pass] Khớp hoàn toàn
+[organization] schema: 22 fields, CONTENT_MODEL: 22 fields
+  [pass] Khớp hoàn toàn
+[person] schema: 17 fields, CONTENT_MODEL: 17 fields
+  [pass] Khớp hoàn toàn
+[place] schema: 27 fields, CONTENT_MODEL: 28 fields
+[resort] schema: 33 fields, CONTENT_MODEL: 33 fields
+  [pass] Khớp hoàn toàn
+[restaurant] schema: 27 fields, CONTENT_MODEL: 27 fields
+  [pass] Khớp hoàn toàn
+[siteSettings] schema: 5 fields, CONTENT_MODEL: 15 fields
+[specialty] schema: 20 fields, CONTENT_MODEL: 20 fields
+  [pass] Khớp hoàn toàn
+[tour] schema: 27 fields, CONTENT_MODEL: 27 fields
+  [pass] Khớp hoàn toàn
+[touristDestination] schema: 28 fields, CONTENT_MODEL: 29 fields
+
+[DRIFT] 14 điểm không khớp (0 fail, 14 warn):
+
+  ── category ──
+    [WARN] Field "language" có trong CONTENT_MODEL §2 cho category nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "translationGroup" có trong CONTENT_MODEL §2 cho category nhưng KHÔNG có trong schema — có thể chưa implement
+
+  ── place ──
+    [WARN] Field "containsPlace" có trong CONTENT_MODEL §2 cho place nhưng KHÔNG có trong schema — có thể chưa implement
+
+  ── siteSettings ──
+    [WARN] Field "slug" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "summary" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "mainImage" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "seo" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "category" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "publishedAt" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "updatedAt" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "reviewStatus" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "approvedBy" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "contentProvenance" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement
+
+  ── touristDestination ──
+    [WARN] Field "speakable" có trong CONTENT_MODEL §2 cho touristDestination nhưng KHÔNG có trong schema — có thể chưa implement
+
+[report] Ghi scripts/reports/g1-content-model-vs-schema.json
+
+[exit] Không có drift mức fail.
+=== Meta-validator G3: BINDING_MAP vs template field access ===
+
+[place] PlaceDetail.astro: 18 field accesses
+[attraction] AttractionDetail.astro: 21 field accesses
+[experience] ExperienceDetail.astro: 16 field accesses
+[restaurant] RestaurantDetail.astro: 19 field accesses
+[specialty] SpecialtyDetail.astro: 12 field accesses
+[hotel] LodgingDetail.astro: 22 field accesses
+[resort] LodgingDetail.astro: 22 field accesses
+[tour] TourDetail.astro: 19 field accesses
+[event] EventDetail.astro: 16 field accesses
+[article] ArticleDetail.astro: 13 field accesses
+[person] PersonDetail.astro: 8 field accesses
+[organization] OrganizationDetail.astro: 13 field accesses
+
+[DRIFT] 40 điểm không khớp (0 fail, 40 warn):
+
+  ── place ──
+    [WARN] Template truy cập data.placeType nhưng field này không có trong BINDING_MAP cho place — dữ liệu không được đặc tả
+    [WARN] Template truy cập data.containedInPlace nhưng field này không có trong BINDING_MAP cho place — dữ liệu không được đặc tả
+    [WARN] Template truy cập data.sameAs nhưng field này không có trong BINDING_MAP cho place — dữ liệu không được đặc tả
+    [WARN] Template truy cập data.experiences nhưng field này không có trong BINDING_MAP cho place — dữ liệu không được đặc tả
+
+  ── attraction ──
+    [WARN] Template truy cập data.attractionType nhưng field này không có trong BINDING_MAP cho attraction — dữ liệu không được đặc tả
+    [WARN] Template truy cập data.bookingRef nhưng field này không có trong BINDING_MAP cho attraction — dữ liệu không được đặc tả
+    [WARN] Template truy cập data.telephone nhưng field này không có trong BINDING_MAP cho attraction — dữ liệu không được đặc tả
+    [WARN] Template truy cập data.sameAs nhưng field này không có trong BINDING_MAP cho attraction — dữ liệu không được đặc tả
+    [WARN] Template truy cập data.containedInPlace nhưng field này không có trong BINDING_MAP cho attraction — dữ liệu không được đặc tả
+    [WARN] Template truy cập data.experiences nhưng field này không có trong BINDING_MAP cho attraction — dữ liệu không được đặc tả
+
+  ── experience ──
+    [WARN] Template truy cập data.bookingRef nhưng field này không có trong BINDING_MAP cho experience — dữ liệu không được đặc tả
+    [WARN] Template truy cập data.isAccessibleForFree nhưng field này không có trong BINDING_MAP cho experience — dữ liệu không được đặc tả
+    [WARN] Template truy cập data.geo nhưng field này không có trong BINDING_MAP cho experience — dữ liệu không được đặc tả
+
+  ── restaurant ──
+    [WARN] Template truy cập data.sameAs nhưng field này không có trong BINDING_MAP cho restaurant — dữ liệu không được đặc tả
+    [WARN] Template truy cập data.containedInPlace nhưng field này không có trong BINDING_MAP cho restaurant — dữ liệu không được đặc tả
+
+  ── specialty ──
+    [WARN] Zone tùy chọn "Highlights" (source=[highlights]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Template truy cập data.sameAs nhưng field này không có trong BINDING_MAP cho specialty — dữ liệu không được đặc tả
+
+  ── hotel ──
+    [WARN] Template truy cập data.bookingRef nhưng field này không có trong BINDING_MAP cho hotel — dữ liệu không được đặc tả
+    [WARN] Template truy cập data.sameAs nhưng field này không có trong BINDING_MAP cho hotel — dữ liệu không được đặc tả
+    [WARN] Template truy cập data.containedInPlace nhưng field này không có trong BINDING_MAP cho hotel — dữ liệu không được đặc tả
+
+  ── resort ──
+    [WARN] Zone tùy chọn "Beachfront & land area" (source=[beachfront, landArea]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "On-site activities" (source=[onSiteActivities]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Template truy cập data.bookingRef nhưng field này không có trong BINDING_MAP cho resort — dữ liệu không được đặc tả
+    [WARN] Template truy cập data.sameAs nhưng field này không có trong BINDING_MAP cho resort — dữ liệu không được đặc tả
+    [WARN] Template truy cập data.containedInPlace nhưng field này không có trong BINDING_MAP cho resort — dữ liệu không được đặc tả
+
+  ── tour ──
+    [WARN] Template truy cập data.bookingRef nhưng field này không có trong BINDING_MAP cho tour — dữ liệu không được đặc tả
+
+  ── event ──
+    [WARN] Zone tùy chọn "Highlights" (source=[highlights]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Template truy cập data.eventType nhưng field này không có trong BINDING_MAP cho event — dữ liệu không được đặc tả
+
+  ── article ──
+    [WARN] Zone tùy chọn "Gallery" (source=[gallery]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "Highlights" (source=[highlights]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Template truy cập data.updatedAt nhưng field này không có trong BINDING_MAP cho article — dữ liệu không được đặc tả
+    [WARN] Template truy cập data.mentions nhưng field này không có trong BINDING_MAP cho article — dữ liệu không được đặc tả
+
+  ── person ──
+    [WARN] Zone tùy chọn "Body" (source=[body]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "Gallery" (source=[gallery]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "Highlights" (source=[highlights]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "FAQ" (source=[faq]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+
+  ── organization ──
+    [WARN] Zone tùy chọn "Gallery" (source=[gallery]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "Highlights" (source=[highlights]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "FAQ" (source=[faq]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Template truy cập data.sameAs nhưng field này không có trong BINDING_MAP cho organization — dữ liệu không được đặc tả
+
+[report] Ghi /Users/tuanbao/Documents/Projects/ctytnhhtourdao/tourdaovn/scripts/reports/g3-binding-map-vs-template.json
+
+[exit] Không có drift mức fail.
+=== Meta-validator G4: GROQ field validity ===
+
+  [pass] attraction
+  [pass] restaurant
+  [pass] hotel
+  [pass] resort
+  [pass] category
+
+[DRIFT] 37 field không có trong CONTENT_MODEL:
+
+  ── touristDestination.ts ──
+    [WARN] linkUrl: GROQ query trong touristDestination.ts gọi field "linkUrl" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null
+    [WARN] image: GROQ query trong touristDestination.ts gọi field "image" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null
+    [WARN] hotspot: GROQ query trong touristDestination.ts gọi field "hotspot" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null
+    [WARN] alt: GROQ query trong touristDestination.ts gọi field "alt" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null
+    [WARN] variant: GROQ query trong touristDestination.ts gọi field "variant" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null
+    [WARN] theme: GROQ query trong touristDestination.ts gọi field "theme" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null
+    [WARN] isActive: GROQ query trong touristDestination.ts gọi field "isActive" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null
+    [WARN] priority: GROQ query trong touristDestination.ts gọi field "priority" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null
+    [WARN] placeType: GROQ query trong touristDestination.ts gọi field "placeType" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null
+    [WARN] articleType: GROQ query trong touristDestination.ts gọi field "articleType" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null
+    [WARN] author: GROQ query trong touristDestination.ts gọi field "author" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null
+
+  ── place.ts ──
+    [WARN] containedInPlaceRef: GROQ query trong place.ts gọi field "containedInPlaceRef" nhưng field này không có trong CONTENT_MODEL cho place — có thể trả null
+    [WARN] attractionType: GROQ query trong place.ts gọi field "attractionType" nhưng field này không có trong CONTENT_MODEL cho place — có thể trả null
+
+  ── experience.ts ──
+    [WARN] termCode: GROQ query trong experience.ts gọi field "termCode" nhưng field này không có trong CONTENT_MODEL cho experience — có thể trả null
+
+  ── specialty.ts ──
+    [WARN] geo: GROQ query trong specialty.ts gọi field "geo" nhưng field này không có trong CONTENT_MODEL cho specialty — có thể trả null
+
+  ── tour.ts ──
+    [WARN] place: GROQ query trong tour.ts gọi field "place" nhưng field này không có trong CONTENT_MODEL cho tour — có thể trả null
+    [WARN] geo: GROQ query trong tour.ts gọi field "geo" nhưng field này không có trong CONTENT_MODEL cho tour — có thể trả null
+    [WARN] externalStop: GROQ query trong tour.ts gọi field "externalStop" nhưng field này không có trong CONTENT_MODEL cho tour — có thể trả null
+    [WARN] note: GROQ query trong tour.ts gọi field "note" nhưng field này không có trong CONTENT_MODEL cho tour — có thể trả null
+    [WARN] durationAtStop: GROQ query trong tour.ts gọi field "durationAtStop" nhưng field này không có trong CONTENT_MODEL cho tour — có thể trả null
+    [WARN] select: GROQ query trong tour.ts gọi field "select" nhưng field này không có trong CONTENT_MODEL cho tour — có thể trả null
+    [WARN] url: GROQ query trong tour.ts gọi field "url" nhưng field này không có trong CONTENT_MODEL cho tour — có thể trả null
+
+  ── organization.ts ──
+    [WARN] alt: GROQ query trong organization.ts gọi field "alt" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null
+    [WARN] tourFormat: GROQ query trong organization.ts gọi field "tourFormat" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null
+    [WARN] duration: GROQ query trong organization.ts gọi field "duration" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null
+    [WARN] bookingRef: GROQ query trong organization.ts gọi field "bookingRef" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null
+    [WARN] eventType: GROQ query trong organization.ts gọi field "eventType" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null
+    [WARN] startDate: GROQ query trong organization.ts gọi field "startDate" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null
+    [WARN] endDate: GROQ query trong organization.ts gọi field "endDate" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null
+    [WARN] eventStatus: GROQ query trong organization.ts gọi field "eventStatus" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null
+
+  ── event.ts ──
+    [WARN] select: GROQ query trong event.ts gọi field "select" nhưng field này không có trong CONTENT_MODEL cho event — có thể trả null
+
+  ── article.ts ──
+    [WARN] sameAs: GROQ query trong article.ts gọi field "sameAs" nhưng field này không có trong CONTENT_MODEL cho article — có thể trả null
+    [WARN] url: GROQ query trong article.ts gọi field "url" nhưng field này không có trong CONTENT_MODEL cho article — có thể trả null
+    [WARN] jobTitle: GROQ query trong article.ts gọi field "jobTitle" nhưng field này không có trong CONTENT_MODEL cho article — có thể trả null
+
+  ── person.ts ──
+    [WARN] name: GROQ query trong person.ts gọi field "name" nhưng field này không có trong CONTENT_MODEL cho person — có thể trả null
+    [WARN] articleType: GROQ query trong person.ts gọi field "articleType" nhưng field này không có trong CONTENT_MODEL cho person — có thể trả null
+    [WARN] author: GROQ query trong person.ts gọi field "author" nhưng field này không có trong CONTENT_MODEL cho person — có thể trả null
+
+[report] Ghi scripts/reports/g4-groq-field-validity.json
