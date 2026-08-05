@@ -13,7 +13,8 @@
  * nên cả 3 kiểm đều fail-closed. Xem package.json và README mục "Cổng".
  */
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
-import { join } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { getClient } from './lib/sanity-client'
 import { GATE } from './gate.config'
 
@@ -97,7 +98,10 @@ function walkHtml(dir: string, out: string[]) {
 }
 
 function validateJsonLd(required: boolean) {
-  const dist = join(process.cwd(), '..', 'dist')
+  // Xác định dist/ từ vị trí file này, không từ thư mục làm việc: `npm --prefix
+  // scripts` đổi CWD nên cách cũ chỉ đúng khi được gọi đúng một kiểu. Đây là điều
+  // check-no-process-cwd.sh cấm, và nó đã đỏ từ commit fork d7bac08. Xem DR-020.
+  const dist = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'dist')
   if (!existsSync(dist)) {
     if (required) {
       fails.push('V1 JSON-LD: không tìm thấy dist/ ở bước post-build (astro build có thể đã lỗi).')

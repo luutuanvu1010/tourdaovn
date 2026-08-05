@@ -6,7 +6,8 @@
     "validate": "node --import ./node_modules/tsx/dist/esm/index.mjs validate-constraints.ts",
     "validate:min": "node --import ./node_modules/tsx/dist/esm/index.mjs validate-min.ts",
     "validate:jsonld": "node --import ./node_modules/tsx/dist/esm/index.mjs validate-min.ts --jsonld-only",
-    "validate:post": "node --import ./node_modules/tsx/dist/esm/index.mjs validators/jsonld-post.ts && node --import ./node_modules/tsx/dist/esm/index.mjs validators/r3-r4-post.ts && node --import ./node_modules/tsx/dist/esm/index.mjs validators/governance-post.ts && node --import ./node_modules/tsx/dist/esm/index.mjs validators/geo-knowledge-post.ts && node --import ./node_modules/tsx/dist/esm/index.mjs validators/entity-layout-post.ts && node --import ./node_modules/tsx/dist/esm/index.mjs validators/control-registry-gate.ts && node --import ./node_modules/tsx/dist/esm/index.mjs validators/deferred-gate.ts",
+    "validate:post": "node run-gates.mjs post",
+    "gate:all": "node run-gates.mjs post spec",
     "validate:git-governance": "node --import ./node_modules/tsx/dist/esm/index.mjs validators/git-governance.ts",
     "precheck": "node --import ./node_modules/tsx/dist/esm/index.mjs precheck-drafts.ts",
     "precheck:batch": "node --import ./node_modules/tsx/dist/esm/index.mjs precheck-batch.ts",
@@ -19,7 +20,7 @@
     "snapshot:slugs": "node --import ./node_modules/tsx/dist/esm/index.mjs tools/snapshot-slugs.ts",
     "gen:slug-redirects": "node --import ./node_modules/tsx/dist/esm/index.mjs tools/gen-slug-redirects.ts",
     "test": "tsx --test synthesis/__tests__/*.test.ts",
-    "audit:spec": "node --import ./node_modules/tsx/dist/esm/index.mjs meta-validators/g1-content-model-vs-schema.ts && node --import ./node_modules/tsx/dist/esm/index.mjs meta-validators/g3-binding-map-vs-template.ts && node --import ./node_modules/tsx/dist/esm/index.mjs meta-validators/g4-groq-field-validity.ts"
+    "audit:spec": "node run-gates.mjs spec"
   },
   "dependencies": {
     "@sanity/client": "^6.28.0",
