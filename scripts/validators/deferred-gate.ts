@@ -14,7 +14,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPORT_DIR = resolve(__dirname, '..', 'reports')
 const PREBUILD = resolve(REPORT_DIR, 'validator-status.json')
 const POSTBUILD = resolve(REPORT_DIR, 'postbuild-status.json')
-const REGISTRY_PATH = resolve(__dirname, '..', '..', 'project', 'governance', 'control-registry.yaml')
+// Xem ghi chú cùng loại ở control-registry-gate.ts: sổ đăng ký của tourdaovn
+// sống ở docs/governance/, không phải project/governance/.
+const REGISTRY_PATH = resolve(__dirname, '..', '..', 'docs', 'governance', 'control-registry.yaml')
 
 type Control = {
   id: string

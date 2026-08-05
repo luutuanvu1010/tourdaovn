@@ -1,10 +1,13 @@
 /**
- * Sinh project/design-context/COMPONENT_INVENTORY.md từ src/components/*.astro.
+ * Sinh docs/design-context/COMPONENT_INVENTORY.md từ src/components/*.astro.
  *
  * Inventory là DẪN XUẤT từ code, không phải nguồn. Sửa component thì chạy lại
  * script, không sửa tay file markdown.
  *
- * Spec: docs/superpowers/specs/2026-07-13-design-context-pack-design.md
+ * Đường ra sửa 2026-08-05: trước đây ghi vào `project/design-context/`, thư mục
+ * không tồn tại ở tourdaovn nên script chưa từng chạy được. Chú thích cũ còn dẫn
+ * `docs/superpowers/specs/2026-07-13-design-context-pack-design.md`, cũng không
+ * tồn tại; đã gỡ. Xem docs/DRIFT_LOG.md DR-010.
  *
  * Ràng buộc 04-CONSTRAINTS điều cấm 7: cấm lấy repo root từ CWD của tiến trình,
  * vì npm --prefix đổi CWD. Resolve từ import.meta.url, tức vị trí của chính file này.
@@ -16,7 +19,7 @@ import { resolve, join, relative } from 'node:path'
 const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url))
 const COMPONENTS_DIR = resolve(REPO_ROOT, 'src/components')
 const LIB_DIR = resolve(REPO_ROOT, 'src/lib')
-const OUT_DIR = resolve(REPO_ROOT, 'project/design-context')
+const OUT_DIR = resolve(REPO_ROOT, 'docs/design-context')
 const OUT_FILE = join(OUT_DIR, 'COMPONENT_INVENTORY.md')
 
 /** Type dựng sẵn của TS hoặc DOM, không cần giải về module dự án. */

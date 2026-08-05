@@ -38,8 +38,13 @@ type Registry = {
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..', '..')
-const REGISTRY_PATH = resolve(REPO_ROOT, 'project', 'governance', 'control-registry.yaml')
-const CONTROL_GATES_PATH = resolve(REPO_ROOT, 'project', 'governance', 'CONTROL_GATES.md')
+// 'project/governance/' là quy ước thư mục của nhatrangtravel, không tồn tại ở
+// tourdaovn. Sổ đăng ký của dự án này sống ở docs/governance/. Xem DR-015.
+const REGISTRY_PATH = resolve(REPO_ROOT, 'docs', 'governance', 'control-registry.yaml')
+// CONTROL_GATES.md cấp dự án chưa được soạn; bản duy nhất trong repo là khuôn
+// rỗng ở playbook/governance/ không có dấu ✅ nào, nên documentedLiveIds() trả
+// tập rỗng và vòng đối chiếu chéo hiện là no-op. Ghi phiếu nợ ND-004.
+const CONTROL_GATES_PATH = resolve(REPO_ROOT, 'docs', 'governance', 'CONTROL_GATES.md')
 const POSTBUILD_STATUS = resolve(REPO_ROOT, 'scripts', 'reports', 'postbuild-status.json')
 
 function loadRegistry(): Registry {
