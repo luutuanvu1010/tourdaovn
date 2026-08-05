@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — trang chủ /</title>
+<link rel="stylesheet" href="../../../src/styles/tokens.css">
+<link rel="stylesheet" href="_pattern.css">
+<link rel="stylesheet" href="_shell.css">
+<style>
+  /* Chỉ hai mẫu riêng của trang chủ; phần còn lại dùng _pattern.css */
+
+  .home-hero {
+    position: relative;
+    min-height: var(--hero-min-h);
+    display: flex;
+    align-items: center;
+    background: var(--c-primary);
+    overflow: hidden;
+  }
+  .home-hero__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .home-hero__scrim {
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      to top,
+      var(--c-primary-strong) 0%,
+      color-mix(in srgb, var(--c-primary-strong) 66%, transparent) 52%,
+      color-mix(in srgb, var(--c-primary-strong) 20%, transparent) 100%);
+  }
+  .home-hero__inner { position: relative; z-index: 1; padding-block: var(--s9); }
+  .home-hero__eyebrow {
+    color: var(--c-text-inverse); opacity: .82;
+    font-size: var(--fs-label); font-weight: var(--fw-700);
+    text-transform: uppercase; margin-bottom: var(--s3);
+  }
+  .home-hero__title {
+    font-family: var(--font-display);
+    font-size: clamp(var(--fs-h2), 5vw, var(--fs-hero));
+    font-weight: var(--fw-800);
+    line-height: var(--lh-heading);
+    color: var(--c-text-inverse);
+    max-width: 18ch;
+  }
+  .home-hero__sub {
+    color: var(--c-text-inverse); opacity: .88;
+    font-size: var(--fs-base); line-height: var(--lh-body);
+    max-width: 56ch; margin-top: var(--s4);
+  }
+  .home-hero__actions { display: flex; flex-wrap: wrap; gap: var(--s3); margin-top: var(--s6); }
+
+  .trust { display: grid; gap: var(--s5); grid-template-columns: 1fr; }
+  @media (min-width: 640px) { .trust { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1024px) { .trust { grid-template-columns: repeat(4, 1fr); } }
+  .trust__item { display: flex; flex-direction: column; gap: var(--s2); }
+  .trust__title { font-family: var(--font-display); font-size: var(--fs-base); font-weight: var(--fw-700); color: var(--c-text); }
+  .trust__desc { font-size: var(--fs-sm); color: var(--c-text-muted); line-height: var(--lh-body); }
+  .trust__mark { width: var(--underline-width); height: var(--underline-height); background: var(--c-sand); border-radius: var(--radius-sm); }
+
+  .hub { display: grid; gap: var(--s4); grid-template-columns: 1fr; }
+  @media (min-width: 768px) { .hub { grid-template-columns: repeat(3, 1fr); } }
+  .hub__tile {
+    display: flex; flex-direction: column; gap: var(--s2);
+    padding: var(--s5);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    background: var(--c-card);
+    box-shadow: var(--shadow-card);
+  }
+  .hub__tile:hover { border-color: var(--c-primary); box-shadow: var(--shadow-raised); }
+  .hub__name { font-family: var(--font-display); font-size: var(--fs-h5); font-weight: var(--fw-700); color: var(--c-primary); }
+  .hub__desc { font-size: var(--fs-sm); color: var(--c-text-muted); }
+  .hub__count { font-size: var(--fs-label); color: var(--c-text-muted); margin-top: auto; padding-top: var(--s3); }
+
+  .facts { display: grid; gap: var(--s4); grid-template-columns: repeat(2, 1fr); }
+  @media (min-width: 768px) { .facts { grid-template-columns: repeat(4, 1fr); } }
+  .facts__item { background: var(--c-primary-soft); border-radius: var(--radius-md); padding: var(--s4); }
+  .facts__key { font-size: var(--fs-label); color: var(--c-text-muted); }
+  .facts__val { font-family: var(--font-display); font-size: var(--fs-h5); font-weight: var(--fw-700); color: var(--c-primary); }
+</style>
+</head>
+<body>
+
+<div class="mk-chrome">
+  <div class="mk-chrome__name">
+    Mockup · trang chủ
+    <small>06-BINDING_MAP §5.7 (khung) + §4.1 (nội dung khối) — thứ tự khối là ĐỀ XUẤT, `siteSettings.sections` mới là nơi chốt</small>
+  </div>
+</div>
+
+<header class="mk-header">
+  <div class="container mk-header__inner" data-bind="§2 · nav (site.config)">
+    <a class="mk-logo" href="#">Tour Đảo</a>
+    <nav class="mk-nav">
+      <a href="#">Tour &amp; Vé</a>
+      <a href="#">Kinh nghiệm du lịch</a>
+      <a href="#">Hỗ trợ</a>
+      <a href="#">Liên hệ</a>
+      <a href="#" class="mk-nav__cta">Đặt vé trực tuyến</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ══ 1. HERO — §5.7 ══
+       Đề xuất đổi vai hai dòng có sẵn, KHÔNG thêm field:
+         • eyebrow  ← brand.name (config build)
+         • h1       ← siteSettings.heroText  (hôm nay heroText đang nằm ở eyebrow)
+         • nút chính ← mục kind:'zalo' của nav  (hôm nay là destinationHref)
+         • nút phụ   ← destinationHref
+       Hai đổi này chạm §5.7 nên phải chủ dự án chốt — xem PHA-F-BAN-GIAO §6 câu hỏi Q4, Q5. -->
+  <section class="home-hero">
+    <img class="home-hero__img"
+         src="https://cdn.sanity.io/images/pgedy374/production/6c1b5f52fce4a1eaaf99b5991e7193a731b42f43-1360x764.webp?w=1800&amp;q=80&amp;auto=format"
+         alt="">
+    <div class="home-hero__scrim"></div>
+    <div class="container home-hero__inner">
+      <p class="home-hero__eyebrow" data-bind="§5.7 · brand.name">Tour Đảo</p>
+      <h1 class="home-hero__title" data-bind="§5.7 · siteSettings.heroText">Tour biển đảo Nha Trang, đặt một đầu mối là xong cả chuyến</h1>
+      <p class="home-hero__sub" data-bind="§5.7 · brand.description">
+        Tour đảo, lặn biển, vé VinWonders, khách sạn và xe đưa đón sân bay. Nhận khách lẻ và khách đoàn,
+        có hướng dẫn viên đi cùng, đặt nhanh qua Zalo.
+      </p>
+      <div class="home-hero__actions">
+        <a class="btn btn--primary" href="#" data-bind="§5.7 · nav kind:'zalo'">Nhắn Zalo nhận báo giá</a>
+        <a class="btn btn--onDark" href="#" data-bind="§5.7 · destinationHref">Tìm hiểu Nha Trang</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 2. TOUR ĐANG BÁN — §4.1 featuredTours ══
+       Đẩy lên ngay dưới hero. Hôm nay khối này có ĐÚNG 1 mục → thẻ spotlight
+       nằm ngang, không phải một thẻ dọc lẻ loi trong lưới ba cột. -->
+  <section class="section" data-hide-when-empty>
+    <div class="container">
+      <div class="section__head">
+        <h2 class="section__title">Tour đang nhận đặt</h2>
+        <a class="section__link" href="#">Xem tất cả tour ›</a>
+      </div>
+      <div class="grid" data-density data-bind="§4.1 · featuredTours → card §5.1">
+        <a class="card" href="#">
+          <div class="card__media">
+            <img src="https://cdn.sanity.io/images/pgedy374/production/b269e1f4c44345e34b4e6c061f0e1e30e0c682d5-750x500.jpg?w=900&amp;q=75&amp;auto=format" alt="tour 3 đảo nha trang">
+          </div>
+          <div class="card__body">
+            <h3 class="card__title">Tour 3 đảo Nha Trang</h3>
+            <p class="card__summary">Hòn Mun ngắm biển, Làng Chài ăn trưa trên bè nổi, Hòn Tằm tắm bùn khoáng. Xe đón tận khách sạn, hướng dẫn viên đi cùng.</p>
+            <div class="card__meta"><span class="badge">Linh hoạt</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"><img src="https://cdn.sanity.io/images/pgedy374/production/3b3f565d5063b82d91c1e50d577642b27a05e38d-1067x800.jpg?w=900&amp;q=75&amp;auto=format" alt="Hòn Tằm"></div>
+          <div class="card__body">
+            <h3 class="card__title">Tour Hòn Tằm nửa ngày</h3>
+            <p class="card__summary">Ra đảo bằng cano, tắm bùn khoáng và hồ bơi hướng vịnh, về trong chiều.</p>
+            <div class="card__meta"><span class="badge">Linh hoạt</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Tour lặn biển Hòn Mun</h3>
+            <p class="card__summary">Lặn bình khí có huấn luyện viên kèm, tại điểm lặn được phép.</p>
+            <div class="card__meta"><span class="badge">Tour ghép</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Tour 4 đảo trọn ngày</h3>
+            <p class="card__summary">Thêm một chặng đảo so với tuyến 3 đảo.</p>
+            <div class="card__meta"><span class="badge">Tour riêng</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Tour Bình Ba</h3>
+            <p class="card__summary">Đảo tôm hùm, đi trong ngày từ Nha Trang.</p>
+            <div class="card__meta"><span class="badge">Tour ghép</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Tour Điệp Sơn</h3>
+            <p class="card__summary">Con đường giữa biển lúc thuỷ triều xuống.</p>
+            <div class="card__meta"><span class="badge">Tour ghép</span></div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 3. BỐN ĐIỂM KHÁC BIỆT — §4.1 "Trust bar", config(build) ══
+       Cùng hàng binding với trust bar đang chạy, chỉ đổi NỘI DUNG bốn mục:
+       hôm nay là câu của engine gốc ("không quảng cáo, không PR", "liên kết
+       Wikidata/OSM") — không phải cam kết của một công ty bán tour.
+       Bốn mục dưới đây lấy nguyên văn 00-PROJECT_BRIEF §3. -->
+  <section class="section section--alt">
+    <div class="container">
+      <div class="trust" data-bind="§4.1 · Trust bar (config build)">
+        <div class="trust__item">
+          <span class="trust__mark"></span>
+          <p class="trust__title">Xe đưa đón tận nơi</p>
+          <p class="trust__desc">Đón và trả tại khách sạn khu trung tâm, không bắt khách tự ra bến.</p>
+        </div>
+        <div class="trust__item">
+          <span class="trust__mark"></span>
+          <p class="trust__title">Hướng dẫn viên đi cùng</p>
+          <p class="trust__desc">Có người chịu trách nhiệm suốt chuyến, không thả khách giữa đảo.</p>
+        </div>
+        <div class="trust__item">
+          <span class="trust__mark"></span>
+          <p class="trust__title">Giá tốt, báo giá trọn gói</p>
+          <p class="trust__desc">Nói rõ gồm gì và không gồm gì trước khi đi, không phụ thu giữa chừng.</p>
+        </div>
+        <div class="trust__item">
+          <span class="trust__mark"></span>
+          <p class="trust__title">Thanh toán linh hoạt</p>
+          <p class="trust__desc">Thống nhất cách thanh toán qua Zalo trước ngày khởi hành.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 4. LỐI VÀO HUB — §4.1 "Lối vào 4 hub" ══
+       §4.1 cho phép Design dùng rollup đếm entity mỗi hub. Dùng luôn con số đó
+       để ẨN ô hub đang có 0 mục (hôm nay: Lưu trú = 0) — cùng tinh thần
+       quyết định nền 4, khách không bấm vào trang trắng. -->
+  <section class="section">
+    <div class="container">
+      <div class="section__head"><h2 class="section__title">Bắt đầu từ đâu</h2></div>
+      <div class="hub" data-bind="§4.1 · 4 hub (config build) + rollup đếm">
+        <a class="hub__tile" href="#">
+          <span class="hub__name">Khám phá</span>
+          <span class="hub__desc">Đảo, điểm tham quan, trải nghiệm lặn biển và vé vào cổng.</span>
+          <span class="hub__count">3 mục</span>
+        </a>
+        <a class="hub__tile" href="#">
+          <span class="hub__name">Đi lại</span>
+          <span class="hub__desc">Đưa đón sân bay và cách di chuyển trong vịnh.</span>
+          <span class="hub__count">1 mục</span>
+        </a>
+        <!-- Ô "Lưu trú" KHÔNG render: 0 khách sạn, 0 resort đang publish. -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 5. TRẢI NGHIỆM — §4.1 featuredExperiences ══ -->
+  <section class="section section--alt" data-hide-when-empty>
+    <div class="container">
+      <div class="section__head">
+        <h2 class="section__title">Trải nghiệm trong vịnh</h2>
+        <a class="section__link" href="#">Xem tất cả ›</a>
+      </div>
+      <div class="grid" data-density data-bind="§4.1 · featuredExperiences → card §5.1">
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Lặn biển</h3>
+            <p class="card__summary">Nha Trang là một trong những trung tâm lặn biển hàng đầu Việt Nam, nước trong và rạn san hô còn tốt ở nhiều điểm.</p>
+            <div class="card__meta"><span class="badge badge--sea">Thể thao nước</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Tắm bùn khoáng</h3>
+            <p class="card__summary">Ngâm bùn khoáng nóng và hồ jacuzzi sau nửa ngày dầm nắng biển.</p>
+            <div class="card__meta"><span class="badge badge--sea">Nghỉ dưỡng</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Dù bay, mô tô nước</h3>
+            <p class="card__summary">Thể thao nước tại các bãi được phép trong vịnh.</p>
+            <div class="card__meta"><span class="badge badge--sea">Thể thao nước</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Chèo kayak</h3>
+            <p class="card__summary">Chèo quanh đảo lúc sáng sớm, nước lặng.</p>
+            <div class="card__meta"><span class="badge badge--sea">Thể thao nước</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Câu mực đêm</h3>
+            <p class="card__summary">Ra vịnh buổi chiều, câu mực và ăn tối trên tàu.</p>
+            <div class="card__meta"><span class="badge badge--sea">Trên biển</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Tàu đáy kính</h3>
+            <p class="card__summary">Ngắm rạn san hô mà không cần xuống nước.</p>
+            <div class="card__meta"><span class="badge badge--sea">Trên biển</span></div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 6. ĐIỂM THAM QUAN — §4.1 featuredAttractions ══ -->
+  <section class="section" data-hide-when-empty>
+    <div class="container">
+      <div class="section__head">
+        <h2 class="section__title">Điểm tham quan có bán vé</h2>
+        <a class="section__link" href="#">Xem tất cả ›</a>
+      </div>
+      <div class="grid" data-density data-bind="§4.1 · featuredAttractions → card §5.1">
+        <a class="card" href="#">
+          <div class="card__media"><img src="https://cdn.sanity.io/images/pgedy374/production/3b3f565d5063b82d91c1e50d577642b27a05e38d-1067x800.jpg?w=900&amp;q=75&amp;auto=format" alt="Hòn Tằm"></div>
+          <div class="card__body">
+            <h3 class="card__title">Khu du lịch Hòn Tằm</h3>
+            <p class="card__summary">Đảo Thuỷ Kim Sơn cách trung tâm 7 km: bãi cát trắng, hồ bơi vô cực, khu tắm bùn khoáng.</p>
+            <div class="card__meta"><span class="badge">Khu vui chơi</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">VinWonders Nha Trang</h3>
+            <p class="card__summary">Công viên giải trí trên đảo Hòn Tre, đi bằng cáp treo vượt biển.</p>
+            <div class="card__meta"><span class="badge">Khu vui chơi</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Tắm bùn Tháp Bà</h3>
+            <p class="card__summary">Khu tắm bùn khoáng lâu đời trong đất liền.</p>
+            <div class="card__meta"><span class="badge">Khu vui chơi</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">i-Resort</h3>
+            <p class="card__summary">Tắm bùn, tắm thảo dược, spa — nhiều gói vé.</p>
+            <div class="card__meta"><span class="badge">Khu vui chơi</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">KongForest</h3>
+            <p class="card__summary">Khu trò chơi vận động trong rừng.</p>
+            <div class="card__meta"><span class="badge">Khu vui chơi</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Tháp Bà Ponagar</h3>
+            <p class="card__summary">Di tích Chăm Pa ngay trung tâm.</p>
+            <div class="card__meta"><span class="badge">Di tích</span></div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 7. CẨM NANG — §4.1 "Cẩm nang bản địa" (rollup Article) ══ -->
+  <section class="section section--alt" data-hide-when-empty>
+    <div class="container">
+      <div class="section__head">
+        <h2 class="section__title">Kinh nghiệm trước khi đi</h2>
+        <a class="section__link" href="#">Xem tất cả bài ›</a>
+      </div>
+      <div class="grid" data-density data-bind="§4.1 · rollup Article → card §5.1">
+        <a class="card" href="#">
+          <div class="card__media"><img src="https://cdn.sanity.io/images/pgedy374/production/b269e1f4c44345e34b4e6c061f0e1e30e0c682d5-750x500.jpg?w=900&amp;q=75&amp;auto=format" alt="tour 3 đảo nha trang"></div>
+          <div class="card__body">
+            <h3 class="card__title">Tour 3 đảo Nha Trang: lịch trình chi tiết và kinh nghiệm đi</h3>
+            <p class="card__summary">Đi những đảo nào, lịch trình từng giờ, chi phí và các lưu ý cập nhật mới nhất.</p>
+            <div class="card__meta"><span class="badge">Vũ Lưu</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Từ sân bay Cam Ranh về Nha Trang</h3>
+            <p class="card__summary">Các cách di chuyển, thời gian và chi phí tham khảo.</p>
+            <div class="card__meta"><span class="badge">Vũ Lưu</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Đi Nha Trang mùa nào đẹp</h3>
+            <p class="card__summary">Mùa biển êm, mùa mưa và cách chọn ngày ra đảo.</p>
+            <div class="card__meta"><span class="badge">Vũ Lưu</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Mang gì khi đi tour đảo</h3>
+            <p class="card__summary">Danh sách đồ cần mang cho một ngày trên biển.</p>
+            <div class="card__meta"><span class="badge">Vũ Lưu</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Say sóng và cách phòng</h3>
+            <p class="card__summary">Chọn chỗ ngồi, uống thuốc trước bao lâu.</p>
+            <div class="card__meta"><span class="badge">Vũ Lưu</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Đi đoàn đông cần chuẩn bị gì</h3>
+            <p class="card__summary">Chia nhóm, giờ đón, và cách chốt suất ăn.</p>
+            <div class="card__meta"><span class="badge">Vũ Lưu</span></div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 8. KHỐI ĐANG RỖNG — chứng minh R4 ══
+       "Nơi ở gần biển" (§4.1 featuredStays) hôm nay có 0 khách sạn, 0 resort.
+       Cả section ẩn hẳn: không khung trống, không "đang cập nhật", không CTA giả.
+       Bấm "Số mục" ở thanh trên để thấy nó tự mọc lại khi có dữ liệu. -->
+  <section class="section" data-hide-when-empty>
+    <div class="container">
+      <div class="section__head">
+        <h2 class="section__title">Nơi ở gần biển</h2>
+        <a class="section__link" href="#">Xem tất cả ›</a>
+      </div>
+      <div class="grid" data-density data-bind="§4.1 · featuredStays → card §5.1">
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">(chưa có khách sạn nào trong Sanity)</h3>
+            <p class="card__summary">Thẻ này chỉ xuất hiện khi khối được kéo lên ≥1 mục bằng công tắc phía trên.</p>
+            <div class="card__meta"><span class="badge">5 sao</span></div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 9. KHU VỰC NÊN BIẾT — §4.1 rollup Place ══ -->
+  <section class="section section--alt" data-hide-when-empty>
+    <div class="container">
+      <div class="section__head">
+        <h2 class="section__title">Các đảo và khu vực nên biết</h2>
+        <a class="section__link" href="#">Xem tất cả địa danh ›</a>
+      </div>
+      <div class="grid" data-density data-bind="§4.1 · rollup Place → card §5.1">
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Hòn Mun</h3>
+            <p class="card__summary">Khu bảo tồn biển đầu tiên của Việt Nam, cách trung tâm khoảng 10 km về phía đông nam.</p>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Hòn Tằm</h3>
+            <p class="card__summary">Đảo Thuỷ Kim Sơn, 110 ha, bãi cát trắng và khu tắm bùn khoáng.</p>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Hòn Tre</h3>
+            <p class="card__summary">Đảo lớn nhất vịnh, nơi đặt VinWonders.</p>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Làng Chài</h3>
+            <p class="card__summary">Khu bè nổi nuôi hải sản giữa vịnh.</p>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Bãi Tranh</h3>
+            <p class="card__summary">Bãi tắm trên đảo Hòn Miễu.</p>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Vịnh Nha Trang</h3>
+            <p class="card__summary">Gần 20 đảo lớn nhỏ, nước trong gần như quanh năm.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 10. GIỚI THIỆU ĐIỂM ĐẾN — §4.1 body + keyFacts ══
+       Đề xuất đẩy XUỐNG dưới sản phẩm: đây là bài đọc dài, không phải thứ
+       khách cần thấy đầu tiên trên một site bán tour. -->
+  <section class="section">
+    <div class="container">
+      <div class="section__head"><h2 class="section__title">Về Nha Trang</h2></div>
+      <div class="container--editorial" style="padding-inline:0" data-bind="§4.1 · touristDestination.body">
+        <p class="muted" style="line-height:var(--lh-body)">
+          Nha Trang nằm ở duyên hải Nam Trung Bộ, có đường bờ biển dài cùng nhiều vịnh và đảo lớn nhỏ.
+          Khí hậu nhiệt đới ôn hoà, số giờ nắng cao, mùa mưa ngắn nên đi biển được gần như quanh năm.
+          Hệ sinh thái biển với rạn san hô và thảm cỏ biển là nền cho các hoạt động lặn và khám phá vịnh.
+        </p>
+      </div>
+      <div class="facts" style="margin-top: var(--s6)" data-bind="§4.1 · keyFacts">
+        <div class="facts__item"><p class="facts__key">Chi phí</p><p class="facts__val">Trung bình</p></div>
+        <div class="facts__item"><p class="facts__key">Thời tiết</p><p class="facts__val">Ôn hoà</p></div>
+        <div class="facts__item"><p class="facts__key">Nhiệt độ trung bình</p><p class="facts__val">29°C</p></div>
+        <div class="facts__item"><p class="facts__key">Số ngày nắng</p><p class="facts__val">&gt; 300</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 11. HỎI ĐÁP — §4.1 faq (nuôi FAQPage) ══ -->
+  <section class="section section--alt" data-hide-when-empty>
+    <div class="container">
+      <div class="section__head"><h2 class="section__title">Câu hỏi thường gặp</h2></div>
+      <div class="faq" data-density data-bind="§4.1 · touristDestination.faq">
+        <details open>
+          <summary>Đặt tour thế nào?</summary>
+          <p>Nhắn Zalo hoặc gọi hotline. Không có giỏ hàng và không thanh toán trên site — mọi việc chốt qua người thật.</p>
+        </details>
+        <details>
+          <summary>Có nhận khách đoàn không?</summary>
+          <p>Có. Công ty tự vận hành phần lõi và kết nối đối tác cho xe, vé, phòng.</p>
+        </details>
+        <details>
+          <summary>Giá đã gồm những gì?</summary>
+          <p>Mỗi tour ghi rõ phần đã bao gồm và chưa bao gồm ngay trên trang tour.</p>
+        </details>
+        <details>
+          <summary>Đi mùa nào đẹp nhất?</summary>
+          <p>Tháng 2 đến tháng 10 biển êm và ít mưa.</p>
+        </details>
+        <details>
+          <summary>Trẻ nhỏ đi được không?</summary>
+          <p>Được. Các đảo trong tuyến đều có khu nước nông và nhà tắm tráng.</p>
+        </details>
+        <details>
+          <summary>Có đón ở sân bay Cam Ranh không?</summary>
+          <p>Có dịch vụ đưa đón sân bay, đặt cùng lúc với tour.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="mk-note">
+      <b>Thứ tự khối ở trên là ĐỀ XUẤT, không phải quyết định.</b>
+      §5.7 nói rõ thứ tự do <code>siteSettings.sections</code> quyết, biên tập viên kéo thả trong Studio.
+      Thứ tự đề xuất: hero → tours → trustBar → hubGrid → experiences → attractions → guides → stays →
+      areas → editorialBody → faq → safety. Khác bản đang chạy ở hai chỗ: <b>tours</b> nhảy từ áp chót
+      lên vị trí 2, và <b>editorialBody</b> (bài dài về Nha Trang) lùi xuống dưới sản phẩm.
+      Khối <code>specialties</code> nên bỏ khỏi <code>DEFAULT_SECTIONS</code>: entity đó đang tắt nên
+      vĩnh viễn rỗng.
+    </div>
+  </div>
+
+</main>
+
+<footer class="mk-footer">
+  <div class="container">
+    <p>Công ty TNHH Tour Đảo — đầu mối trọn gói cho chuyến biển đảo Nha Trang.</p>
+  </div>
+</footer>
+
+<script src="_shell.js"></script>
+</body>
+</html>

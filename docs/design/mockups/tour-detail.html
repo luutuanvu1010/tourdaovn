@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — trang tour chi tiết /tour/{slug}/</title>
+<!-- Nguồn token DUY NHẤT: file thật đang chạy production. Mockup không chép lại token. -->
+<link rel="stylesheet" href="../../../src/styles/tokens.css">
+<link rel="stylesheet" href="_pattern.css">
+<link rel="stylesheet" href="_shell.css">
+</head>
+<body class="has-actionbar">
+
+<div class="mk-chrome">
+  <div class="mk-chrome__name">
+    Mockup · trang tour chi tiết
+    <small>06-BINDING_MAP §2 + §3 + §4.8 — dữ liệu thật của tour duy nhất đang publish</small>
+  </div>
+</div>
+
+<!-- ══ Header: 06 §2 "Header điều hướng" — config(build), khối nav trong site.config.ts ══ -->
+<header class="mk-header">
+  <div class="container mk-header__inner" data-bind="§2 · nav (site.config)">
+    <a class="mk-logo" href="#">Tour Đảo</a>
+    <nav class="mk-nav">
+      <a href="#">Tour &amp; Vé</a>
+      <a href="#">Kinh nghiệm du lịch</a>
+      <a href="#">Hỗ trợ</a>
+      <a href="#">Liên hệ</a>
+      <a href="#" class="mk-nav__cta">Đặt vé trực tuyến</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ══ Hero: 06 §3 "Hero" — title + mainImage. Tour này có 2 ảnh (<4) nên
+       KHÔNG đi mosaic, dùng ảnh đơn. ══ -->
+  <div class="container" style="padding-top: var(--s5)">
+    <div class="hero" data-bind="§3 · title + mainImage">
+      <img class="hero__img"
+           src="https://cdn.sanity.io/images/pgedy374/production/b269e1f4c44345e34b4e6c061f0e1e30e0c682d5-750x500.jpg?w=1600&amp;q=80&amp;auto=format"
+           alt="tour 3 đảo nha trang">
+      <div class="hero__scrim"></div>
+      <div class="hero__inner">
+        <p class="hero__crumb" data-bind="§3 · Breadcrumb (nhánh URL)">
+          <a href="#">Trang chủ</a> › <a href="#">Tour</a>
+        </p>
+        <h1 class="hero__title">Tour 3 đảo Nha Trang</h1>
+        <div class="hero__badges">
+          <span class="badge" data-bind="§3 · tourFormat">Linh hoạt</span>
+          <span class="badge" data-bind="§4.8 · departureNote">Khởi hành linh hoạt</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Thanh thông tin nhanh — gom các field ngắn của §4.8.
+       Chỉ render ô CÓ dữ liệu; số cột bám số ô thật nên không có ô trống. ══ -->
+  <div class="container" style="padding-top: var(--s5)">
+    <div class="infobar">
+      <div class="infobar__item" data-bind="§4.8 · tourFormat">
+        <span class="infobar__label">Hình thức</span>
+        <span class="infobar__value">Cả hai (ghép đoàn hoặc riêng)</span>
+      </div>
+      <div class="infobar__item" data-bind="§4.8 · departureNote">
+        <span class="infobar__label">Ngày điển hình</span>
+        <span class="infobar__value">Lịch trình linh hoạt</span>
+      </div>
+      <div class="infobar__item" data-bind="§4.8 · seasonNote">
+        <span class="infobar__label">Mùa đẹp</span>
+        <span class="infobar__value">Tháng 2 đến 10</span>
+      </div>
+      <!-- Ô "Thời lượng" (§4.8 duration) KHÔNG render: field đang chứa chuỗi
+           "ISO 8601" thay vì thời lượng thật. Vùng rỗng ẩn hẳn — 06 quyết định nền 2.
+           Ô "Giá từ" (§4.8 bookingRef) KHÔNG render: prices.yaml đang trống. -->
+    </div>
+  </div>
+
+  <div class="container section">
+    <div class="detail">
+
+      <!-- ══════════ CỘT NỘI DUNG ══════════ -->
+      <div class="detail__main">
+
+        <p class="lead" data-bind="§3 · summary">
+          Một ngày trọn vẹn trong vịnh Nha Trang: Hòn Mun ngắm biển và san hô, Làng Chài ăn trưa
+          trên bè nổi, Hòn Tằm tắm bùn khoáng và hồ bơi hướng vịnh. Có xe đón tận khách sạn trung
+          tâm và hướng dẫn viên đi cùng suốt hành trình.
+        </p>
+
+        <!-- ── Hành trình: §4.8 itinerary — gate I14 buộc ≥1 chặng ── -->
+        <section data-bind="§4.8 · itinerary" data-hide-when-empty>
+          <h2 class="block__title">Hành trình</h2>
+          <div class="timeline" data-density>
+            <div class="stop">
+              <p class="stop__name">Hòn Mun</p>
+              <p class="stop__note">Ngắm biển, tắm ở khu vực được phép, chụp ảnh. Khu bảo tồn biển đầu tiên của Việt Nam.</p>
+              <p class="stop__dur">90 phút</p>
+            </div>
+            <div class="stop">
+              <p class="stop__name">Làng Chài</p>
+              <p class="stop__note">Tham quan bè nuôi, ăn trưa hải sản set menu ngay trên mặt nước.</p>
+              <p class="stop__dur">90 phút</p>
+            </div>
+            <div class="stop">
+              <p class="stop__name">Khu du lịch Hòn Tằm</p>
+              <p class="stop__note">Tắm bùn khoáng, hồ jacuzzi, hồ bơi hướng vịnh, bãi biển riêng.</p>
+              <p class="stop__dur">150 phút</p>
+            </div>
+            <div class="stop">
+              <p class="stop__name">Bãi Tranh</p>
+              <p class="stop__note">Chặng thay thế khi thời tiết không cho phép ra Hòn Mun.</p>
+            </div>
+            <div class="stop">
+              <p class="stop__name">Hòn Miễu</p>
+              <p class="stop__note">Chặng thay thế theo điều kiện thuỷ triều.</p>
+            </div>
+            <div class="stop">
+              <p class="stop__name">Hòn Một</p>
+              <p class="stop__note">Chặng thay thế theo yêu cầu của đoàn.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Gồm gì / không gồm gì: §4.8 includes, excludes — ẩn TỪNG khối riêng ── -->
+        <section data-bind="§4.8 · includes + excludes">
+          <h2 class="block__title">Gồm gì, không gồm gì</h2>
+          <div class="twocol">
+            <div>
+              <p class="subhead">Đã bao gồm</p>
+              <ul class="checklist checklist--in">
+                <li><span class="checklist__mark">✓</span> Xe đưa đón tại khách sạn trung tâm</li>
+                <li><span class="checklist__mark">✓</span> Vé vào cổng các đảo trong chương trình</li>
+                <li><span class="checklist__mark">✓</span> Tham quan 3 đảo bằng cano cao tốc</li>
+                <li><span class="checklist__mark">✓</span> Ăn trưa set menu tại Làng Chài</li>
+                <li><span class="checklist__mark">✓</span> Bảo hiểm hành khách</li>
+              </ul>
+            </div>
+            <div>
+              <p class="subhead">Chưa bao gồm</p>
+              <ul class="checklist checklist--out">
+                <li><span class="checklist__mark">✕</span> Chi phí cá nhân khác</li>
+                <li><span class="checklist__mark">✕</span> Chi phí ngoài chương trình</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Điểm nổi bật: §3 highlights ── -->
+        <section data-bind="§3 · highlights" data-hide-when-empty>
+          <h2 class="block__title">Điểm nổi bật</h2>
+          <ul class="checklist checklist--in" data-density>
+            <li><span class="checklist__mark">✦</span> Cano cao tốc, ít say sóng hơn tàu gỗ</li>
+            <li><span class="checklist__mark">✦</span> Hướng dẫn viên bản địa đi cùng suốt chuyến</li>
+            <li><span class="checklist__mark">✦</span> Phù hợp gia đình có trẻ nhỏ và người lớn tuổi</li>
+            <li><span class="checklist__mark">✦</span> Không ghé điểm bán hàng, không phát sinh phí ẩn</li>
+            <li><span class="checklist__mark">✦</span> Đón tận khách sạn khu trung tâm</li>
+            <li><span class="checklist__mark">✦</span> Nhận cả khách lẻ và khách đoàn</li>
+          </ul>
+        </section>
+
+        <!-- ── Thân bài: §3 body (portable text) ── -->
+        <section data-bind="§3 · body">
+          <h2 class="block__title">Chi tiết chương trình</h2>
+          <div class="container--editorial" style="padding-inline:0">
+            <p class="muted" style="line-height:var(--lh-body)">
+              Vịnh Nha Trang có gần 20 hòn đảo lớn nhỏ, nên “3 đảo” thực chất là một combo linh hoạt.
+              Tuyến được yêu thích và tối ưu trải nghiệm nhất hiện nay là Hòn Mun – Làng Chài – Hòn Tằm.
+              Ba điểm này bổ trợ nhau: một nơi để ngắm biển, một nơi để ăn, một nơi để thư giãn…
+            </p>
+          </div>
+        </section>
+
+        <!-- ── Mùa: §4.8 seasonNote ── -->
+        <section data-bind="§4.8 · seasonNote">
+          <h2 class="block__title">Mùa thích hợp</h2>
+          <p class="callout">Tháng 2 đến tháng 10 biển êm, nắng đẹp, ít mưa. Đây cũng là mùa cao điểm nên nên giữ chỗ trước 1–3 ngày.</p>
+        </section>
+
+        <!-- ── Hỏi đáp: §3 faq → nuôi FAQPage trong JSON-LD ── -->
+        <section data-bind="§3 · faq" data-hide-when-empty>
+          <h2 class="block__title">Câu hỏi thường gặp</h2>
+          <div class="faq" data-density>
+            <details open>
+              <summary>Tour có đón tại khách sạn không?</summary>
+              <p>Có. Xe đón tại các khách sạn khu trung tâm Nha Trang, khung 07:30–08:00.</p>
+            </details>
+            <details>
+              <summary>Trẻ em đi được không?</summary>
+              <p>Được. Các đảo đều có phòng thay đồ, nhà tắm tráng và khu nước nông an toàn.</p>
+            </details>
+            <details>
+              <summary>Có lặn ngắm san hô ở Hòn Mun không?</summary>
+              <p>Từ 2022 một số khu vực quanh Hòn Mun tạm dừng bơi lặn để phục hồi rạn san hô. Điểm lặn được bố trí ở khu vực thay thế được phép.</p>
+            </details>
+            <details>
+              <summary>Đặt tour trước bao lâu?</summary>
+              <p>Mùa cao điểm nên đặt trước 1–3 ngày để giữ chỗ cano.</p>
+            </details>
+            <details>
+              <summary>Có nhận khách đoàn không?</summary>
+              <p>Có. Đoàn từ 4 khách trở lên nhắn Zalo để nhận báo giá riêng.</p>
+            </details>
+            <details>
+              <summary>Thanh toán thế nào?</summary>
+              <p>Thanh toán linh hoạt, thống nhất qua Zalo trước ngày khởi hành.</p>
+            </details>
+          </div>
+        </section>
+
+        <!-- ── Ngày cập nhật: §3 updatedAt — S2.4 buộc hiện ở HTML ── -->
+        <p class="updated" data-bind="§3 · _updatedAt">Cập nhật 04/08/2026</p>
+      </div>
+
+      <!-- ══════════ CỘT PHẢI — DÍNH KHI CUỘN ══════════ -->
+      <aside class="detail__aside">
+
+        <!-- Hộp đặt chỗ ở TRẠNG THÁI THẬT HÔM NAY: prices.yaml trống →
+             §3 "Vùng giá cộng CTA" ẩn hẳn, không nút "Đặt tour" giả (R4,
+             quyết định nền 3). Cụm còn lại là kênh liên hệ của §2 — một
+             hàng binding khác, một hành động có thật. -->
+        <div class="booking" data-bind="§2 · siteSettings.contact">
+          <p class="subhead" style="margin:0">Nhận báo giá qua Zalo</p>
+          <p class="booking__hint">
+            Giá thay đổi theo ngày, số khách và loại vé Hòn Tằm nên site không niêm yết sẵn.
+            Nhắn Zalo để nhận báo giá trọn gói, người thật trả lời.
+          </p>
+          <div class="booking__channels">
+            <a class="channel" href="#"><b>Chat Zalo</b> <span>trả lời nhanh nhất</span></a>
+            <a class="channel" href="tel:0849256256"><b>0849 256 256</b> <span>hotline</span></a>
+            <a class="channel" href="#"><b>WhatsApp</b> <span>+84 849 256 256</span></a>
+          </div>
+        </div>
+
+        <div class="factlist" style="margin-top: var(--s4)" data-bind="§4.8 · operator, tripOrigin, touristType">
+          <div class="factlist__row">
+            <span class="factlist__key">Đơn vị vận hành</span>
+            <span class="factlist__val">Công ty TNHH Tour Đảo</span>
+          </div>
+          <div class="factlist__row">
+            <span class="factlist__key">Hình thức</span>
+            <span class="factlist__val">Cả hai</span>
+          </div>
+          <div class="factlist__row">
+            <span class="factlist__key">Xuất phát từ</span>
+            <span class="factlist__val">Nha Trang</span>
+          </div>
+          <div class="factlist__row">
+            <span class="factlist__key">Phù hợp với</span>
+            <span class="factlist__val">Gia đình, nhóm bạn, khách đoàn</span>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- ══ Tour tương tự: rollup(build). 0 mục hôm nay → CẢ SECTION ẩn.
+       Bấm "Số mục" trên thanh trên để xem 1 / 2 / 3 / 4 / 6 mục. ══ -->
+  <section class="section section--alt" data-hide-when-empty>
+    <div class="container">
+      <div class="section__head">
+        <h2 class="section__title">Tour tương tự</h2>
+        <a class="section__link" href="#">Xem tất cả tour ›</a>
+      </div>
+      <div class="grid" data-density data-bind="§5.1 · card chuẩn">
+        <a class="card" href="#">
+          <div class="card__media">
+            <img src="https://cdn.sanity.io/images/pgedy374/production/3b3f565d5063b82d91c1e50d577642b27a05e38d-1067x800.jpg?w=800&amp;q=75&amp;auto=format" alt="Hòn Tằm">
+          </div>
+          <div class="card__body">
+            <h3 class="card__title">Tour Hòn Tằm nửa ngày</h3>
+            <p class="card__summary">Ra đảo bằng cano, tắm bùn khoáng và hồ bơi hướng vịnh, về trong buổi chiều.</p>
+            <div class="card__meta"><span class="badge">Linh hoạt</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media">
+            <img src="https://cdn.sanity.io/images/pgedy374/production/6c1b5f52fce4a1eaaf99b5991e7193a731b42f43-1360x764.webp?w=800&amp;q=75&amp;auto=format" alt="Tour 3 đảo">
+          </div>
+          <div class="card__body">
+            <h3 class="card__title">Tour lặn biển Hòn Mun</h3>
+            <p class="card__summary">Lặn bình khí có huấn luyện viên kèm một kèm một tại điểm lặn được phép.</p>
+            <div class="card__meta"><span class="badge">Tour ghép</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Tour 4 đảo trọn ngày</h3>
+            <p class="card__summary">Thêm một chặng đảo so với tuyến 3 đảo, phù hợp nhóm ở lại lâu.</p>
+            <div class="card__meta"><span class="badge">Tour riêng</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Tour Bình Ba</h3>
+            <p class="card__summary">Đảo tôm hùm, đi trong ngày từ Nha Trang.</p>
+            <div class="card__meta"><span class="badge">Tour ghép</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Tour Điệp Sơn</h3>
+            <p class="card__summary">Con đường giữa biển, chụp ảnh lúc thuỷ triều xuống.</p>
+            <div class="card__meta"><span class="badge">Tour ghép</span></div>
+          </div>
+        </a>
+        <a class="card" href="#">
+          <div class="card__media"></div>
+          <div class="card__body">
+            <h3 class="card__title">Tour câu cá đêm</h3>
+            <p class="card__summary">Ra vịnh buổi chiều, câu mực và ăn tối trên tàu.</p>
+            <div class="card__meta"><span class="badge">Tour riêng</span></div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ Tham chiếu: hộp đặt chỗ khi prices.yaml ĐÃ có khoá bookingRef ══ -->
+  <div class="container">
+    <div class="mk-note">
+      <b>Biến thể khi đã có giá.</b> Khi <code>data/prices.yaml</code> có khoá khớp
+      <code>bookingRef</code>, §3 “Vùng giá cộng CTA” mới bật. Hộp bên dưới là hình dạng đúng của
+      nó — nút đặt màu accent xuất hiện <i>cùng lúc</i> với con số, không bao giờ đứng một mình.
+      <div style="max-width:340px; margin-top: var(--s4)">
+        <div class="booking">
+          <div class="booking__price">
+            <span class="booking__amount">550.000₫</span>
+            <span class="booking__unit">/khách</span>
+          </div>
+          <a class="btn btn--primary btn--block" href="#">Đặt tour</a>
+          <p class="booking__hint">Giá cập nhật tháng 7/2026. Đoàn từ 4 khách nhắn Zalo để nhận giá riêng.</p>
+          <div class="booking__channels">
+            <a class="channel" href="#"><b>Chat Zalo</b> <span>hỏi trước khi đặt</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══ Thanh hành động cố định trên mobile — cùng hàng binding §2 với hộp
+     bên phải, không phải một CTA mới. Desktop ẩn vì cột phải đã dính. ══ -->
+<div class="actionbar" data-bind="§2 · siteSettings.contact">
+  <a class="btn btn--primary" href="#">Chat Zalo</a>
+  <a class="btn btn--secondary" href="tel:0849256256">Gọi hotline</a>
+</div>
+
+<footer class="mk-footer">
+  <div class="container">
+    <p>Công ty TNHH Tour Đảo — đầu mối trọn gói cho chuyến biển đảo Nha Trang.</p>
+  </div>
+</footer>
+
+<script src="_shell.js"></script>
+</body>
+</html>

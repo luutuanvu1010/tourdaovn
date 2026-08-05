@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — trang danh sách /tour/</title>
+<link rel="stylesheet" href="../../../src/styles/tokens.css">
+<link rel="stylesheet" href="_pattern.css">
+<link rel="stylesheet" href="_shell.css">
+<style>
+  .index-head { padding-block: var(--s7) var(--s5); }
+  .index-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-h1);
+    font-weight: var(--fw-800);
+    line-height: var(--lh-heading);
+    color: var(--c-text);
+  }
+  .index-title::after {
+    content: ''; display: block;
+    width: var(--underline-width); height: var(--underline-height);
+    background: var(--c-sand); border-radius: var(--radius-sm);
+    margin-block: var(--s3) var(--s4);
+  }
+  .index-desc { font-size: var(--fs-h5); color: var(--c-text-muted); max-width: 70ch; line-height: var(--lh-body); }
+
+  .terms { display: flex; flex-wrap: wrap; gap: var(--s2); margin-top: var(--s5); }
+  .term {
+    display: inline-flex; align-items: center;
+    padding: var(--s3) var(--s4);
+    background: var(--c-primary-soft); color: var(--c-primary);
+    border-radius: var(--radius-pill);
+    font-size: var(--fs-sm); font-weight: var(--fw-600);
+  }
+  .term:hover { background: var(--c-primary); color: var(--c-text-inverse); }
+
+  .count { font-size: var(--fs-sm); color: var(--c-text-muted); margin-top: var(--s6); }
+</style>
+</head>
+<body>
+
+<div class="mk-chrome">
+  <div class="mk-chrome__name">
+    Mockup · trang danh sách tour
+    <small>06-BINDING_MAP §5.2 (khung index) + §5.1 (card chuẩn)</small>
+  </div>
+</div>
+
+<header class="mk-header">
+  <div class="container mk-header__inner" data-bind="§2 · nav (site.config)">
+    <a class="mk-logo" href="#">Tour Đảo</a>
+    <nav class="mk-nav">
+      <a href="#">Tour &amp; Vé</a>
+      <a href="#">Kinh nghiệm du lịch</a>
+      <a href="#">Hỗ trợ</a>
+      <a href="#">Liên hệ</a>
+      <a href="#" class="mk-nav__cta">Đặt vé trực tuyến</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="container index-head">
+    <h1 class="index-title" data-bind="§5.2 · tiêu đề nhánh (config build)">Tour biển đảo Nha Trang</h1>
+    <p class="index-desc" data-bind="§5.2 · mô tả nhánh (config build)">
+      Tour do Tour Đảo trực tiếp vận hành và tour của đối tác. Mỗi tour ghi rõ hành trình từng chặng,
+      phần đã bao gồm và chưa bao gồm. Đặt chỗ qua Zalo, người thật trả lời.
+    </p>
+
+    <!-- Lối lọc theo term — §5.2 chỉ áp cho /trai-nghiem/ và /tour/, và ẩn khi
+         chưa term nào đủ R2. Hôm nay CHƯA term nào có trang → cụm này không
+         render trên bản thật. Giữ ở đây để bước 8 biết hình dạng khi có term. -->
+    <div class="terms" data-bind="§5.2 · term có trang (R2)">
+      <a class="term" href="#">Tour ghép</a>
+      <a class="term" href="#">Tour riêng</a>
+      <a class="term" href="#">Lặn biển</a>
+    </div>
+  </div>
+
+  <div class="container" style="padding-bottom: var(--s9)">
+    <div class="grid" data-density data-bind="§5.1 · card chuẩn">
+      <a class="card" href="#">
+        <div class="card__media">
+          <img src="https://cdn.sanity.io/images/pgedy374/production/b269e1f4c44345e34b4e6c061f0e1e30e0c682d5-750x500.jpg?w=900&amp;q=75&amp;auto=format" alt="tour 3 đảo nha trang">
+        </div>
+        <div class="card__body">
+          <h2 class="card__title">Tour 3 đảo Nha Trang</h2>
+          <p class="card__summary">
+            Hòn Mun ngắm biển và san hô, Làng Chài ăn trưa trên bè nổi, Hòn Tằm tắm bùn khoáng và hồ bơi
+            hướng vịnh. Xe đón tận khách sạn trung tâm, hướng dẫn viên đi cùng suốt hành trình.
+          </p>
+          <div class="card__meta">
+            <span class="badge">Linh hoạt</span>
+            <!-- Nhãn giá (§5.1) KHÔNG render: tour chưa có bookingRef, prices.yaml trống. -->
+          </div>
+        </div>
+      </a>
+      <a class="card" href="#">
+        <div class="card__media"><img src="https://cdn.sanity.io/images/pgedy374/production/3b3f565d5063b82d91c1e50d577642b27a05e38d-1067x800.jpg?w=900&amp;q=75&amp;auto=format" alt="Hòn Tằm"></div>
+        <div class="card__body">
+          <h2 class="card__title">Tour Hòn Tằm nửa ngày</h2>
+          <p class="card__summary">Ra đảo bằng cano, tắm bùn khoáng và hồ bơi hướng vịnh, về trong buổi chiều.</p>
+          <div class="card__meta">
+            <span class="badge">Linh hoạt</span>
+            <span class="badge badge--price">từ 350.000₫</span>
+          </div>
+        </div>
+      </a>
+      <a class="card" href="#">
+        <div class="card__media"></div>
+        <div class="card__body">
+          <h2 class="card__title">Tour lặn biển Hòn Mun</h2>
+          <p class="card__summary">Lặn bình khí có huấn luyện viên kèm một kèm một, tại điểm lặn được phép.</p>
+          <div class="card__meta"><span class="badge">Tour ghép</span></div>
+        </div>
+      </a>
+      <a class="card" href="#">
+        <div class="card__media"></div>
+        <div class="card__body">
+          <h2 class="card__title">Tour 4 đảo trọn ngày</h2>
+          <p class="card__summary">Thêm một chặng đảo so với tuyến 3 đảo, phù hợp nhóm ở lại lâu.</p>
+          <div class="card__meta"><span class="badge">Tour riêng</span></div>
+        </div>
+      </a>
+      <a class="card" href="#">
+        <div class="card__media"></div>
+        <div class="card__body">
+          <h2 class="card__title">Tour Bình Ba</h2>
+          <p class="card__summary">Đảo tôm hùm, đi trong ngày từ Nha Trang.</p>
+          <div class="card__meta"><span class="badge">Tour ghép</span></div>
+        </div>
+      </a>
+      <a class="card" href="#">
+        <div class="card__media"></div>
+        <div class="card__body">
+          <h2 class="card__title">Tour Điệp Sơn</h2>
+          <p class="card__summary">Con đường giữa biển, chụp ảnh lúc thuỷ triều xuống.</p>
+          <div class="card__meta"><span class="badge">Tour ghép</span></div>
+        </div>
+      </a>
+    </div>
+
+    <p class="count">1 tour</p>
+
+    <div class="mk-note">
+      <b>Vì sao trang này được phép để hàng cuối lẻ, còn trang chủ thì không.</b>
+      Danh sách có dòng đếm “N tour” đóng khung nó là một danh sách — hàng cuối 1–2 thẻ đọc ra là
+      “hết danh sách”. Khối trên trang chủ không có dòng đếm, nên hàng lẻ đọc ra là “thiếu”.
+      Vì vậy: trang danh sách dùng 3 cột từ 5 mục trở lên; khối trang chủ cắt còn 3 hoặc 4 mục
+      (§4.1 đã cho phép “tối đa 4 card”) kèm link “Xem tất cả”.
+      Riêng mốc 1 mục thì cả hai trang dùng chung một quy tắc: <b>thẻ spotlight nằm ngang</b>.
+    </div>
+
+    <div class="mk-note">
+      <b>Trạng thái 0 tour không tồn tại trên trang sống.</b> §5.2 và quyết định nền 4: nhánh 0 entity
+      publish thì không sinh trang index, header gỡ luôn link nhánh đó. Nên mockup này cố ý KHÔNG có
+      thiết kế “empty state”. Xem PHA-F-BAN-GIAO §7 — bản build hiện tại đang sinh trang rỗng cho
+      <code>/khach-san/</code>, <code>/resort/</code>, <code>/luu-tru/</code>, tức lệch với luật này.
+    </div>
+  </div>
+</main>
+
+<footer class="mk-footer">
+  <div class="container">
+    <p>Công ty TNHH Tour Đảo — đầu mối trọn gói cho chuyến biển đảo Nha Trang.</p>
+  </div>
+</footer>
+
+<script src="_shell.js"></script>
+</body>
+</html>
