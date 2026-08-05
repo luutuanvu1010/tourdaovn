@@ -209,6 +209,61 @@ export default defineType({
         },
       ],
     }),
+    // CONTENT_MODEL §2.15 v1.0.14 — nội dung trang /ho-tro (ADR-0023).
+    // Ba phần độc lập: phần nào trống thì khối đó không hiện trên trang và node
+    // JSON-LD tương ứng không phát. Cấm hardcode chính sách hay câu hỏi thường
+    // gặp trong component.
+    defineField({
+      name: 'support',
+      title: 'Trang Hỗ trợ',
+      description:
+        'Nội dung trang /ho-tro. Ba phần độc lập nhau — để trống phần nào thì phần đó ' +
+        'không hiện, trang vẫn chạy bình thường.',
+      type: 'object',
+      options: { collapsible: true, collapsed: true },
+      fields: [
+        defineField({
+          name: 'bookingGuide',
+          title: 'Hướng dẫn đặt tour',
+          description: 'Các bước khách cần làm để đặt. Kéo thả để sắp thứ tự.',
+          type: 'array',
+          of: [
+            {
+              type: 'object',
+              fields: [
+                defineField({
+                  name: 'step',
+                  title: 'Tên bước',
+                  type: 'string',
+                  description: 'Ví dụ "Bước 1 — Chọn tour".',
+                }),
+                defineField({
+                  name: 'text',
+                  title: 'Mô tả',
+                  type: 'text',
+                  rows: 3,
+                }),
+              ],
+              preview: { select: { title: 'step', subtitle: 'text' } },
+            },
+          ],
+        }),
+        defineField({
+          name: 'cancellationPolicy',
+          title: 'Chính sách huỷ và hoàn tiền',
+          description: 'Viết như một bài — có thể in đậm, gạch đầu dòng, chèn ảnh.',
+          type: 'array',
+          of: [{ type: 'block' }, { type: 'image' }],
+        }),
+        defineField({
+          name: 'faq',
+          title: 'Câu hỏi thường gặp',
+          description: 'Hiện trên trang, đồng thời phát ra dữ liệu có cấu trúc cho Google.',
+          type: 'array',
+          of: [{ type: 'faqItem' }],
+        }),
+      ],
+    }),
   ],
   preview: {
     select: { title: 'title' },

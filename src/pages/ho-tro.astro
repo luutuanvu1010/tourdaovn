@@ -1,0 +1,180 @@
+---
+// Trang Hỗ trợ — URL: /ho-tro/
+//
+// Nguồn dữ liệu duy nhất: siteSettings.support (CONTENT_MODEL §2.15 v1.0.14, ADR-0023).
+// Ba phần độc lập nhau — phần nào trống thì khối đó không render và node JSON-LD tương
+// ứng không phát. Cấm hardcode chính sách hay câu hỏi thường gặp tại đây.
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Section from '../components/Section.astro'
+import Body from '../components/Body.astro'
+import FAQ from '../components/FAQ.astro'
+import ContactChannels from '../components/ContactChannels.astro'
+import { getClient } from '../lib/sanity'
+import { siteSettingsQuery } from '../lib/queries'
+import { jsonLdScriptContent, faqToLd } from '../lib/serialize/utils'
+import { siteBaseUrl } from '../lib/siteUrl'
+import { brand, defaultLang } from '../site.config'
+import type { SiteSettingsResult } from '../lib/types'
+
+const PATH = '/ho-tro/'
+
+const config: SiteSettingsResult | null = await getClient().fetch(siteSettingsQuery())
+const support = config?.support ?? null
+const contact = config?.contact ?? null
+
+const bookingGuide = (support?.bookingGuide ?? []).filter(s => s.step || s.text)
+const policy = support?.cancellationPolicy ?? null
+const faq = support?.faq ?? []
+
+const metaTitle = `Hỗ trợ — ${brand.name}`
+const metaDescription = `Hướng dẫn đặt tour, chính sách huỷ và hoàn tiền, câu hỏi thường gặp của ${brand.legalName}.`
+
+const siteBase = siteBaseUrl(Astro.site).replace(/\/$/, '')
+const pageUrl = siteBase + PATH
+
+// HowTo dựng theo đúng khuôn đã dùng cho article.howTo (serialize/article.ts) — cùng
+// một hình dạng dữ liệu thì dùng cùng một cách serialize, không viết bản thứ hai.
+const howToLd = bookingGuide.length > 0
+  ? {
+      '@type': 'HowTo',
+      '@id': `${pageUrl}#howto`,
+      name: 'Hướng dẫn đặt tour',
+      step: bookingGuide.map((s, i) => ({
+        '@type': 'HowToStep',
+        position: i + 1,
+        name: s.step,
+        text: s.text,
+      })),
+    }
+  : null
+
+// Dùng faqToLd (dựng mảng Question) chứ không dùng faqPageToLd: hàm kia tự dựng
+// `@id` qua urlForEntity, mà đây là trang tĩnh chứ không phải entity nên nó sẽ ra
+// đường dẫn không tồn tại. Phần còn lại giữ đúng hình dạng của faqPageToLd, kể cả
+// `speakable` — hợp lệ trên FAQPage vì FAQPage là subtype của WebPage.
+const questions = faqToLd(faq)
+const faqLd = questions.length > 0
+  ? {
+      '@type': 'FAQPage',
+      '@id': `${pageUrl}#faq`,
+      mainEntity: questions,
+      speakable: { '@type': 'SpeakableSpecification', cssSelector: ['[data-speakable]'] },
+    }
+  : null
+
+const subjectOf = [howToLd, faqLd].filter(Boolean)
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': `${pageUrl}#webpage`,
+    url: pageUrl,
+    name: metaTitle,
+    description: metaDescription,
+    inLanguage: defaultLang,
+    isPartOf: { '@id': `${siteBase}/#website` },
+    ...(subjectOf.length > 0 ? { subjectOf } : {}),
+  },
+]
+
+const hasAnything = bookingGuide.length > 0 || !!policy || faq.length > 0
+---
+
+<BaseLayout title={metaTitle} description={metaDescription} lang={defaultLang} currentPath={PATH}>
+  <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)} />
+
+  <Section heading="Hỗ trợ">
+    {!hasAnything && (
+      <p class="lead">Nội dung hỗ trợ đang được cập nhật. Trong lúc chờ, bạn liên hệ trực tiếp giúp chúng tôi.</p>
+    )}
+
+    {bookingGuide.length > 0 && (
+      <div class="support-block">
+        <h2 class="support-heading">Hướng dẫn đặt tour</h2>
+        <ol class="steps">
+          {bookingGuide.map(step => (
+            <li class="step">
+              {step.step && <strong class="step-name">{step.step}</strong>}
+              {step.text && <p class="step-text">{step.text}</p>}
+            </li>
+          ))}
+        </ol>
+      </div>
+    )}
+
+    {policy && (
+      <div class="support-block">
+        <h2 class="support-heading">Chính sách huỷ và hoàn tiền</h2>
+        <div class="body-text"><Body blocks={policy} /></div>
+      </div>
+    )}
+
+    <ContactChannels contact={contact} lang={defaultLang} />
+  </Section>
+
+  {faq.length > 0 && <FAQ faq={faq} heading="Câu hỏi thường gặp" lang={defaultLang} />}
+</BaseLayout>
+
+<style>
+  .lead {
+    max-width: var(--container-editorial);
+    font-size: var(--fs-base);
+    color: var(--c-text-muted);
+    margin-bottom: var(--s5);
+  }
+
+  .support-block {
+    max-width: var(--container-editorial);
+    margin-bottom: var(--s7);
+  }
+
+  .support-heading {
+    font-size: var(--fs-section);
+    margin-bottom: var(--s4);
+  }
+
+  .steps {
+    list-style: none;
+    counter-reset: step;
+  }
+
+  .step {
+    counter-increment: step;
+    position: relative;
+    padding-left: var(--s7);
+    padding-bottom: var(--s5);
+  }
+
+  .step::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-pill);
+    background: var(--c-primary-soft);
+    color: var(--c-primary);
+    font-weight: var(--fw-700);
+    font-size: var(--fs-sm);
+  }
+
+  .step-name {
+    display: block;
+    font-family: var(--font-display);
+    font-size: var(--fs-card-title);
+    margin-bottom: var(--s2);
+  }
+
+  .step-text {
+    color: var(--c-text-muted);
+  }
+
+  .body-text {
+    line-height: var(--lh-body);
+  }
+</style>

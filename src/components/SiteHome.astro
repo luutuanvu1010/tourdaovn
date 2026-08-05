@@ -1,5 +1,6 @@
 ---
 import { HOME_COPY, indexHref } from '../lib/homepage'
+import { resolveNav } from '../lib/routes'
 import { imageUrl } from '../lib/sanity-image'
 import type { Lang, TouristDestinationResult, SiteSettingsResult } from '../lib/types'
 import { brand } from '../site.config'
@@ -20,6 +21,12 @@ export interface Props {
 
 const { td, lang, destinationHref, config } = Astro.props
 const copy = HOME_COPY[lang]
+
+// Nút phụ ở hero lấy mục đầu tiên của menu (ADR-0023) thay vì hardcode hub-kham-pha.
+// Menu đổi thì nút này đổi theo, không còn hai nơi khai điều hướng (DR-007).
+const firstNavItem = resolveNav(lang, config?.contact?.zaloUrl)
+  .flatMap(item => (item.children.length > 0 ? item.children : [item]))
+  .find(item => item.href)
 
 const SITE_COPY: Record<Lang, {
   eyebrow: string
@@ -111,7 +118,7 @@ const activeSections = rawSections.filter((s) => !s.hidden)
     <p class="site-home-summary">{siteCopy.summary}</p>
     <div class="site-home-actions">
       <a href={destinationHref} class="primary-action">{siteCopy.destinationCta}</a>
-      {indexHref('hub-kham-pha', lang) && <a href={indexHref('hub-kham-pha', lang)} class="secondary-action">{copy.quickLinks[0]?.label}</a>}
+      {firstNavItem?.href && <a href={firstNavItem.href} class="secondary-action">{firstNavItem.label}</a>}
     </div>
   </div>
 </section>

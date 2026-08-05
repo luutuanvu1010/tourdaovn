@@ -17,7 +17,7 @@ Phần KHÔNG nhãn (cơ chế field 2.0, ba họ gate, quy tắc giá, khối q
 > 🔧 **SITE-SPECIFIC:** danh mục 14 entity và mọi ví dụ (Specialty, TouristDestination, 5 ngôn ngữ) là của nhatrangtravel. Giữ *cơ chế* (field 2.0, ba họ gate, quy tắc bookingRef, khối quản trị); thay *danh mục entity* theo site.
 
 - **Trạng thái:** đã duyệt. Founder soát toàn văn theo cụm 2026-06-11 (rà phản biện độc lập, 7 vết chốt qua trắc nghiệm), bước 1 đóng.
-- **Phiên bản:** v1.0.13   **Ngày:** 2026-08-04   **Người soạn:** Cowork (tác nhân điều phối).
+- **Phiên bản:** v1.0.14   **Ngày:** 2026-08-05   **Người soạn:** Cowork (tác nhân điều phối).
 - **Nguồn quyết định:** brief mục 5-6 cộng các lựa chọn founder 2026-06-10 và 2026-06-11 (xem `DECISIONS.md` và `project/adr/` từ ADR-0002 đến ADR-0006).
 - **Kế thừa ràng buộc:** CONSTITUTION v2.2.0, PROJECT_OVERLAY v1.0.2 (S2.2 bất biến dữ liệu, S2.3 ngưỡng, S2.4 SEO/GEO, S2.5 đa ngôn ngữ).
 - **Override hiện hành:** từ 2026-06-30, `imageProvenance` là dữ liệu nội bộ tùy chọn, ẩn khỏi layout biên tập và không còn nằm trong gate publish I12. Từ 2026-07-02, `Attraction.containedInPlace` có thể trỏ `Place` hoặc `TouristDestination` khi Nha Trang là container thực tế; không khôi phục `seed.trung-tam-nha-trang`. Các dòng lịch sử bên dưới ghi "có khi có ảnh", "cộng imageProvenance khi có ảnh", hoặc "Attraction Place-only" chỉ còn là bối cảnh cũ, đã bị supersede bởi `DECISIONS.md`.
@@ -537,6 +537,7 @@ Cấu hình toàn site. Toàn bộ dataset chỉ có đúng 1 document. i18n fie
 | heroText | object {vi,en,zh,ko,ru} | tùy | có (field-level) | ghi đè dòng eyebrow của hero; để trống → dùng SITE_COPY | founder |
 | contact | object | tùy | không | 4 field con, dữ liệu trung lập ngôn ngữ; field con nào trống thì kênh đó không render (guard rỗng, không nút chết) | founder |
 | pickupPoints | array object | tùy | không | lộ trình đón khách của công ty; thứ tự render là thứ tự trong mảng; mảng rỗng hoặc thiếu → trang lộ trình không render bản đồ (guard rỗng) | founder |
+| support | object | tùy | không | nội dung trang `/ho-tro/`; 3 phần con độc lập nhau, phần nào trống thì khối đó không render (guard rỗng); cả object trống hoặc thiếu → trang vẫn dựng, chỉ còn tiêu đề và kênh liên hệ | founder |
 
 Field `sections[]`:
 - `key`: string enum đóng 15 giá trị — hero | trustBar | editorialBody | banners | hubGrid | areas | attractions | experiences | guides | stays | specialties | tours | faq | safety | meta
@@ -564,9 +565,20 @@ Field `pickupPoints[]` (thêm v1.0.13 — lộ trình đón khách, chuỗi CONV
 
 Đây là nguồn duy nhất cho lộ trình đón khách, cấm hardcode danh sách điểm đón trong component hay copy tĩnh. Nơi render: trang `/lo-trinh-don-khach` (bản đồ RouteMap + bảng giờ đón). Bản đồ vẽ đường nối các điểm theo đúng thứ tự mảng; điểm `hidden = true` bị loại khỏi cả bản đồ lẫn bảng.
 
-**Trạng thái 2026-08-04 — ĐANG PHÁT TRIỂN, CHƯA LÊN PRODUCTION.** Chủ dự án chốt giữ tính năng ở chế độ phát triển. Cờ `devPages['lo-trinh-don-khach']` trong `src/site.config.ts` (mục 5) đang để `false`: trang chỉ xem được bằng `npm run dev`, bản `npm run build` không sinh trang và sitemap không liệt kê. Field trong Sanity Studio VẪN MỞ để nhập thử dữ liệu — dữ liệu nhập vào lúc này không hiện ra site thật. Khi chốt công bố: bật cờ sang `true`, và quyết luôn chỗ đặt link (menu chính sinh từ `routes.ts` nên thêm link cứng vào `Header.astro` sẽ phá quy tắc một nguồn sự thật R3 — đây là phiếu nợ chưa xử).
+**Trạng thái 2026-08-04 — ĐANG PHÁT TRIỂN, CHƯA LÊN PRODUCTION.** Chủ dự án chốt giữ tính năng ở chế độ phát triển. Cờ `devPages['lo-trinh-don-khach']` trong `src/site.config.ts` (mục 5) đang để `false`: trang chỉ xem được bằng `npm run dev`, bản `npm run build` không sinh trang và sitemap không liệt kê. Field trong Sanity Studio VẪN MỞ để nhập thử dữ liệu — dữ liệu nhập vào lúc này không hiện ra site thật. Khi chốt công bố: bật cờ sang `true`, và khai một dòng `kind: 'static'` trong `nav` ở `site.config.ts`. Phiếu nợ "chỗ đặt link" nêu ở đây đã được ADR-0023 trả: điều hướng nay khai một chỗ duy nhất, không còn phải thêm link cứng vào `Header.astro`.
 
 Có chủ ý KHÔNG lưu: vị trí xe theo thời gian thực (cần thiết bị GPS và hợp đồng nhà cung cấp, ngoài phạm vi CMS), và giá vé (I1 — giá không nằm trong CMS).
+
+Field `support` (thêm v1.0.14 — nội dung trang Hỗ trợ, ADR-0023):
+- `bookingGuide`: array object `{step, text}` — hướng dẫn đặt tour theo bước; cùng hình dạng `article.howTo` và serialize ra `HowTo` + `HowToStep`
+- `cancellationPolicy`: portable text — chính sách huỷ và hoàn; cùng hình dạng `body`, render bằng `Body.astro`
+- `faq`: array `faqItem` — câu hỏi thường gặp; serialize ra `FAQPage` bằng đúng `faqPageToLd()` dùng chung
+
+Ba phần độc lập: phần nào trống thì khối đó không render và node JSON-LD tương ứng không phát (guard rỗng theo §5.1). Đây là nguồn duy nhất cho nội dung trang `/ho-tro/`, cấm hardcode chính sách hay câu hỏi thường gặp trong component. Nơi render: trang `/ho-tro/`.
+
+**Dữ liệu trung lập ngôn ngữ, không bọc object đa ngữ.** Theo đúng tiền lệ `contact` (v1.0.11) và `pickupPoints` (v1.0.13) trong chính singleton này, và khớp `langs = ['vi']` ở `site.config.ts`. Dựng sẵn khuôn 5 ngôn ngữ cho một site chạy một ngôn ngữ chính là hình dạng đã sinh ra DR-012 và DR-024, phải đi sửa hai lần. Khi site mở thêm ngôn ngữ, nâng `support` lên object localized theo đúng thủ tục §2.2, cùng lúc với `contact` và `pickupPoints`.
+
+Trang `/lien-he/` KHÔNG cần field mới: nó đọc `contact` đã có, cộng `brand.legalName` từ `site.config.ts`. Serialize ra `ContactPage`.
 
 Gate publish: không có gate publish — đây là config, không phải content entity. reviewStatus/approvedBy/contentProvenance không áp dụng.
 
@@ -796,5 +808,7 @@ Lý do chi tiết và phương án đã loại của từng thay đổi nằm �
 - v1.0.12 (2026-08-04): hai thay đổi do chủ dự án chốt. (1) **Chuỗi phân cấp địa lý thành entity thật** — thêm `province` và `commune` vào enum `placeType` (§2.2), tỉnh Khánh Hoà giờ là một Place cấp province làm gốc chuỗi: Tỉnh Khánh Hoà → Phường Nha Trang → Hòn Mun → Lặn biển (§3). Bảng quan hệ sửa "Place nằm trong TouristDestination" thành "Place nằm trong Place cấp trên hoặc TouristDestination". Thêm field display-only `placeHierarchy` (§2.2) hiển thị trọn chuỗi trong Studio, `incomingExperiences` bị nó thay thế và ẩn khỏi layout. Không thêm document type mới nên là cửa hai chiều theo §5.3. (2) **Nới bắt buộc** — mọi field tuỳ chọn trừ `title.vi` và `slug.vi`, áp ở cả `cms/schemas/*.ts` lẫn `scripts/gate.config.ts`; I19 và kiểm reference giữ nguyên. Xem "Nới bắt buộc v1.0.12" ở §4.
 
 - v1.0.13 (2026-08-04): thêm field `pickupPoints` vào siteSettings (§2.15) — danh sách điểm đón khách của công ty (tên, địa chỉ, toạ độ, giờ đón, ghi chú, cờ ẩn), nguồn duy nhất cho trang `/lo-trinh-don-khach`. Không thêm document type mới nên là cửa hai chiều theo §5.3. Chốt phạm vi: chỉ điểm đón tĩnh + đường nối, KHÔNG theo dõi xe thời gian thực (cần thiết bị GPS và hợp đồng nhà cung cấp, ngoài phạm vi CMS). Cùng ngày chủ dự án chốt GIỮ Ở CHẾ ĐỘ PHÁT TRIỂN, chưa công bố — thêm bảng `devPages` vào `src/site.config.ts` (mục 5) làm công tắc, cờ để `false`. Field trong Studio vẫn mở để nhập thử.
+
+- v1.0.14 (2026-08-05): thêm field `support` vào siteSettings (§2.15) — nội dung trang `/ho-tro/`, ba phần độc lập: `bookingGuide` (hướng dẫn đặt tour, cùng hình dạng `article.howTo`, ra `HowTo`), `cancellationPolicy` (chính sách huỷ/hoàn, portable text), `faq` (câu hỏi thường gặp, `faqItem`, ra `FAQPage`). Dữ liệu trung lập ngôn ngữ theo tiền lệ `contact` và `pickupPoints`. Không thêm document type mới nên là cửa hai chiều theo §5.3. Trang `/lien-he/` không cần field mới, đọc `contact` đã có và ra `ContactPage`. Phần điều hướng của cùng đợt ghi ở ADR-0023; phiếu nợ "chỗ đặt link menu" nêu trong §2.15 được ADR đó trả. Bản ghi DECISIONS cùng ngày.
 
 Mỗi bảng field có cột "dịch được" để quyết i18n field-level, field bất biến không nhân bản (ADR-0004). Khi dựng một trang, tách rõ ba tầng: field của entity, rollup suy ở build từ entity liên quan, và trình bày của template. Đừng biến layout thành field (N1).

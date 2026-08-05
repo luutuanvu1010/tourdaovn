@@ -1,6 +1,7 @@
 ---
 import type { Lang } from '../lib/types'
-import { ROUTE_MAP } from '../lib/routes'
+import { resolveNav } from '../lib/routes'
+import { fetchSiteContact } from '../lib/siteContact'
 import { uiCopy } from '../lib/uiCopy'
 import { brand, langs } from '../site.config'
 
@@ -17,14 +18,19 @@ export interface Props {
 const { currentPath = '/', lang = 'vi', alternates } = Astro.props;
 const uiLang = (['vi', 'en', 'zh', 'ko', 'ru'].includes(lang) ? lang : 'vi') as Lang
 const t = uiCopy(uiLang)
-const prefix = uiLang === 'vi' ? '' : `/${uiLang}`
 const homeHref = uiLang === 'vi' ? '/' : `/${uiLang}/`
 
-// Nav từ ROUTE_MAP — nguồn duy nhất cho segment + nhãn hub theo ngôn ngữ (R3)
-const navItems = ['hub-kham-pha', 'hub-luu-tru', 'hub-di-lai']
-  .map(id => ROUTE_MAP.find(r => r.entity === id))
-  .filter(Boolean)
-  .map(r => ({ label: r!.labels[uiLang], href: `${prefix}/${r!.segments[uiLang]}/` }));
+// Menu đọc từ `nav` trong site.config.ts — nguồn duy nhất (ADR-0023, DR-007).
+// zaloUrl lấy từ Sanity: chưa điền thì mục "Đặt vé trực tuyến" tự biến mất,
+// không render nút chết.
+const contact = await fetchSiteContact()
+const navItems = resolveNav(uiLang, contact?.zaloUrl)
+
+/** Mục đang mở? Dùng cho cả mục lẻ lẫn nhóm có con. */
+function isActive(href: string | null, children: { href: string | null }[]): boolean {
+  if (href && href !== '/' && currentPath.startsWith(href)) return true
+  return children.some(c => c.href && c.href !== '/' && currentPath.startsWith(c.href))
+}
 
 // Danh sách nút chuyển ngôn ngữ đọc từ `langs` trong site.config.ts (PHA 4, GÓI 2) —
 // không khai tay danh sách 5 ngôn ngữ ở đây nữa. Chỉ 1 ngôn ngữ → ẩn hẳn cụm, không xoá
@@ -48,10 +54,31 @@ const languages = langs.map(code => ({ code, label: LANG_LABELS[code] }));
     </a>
 
     <nav class="nav-main" aria-label={t('mainNavAria')}>
-      {navItems.map(item => (
+      {navItems.map(item => item.children.length > 0 ? (
+        <div class="nav-group">
+          <button
+            type="button"
+            class={`nav-link nav-toggle${isActive(item.href, item.children) ? ' active' : ''}`}
+            aria-expanded="false"
+          >
+            {item.label}
+            <svg class="nav-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+          <div class="nav-submenu">
+            {item.children.map(child => (
+              <a href={child.href} class={child.href && currentPath.startsWith(child.href) ? 'active' : ''}>
+                {child.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      ) : (
         <a
           href={item.href}
-          class={currentPath.startsWith(item.href) ? 'active' : ''}
+          class={`nav-link${isActive(item.href, item.children) ? ' active' : ''}`}
+          {...(item.href?.startsWith('http') ? { rel: 'noopener', target: '_blank' } : {})}
         >
           {item.label}
         </a>
@@ -149,9 +176,41 @@ const languages = langs.map(code => ({ code, label: LANG_LABELS[code] }));
     a.addEventListener('click', () => { if (open) hide(); });
   });
 
+  // ── Nhóm thả xuống ──
+  // Dùng <button> chứ không phải hover thuần CSS: hover không mở được bằng bàn
+  // phím và không dùng được trên cảm ứng.
+  const groups = Array.from(document.querySelectorAll('.nav-group')) as HTMLElement[];
+
+  function closeGroups(except?: HTMLElement) {
+    for (const g of groups) {
+      if (g === except) continue;
+      g.removeAttribute('data-open');
+      g.querySelector('.nav-toggle')?.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  for (const group of groups) {
+    const toggle = group.querySelector('.nav-toggle') as HTMLElement | null;
+    if (!toggle) continue;
+    toggle.addEventListener('click', () => {
+      const isOpen = group.getAttribute('data-open') === 'true';
+      closeGroups(group);
+      group.toggleAttribute('data-open', !isOpen);
+      if (!isOpen) group.setAttribute('data-open', 'true');
+      toggle.setAttribute('aria-expanded', String(!isOpen));
+    });
+  }
+
+  // Bấm ra ngoài thì đóng
+  document.addEventListener('click', (e) => {
+    if (!(e.target as Element)?.closest('.nav-group')) closeGroups();
+  });
+
   // Close on Escape
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && open) {
+    if (e.key !== 'Escape') return;
+    closeGroups();
+    if (open) {
       hide();
       btn!.focus();
     }
@@ -215,27 +274,74 @@ const languages = langs.map(code => ({ code, label: LANG_LABELS[code] }));
 
   .nav-main {
     display: flex;
+    align-items: center;
     gap: var(--s2);
     flex: 1;
   }
 
-  .nav-main a {
+  .nav-main a,
+  .nav-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s1);
     padding: var(--s3) var(--s3);
     border-radius: var(--radius-sm);
+    font-family: inherit;
     font-size: var(--fs-sm);
     font-weight: var(--fw-600);
     color: var(--c-text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
     transition: all var(--m-fast) var(--m-ease);
   }
 
-  .nav-main a:hover {
+  .nav-main a:hover,
+  .nav-toggle:hover {
     color: var(--c-primary);
     background: var(--c-primary-soft);
   }
 
-  .nav-main a.active {
+  .nav-main a.active,
+  .nav-toggle.active {
     color: var(--c-primary);
     background: var(--c-primary-soft);
+  }
+
+  /* ── Nhóm thả xuống ── */
+  .nav-group {
+    position: relative;
+  }
+
+  .nav-caret {
+    transition: transform var(--m-fast) var(--m-ease);
+  }
+
+  .nav-toggle[aria-expanded='true'] .nav-caret {
+    transform: rotate(180deg);
+  }
+
+  .nav-submenu {
+    display: none;
+    position: absolute;
+    top: calc(100% + var(--s2));
+    left: 0;
+    min-width: 232px;
+    flex-direction: column;
+    padding: var(--s2);
+    background: var(--c-card);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-raised);
+    z-index: 120;
+  }
+
+  .nav-group[data-open='true'] .nav-submenu {
+    display: flex;
+  }
+
+  .nav-submenu a {
+    white-space: nowrap;
   }
 
   .nav-actions {
@@ -298,6 +404,24 @@ const languages = langs.map(code => ({ code, label: LANG_LABELS[code] }));
     }
     .hamburger {
       display: inline-flex;
+    }
+    /* Trên điện thoại menu đã là một cột — nhóm con trải phẳng thay vì
+       nổi lên trên, vì lớp nổi trong menu dọc rất khó bấm trúng. */
+    .nav-group,
+    .nav-submenu {
+      display: block;
+      position: static;
+      min-width: 0;
+      padding: 0;
+      border: none;
+      box-shadow: none;
+      background: none;
+    }
+    .nav-submenu a {
+      padding-left: var(--s5);
+    }
+    .nav-toggle {
+      display: none;
     }
   }
 </style>

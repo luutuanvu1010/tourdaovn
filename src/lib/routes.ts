@@ -4,6 +4,11 @@ import {
   isRouteEnabled,
   entities as ENTITY_FLAGS,
   hubs as HUB_FLAGS,
+  nav,
+  staticPages,
+  langs,
+  defaultLang,
+  type NavItem,
 } from '../site.config'
 
 /** Mọi mục ĐÃ ĐƯỢC KHAI trong site.config, kể cả mục đang để false. */
@@ -97,4 +102,147 @@ export function lookupRoute(segment: string, lang: Lang): RouteEntry | null {
 
 export function isTermEntity(entity: string): boolean {
   return entity === 'experience' || entity === 'tour'
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+//  MENU CHÍNH — phân giải `nav` trong site.config.ts thành địa chỉ thật
+//  (ADR-0023. Trước đây menu viết cứng ở Header/Footer/homepage — DR-007.)
+// ───────────────────────────────────────────────────────────────────────────
+
+/** Một mục menu đã phân giải xong, sẵn sàng render. */
+export interface ResolvedNavItem {
+  label: string
+  /** Địa chỉ đích. `null` với mục 'zalo' chưa điền link, và với mục có children. */
+  href: string | null
+  /** Địa chỉ nội bộ phải tồn tại trong build. `null` nếu đích nằm ngoài site. */
+  internalPath: string | null
+  children: ResolvedNavItem[]
+}
+
+function langPrefix(lang: Lang): string {
+  return lang === defaultLang ? '' : `/${lang}`
+}
+
+/** Segment công khai của một danh mục hoặc hub. `null` nếu mục đang tắt. */
+function segmentOf(entity: string, lang: Lang): string | null {
+  return ROUTE_MAP.find(r => r.entity === entity)?.segments[lang] ?? null
+}
+
+/**
+ * Đổi một mục menu thành đường dẫn nội bộ.
+ * Trả `null` khi đích nằm ngoài site ('zalo') hoặc mục chỉ là nhóm chứa con.
+ * Ném lỗi khi khai sai — bắt sớm còn hơn để menu trỏ vào hư không.
+ */
+function resolveInternalPath(item: NavItem, lang: Lang): string | null {
+  if (item.children?.length) return null
+  if (item.kind === 'zalo') return null
+
+  const prefix = langPrefix(lang)
+  const bad = (msg: string) => {
+    throw new Error(`\n\n[site.config] Mục menu "${item.label}": ${msg}\n`)
+  }
+
+  if (!item.kind) bad('thiếu `kind`. Xem bảng sáu loại đích ở site.config.ts mục 7.')
+  if (!item.target) bad(`\`kind: '${item.kind}'\` cần có \`target\`.`)
+  const target = item.target as string
+
+  if (item.kind === 'static') {
+    if (!(staticPages as readonly string[]).includes(target)) {
+      bad(`trang tĩnh "${target}" chưa khai trong \`staticPages\` ở site.config.ts.`)
+    }
+    return `${prefix}/${target}/`
+  }
+
+  if (item.kind === 'index' || item.kind === 'hub') {
+    const seg = segmentOf(target, lang)
+    if (!seg) bad(`"${target}" không có địa chỉ URL, hoặc đang tắt trong site.config.ts.`)
+    return `${prefix}/${seg}/`
+  }
+
+  // 'detail' và 'term' dùng chung dạng '<danh mục>/<đường dẫn>'
+  const slash = target.indexOf('/')
+  if (slash < 1 || slash === target.length - 1) {
+    bad(`\`kind: '${item.kind}'\` cần \`target\` dạng '<danh mục>/<đường dẫn>', đang là "${target}".`)
+  }
+  const entity = target.slice(0, slash)
+  const slug = target.slice(slash + 1)
+  const seg = segmentOf(entity, lang)
+  if (!seg) bad(`danh mục "${entity}" không có địa chỉ URL, hoặc đang tắt trong site.config.ts.`)
+  if (item.kind === 'term' && !isTermEntity(entity)) {
+    bad(`danh mục "${entity}" không có trang danh mục con, nên \`kind: 'term'\` không dùng được.`)
+  }
+  return `${prefix}/${seg}/${slug}/`
+}
+
+/**
+ * Menu đã phân giải, cho một ngôn ngữ.
+ *
+ * `zaloUrl` lấy từ siteSettings lúc build. Chưa điền thì mục 'zalo' bị bỏ hẳn
+ * khỏi menu — không render nút chết.
+ */
+export function resolveNav(lang: Lang, zaloUrl?: string | null): ResolvedNavItem[] {
+  const walk = (items: NavItem[]): ResolvedNavItem[] =>
+    items.flatMap(item => {
+      if (item.kind === 'zalo' && !zaloUrl) return []
+      const children = item.children?.length ? walk(item.children) : []
+      if (item.children?.length && children.length === 0) return []
+      const internalPath = resolveInternalPath(item, lang)
+      return [{
+        label: item.label,
+        href: item.kind === 'zalo' ? (zaloUrl ?? null) : internalPath,
+        internalPath,
+        children,
+      }]
+    })
+  return walk(nav)
+}
+
+/** Mọi đường dẫn nội bộ mà menu trỏ tới, cho mọi ngôn ngữ đang bật. */
+export function navInternalPaths(): string[] {
+  const out: string[] = []
+  const walk = (items: ResolvedNavItem[]) => {
+    for (const item of items) {
+      if (item.internalPath) out.push(item.internalPath)
+      walk(item.children)
+    }
+  }
+  // Truyền zaloUrl giả để mục 'zalo' không bị lọc mất — nó không có đường dẫn
+  // nội bộ nên không ảnh hưởng kết quả.
+  for (const lang of langs) walk(resolveNav(lang, 'https://zalo.me/placeholder'))
+  return out
+}
+
+/**
+ * BỘ KIỂM: mọi mục menu phải trỏ tới trang mà lần build này THỰC SỰ sinh ra.
+ * Mức `fail` (QĐ-2026-08-05-14). Gọi từ getStaticPaths sau khi đã dựng xong
+ * danh sách trang.
+ *
+ * Không có phép kiểm này thì khai một mục menu quá sớm sẽ lên production rồi
+ * khách bấm vào trang trắng. Có nó, build dừng ngay trên máy.
+ */
+export function assertNavTargetsExist(generatedPaths: Iterable<string>): void {
+  const norm = (p: string) => `/${p.replace(/^\/+|\/+$/g, '')}/`.replace('//', '/')
+  const have = new Set([...generatedPaths].map(norm))
+
+  // Giới hạn đã biết của phép kiểm này: trang tĩnh được TIN là có, không được
+  // kiểm. Lúc getStaticPaths chạy, các file trang khác chưa dựng nên không có
+  // cách nào biết. Khai một tên vào `staticPages` mà quên tạo file .astro thì
+  // chỗ này không bắt được — R4 post-build mới bắt, bằng cách so sitemap với
+  // output thật. R4 đã chứng minh bắt được đúng loại lỗi đó khi hai trang
+  // /ho-tro/ và /lien-he/ lần đầu bị quên khỏi sitemap.
+  for (const key of staticPages) {
+    for (const lang of langs) have.add(norm(`${langPrefix(lang)}/${key}`))
+  }
+
+  const missing = navInternalPaths().filter(p => !have.has(norm(p)))
+  if (missing.length === 0) return
+
+  throw new Error(
+    '\n\n[site.config] Menu đang trỏ tới trang KHÔNG TỒN TẠI:\n' +
+      [...new Set(missing)].map(p => `  • ${p}`).join('\n') +
+      '\n\nNguyên nhân thường gặp: khai mục menu trước khi nhập nội dung trong\n' +
+      'Sanity Studio, hoặc đường dẫn (slug) trong `nav` không khớp document thật.\n\n' +
+      'Sửa: nhập nội dung trước, hoặc tạm ghi chú dòng đó lại trong\n' +
+      'src/site.config.ts mục 7, rồi build lại.\n',
+  )
 }

@@ -204,6 +204,86 @@ export const devPages = {
 export const primaryDestinationSlug = 'nha-trang'
 
 // ═══════════════════════════════════════════════════════════════════════════
+//  7. MENU CHÍNH
+// ═══════════════════════════════════════════════════════════════════════════
+//
+//  ⚠️  ĐÂY LÀ NƠI DUY NHẤT khai menu. Trước đây menu bị viết cứng ở ba chỗ
+//      (Header.astro, Footer.astro, homepage.ts) và lệch nhau — xem ADR-0023.
+//
+//  ─────────────────────────────────────────────────────────────────────────
+//  THÊM MỘT MỤC VÀO MENU
+//  ─────────────────────────────────────────────────────────────────────────
+//
+//   1. Nhập nội dung trong Sanity Studio TRƯỚC (tour, vé, bài viết...).
+//   2. Thêm một dòng vào danh sách bên dưới.
+//   3. Chạy `npm run build`.
+//
+//   Khai một mục trỏ tới trang CHƯA CÓ nội dung thì build DỪNG và in ra đúng
+//   dòng sai. Đây là cố ý: thà đỏ trên máy còn hơn khách bấm vào trang trắng.
+//
+//  ─────────────────────────────────────────────────────────────────────────
+//  SÁU LOẠI ĐÍCH  (`kind`)
+//  ─────────────────────────────────────────────────────────────────────────
+//
+//   kind        target là gì                         Ví dụ
+//   ─────────   ─────────────────────────────────    ──────────────────────
+//   'index'     tên danh mục → trang danh sách       'article'
+//   'hub'       tên hub → trang gom nhiều danh mục   'hub-luu-tru'
+//   'term'      '<danh mục>/<đường dẫn danh mục con>' 'experience/lan-bien'
+//   'detail'    '<danh mục>/<đường dẫn document>'    'tour/tour-hon-tam'
+//   'static'    tên trang tĩnh                       'lien-he'
+//   'zalo'      KHÔNG có target — tự lấy "Liên kết Zalo" trong Sanity Studio
+//
+//   Mục có `children` trở thành menu thả xuống.
+//
+//   Riêng 'zalo': chưa điền Liên kết Zalo trong Studio thì mục này tự ẩn.
+//   Không có nút chết.
+
+export type NavKind = 'index' | 'hub' | 'term' | 'detail' | 'static' | 'zalo'
+
+export interface NavItem {
+  /** Chữ hiện trên menu */
+  label: string
+  /** Loại đích. Mục có `children` thì bỏ trống. */
+  kind?: NavKind
+  /** Địa chỉ đích, theo bảng sáu loại ở trên. */
+  target?: string
+  /** Danh sách con — mục này thành menu thả xuống. */
+  children?: NavItem[]
+}
+
+export const nav: NavItem[] = [
+  {
+    label: 'Tour & Vé',
+    children: [
+      { label: 'Tour đảo Nha Trang', kind: 'detail', target: 'tour/tour-3-dao-nha-trang-review-chi-tiet' },
+
+      // ── CHƯA CÓ NỘI DUNG ─────────────────────────────────────────────
+      //  Nhập document trong Sanity Studio rồi bỏ dấu // ở đầu dòng tương
+      //  ứng, sửa lại phần sau dấu / cho khớp đường dẫn thật.
+      //
+      // { label: 'Tour Hòn Tằm',    kind: 'detail', target: 'tour/tour-hon-tam' },
+      // { label: 'Tour Mini Beach', kind: 'detail', target: 'tour/tour-mini-beach' },
+      // { label: 'Vé VinWonders',   kind: 'detail', target: 'attraction/vinwonders-nha-trang' },
+      // { label: 'KongForest',      kind: 'detail', target: 'attraction/kongforest' },
+      // { label: 'Tắm bùn Tháp Bà', kind: 'detail', target: 'attraction/tam-bun-thap-ba' },
+      // { label: 'i-Resort',        kind: 'detail', target: 'attraction/i-resort' },
+    ],
+  },
+  { label: 'Kinh nghiệm du lịch', kind: 'index',  target: 'article' },
+  { label: 'Đặt vé trực tuyến',   kind: 'zalo' },
+  { label: 'Hỗ trợ',              kind: 'static', target: 'ho-tro' },
+  { label: 'Liên hệ',             kind: 'static', target: 'lien-he' },
+]
+
+/**
+ * Trang tĩnh site tự dựng (không phải document trong Sanity).
+ * Dùng cho `kind: 'static'`. Thêm trang mới thì thêm cả ở đây.
+ */
+export const staticPages = ['ho-tro', 'lien-he'] as const
+export type StaticPageKey = (typeof staticPages)[number]
+
+// ═══════════════════════════════════════════════════════════════════════════
 //  ── HẾT PHẦN CẤU HÌNH ──
 //  Phần dưới là phần máy tự tính từ các khai báo trên. KHÔNG cần sửa.
 // ═══════════════════════════════════════════════════════════════════════════

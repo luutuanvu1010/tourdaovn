@@ -486,12 +486,22 @@ export interface PickupPoint {
   hidden?: boolean
 }
 
+// Nội dung trang /ho-tro (CONTENT_MODEL §2.15 v1.0.14, ADR-0023).
+// Ba phần độc lập — phần nào null thì khối đó không render và node JSON-LD
+// tương ứng không phát.
+export interface SiteSupport {
+  bookingGuide: Array<{ step?: string; text?: string }> | null
+  cancellationPolicy: unknown[] | null
+  faq: FAQItem[] | null
+}
+
 export interface SiteSettingsResult {
   title: string
   sections: SiteSettingsSection[] | null
   heroText: Record<'vi' | 'en' | 'zh' | 'ko' | 'ru', string | undefined> | null
   contact: SiteContact | null
   pickupPoints: PickupPoint[] | null
+  support: SiteSupport | null
 }
 
 // ---------- JSON-LD ----------

@@ -1,7 +1,7 @@
 ---
 import RouteDispatch from '../components/RouteDispatch.astro'
 import { fetchAllSlugs, fetchAllTerms, fetchAllDestinationSlugs } from '../lib/sanity'
-import { ROUTE_MAP } from '../lib/routes'
+import { ROUTE_MAP, assertNavTargetsExist } from '../lib/routes'
 import type { Lang } from '../lib/types'
 
 // Disambiguation term vs detail: quyết ngay tại đây qua props.kind, không đoán ở render.
@@ -71,6 +71,12 @@ export async function getStaticPaths() {
       props: { kind: 'destination', entity: 'touristDestination', slug: destSlug },
     })
   }
+
+  // Cổng: mọi mục menu phải trỏ tới trang mà lần build này THỰC SỰ sinh ra
+  // (QĐ-2026-08-05-14, mức fail). Đặt ở đây vì đây là chỗ duy nhất biết trọn
+  // danh sách trang động. Khai một mục menu trước khi nhập nội dung thì build
+  // dừng ngay trên máy, thay vì lên production rồi khách bấm vào trang trắng.
+  assertNavTargetsExist(paths.map(p => `/${p.params.path}/`))
 
   return paths
 }

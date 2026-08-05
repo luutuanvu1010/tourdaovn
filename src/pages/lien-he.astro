@@ -1,0 +1,124 @@
+---
+// Trang Liên hệ — URL: /lien-he/
+//
+// Nguồn dữ liệu duy nhất: siteSettings.contact (CONTENT_MODEL §2.15 v1.0.11) cộng
+// `brand` trong site.config.ts. Cấm hardcode số điện thoại, email hay link Zalo tại
+// đây — đó đúng là thứ mà `contact` sinh ra để làm nguồn duy nhất.
+//
+// Không mở entity mới cho trang này: ADR-0023 chốt sinh trang tĩnh từ siteSettings,
+// theo khuôn /lo-trinh-don-khach/. JSON-LD phát ContactPage, không phát Article —
+// mượn Article cho một trang liên hệ là làm bẩn lớp dữ liệu có cấu trúc (I6).
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Section from '../components/Section.astro'
+import ContactChannels from '../components/ContactChannels.astro'
+import { fetchSiteContact } from '../lib/siteContact'
+import { jsonLdScriptContent } from '../lib/serialize/utils'
+import { siteBaseUrl } from '../lib/siteUrl'
+import { brand, defaultLang } from '../site.config'
+
+const PATH = '/lien-he/'
+
+const contact = await fetchSiteContact()
+
+// Guard rỗng: kênh nào chưa điền trong Studio thì dòng đó không render. Không có
+// kênh nào thì trang vẫn lên, chỉ nói rõ đang cập nhật — không để khung trống gây
+// hiểu nhầm là lỗi.
+const rows = [
+  { label: 'Điện thoại', value: contact?.hotline, href: contact?.hotline ? `tel:${contact.hotline.replace(/\s+/g, '')}` : null },
+  { label: 'Zalo', value: contact?.zaloUrl ? 'Nhắn tin qua Zalo' : null, href: contact?.zaloUrl ?? null },
+  { label: 'WhatsApp', value: contact?.whatsapp, href: contact?.whatsapp ? `https://wa.me/${contact.whatsapp.replace(/\s+/g, '')}` : null },
+  { label: 'Email', value: contact?.email, href: contact?.email ? `mailto:${contact.email}` : null },
+].filter(r => r.value)
+
+const metaTitle = `Liên hệ — ${brand.name}`
+const metaDescription = `Số điện thoại, Zalo và email của ${brand.legalName}. Liên hệ để được tư vấn và đặt tour đảo Nha Trang.`
+
+const siteBase = siteBaseUrl(Astro.site).replace(/\/$/, '')
+const pageUrl = siteBase + PATH
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ContactPage',
+    '@id': `${pageUrl}#webpage`,
+    url: pageUrl,
+    name: metaTitle,
+    description: metaDescription,
+    inLanguage: defaultLang,
+    isPartOf: { '@id': `${siteBase}/#website` },
+    about: { '@id': `${siteBase}/#organization` },
+  },
+]
+---
+
+<BaseLayout title={metaTitle} description={metaDescription} lang={defaultLang} currentPath={PATH}>
+  <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)} />
+
+  <Section heading="Liên hệ">
+    <p class="lead">
+      {brand.legalName} nhận tư vấn và đặt chỗ qua các kênh dưới đây. Nhắn Zalo thường
+      được trả lời nhanh nhất.
+    </p>
+
+    {rows.length > 0 ? (
+      <dl class="contact-list">
+        {rows.map(row => (
+          <div class="contact-row">
+            <dt>{row.label}</dt>
+            <dd>
+              {row.href
+                ? <a href={row.href} {...(row.href.startsWith('http') ? { target: '_blank', rel: 'noopener' } : {})}>{row.value}</a>
+                : row.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    ) : (
+      <p class="lead">Kênh liên hệ đang được cập nhật.</p>
+    )}
+
+    <ContactChannels contact={contact} lang={defaultLang} />
+  </Section>
+</BaseLayout>
+
+<style>
+  .lead {
+    max-width: var(--container-editorial);
+    font-size: var(--fs-base);
+    color: var(--c-text-muted);
+    margin-bottom: var(--s5);
+  }
+
+  .contact-list {
+    max-width: var(--container-editorial);
+    margin-bottom: var(--s6);
+  }
+
+  .contact-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s2) var(--s4);
+    padding: var(--s4) 0;
+    border-bottom: 1px solid var(--c-border);
+  }
+
+  .contact-row dt {
+    min-width: 140px;
+    font-weight: var(--fw-600);
+    color: var(--c-text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  .contact-row dd {
+    font-weight: var(--fw-600);
+    color: var(--c-text);
+  }
+
+  .contact-row a {
+    color: var(--c-primary);
+  }
+
+  .contact-row a:hover {
+    text-decoration: underline;
+  }
+</style>

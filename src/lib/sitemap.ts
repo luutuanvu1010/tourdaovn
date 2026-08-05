@@ -1,7 +1,7 @@
 import { ROUTE_MAP } from './routes'
 import { fetchAllDestinationSlugs, fetchAllSlugs, fetchAllTerms } from './sanity'
 import type { Lang } from './types'
-import { langs, publishedDevPages } from '../site.config'
+import { langs, publishedDevPages, staticPages } from '../site.config'
 
 /** Ngôn ngữ site đang chạy. Nguồn sự thật: src/site.config.ts */
 export const LANGS: Lang[] = langs
@@ -56,6 +56,13 @@ export async function buildSitemapPaths(lang: Lang): Promise<string[]> {
     if (route.hasIndex || route.entity.startsWith('hub-')) {
       paths.add(withTrailingSlash(`${langPrefix(lang)}/${route.segments[lang]}`))
     }
+  }
+
+  // Trang tĩnh site tự dựng (ADR-0023) — /ho-tro/, /lien-he/. Đọc từ site.config
+  // chứ không liệt tay: thêm trang mới mà quên sitemap thì R4 đỏ, và đó đúng là
+  // lỗi đã xảy ra khi dựng hai trang này lần đầu.
+  for (const page of staticPages) {
+    paths.add(withTrailingSlash(`${langPrefix(lang)}/${page}`))
   }
 
   const [slugs, terms] = await Promise.all([

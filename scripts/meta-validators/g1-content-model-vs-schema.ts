@@ -68,6 +68,8 @@ const SUB_FIELD_IGNORE = new Set([
   'hotline', 'zaloUrl', 'whatsapp', 'email',
   // siteSettings.pickupPoints[] sub-fields (CONTENT_MODEL §2.15 v1.0.13)
   'stopName', 'stopAddress', 'pickupTime', 'pickupNote',
+  // siteSettings.support sub-fields (CONTENT_MODEL §2.15 v1.0.14, ADR-0023)
+  'bookingGuide', 'cancellationPolicy',
 ])
 
 // Fields that exist as both top-level and sub-field in different entities
@@ -82,8 +84,9 @@ const AMBIGUOUS_SUB_FIELDS: Record<string, string[]> = {
   touristDestination: ['name', 'url', 'image', 'description', 'value'],
   tour: ['name', 'geo', 'sameAs', 'note'],
   // "hidden" là sub-field của sections[] và pickupPoints[] (CONTENT_MODEL §2.15),
-  // "geo" là sub-field của pickupPoints[] (v1.0.13) — cả hai không phải field top-level
-  siteSettings: ['hidden', 'geo'],
+  // "geo" là sub-field của pickupPoints[] (v1.0.13) — cả hai không phải field top-level.
+  // "faq" là top-level ở nhiều entity khác, nhưng ở đây là sub-field của support (v1.0.14).
+  siteSettings: ['hidden', 'geo', 'faq'],
 }
 
 // Common fields from CONTENT_MODEL §2.0
@@ -258,6 +261,8 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
     contact: { required: false },
     // pickupPoints thêm v1.0.13 — lộ trình đón khách, nguồn cho /lo-trinh-don-khach
     pickupPoints: { required: false },
+    // support thêm v1.0.14 (ADR-0023) — nội dung trang /ho-tro
+    support: { required: false },
   },
 }
 

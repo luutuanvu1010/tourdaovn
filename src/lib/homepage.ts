@@ -3,8 +3,6 @@ import type { Lang } from './types'
 
 export const HOME_COPY: Record<Lang, {
   heroEyebrow: string
-  quickLinksLabel: string
-  quickLinks: Array<{ label: string; entity: string }>
   hubsHeading: string
   hubsSub: string
   hubDescriptions: Record<string, string>
@@ -29,12 +27,6 @@ export const HOME_COPY: Record<Lang, {
 }> = {
   vi: {
     heroEyebrow: 'Cẩm nang địa phương',
-    quickLinksLabel: 'Lối vào nhanh',
-    quickLinks: [
-      { label: 'Khám phá', entity: 'hub-kham-pha' },
-      { label: 'Lưu trú', entity: 'hub-luu-tru' },
-      { label: 'Tour', entity: 'tour' },
-    ],
     hubsHeading: 'Bắt đầu từ đâu?',
     hubsSub: 'Chọn chuyên mục bạn cần — mỗi hub có đầy đủ danh sách, bộ lọc và thông tin thực tế.',
     hubDescriptions: {
@@ -68,12 +60,6 @@ export const HOME_COPY: Record<Lang, {
   },
   en: {
     heroEyebrow: 'Local travel guide',
-    quickLinksLabel: 'Quick links',
-    quickLinks: [
-      { label: 'Things to do', entity: 'hub-kham-pha' },
-      { label: 'Where to stay', entity: 'hub-luu-tru' },
-      { label: 'Tours', entity: 'tour' },
-    ],
     hubsHeading: 'Where to start?',
     hubsSub: 'Pick the section you need — each hub has full listings, filters and practical information.',
     hubDescriptions: {
@@ -107,12 +93,6 @@ export const HOME_COPY: Record<Lang, {
   },
   zh: {
     heroEyebrow: '本地旅行指南',
-    quickLinksLabel: '快捷入口',
-    quickLinks: [
-      { label: '玩乐', entity: 'hub-kham-pha' },
-      { label: '住宿', entity: 'hub-luu-tru' },
-      { label: '旅行团', entity: 'tour' },
-    ],
     hubsHeading: '从哪里开始？',
     hubsSub: '选择您需要的板块 — 每个板块都有完整的列表、筛选器和实用信息。',
     hubDescriptions: {
@@ -146,12 +126,6 @@ export const HOME_COPY: Record<Lang, {
   },
   ko: {
     heroEyebrow: '현지 여행 가이드',
-    quickLinksLabel: '빠른 링크',
-    quickLinks: [
-      { label: '즐길거리', entity: 'hub-kham-pha' },
-      { label: '숙소', entity: 'hub-luu-tru' },
-      { label: '투어', entity: 'tour' },
-    ],
     hubsHeading: '어디서 시작할까요?',
     hubsSub: '필요한 섹션을 선택하세요 — 각 허브에는 전체 목록, 필터 및 실용 정보가 있습니다.',
     hubDescriptions: {
@@ -185,12 +159,6 @@ export const HOME_COPY: Record<Lang, {
   },
   ru: {
     heroEyebrow: 'Местный путеводитель',
-    quickLinksLabel: 'Быстрые ссылки',
-    quickLinks: [
-      { label: 'Развлечения', entity: 'hub-kham-pha' },
-      { label: 'Проживание', entity: 'hub-luu-tru' },
-      { label: 'Туры', entity: 'tour' },
-    ],
     hubsHeading: 'С чего начать?',
     hubsSub: 'Выберите нужный раздел — в каждом хабе есть полные списки, фильтры и практическая информация.',
     hubDescriptions: {
@@ -252,15 +220,6 @@ export function entityHref(entity: string, slug: string, lang: Lang): string | u
 export function hasClearIndex(entity: string): boolean {
   const route = routeForEntity(entity)
   return Boolean(route?.hasIndex || entity.startsWith('hub-'))
-}
-
-export function homeQuickLinks(lang: Lang) {
-  return HOME_COPY[lang].quickLinks
-    .map(item => {
-      const href = indexHref(item.entity, lang)
-      return href ? { label: item.label, href } : null
-    })
-    .filter(Boolean) as Array<{ label: string; href: string }>
 }
 
 const COUNT_LABELS: Record<Lang, (n: number) => string> = {

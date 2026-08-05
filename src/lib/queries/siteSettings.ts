@@ -32,6 +32,11 @@ export function siteSettingsQuery(): string {
       pickupTime,
       pickupNote,
       hidden
+    },
+    support {
+      bookingGuide[] { step, text },
+      cancellationPolicy,
+      faq[] { question, answer }
     }
   }`
 }

@@ -1,6 +1,6 @@
 ---
 import type { Lang } from '../lib/types'
-import { ROUTE_MAP } from '../lib/routes'
+import { resolveNav } from '../lib/routes'
 import { uiCopy } from '../lib/uiCopy'
 import { fetchSiteContact } from '../lib/siteContact'
 import { brand } from '../site.config'
@@ -22,17 +22,12 @@ const footerChannels = [
   contact?.email ? { href: `mailto:${contact.email}`, label: contact.email } : null,
 ].filter(Boolean) as { href: string; label: string; external?: boolean }[]
 
-// Link entity qua ROUTE_MAP — nguồn duy nhất cho segment + nhãn theo ngôn ngữ (R3)
-function routeLink(entity: string): { label: string; href: string } | null {
-  const r = ROUTE_MAP.find(e => e.entity === entity)
-  if (!r) return null
-  return { label: r.labels[uiLang], href: `${prefix}/${r.segments[uiLang]}/` }
-}
-
-const exploreLinks = ['attraction', 'experience', 'tour'].map(routeLink).filter(Boolean) as { label: string; href: string }[]
-const serviceLinks = ['hotel', 'resort'].map(routeLink).filter(Boolean) as { label: string; href: string }[]
-const exploreHeading = ROUTE_MAP.find(e => e.entity === 'hub-kham-pha')?.labels[uiLang] ?? ''
-const guidesLink = routeLink('article')
+// Chân trang đọc cùng một `nav` với menu chính (ADR-0023, DR-007). Trước đây hai
+// danh sách entity viết cứng ở đây, nên chân trang và menu lệch nhau mà không ai
+// thấy. Nay sửa một chỗ là cả hai đổi theo.
+const navItems = resolveNav(uiLang, contact?.zaloUrl)
+const navGroups = navItems.filter(i => i.children.length > 0)
+const navFlat = navItems.filter(i => i.children.length === 0 && i.href)
 
 const currentYear = new Date().getFullYear()
 const copyrightYear = brand.foundedYear < currentYear ? `${brand.foundedYear}–${currentYear}` : `${currentYear}`
@@ -54,24 +49,37 @@ const copyrightYear = brand.foundedYear < currentYear ? `${brand.foundedYear}–
         <p>{t('footerTagline')}</p>
       </div>
 
-      <div class="foot-col">
-        <h4>{exploreHeading}</h4>
-        <ul>
-          {exploreLinks.map(link => <li><a href={link.href}>{link.label}</a></li>)}
-        </ul>
-      </div>
+      {navGroups.map(group => (
+        <div class="foot-col">
+          <h4>{group.label}</h4>
+          <ul>
+            {group.children.map(child => (
+              <li><a href={child.href}>{child.label}</a></li>
+            ))}
+          </ul>
+        </div>
+      ))}
 
-      <div class="foot-col">
-        <h4>{t('footerServices')}</h4>
-        <ul>
-          {serviceLinks.map(link => <li><a href={link.href}>{link.label}</a></li>)}
-        </ul>
-      </div>
+      {navFlat.length > 0 && (
+        <div class="foot-col">
+          <h4>{t('footerServices')}</h4>
+          <ul>
+            {navFlat.map(item => (
+              <li>
+                <a
+                  href={item.href}
+                  target={item.href?.startsWith('http') ? '_blank' : undefined}
+                  rel={item.href?.startsWith('http') ? 'noopener' : undefined}
+                >{item.label}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div class="foot-col">
         <h4>{t('footerAboutUs')}</h4>
         <ul>
-          {guidesLink && <li><a href={guidesLink.href}>{t('footerGuides')}</a></li>}
           {footerChannels.map(ch => (
             <li><a href={ch.href} target={ch.external ? '_blank' : undefined} rel={ch.external ? 'noopener' : undefined}>{ch.label}</a></li>
           ))}

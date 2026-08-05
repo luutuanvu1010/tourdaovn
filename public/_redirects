@@ -1,0 +1,12 @@
+# Chuyển hướng — Cloudflare Pages đọc file này.
+#
+# Luật R3 (04-CONSTRAINTS §1c): một URL đã từng tồn tại KHÔNG được biến mất câm.
+# Đổi đường dẫn hay gỡ trang thì phải có một dòng ở đây — 301 về nơi thay thế,
+# hoặc 410 khi gỡ hẳn. Validator so sitemap production với sitemap build mới và
+# chặn ở mức fail nếu thiếu.
+#
+# Dạng dòng:   <đường dẫn cũ>   <đường dẫn mới>   301
+#
+# Hiện chưa có dòng nào. Đợt điều hướng theo dòng dịch vụ (ADR-0023) không đổi
+# đường dẫn nào: ba hub Khám phá / Lưu trú / Đi lại chỉ rời khỏi menu, URL vẫn
+# sống và vẫn nằm trong sitemap.
