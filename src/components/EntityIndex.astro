@@ -195,9 +195,8 @@ const termPrefix = lang === 'vi' ? '' : `/${lang}`
     overflow: hidden;
     padding: var(--s7) 0 var(--s5);
     background:
-      var(--pattern-contour-lines),
       radial-gradient(620px 260px at 8% 0%, color-mix(in srgb, var(--c-primary-soft) 70%, transparent), transparent 66%),
-      radial-gradient(520px 220px at 86% 28%, color-mix(in srgb, var(--c-land-rice) 64%, transparent), transparent 72%);
+      linear-gradient(135deg, var(--c-primary-soft), var(--c-sand-soft));
     border-bottom: 1px solid color-mix(in srgb, var(--c-border) 70%, transparent);
   }
 
@@ -207,7 +206,7 @@ const termPrefix = lang === 'vi' ? '' : `/${lang}`
     inset: auto 0 0;
     height: 18px;
     pointer-events: none;
-    background: var(--pattern-rice-lines);
+    background: var(--c-surface-alt);
     opacity: .52;
   }
 

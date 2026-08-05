@@ -33,11 +33,13 @@ Mọi cặp màu chữ trên nền dưới đây đã kiểm WCAG AA (≥ 4,5:1 
 | color.primary | #0C4A6E | heading, link, nhãn nhánh ở header, viền focus; chữ trắng trên nền này đạt AA |
 | color.primary.strong | #082F49 | hover và active của link, nền footer, nền header đậm nếu mockup chọn |
 | color.primary.soft | #F0F7FC | nền khối nhấn nhẹ (hỏi đáp, số liệu nhanh, lưu ý an toàn) với chữ text |
-| color.accent | #C2410C | nút CTA đặt, CTA gọi điện; chữ trắng trên nền này đạt AA |
-| color.accent.strong | #9A3412 | hover của CTA; chữ nhãn giá trên nền accent.soft |
-| color.accent.soft | #FFF7ED | nền nhãn giá trên card và vùng giá ("từ X, cập nhật [ngày]") |
-| color.surface | #FFFFFF | nền trang mặc định |
+| color.accent | #C0392B | san hô — nút CTA đặt, CTA gọi điện; chữ trắng đạt 5.44 (AA) |
+| color.accent.strong | #96271A | hover của CTA; chữ nhãn giá trên nền accent.soft |
+| color.accent.soft | #FEF2F0 | nền nhãn giá trên card và vùng giá ("từ X, cập nhật [ngày]") |
+| color.surface | #FFFFFF | nền trang mặc định — **chủ dự án chốt 2026-08-06, giải DR-003**; `08-QA_CHECKLIST` B4 phải sửa theo |
 | color.surface.alt | #F8FAFC | nền xen kẽ khối, nền card trên nền trắng |
+| color.sea | #0E7490 | ngọc lam vịnh nông — nhãn tự nhiên, tiện ích, trạng thái thành công; chữ trắng đạt 5.36 (AA) |
+| color.sand | #F5A623 | cát biển — nhãn ấm, gạch chân trang trí. **Không dùng làm nền CTA**: tương phản với chữ trắng không đạt AA |
 | color.text | #0F172A | chữ chính trên surface và surface.alt |
 | color.text.muted | #475569 | mô tả ngắn trên card, ngày cập nhật, nhãn phụ, breadcrumb |
 | color.text.inverse | #F8FAFC | chữ trên primary, primary.strong, accent |
@@ -45,7 +47,16 @@ Mọi cặp màu chữ trên nền dưới đây đã kiểm WCAG AA (≥ 4,5:1 
 
 Quy tắc dùng accent: accent chỉ xuất hiện ở vùng hành động và nhãn giá (binding map 5.1, các vùng giá cộng CTA ở mục 4). Vùng nội dung không dùng accent. Đây là cách giữ luật "không CTA giả" của 06 ở tầng thị giác: thấy màu ấm là có hành động thật.
 
-Quy tắc cảnh quan Khánh Hoà: `color.primary` giữ vai trò biển/vịnh và niềm tin; `color.sand` gợi cát, ánh lúa, vùng ven đầm và các khối nội dung ấm; màu xanh phụ trợ hiện có trong runtime chỉ dùng cho tự nhiên, tiện ích, eco hoặc trạng thái thành công. Không dùng xanh lá làm primary thứ hai, không dùng sand làm CTA, và không thêm token màu cho núi/rừng/đồng lúa khi ảnh thật hoặc motif trung tính đã đủ truyền tải.
+**Quy tắc cảnh quan biển đảo** (chủ dự án chốt hướng thị giác 2026-08-06, thay quy tắc cảnh quan cũ):
+
+- `color.primary` là **biển sâu** — vai trò tin cậy, heading, link.
+- `color.sea` là **vịnh nông** — tự nhiên, tiện ích, trạng thái thành công.
+- `color.sand` là **cát** — nhãn ấm và chi tiết trang trí. Không làm nền CTA.
+- `color.accent` là **san hô** — chỉ xuất hiện ở vùng hành động và nhãn giá.
+
+**Cấm token và hoạ tiết đất liền.** Không thêm màu hay hoạ tiết gợi ruộng lúa, đồng bằng, núi rừng, đường bình độ. Bản v1 có `--c-land-rice`, `--c-land-forest`, `--pattern-rice-lines`, `--pattern-contour-lines` — đó là bộ nhận diện của một site du lịch Nha Trang nói chung, không phải của một công ty bán tour biển đảo. Đã gỡ (DR-002).
+
+**Nền trang là trắng thuần**, không gradient phủ toàn trang. Ảnh thật của biển và đảo là thứ mang màu; nền phải lùi lại để ảnh nổi lên.
 
 ## 2. Chữ
 

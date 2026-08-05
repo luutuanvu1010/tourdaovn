@@ -430,3 +430,97 @@ Hai lỗi còn lại là **dữ liệu, không phải code**, chủ dự án s�
 **`deferred-gate` vẫn đỏ nhưng vì lý do khác.** Trước: "thiếu validator-status.json — pre-build validate chưa chạy". Nay: "I16 deferred nhưng registry không khai live post-build executor" — thuộc ND-004, không phải ND-005.
 
 **Không đụng đường phát hành.** `build:ci` vẫn là `npm run build`, không gọi `validate` (ADR-0022). Việc `validate` đỏ vì dữ liệu không chặn production.
+
+---
+
+## QĐ-2026-08-06-04 — Bổ sung `QĐ-2026-08-06-02`: bằng chứng thi hành và quy trình gỡ chuyển hướng
+
+Mục này **bổ sung**, không thay thế `QĐ-2026-08-06-02`. Mục kia đã commit nên không được sửa (`04-CONSTRAINTS` §2.5).
+
+**Đã thi hành.** Deploy 2026-08-06, Worker `tourdaovn`, version `4100e5af-4b82-46be-b0d6-ffa0b13b4f71`. Đo trên production:
+
+| URL | Kết quả |
+|---|---|
+| `https://tourdao.vn/` | `302` một chặng → `https://tourdaonhatrang.com/` (đích `200`) |
+| `http://tourdao.vn/` | `302` → cùng đích |
+| `https://tourdao.vn/?fbclid=x` | `302` → `.../?fbclid=x` |
+| `https://tourdao.vn/sitemap.xml` | `200` |
+| `/lien-he/`, `/nha-trang/`, `/robots.txt` | `200` |
+
+`r3-r4-post.ts` pass trên `dist/` mới. Trang chủ vẫn build ra `dist/index.html` và vẫn nằm trong `sitemap-vi.xml` — đó là lý do R3 không đỏ.
+
+**Lưu ý hành vi.** `_redirects` **giữ nguyên query string**, không có tuỳ chọn tắt (khác Redirect Rules). Vô hại, và có lợi cho việc lần nguồn traffic.
+
+### Quy trình gỡ chuyển hướng — làm thủ công
+
+Mốc dự kiến 2026-08-09 khi site công bố (`QĐ-2026-08-06-01`), nhưng gỡ được bất cứ lúc nào. **Không đụng dashboard Cloudflare.**
+
+**Bước 1.** Trong `public/_redirects`, xoá dòng luật:
+
+```
+/    https://tourdaonhatrang.com/    302
+```
+
+**Bước 2.** Xoá luôn khối chú thích "Phần 2. Điều hướng tạm thời" ngay phía trên. Giữ nguyên Phần 1 — đó là phần R3, không liên quan.
+
+**Bước 3.** Build và deploy:
+
+```
+npm run build
+npx wrangler deploy
+```
+
+Phải là `npx wrangler deploy`. **Không dùng `npm run deploy`** — xem mục "Còn nợ" dưới.
+
+**Bước 4.** Kiểm chứng:
+
+```
+for u in "https://tourdao.vn/" "https://tourdao.vn/sitemap.xml" "https://tourdao.vn/lien-he/" "https://tourdao.vn/nha-trang/"; do printf '%-40s ' "$u"; curl -sS -o /dev/null -m 20 -w '%{http_code}\n' "$u"; done
+```
+
+Gỡ xong khi **cả bốn trả `200`**. Nếu `/` còn `302` thì deploy chưa tới đích — kiểm lại đã dùng `npx wrangler deploy` chưa.
+
+**Bước 5.** Không cần purge cache Cloudflare. `cf-cache-status: HIT` trên site này là lớp asset của Worker, không phải cache edge. Trình duyệt thì thử bằng tab ẩn danh hoặc `curl` cho sạch.
+
+**Bước 6.** Ghi mục mới trong sổ này để đóng `QĐ-2026-08-06-02`. Không sửa hai mục cũ.
+
+### Vì sao mọi cách trên dashboard đều thất bại — ghi để khỏi thử lại
+
+`tourdao.vn` do Worker phục vụ. Cloudflare vô hiệu hoá 18 Page Rules khi request khớp Worker route, trong đó có `Forwarding URL` và `Always Use HTTPS`. Bảng chính thức: `Client → Worker = Rule Ignored`.
+
+- **Page Rules** — không bao giờ chạy. Đã thử hai lần, hai cấu hình khác nhau, cùng thất bại.
+- **Always Use HTTPS** — bật hay tắt cũng vô nghĩa trên hostname này. Đừng mất công vào SSL/TLS.
+- **Redirect Rules** — không kiểm chứng được, mục này không có trong dashboard của tài khoản. Trên lý thuyết chạy được vì `http_request_dynamic_redirect` là phase đầu tiên, trước Worker.
+
+Kết luận vận hành: **mọi nhu cầu chuyển hướng của `tourdao.vn` làm trong `public/_redirects`, không làm trên dashboard.**
+
+### Còn nợ — `npm run deploy` hỏng
+
+`package.json` khai `deploy` là `wrangler pages deploy --project-name tourdaovn`, nhưng Pages project đó **không tồn tại** (tài khoản chỉ có `fastbooking-tourdao` và `nhatrangtravel`). Chạy nó sẽ hỏi "Would you like to create it?" — **chọn Create là sai**, sẽ dựng ra đích deploy thứ hai rỗng không phục vụ `tourdao.vn`.
+
+Đường deploy thật là Worker, qua `npx wrangler deploy`, khớp `wrangler.toml`. Diff đề xuất (`"deploy": "wrangler deploy"`) chưa áp vì chạm đường phát hành, chờ chủ dự án duyệt.
+
+---
+
+## QĐ-2026-08-06-04 — Nền trắng, hướng thị giác biển đảo (giải DR-003)
+
+**Chốt.** Chủ dự án 2026-08-06: nền trang **trắng thuần**, hướng thị giác **biển đảo**.
+
+**Giải DR-003.** `07-DESIGN_TOKENS` §1 khai `color.surface = #FFFFFF`; `08-QA_CHECKLIST` B4 khai `#FBF8F3` và cấm nền trắng thuần. Hai spec cùng tầng, cả hai đã phê chuẩn, nên tác nhân không được hoà giải (`GOVERNANCE` 3.5). Chủ dự án chốt: **`07-DESIGN_TOKENS` thắng**, `08-QA_CHECKLIST` B4 sửa theo.
+
+**Đổi màu, có số tương phản kèm theo** — không chọn theo cảm tính:
+
+| Token | Trước | Sau | Chữ trắng trên nền đó |
+|---|---|---|---|
+| `--c-surface` | #FBF8F3 kem | **#FFFFFF** | — |
+| `--c-accent` | #C2410C cam cháy | **#C0392B** san hô | 5.44 ✓ AA |
+| `--c-sea` (mới) | — | **#0E7490** vịnh nông | 5.36 ✓ AA |
+| `--c-primary` | #0C4A6E | giữ nguyên | 9.46 ✓ |
+
+Coral sáng #E8654E từng có trong runtime chỉ đạt **3.28 — rớt AA**, nên không dùng làm nền CTA. `--c-sand` giữ nhưng cấm làm nền CTA vì cùng lý do.
+
+**Gỡ toàn bộ token và hoạ tiết đất liền.** `--c-land-rice`, `--c-land-forest`, `--c-land-mist`, `--c-sand-paper`, `--pattern-rice-lines` (vạch ruộng lúa), `--pattern-contour-lines` (đường bình độ đồi núi), `--landscape-page-bg`. Đó là nhận diện của một site du lịch nói chung; công ty bán tour biển đảo. Đóng phần lớn DR-002.
+
+**Bảy chỗ trong component còn trỏ vào token đã gỡ** đã thay hết. CSS không báo lỗi khi biến không tồn tại — nó lặng lẽ mất nền, nên phải quét tay.
+
+**Chưa làm ở đợt này:** font vẫn là Be Vietnam Pro + Plus Jakarta Sans (chưa có lý do đổi), và bố cục chưa động tới. `08-QA_CHECKLIST` §B còn giá trị hardcode ở mục liệt kê, cần rà lại khi Design xuất mockup.

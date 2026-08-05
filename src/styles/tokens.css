@@ -1,28 +1,35 @@
 /* ═══════════════════════════════════════════════════════════════
-   DESIGN TOKENS — từ DESIGN.md §1-4
+   DESIGN TOKENS — thi hành docs/core-specs/07-DESIGN_TOKENS.md
    Nguồn token duy nhất cho mọi component. 0 hardcoded value bên ngoài file này.
+
+   v2 (2026-08-06) — hướng thị giác BIỂN ĐẢO, chủ dự án chốt:
+     • nền trang TRẮNG THUẦN (giải DR-003; 07-DESIGN_TOKENS thắng 08-QA_CHECKLIST)
+     • accent đổi sang san hô #C0392B — chữ trắng đạt 5.44, qua AA
+     • gỡ toàn bộ token và hoạ tiết ĐẤT LIỀN: ruộng lúa, đồi núi, đường bình độ.
+       Đó là nhận diện của một site du lịch nói chung, không phải công ty tour đảo.
+   Tham chiếu cũ "DESIGN.md" đã gỡ — file đó chưa bao giờ tồn tại (DR-008).
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
-  /* §1 Color — landscape-aware token set */
+  /* §1 Color — bảng màu biển đảo */
   --c-primary:        #0C4A6E;
   --c-primary-strong: #082F49;
   --c-primary-soft:   #F0F7FC;
-  --c-accent:         #C2410C;
-  --c-accent-strong:  #9A3412;
-  --c-accent-soft:    #FFF7ED;
+  --c-accent:         #C0392B;   /* san hô — CTA, nhãn giá */
+  --c-accent-strong:  #96271A;
+  --c-accent-soft:    #FEF2F0;
   --c-sand:           #F5A623;
   --c-sand-soft:      #FBE3B3;
-  --c-sand-paper:     #FAF1DE;
-  --c-surface:        #FBF8F3;
-  --c-surface-alt:    #F5F1EA;
+  --c-surface:        #FFFFFF;   /* nền trang — trắng thuần */
+  --c-surface-alt:    #F8FAFC;   /* khối xen kẽ */
   --c-card:           #FFFFFF;
   --c-text:           #0F172A;
   --c-text-muted:     #475569;
   --c-text-inverse:   #F8FAFC;
   --c-border:         #E2E8F0;
   --c-coral:          #E8654E;
-  --c-green:          #3FA796;
+  --c-sea:            #0E7490;   /* ngọc lam vịnh nông */
+  --c-green:          #0E7490;   /* bí danh cũ, giữ để không gãy component */
   --c-green-soft:     #DCFCE7;
   --c-green-text:     #166534;
   --c-sand-border:    #e9d3a4;
@@ -38,22 +45,6 @@
   --c-hero-fallback-top-teal:    #ceddd9;
   --c-hero-fallback-bottom-teal: #a8c8b8;
   --c-hero-overlay-light:   rgba(255,255,255,.18);
-  --c-land-rice:      color-mix(in srgb, var(--c-sand) 18%, var(--c-surface));
-  --c-land-forest:    color-mix(in srgb, var(--c-green) 16%, var(--c-primary-soft));
-  --c-land-mist:      color-mix(in srgb, var(--c-primary-soft) 78%, var(--c-surface));
-  --landscape-page-bg:
-    radial-gradient(900px 420px at 8% -8%, color-mix(in srgb, var(--c-primary-soft) 72%, transparent), transparent 70%),
-    radial-gradient(720px 360px at 92% 12%, color-mix(in srgb, var(--c-land-rice) 58%, transparent), transparent 68%),
-    linear-gradient(180deg, var(--c-surface) 0%, color-mix(in srgb, var(--c-surface) 84%, var(--c-land-mist)) 52%, var(--c-surface) 100%);
-  --pattern-rice-lines:
-    repeating-linear-gradient(
-      0deg,
-      color-mix(in srgb, var(--c-sand) 18%, transparent) 0 1px,
-      transparent 1px 13px
-    );
-  --pattern-contour-lines:
-    radial-gradient(ellipse at 12% 100%, transparent 0 46%, color-mix(in srgb, var(--c-primary) 10%, transparent) 47% 48%, transparent 49%),
-    radial-gradient(ellipse at 84% 0%, transparent 0 54%, color-mix(in srgb, var(--c-green) 12%, transparent) 55% 56%, transparent 57%);
 
   /* §2 Typography — Vietnamese-readable, token-first */
   --font-display: "Be Vietnam Pro", system-ui, sans-serif;
@@ -137,8 +128,7 @@ body {
   font-weight: var(--fw-500);
   line-height: var(--lh-body);
   color: var(--c-text);
-  background: var(--landscape-page-bg);
-  background-attachment: fixed;
+  background: var(--c-surface);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -148,18 +138,8 @@ main {
   isolation: isolate;
 }
 
-main::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    var(--pattern-contour-lines),
-    linear-gradient(90deg, transparent, color-mix(in srgb, var(--c-sand) 5%, transparent), transparent);
-  opacity: .46;
-}
-
+/* v2: đã gỡ lớp hoạ tiết phủ toàn trang (đường bình độ + vệt cát).
+   Nền trắng để ảnh biển đảo thật là thứ mang màu — 07-DESIGN_TOKENS §1. */
 img {
   max-width: 100%;
   display: block;

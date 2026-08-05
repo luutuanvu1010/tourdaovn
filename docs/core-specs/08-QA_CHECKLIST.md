@@ -68,9 +68,10 @@ Với mỗi loại trang được mockup, rà từng vùng trong bảng tương 
 
 ### B4. Nền trang
 
-- [ ] `body` background = `--c-surface` (#FBF8F3).
-- [ ] Card background = `--c-card` (#FFFFFF).
-- [ ] Không có vùng nào dùng nền trắng thuần cho body.
+- [ ] `body` background = `--c-surface` (#FFFFFF).
+- [ ] Khối xen kẽ dùng `--c-surface-alt` (#F8FAFC), không dùng nền kem.
+
+> **DR-003 đã giải 2026-08-06.** Mục này trước đây đòi nền kem #FBF8F3 và cấm nền trắng thuần, mâu thuẫn với `07-DESIGN_TOKENS` §1. Chủ dự án chốt **nền trắng**; `07-DESIGN_TOKENS` thắng, mục này sửa theo.
 
 ### B5. Typography
 
