@@ -13,7 +13,8 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..', '..')
-const BINDING_MAP_PATH = resolve(REPO_ROOT, 'project', '06-BINDING_MAP.md')
+// Xem ghi chú cùng loại ở g1: spec sống ở docs/core-specs/, không phải project/.
+const BINDING_MAP_PATH = resolve(REPO_ROOT, 'docs', 'core-specs', '06-BINDING_MAP.md')
 const COMPONENTS_DIR = resolve(REPO_ROOT, 'src', 'components')
 const REPORT_DIR = resolve(REPO_ROOT, 'scripts', 'reports')
 

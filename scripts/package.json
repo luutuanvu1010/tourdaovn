@@ -19,7 +19,7 @@
     "snapshot:slugs": "node --import ./node_modules/tsx/dist/esm/index.mjs tools/snapshot-slugs.ts",
     "gen:slug-redirects": "node --import ./node_modules/tsx/dist/esm/index.mjs tools/gen-slug-redirects.ts",
     "test": "tsx --test synthesis/__tests__/*.test.ts",
-    "audit:spec": "node --import ./node_modules/tsx/dist/esm/index.mjs meta-validators/g1-content-model-vs-schema.ts && node --import ./node_modules/tsx/dist/esm/index.mjs meta-validators/g2-content-model-vs-gatefields.ts && node --import ./node_modules/tsx/dist/esm/index.mjs meta-validators/g3-binding-map-vs-template.ts && node --import ./node_modules/tsx/dist/esm/index.mjs meta-validators/g4-groq-field-validity.ts"
+    "audit:spec": "node --import ./node_modules/tsx/dist/esm/index.mjs meta-validators/g1-content-model-vs-schema.ts && node --import ./node_modules/tsx/dist/esm/index.mjs meta-validators/g3-binding-map-vs-template.ts && node --import ./node_modules/tsx/dist/esm/index.mjs meta-validators/g4-groq-field-validity.ts"
   },
   "dependencies": {
     "@sanity/client": "^6.28.0",

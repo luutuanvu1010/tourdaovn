@@ -8,6 +8,22 @@
  *
  * Đây là meta-validator — chạy độc lập, không nằm trong `npm run gate`.
  * Output: báo cáo drift ra console + JSON.
+ *
+ * ── ĐANG TẮT — PHIẾU NỢ ND-001 (chủ dự án chốt 2026-08-05) ──────────────────
+ * File này KHÔNG còn nằm trong chuỗi `npm run audit:spec`. Lý do: nó đọc
+ * `shared/gates/index.ts`, thứ không tồn tại ở tourdaovn, nên ném ENOENT và
+ * giết cả chuỗi — kéo theo g3 (kiểm code vs BINDING_MAP) chưa từng chạy được.
+ *
+ * Vì sao không trỏ sang `scripts/gate.config.ts`: hai file khác hình dạng.
+ * g2 đọc `gateFields: Record<string, GateDef>` có `conditional` và
+ * `conditionalExpression`; `GATE.requiredFields` chỉ là `Record<string,
+ * string[]>` phẳng, không diễn tả được điều kiện. Port sang sẽ làm phần kiểm
+ * gate có điều kiện lặng lẽ thành vô hiệu — một validator xanh mà kiểm ít hơn
+ * trước, nguy hiểm hơn một validator tắt hẳn.
+ *
+ * Hệ quả phải biết: bất biến "CONTENT_MODEL và enforcement khớp nhau về field
+ * bắt buộc" hiện KHÔNG có kiểm máy. Xem docs/DECISIONS.md mục ND-001.
+ * ───────────────────────────────────────────────────────────────────────────
  */
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'

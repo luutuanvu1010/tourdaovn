@@ -12,7 +12,10 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..', '..')
-const CONTENT_MODEL_PATH = resolve(REPO_ROOT, 'project', '01-CONTENT_MODEL.md')
+// Spec sống ở docs/core-specs/ trong repo này. Đường dẫn 'project/' là quy ước
+// của nhatrangtravel, thư mục đó không tồn tại ở tourdaovn nên validator ném
+// ENOENT và cả chuỗi audit:spec chết. Sửa 2026-08-05, xem docs/DRIFT_LOG.md.
+const CONTENT_MODEL_PATH = resolve(REPO_ROOT, 'docs', 'core-specs', '01-CONTENT_MODEL.md')
 const SCHEMAS_DIR = resolve(REPO_ROOT, 'cms', 'schemas')
 const REPORT_DIR = resolve(REPO_ROOT, 'scripts', 'reports')
 

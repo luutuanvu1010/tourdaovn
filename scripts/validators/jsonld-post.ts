@@ -57,7 +57,11 @@ const DETAIL_ENTITY_TYPES: Record<string, string[]> = {
   event: ['Event', 'Festival', 'SportsEvent', 'MusicEvent', 'FoodEvent', 'ExhibitionEvent'],
   article: ['Article'],
   person: ['Person'],
-  organization: ['Organization'],
+  // Đồng bộ ORG_TYPE_MAP (src/lib/serialize/organization.ts) — @type theo orgType.
+  // CONTENT_MODEL §2.9 dòng 375 và 05-URL_MAP dòng 118 đều khai "TravelAgency hoặc
+  // Organization theo orgType"; danh sách này trước đây chỉ có Organization nên mọi
+  // đơn vị orgType=travelAgency đều bị báo I6 sai. Xem docs/DRIFT_LOG.md DR-009.
+  organization: ['Organization', 'TravelAgency'],
 }
 
 const DETAIL_SCHEMA_BY_SEGMENT = new Map<string, string[]>()

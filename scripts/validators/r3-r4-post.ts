@@ -6,16 +6,22 @@
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
 import { resolve, join, relative, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { site } from '../../src/site.config'
+import { site, langs } from '../../src/site.config'
 
 // Repo root = scripts/validators/ → ../../
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..', '..')
 const DIST = resolve(REPO_ROOT, 'dist')
 const SITE = site.url
-const LANGS = ['vi', 'en', 'zh', 'ko', 'ru'] as const
-type Lang = typeof LANGS[number]
+// Bảng prefix giữ đủ 5 ngôn ngữ vì đó là tập khả dĩ của core. Nhưng danh sách
+// ngôn ngữ ĐANG BẬT phải đọc từ site.config: ADR-0021 chốt site.config.ts là
+// nguồn sự thật duy nhất về phạm vi site, gồm cả ngôn ngữ. Trước đây file này
+// hardcode cả 5 nên R4 đòi sitemap-en/zh/ko/ru trên một site vi-only và luôn
+// fail 8 lỗi. Xem docs/DRIFT_LOG.md DR-012.
+const ALL_LANGS = ['vi', 'en', 'zh', 'ko', 'ru'] as const
+type Lang = typeof ALL_LANGS[number]
 const LANG_PREFIXES: Record<Lang, string> = { vi: '', en: '/en', zh: '/zh', ko: '/ko', ru: '/ru' }
+const LANGS: readonly Lang[] = ALL_LANGS.filter((l) => (langs as readonly string[]).includes(l))
 
 interface PostResult {
   id: string
