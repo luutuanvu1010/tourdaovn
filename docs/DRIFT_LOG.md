@@ -455,3 +455,23 @@ Thực tế `/khach-san/`, `/resort/` và `/luu-tru/` đều có **0 document** 
 Đây là lệch giữa đặc tả và code, không phải lệch dữ liệu. Sửa thuộc bước 8 (pha G): `[...path].astro` phải bỏ qua nhánh có 0 entity, và `sitemap.ts` bỏ theo.
 
 Liên quan `ND-007` (khách sạn và resort chưa có lối vào từ menu) — cùng gốc là chưa có nội dung, nhưng ND-007 là quyết định điều hướng còn DR-030 là lỗi thi hành.
+
+---
+
+## DR-031 — Mười sáu chỗ vẫn xin cấp đậm 800/900 mà Lora không có
+
+**Trạng thái:** mở. Phát hiện 2026-08-06 ngay sau khi đổi chữ hiển thị sang Lora (QĐ-2026-08-06-10).
+
+Lora là font biến thiên **400–700**. Mọi khai báo `font-weight: var(--fw-800)` hay `var(--fw-900)` đi cùng `font-family: var(--font-display)` nay bị trình duyệt kẹp về 700 — CSS không tổng hợp giả cấp đậm khi đã có 700 thật. Nghĩa là mã nguồn nói 800/900 còn màn hình hiện 700.
+
+Đây là lệch giữa mã và thứ thật sự render, không phải lỗi thị giác: trang vẫn đúng như đã duyệt, chỉ có mã đang nói một điều không còn đúng.
+
+Mười sáu chỗ còn lại, đều là `--fw-800` trừ hai chỗ ghi rõ:
+
+`DetailLayout.sticky-bar__price` · `EntityIndex.entity-title` · `FAQ.faq-heading` · `Footer .foot-brand .logo` · `Header .logo` · `HomeGroupQuote .gq-copy h2` · `HomeHero.hero-title` · `HomeHubGrid.hubs-title` (**900**) · `HomeHubGrid.hub-name` · `HomePartners h2` · `HomeTestimonials h2` · `HomeTestimonials.tm-mark` · `HomeTrustBar h2` · `Section.section-title` · `SiteHome.editorial-section-heading` · `SiteHome .home-faq-section h2` · `SiteHome .home-safety-section h2` · `TermIndex.term-heading` · `TourIndex.tour-title`
+
+Ba chỗ **đã** hạ xuống `--fw-700` trong cùng đợt (`site-home-title`, `detail-title`, `stat-value`) chỉ vì đang sửa đúng những quy tắc đó cho `--lh-display`. Không phải chọn một bên — phần còn lại để lại đây chờ quyết.
+
+**Vì sao không tự quét hết.** Hạ cả mười sáu chỗ xuống `--fw-700` làm mã trung thực, nhưng nếu sau này quay lại Be Vietnam Pro thì tiêu đề sẽ nhẹ hơn bản đã duyệt và phải sửa lại từng chỗ. Đây là đánh đổi ở tầng token, không phải việc dọn dẹp.
+
+**Điều kiện xử.** Chủ dự án chọn một: (a) hạ cả mười sáu chỗ xuống `--fw-700` cho mã khớp thứ render; (b) giữ nguyên và chấp nhận mã nói một đằng render một nẻo, đổi lại giữ được đường lùi về Be Vietnam Pro; (c) khai một token ngữ nghĩa kiểu "cấp đậm nhất mà chữ hiển thị có" để cả hai font cùng đúng — cách này sạch nhất nhưng là token mới, phải duyệt.
