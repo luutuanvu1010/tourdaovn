@@ -51,6 +51,14 @@ Nhóm cần tổng quát hóa (có GHI CHÚ CORE — nguyên tắc engine, hằn
   fail-closed của Core — cùng loại với ADR-0019 của nhatrangtravel. Site mới vẫn mặc định
   fail-closed theo ADR-0010/0018.
 
+- [ADR-0023](ADR-0023-dieu-huong-theo-dong-dich-vu.md) — **Điều hướng theo dòng dịch vụ**,
+  và hai trang tĩnh sinh từ `siteSettings`. Cơ chế `nav` khai trong `site.config` (sáu `kind`,
+  kiểm lúc build) là khuôn tái dùng được; nội dung menu là của riêng site này.
+- [ADR-0024](ADR-0024-trang-chu-de-bang-chung-ganh.md) — **Trang chủ để bằng chứng gánh, không
+  phải catalogue**. Khuôn tái dùng: khi catalogue mỏng, chuyển gánh nặng thuyết phục sang dữ
+  liệu singleton không phụ thuộc số lượng sản phẩm. Kèm luật cứng: đánh giá tự đăng KHÔNG
+  serialize ra JSON-LD.
+
 ## ADR gốc KHÔNG mang vào Core (và vì sao)
 
 - **ADR-0005** (Specialty đặc sản) — entity gắn ẩm thực Nha Trang; trong Core là *module
