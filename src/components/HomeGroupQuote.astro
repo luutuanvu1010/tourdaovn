@@ -1,0 +1,92 @@
+---
+// Khối báo giá đoàn — 06-BINDING_MAP §5.7. Nguồn: siteSettings.groupQuote.
+//
+// Nút đọc `siteSettings.contact.zaloUrl` — KHÔNG khai số hay link thứ hai trong
+// `groupQuote`. Không có zaloUrl thì không render nút; không có nút mà vẫn còn
+// chữ thì khối vẫn có nghĩa, nên khối chỉ ẩn khi thiếu cả tiêu đề lẫn mô tả.
+import type { SiteGroupQuote } from '../lib/types'
+
+export interface Props {
+  groupQuote?: SiteGroupQuote | null
+  zaloUrl?: string | null
+  fallbackCtaLabel: string
+}
+
+const { groupQuote, zaloUrl, fallbackCtaLabel } = Astro.props
+const heading = groupQuote?.heading?.trim() || ''
+const text = groupQuote?.text?.trim() || ''
+const show = !!(heading || text)
+const ctaLabel = groupQuote?.ctaLabel?.trim() || fallbackCtaLabel
+---
+
+{show && (
+  <section class="gq-section">
+    <div class="container gq-inner">
+      <div class="gq-copy">
+        {heading && <h2>{heading}</h2>}
+        {text && <p>{text}</p>}
+      </div>
+      {zaloUrl && (
+        <a class="gq-cta" href={zaloUrl} target="_blank" rel="noopener">{ctaLabel}</a>
+      )}
+    </div>
+  </section>
+)}
+
+<style>
+  /* Nền --c-primary với chữ --c-text-inverse — cùng cặp đã đo AA với dải số liệu. */
+  .gq-section {
+    background: var(--c-primary);
+    color: var(--c-text-inverse);
+    padding: var(--s8) 0;
+  }
+
+  .gq-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s8);
+  }
+
+  .gq-copy {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s3);
+    max-width: 60ch;
+  }
+
+  .gq-copy h2 {
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    font-weight: var(--fw-800);
+    line-height: var(--lh-heading);
+    color: var(--c-text-inverse);
+    text-wrap: balance;
+  }
+
+  .gq-copy p {
+    font-size: var(--fs-base);
+    line-height: var(--lh-body);
+    opacity: 0.86;
+  }
+
+  .gq-cta {
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    min-height: 44px;
+    padding: 0 var(--s7);
+    border-radius: var(--radius-pill);
+    background: var(--c-accent);
+    color: var(--c-text-inverse);
+    font-size: var(--fs-base);
+    font-weight: var(--fw-700);
+    text-decoration: none;
+  }
+
+  .gq-cta:hover { background: var(--c-accent-strong); color: var(--c-text-inverse); }
+
+  @media (max-width: 767px) {
+    .gq-inner { flex-direction: column; align-items: flex-start; gap: var(--s5); }
+  }
+</style>

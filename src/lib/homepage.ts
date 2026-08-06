@@ -20,7 +20,18 @@ export const HOME_COPY: Record<Lang, {
     tours: string
     relatedDestinations: string
     faq: string
+    /** Bốn khối thêm cho trang chủ hướng A (SPEC-2026-08-06). */
+    whyUs: string
+    partners: string
+    testimonials: string
+    groupQuote: string
   }
+  /** Câu phụ dưới tiêu đề khối đối tác. */
+  partnersSub: string
+  /** Dòng minh bạch dưới khối đánh giá — đánh giá KHÔNG serialize (QĐ-2026-08-06-09). */
+  testimonialsDisclosure: string
+  /** Nhãn nút báo giá đoàn khi Studio chưa nhập `groupQuote.ctaLabel`. */
+  groupQuoteCta: string
   viewAll: string
   updatedAt: string
   safety: string
@@ -35,10 +46,10 @@ export const HOME_COPY: Record<Lang, {
       'hub-di-lai': 'Sân bay, xe bus, taxi, thuê xe máy',
     },
     trustItems: [
-      { icon: '🚐', title: 'Xe đưa đón tận nơi', description: 'Không bắt khách tự ra bến' },
-      { icon: '🧭', title: 'Hướng dẫn viên đi cùng', description: 'Có người chịu trách nhiệm suốt chuyến' },
-      { icon: '🏷️', title: 'Giá tốt', description: 'Báo giá trọn gói, không phụ thu' },
-      { icon: '💬', title: 'Thanh toán linh hoạt', description: 'Chốt qua Zalo với người thật' },
+      { icon: '🚐', title: 'Xe đưa đón tận nơi', description: 'Không bắt khách tự ra bến. Tài xế nhận khách ngay tại khách sạn theo giờ đã hẹn.' },
+      { icon: '🧭', title: 'Hướng dẫn viên đi cùng', description: 'Có người chịu trách nhiệm suốt chuyến, từ lúc lên xe đến lúc về lại khách sạn.' },
+      { icon: '🏷️', title: 'Giá tốt', description: 'Báo giá trọn gói, không phụ thu phát sinh trong ngày. Giá trên trang là giá bạn trả.' },
+      { icon: '💬', title: 'Thanh toán linh hoạt', description: 'Chốt qua Zalo với người thật, thống nhất cách thanh toán trước khi giữ chỗ.' },
     ],
     sections: {
       overview: 'Tổng quan về Nha Trang',
@@ -53,7 +64,14 @@ export const HOME_COPY: Record<Lang, {
       tours: 'Tour nổi bật',
       relatedDestinations: 'Điểm đến liên quan',
       faq: 'Câu hỏi thường gặp',
+      whyUs: 'Vì sao chọn',
+      partners: 'Chúng tôi làm việc cùng',
+      testimonials: 'Khách đã đi nói gì',
+      groupQuote: 'Báo giá đoàn',
     },
+    partnersSub: 'Sàn đặt phòng, hãng tàu, khách sạn và đại lý mà công ty nối sản phẩm trực tiếp.',
+    testimonialsDisclosure: 'Đánh giá do khách gửi trực tiếp cho công ty hoặc trích từ trang nguồn ghi kèm. Chúng tôi không phát dữ liệu đánh giá cho công cụ tìm kiếm.',
+    groupQuoteCta: 'Nhận báo giá qua Zalo',
     viewAll: 'Xem tất cả',
     updatedAt: 'Cập nhật',
     safety: 'Lưu ý an toàn',
@@ -86,7 +104,14 @@ export const HOME_COPY: Record<Lang, {
       tours: 'Featured tours',
       relatedDestinations: 'Related destinations',
       faq: 'Frequently asked questions',
+      whyUs: 'Why choose us',
+      partners: 'We work with',
+      testimonials: 'What our guests say',
+      groupQuote: 'Group quote',
     },
+    partnersSub: 'Booking platforms, boat operators, hotels and agencies we source directly from.',
+    testimonialsDisclosure: 'Reviews are sent to us directly by guests or quoted from the source page named. We do not emit review data to search engines.',
+    groupQuoteCta: 'Get a quote on Zalo',
     viewAll: 'View all',
     updatedAt: 'Updated',
     safety: 'Safety note',
@@ -119,7 +144,14 @@ export const HOME_COPY: Record<Lang, {
       tours: '精选旅行团',
       relatedDestinations: '相关目的地',
       faq: '常见问题',
+      whyUs: '为什么选择我们',
+      partners: '合作伙伴',
+      testimonials: '客人怎么说',
+      groupQuote: '团队报价',
     },
+    partnersSub: '我们直接对接的订房平台、船公司、酒店和代理商。',
+    testimonialsDisclosure: '评价由客人直接提供或引用所注明的来源页面。我们不向搜索引擎发送评价数据。',
+    groupQuoteCta: '通过 Zalo 获取报价',
     viewAll: '查看全部',
     updatedAt: '更新',
     safety: '安全提示',
@@ -152,7 +184,14 @@ export const HOME_COPY: Record<Lang, {
       tours: '추천 투어',
       relatedDestinations: '관련 목적지',
       faq: '자주 묻는 질문',
+      whyUs: '왜 저희를 선택하나요',
+      partners: '함께하는 파트너',
+      testimonials: '다녀온 손님의 말',
+      groupQuote: '단체 견적',
     },
+    partnersSub: '직접 연결된 예약 플랫폼, 선사, 호텔, 여행사입니다.',
+    testimonialsDisclosure: '후기는 손님이 직접 보내주셨거나 명시된 출처에서 인용한 것입니다. 검색엔진에 후기 데이터를 내보내지 않습니다.',
+    groupQuoteCta: 'Zalo로 견적 받기',
     viewAll: '전체 보기',
     updatedAt: '업데이트',
     safety: '안전 안내',
@@ -185,7 +224,14 @@ export const HOME_COPY: Record<Lang, {
       tours: 'Избранные туры',
       relatedDestinations: 'Похожие направления',
       faq: 'Частые вопросы',
+      whyUs: 'Почему мы',
+      partners: 'Мы работаем с',
+      testimonials: 'Что говорят гости',
+      groupQuote: 'Расчёт для группы',
     },
+    partnersSub: 'Платформы бронирования, судовые компании, отели и агентства, с которыми мы работаем напрямую.',
+    testimonialsDisclosure: 'Отзывы присланы гостями напрямую или процитированы с указанного источника. Мы не передаём данные отзывов поисковым системам.',
+    groupQuoteCta: 'Получить расчёт в Zalo',
     viewAll: 'Смотреть все',
     updatedAt: 'Обновлено',
     safety: 'Совет по безопасности',

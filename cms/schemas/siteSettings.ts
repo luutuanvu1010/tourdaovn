@@ -3,7 +3,11 @@ import { CogIcon } from '@sanity/icons'
 
 const SECTION_KEYS = [
   { title: '🖼 Hero — Lời chào và ảnh bìa', value: 'hero' },
-  { title: '✅ Thanh tin cậy', value: 'trustBar' },
+  { title: '✅ Vì sao chọn (bốn điểm khác biệt)', value: 'trustBar' },
+  { title: '📊 Dải số liệu', value: 'stats' },
+  { title: '🤝 Logo đối tác', value: 'partners' },
+  { title: '💬 Đánh giá khách', value: 'testimonials' },
+  { title: '📨 Báo giá đoàn', value: 'groupQuote' },
   { title: '📝 Nội dung biên tập (body, highlights, facts)', value: 'editorialBody' },
   { title: '🎫 Banner', value: 'banners' },
   { title: '🧭 Hub điều hướng (3 hub)', value: 'hubGrid' },

@@ -1,0 +1,157 @@
+---
+// Đánh giá khách — 06-BINDING_MAP §5.7. Nguồn duy nhất: siteSettings.testimonials.
+//
+// KHÔNG serialize ra JSON-LD. Google cấm rich snippet đánh giá tự phục vụ, tức
+// nội dung doanh nghiệp tự đăng về chính mình; phát `Review` hay `AggregateRating`
+// ở đây là rủi ro phạt thủ công, mà I6 là cổng mức `fail`. Xem QĐ-2026-08-06-09.
+// Vì vậy component này cố ý KHÔNG có `<script type="application/ld+json">`, và
+// cũng không vẽ sao vàng — hình sao gợi ý một rich snippet không tồn tại.
+import type { SiteTestimonial } from '../lib/types'
+
+export interface Props {
+  testimonials?: SiteTestimonial[] | null
+  heading: string
+  disclosure?: string
+}
+
+const { testimonials, heading, disclosure } = Astro.props
+// Không có `quote` thì không phải một đánh giá — bỏ.
+const items = (testimonials ?? []).filter(t => t.quote)
+const cols = Math.min(items.length, 3)
+---
+
+{items.length > 0 && (
+  <section class="tm-section">
+    <div class="container">
+      <div class="tm-head">
+        <h2>{heading}</h2>
+        <span class="tm-underline" aria-hidden="true"></span>
+      </div>
+
+      <div class="tm-grid" style={`--tm-cols:${cols}`}>
+        {items.map(t => (
+          <figure class="tm-card">
+            <span class="tm-mark" aria-hidden="true">&rdquo;</span>
+            <blockquote>{t.quote}</blockquote>
+            <figcaption>
+              {t.authorName && <span class="tm-author">{t.authorName}</span>}
+              {t.authorNote && <span class="tm-note">{t.authorNote}</span>}
+              {t.sourceUrl && t.sourceName && (
+                <a class="tm-source" href={t.sourceUrl} target="_blank" rel="noopener nofollow">
+                  Đánh giá trên {t.sourceName}
+                </a>
+              )}
+              {!t.sourceUrl && t.sourceName && <span class="tm-note">Nguồn: {t.sourceName}</span>}
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+
+      {disclosure && <p class="tm-disclosure">{disclosure}</p>}
+    </div>
+  </section>
+)}
+
+<style>
+  .tm-section {
+    background: var(--c-primary-soft);
+    padding: var(--s9) 0;
+  }
+
+  .tm-head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s3);
+    margin-bottom: var(--s7);
+  }
+
+  .tm-head h2 {
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    font-weight: var(--fw-800);
+    color: var(--c-primary);
+    line-height: var(--lh-heading);
+    text-wrap: balance;
+  }
+
+  .tm-underline {
+    display: block;
+    width: var(--underline-width);
+    height: var(--underline-height);
+    background: var(--c-sand);
+    border-radius: 2px;
+  }
+
+  .tm-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--tm-cols, 3), 1fr);
+    gap: var(--s5);
+    align-items: stretch;
+  }
+
+  .tm-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s4);
+    background: var(--c-card);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    padding: var(--s6);
+    box-shadow: var(--shadow-card);
+  }
+
+  .tm-mark {
+    font-family: var(--font-display);
+    font-size: var(--fs-h2);
+    font-weight: var(--fw-800);
+    line-height: 0.6;
+    color: var(--c-sand);
+  }
+
+  .tm-card blockquote {
+    font-size: var(--fs-base);
+    line-height: var(--lh-body);
+    color: var(--c-text);
+    flex: 1;
+  }
+
+  .tm-card figcaption {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s1);
+    border-top: 1px solid var(--c-border);
+    padding-top: var(--s4);
+  }
+
+  .tm-author {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-700);
+    color: var(--c-text);
+  }
+
+  .tm-note {
+    font-size: var(--fs-label);
+    color: var(--c-text-muted);
+  }
+
+  .tm-source {
+    font-size: var(--fs-label);
+    font-weight: var(--fw-600);
+    text-decoration: underline;
+    margin-top: var(--s1);
+  }
+
+  .tm-disclosure {
+    font-size: var(--fs-label);
+    color: var(--c-text-muted);
+    margin-top: var(--s5);
+  }
+
+  @media (max-width: 1023px) {
+    .tm-grid { grid-template-columns: repeat(min(var(--tm-cols, 3), 2), 1fr); }
+  }
+
+  @media (max-width: 640px) {
+    .tm-grid { grid-template-columns: 1fr; }
+  }
+</style>

@@ -1,0 +1,100 @@
+---
+// Dải số liệu — 06-BINDING_MAP §5.7. Nguồn duy nhất: siteSettings.stats.
+//
+// Đây là trụ của trang chủ: nó KHÔNG đọc một document tour nào, nên site có 4
+// hay 40 sản phẩm thì khối này vẫn đầy. Đó là lý do nó tồn tại.
+//
+// Bố cục theo mockup vòng 2: ô căn trái, gạch cát nhỏ ở đầu mỗi ô, ngăn nhau
+// bằng đường dọc mờ — không phải các ô căn giữa rời rạc.
+import type { SiteStat } from '../lib/types'
+
+export interface Props {
+  stats?: SiteStat[] | null
+}
+
+const { stats } = Astro.props
+// Ô thiếu cả `value` lẫn `label` là ô rỗng — bỏ, không render ô trắng.
+const items = (stats ?? []).filter(s => s.value || s.label)
+// Trần 4 cột: quá bốn ô một hàng thì con số bị bóp.
+const cols = Math.min(items.length, 4)
+---
+
+{items.length > 0 && (
+  <section class="stats-band">
+    <div class="container stats-grid" style={`--stat-cols:${cols}`}>
+      {items.map(stat => (
+        <div class="stat">
+          <span class="stat-rule" aria-hidden="true"></span>
+          {stat.value && <span class="stat-value">{stat.value}</span>}
+          {stat.label && <span class="stat-label">{stat.label}</span>}
+          {stat.note && <span class="stat-note">{stat.note}</span>}
+        </div>
+      ))}
+    </div>
+  </section>
+)}
+
+<style>
+  /* Nền --c-primary với chữ --c-text-inverse. Cả ba bộ giao diện đều đạt AA ở
+     cặp này (9.46 / 7.27 / 5.47). Cấm đổi sang --c-sand: cặp đó chỉ đạt 3.28. */
+  .stats-band {
+    background: var(--c-primary);
+    color: var(--c-text-inverse);
+    padding: var(--s7) 0;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--stat-cols, 4), 1fr);
+    gap: 0;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s2);
+    padding: 0 var(--s6);
+  }
+
+  .stat:first-child { padding-left: 0; }
+  .stat:last-child { padding-right: 0; }
+
+  .stat + .stat {
+    border-left: 1px solid color-mix(in srgb, var(--c-text-inverse) 24%, transparent);
+  }
+
+  .stat-rule {
+    width: var(--underline-width);
+    height: var(--underline-height);
+    background: var(--c-sand);
+    border-radius: 2px;
+  }
+
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: var(--fs-h1);
+    font-weight: var(--fw-900);
+    line-height: 1.05;
+  }
+
+  .stat-label {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-600);
+  }
+
+  .stat-note {
+    font-size: var(--fs-label);
+    opacity: 0.7;
+  }
+
+  @media (max-width: 1023px) {
+    .stats-grid { grid-template-columns: repeat(min(var(--stat-cols, 4), 2), 1fr); gap: var(--s5); }
+    .stat { padding: 0; }
+    .stat + .stat { border-left: none; }
+  }
+
+  @media (max-width: 640px) {
+    .stats-grid { grid-template-columns: 1fr; }
+    .stat-value { font-size: var(--fs-h3); }
+  }
+</style>

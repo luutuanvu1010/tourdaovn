@@ -533,7 +533,7 @@ Cấu hình toàn site. Toàn bộ dataset chỉ có đúng 1 document. i18n fie
 | Field | Kiểu | Bắt buộc? | Dịch? | Bất biến / quy tắc | Ai cung cấp |
 |---|---|---|---|---|---|
 | title | string | tùy | không | mặc định "Trang chủ", hiển thị trên document header | hệ thống |
-| sections | array object | tùy | không | thứ tự render là thứ tự trong mảng; `key` là enum đóng 15 giá trị; `hidden` mặc định false. Thiếu field `sections` hoặc mảng rỗng → homepage dùng DEFAULT_SECTIONS. | founder |
+| sections | array object | tùy | không | thứ tự render là thứ tự trong mảng; `key` là enum đóng 19 giá trị; `hidden` mặc định false. Thiếu field `sections` hoặc mảng rỗng → homepage dùng DEFAULT_SECTIONS. | founder |
 | heroText | object {vi,en,zh,ko,ru} | tùy | có (field-level) | ghi đè dòng eyebrow của hero; để trống → dùng SITE_COPY | founder |
 | contact | object | tùy | không | 4 field con, dữ liệu trung lập ngôn ngữ; field con nào trống thì kênh đó không render (guard rỗng, không nút chết) | founder |
 | pickupPoints | array object | tùy | không | lộ trình đón khách của công ty; thứ tự render là thứ tự trong mảng; mảng rỗng hoặc thiếu → trang lộ trình không render bản đồ (guard rỗng) | founder |
@@ -545,7 +545,8 @@ Cấu hình toàn site. Toàn bộ dataset chỉ có đúng 1 document. i18n fie
 | support | object | tùy | không | nội dung trang `/ho-tro/`; 3 phần con độc lập nhau, phần nào trống thì khối đó không render (guard rỗng); cả object trống hoặc thiếu → trang vẫn dựng, chỉ còn tiêu đề và kênh liên hệ | founder |
 
 Field `sections[]`:
-- `key`: string enum đóng 15 giá trị — hero | trustBar | editorialBody | banners | hubGrid | areas | attractions | experiences | guides | stays | specialties | tours | faq | safety | meta
+- `key`: string enum đóng 19 giá trị — hero | stats | trustBar | partners | testimonials | editorialBody | banners | hubGrid | areas | attractions | experiences | guides | stays | specialties | tours | faq | safety | groupQuote | meta
+  - Bốn khoá `stats`, `partners`, `testimonials`, `groupQuote` thêm v1.0.16 cùng bốn field cùng tên. `trustBar` giữ nguyên khoá nhưng đổi vai thành khối "Vì sao chọn" (bốn điểm khác biệt, nguồn `config (build)`).
 - `hidden`: boolean, mặc định false
 
 Empty guard là cổng cứng: `hidden = false` nhưng section không có dữ liệu → section vẫn ẩn. `hidden` chỉ để chủ động tắt section đã có dữ liệu.

@@ -12,6 +12,10 @@ import HomeRollupSection from './HomeRollupSection.astro'
 import HomeFacts from './HomeFacts.astro'
 import HomeAreaGrid from './HomeAreaGrid.astro'
 import HomeGuideGrid from './HomeGuideGrid.astro'
+import HomeStatsBand from './HomeStatsBand.astro'
+import HomePartners from './HomePartners.astro'
+import HomeTestimonials from './HomeTestimonials.astro'
+import HomeGroupQuote from './HomeGroupQuote.astro'
 export interface Props {
   td: TouristDestinationResult | null
   lang: Lang
@@ -92,20 +96,28 @@ const heroImage = imageUrl(td?.mainImage, { width: 1800 })
 // `tours` đứng thứ 12/14 — sau cả `specialties` là danh mục đã tắt — nên trang
 // chủ của một công ty bán tour không hề bán gì ở nửa trên.
 // Đây chỉ là mặc định; `siteSettings.sections` mới là nơi chốt thứ tự thật.
+// Thứ tự hướng A của SPEC-2026-08-06: BẰNG CHỨNG gánh trang, không phải catalogue.
+// `stats` đứng ngay dưới hero vì nó không đọc document tour nào — 4 hay 40 sản
+// phẩm cũng không lộ. `trustBar` (nay là khối "Vì sao chọn") đứng sau tour, và
+// `groupQuote` khoá đuôi trang.
 const DEFAULT_SECTIONS = [
   { key: 'hero', hidden: false },
+  { key: 'stats', hidden: false },
   { key: 'tours', hidden: false },
   { key: 'trustBar', hidden: false },
+  { key: 'partners', hidden: false },
+  { key: 'testimonials', hidden: false },
+  { key: 'guides', hidden: false },
   { key: 'experiences', hidden: false },
   { key: 'hubGrid', hidden: false },
   { key: 'stays', hidden: false },
   { key: 'attractions', hidden: false },
   { key: 'areas', hidden: false },
-  { key: 'guides', hidden: false },
   { key: 'editorialBody', hidden: false },
   { key: 'banners', hidden: false },
   { key: 'faq', hidden: false },
   { key: 'safety', hidden: false },
+  { key: 'groupQuote', hidden: false },
 ]
 
 const rawSections = config?.sections?.length ? config.sections : DEFAULT_SECTIONS
@@ -132,7 +144,15 @@ const activeSections = rawSections.filter((s) => !s.hidden)
       case 'hero':
         return null
       case 'trustBar':
-        return <HomeTrustBar items={copy.trustItems} />
+        return <HomeTrustBar items={copy.trustItems} heading={`${copy.sections.whyUs} ${brand.name}`} />
+      case 'stats':
+        return <HomeStatsBand stats={config?.stats} />
+      case 'partners':
+        return <HomePartners partners={config?.partners} heading={copy.sections.partners} sub={copy.partnersSub} />
+      case 'testimonials':
+        return <HomeTestimonials testimonials={config?.testimonials} heading={copy.sections.testimonials} disclosure={copy.testimonialsDisclosure} />
+      case 'groupQuote':
+        return <HomeGroupQuote groupQuote={config?.groupQuote} zaloUrl={config?.contact?.zaloUrl} fallbackCtaLabel={copy.groupQuoteCta} />
       case 'editorialBody': {
         if (!td) return null
         const hasBody = Boolean(td.body)
