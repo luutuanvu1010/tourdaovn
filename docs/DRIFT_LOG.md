@@ -425,7 +425,9 @@ Không vỡ lúc chạy: giá trị là `undefined` và `resolvePrice` chịu đ
 
 ## DR-029 — Site chưa bao giờ hiện đúng font đã duyệt
 
-**Trạng thái:** mở. Phát hiện 2026-08-06 khi Claude Design dựng mockup pha F; Cowork đã kiểm chứng lại.
+**Trạng thái:** **đã xử 2026-08-06.** Chủ dự án chốt **tự host**. Tải 10 file `.woff2` (2 subset `latin` + `vietnamese`, đúng 5 cấp đậm mà `@font-face` khai) vào `public/fonts/`, tổng ~140 KB. Kiểm chữ ký `wOF2` cả 10 file; `dist/` nay có đủ 10. Giấy phép OFL 1.1, ghi ở `public/fonts/README.md`. Nguyên văn phần dưới giữ lại làm bản ghi lịch sử.
+
+**Trạng thái cũ:** mở. Phát hiện 2026-08-06 khi Claude Design dựng mockup pha F; Cowork đã kiểm chứng lại.
 
 `src/layouts/BaseLayout.astro` khai **10 khối `@font-face`** trỏ `/fonts/*.woff2`. Nhưng:
 
