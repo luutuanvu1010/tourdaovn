@@ -1,4 +1,4 @@
-# GÓI BÀN GIAO — Pha F vòng 2: thiết kế lại trang chủ
+# GÓI BÀN GIAO — Pha F vòng 2: thiết kế lại TOÀN BỘ site
 
 > **File này tự chứa.** Prompt và mọi tài liệu đầu vào đã gộp vào đây, không cần mở repo.
 > Dán hoặc tải file này lên phiên Claude Design là đủ.
@@ -7,15 +7,16 @@
 
 ## Mục lục
 
-1. Prompt nhiệm vụ  ← đọc trước, có hợp đồng bốn khối mới
-2. `06-BINDING_MAP.md` — bản ánh xạ vùng ↔ dữ liệu cho các khối CŨ
+1. Prompt nhiệm vụ  ← đọc trước; có phạm vi 7 trang và hợp đồng 4 khối mới
+2. `06-BINDING_MAP.md` — bản ánh xạ vùng ↔ dữ liệu
 3. `07-DESIGN_TOKENS.md` — bộ token, gồm §1b ba bộ giao diện
 4. `00-PROJECT_BRIEF.md` — định vị, khách hàng, bốn điểm khác biệt
 5. `tokens.css` — token đang chạy thật
+6. `COMPONENT_INVENTORY.md` — 54 component đang có
 
-> **Đọc §5.7 của tài liệu 2 kèm cảnh báo này:** nó CHƯA liệt bốn khối mới (dải số
-> liệu, logo đối tác, đánh giá khách, báo giá đoàn). Hợp đồng cho bốn khối đó nằm ở
-> mục 1. Việc khai chúng vào `06-BINDING_MAP` đang chờ thi hành.
+> **Đọc §5.7 của tài liệu 2 kèm cảnh báo này:** nó CHƯA liệt bốn khối mới của trang
+> chủ (dải số liệu, logo đối tác, đánh giá khách, báo giá đoàn). Hợp đồng cho bốn khối
+> đó nằm ở mục 1. Việc khai chúng vào `06-BINDING_MAP` đang chờ thi hành.
 
 ---
 
@@ -25,15 +26,38 @@
 
 Anh làm **bề mặt**: xuất mockup và đề xuất token. Anh **không** viết code sản phẩm, không quyết kiến trúc, không chạm dữ liệu.
 
-Đây là **vòng thứ hai** của bước 7. Vòng một đã giao bảy loại trang và đã được duyệt. Vòng này chỉ làm **một trang: trang chủ**.
+Đây là **vòng thứ hai** của bước 7, và nó **làm lại toàn bộ site**, không chỉ một trang.
 
 ## Vì sao có vòng hai
 
-Trang chủ hiện tại đã dựng theo vòng một, và chủ dự án xem xong nói:
+Bốn trang đã dựng theo vòng một. Chủ dự án xem xong nói:
 
 > *"Trang chủ vẫn còn rất xấu, chưa xứng tầm với một công ty du lịch có doanh thu 7 triệu đô la một năm."*
 
-Vòng một vẽ màn `Home` chỉ có bốn khối: hero, thanh tin cậy, tour, lưới hub. Bốn khối làm nên "chất công ty lớn" chưa từng được vẽ.
+Hai nguyên nhân, và cả hai đều là lỗi của vòng một chứ không phải lỗi thi hành:
+
+1. **Vòng một thiếu bối cảnh quyết định.** Nó không biết doanh thu công ty đến từ đâu, không biết bằng chứng nào có sẵn. Nên nó thiết kế như cho một site nội dung, trong khi đây là site của một công ty đã lớn nhưng mới lên web.
+2. **Màn `Home` của vòng một chỉ có bốn khối** — hero, thanh tin cậy, tour, lưới hub. Bốn khối làm nên "chất công ty lớn" chưa từng được vẽ.
+
+Vòng này sửa cả hai. Và vì bối cảnh đổi thì **mọi trang đều phải xem lại**, không riêng trang chủ.
+
+## Phạm vi: bảy loại trang
+
+Theo thứ tự ưu tiên. Nếu không đủ sức làm hết, làm chắc từ trên xuống, đừng làm dở cả bảy.
+
+| # | Loại trang | Đường dẫn | Ghi chú |
+|---|---|---|---|
+| 1 | **Trang chủ** | `/` | quan trọng nhất; bốn khối mới nằm ở đây |
+| 2 | **Tour chi tiết** | `/tour/<slug>/` | trang chốt đơn |
+| 3 | **Danh sách tour** | `/tour/` | |
+| 4 | Địa danh chi tiết | `/dia-danh/<slug>/` | |
+| 5 | Điểm tham quan chi tiết | `/diem-tham-quan/<slug>/` | |
+| 6 | Trải nghiệm chi tiết | `/trai-nghiem/<slug>/` | |
+| 7 | Cẩm nang chi tiết | `/cam-nang/<slug>/` | |
+
+Sáu trang từ 2 đến 7 đã có bản vòng một. Anh **được phép giữ** phần nào còn đúng — nhưng phải xem lại dưới ánh sáng bối cảnh mới ở mục dưới, và nói rõ chỗ nào giữ, chỗ nào đổi, vì sao.
+
+Hai trang tĩnh `/ho-tro/` và `/lien-he/` **không** thuộc phạm vi vòng này.
 
 ## Bối cảnh — đọc kỹ, đây là chỗ dễ thiết kế sai nhất
 
@@ -49,9 +73,9 @@ Vòng một vẽ màn `Home` chỉ có bốn khối: hero, thanh tin cậy, tour
 
 **Gu chủ dự án chốt:** *"chắc chắn và nhiều số liệu, kiểu công ty lớn."*
 
-## Bố cục đã duyệt — hướng A
+## Bố cục TRANG CHỦ đã duyệt — hướng A
 
-Tám khối, đúng thứ tự này. Chủ dự án đã chọn hướng này sau khi cân ba phương án.
+Tám khối, đúng thứ tự này. Chủ dự án đã chọn hướng này sau khi cân ba phương án. Sáu trang còn lại không có bố cục chốt sẵn — anh đề xuất, nhưng phải bám `06-BINDING_MAP`.
 
 ```
 1  Hero                 ảnh thật + câu định vị + 2 CTA
@@ -120,10 +144,14 @@ Dải số liệu nên dùng `--c-primary` với chữ `--c-text-inverse`: đã 
 
 Đây là ràng buộc đã làm hỏng một vòng thiết kế trước. Với **mỗi** khối, khai rõ nó hiển thị ra sao ở:
 
-- **Khối tour:** 1 mục và 4 mục. Bốn là mốc ra mắt, không phải bốn mươi.
+- **Khối tour trên trang chủ:** 1 mục và 4 mục. Bốn là mốc ra mắt, không phải bốn mươi.
 - **Dải số liệu:** 3 ô và 5 ô.
 - **Logo đối tác:** 3 logo và 8 logo.
 - **Đánh giá:** 1 và 3.
+- **Trang danh sách `/tour/`:** 1 mục và 4 mục.
+- **Mọi khối rollup trên trang chi tiết** ("trải nghiệm tại đây", "tour liên quan"): 0 mục và 2 mục.
+
+Dataset thật hôm nay: **1 tour, 1 trải nghiệm, 1 địa danh, 1 điểm tham quan, 1 bài cẩm nang, 0 khách sạn, 0 resort.** Thiết kế nào chỉ đẹp khi đủ hàng là thiết kế chưa dùng được.
 
 Lưới nhiều cột để một thẻ nằm lẻ loi là hỏng. Trang chủ hiện tại đã có luật xử việc này — 1 mục thì thẻ nằm ngang chiếm trọn chiều rộng; anh có thể theo hoặc đề xuất khác, nhưng **phải nói rõ**.
 
@@ -143,6 +171,7 @@ Giao xong thì **dừng, chờ chủ dự án duyệt QA1** (`GOVERNANCE` 4.3). 
 - Mỗi khối khai rõ trạng thái ít dữ liệu và trạng thái rỗng.
 - Không giá trị màu hay cỡ chữ nào nằm ngoài token.
 - Ba bộ giao diện đều dùng được.
+- **Với sáu trang đã có bản vòng một:** nói rõ chỗ nào giữ, chỗ nào đổi, và vì sao. Không im lặng vẽ lại từ đầu, cũng không im lặng giữ nguyên.
 
 **Không tự mở cổng sang bước 8.** Chủ dự án chốt.
 
@@ -1031,3 +1060,895 @@ p {
 }
 
 ```
+
+
+---
+
+# 6. `docs/design-context/COMPONENT_INVENTORY.md`
+
+# Danh mục component — Tour Đảo
+
+> File sinh tự động bởi `scripts/gen-component-inventory.mjs`. Không sửa tay.
+> Sinh lại: `npm run gen:design-context`
+
+Hợp đồng API của thư viện component đang chạy production. Mỗi mục là interface
+`Props` nguyên văn trong code, không diễn giải lại.
+
+## Primitive dùng chung (27)
+
+### AuthorityMeta
+
+`src/components/AuthorityMeta.astro`
+
+```ts
+export interface Props {
+  data: {
+    _updatedAt?: string
+    updatedAt?: string
+    approvedBy?: string
+    contentProvenance?: 'human' | 'ai-t1' | 'mixed'
+    officialSource?: string
+    sameAs?: string[]
+    author?: { title?: string; url?: string; sameAs?: string[] }
+  }
+  lang: Lang
+}
+```
+
+### Body
+
+`src/components/Body.astro`
+
+```ts
+export interface Props {
+  blocks: any[] | undefined
+  class?: string
+}
+```
+
+### BookingCTA
+
+`src/components/BookingCTA.astro`
+
+```ts
+export interface Props {
+  /** Nhãn giá; bỏ trống ở variant fallback (chỉ có nút trỏ nguồn chính thức). */
+  priceText?: string
+  ctaUrl?: string
+  ctaLabel: string
+  asOf?: string
+}
+```
+
+### Breadcrumb
+
+`src/components/Breadcrumb.astro`
+
+```ts
+export interface Props {
+  containedInPlace?: EntityRef
+  entityType: string
+  lang: Lang
+  hubEntity?: string
+  currentTitle?: string
+  inverse?: boolean
+}
+```
+
+### Card
+
+`src/components/Card.astro`
+
+```ts
+export interface Props {
+  title: string;
+  summary: string;
+  href: string;
+  image?: string;
+  imageAlt?: string;
+  badge?: string;
+  badgeVariant?: 'default' | 'author' | 'free' | 'past';
+  priceLabel?: string;
+  authorLabel?: string;
+}
+```
+
+### ContactCTA
+
+`src/components/ContactCTA.astro`
+
+```ts
+export interface Props {
+  telephone: string
+  lang: Lang
+}
+```
+
+### ContactChannels
+
+`src/components/ContactChannels.astro`
+
+```ts
+export interface Props {
+  contact?: SiteContact | null
+  lang: Lang
+}
+```
+
+### DetailLayout
+
+`src/components/DetailLayout.astro`
+
+```ts
+export interface Props {
+  title: string
+  lang: Lang
+  entityType: string
+  image?: string | ImageAsset
+  gallery?: ImageAsset[]
+  containedInPlace?: EntityRef
+  infoBarItems?: InfoBarItem[]
+  sidebarSlots: Slot[]
+  nearbyTitle: string
+  nearby: NearbyEntity[]
+  updatedAt: string
+}
+```
+
+Type phụ trợ:
+
+```ts
+export interface InfoBarItem {
+  icon: string
+  label: string
+  value: string
+  visible: boolean
+} // khai ở InfoBar.astro
+export interface Slot {
+  name: string
+  component: 'BookingCTA' | 'InfoCard' | 'Map' | 'Article' | 'custom'
+  visible: boolean
+  props: Record<string, any>
+} // khai ở Sidebar.astro
+```
+
+### EmptyState
+
+`src/components/EmptyState.astro`
+
+```ts
+export interface Props {
+  entityType: string
+  lang: Lang
+  message?: string
+}
+```
+
+### FAQ
+
+`src/components/FAQ.astro`
+
+```ts
+export interface Props {
+  faq: FAQItem[]
+  heading?: string
+  lang?: Lang
+  contained?: boolean
+}
+```
+
+### Footer
+
+`src/components/Footer.astro`
+
+```ts
+export interface Props {
+  lang?: string
+}
+```
+
+### Gallery
+
+`src/components/Gallery.astro`
+
+```ts
+export interface Props {
+  images: ImageAsset[]
+  lang?: Lang
+}
+```
+
+### Header
+
+`src/components/Header.astro`
+
+```ts
+export interface Props {
+  currentPath?: string;
+  lang?: string;
+  /**
+   * Map ngôn ngữ → URL bản dịch CÓ THẬT cho trang hiện tại. Ngôn ngữ vắng trong map =
+   * chưa có bản dịch (track QĐ3) → render disable, KHÔNG link chết (audit G5, prompt R5).
+   */
+  alternates?: Record<string, string>;
+}
+```
+
+### Hero
+
+`src/components/Hero.astro`
+
+```ts
+export interface Props {
+  image?: string | ImageAsset
+  gallery?: ImageAsset[]
+  imageAlt?: string
+}
+```
+
+### InfoBar
+
+`src/components/InfoBar.astro`
+
+```ts
+export interface Props {
+  items: InfoBarItem[]
+}
+```
+
+Type phụ trợ:
+
+```ts
+export interface InfoBarItem {
+  icon: string
+  label: string
+  value: string
+  visible: boolean
+}
+```
+
+### InfoCard
+
+`src/components/InfoCard.astro`
+
+```ts
+export interface Props {
+  rows: InfoRow[]
+  lang?: Lang
+}
+```
+
+Type phụ trợ:
+
+```ts
+export interface InfoRow {
+  icon: string
+  label: string
+  value: string
+  href?: string
+  visible: boolean
+}
+```
+
+### MapView
+
+`src/components/MapView.astro`
+
+```ts
+export interface Props {
+  geo: { lat: number; lng: number }
+  title: string
+  height?: number
+  markers?: { lat: number; lng: number; title: string }[]
+}
+```
+
+### NearbySection
+
+`src/components/NearbySection.astro`
+
+```ts
+export interface Props {
+  title: string
+  entities: NearbyEntity[]
+  viewAllUrl?: string
+  lang?: Lang
+}
+```
+
+### PriceDisplay
+
+`src/components/PriceDisplay.astro`
+
+```ts
+export interface Props {
+  bookingRef?: { key?: string }
+  isAccessibleForFree?: boolean
+  entityType: string
+  lang: Lang
+}
+```
+
+### RouteDispatch
+
+`src/components/RouteDispatch.astro`
+
+```ts
+export interface Props {
+  kind: 'detail' | 'index' | 'hub' | 'term' | 'destination' | 'notfound'
+  entity: string
+  slug?: string
+  lang: Lang
+}
+```
+
+### RouteMap
+
+`src/components/RouteMap.astro`
+
+```ts
+export interface Props {
+  points: PickupPoint[]
+  height?: number
+}
+```
+
+### Section
+
+`src/components/Section.astro`
+
+```ts
+export interface Props {
+  heading?: string
+  id?: string
+  contained?: boolean
+}
+```
+
+### Sidebar
+
+`src/components/Sidebar.astro`
+
+```ts
+export interface Props {
+  slots: Slot[]
+}
+```
+
+Type phụ trợ:
+
+```ts
+export interface Slot {
+  name: string
+  component: 'BookingCTA' | 'InfoCard' | 'Map' | 'Article' | 'custom'
+  visible: boolean
+  props: Record<string, any>
+}
+```
+
+### SiteHome
+
+`src/components/SiteHome.astro`
+
+```ts
+export interface Props {
+  td: TouristDestinationResult | null
+  lang: Lang
+  destinationHref: string
+  config: SiteSettingsResult | null
+}
+```
+
+### SkeletonCard
+
+`src/components/SkeletonCard.astro`
+
+```ts
+export interface Props {
+  count?: number
+}
+```
+
+### TouristDestinationHub
+
+`src/components/TouristDestinationHub.astro`
+
+```ts
+export interface Props extends TouristDestinationHubProps {}
+```
+
+### WaveDivider
+
+`src/components/WaveDivider.astro`
+
+```ts
+export interface Props {
+  fill?: string     // CSS color value, mặc định --c-primary
+  flip?: boolean    // lật ngược wave (dùng cho top của hubs section)
+  opacity?: number  // opacity của wave, mặc định 0.08
+  noSecond?: boolean // bỏ wave thứ hai (đường mờ hơn)
+}
+```
+
+## Template entity detail (13)
+
+### ArticleDetail
+
+`src/components/ArticleDetail.astro`
+
+```ts
+export interface Props {
+  data: ArticleResult
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+}
+```
+
+### AttractionDetail
+
+`src/components/AttractionDetail.astro`
+
+```ts
+export interface Props {
+  data: AttractionResult
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+}
+```
+
+### EventDetail
+
+`src/components/EventDetail.astro`
+
+```ts
+export interface Props {
+  data: EventResult
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+}
+```
+
+### ExperienceDetail
+
+`src/components/ExperienceDetail.astro`
+
+```ts
+export interface Props {
+  data: ExperienceResult
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+  contact?: SiteContact | null
+}
+```
+
+### HotelDetail
+
+`src/components/HotelDetail.astro`
+
+```ts
+export interface Props {
+  data: HotelResult
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+  contact?: SiteContact | null
+}
+```
+
+### LodgingDetail
+
+`src/components/LodgingDetail.astro`
+
+```ts
+export interface Props {
+  data: HotelResult | ResortResult
+  entityType: 'hotel' | 'resort'
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+  contact?: SiteContact | null
+}
+```
+
+### OrganizationDetail
+
+`src/components/OrganizationDetail.astro`
+
+```ts
+export interface Props {
+  data: OrganizationResult
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+}
+```
+
+### PersonDetail
+
+`src/components/PersonDetail.astro`
+
+```ts
+export interface Props {
+  data: PersonResult
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+}
+```
+
+### PlaceDetail
+
+`src/components/PlaceDetail.astro`
+
+```ts
+export interface Props {
+  data: PlaceResult
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+}
+```
+
+### ResortDetail
+
+`src/components/ResortDetail.astro`
+
+```ts
+export interface Props {
+  data: ResortResult
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+  contact?: SiteContact | null
+}
+```
+
+### RestaurantDetail
+
+`src/components/RestaurantDetail.astro`
+
+```ts
+export interface Props {
+  data: RestaurantResult
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+}
+```
+
+### SpecialtyDetail
+
+`src/components/SpecialtyDetail.astro`
+
+```ts
+export interface Props {
+  data: SpecialtyResult
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+}
+```
+
+### TourDetail
+
+`src/components/TourDetail.astro`
+
+```ts
+export interface Props {
+  data: TourResult
+  lang: Lang
+  nearby?: import('../lib/types').NearbyEntity[]
+  contact?: SiteContact | null
+}
+```
+
+## Trang danh sách (5)
+
+### EntityIndex
+
+`src/components/EntityIndex.astro`
+
+```ts
+export interface Props {
+  entities: ListingEntity[]
+  entityType: string
+  lang: Lang
+  title: string
+  description: string
+  terms?: { name: string; slug: string }[]
+  totalCount?: number
+  prices?: Map<string, PriceEntry>
+}
+```
+
+Type phụ trợ:
+
+```ts
+interface ListingEntity {
+  title: string
+  summary: string
+  slug: string
+  image?: string
+  imageAlt?: string
+  attractionType?: string
+  experienceType?: string
+  servesCuisine?: string[]
+  specialtyType?: string
+  starRating?: number
+  tourFormat?: string
+  articleType?: string
+  bookingRef?: { key?: string }
+  author?: { title: string }
+}
+```
+
+### EventIndex
+
+`src/components/EventIndex.astro`
+
+```ts
+export interface Props {
+  upcoming: EventEntity[]
+  past: EventEntity[]
+  lang: Lang
+  prices?: Map<string, PriceEntry>
+}
+```
+
+Type phụ trợ:
+
+```ts
+interface EventEntity {
+  title: string
+  summary: string
+  slug: string
+  image?: string
+  imageAlt?: string
+  eventType: string
+  startDate: string
+  bookingRef?: { key?: string }
+}
+```
+
+### HubIndex
+
+`src/components/HubIndex.astro`
+
+```ts
+export interface Props {
+  sections: HubSection[]
+  lang: Lang
+  prices?: Map<string, PriceEntry>
+}
+```
+
+Type phụ trợ:
+
+```ts
+interface HubSection {
+  title: string
+  description?: string
+  entityType: string
+  entities: ListingEntity[]
+  href?: string
+}
+interface ListingEntity {
+  title: string
+  summary: string
+  slug: string
+  image?: string
+  imageAlt?: string
+  attractionType?: string
+  experienceType?: string
+  servesCuisine?: string[]
+  specialtyType?: string
+  starRating?: number
+  tourFormat?: string
+  articleType?: string
+  bookingRef?: { key?: string }
+  author?: { title: string }
+} // khai ở EntityIndex.astro
+```
+
+### TermIndex
+
+`src/components/TermIndex.astro`
+
+```ts
+export interface Props {
+  term: TermData
+  entities: ListingEntity[]
+  entityType: 'experience' | 'tour'
+  lang: Lang
+  prices?: Map<string, PriceEntry>
+}
+```
+
+Type phụ trợ:
+
+```ts
+interface TermData {
+  name: string
+  description: string
+  slug: string
+  sameAs?: string
+}
+interface ListingEntity {
+  title: string
+  summary: string
+  slug: string
+  image?: string
+  imageAlt?: string
+  attractionType?: string
+  experienceType?: string
+  servesCuisine?: string[]
+  specialtyType?: string
+  starRating?: number
+  tourFormat?: string
+  articleType?: string
+  bookingRef?: { key?: string }
+  author?: { title: string }
+} // khai ở EntityIndex.astro
+```
+
+### TourIndex
+
+`src/components/TourIndex.astro`
+
+```ts
+export interface Props {
+  tours: TourEntity[]
+  terms: { name: string; slug: string }[]
+  lang: Lang
+  title?: string
+  description?: string
+  prices?: Map<string, PriceEntry>
+}
+```
+
+Type phụ trợ:
+
+```ts
+interface TourEntity {
+  title: string
+  summary: string
+  slug: string
+  image?: string
+  imageAlt?: string
+  tourFormat?: string
+  bookingRef?: { key?: string }
+}
+```
+
+## Trang chủ (9)
+
+### HomeAreaGrid
+
+`src/components/HomeAreaGrid.astro`
+
+```ts
+export interface Props {
+  places?: HomepagePlaceCard[]
+  lang: Lang
+  heading: string
+  viewAllLabel: string
+  viewAllHref?: string
+}
+```
+
+### HomeBannerGrid
+
+`src/components/HomeBannerGrid.astro`
+
+```ts
+export interface Props {
+  banners?: HomepageBanner[]
+  lang: Lang
+}
+```
+
+### HomeFacts
+
+`src/components/HomeFacts.astro`
+
+```ts
+export interface Props {
+  facts?: KeyFact[]
+}
+```
+
+### HomeGuideGrid
+
+`src/components/HomeGuideGrid.astro`
+
+```ts
+export interface Props {
+  articles?: HomepageArticleCard[]
+  lang: Lang
+  heading: string
+  viewAllLabel: string
+  viewAllHref?: string
+}
+```
+
+### HomeHero
+
+`src/components/HomeHero.astro`
+
+```ts
+export interface Props {
+  title: string
+  summary?: string
+  image?: string | ImageAsset
+  imageAlt?: string
+  eyebrow?: string
+  imageCredit?: string
+  stampText?: string
+  stampYear?: string
+}
+```
+
+### HomeHubGrid
+
+`src/components/HomeHubGrid.astro`
+
+```ts
+export interface Props {
+  lang: Lang
+  hubCounts?: Record<string, number>
+}
+```
+
+### HomeMetaBar
+
+`src/components/HomeMetaBar.astro`
+
+```ts
+export interface Props {
+  // Sanity trả null cho field mảng chưa đặt, không trả undefined, nên default
+  // của destructuring không đỡ được. Hợp đồng phải nói rõ là nhận cả null.
+  sameAs?: string[] | null
+  updatedLabel?: string
+  lang: Lang
+}
+```
+
+### HomeRollupSection
+
+`src/components/HomeRollupSection.astro`
+
+```ts
+export interface Props {
+  heading: string
+  items?: HomeCard[]
+  lang: Lang
+  viewAllLabel: string
+  viewAllHref?: string
+  badgeLabel?: string
+}
+```
+
+Type phụ trợ:
+
+```ts
+type HomeCard = EntityRef | HomepagePlaceCard | HomepageArticleCard
+```
+
+### HomeTrustBar
+
+`src/components/HomeTrustBar.astro`
+
+```ts
+export interface Props {
+  items: Array<{ icon: string; title: string; description: string }>
+}
+```
+
+## Module cần đính kèm để giải hết type
+
+Các `Props` trên tham chiếu type định nghĩa ở những module sau. Đính kèm chúng
+cùng inventory, nếu không thì hợp đồng API còn type treo.
+
+- `src/lib/types.ts`
+
+## Tổng kết
+
+| Nhóm | Số component |
+|---|---|
+| Primitive dùng chung | 27 |
+| Template entity detail | 13 |
+| Trang danh sách | 5 |
+| Trang chủ | 9 |
+| **Tổng** | **54** |

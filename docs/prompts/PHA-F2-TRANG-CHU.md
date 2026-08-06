@@ -1,4 +1,4 @@
-# Prompt bàn giao — Pha F vòng 2: thiết kế lại trang chủ
+# Prompt bàn giao — Pha F vòng 2: thiết kế lại TOÀN BỘ site
 
 > **Cách dùng:** đưa file gói `PHA-F2-GOI-BAN-GIAO.md` cho Claude Design. File này là
 > phần prompt; gói kia có thêm toàn bộ tài liệu đầu vào.
@@ -11,15 +11,38 @@
 
 Anh làm **bề mặt**: xuất mockup và đề xuất token. Anh **không** viết code sản phẩm, không quyết kiến trúc, không chạm dữ liệu.
 
-Đây là **vòng thứ hai** của bước 7. Vòng một đã giao bảy loại trang và đã được duyệt. Vòng này chỉ làm **một trang: trang chủ**.
+Đây là **vòng thứ hai** của bước 7, và nó **làm lại toàn bộ site**, không chỉ một trang.
 
 ## Vì sao có vòng hai
 
-Trang chủ hiện tại đã dựng theo vòng một, và chủ dự án xem xong nói:
+Bốn trang đã dựng theo vòng một. Chủ dự án xem xong nói:
 
 > *"Trang chủ vẫn còn rất xấu, chưa xứng tầm với một công ty du lịch có doanh thu 7 triệu đô la một năm."*
 
-Vòng một vẽ màn `Home` chỉ có bốn khối: hero, thanh tin cậy, tour, lưới hub. Bốn khối làm nên "chất công ty lớn" chưa từng được vẽ.
+Hai nguyên nhân, và cả hai đều là lỗi của vòng một chứ không phải lỗi thi hành:
+
+1. **Vòng một thiếu bối cảnh quyết định.** Nó không biết doanh thu công ty đến từ đâu, không biết bằng chứng nào có sẵn. Nên nó thiết kế như cho một site nội dung, trong khi đây là site của một công ty đã lớn nhưng mới lên web.
+2. **Màn `Home` của vòng một chỉ có bốn khối** — hero, thanh tin cậy, tour, lưới hub. Bốn khối làm nên "chất công ty lớn" chưa từng được vẽ.
+
+Vòng này sửa cả hai. Và vì bối cảnh đổi thì **mọi trang đều phải xem lại**, không riêng trang chủ.
+
+## Phạm vi: bảy loại trang
+
+Theo thứ tự ưu tiên. Nếu không đủ sức làm hết, làm chắc từ trên xuống, đừng làm dở cả bảy.
+
+| # | Loại trang | Đường dẫn | Ghi chú |
+|---|---|---|---|
+| 1 | **Trang chủ** | `/` | quan trọng nhất; bốn khối mới nằm ở đây |
+| 2 | **Tour chi tiết** | `/tour/<slug>/` | trang chốt đơn |
+| 3 | **Danh sách tour** | `/tour/` | |
+| 4 | Địa danh chi tiết | `/dia-danh/<slug>/` | |
+| 5 | Điểm tham quan chi tiết | `/diem-tham-quan/<slug>/` | |
+| 6 | Trải nghiệm chi tiết | `/trai-nghiem/<slug>/` | |
+| 7 | Cẩm nang chi tiết | `/cam-nang/<slug>/` | |
+
+Sáu trang từ 2 đến 7 đã có bản vòng một. Anh **được phép giữ** phần nào còn đúng — nhưng phải xem lại dưới ánh sáng bối cảnh mới ở mục dưới, và nói rõ chỗ nào giữ, chỗ nào đổi, vì sao.
+
+Hai trang tĩnh `/ho-tro/` và `/lien-he/` **không** thuộc phạm vi vòng này.
 
 ## Bối cảnh — đọc kỹ, đây là chỗ dễ thiết kế sai nhất
 
@@ -35,9 +58,9 @@ Vòng một vẽ màn `Home` chỉ có bốn khối: hero, thanh tin cậy, tour
 
 **Gu chủ dự án chốt:** *"chắc chắn và nhiều số liệu, kiểu công ty lớn."*
 
-## Bố cục đã duyệt — hướng A
+## Bố cục TRANG CHỦ đã duyệt — hướng A
 
-Tám khối, đúng thứ tự này. Chủ dự án đã chọn hướng này sau khi cân ba phương án.
+Tám khối, đúng thứ tự này. Chủ dự án đã chọn hướng này sau khi cân ba phương án. Sáu trang còn lại không có bố cục chốt sẵn — anh đề xuất, nhưng phải bám `06-BINDING_MAP`.
 
 ```
 1  Hero                 ảnh thật + câu định vị + 2 CTA
@@ -106,10 +129,14 @@ Dải số liệu nên dùng `--c-primary` với chữ `--c-text-inverse`: đã 
 
 Đây là ràng buộc đã làm hỏng một vòng thiết kế trước. Với **mỗi** khối, khai rõ nó hiển thị ra sao ở:
 
-- **Khối tour:** 1 mục và 4 mục. Bốn là mốc ra mắt, không phải bốn mươi.
+- **Khối tour trên trang chủ:** 1 mục và 4 mục. Bốn là mốc ra mắt, không phải bốn mươi.
 - **Dải số liệu:** 3 ô và 5 ô.
 - **Logo đối tác:** 3 logo và 8 logo.
 - **Đánh giá:** 1 và 3.
+- **Trang danh sách `/tour/`:** 1 mục và 4 mục.
+- **Mọi khối rollup trên trang chi tiết** ("trải nghiệm tại đây", "tour liên quan"): 0 mục và 2 mục.
+
+Dataset thật hôm nay: **1 tour, 1 trải nghiệm, 1 địa danh, 1 điểm tham quan, 1 bài cẩm nang, 0 khách sạn, 0 resort.** Thiết kế nào chỉ đẹp khi đủ hàng là thiết kế chưa dùng được.
 
 Lưới nhiều cột để một thẻ nằm lẻ loi là hỏng. Trang chủ hiện tại đã có luật xử việc này — 1 mục thì thẻ nằm ngang chiếm trọn chiều rộng; anh có thể theo hoặc đề xuất khác, nhưng **phải nói rõ**.
 
@@ -129,6 +156,7 @@ Giao xong thì **dừng, chờ chủ dự án duyệt QA1** (`GOVERNANCE` 4.3). 
 - Mỗi khối khai rõ trạng thái ít dữ liệu và trạng thái rỗng.
 - Không giá trị màu hay cỡ chữ nào nằm ngoài token.
 - Ba bộ giao diện đều dùng được.
+- **Với sáu trang đã có bản vòng một:** nói rõ chỗ nào giữ, chỗ nào đổi, và vì sao. Không im lặng vẽ lại từ đầu, cũng không im lặng giữ nguyên.
 
 **Không tự mở cổng sang bước 8.** Chủ dự án chốt.
 
