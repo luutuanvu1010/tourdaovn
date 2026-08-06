@@ -1,6 +1,6 @@
 # SPEC — Trang chủ xứng tầm, và dựng nốt trang chi tiết
 
-- **Trạng thái:** nháp, chờ chủ dự án duyệt cổng QA1. **Chưa sửa một dòng code nào.**
+- **Trạng thái:** **đã duyệt** — chủ dự án chốt 2026-08-06. Code chạy được.
 - **Ngày soạn:** 2026-08-06   **Người soạn:** Cowork   **Người duyệt:** Lưu Tuấn Vũ
 - **Bước PLAYBOOK:** 1 (mô hình nội dung) → 6 (binding map) → 7 (thiết kế) → 8 (thực thi)
 - **Loại quyết định:** cửa hai chiều — thêm field vào singleton đã có, không mở entity mới
@@ -156,8 +156,10 @@ Cowork đã nêu rõ hai đường: dời mốc, hoặc ra mắt trước rồi 
 
 **Dừng, chờ chủ dự án duyệt cổng QA1** (`GOVERNANCE` 4.2: chưa qua QA1 thì Code không chạy).
 
-Cần chủ dự án:
+Cả ba mục đã được chủ dự án chốt 2026-08-06:
 
-1. Duyệt hình dạng bốn field ở §5.
-2. Duyệt ràng buộc §6 — không phát JSON-LD đánh giá.
-3. Cho **mốc ra mắt mới** để cập nhật `00-PROJECT_BRIEF` §6.
+1. ✅ Hình dạng bốn field ở §5.
+2. ✅ Ràng buộc §6 — không phát JSON-LD đánh giá.
+3. ✅ Mốc ra mắt mới: **2026-08-10**. `00-PROJECT_BRIEF` §6 đã cập nhật.
+
+Cổng QA1 mở. Thi hành theo đúng thứ tự §7.

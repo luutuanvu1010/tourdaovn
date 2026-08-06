@@ -96,7 +96,7 @@ Chủ dự án chốt 2026-08-06.
 
 | Chiều | Ngưỡng | Ghi chú |
 |---|---|---|
-| Thời điểm ra mắt | **2026-08-09** (3 ngày kể từ 2026-08-06) | |
+| Thời điểm ra mắt | **2026-08-10** | dời từ 2026-08-09, chủ dự án chốt 2026-08-06 khi mở rộng phạm vi sang trang chủ và bốn trang chi tiết còn lại |
 | Nội dung tại mốc ra mắt | **4 sản phẩm** có trang đầy đủ | hiện có 1 (`tour-3-dao-nha-trang-review-chi-tiet`), cần thêm 3 |
 | Chuyển đổi | chưa đặt ngưỡng | đo sau ra mắt, cần công cụ đếm lượt bấm Zalo — chưa có |
 | Tìm kiếm | chưa đặt ngưỡng | 3 ngày là quá ngắn để đặt mục tiêu organic |
@@ -117,7 +117,7 @@ Dữ kiện chắc chắn:
 - **Cổng phát hành:** validator đã gỡ khỏi đường tự động (ADR-0022); `reviewStatus == "approved"` trong Sanity là cổng duyệt nội dung tự động duy nhất còn hiệu lực.
 - **Ràng buộc dữ liệu:** Sanity không lưu con số giá (I1); giá đi một chiều từ `data/prices.yaml` qua `bookingRef` (ADR-0003, ADR-0007).
 
-- **Thời gian:** ra mắt 2026-08-09, ba ngày kể từ khi chốt brief.
+- **Thời gian:** ra mắt **2026-08-10**.
 - **Địa danh:** luật `I15` (cấm chuỗi "thành phố Nha Trang") **không còn áp dụng** cho tourdaovn — chủ dự án chốt 2026-08-06. Xem `04-CONSTRAINTS` §1.
 
 ## 8. Trạng thái bước 0

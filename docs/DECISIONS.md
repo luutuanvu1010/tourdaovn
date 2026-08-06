@@ -583,3 +583,22 @@ Chủ dự án **chấp nhận mở cổng với 15 cảnh báo ở điều ki�
 **Phạm vi chưa dựng, ghi để không rơi.** Bàn giao bước 7 có bảy loại trang; đợt này dựng bốn. Còn: điểm tham quan, trải nghiệm, cẩm nang, danh sách tour. Và Design **không vẽ** trang Liên hệ — trang đó áp lại pattern card của bàn giao, không có mockup để bám.
 
 **Trạng thái cổng lúc duyệt:** `astro check` 0 lỗi 0 cảnh báo · `npm run build` đi hết · `check:theme` 3 bộ đạt AA · `gate:all` 9 xanh / 1 đỏ đúng `deferred-gate` (ND-004).
+
+---
+
+## QĐ-2026-08-06-08 — Duyệt spec trang chủ, dời mốc ra mắt sang 2026-08-10
+
+**Chốt.** Chủ dự án duyệt `docs/specs/SPEC-2026-08-06-trang-chu-xung-tam.md` ngày 2026-08-06. Cổng QA1 mở.
+
+**Phạm vi mở rộng:** bốn field mới trong `siteSettings` (`stats`, `partners`, `testimonials`, `groupQuote`), bố cục lại trang chủ theo hướng A, và dựng nốt bốn loại trang chi tiết còn lại trong bàn giao bước 7.
+
+**Mốc ra mắt dời từ 2026-08-09 sang 2026-08-10.** `00-PROJECT_BRIEF` §6 và §7 đã cập nhật.
+
+**Đánh giá về thời gian, ghi lại nguyên văn để sau này truy được.** Cowork nêu rõ trước khi chủ dự án quyết: gói này gồm sửa mô hình dữ liệu, một vòng Design, dựng lại trang chủ, dựng nốt bốn trang chi tiết, cộng việc chủ dự án nhập số liệu, logo, đánh giá và ảnh thật — và Cowork **không cho là kịp**. Hai đường đã trình: dời mốc đủ xa, hoặc ra mắt trước rồi làm gói này sau.
+
+Chủ dự án chọn **làm đủ**, và đặt mốc mới hơn mốc cũ **một ngày**. Đây là quyết định của chủ dự án trong thẩm quyền của mình (`GOVERNANCE` 3.1). Ghi lại không phải để bàn lại, mà để nếu mốc trượt thì biết nguyên nhân nằm ở phạm vi chứ không phải ở thi hành.
+
+**Hai quyết định kỹ thuật kèm theo:**
+
+- **Bằng chứng gánh trang, không phải catalogue gánh trang.** Dải số liệu đặt ngay dưới hero và không đọc document tour nào, nên 4 sản phẩm hay 40 cũng không lộ. Đây là lời giải cho bài toán thật: site mới, doanh thu đến từ offline/đại lý/OTA.
+- **Đánh giá tự đăng không phát JSON-LD `Review` hay `AggregateRating`.** Google cấm rich snippet tự phục vụ; `I6` là cổng mức `fail`. Đánh giá hiện cho người đọc, dẫn nguồn qua `sourceName`/`sourceUrl`.
