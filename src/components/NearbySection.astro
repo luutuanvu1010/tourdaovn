@@ -89,6 +89,12 @@ function entitySegment(entityType: string): string {
     gap: var(--s5);
   }
 
+  /* Lưới co theo SỐ MỤC THẬT — cùng luật đã dùng ở HomeRollupSection và
+     EntityIndex. Lưới bốn cột với hai mục để hở hai ô, trông như thiếu dữ liệu. */
+  .nearby-grid:has(> :last-child:nth-child(1)) { grid-template-columns: 1fr; }
+  .nearby-grid:has(> :last-child:nth-child(2)) { grid-template-columns: repeat(2, 1fr); }
+  .nearby-grid:has(> :last-child:nth-child(3)) { grid-template-columns: repeat(3, 1fr); }
+
   .nearby-card {
     background: var(--c-card);
     border-radius: var(--radius-md);
