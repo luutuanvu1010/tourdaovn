@@ -47,6 +47,27 @@ const infoBarItems = [
   { icon: '📋', label: t('includes'), value: data.includes?.slice(0, 2).join(', ') || '', visible: !!(data.includes && data.includes.length > 0) },
 ]
 
+// Phù hiệu trong hero: loại trải nghiệm (§4.4 `experienceType`) và thời lượng.
+// Cả hai là gate của §4.4 nhưng trước đây không đọc được trên màn đầu.
+const heroBadges = [data.experienceType?.name, data.duration].filter((x): x is string => !!x)
+
+// Thanh dính: neo tới đúng những mục THẬT SỰ render. Trước đây ExperienceDetail
+// không truyền jumpLinks/priceLabel/ctaHref nào, nên showStickyBar luôn sai và
+// trang có giá + có Zalo lại không có thanh đặt chỗ. Đây là lỗi thật, không phải
+// khác biệt cố ý so với trang tour.
+const jumpLinks = [
+  { id: 'highlights', label: t('highlights'), on: !!data.highlights?.length },
+  { id: 'details', label: t('details'), on: hasPtContent(data.body) },
+  { id: 'includes', label: t('includes'), on: !!data.includes?.length },
+  { id: 'faq', label: t('faqHeading'), on: !!data.faq?.length },
+].filter(x => x.on).map(x => ({ href: `#${x.id}`, label: x.label }))
+
+// Nhãn giá dùng chung một quy tắc với InfoBar: miễn phí thì hiện nhãn thay số.
+const stickyPriceLabel = data.isAccessibleForFree ? t('free') : (priceView?.label ?? null)
+
+// CTA trên thanh dính là Zalo — kênh đặt chỗ duy nhất của site (00 §3).
+const zaloHref = contact?.zaloUrl || ''
+
 const sidebarRows = [
   { icon: '🏷️', label: t('type'), value: data.experienceType?.name || '', visible: !!data.experienceType?.name },
   { icon: '📍', label: t('venue'), value: data.venue?.title || '', visible: !!data.venue?.title },
@@ -61,6 +82,13 @@ const sidebarRows = [
   entityType="experience"
   image={data.mainImage}
   gallery={data.gallery}
+  containedInPlace={data.venue}
+  badges={heroBadges}
+  summary={data.summary}
+  jumpLinks={jumpLinks}
+  priceLabel={stickyPriceLabel}
+  ctaHref={zaloHref || null}
+  ctaLabel={zaloHref ? t('contactZalo') : null}
   infoBarItems={infoBarItems}
   sidebarSlots={[
     { name: 'booking', component: 'BookingCTA', visible: !!priceView?.label || hasContactChannel, props: {} },
@@ -72,10 +100,9 @@ const sidebarRows = [
   updatedAt={data._updatedAt}
 >
   <div slot="content">
-    <div class="summary-block">{data.summary}</div>
-
+    {/* `summary` đã lên hero qua DetailLayout — không lặp lại ở thân bài. */}
     {data.highlights && data.highlights.length > 0 && (
-      <Section heading={t('highlights')} contained={false}>
+      <Section heading={t('highlights')} contained={false} id="highlights">
         <ul class="hl-list">
           {data.highlights.map((h: string) => <li>{h}</li>)}
         </ul>
@@ -83,20 +110,20 @@ const sidebarRows = [
     )}
 
     {hasPtContent(data.body) && (
-      <Section heading={t('details')} contained={false}>
+      <Section heading={t('details')} contained={false} id="details">
         <Body blocks={data.body} />
       </Section>
     )}
 
     {data.includes && data.includes.length > 0 && (
-      <Section heading={t('includes')} contained={false}>
+      <Section heading={t('includes')} contained={false} id="includes">
         <ul class="check-list">
           {data.includes.map((item) => <li><span class="check-icon">&#10003;</span> {item}</li>)}
         </ul>
       </Section>
     )}
 
-    {data.faq && data.faq.length > 0 && <FAQ faq={data.faq} lang={lang} contained={false} />}
+    {data.faq && data.faq.length > 0 && <FAQ faq={data.faq} lang={lang} contained={false} id="faq" />}
   </div>
 
   {priceView?.label && <BookingCTA slot="booking" priceText={priceView.label} ctaLabel={t('bookNow')} />}
@@ -108,27 +135,20 @@ const sidebarRows = [
 <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
 
 <style>
-  .summary-block {
-    font-size: var(--fs-h5);
-    max-width: 70ch;
-    line-height: var(--lh-body);
-    font-weight: var(--fw-500);
-    font-family: var(--font-ui);
-    margin-bottom: var(--s6);
-  }
-
+  /* Trải nghiệm chỉ có `includes`, không có `excludes` — nên đây là danh sách
+     hai cột, không phải hai thẻ đối nhau như trang tour (một thẻ sẽ trống). */
   .check-list {
     list-style: none;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--s2);
+    gap: var(--s3) var(--s5);
   }
 
   .check-list li {
     display: flex;
-    gap: var(--s2);
+    gap: var(--s3);
     align-items: center;
-    font-size: var(--fs-sm);
+    font-size: var(--fs-base);
     color: var(--c-text);
   }
 
@@ -138,6 +158,6 @@ const sidebarRows = [
   }
 
   .hl-list { list-style: none; display: flex; flex-direction: column; gap: var(--s2); }
-  .hl-list li { font-size: var(--fs-sm); color: var(--c-text-muted); padding-left: var(--s5); position: relative; }
+  .hl-list li { font-size: var(--fs-base); color: var(--c-text-muted); padding-left: var(--s5); position: relative; }
   .hl-list li::before { content: "✦"; position: absolute; left: 0; color: var(--c-primary); font-size: var(--fs-xs); }
 </style>
