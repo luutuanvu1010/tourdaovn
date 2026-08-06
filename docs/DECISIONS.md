@@ -602,3 +602,15 @@ Chủ dự án chọn **làm đủ**, và đặt mốc mới hơn mốc cũ **m�
 
 - **Bằng chứng gánh trang, không phải catalogue gánh trang.** Dải số liệu đặt ngay dưới hero và không đọc document tour nào, nên 4 sản phẩm hay 40 cũng không lộ. Đây là lời giải cho bài toán thật: site mới, doanh thu đến từ offline/đại lý/OTA.
 - **Đánh giá tự đăng không phát JSON-LD `Review` hay `AggregateRating`.** Google cấm rich snippet tự phục vụ; `I6` là cổng mức `fail`. Đánh giá hiện cho người đọc, dẫn nguồn qua `sourceName`/`sourceUrl`.
+
+---
+
+## QĐ-2026-08-06-09 — Bốn field trang chủ, và luật không serialize đánh giá
+
+**Chốt.** Thêm `stats`, `partners`, `testimonials`, `groupQuote` vào `siteSettings`. Thi hành `SPEC-2026-08-06-trang-chu-xung-tam` đã duyệt.
+
+**Vì sao vào `siteSettings` chứ không mở entity.** Cả bốn là dữ liệu singleton toàn site, không có URL riêng, không cần gate publish. Mở `_type` mới là cửa một chiều (§5.3) và kéo theo họ validator `I`. Ngưỡng đã ghi: `siteSettings` sau đợt này có 11 field cấp đầu; tới field thứ mười lăm thì dừng lại xét tách.
+
+**Đánh giá không serialize.** Google cấm rich snippet đánh giá tự phục vụ. Phát `Review`/`AggregateRating` cho nội dung tự đăng là rủi ro phạt thủ công, mà I6 là cổng mức `fail`. Đánh giá hiện cho người đọc; dẫn nguồn qua `sourceName`/`sourceUrl`.
+
+**`stats.value` là chuỗi.** Kiểu số không diễn tả được "50.000+", "4,9/5", "24/7" — những dạng mà một dải số liệu thật cần.

@@ -17,7 +17,7 @@ Phần KHÔNG nhãn (cơ chế field 2.0, ba họ gate, quy tắc giá, khối q
 > 🔧 **SITE-SPECIFIC:** danh mục 14 entity và mọi ví dụ (Specialty, TouristDestination, 5 ngôn ngữ) là của nhatrangtravel. Giữ *cơ chế* (field 2.0, ba họ gate, quy tắc bookingRef, khối quản trị); thay *danh mục entity* theo site.
 
 - **Trạng thái:** đã duyệt. Founder soát toàn văn theo cụm 2026-06-11 (rà phản biện độc lập, 7 vết chốt qua trắc nghiệm), bước 1 đóng.
-- **Phiên bản:** v1.0.15   **Ngày:** 2026-08-05   **Người soạn:** Cowork (tác nhân điều phối).
+- **Phiên bản:** v1.0.16   **Ngày:** 2026-08-06   **Người soạn:** Cowork (tác nhân điều phối).
 - **Nguồn quyết định:** brief mục 5-6 cộng các lựa chọn founder 2026-06-10 và 2026-06-11 (xem `DECISIONS.md` và `project/adr/` từ ADR-0002 đến ADR-0006).
 - **Kế thừa ràng buộc:** CONSTITUTION v2.2.0, PROJECT_OVERLAY v1.0.2 (S2.2 bất biến dữ liệu, S2.3 ngưỡng, S2.4 SEO/GEO, S2.5 đa ngôn ngữ).
 - **Override hiện hành:** từ 2026-06-30, `imageProvenance` là dữ liệu nội bộ tùy chọn, ẩn khỏi layout biên tập và không còn nằm trong gate publish I12. Từ 2026-07-02, `Attraction.containedInPlace` có thể trỏ `Place` hoặc `TouristDestination` khi Nha Trang là container thực tế; không khôi phục `seed.trung-tam-nha-trang`. Các dòng lịch sử bên dưới ghi "có khi có ảnh", "cộng imageProvenance khi có ảnh", hoặc "Attraction Place-only" chỉ còn là bối cảnh cũ, đã bị supersede bởi `DECISIONS.md`.
@@ -538,6 +538,10 @@ Cấu hình toàn site. Toàn bộ dataset chỉ có đúng 1 document. i18n fie
 | contact | object | tùy | không | 4 field con, dữ liệu trung lập ngôn ngữ; field con nào trống thì kênh đó không render (guard rỗng, không nút chết) | founder |
 | pickupPoints | array object | tùy | không | lộ trình đón khách của công ty; thứ tự render là thứ tự trong mảng; mảng rỗng hoặc thiếu → trang lộ trình không render bản đồ (guard rỗng) | founder |
 | theme | string | tùy | không | bộ giao diện đang bật; enum đóng, giá trị hợp lệ khai ở `07-DESIGN_TOKENS` §1b; để trống → dùng bộ mặc định `bien-sau` | founder |
+| stats | array object | tùy | không | dải số liệu trang chủ; `value` là CHUỖI để nhập được "50.000+", "4,9/5"; mảng rỗng hoặc thiếu → khối không render | founder |
+| partners | array object | tùy | không | logo đối tác; `logo` bắt buộc có alt (I12); thiếu `url` thì logo không thành link | founder |
+| testimonials | array object | tùy | không | đánh giá khách; **KHÔNG** serialize ra JSON-LD, xem ghi chú dưới bảng | founder |
+| groupQuote | object | tùy | không | khối báo giá đoàn cuối trang chủ; nút dùng lại `contact.zaloUrl`, không khai số thứ hai | founder |
 | support | object | tùy | không | nội dung trang `/ho-tro/`; 3 phần con độc lập nhau, phần nào trống thì khối đó không render (guard rỗng); cả object trống hoặc thiếu → trang vẫn dựng, chỉ còn tiêu đề và kênh liên hệ | founder |
 
 Field `sections[]`:
@@ -575,6 +579,19 @@ Field `theme` (thêm v1.0.15 — chọn bộ giao diện, ADR-0023 mở rộng):
 - Thiếu hoặc giá trị lạ → site dùng bộ mặc định, không vỡ.
 - Nơi render: thuộc tính `data-theme` trên thẻ `<html>`; mỗi bộ là một khối biến CSS trong `src/styles/tokens.css`.
 - Mọi bộ phải qua ngưỡng tương phản WCAG AA. Có kiểm máy: `npm --prefix scripts run check:theme`.
+
+Field `stats[]`, `partners[]`, `testimonials[]`, `groupQuote` (thêm v1.0.16 — trang chủ xứng tầm, SPEC-2026-08-06):
+
+- `stats[]`: `value` (string), `label` (string), `note` (string, tùy). `value` cố ý là chuỗi chứ không phải số — kiểu số không diễn tả được "50.000+", "4,9/5", "24/7".
+- `partners[]`: `name` (string), `logo` (image, **alt bắt buộc**), `url` (url, tùy). Không có `url` thì logo render thành ảnh tĩnh, không phải link chết.
+- `testimonials[]`: `quote` (text), `authorName` (string), `authorNote` (string, tùy), `sourceName` (string, tùy), `sourceUrl` (url, tùy).
+- `groupQuote`: `heading` (string, tùy), `text` (text, tùy), `ctaLabel` (string, tùy). **Không** có field số điện thoại hay link — nút đọc `contact.zaloUrl`.
+
+Bốn phần độc lập nhau: phần nào trống thì khối đó không render, trang vẫn dựng (guard rỗng §5.1).
+
+**Ràng buộc bắt buộc — đánh giá KHÔNG serialize.** `testimonials` **không** xuất `Review` hay `AggregateRating` trong JSON-LD. Google cấm rich snippet đánh giá tự phục vụ, tức nội dung doanh nghiệp tự đăng về chính mình; phát ra là rủi ro phạt thủ công, mà I6 là cổng mức `fail`. Đánh giá hiện cho người đọc, dẫn nguồn trung thực qua `sourceName` và `sourceUrl`. Muốn có sao vàng trên kết quả tìm kiếm thì phải lấy từ nguồn thứ ba qua API — việc riêng.
+
+Dữ liệu trung lập ngôn ngữ, theo đúng tiền lệ `contact` (v1.0.11), `pickupPoints` (v1.0.13) và `support` (v1.0.14).
 
 Field `support` (thêm v1.0.14 — nội dung trang Hỗ trợ, ADR-0023):
 - `bookingGuide`: array object `{step, text}` — hướng dẫn đặt tour theo bước; cùng hình dạng `article.howTo` và serialize ra `HowTo` + `HowToStep`
@@ -818,5 +835,7 @@ Lý do chi tiết và phương án đã loại của từng thay đổi nằm �
 
 - v1.0.14 (2026-08-05): thêm field `support` vào siteSettings (§2.15) — nội dung trang `/ho-tro/`, ba phần độc lập: `bookingGuide` (hướng dẫn đặt tour, cùng hình dạng `article.howTo`, ra `HowTo`), `cancellationPolicy` (chính sách huỷ/hoàn, portable text), `faq` (câu hỏi thường gặp, `faqItem`, ra `FAQPage`). Dữ liệu trung lập ngôn ngữ theo tiền lệ `contact` và `pickupPoints`. Không thêm document type mới nên là cửa hai chiều theo §5.3. Trang `/lien-he/` không cần field mới, đọc `contact` đã có và ra `ContactPage`. Phần điều hướng của cùng đợt ghi ở ADR-0023; phiếu nợ "chỗ đặt link menu" nêu trong §2.15 được ADR đó trả. Bản ghi DECISIONS cùng ngày.
 - v1.0.15 (2026-08-06): thêm field `theme` vào siteSettings (§2.15) — chọn bộ giao diện, enum đóng 3 giá trị khai ở `07-DESIGN_TOKENS` §1b. Studio CHỈ chọn, không nhập giá trị màu, nên không sinh nguồn sự thật thứ hai: màu vẫn chỉ sống ở `tokens.css`. Giá trị lạ hoặc trống → bộ mặc định, trang không vỡ. Mọi bộ phải qua WCAG AA, có kiểm máy `npm --prefix scripts run check:theme`. Không thêm document type mới nên là cửa hai chiều theo §5.3. Bản ghi DECISIONS cùng ngày.
+
+- v1.0.16 (2026-08-06): thêm bốn field vào siteSettings (§2.15) — `stats`, `partners`, `testimonials`, `groupQuote` — phục vụ trang chủ theo `SPEC-2026-08-06-trang-chu-xung-tam`. Bối cảnh: doanh thu công ty đến từ offline/đại lý/OTA, site là kênh mới với 4 sản phẩm lúc ra mắt, nên trang chủ phải để BẰNG CHỨNG gánh thay vì catalogue. Ràng buộc kèm theo: `testimonials` KHÔNG serialize ra JSON-LD (Google cấm rich snippet tự phục vụ, I6 là cổng fail). Không thêm document type mới nên là cửa hai chiều theo §5.3. Bản ghi DECISIONS cùng ngày.
 
 Mỗi bảng field có cột "dịch được" để quyết i18n field-level, field bất biến không nhân bản (ADR-0004). Khi dựng một trang, tách rõ ba tầng: field của entity, rollup suy ở build từ entity liên quan, và trình bày của template. Đừng biến layout thành field (N1).
