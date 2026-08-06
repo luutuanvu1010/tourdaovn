@@ -229,6 +229,108 @@ export default defineType({
         layout: 'radio',
       },
     }),
+    // CONTENT_MODEL §2.15 v1.0.16 — dải số liệu trang chủ.
+    defineField({
+      name: 'stats',
+      title: 'Dải số liệu (trang chủ)',
+      description:
+        'Con số làm bằng chứng: số năm hoạt động, số khách đã phục vụ, số chuyến/năm. ' +
+        'Để trống toàn bộ thì khối không hiện.',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            defineField({
+              name: 'value',
+              title: 'Con số',
+              type: 'string',
+              description: 'Viết đúng như muốn hiện: 50.000+, 12, 4,9/5, 24/7.',
+            }),
+            defineField({ name: 'label', title: 'Nhãn', type: 'string', description: 'Ví dụ "khách đã phục vụ".' }),
+            defineField({ name: 'note', title: 'Ghi chú nhỏ', type: 'string' }),
+          ],
+          preview: { select: { title: 'value', subtitle: 'label' } },
+        },
+      ],
+    }),
+    // CONTENT_MODEL §2.15 v1.0.16 — logo đối tác.
+    defineField({
+      name: 'partners',
+      title: 'Đối tác (trang chủ)',
+      description: 'Logo OTA, hãng tàu, khách sạn, đại lý. Để trống thì khối không hiện.',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            defineField({ name: 'name', title: 'Tên đối tác', type: 'string' }),
+            defineField({
+              name: 'logo',
+              title: 'Logo',
+              type: 'image',
+              fields: [
+                defineField({
+                  name: 'alt',
+                  title: 'Mô tả ảnh (alt)',
+                  type: 'string',
+                  description: 'Bắt buộc khi có ảnh — người dùng trình đọc màn hình cần nó.',
+                }),
+              ],
+            }),
+            defineField({
+              name: 'url',
+              title: 'Liên kết',
+              type: 'url',
+              description: 'Để trống thì logo không thành link.',
+              validation: (Rule) => Rule.uri({ scheme: ['http', 'https'] }),
+            }),
+          ],
+          preview: { select: { title: 'name', media: 'logo' } },
+        },
+      ],
+    }),
+    // CONTENT_MODEL §2.15 v1.0.16 — đánh giá khách.
+    // KHÔNG serialize ra JSON-LD: Google cấm rich snippet đánh giá tự phục vụ.
+    defineField({
+      name: 'testimonials',
+      title: 'Đánh giá khách (trang chủ)',
+      description:
+        'Hiện cho người đọc. Cố ý KHÔNG xuất dữ liệu có cấu trúc cho Google — ' +
+        'đánh giá tự đăng mà xuất ra là rủi ro bị phạt.',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            defineField({ name: 'quote', title: 'Nội dung đánh giá', type: 'text', rows: 4 }),
+            defineField({ name: 'authorName', title: 'Tên khách', type: 'string' }),
+            defineField({ name: 'authorNote', title: 'Ghi chú về khách', type: 'string', description: 'Ví dụ "Đoàn 24 khách, tháng 6/2026".' }),
+            defineField({ name: 'sourceName', title: 'Nguồn', type: 'string', description: 'Ví dụ "TripAdvisor". Để trống nếu thu trực tiếp.' }),
+            defineField({
+              name: 'sourceUrl',
+              title: 'Liên kết nguồn',
+              type: 'url',
+              validation: (Rule) => Rule.uri({ scheme: ['http', 'https'] }),
+            }),
+          ],
+          preview: { select: { title: 'authorName', subtitle: 'quote' } },
+        },
+      ],
+    }),
+    // CONTENT_MODEL §2.15 v1.0.16 — khối báo giá đoàn.
+    defineField({
+      name: 'groupQuote',
+      title: 'Khối báo giá đoàn (trang chủ)',
+      description: 'Khối cuối trang chủ dành cho khách đoàn. Nút dùng lại Liên kết Zalo ở mục Kênh liên hệ.',
+      type: 'object',
+      options: { collapsible: true, collapsed: true },
+      fields: [
+        defineField({ name: 'heading', title: 'Tiêu đề', type: 'string' }),
+        defineField({ name: 'text', title: 'Mô tả', type: 'text', rows: 3 }),
+        defineField({ name: 'ctaLabel', title: 'Chữ trên nút', type: 'string' }),
+      ],
+    }),
     // CONTENT_MODEL §2.15 v1.0.14 — nội dung trang /ho-tro (ADR-0023).
     // Ba phần độc lập: phần nào trống thì khối đó không hiện trên trang và node
     // JSON-LD tương ứng không phát. Cấm hardcode chính sách hay câu hỏi thường

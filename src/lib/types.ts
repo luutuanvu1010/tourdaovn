@@ -500,6 +500,34 @@ export interface SiteSupport {
 /** Bộ giao diện — enum đóng, xem 07-DESIGN_TOKENS §1b. */
 export type SiteTheme = 'bien-sau' | 'cat-bien' | 'ngoc-lam'
 
+/** Một ô trong dải số liệu. `value` là CHUỖI — xem CONTENT_MODEL §2.15 v1.0.16. */
+export interface SiteStat {
+  value?: string
+  label?: string
+  note?: string
+}
+
+export interface SitePartner {
+  name?: string
+  logo?: ImageAsset
+  url?: string
+}
+
+/** Đánh giá khách. KHÔNG serialize ra JSON-LD — xem QĐ-2026-08-06-09. */
+export interface SiteTestimonial {
+  quote?: string
+  authorName?: string
+  authorNote?: string
+  sourceName?: string
+  sourceUrl?: string
+}
+
+export interface SiteGroupQuote {
+  heading?: string
+  text?: string
+  ctaLabel?: string
+}
+
 export interface SiteSettingsResult {
   title: string
   theme: SiteTheme | null
@@ -508,6 +536,10 @@ export interface SiteSettingsResult {
   contact: SiteContact | null
   pickupPoints: PickupPoint[] | null
   support: SiteSupport | null
+  stats: SiteStat[] | null
+  partners: SitePartner[] | null
+  testimonials: SiteTestimonial[] | null
+  groupQuote: SiteGroupQuote | null
 }
 
 // ---------- JSON-LD ----------

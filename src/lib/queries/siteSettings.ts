@@ -38,6 +38,14 @@ export function siteSettingsQuery(): string {
       bookingGuide[] { step, text },
       cancellationPolicy,
       faq[] { question, answer }
-    }
+    },
+    stats[] { value, label, note },
+    partners[] {
+      name,
+      logo { _type, asset->{ _id, url }, hotspot, "alt": alt },
+      url
+    },
+    testimonials[] { quote, authorName, authorNote, sourceName, sourceUrl },
+    groupQuote { heading, text, ctaLabel }
   }`
 }
