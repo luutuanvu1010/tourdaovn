@@ -22,19 +22,60 @@ export interface Props {
   nearbyTitle: string
   nearby: NearbyEntity[]
   updatedAt: string
+  /** Phù hiệu ngắn cạnh tiêu đề trong hero — 06-BINDING_MAP §3 "Nhãn loại entity". */
+  badges?: string[] | null
+  /** Đoạn mở trong hero — §3 "Đoạn mở", `summary`. */
+  summary?: string | null
+  /** Mục neo cho thanh dính. Rỗng thì không render thanh. */
+  jumpLinks?: { href: string; label: string }[] | null
+  /** Nhãn giá đã render sẵn (I16) — null thì thanh dính không hiện vùng giá. */
+  priceLabel?: string | null
+  /** CTA chính trên thanh dính, thường là Zalo. Thiếu thì không render nút. */
+  ctaHref?: string | null
+  ctaLabel?: string | null
 }
 
-const { title, lang, entityType, image, gallery, containedInPlace, infoBarItems, sidebarSlots, nearbyTitle, nearby, updatedAt } = Astro.props
+const {
+  title, lang, entityType, image, gallery, containedInPlace, infoBarItems,
+  sidebarSlots, nearbyTitle, nearby, updatedAt,
+  badges, summary, jumpLinks, priceLabel, ctaHref, ctaLabel,
+} = Astro.props
+
+const badgeList = badges ?? []
+const jumps = jumpLinks ?? []
+// Thanh dính chỉ có nghĩa khi có ít nhất một thứ để hiện. Không có thì không
+// render — vùng rỗng ẩn hẳn, 06-BINDING_MAP quyết định nền 2.
+const showStickyBar = jumps.length > 0 || !!priceLabel || !!(ctaHref && ctaLabel)
 
 const t = uiCopy(lang)
 ---
 
-<div class="container">
-  <Hero image={image} gallery={gallery}>
-    <h1 slot="overlay" class="detail-title">{title}</h1>
-    <Breadcrumb slot="overlay" containedInPlace={containedInPlace} entityType={entityType} lang={lang} currentTitle={title} inverse />
-  </Hero>
-</div>
+<Hero image={image} gallery={gallery} fullBleed>
+  <Breadcrumb slot="overlay" containedInPlace={containedInPlace} entityType={entityType} lang={lang} currentTitle={title} inverse />
+  {badgeList.length > 0 && (
+    <div slot="overlay" class="detail-badges">
+      {badgeList.map(b => <span class="detail-badge">{b}</span>)}
+    </div>
+  )}
+  <h1 slot="overlay" class="detail-title">{title}</h1>
+  {summary && <p slot="overlay" class="detail-summary">{summary}</p>}
+</Hero>
+
+{showStickyBar && (
+  <div class="sticky-bar">
+    <div class="container sticky-bar__inner">
+      <nav class="sticky-bar__jump" aria-label={title}>
+        {jumps.map(j => <a href={j.href}>{j.label}</a>)}
+      </nav>
+      <div class="sticky-bar__action">
+        {priceLabel && <span class="sticky-bar__price">{priceLabel}</span>}
+        {ctaHref && ctaLabel && (
+          <a class="sticky-bar__cta" href={ctaHref} target="_blank" rel="noopener">{ctaLabel}</a>
+        )}
+      </div>
+    </div>
+  </div>
+)}
 
 {infoBarItems && infoBarItems.length > 0 && <InfoBar items={infoBarItems} />}
 
@@ -61,6 +102,103 @@ const t = uiCopy(lang)
 {nearby.length > 0 && <NearbySection title={nearbyTitle} entities={nearby} lang={lang} />}
 
 <style>
+  .detail-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s2);
+  }
+
+  .detail-badge {
+    padding: var(--badge-py) var(--badge-px);
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--c-text-inverse) 22%, transparent);
+    color: var(--c-text-inverse);
+    font-size: var(--fs-label);
+    font-weight: var(--fw-600);
+    backdrop-filter: blur(4px);
+  }
+
+  .detail-summary {
+    max-width: 62ch;
+    color: var(--c-text-inverse);
+    font-size: var(--fs-base);
+    line-height: var(--lh-body);
+    opacity: 0.92;
+  }
+
+  /* Thanh dính: neo mục + giá + CTA. Bám dưới header nên dùng --header-h. */
+  .sticky-bar {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 90;
+    background: var(--c-surface);
+    border-bottom: 1px solid var(--c-border);
+  }
+
+  .sticky-bar__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s5);
+  }
+
+  .sticky-bar__jump {
+    display: flex;
+    gap: var(--s5);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .sticky-bar__jump::-webkit-scrollbar { display: none; }
+
+  .sticky-bar__jump a {
+    padding: var(--s4) 0;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-600);
+    color: var(--c-text-muted);
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: color var(--m-fast) var(--m-ease), border-color var(--m-fast) var(--m-ease);
+  }
+
+  .sticky-bar__jump a:hover {
+    color: var(--c-primary);
+    border-bottom-color: var(--c-primary);
+  }
+
+  .sticky-bar__action {
+    display: flex;
+    align-items: center;
+    gap: var(--s4);
+    flex-shrink: 0;
+  }
+
+  .sticky-bar__price {
+    font-family: var(--font-display);
+    font-size: var(--fs-h5);
+    font-weight: var(--fw-800);
+    color: var(--c-primary-strong);
+    white-space: nowrap;
+  }
+
+  .sticky-bar__cta {
+    padding: var(--s3) var(--s5);
+    border-radius: var(--radius-pill);
+    background: var(--c-accent);
+    color: var(--c-text-inverse);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-700);
+    white-space: nowrap;
+    transition: background var(--m-fast) var(--m-ease);
+  }
+
+  .sticky-bar__cta:hover { background: var(--c-accent-strong); }
+
+  @media (max-width: 767px) {
+    .sticky-bar__jump { display: none; }
+    .sticky-bar__inner { justify-content: flex-end; }
+  }
+
   .detail-title {
     font-family: var(--font-display);
     font-size: clamp(var(--fs-h3), 4.2vw, var(--fs-hero));

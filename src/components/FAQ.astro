@@ -4,17 +4,19 @@ import { uiCopy } from '../lib/uiCopy'
 
 export interface Props {
   faq: FAQItem[]
+  /** Neo cho thanh dính ở DetailLayout. */
+  id?: string
   heading?: string
   lang?: Lang
   contained?: boolean
 }
 
-const { faq, heading, lang = 'vi', contained = true } = Astro.props
+const { faq, heading, lang = 'vi', contained = true, id } = Astro.props
 const headingText = heading ?? uiCopy(lang)('faqHeading')
 ---
 
 {faq.length > 0 && (
-  <section class="faq-section">
+  <section class="faq-section" {...(id ? { id } : {})}>
     <div class:list={{ container: contained }}>
       <h2 class="faq-heading">{headingText}</h2>
       <div class="faq-list" role="list">

@@ -41,6 +41,22 @@ const operatorUrl = data.operator?.url || data.operator?.officialSource || ''
 const showFallbackCta = !priceView?.label && !!operatorUrl
 const hasContactChannel = !!(contact?.zaloUrl || contact?.hotline || contact?.whatsapp)
 
+// Phù hiệu trong hero: hình thức tour (§4.8 `tourFormat`) và thời lượng (§4.8
+// `duration`). Chỉ đưa cái nào có dữ liệu — vùng rỗng ẩn hẳn.
+const heroBadges = [formatLabel, data.duration].filter((x): x is string => !!x)
+
+// Thanh dính: neo tới đúng những mục THẬT SỰ render, nên phải tính sau khi biết
+// khối nào có dữ liệu. Khối vắng mà vẫn để neo là link chết.
+const jumpLinks = [
+  { id: 'itinerary', label: t('itinerary'), on: !!data.itinerary?.length },
+  { id: 'includes', label: t('includesExcludes'), on: !!(data.includes?.length || data.excludes?.length) },
+  { id: 'highlights', label: t('highlights'), on: !!data.highlights?.length },
+  { id: 'faq', label: t('faqHeading'), on: !!data.faq?.length },
+].filter(x => x.on).map(x => ({ href: `#${x.id}`, label: x.label }))
+
+// CTA trên thanh dính là Zalo — kênh đặt chỗ duy nhất của site (00 §3).
+const zaloHref = contact?.zaloUrl || ''
+
 const siteBase = siteBaseUrl(Astro.site)
 const entityJsonLd = applyPriceToJsonLd(
   tourToJsonLd(data, siteBase, lang),
@@ -71,6 +87,12 @@ const sidebarRows = [
   entityType="tour"
   image={data.mainImage}
   gallery={data.gallery}
+  badges={heroBadges}
+  summary={data.summary}
+  jumpLinks={jumpLinks}
+  priceLabel={priceView?.label ?? null}
+  ctaHref={zaloHref || null}
+  ctaLabel={zaloHref ? t('contactZalo') : null}
   infoBarItems={infoBarItems}
   sidebarSlots={[
     { name: 'booking', component: 'BookingCTA', visible: !!priceView?.label || showFallbackCta || hasContactChannel, props: {} },
@@ -81,10 +103,8 @@ const sidebarRows = [
   updatedAt={data._updatedAt}
 >
   <div slot="content">
-    <div class="summary-block">{data.summary}</div>
-
     {data.itinerary && data.itinerary.length > 0 && (
-      <Section heading={t('itinerary')} contained={false}>
+      <Section heading={t('itinerary')} contained={false} id="itinerary">
         <div class="timeline">
           {data.itinerary.map((stop) => (
             <div class="tl-stop">
@@ -102,7 +122,7 @@ const sidebarRows = [
     )}
 
     {((data.includes && data.includes.length > 0) || (data.excludes && data.excludes.length > 0)) && (
-      <Section heading={t('includesExcludes')} contained={false}>
+      <Section heading={t('includesExcludes')} contained={false} id="includes">
         <div class="inc-ex-grid">
           {data.includes && data.includes.length > 0 && (
             <div>
@@ -125,7 +145,7 @@ const sidebarRows = [
     )}
 
     {data.highlights && data.highlights.length > 0 && (
-      <Section heading={t('highlights')} contained={false}>
+      <Section heading={t('highlights')} contained={false} id="highlights">
         <ul class="hl-list">
           {data.highlights.map((h: string) => <li>{h}</li>)}
         </ul>
@@ -144,7 +164,7 @@ const sidebarRows = [
       </Section>
     )}
 
-    {data.faq && data.faq.length > 0 && <FAQ faq={data.faq} lang={lang} contained={false} />}
+    {data.faq && data.faq.length > 0 && <FAQ faq={data.faq} lang={lang} contained={false} id="faq" />}
   </div>
 
   {priceView?.label && <BookingCTA slot="booking" priceText={priceView.label} ctaLabel={t('bookTour')} />}

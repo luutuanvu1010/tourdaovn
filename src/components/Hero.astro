@@ -6,11 +6,17 @@ export interface Props {
   image?: string | ImageAsset
   gallery?: ImageAsset[] | null
   imageAlt?: string
+  /**
+   * Hero tràn hết chiều ngang thay vì nằm trong container.
+   * Container policy (06-BINDING_MAP §3) cho Hero là ngoại lệ full-width có chủ
+   * ý; phần chữ bên trong vẫn tự bọc container nên không có element trần.
+   */
+  fullBleed?: boolean
 }
 
 // Không dùng default `= []` ở đây: nó chỉ kích hoạt với `undefined`, mà caller
 // đưa `null` (GROQ). Chặn bằng `?? []` ở điểm dùng bên dưới.
-const { image, gallery, imageAlt } = Astro.props
+const { image, gallery, imageAlt, fullBleed = false } = Astro.props
 const src = typeof image === 'string' ? image : imageUrl(image, { width: 1200 })
 const alt = imageAlt || (typeof image === 'object' ? image?.alt : undefined) || ''
 const mainImageKey = typeof image === 'object' ? (image?.asset?._id || image?.asset?.url) : src
@@ -29,7 +35,7 @@ const hasMedia = !!src
 const hasGallery = galleryItems.length === 4
 ---
 
-<section class="hero-shell">
+<section class:list={["hero-shell", { "hero-shell--full": fullBleed }]}>
   {hasMedia ? (
     <div class={hasGallery ? 'hero-block hero-block--mosaic' : 'hero-block'}>
       <div class="hero-media-grid">
@@ -38,9 +44,9 @@ const hasGallery = galleryItems.length === 4
             <img src={src} alt={alt} loading="eager" fetchpriority="high" />
           </figure>
           <div class="hero-gradient-overlay" aria-hidden="true"></div>
-          <div class="hero-overlay">
+          <div class="hero-overlay"><div class:list={[{ container: fullBleed }]}>
             <slot name="overlay" />
-          </div>
+          </div></div>
         </div>
         {hasGallery && (
           <div class="hero-gallery-grid">
@@ -123,6 +129,17 @@ const hasGallery = galleryItems.length === 4
     right: 0;
     padding: var(--s7) var(--s5) var(--s5);
     z-index: 2;
+  }
+
+  .hero-shell--full {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    border-radius: 0;
+  }
+
+  .hero-shell--full .hero-main-figure,
+  .hero-shell--full .hero-main-figure img {
+    border-radius: 0;
   }
 
   /* ── Booking-style gallery mosaic ── */
