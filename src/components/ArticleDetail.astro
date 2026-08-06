@@ -33,6 +33,21 @@ function hasBlocksContent(blocks: unknown[] | undefined | null): boolean {
   return blocks.some((b: any) => b._type === 'block' && b.children?.some((c: any) => (c.text || '').trim()))
 }
 
+// Phù hiệu hero: chuyên mục bài (§4.10 `articleType`) và tên tác giả — tác giả
+// là tín hiệu E-E-A-T, phải đọc được ngay trên màn đầu chứ không nằm dưới thân bài.
+const heroBadges = [
+  typeLabel,
+  data.author?.title ? `Bởi ${data.author.title}` : null,
+].filter((x): x is string => !!x)
+
+// Neo chỉ trỏ tới mục thật sự render — khối vắng mà vẫn để neo là link chết.
+const jumpLinks = [
+  { id: 'howto', label: t('howTo'), on: !!data.howTo?.length },
+  { id: 'about', label: t('aboutEntity'), on: !!data.about?.length },
+  { id: 'mentions', label: t('mentions'), on: !!data.mentions?.length },
+  { id: 'faq', label: t('faqHeading'), on: !!data.faq?.length },
+].filter(x => x.on).map(x => ({ href: `#${x.id}`, label: x.label }))
+
 const sidebarRows = [
   { icon: '👤', label: t('author'), value: data.author?.title || '', visible: !!data.author?.title },
   { icon: '📂', label: t('category'), value: typeLabel, visible: true },
@@ -46,6 +61,10 @@ const sidebarRows = [
   lang={lang}
   entityType="article"
   image={data.mainImage}
+  badges={heroBadges}
+  summary={data.summary}
+  speakable
+  jumpLinks={jumpLinks}
   infoBarItems={[]}
   sidebarSlots={[
     { name: 'info', component: 'InfoCard', visible: sidebarRows.some(r => r.visible), props: { rows: sidebarRows } },
@@ -65,13 +84,8 @@ const sidebarRows = [
       </div>
     )}
 
-    <div class="cat-row">
-      <span class="badge badge-default">{typeLabel}</span>
-    </div>
-
-    {/* data-speakable: target của speakable trong JSON-LD Article (serialize/article.ts) */}
-    <div class="summary-block" data-speakable>{data.summary}</div>
-
+    {/* Chuyên mục, tác giả và tóm tắt đã lên hero qua DetailLayout. `data-speakable`
+        đi theo tóm tắt lên đó — cssSelector trong JSON-LD vẫn là `[data-speakable]`. */}
     {hasBlocksContent(data.body) && (
       <Section contained={false}>
         <Body blocks={data.body} />
@@ -79,7 +93,7 @@ const sidebarRows = [
     )}
 
     {data.howTo && data.howTo.length > 0 && (
-      <Section heading={t('howTo')} contained={false}>
+      <Section heading={t('howTo')} contained={false} id="howto">
         <div class="howto-steps">
           {data.howTo.map((s) => (
             <div class="howto-step">
@@ -92,7 +106,7 @@ const sidebarRows = [
     )}
 
     {data.about && data.about.length > 0 && (
-      <Section heading={t('aboutEntity')} contained={false}>
+      <Section heading={t('aboutEntity')} contained={false} id="about">
         <div class="about-grid">
           {data.about.map((e) => (
             <a href={entityHref(e._type, e.slug)} class="about-card">
@@ -105,7 +119,7 @@ const sidebarRows = [
     )}
 
     {data.mentions && data.mentions.length > 0 && (
-      <Section heading={t('mentions')} contained={false}>
+      <Section heading={t('mentions')} contained={false} id="mentions">
         <div class="about-grid">
           {data.mentions.map((e) => (
             <a href={entityHref(e._type, e.slug)} class="about-card">
@@ -117,7 +131,7 @@ const sidebarRows = [
       </Section>
     )}
 
-    {data.faq && data.faq.length > 0 && <FAQ faq={data.faq} lang={lang} contained={false} />}
+    {data.faq && data.faq.length > 0 && <FAQ faq={data.faq} lang={lang} contained={false} id="faq" />}
   </Fragment>
 
   {sidebarRows.some(r => r.visible) && <InfoCard slot="info" rows={sidebarRows} lang={lang} />}
@@ -144,27 +158,6 @@ const sidebarRows = [
 
   .author-info strong { display: block; font-size: var(--fs-base); font-weight: var(--fw-700); color: var(--c-text); }
   .author-info span { font-size: var(--fs-sm); color: var(--c-text-muted); }
-
-  .cat-row { margin-bottom: var(--s4); }
-
-  .badge {
-    display: inline-flex;
-    padding: var(--s1) var(--s3);
-    border-radius: var(--radius-pill);
-    font-size: var(--fs-badge);
-    font-weight: var(--fw-600);
-    font-family: var(--font-ui);
-  }
-  .badge-default { background: var(--c-primary-soft); color: var(--c-primary); }
-
-  .summary-block {
-    font-size: var(--fs-h5);
-    max-width: 70ch;
-    line-height: var(--lh-body);
-    font-weight: var(--fw-500);
-    font-family: var(--font-ui);
-    margin-bottom: var(--s6);
-  }
 
   .howto-steps { display: flex; flex-direction: column; gap: var(--s4); }
   .howto-step strong { display: block; font-size: var(--fs-base); font-weight: var(--fw-700); color: var(--c-text); margin-bottom: var(--s1); }

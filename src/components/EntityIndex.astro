@@ -284,6 +284,29 @@ const termPrefix = lang === 'vi' ? '' : `/${lang}`
     gap: var(--s5);
   }
 
+  /* ── Lưới thích ứng theo SỐ MỤC THẬT ──
+     /tour/ đang có 1 mục. Lưới ba cột để một thẻ dọc nằm lẻ loi bên trái,
+     trông như trang lỗi. Cùng luật đã dùng ở HomeRollupSection. */
+
+  .card-grid:has(> :last-child:nth-child(1)) {
+    grid-template-columns: 1fr;
+  }
+
+  .card-grid:has(> :last-child:nth-child(1)) :global(.card) {
+    display: grid;
+    grid-template-columns: minmax(0, 42%) 1fr;
+    align-items: stretch;
+  }
+
+  .card-grid:has(> :last-child:nth-child(1)) :global(.card-img-wrap) {
+    height: 100%;
+    min-height: 240px;
+  }
+
+  .card-grid:has(> :last-child:nth-child(2)) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .entity-count {
     font-size: var(--fs-sm);
     color: var(--c-text-muted);
@@ -293,6 +316,15 @@ const termPrefix = lang === 'vi' ? '' : `/${lang}`
   @media (max-width: 1023px) {
     .card-grid {
       grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .card-grid:has(> :last-child:nth-child(1)) :global(.card) {
+      grid-template-columns: 1fr;
+    }
+    .card-grid:has(> :last-child:nth-child(1)) :global(.card-img-wrap) {
+      min-height: 0;
     }
   }
 

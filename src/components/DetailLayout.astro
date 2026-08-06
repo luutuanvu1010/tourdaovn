@@ -26,6 +26,9 @@ export interface Props {
   badges?: string[] | null
   /** Đoạn mở trong hero — §3 "Đoạn mở", `summary`. */
   summary?: string | null
+  /** Gắn `data-speakable` lên đoạn mở. Chỉ trang cẩm nang bật, vì chỉ Article
+   *  khai `speakable` với cssSelector `[data-speakable]` trong JSON-LD. */
+  speakable?: boolean
   /** Mục neo cho thanh dính. Rỗng thì không render thanh. */
   jumpLinks?: { href: string; label: string }[] | null
   /** Nhãn giá đã render sẵn (I16) — null thì thanh dính không hiện vùng giá. */
@@ -38,7 +41,7 @@ export interface Props {
 const {
   title, lang, entityType, image, gallery, containedInPlace, infoBarItems,
   sidebarSlots, nearbyTitle, nearby, updatedAt,
-  badges, summary, jumpLinks, priceLabel, ctaHref, ctaLabel,
+  badges, summary, speakable = false, jumpLinks, priceLabel, ctaHref, ctaLabel,
 } = Astro.props
 
 const badgeList = badges ?? []
@@ -58,7 +61,7 @@ const t = uiCopy(lang)
     </div>
   )}
   <h1 slot="overlay" class="detail-title">{title}</h1>
-  {summary && <p slot="overlay" class="detail-summary">{summary}</p>}
+  {summary && <p slot="overlay" class="detail-summary" {...(speakable ? { 'data-speakable': true } : {})}>{summary}</p>}
 </Hero>
 
 {showStickyBar && (
