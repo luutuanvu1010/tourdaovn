@@ -62,7 +62,7 @@ Dải số liệu đặt ngay dưới hero là thứ làm một site mới trôn
 | Cẩm nang | `touristDestination.homepageArticles` | ✅ |
 | **Báo giá đoàn** | — | 🛑 |
 
-`siteSettings` hiện chỉ có: `sections`, `heroText`, `contact`, `pickupPoints`, `support`, `theme`.
+`siteSettings` hiện chỉ có sáu field mang nội dung: `sections`, `heroText`, `contact`, `pickupPoints`, `support`, `theme` — cộng `title` chỉ dùng hiển thị trong Studio, thành 7 field cấp đầu.
 
 **Bốn khối làm nên "chất công ty lớn" thì không khối nào có nơi chứa.** Đây đúng hình dạng đã gặp hai lần trong phiên: "Đặt vé trực tuyến" và "Đưa đón sân bay". Bài học giống nhau: sửa `01-CONTENT_MODEL` trước, không code trước rồi hợp thức hoá sau (`04-CONSTRAINTS` §2.2, điều cấm 2).
 
