@@ -260,7 +260,9 @@ Toàn trang là config (build) cộng decor: thông điệp, link về `/` và 4
 
 Trang chủ **không** phải trang entity. Nó là loại trang riêng, component `SiteHome`, phát JSON-LD `WebSite` cộng `Organization` (01 mục 5.1). Nội dung lấy từ document `touristDestination` khai ở `primaryDestinationSlug`, cộng `siteSettings`.
 
-Thứ tự và ẩn/hiện từng khối do `siteSettings.sections` quyết (biên tập viên kéo thả trong Studio); thiếu `sections` thì dùng `DEFAULT_SECTIONS` trong code.
+Thứ tự và ẩn/hiện từng khối do `siteSettings.sections` quyết (biên tập viên kéo thả trong Studio); thiếu `sections` thì dùng `DEFAULT_SECTIONS` trong code. Thứ tự mặc định trong code theo hướng A của `SPEC-2026-08-06-trang-chu-xung-tam`: **bằng chứng gánh trang, không phải catalogue gánh trang** — hero, dải số liệu, tour, vì sao chọn, đối tác, đánh giá, cẩm nang, báo giá đoàn.
+
+Lý do: doanh thu công ty đến từ offline/đại lý/OTA, site là kênh mới với 4 sản phẩm lúc ra mắt. Dải số liệu đặt ngay dưới hero **không đọc document tour nào**, nên 4 hay 40 sản phẩm cũng không lộ.
 
 | Vùng giao diện | Dữ liệu nuôi | Bắt buộc? | Khi rỗng thì hiện gì | Ghi chú |
 |---|---|---|---|---|
@@ -269,6 +271,11 @@ Thứ tự và ẩn/hiện từng khối do `siteSettings.sections` quyết (bi�
 | Hero: ảnh nền | `mainImage` của touristDestination | nên có | nền thuần màu | |
 | Hero: nút chính | config (build): `destinationHref` | có | — | trỏ trang điểm đến |
 | Hero: nút phụ | config (build): mục đầu tiên của `nav` | có | ẩn khi `nav` rỗng | ADR-0023 — không hardcode hub |
+| Dải số liệu | `siteSettings.stats[]`: `value`, `label`, `note` | tùy | mảng rỗng hoặc thiếu → khối không render | trụ của trang; **không đọc document tour nào** nên số lượng tour không ảnh hưởng |
+| Logo đối tác | `siteSettings.partners[]`: `name`, `logo`, `url` | tùy | ẩn khối | `logo` bắt buộc có alt (I12); thiếu `url` thì logo là ảnh tĩnh, không phải link chết |
+| Đánh giá khách | `siteSettings.testimonials[]`: `quote`, `authorName`, `authorNote`, `sourceName`, `sourceUrl` | tùy | ẩn khối | **KHÔNG serialize ra JSON-LD** — Google cấm rich snippet tự phục vụ, xem QĐ-2026-08-06-09 |
+| Báo giá đoàn | `siteSettings.groupQuote`: `heading`, `text`, `ctaLabel` | tùy | ẩn khối | nút đọc `contact.zaloUrl`, không khai số thứ hai |
+| Vì sao chọn | config (build) | tùy | ẩn khối | bốn điểm khác biệt; xem việc 12 của kế hoạch 2026-08-06 |
 | Các khối nội dung | như §4.1 (trust bar, banner, hub grid, areas, guides, featured, faq, safety) | tùy | khối rỗng tự ẩn dù `hidden = false` | empty guard là cổng cứng, xem §4.1 |
 | JSON-LD | `WebSite` cộng `Organization`; `telephone`/`email` từ `siteSettings.contact` | có | field liên hệ trống thì không phát thuộc tính đó | guard rỗng §5.1 |
 
