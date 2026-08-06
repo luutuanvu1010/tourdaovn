@@ -23,6 +23,18 @@ const { data, lang, nearby = [] } = Astro.props
 const t = uiCopy(lang)
 
 const typeLabel = lookupLabel(PLACE_TYPE_LABELS, lang, data.placeType)
+
+// Phù hiệu hero: loại địa danh (§3 "Nhãn loại entity", `placeType`).
+const heroBadges = [typeLabel].filter((x): x is string => !!x)
+
+// Neo chỉ trỏ tới mục thật sự render — khối vắng mà vẫn để neo là link chết.
+const jumpLinks = [
+  { id: 'highlights', label: t('highlights'), on: !!data.highlights?.length },
+  { id: 'details', label: t('details'), on: !!data.body?.length },
+  { id: 'access', label: t('howToGetThere'), on: !!data.accessInfo?.length },
+  { id: 'experiences', label: t('experiencesHere'), on: !!data.experiences?.length },
+  { id: 'faq', label: t('faqHeading'), on: !!data.faq?.length },
+].filter(x => x.on).map(x => ({ href: `#${x.id}`, label: x.label }))
 const parentHref = data.containedInPlace?.slug
   ? entityHref(data.containedInPlace._type, data.containedInPlace.slug, lang)
   : undefined
@@ -54,6 +66,9 @@ const jsonLd = entityPageGraphToLd(placeToJsonLd(data, siteBase, lang), data, si
 ---
 
 <DetailLayout
+  badges={heroBadges}
+  summary={data.summary}
+  jumpLinks={jumpLinks}
   title={data.title}
   lang={lang}
   entityType="place"
@@ -70,10 +85,9 @@ const jsonLd = entityPageGraphToLd(placeToJsonLd(data, siteBase, lang), data, si
   updatedAt={data._updatedAt}
 >
   <Fragment slot="content">
-    <div class="summary-block">{data.summary}</div>
 
     {data.highlights && data.highlights.length > 0 && (
-      <Section heading={t('highlights')} contained={false}>
+      <Section heading={t('highlights')} contained={false} id="highlights">
         <ul class="hl-list">
           {data.highlights.map((h: string) => <li>{h}</li>)}
         </ul>
@@ -81,13 +95,13 @@ const jsonLd = entityPageGraphToLd(placeToJsonLd(data, siteBase, lang), data, si
     )}
 
     {hasPtContent(data.body) && (
-      <Section heading={t('details')} contained={false}>
+      <Section heading={t('details')} contained={false} id="details">
         <Body blocks={data.body} />
       </Section>
     )}
 
     {hasPtContent(data.accessInfo) && (
-      <Section heading={t('howToGetThere')} contained={false}>
+      <Section heading={t('howToGetThere')} contained={false} id="access">
         <div class="info-callout">
           {data.accessInfo!.map((block: any) => {
             if (block._type === 'block' && block.children) {
@@ -103,10 +117,10 @@ const jsonLd = entityPageGraphToLd(placeToJsonLd(data, siteBase, lang), data, si
       </Section>
     )}
 
-    {data.faq && data.faq.length > 0 && <FAQ faq={data.faq} lang={lang} contained={false} />}
+    {data.faq && data.faq.length > 0 && <FAQ faq={data.faq} lang={lang} contained={false} id="faq" />}
 
     {data.experiences && data.experiences.length > 0 && (
-      <Section heading={t('experiencesHere')} contained={false}>
+      <Section heading={t('experiencesHere')} contained={false} id="experiences">
         <div class="card-grid">
           {data.experiences.map(exp => (
             <Card

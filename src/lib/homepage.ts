@@ -35,10 +35,10 @@ export const HOME_COPY: Record<Lang, {
       'hub-di-lai': 'Sân bay, xe bus, taxi, thuê xe máy',
     },
     trustItems: [
-      { icon: '🛡️', title: 'Nội dung đã duyệt', description: 'Biên tập viên người địa phương kiểm duyệt' },
-      { icon: '📊', title: 'Dữ liệu có nguồn', description: 'Liên kết Wikidata, OSM, gov.vn' },
-      { icon: '🔄', title: 'Cập nhật thường xuyên', description: 'Thông tin địa điểm cập nhật hàng tháng' },
-      { icon: '🧭', title: 'Ưu tiên thực tế', description: 'Không quảng cáo, không PR, chỉ thông tin' },
+      { icon: '🚐', title: 'Xe đưa đón tận nơi', description: 'Không bắt khách tự ra bến' },
+      { icon: '🧭', title: 'Hướng dẫn viên đi cùng', description: 'Có người chịu trách nhiệm suốt chuyến' },
+      { icon: '🏷️', title: 'Giá tốt', description: 'Báo giá trọn gói, không phụ thu' },
+      { icon: '💬', title: 'Thanh toán linh hoạt', description: 'Chốt qua Zalo với người thật' },
     ],
     sections: {
       overview: 'Tổng quan về Nha Trang',

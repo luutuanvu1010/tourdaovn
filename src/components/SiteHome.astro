@@ -39,7 +39,7 @@ const SITE_COPY: Record<Lang, {
 }> = {
   vi: {
     eyebrow: 'Tour biển đảo Nha Trang',
-    title: brand.name,
+    title: brand.headline,
     summary: brand.description,
     destinationLabel: 'Điểm đến chính',
     destinationCta: 'Xem trang điểm đến',
@@ -88,19 +88,22 @@ const siteCopy = SITE_COPY[lang]
 const heroEyebrow = config?.heroText?.[lang] || siteCopy.eyebrow
 const heroImage = imageUrl(td?.mainImage, { width: 1800 })
 
+// Thứ tự mặc định theo bàn giao bước 7: SẢN PHẨM trước, nội dung sau. Trước đây
+// `tours` đứng thứ 12/14 — sau cả `specialties` là danh mục đã tắt — nên trang
+// chủ của một công ty bán tour không hề bán gì ở nửa trên.
+// Đây chỉ là mặc định; `siteSettings.sections` mới là nơi chốt thứ tự thật.
 const DEFAULT_SECTIONS = [
   { key: 'hero', hidden: false },
+  { key: 'tours', hidden: false },
   { key: 'trustBar', hidden: false },
+  { key: 'experiences', hidden: false },
+  { key: 'hubGrid', hidden: false },
+  { key: 'stays', hidden: false },
+  { key: 'attractions', hidden: false },
+  { key: 'areas', hidden: false },
+  { key: 'guides', hidden: false },
   { key: 'editorialBody', hidden: false },
   { key: 'banners', hidden: false },
-  { key: 'hubGrid', hidden: false },
-  { key: 'areas', hidden: false },
-  { key: 'attractions', hidden: false },
-  { key: 'experiences', hidden: false },
-  { key: 'guides', hidden: false },
-  { key: 'stays', hidden: false },
-  { key: 'specialties', hidden: false },
-  { key: 'tours', hidden: false },
   { key: 'faq', hidden: false },
   { key: 'safety', hidden: false },
 ]

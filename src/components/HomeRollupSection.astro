@@ -59,6 +59,45 @@ const cards = items
   .home-card-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* ── Lưới thích ứng theo SỐ MỤC THẬT (bàn giao bước 7) ──
+     Dataset đang rất mỏng: nhiều khối chỉ có 1 mục. Lưới 4 cột cứng để một thẻ
+     dọc nằm lẻ loi bên trái, trông như trang lỗi. Ba luật dưới đây sửa việc đó
+     bằng :has(), không cần JS và không cần biết trước số mục. */
+
+  /* 1 mục → thẻ nằm ngang chiếm trọn chiều rộng */
+  .home-card-grid:has(> :last-child:nth-child(1)) {
+    grid-template-columns: 1fr;
+  }
+
+  .home-card-grid:has(> :last-child:nth-child(1)) :global(.card) {
+    display: grid;
+    grid-template-columns: minmax(0, 42%) 1fr;
+    align-items: stretch;
+  }
+
+  .home-card-grid:has(> :last-child:nth-child(1)) :global(.card-img-wrap) {
+    height: 100%;
+    min-height: 240px;
+  }
+
+  /* 2 mục → 2 cột, 3 mục → 3 cột. Không để hàng cuối lẻ một thẻ. */
+  .home-card-grid:has(> :last-child:nth-child(2)) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .home-card-grid:has(> :last-child:nth-child(3)) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 767px) {
+    .home-card-grid:has(> :last-child:nth-child(1)) :global(.card) {
+      grid-template-columns: 1fr;
+    }
+    .home-card-grid:has(> :last-child:nth-child(1)) :global(.card-img-wrap) {
+      min-height: 0;
+    }
     gap: var(--s4);
   }
 

@@ -95,6 +95,13 @@ export const brand = {
     'Tour đảo Nha Trang, lặn biển, vé VinWonders, khách sạn và xe đưa đón sân bay. ' +
     'Nhận khách lẻ và khách đoàn, có hướng dẫn viên đi cùng, đặt nhanh qua Zalo.',
 
+  /**
+   * Câu định vị — tiêu đề chính (h1) của trang chủ.
+   * Nguồn: `00-PROJECT_BRIEF` §1 và §3, chủ dự án chốt 2026-08-06.
+   * Trước đây h1 là tên thương hiệu, không nói được site bán gì.
+   */
+  headline: 'Một đầu mối cho cả chuyến biển đảo Nha Trang',
+
   /** Một dòng ngắn cho chân trang. */
   tagline: 'Đầu mối trọn gói cho chuyến biển đảo Nha Trang — tour, vé, phòng, xe đưa đón.',
 } as const
