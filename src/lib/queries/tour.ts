@@ -6,7 +6,8 @@ import {
   baseFieldsFragment, mainImageFragment, galleryFragment,
   faqFragment, imageProvenanceFragment, bodyFragment,
   highlightsFragment, includesFragment, excludesFragment,
-  touristTypeFragment, departureNoteFragment, seasonNoteFragment
+  touristTypeFragment, departureNoteFragment, seasonNoteFragment,
+  licenseInfoFragment
 } from './fragments'
 import type { TourResult } from '../types'
 
@@ -43,7 +44,8 @@ export function tourBySlugQuery(lang: string): string {
       "slug": slug.${lang}.current,
       "summary": summary.${lang},
       ${mainImageFragment()},
-      url, officialSource
+      url, officialSource,
+      ${licenseInfoFragment(lang)}
     }, null),
     tourFormat,
     "tripOrigin": tripOrigin->{

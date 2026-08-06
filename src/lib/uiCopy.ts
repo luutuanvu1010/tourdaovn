@@ -96,7 +96,7 @@ const vi = {
   whereToTry: 'Ăn ở đâu',
   origin: 'Gốc gác',
   season: 'Mùa',
-  bestSeason: 'Mùa thích hợp',
+  bestSeason: 'Mùa nào nên đi',
   // Tour, trải nghiệm
   duration: 'Thời lượng',
   format: 'Hình thức',
@@ -245,7 +245,7 @@ const en: Record<UIKey, string> = {
   whereToTry: 'Where to try',
   origin: 'Origin',
   season: 'Season',
-  bestSeason: 'Best season',
+  bestSeason: 'When to go',
   duration: 'Duration',
   format: 'Format',
   departure: 'Departure',

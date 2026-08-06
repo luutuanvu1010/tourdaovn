@@ -12,14 +12,18 @@ export interface Props {
 
 const { items } = Astro.props
 const visible = items.filter(i => i.visible)
+// Lưới co theo số ô THẬT. Trước đây lưới cố định 4 cột và ô ẩn dùng
+// `display:none`, nên ba ô có dữ liệu vẫn để hở một cột. Bốn là trần vì quá
+// bốn ô một hàng thì chữ bị bóp.
+const cols = Math.min(visible.length, 4)
 ---
 
 {visible.length > 0 && (
   <section class="info-bar">
     <div class="container">
-      <div class="info-bar-grid">
-        {items.map((item) => (
-          <div class="info-slot" class:list={{ 'info-slot--hidden': !item.visible }}>
+      <div class="info-bar-grid" style={`--info-cols:${cols}`}>
+        {visible.map((item) => (
+          <div class="info-slot">
             <span class="info-icon" aria-hidden="true">{item.icon}</span>
             <div class="info-text">
               <span class="info-label">{item.label}</span>
@@ -39,7 +43,7 @@ const visible = items.filter(i => i.visible)
 
   .info-bar-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(var(--info-cols, 4), 1fr);
     gap: var(--s3);
     background: var(--c-surface-alt);
     border: 1px solid var(--c-border);
@@ -54,10 +58,6 @@ const visible = items.filter(i => i.visible)
     text-align: left;
     gap: var(--s2);
     min-width: 0;
-  }
-
-  .info-slot--hidden {
-    display: none;
   }
 
   .info-icon {
@@ -89,7 +89,7 @@ const visible = items.filter(i => i.visible)
 
   @media (max-width: 1023px) {
     .info-bar-grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(min(var(--info-cols, 4), 2), 1fr);
     }
   }
 </style>

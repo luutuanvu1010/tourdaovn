@@ -44,10 +44,11 @@ function hasPtContent(blocks: unknown[] | undefined | null): boolean {
   return blocks.some((b: any) => b._type === 'block' && b.children?.some((c: any) => (c.text || '').trim()))
 }
 
+// Ô nào không có dữ liệu thì không vào lưới — InfoBar co theo số ô thật, nên
+// ở đây bỏ ô "khoảng cách" chết cứng.
 const infoBarItems = [
   { icon: '🏷️', label: t('type'), value: typeLabel, visible: true },
-  { icon: '🕐', label: t('hours'), value: data.openingHours ? `${data.openingHours.open || ''} - ${data.openingHours.close || ''}` : t('freeAccess'), visible: true },
-  { icon: '📍', label: t('distance'), value: '', visible: false },
+  { icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : t('freeAccess'), visible: true },
   { icon: '🗺️', label: t('partOf'), value: data.containedInPlace?.title || '', visible: !!data.containedInPlace?.title },
 ]
 
@@ -153,13 +154,15 @@ const jsonLd = entityPageGraphToLd(placeToJsonLd(data, siteBase, lang), data, si
     margin-bottom: var(--s6);
   }
 
+  /* "Cách tới nơi" — với đảo, "đi bằng gì" là câu hỏi đầu tiên của khách, nên
+     khối này không được là cỡ chữ nhỏ nhất trang. Nền cát giữ nguyên. */
   .info-callout {
     background: var(--c-sand-soft);
     border: 1px solid var(--c-sand-border);
     border-radius: var(--radius-lg);
     padding: var(--s4) var(--s5);
-    font-size: var(--fs-sm);
-    line-height: 1.6;
+    font-size: var(--fs-base);
+    line-height: var(--lh-body);
     color: var(--c-sand-text);
   }
 
@@ -167,7 +170,7 @@ const jsonLd = entityPageGraphToLd(placeToJsonLd(data, siteBase, lang), data, si
   .info-callout p { margin-bottom: var(--s2); }
 
   .hl-list { list-style: none; display: flex; flex-direction: column; gap: var(--s2); }
-  .hl-list li { font-size: var(--fs-sm); color: var(--c-text-muted); padding-left: var(--s5); position: relative; }
+  .hl-list li { font-size: var(--fs-base); color: var(--c-text-muted); padding-left: var(--s5); position: relative; }
   .hl-list li::before { content: "✦"; position: absolute; left: 0; color: var(--c-primary); font-size: var(--fs-xs); }
 
   .card-grid {

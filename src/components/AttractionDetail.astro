@@ -1,5 +1,5 @@
 ---
-import type { AttractionResult, Lang } from '../lib/types'
+import type { AttractionResult, Lang, SiteContact } from '../lib/types'
 import { siteBaseUrl } from '../lib/siteUrl'
 import { uiCopy, typeLabel as lookupLabel, ATTRACTION_TYPE_LABELS } from '../lib/uiCopy'
 import DetailLayout from './DetailLayout.astro'
@@ -20,13 +20,19 @@ export interface Props {
   data: AttractionResult
   lang: Lang
   nearby?: import('../lib/types').NearbyEntity[]
+  contact?: SiteContact | null
 }
 
-const { data, lang, nearby = [] } = Astro.props
+const { data, lang, nearby = [], contact = null } = Astro.props
 
 const t = uiCopy(lang)
 
 const typeLabel = lookupLabel(ATTRACTION_TYPE_LABELS, lang, data.attractionType)
+
+// Phù hiệu hero: loại điểm tham quan (§3 "Nhãn loại entity", `attractionType`).
+// Trước đây nhãn này nằm trong thân bài dưới dạng `.cat-row`, còn hero trống —
+// khác hẳn trang địa danh dù hai trang dùng chung khung.
+const heroBadges = [typeLabel].filter((x): x is string => !!x)
 
 function hasPtContent(blocks: unknown[] | undefined | null): boolean {
   if (!blocks || blocks.length === 0) return false
@@ -42,10 +48,25 @@ const entityJsonLd = applyPriceToJsonLd(
 )
 const jsonLd = entityPageGraphToLd(entityJsonLd, data, siteBase, lang)
 
+// Neo chỉ trỏ tới mục thật sự render — khối vắng mà vẫn để neo là link chết.
+const jumpLinks = [
+  { id: 'highlights', label: t('highlights'), on: !!data.highlights?.length },
+  { id: 'overview', label: t('overview'), on: hasPtContent(data.body) },
+  { id: 'access', label: t('howToGetThere'), on: hasPtContent(data.accessInfo) },
+  { id: 'experiences', label: t('experiencesHere'), on: !!data.experiences?.length },
+  { id: 'faq', label: t('faqHeading'), on: !!data.faq?.length },
+].filter(x => x.on).map(x => ({ href: `#${x.id}`, label: x.label }))
+
+// Đặt vé đi qua Zalo — kênh đặt chỗ duy nhất của site (00 §3, R6). Trước đây
+// nút này trỏ `#booking-<key>`, một neo tới phần tử không tồn tại trên trang:
+// đúng là "CTA giả" mà R4 cấm. Không có zaloUrl thì không render nút.
+const bookingHref = contact?.zaloUrl || ''
+
+// Ô nào không có dữ liệu thì không vào lưới — InfoBar co theo số ô thật, nên
+// ở đây bỏ ô "khoảng cách" chết cứng và bỏ luôn giá trị "không có" giả.
 const infoBarItems = [
-  { icon: '🕐', label: t('hours'), value: data.openingHours ? `${data.openingHours.open || ''} - ${data.openingHours.close || ''}` : t('notAvailable'), visible: !!data.openingHours },
-  { icon: '🎫', label: t('ticketPrice'), value: priceView?.label || t('notAvailable'), visible: !!(priceView?.label) },
-  { icon: '📍', label: t('distance'), value: '', visible: false },
+  { icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : '', visible: !!data.openingHours },
+  { icon: '🎫', label: t('ticketPrice'), value: priceView?.label || '', visible: !!(priceView?.label) },
   { icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
 ]
 
@@ -67,9 +88,15 @@ const sidebarRows = [
   image={data.mainImage}
   gallery={data.gallery}
   containedInPlace={data.containedInPlace}
+  badges={heroBadges}
+  summary={data.summary}
+  jumpLinks={jumpLinks}
+  priceLabel={priceView?.label ?? null}
+  ctaHref={bookingHref || null}
+  ctaLabel={bookingHref ? t('contactZalo') : null}
   infoBarItems={infoBarItems}
   sidebarSlots={[
-    { name: 'booking', component: 'BookingCTA', visible: !!priceView?.label, props: { priceText: priceView?.label || '', ctaLabel: t('bookTicket'), ctaUrl: data.bookingRef?.key ? `#booking-${data.bookingRef.key}` : undefined } },
+    { name: 'booking', component: 'BookingCTA', visible: !!priceView?.label, props: { priceText: priceView?.label || '', ctaLabel: t('bookTicket'), ctaUrl: bookingHref || undefined } },
     { name: 'info', component: 'InfoCard', visible: sidebarRows.some(r => r.visible), props: { rows: sidebarRows } },
     { name: 'map', component: 'Map', visible: !!(data.geo), props: { geo: data.geo, title: data.title } },
   ]}
@@ -78,14 +105,9 @@ const sidebarRows = [
   updatedAt={data._updatedAt}
 >
   <Fragment slot="content">
-    <div class="cat-row">
-      <span class="badge badge-default">{typeLabel}</span>
-    </div>
-
-    <div class="summary-block">{data.summary}</div>
-
+    {/* Nhãn loại và `summary` đã lên hero qua DetailLayout — không lặp lại. */}
     {data.highlights && data.highlights.length > 0 && (
-      <Section heading={t('highlights')} contained={false}>
+      <Section heading={t('highlights')} contained={false} id="highlights">
         <ul class="hl-list">
           {data.highlights.map((h: string) => <li>{h}</li>)}
         </ul>
@@ -93,13 +115,13 @@ const sidebarRows = [
     )}
 
     {hasPtContent(data.body) && (
-      <Section heading={t('overview')} contained={false}>
+      <Section heading={t('overview')} contained={false} id="overview">
         <Body blocks={data.body} />
       </Section>
     )}
 
     {hasPtContent(data.accessInfo) && (
-      <Section heading={t('howToGetThere')} contained={false}>
+      <Section heading={t('howToGetThere')} contained={false} id="access">
         <div class="info-callout">
           {data.accessInfo!.map((block: any) => {
             if (block._type === 'block' && block.children) {
@@ -115,10 +137,10 @@ const sidebarRows = [
       </Section>
     )}
 
-    {data.faq && data.faq.length > 0 && <FAQ faq={data.faq} lang={lang} contained={false} />}
+    {data.faq && data.faq.length > 0 && <FAQ faq={data.faq} lang={lang} contained={false} id="faq" />}
 
     {data.experiences && data.experiences.length > 0 && (
-      <Section heading={t('experiencesHere')} contained={false}>
+      <Section heading={t('experiencesHere')} contained={false} id="experiences">
         <div class="card-grid">
           {data.experiences.map(exp => (
             <Card
@@ -136,7 +158,7 @@ const sidebarRows = [
   </Fragment>
 
   {priceView?.label && (
-    <BookingCTA slot="booking" priceText={priceView.label} ctaLabel={t('bookTicket')} ctaUrl={data.bookingRef?.key ? `#booking-${data.bookingRef.key}` : undefined} />
+    <BookingCTA slot="booking" priceText={priceView.label} ctaLabel={t('bookTicket')} ctaUrl={bookingHref || undefined} />
   )}
   {sidebarRows.some(r => r.visible) && <InfoCard slot="info" rows={sidebarRows} lang={lang} />}
   {data.geo && <MapView slot="map" geo={data.geo} title={data.title} height={240} />}
@@ -145,43 +167,23 @@ const sidebarRows = [
 <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
 
 <style>
-  .cat-row { margin-bottom: var(--s4); }
-
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    padding: var(--s1) var(--s3);
-    border-radius: var(--radius-pill);
-    font-size: var(--fs-badge);
-    font-weight: var(--fw-600);
-    font-family: var(--font-ui);
-  }
-
-  .badge-default { background: var(--c-primary-soft); color: var(--c-primary); }
-
-  .summary-block {
-    font-size: var(--fs-h5);
-    max-width: 70ch;
-    line-height: var(--lh-body);
-    font-weight: var(--fw-500);
-    font-family: var(--font-ui);
-    margin-bottom: var(--s6);
-  }
-
+  /* "Cách tới nơi" — với đảo và công viên trên đảo, "đi bằng gì" là câu hỏi
+     đầu tiên của khách, nên khối này không được là cỡ chữ nhỏ nhất trang.
+     Nền cát giữ nguyên: cát là màu của ghi chú. */
   .info-callout {
     background: var(--c-sand-soft);
     border: 1px solid var(--c-sand-border);
     border-radius: var(--radius-lg);
     padding: var(--s4) var(--s5);
-    font-size: var(--fs-sm);
-    line-height: 1.6;
+    font-size: var(--fs-base);
+    line-height: var(--lh-body);
     color: var(--c-sand-text);
   }
   .info-callout strong { color: var(--c-sand-text-strong); }
   .info-callout p { margin-bottom: var(--s2); }
 
   .hl-list { list-style: none; display: flex; flex-direction: column; gap: var(--s2); }
-  .hl-list li { font-size: var(--fs-sm); color: var(--c-text-muted); padding-left: var(--s5); position: relative; }
+  .hl-list li { font-size: var(--fs-base); color: var(--c-text-muted); padding-left: var(--s5); position: relative; }
   .hl-list li::before { content: "✦"; position: absolute; left: 0; color: var(--c-primary); font-size: var(--fs-xs); }
 
   .card-grid {

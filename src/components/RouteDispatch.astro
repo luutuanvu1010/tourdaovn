@@ -288,7 +288,9 @@ if (kind === 'detail') {
   if (cfg && slug) {
     detailData = await client.fetch(cfg.q(lang), { slug, lang })
     DetailComp = cfg.C
-    if (['tour', 'hotel', 'resort', 'experience'].includes(entity)) {
+    // `attraction` có mặt ở đây vì nút "Đặt vé" phải trỏ Zalo (R6) — không phải
+    // để render cụm ContactChannels, thứ chỉ có trên Tour/Hotel/Resort/Experience.
+    if (['tour', 'hotel', 'resort', 'experience', 'attraction'].includes(entity)) {
       contact = await fetchSiteContact()
     }
   }

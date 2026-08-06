@@ -28,35 +28,30 @@ const { heading, id, contained = true } = Astro.props
     padding: var(--s7) 0;
   }
 
-  .section::before {
-    content: "";
-    position: absolute;
-    inset: var(--s4) 0 auto;
-    height: 1px;
-    pointer-events: none;
-    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--c-sand) 24%, transparent), transparent);
-    opacity: .72;
-  }
-
   .section-head {
     margin-bottom: var(--s6);
   }
 
+  /* Tiêu đề mục màu --c-primary để phân biệt với tiêu đề bài (--c-text). */
   .section-title {
     font-family: var(--font-display);
-    font-size: var(--fs-h3);
+    font-size: var(--fs-section);
     font-weight: var(--fw-800);
-    color: var(--c-text);
+    color: var(--c-primary);
     line-height: var(--lh-heading);
     letter-spacing: 0;
     margin-bottom: var(--s3);
   }
 
+  /* Gạch chân đặc màu cát theo đúng token. Bản cũ dùng 34px (không có trong
+     thang khoảng cách) và gradient pha --c-sand sang --c-green (không phải
+     token nào), cộng một đường kẻ mờ ở đầu mỗi mục — cả ba đều là giá trị
+     nằm ngoài nguồn token, tức nguồn sự thật thứ hai. */
   .section-underline {
     display: block;
-    width: 34px;
-    height: 3px;
-    background: linear-gradient(90deg, var(--c-sand), color-mix(in srgb, var(--c-green) 38%, var(--c-sand)));
+    width: var(--underline-width);
+    height: var(--underline-height);
+    background: var(--c-sand);
     border-radius: 2px;
   }
 

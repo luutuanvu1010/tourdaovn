@@ -73,6 +73,10 @@ const infoBarItems = [
 
 const sidebarRows = [
   { icon: '🏢', label: t('operator'), value: data.operator?.title || '', visible: !!data.operator?.title },
+  // Giấy phép lữ hành đứng ngay dưới tên đơn vị vận hành: đây là trang khách
+  // quyết chuyển tiền, nên tín hiệu tin cậy phải ở cạnh nút đặt chứ không chỉ
+  // ở trang chủ. Dùng field có sẵn `Organization.licenseInfo` (§4.12).
+  { icon: '📋', label: t('license'), value: data.operator?.licenseInfo || '', visible: !!data.operator?.licenseInfo },
   { icon: '👥', label: t('format'), value: formatLabel, visible: true },
   { icon: '📍', label: t('tripOrigin'), value: data.tripOrigin?.title || '', visible: !!data.tripOrigin?.title },
   { icon: '⏱️', label: t('duration'), value: data.duration || '', visible: !!data.duration },
@@ -125,7 +129,7 @@ const sidebarRows = [
       <Section heading={t('includesExcludes')} contained={false} id="includes">
         <div class="inc-ex-grid">
           {data.includes && data.includes.length > 0 && (
-            <div>
+            <div class="inc-ex-card inc-ex-card--in">
               <h5>{t('includes')}</h5>
               <ul class="check-list">
                 {data.includes.map((item) => <li><span class="check-icon">&#10003;</span> {item}</li>)}
@@ -133,7 +137,7 @@ const sidebarRows = [
             </div>
           )}
           {data.excludes && data.excludes.length > 0 && (
-            <div>
+            <div class="inc-ex-card">
               <h5>{t('excludes')}</h5>
               <ul class="cross-list">
                 {data.excludes.map((item) => <li><span class="cross-icon">&#10007;</span> {item}</li>)}
@@ -195,10 +199,21 @@ const sidebarRows = [
   .tl-content p { font-size: var(--fs-sm); color: var(--c-text-muted); margin: var(--s1) 0; }
   .tl-dur { font-size: var(--fs-badge); color: var(--c-text-muted); background: var(--c-surface-alt); padding: 2px 8px; border-radius: var(--radius-pill); }
 
-  .inc-ex-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s5); }
-  .inc-ex-grid h5 { font-family: var(--font-display); font-size: var(--fs-base); font-weight: var(--fw-700); margin-bottom: var(--s3); }
-  .check-list, .cross-list { list-style: none; display: flex; flex-direction: column; gap: var(--s2); }
-  .check-list li, .cross-list li { display: flex; gap: var(--s2); align-items: center; font-size: var(--fs-sm); }
+  /* Đây là "chỗ phát sinh hiểu lầm nhiều nhất" (§2.8), nên hai danh sách cần
+     trọng lượng thị giác của một thẻ chứ không phải hai cột chữ trần. Thẻ nào
+     không có dữ liệu thì không render, thẻ còn lại chiếm trọn chiều rộng. */
+  .inc-ex-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--s5); }
+  .inc-ex-card {
+    background: var(--c-surface-alt);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    padding: var(--s5);
+  }
+  .inc-ex-card--in { background: var(--c-primary-soft); border-color: var(--c-primary-soft); }
+  .inc-ex-grid h5 { font-family: var(--font-display); font-size: var(--fs-card-title); font-weight: var(--fw-700); margin-bottom: var(--s4); color: var(--c-text); }
+  .check-list, .cross-list { list-style: none; display: flex; flex-direction: column; gap: var(--s3); }
+  .check-list li { display: flex; gap: var(--s3); align-items: center; font-size: var(--fs-base); }
+  .cross-list li { display: flex; gap: var(--s3); align-items: center; font-size: var(--fs-sm); color: var(--c-text-muted); }
   .check-icon { color: var(--c-green); font-weight: var(--fw-700); }
   .cross-icon { color: var(--c-text-muted); font-weight: var(--fw-700); }
 

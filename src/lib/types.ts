@@ -400,7 +400,9 @@ export interface TourResult extends BaseEntityFields {
   _type: 'tour'
   itinerary: TourStop[] | null
   // url/officialSource của Organization (§2.9) cho CTA fallback khi tour chưa có giá
-  operator: (EntityRef & { url?: string; officialSource?: string }) | null
+  // `licenseInfo` (§4.12): số giấy phép lữ hành của đơn vị vận hành. Đây là
+  // trang chốt đơn, nên tín hiệu tin cậy này phải nằm cạnh nút đặt.
+  operator: (EntityRef & { url?: string; officialSource?: string; licenseInfo?: string | null }) | null
   tourFormat: 'join-in' | 'private' | 'both'
   tripOrigin?: EntityRef & { geo?: GeoPoint }
   departureNote?: string
