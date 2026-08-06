@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Lora:wght@500;600;700&display=swap" rel="stylesheet"><style>
+/* ═══ TOKEN — chép từ src/styles/tokens.css, không thêm giá trị mới ═══ */
+:root{
+--c-primary:#0C4A6E;--c-primary-strong:#082F49;--c-primary-soft:#F0F7FC;
+--c-accent:#C0392B;--c-accent-strong:#96271A;--c-accent-soft:#FEF2F0;
+--c-sand:#F5A623;--c-sand-soft:#FBE3B3;--c-sand-border:#e9d3a4;--c-sand-text:#5a4109;--c-sand-text-strong:#3d2a05;
+--c-surface:#FFFFFF;--c-surface-alt:#F8FAFC;--c-card:#FFFFFF;
+--c-text:#0F172A;--c-text-muted:#475569;--c-text-inverse:#F8FAFC;--c-border:#E2E8F0;
+--c-sea:#0E7490;--c-green:#0E7490;--c-green-soft:#DCFCE7;--c-green-text:#166534;
+--c-footer-bg:#0E1A23;--c-footer-text:#9aa9b2;--c-footer-border:#233642;--c-footer-muted:#7d8b95;
+--font-display:"Be Vietnam Pro",system-ui,sans-serif;
+--font-ui:"Plus Jakarta Sans",system-ui,-apple-system,sans-serif;
+--fw-500:500;--fw-600:600;--fw-700:700;--fw-800:800;--fw-900:900;
+--fs-badge:0.6875rem;--fs-xs:0.75rem;--fs-label:0.875rem;--fs-sm:0.9375rem;--fs-base:1.0625rem;
+--fs-card-title:1.125rem;--fs-nav:1.125rem;--fs-h5:1.25rem;--fs-h4:1.625rem;--fs-section:1.75rem;
+--fs-h3:2rem;--fs-h2:2.5rem;--fs-h1:2.625rem;--fs-hero:2.875rem;
+--lh-heading:1.16;--lh-body:1.68;
+--underline-width:28px;--underline-height:3px;--badge-py:2px;--badge-px:10px;
+--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px;--s8:64px;--s9:96px;
+--radius-sm:8px;--radius-md:12px;--radius-lg:18px;--radius-pill:999px;
+--shadow-card:0 1px 3px rgba(15,23,42,0.08);
+--shadow-raised:0 6px 24px -8px rgba(0,91,150,.15),0 2px 6px rgba(26,32,44,.05);
+--container:1200px;--container-padding:24px;--header-h:68px;
+--m-fast:180ms;--m-base:300ms;--m-ease:ease;
+/* ĐỀ XUẤT (chờ duyệt) — chưa có trong tokens.css */
+--lh-display:1.22;--ls-eyebrow:0.08em;--lh-eyebrow:1.5;
+}
+[data-theme='cat-bien']{--c-surface:#FDFAF5;--c-primary:#155E75;--c-accent:#B45309;--c-text:#1C1917;--c-text-muted:#57534E;--c-primary-strong:#0E4A5C;--c-accent-strong:#92400E}
+[data-theme='ngoc-lam']{--c-surface:#FFFFFF;--c-primary:#0F766E;--c-accent:#BE123C;--c-text:#0F172A;--c-text-muted:#475569;--c-primary-strong:#0B5A54;--c-accent-strong:#9F1239}
+[data-display='lora']{--font-display:"Lora",Georgia,serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#e8ecef;font-family:var(--font-ui);font-weight:var(--fw-500);line-height:var(--lh-body);color:var(--c-text);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+a{color:var(--c-primary);text-decoration:none}
+a:hover{color:var(--c-primary-strong)}
+h1,h2,h3,h4,h5{font-family:var(--font-display);line-height:var(--lh-heading);letter-spacing:0;font-weight:var(--fw-700)}
+p{text-wrap:pretty}
+summary{cursor:pointer;list-style:none}
+summary::-webkit-details-marker{display:none}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0ms !important;transition-duration:0ms !important}}
+</style></helmet>
+
+<div data-theme="{{ theme }}" data-display="{{ displayFont }}" style="width:1280px;margin:0 auto;background:var(--c-surface)">
+
+<div style="display:flex;align-items:center;gap:var(--s4);padding:var(--s3) var(--s5);background:var(--c-text);color:var(--c-text-inverse)">
+  <span style="font-family:var(--font-ui);font-size:var(--fs-badge);font-weight:var(--fw-700);letter-spacing:var(--ls-eyebrow);opacity:.62">BỘ GIAO DIỆN</span>
+  <div style="display:flex;gap:var(--s2)">
+    <button type="button" onClick="{{ setBienSau }}" style="font-family:var(--font-ui);font-size:var(--fs-label);font-weight:var(--fw-600);padding:var(--s1) var(--s3);border-radius:var(--radius-sm);border:1px solid rgba(248,250,252,.28);background:rgba(248,250,252,.10);color:var(--c-text-inverse);cursor:pointer">biển sâu</button>
+    <button type="button" onClick="{{ setCatBien }}" style="font-family:var(--font-ui);font-size:var(--fs-label);font-weight:var(--fw-600);padding:var(--s1) var(--s3);border-radius:var(--radius-sm);border:1px solid rgba(248,250,252,.28);background:rgba(248,250,252,.10);color:var(--c-text-inverse);cursor:pointer">cát biển</button>
+    <button type="button" onClick="{{ setNgocLam }}" style="font-family:var(--font-ui);font-size:var(--fs-label);font-weight:var(--fw-600);padding:var(--s1) var(--s3);border-radius:var(--radius-sm);border:1px solid rgba(248,250,252,.28);background:rgba(248,250,252,.10);color:var(--c-text-inverse);cursor:pointer">ngọc lam</button>
+  </div>
+  <span style="width:1px;height:20px;background:rgba(248,250,252,.22)"></span>
+  <span style="font-family:var(--font-ui);font-size:var(--fs-badge);font-weight:var(--fw-700);letter-spacing:var(--ls-eyebrow);opacity:.62">CHỮ TIÊU ĐỀ</span>
+  <div style="display:flex;gap:var(--s2)">
+    <button type="button" onClick="{{ setFontToken }}" style="font-family:var(--font-ui);font-size:var(--fs-label);font-weight:var(--fw-600);padding:var(--s1) var(--s3);border-radius:var(--radius-sm);border:1px solid rgba(248,250,252,.28);background:rgba(248,250,252,.10);color:var(--c-text-inverse);cursor:pointer">Be Vietnam Pro · token</button>
+    <button type="button" onClick="{{ setFontLora }}" style="font-family:var(--font-ui);font-size:var(--fs-label);font-weight:var(--fw-600);padding:var(--s1) var(--s3);border-radius:var(--radius-sm);border:1px solid rgba(248,250,252,.28);background:rgba(248,250,252,.10);color:var(--c-text-inverse);cursor:pointer">Lora · đề xuất</button>
+  </div>
+  <span style="margin-left:auto;font-family:var(--font-ui);font-size:var(--fs-badge);font-weight:var(--fw-500);opacity:.5">/trai-nghiem/lan-ong-tho-hon-mun/ · ExperienceDetail · delta §4.4</span>
+</div>
+
+<header style="background:var(--c-surface);border-bottom:1px solid var(--c-border)">
+  <div style="max-width:var(--container);margin:0 auto;padding:0 var(--container-padding);height:var(--header-h);display:flex;align-items:center;gap:var(--s6)">
+    <a href="Trang chu - Hi-fi.dc.html" style="display:flex;align-items:center;gap:var(--s3);font-family:var(--font-display);font-weight:var(--fw-800);font-size:var(--fs-nav);color:var(--c-primary-strong);flex-shrink:0">
+      <svg viewBox="0 0 40 40" fill="none" aria-hidden="true" style="width:34px;height:34px;flex:none"><circle cx="20" cy="20" r="19" fill="var(--c-primary)"></circle><path d="M14 26 L20 9 L20 26 Z" fill="var(--c-sand)"></path><path d="M20 9 L26 26 L20 26 Z" fill="var(--c-sand-soft)"></path><path d="M8 30 Q 12 27 16 30 T 24 30 T 32 30" stroke="var(--c-surface)" stroke-width="1.4" fill="none" stroke-linecap="round"></path></svg>
+      <span>Tour Đảo</span>
+    </a>
+    <nav style="display:flex;align-items:center;gap:var(--s2);flex:1">
+      <a href="#" style="display:inline-flex;align-items:center;gap:var(--s1);padding:var(--s3);border-radius:var(--radius-sm);font-size:var(--fs-sm);font-weight:var(--fw-600);color:var(--c-text-muted)">Tour &amp; Vé
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </a>
+      <a href="#" style="padding:var(--s3);border-radius:var(--radius-sm);font-size:var(--fs-sm);font-weight:var(--fw-600);color:var(--c-text-muted)">Kinh nghiệm du lịch</a>
+      <a href="#" style="padding:var(--s3);border-radius:var(--radius-sm);font-size:var(--fs-sm);font-weight:var(--fw-600);color:var(--c-text-muted)">Hỗ trợ</a>
+      <a href="#" style="padding:var(--s3);border-radius:var(--radius-sm);font-size:var(--fs-sm);font-weight:var(--fw-600);color:var(--c-text-muted)">Liên hệ</a>
+    </nav>
+    <a href="#" style="display:inline-flex;align-items:center;min-height:44px;padding:0 var(--s5);border-radius:var(--radius-pill);background:var(--c-accent);color:var(--c-text-inverse);font-size:var(--fs-sm);font-weight:var(--fw-700)">Đặt vé trực tuyến</a>
+  </div>
+</header>
+
+<section data-screen-label="Hero mosaic" style="display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:var(--s1);height:430px;background:var(--c-card)">
+  <div style="position:relative;overflow:hidden;background:var(--c-primary)">
+    <div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(15,23,42,.05) 0 22px,rgba(15,23,42,.10) 22px 44px);display:flex;align-items:flex-start;justify-content:flex-end;padding:var(--s4) var(--s4) 0 0">
+      <span style="font-size:var(--fs-badge);font-weight:var(--fw-600);color:var(--c-text-inverse);background:rgba(8,47,73,.55);border:1px dashed rgba(248,250,252,.42);border-radius:var(--radius-sm);padding:var(--s2) var(--s3);text-align:right">ảnh chính — mainImage</span>
+    </div>
+    <div style="position:absolute;inset:0;background:linear-gradient(to top,var(--c-primary-strong) 0%,rgba(8,47,73,.55) 38%,transparent 68%)"></div>
+    <div style="position:absolute;inset:auto 0 0 0;z-index:2;padding:var(--s7) var(--s5) var(--s5);display:flex;flex-direction:column;gap:var(--s3)">
+      <div style="display:flex;flex-wrap:wrap;gap:var(--s2)">
+        <a href="#" style="padding:var(--badge-py) var(--badge-px);border-radius:var(--radius-pill);background:rgba(248,250,252,.22);color:var(--c-text-inverse);font-size:var(--fs-label);font-weight:var(--fw-600)">Lặn biển</a>
+        <span style="padding:var(--badge-py) var(--badge-px);border-radius:var(--radius-pill);background:rgba(248,250,252,.22);color:var(--c-text-inverse);font-size:var(--fs-label);font-weight:var(--fw-600)">90 phút</span>
+      </div>
+      <h1 style="font-size:var(--fs-hero);font-weight:var(--fw-900);line-height:var(--lh-display);color:var(--c-text-inverse);max-width:20ch;text-wrap:balance">Lặn ống thở ngắm san hô Hòn Mun</h1>
+      <p style="display:flex;align-items:center;gap:var(--s2);font-size:var(--fs-sm);color:var(--c-text-inverse);opacity:.85">
+        <span aria-hidden="true">📍</span><span>Diễn ra tại <a href="#" style="color:var(--c-text-inverse);text-decoration:underline">Hòn Mun</a></span>
+      </p>
+      <p style="max-width:52ch;color:var(--c-text-inverse);font-size:var(--fs-base);line-height:var(--lh-body);opacity:.92">Xuống nước ở khu vực quy định trong vùng lõi khu bảo tồn biển, có áo phao và huấn luyện viên trực nước. Người chưa từng lặn vẫn tham gia được.</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:var(--s1);overflow:hidden">
+    <div style="background:var(--c-primary-soft);display:flex;align-items:center;justify-content:center;font-size:var(--fs-badge);font-weight:var(--fw-600);color:var(--c-primary)">gallery[0]</div>
+    <div style="background:var(--c-primary-soft);display:flex;align-items:center;justify-content:center;font-size:var(--fs-badge);font-weight:var(--fw-600);color:var(--c-primary)">gallery[1]</div>
+    <div style="background:var(--c-primary-soft);display:flex;align-items:center;justify-content:center;font-size:var(--fs-badge);font-weight:var(--fw-600);color:var(--c-primary)">gallery[2]</div>
+    <div style="background:var(--c-primary-soft);display:flex;align-items:center;justify-content:center;font-size:var(--fs-badge);font-weight:var(--fw-600);color:var(--c-primary)">gallery[3]</div>
+  </div>
+</section>
+
+<div style="position:sticky;top:0;z-index:90;background:var(--c-surface);border-bottom:1px solid var(--c-border)">
+  <div style="max-width:var(--container);margin:0 auto;padding:0 var(--container-padding);display:flex;align-items:center;justify-content:space-between;gap:var(--s5)">
+    <nav aria-label="Lặn ống thở ngắm san hô Hòn Mun" style="display:flex;gap:var(--s5)">
+      <a href="#tn-highlights" style="padding:var(--s4) 0;font-size:var(--fs-sm);font-weight:var(--fw-600);color:var(--c-primary);border-bottom:2px solid var(--c-primary);white-space:nowrap">Điểm nổi bật</a>
+      <a href="#tn-details" style="padding:var(--s4) 0;font-size:var(--fs-sm);font-weight:var(--fw-600);color:var(--c-text-muted);border-bottom:2px solid transparent;white-space:nowrap">Chi tiết</a>
+      <a href="#tn-includes" style="padding:var(--s4) 0;font-size:var(--fs-sm);font-weight:var(--fw-600);color:var(--c-text-muted);border-bottom:2px solid transparent;white-space:nowrap">Gồm những gì</a>
+      <a href="#tn-faq" style="padding:var(--s4) 0;font-size:var(--fs-sm);font-weight:var(--fw-600);color:var(--c-text-muted);border-bottom:2px solid transparent;white-space:nowrap">Câu hỏi thường gặp</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:var(--s4);flex-shrink:0">
+      <span style="font-family:var(--font-display);font-size:var(--fs-h5);font-weight:var(--fw-800);color:var(--c-primary-strong);white-space:nowrap">350.000 ₫/người</span>
+      <a href="#" style="padding:var(--s3) var(--s5);border-radius:var(--radius-pill);background:var(--c-accent);color:var(--c-text-inverse);font-size:var(--fs-sm);font-weight:var(--fw-700);white-space:nowrap">Đặt qua Zalo</a>
+    </div>
+  </div>
+</div>
+
+<section data-screen-label="InfoBar" style="max-width:var(--container);margin:0 auto;padding:var(--s5) var(--container-padding) var(--s4)">
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s3);background:var(--c-surface-alt);border:1px solid var(--c-border);border-radius:var(--radius-md);box-shadow:var(--shadow-card);padding:var(--s4)">
+    <div style="display:flex;align-items:flex-start;gap:var(--s2);min-width:0"><span style="font-size:1.5rem;line-height:1;flex:none" aria-hidden="true">⏱️</span><div style="min-width:0"><span style="display:block;font-size:var(--fs-sm);color:var(--c-text-muted)">Thời lượng</span><span style="display:block;font-family:var(--font-display);font-size:var(--fs-base);font-weight:var(--fw-700);margin-top:2px;color:var(--c-text)">90 phút</span></div></div>
+    <div style="display:flex;align-items:flex-start;gap:var(--s2);min-width:0"><span style="font-size:1.5rem;line-height:1;flex:none" aria-hidden="true">👤</span><div style="min-width:0"><span style="display:block;font-size:var(--fs-sm);color:var(--c-text-muted)">Phù hợp với</span><span style="display:block;font-family:var(--font-display);font-size:var(--fs-base);font-weight:var(--fw-700);margin-top:2px;color:var(--c-text)">Người mới lặn</span></div></div>
+    <div style="display:flex;align-items:flex-start;gap:var(--s2);min-width:0"><span style="font-size:1.5rem;line-height:1;flex:none" aria-hidden="true">🎫</span><div style="min-width:0"><span style="display:block;font-size:var(--fs-sm);color:var(--c-text-muted)">Giá</span><span style="display:block;font-family:var(--font-display);font-size:var(--fs-base);font-weight:var(--fw-700);margin-top:2px;color:var(--c-text)">350.000 ₫/người</span></div></div>
+    <div style="display:flex;align-items:flex-start;gap:var(--s2);min-width:0"><span style="font-size:1.5rem;line-height:1;flex:none" aria-hidden="true">📋</span><div style="min-width:0"><span style="display:block;font-size:var(--fs-sm);color:var(--c-text-muted)">Gồm</span><span style="display:block;font-family:var(--font-display);font-size:var(--fs-base);font-weight:var(--fw-700);margin-top:2px;color:var(--c-text)">Áo phao, kính lặn</span></div></div>
+  </div>
+</section>
+
+<div style="max-width:var(--container);margin:0 auto;padding:var(--s6) var(--container-padding) var(--s7);display:grid;grid-template-columns:1fr 340px;gap:var(--s7);align-items:start">
+<div style="display:flex;flex-direction:column;gap:var(--s8);min-width:0">
+
+  <section id="tn-highlights" style="display:flex;flex-direction:column;gap:var(--s5)">
+    <div style="display:flex;flex-direction:column;gap:var(--s3)"><h2 style="font-size:var(--fs-section);font-weight:var(--fw-800);color:var(--c-primary)">Điểm nổi bật</h2><span style="width:var(--underline-width);height:var(--underline-height);background:var(--c-sand);border-radius:2px"></span></div>
+    <ul style="list-style:none;display:flex;flex-direction:column;gap:var(--s3)">
+      <li style="font-size:var(--fs-base);color:var(--c-text-muted);padding-left:var(--s5);position:relative"><span style="position:absolute;left:0;color:var(--c-primary)">✦</span>Lặn ngay trong vùng lõi khu bảo tồn biển, nơi san hô còn dày nhất vịnh.</li>
+      <li style="font-size:var(--fs-base);color:var(--c-text-muted);padding-left:var(--s5);position:relative"><span style="position:absolute;left:0;color:var(--c-primary)">✦</span>Huấn luyện viên trực nước cùng nhóm, không phải tự bơi ra xa.</li>
+      <li style="font-size:var(--fs-base);color:var(--c-text-muted);padding-left:var(--s5);position:relative"><span style="position:absolute;left:0;color:var(--c-primary)">✦</span>Không cần biết bơi: áo phao và phao nổi luôn có sẵn.</li>
+      <li style="font-size:var(--fs-base);color:var(--c-text-muted);padding-left:var(--s5);position:relative"><span style="position:absolute;left:0;color:var(--c-primary)">✦</span>Nhóm nhỏ, mỗi lượt xuống nước tối đa 10 khách.</li>
+    </ul>
+  </section>
+
+  <section id="tn-details" style="display:flex;flex-direction:column;gap:var(--s5)">
+    <div style="display:flex;flex-direction:column;gap:var(--s3)"><h2 style="font-size:var(--fs-section);font-weight:var(--fw-800);color:var(--c-primary)">Chi tiết</h2><span style="width:var(--underline-width);height:var(--underline-height);background:var(--c-sand);border-radius:2px"></span></div>
+    <div style="display:flex;flex-direction:column;gap:var(--s4);max-width:70ch">
+      <p style="font-size:var(--fs-base);line-height:var(--lh-body);color:var(--c-text)">Đây là hoạt động lặn ống thở, không phải lặn bình khí: khách nổi trên mặt nước với kính và ống thở, nhìn xuống rạn san hô ở độ sâu hai đến bốn mét. Không cần chứng chỉ, không cần kinh nghiệm.</p>
+      <p style="font-size:var(--fs-base);line-height:var(--lh-body);color:var(--c-text)">Tàu neo ở bãi lặng phía nam đảo. Huấn luyện viên hướng dẫn cách dùng kính và ống thở trên tàu khoảng năm phút, sau đó xuống nước theo từng lượt mười người, có phao nổi để bám.</p>
+      <p style="font-size:var(--fs-base);line-height:var(--lh-body);color:var(--c-text)">Hoạt động này đã nằm trong tour 3 đảo. Trang này dành cho khách muốn đặt riêng, hoặc muốn biết chính xác phần lặn diễn ra thế nào trước khi đặt tour.</p>
+    </div>
+  </section>
+
+  <section id="tn-includes" style="display:flex;flex-direction:column;gap:var(--s5)">
+    <div style="display:flex;flex-direction:column;gap:var(--s3)"><h2 style="font-size:var(--fs-section);font-weight:var(--fw-800);color:var(--c-primary)">Gồm những gì</h2><span style="width:var(--underline-width);height:var(--underline-height);background:var(--c-sand);border-radius:2px"></span></div>
+    <ul style="list-style:none;display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s3) var(--s5)">
+      <li style="display:flex;gap:var(--s3);align-items:center;font-size:var(--fs-base);color:var(--c-text)"><span style="color:var(--c-green);font-weight:var(--fw-700);flex:none">✓</span><span>Áo phao và phao nổi</span></li>
+      <li style="display:flex;gap:var(--s3);align-items:center;font-size:var(--fs-base);color:var(--c-text)"><span style="color:var(--c-green);font-weight:var(--fw-700);flex:none">✓</span><span>Kính lặn và ống thở</span></li>
+      <li style="display:flex;gap:var(--s3);align-items:center;font-size:var(--fs-base);color:var(--c-text)"><span style="color:var(--c-green);font-weight:var(--fw-700);flex:none">✓</span><span>Huấn luyện viên trực nước</span></li>
+      <li style="display:flex;gap:var(--s3);align-items:center;font-size:var(--fs-base);color:var(--c-text)"><span style="color:var(--c-green);font-weight:var(--fw-700);flex:none">✓</span><span>Phí vào vùng bảo tồn</span></li>
+      <li style="display:flex;gap:var(--s3);align-items:center;font-size:var(--fs-base);color:var(--c-text)"><span style="color:var(--c-green);font-weight:var(--fw-700);flex:none">✓</span><span>Nước uống trên tàu</span></li>
+      <li style="display:flex;gap:var(--s3);align-items:center;font-size:var(--fs-base);color:var(--c-text)"><span style="color:var(--c-green);font-weight:var(--fw-700);flex:none">✓</span><span>Khăn và chỗ tráng nước ngọt</span></li>
+    </ul>
+    <p style="font-size:var(--fs-label);color:var(--c-text-muted)">Trải nghiệm chỉ có <strong>includes</strong>, không có <strong>excludes</strong> — khác trang tour. Nên khối này là một danh sách hai cột, không phải hai thẻ đối nhau.</p>
+  </section>
+
+  <section id="tn-faq" style="display:flex;flex-direction:column;gap:var(--s5)">
+    <h2 style="font-size:var(--fs-h3);font-weight:var(--fw-800);color:var(--c-text);line-height:var(--lh-heading)">Câu hỏi thường gặp</h2>
+    <div style="display:flex;flex-direction:column" role="list">
+      <details open="true" role="listitem" style="border-top:1px solid var(--c-border);border-bottom:1px solid var(--c-border);color:var(--c-primary)">
+        <summary style="display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s4);padding:var(--s4) 0;font-weight:var(--fw-600);font-size:var(--fs-base);color:inherit;cursor:pointer"><span>Khác gì lặn bình khí?</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex-shrink:0;margin-top:2px;color:var(--c-text-muted);transform:rotate(180deg)"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
+        <div style="padding:0 0 var(--s4);font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body);max-width:70ch"><p>Lặn ống thở là nổi trên mặt nước nhìn xuống, không xuống sâu và không cần bình khí. Lặn bình khí là hoạt động riêng, có huấn luyện viên kèm một-một và tính giá khác.</p></div>
+      </details>
+      <details role="listitem" style="border-bottom:1px solid var(--c-border);color:var(--c-text)">
+        <summary style="display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s4);padding:var(--s4) 0;font-weight:var(--fw-600);font-size:var(--fs-base);color:inherit;cursor:pointer"><span>Trẻ em tham gia được không?</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex-shrink:0;margin-top:2px;color:var(--c-text-muted)"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
+        <div style="padding:0 0 var(--s4);font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body);max-width:70ch"><p>Từ sáu tuổi và phải có người lớn xuống nước cùng. Nhỏ hơn thì ở trên tàu, không tính phí.</p></div>
+      </details>
+      <details role="listitem" style="border-bottom:1px solid var(--c-border);color:var(--c-text)">
+        <summary style="display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s4);padding:var(--s4) 0;font-weight:var(--fw-600);font-size:var(--fs-base);color:inherit;cursor:pointer"><span>Đặt riêng hay phải đi kèm tour?</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex-shrink:0;margin-top:2px;color:var(--c-text-muted)"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
+        <div style="padding:0 0 var(--s4);font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body);max-width:70ch"><p>Cả hai đều được. Đặt riêng thì phải tự ra Hòn Mun theo tàu; nhắn Zalo để chúng tôi ghép vào chuyến gần nhất.</p></div>
+      </details>
+    </div>
+  </section>
+
+  <section style="border:1px dashed var(--c-border);border-radius:var(--radius-md);padding:var(--s6);text-align:center;display:flex;flex-direction:column;gap:var(--s2)">
+    <span style="font-family:var(--font-display);font-size:var(--fs-card-title);font-weight:var(--fw-700);color:var(--c-text-muted)">"Trải nghiệm tương tự" — 0 mục</span>
+    <span style="font-size:var(--fs-sm);color:var(--c-text-muted);max-width:64ch;margin:0 auto;line-height:var(--lh-body)">Dataset hôm nay có đúng một trải nghiệm, nên khối này <strong>không render</strong>: không tiêu đề, không khung. Ô nét đứt chỉ có trong mockup để khai trạng thái rỗng. Có 2 mục thì hiện lưới hai cột như khối "Gần đây" ở trang địa danh.</span>
+  </section>
+
+  <div style="padding-top:var(--s4)">
+    <div style="font-size:var(--fs-sm);color:var(--c-text-muted);padding:var(--s4) 0;border-top:1px solid var(--c-border);display:flex;align-items:center;gap:var(--s2)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--c-primary)"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+      <span>Cập nhật 6 tháng 8, 2026</span>
+    </div>
+  </div>
+</div>
+
+<aside data-screen-label="Sidebar" style="width:340px;position:sticky;top:84px;align-self:start;display:flex;flex-direction:column;gap:var(--s4)">
+  <div style="background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--s4);display:flex;flex-direction:column;gap:var(--s4)">
+    <div style="background:var(--c-accent-soft);border:1px solid var(--c-accent);border-radius:var(--radius-md);padding:var(--s5);display:flex;flex-direction:column;gap:var(--s4)">
+      <span style="font-family:var(--font-display);font-size:var(--fs-h4);font-weight:var(--fw-700);color:var(--c-accent-strong);line-height:var(--lh-heading)">350.000 ₫<span style="font-size:var(--fs-base);font-weight:var(--fw-600)"> /người</span></span>
+      <a href="#" style="display:inline-flex;align-items:center;justify-content:center;background:var(--c-accent);color:var(--c-text-inverse);font-family:var(--font-ui);font-size:var(--fs-base);font-weight:var(--fw-600);padding:var(--s3) var(--s5);border-radius:var(--radius-pill);min-height:44px">Đặt ngay</a>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:var(--s2)">
+      <a href="#" style="display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-ui);font-size:var(--fs-base);font-weight:var(--fw-600);padding:var(--s3) var(--s5);border-radius:var(--radius-pill);border:1px solid var(--c-border);background:var(--c-card);color:var(--c-text);min-height:44px">Nhắn Zalo</a>
+      <a href="#" style="display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-ui);font-size:var(--fs-base);font-weight:var(--fw-600);padding:var(--s3) var(--s5);border-radius:var(--radius-pill);border:1px solid var(--c-border);background:var(--c-card);color:var(--c-text);min-height:44px">Gọi điện</a>
+      <a href="#" style="display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-ui);font-size:var(--fs-base);font-weight:var(--fw-600);padding:var(--s3) var(--s5);border-radius:var(--radius-pill);border:1px solid var(--c-border);background:var(--c-card);color:var(--c-text);min-height:44px">WhatsApp</a>
+    </div>
+    <span style="font-size:var(--fs-label);color:var(--c-text-muted);line-height:var(--lh-body)">Ba nút đọc từ <strong>siteSettings.contact</strong>. Kênh nào chưa điền thì nút đó không render; cả ba trống thì cả cụm biến mất.</span>
+  </div>
+
+  <div style="background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--s4)">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s3);padding:var(--s2) 0;border-bottom:1px solid var(--c-border)"><span style="display:flex;align-items:center;gap:var(--s2);font-size:var(--fs-sm);color:var(--c-text-muted);flex-shrink:0"><span aria-hidden="true">🏷️</span>Loại</span><a href="#" style="font-size:var(--fs-sm);font-weight:var(--fw-600);text-align:right">Lặn biển</a></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s3);padding:var(--s2) 0;border-bottom:1px solid var(--c-border)"><span style="display:flex;align-items:center;gap:var(--s2);font-size:var(--fs-sm);color:var(--c-text-muted);flex-shrink:0"><span aria-hidden="true">📍</span>Diễn ra tại</span><a href="#" style="font-size:var(--fs-sm);font-weight:var(--fw-600);text-align:right">Hòn Mun</a></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s3);padding:var(--s2) 0;border-bottom:1px solid var(--c-border)"><span style="display:flex;align-items:center;gap:var(--s2);font-size:var(--fs-sm);color:var(--c-text-muted);flex-shrink:0"><span aria-hidden="true">⏱️</span>Thời lượng</span><span style="font-size:var(--fs-sm);font-weight:var(--fw-600);color:var(--c-text);text-align:right">90 phút</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s3);padding:var(--s2) 0"><span style="display:flex;align-items:center;gap:var(--s2);font-size:var(--fs-sm);color:var(--c-text-muted);flex-shrink:0"><span aria-hidden="true">👤</span>Phù hợp với</span><span style="font-size:var(--fs-sm);font-weight:var(--fw-600);color:var(--c-text);text-align:right">Người mới lặn, gia đình, nhóm bạn</span></div>
+  </div>
+
+  <div style="background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--s4)">
+    <div style="height:240px;border-radius:var(--radius-md);background:var(--c-primary-soft);border:1px dashed var(--c-border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--s2);text-align:center;padding:var(--s4)">
+      <span style="font-size:1.5rem" aria-hidden="true">📍</span>
+      <span style="font-size:var(--fs-sm);font-weight:var(--fw-700);color:var(--c-primary)">MapView — OpenStreetMap</span>
+      <span style="font-family:ui-monospace,Menlo,monospace;font-size:var(--fs-badge);color:var(--c-text-muted)">geo 12.1667, 109.3000 · zoom 15</span>
+      <span style="font-size:var(--fs-label);color:var(--c-text-muted);line-height:1.5">Trải nghiệm chỉ có <strong>geo</strong>, không có <strong>address</strong> — nên không có dòng địa chỉ trong bảng trên.</span>
+    </div>
+  </div>
+</aside>
+</div>
+
+<footer style="background:var(--c-footer-bg);color:var(--c-footer-text);padding:var(--s7) 0 var(--s5);font-size:var(--fs-sm)">
+  <div style="max-width:var(--container);margin:0 auto;padding:0 var(--container-padding)">
+    <div style="display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr;gap:var(--s6);margin-bottom:var(--s6)">
+      <div>
+        <a href="Trang chu - Hi-fi.dc.html" style="display:flex;align-items:center;gap:var(--s3);font-family:var(--font-display);font-weight:var(--fw-800);font-size:var(--fs-nav);color:var(--c-text-inverse);margin-bottom:var(--s3)">
+          <svg viewBox="0 0 40 40" fill="none" aria-hidden="true" style="width:34px;height:34px;flex:none"><circle cx="20" cy="20" r="19" fill="var(--c-primary)"></circle><path d="M14 26 L20 9 L20 26 Z" fill="var(--c-sand)"></path><path d="M20 9 L26 26 L20 26 Z" fill="var(--c-sand-soft)"></path><path d="M8 30 Q 12 27 16 30 T 24 30 T 32 30" stroke="var(--c-surface)" stroke-width="1.4" fill="none" stroke-linecap="round"></path></svg>
+          <span>Tour Đảo</span>
+        </a>
+        <p style="max-width:36ch;line-height:1.6">Đầu mối trọn gói cho chuyến biển đảo Nha Trang — tour, vé, phòng, xe đưa đón.</p>
+      </div>
+      <div>
+        <h4 style="color:var(--c-text-inverse);font-family:var(--font-ui);font-size:var(--fs-label);font-weight:var(--fw-600);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:var(--s3)">Tour &amp; Vé</h4>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:var(--s2)">
+          <li><a href="#" style="color:var(--c-footer-text)">Tour đảo Nha Trang</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color:var(--c-text-inverse);font-family:var(--font-ui);font-size:var(--fs-label);font-weight:var(--fw-600);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:var(--s3)">Dịch vụ</h4>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:var(--s2)">
+          <li><a href="#" style="color:var(--c-footer-text)">Kinh nghiệm du lịch</a></li>
+          <li><a href="#" style="color:var(--c-footer-text)">Đặt vé trực tuyến</a></li>
+          <li><a href="#" style="color:var(--c-footer-text)">Hỗ trợ</a></li>
+          <li><a href="#" style="color:var(--c-footer-text)">Liên hệ</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color:var(--c-text-inverse);font-family:var(--font-ui);font-size:var(--fs-label);font-weight:var(--fw-600);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:var(--s3)">Về chúng tôi</h4>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:var(--s2)">
+          <li><a href="#" style="color:var(--c-footer-text)">Zalo</a></li>
+          <li><a href="#" style="color:var(--c-footer-text)">siteSettings.contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--c-footer-border);padding-top:var(--s4);display:flex;justify-content:space-between;gap:var(--s3);flex-wrap:wrap;font-size:var(--fs-badge);color:var(--c-footer-muted)">
+      <span>© 2026 Công ty TNHH Tour Đảo</span>
+      <span>Đặt chỗ qua Zalo, người thật trả lời.</span>
+    </div>
+  </div>
+</footer>
+
+<section data-screen-label="Ghi chú bàn giao" style="background:var(--c-surface-alt);border-top:1px solid var(--c-border)">
+  <div style="max-width:var(--container);margin:0 auto;padding:var(--s8) var(--container-padding);display:flex;flex-direction:column;gap:var(--s6)">
+    <div style="display:flex;flex-direction:column;gap:var(--s3)">
+      <h2 style="font-size:var(--fs-h4);font-weight:var(--fw-800);color:var(--c-text)">Giữ gì, đổi gì so với vòng một</h2>
+      <span style="width:var(--underline-width);height:var(--underline-height);background:var(--c-sand);border-radius:2px"></span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s5)">
+      <div style="background:var(--c-card);border:1px solid var(--c-sand-border);border-radius:var(--radius-md);padding:var(--s5);display:flex;flex-direction:column;gap:var(--s2)">
+        <span style="font-size:var(--fs-badge);font-weight:var(--fw-700);letter-spacing:var(--ls-eyebrow);color:var(--c-accent-strong)">ĐỔI — LỖI THẬT</span>
+        <h3 style="font-size:var(--fs-card-title);font-weight:var(--fw-700);color:var(--c-text)">Trang bán được nhưng không có thanh dính</h3>
+        <p style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body)"><strong>ExperienceDetail</strong> không truyền <strong>jumpLinks</strong>, <strong>priceLabel</strong>, <strong>ctaHref</strong> nào vào <strong>DetailLayout</strong>, nên điều kiện <strong>showStickyBar</strong> luôn sai và thanh dính không bao giờ render — dù đây là trang có giá và có Zalo. Trang tour có, trang trải nghiệm không. Cùng một khung, cùng một loại hành động, khác hình. Ở đây tôi bật thanh dính với giá và nút Zalo như trang tour.</p>
+      </div>
+      <div style="background:var(--c-card);border:1px solid var(--c-sand-border);border-radius:var(--radius-md);padding:var(--s5);display:flex;flex-direction:column;gap:var(--s2)">
+        <span style="font-size:var(--fs-badge);font-weight:var(--fw-700);letter-spacing:var(--ls-eyebrow);color:var(--c-accent-strong)">ĐỔI</span>
+        <h3 style="font-size:var(--fs-card-title);font-weight:var(--fw-700);color:var(--c-text)">Loại, thời lượng và đoạn mở lên hero</h3>
+        <p style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body)">Hiện <strong>summary</strong> nằm trong thân bài dưới dạng <strong>.summary-block</strong>, còn <strong>experienceType</strong> không hiện ở đâu trong hero. Hai field này là gate của §4.4 — chúng phải đọc được ngay trên màn đầu. Nhãn loại là link tới trang term khi term đã có trang; chưa có thì hiện chữ không link.</p>
+      </div>
+      <div style="background:var(--c-card);border:1px solid var(--c-sand-border);border-radius:var(--radius-md);padding:var(--s5);display:flex;flex-direction:column;gap:var(--s2)">
+        <span style="font-size:var(--fs-badge);font-weight:var(--fw-700);letter-spacing:var(--ls-eyebrow);color:var(--c-accent-strong)">ĐỔI</span>
+        <h3 style="font-size:var(--fs-card-title);font-weight:var(--fw-700);color:var(--c-text)">"Diễn ra tại" thành một dòng trong hero</h3>
+        <p style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body)">Trải nghiệm <strong>không có breadcrumb</strong> theo §3, nên hero không có lối quay về. <strong>venue</strong> là gate và đang chỉ nằm trong bảng ở sidebar. Đưa nó lên hero vừa lấp chỗ breadcrumb vừa trả lời câu hỏi đầu tiên của khách: lặn ở đâu.</p>
+      </div>
+      <div style="background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--s5);display:flex;flex-direction:column;gap:var(--s2)">
+        <span style="font-size:var(--fs-badge);font-weight:var(--fw-700);letter-spacing:var(--ls-eyebrow);color:var(--c-sea)">GIỮ</span>
+        <h3 style="font-size:var(--fs-card-title);font-weight:var(--fw-700);color:var(--c-text)">"Gồm những gì" là danh sách hai cột, không phải hai thẻ</h3>
+        <p style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body)">Trải nghiệm chỉ có <strong>includes</strong>, không có <strong>excludes</strong>. Hai thẻ đối nhau như trang tour ở đây sẽ để một thẻ trống. Giữ lưới hai cột với dấu ✓ màu <strong>--c-green</strong> đúng bản đang chạy; chỉ nâng cỡ chữ từ <strong>--fs-sm</strong> lên <strong>--fs-base</strong>.</p>
+      </div>
+      <div style="background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--s5);display:flex;flex-direction:column;gap:var(--s2)">
+        <span style="font-size:var(--fs-badge);font-weight:var(--fw-700);letter-spacing:var(--ls-eyebrow);color:var(--c-sea)">GIỮ</span>
+        <h3 style="font-size:var(--fs-card-title);font-weight:var(--fw-700);color:var(--c-text)">Ba nút liên hệ dạng viền, xếp dọc</h3>
+        <p style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body)">Đúng bản <strong>ContactChannels</strong> đang chạy: nút bo tròn viền <strong>--c-border</strong> nền trắng, không phải dòng có icon. Nằm dưới thẻ giá nền <strong>--c-accent-soft</strong> nên chỉ có một hành động màu ấm trên trang — đúng quy tắc hai accent hai vùng.</p>
+      </div>
+      <div style="background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--s5);display:flex;flex-direction:column;gap:var(--s2)">
+        <span style="font-size:var(--fs-badge);font-weight:var(--fw-700);letter-spacing:var(--ls-eyebrow);color:var(--c-sea)">GIỮ</span>
+        <h3 style="font-size:var(--fs-card-title);font-weight:var(--fw-700);color:var(--c-text)">Bản đồ chỉ có toạ độ, không có địa chỉ</h3>
+        <p style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body)">Trải nghiệm không có field <strong>address</strong> — chỉ <strong>geo</strong>, dùng cho bản đồ nhỏ và JSON-LD. Nên bảng thông tin không có dòng địa chỉ, và đó là đúng chứ không phải thiếu dữ liệu.</p>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:var(--s3)">
+      <h3 style="font-size:var(--fs-h5);font-weight:var(--fw-800);color:var(--c-text)">Trạng thái ít dữ liệu và trạng thái rỗng</h3>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s4)">
+        <div style="background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--s4);display:flex;flex-direction:column;gap:var(--s1)"><span style="font-size:var(--fs-sm);font-weight:var(--fw-700);color:var(--c-text)">Trải nghiệm tương tự: 0 và 2</span><span style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body)">0 → ẩn cả khối, đây là trạng thái thật hôm nay. 2 → lưới hai cột, không để hàng ba cột hở một ô.</span></div>
+        <div style="background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--s4);display:flex;flex-direction:column;gap:var(--s1)"><span style="font-size:var(--fs-sm);font-weight:var(--fw-700);color:var(--c-text)">isAccessibleForFree = true</span><span style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body)">Thẻ giá đổi thành nhãn "Miễn phí", nút đặt vẫn còn vì Zalo là kênh giữ chỗ. Thanh dính hiện nhãn thay số.</span></div>
+        <div style="background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--s4);display:flex;flex-direction:column;gap:var(--s1)"><span style="font-size:var(--fs-sm);font-weight:var(--fw-700);color:var(--c-text)">Chưa nối bookingRef, không miễn phí</span><span style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body)">Thẻ giá ẩn hẳn, chỉ còn ba nút liên hệ. Ô "Giá" rời khỏi InfoBar, thanh dính chỉ còn neo mục.</span></div>
+        <div style="background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--s4);display:flex;flex-direction:column;gap:var(--s1)"><span style="font-size:var(--fs-sm);font-weight:var(--fw-700);color:var(--c-text)">Hero dưới 4 ảnh gallery</span><span style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body)">Mosaic tắt, hero thành ảnh đơn cao 400px. Không ảnh nào thì hero thuần màu, không placeholder.</span></div>
+        <div style="background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--s4);display:flex;flex-direction:column;gap:var(--s1)"><span style="font-size:var(--fs-sm);font-weight:var(--fw-700);color:var(--c-text)">Thiếu includes</span><span style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body)">Ẩn cả khối, bỏ neo tương ứng, và ô "Gồm" rời khỏi InfoBar. Không hiện danh sách trống.</span></div>
+        <div style="background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--s4);display:flex;flex-direction:column;gap:var(--s1)"><span style="font-size:var(--fs-sm);font-weight:var(--fw-700);color:var(--c-text)">Thiếu geo</span><span style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body)">Thẻ bản đồ không render. Sidebar còn thẻ giá và bảng thông tin; cả ba trống thì cột phải biến mất.</span></div>
+      </div>
+    </div>
+
+    <div style="background:var(--c-accent-soft);border:1px solid var(--c-sand-border);border-radius:var(--radius-md);padding:var(--s5);display:flex;flex-direction:column;gap:var(--s2)">
+      <h3 style="font-size:var(--fs-card-title);font-weight:var(--fw-700);color:var(--c-accent-strong)">Chỗ cần chủ dự án chốt</h3>
+      <p style="font-size:var(--fs-sm);color:var(--c-text);line-height:var(--lh-body)">Một: trải nghiệm này là một phần của tour 3 đảo, nhưng <strong>không có field nào</strong> nối trải nghiệm về tour chứa nó — quan hệ chỉ đi một chiều từ <strong>Experience.venue</strong> sang địa danh. Nên trang này không có khối "nằm trong tour nào", dù đó là đường chốt đơn tự nhiên nhất. Cần chốt: thêm quan hệ đó ở tầng nội dung, hay để khách tự tìm qua khối tour ở trang địa danh. Hai: thanh dính của trang này hiện nhãn "Đặt qua Zalo" còn thẻ giá ở sidebar hiện "Đặt ngay" — hai nhãn cho cùng một hành động, vì <strong>uiCopy</strong> có cả <strong>bookNow</strong> lẫn <strong>contactZalo</strong>. Cần chốt một nhãn.</p>
+    </div>
+  </div>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;bien-sau&quot;,&quot;cat-bien&quot;,&quot;ngoc-lam&quot;],&quot;default&quot;:&quot;bien-sau&quot;,&quot;tsType&quot;:&quot;'bien-sau' | 'cat-bien' | 'ngoc-lam'&quot;,&quot;section&quot;:&quot;Bộ giao diện&quot;},&quot;displayFont&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;token&quot;,&quot;lora&quot;],&quot;default&quot;:&quot;token&quot;,&quot;tsType&quot;:&quot;'token' | 'lora'&quot;,&quot;section&quot;:&quot;Bộ giao diện&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, displayFont: null };
+
+  get theme() { return this.state.theme ?? this.props.theme ?? 'bien-sau'; }
+  get displayFont() { return this.state.displayFont ?? this.props.displayFont ?? 'token'; }
+
+  renderVals() {
+    const set = (theme) => () => this.setState({ theme });
+    const setFont = (displayFont) => () => this.setState({ displayFont });
+    return {
+      theme: this.theme,
+      displayFont: this.displayFont,
+      setBienSau: set('bien-sau'),
+      setCatBien: set('cat-bien'),
+      setNgocLam: set('ngoc-lam'),
+      setFontToken: setFont('token'),
+      setFontLora: setFont('lora'),
+    };
+  }
+}
+</script>
+</body>
+</html>

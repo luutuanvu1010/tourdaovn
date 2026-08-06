@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Lora:wght@500;600;700&display=swap" rel="stylesheet"><style>
+/* ═══ TOKEN — chép từ src/styles/tokens.css, không thêm giá trị mới ═══ */
+:root{
+--c-primary:#0C4A6E;--c-primary-strong:#082F49;--c-primary-soft:#F0F7FC;
+--c-accent:#C0392B;--c-accent-strong:#96271A;--c-accent-soft:#FEF2F0;
+--c-sand:#F5A623;--c-sand-soft:#FBE3B3;--c-sand-border:#e9d3a4;
+--c-surface:#FFFFFF;--c-surface-alt:#F8FAFC;--c-card:#FFFFFF;
+--c-text:#0F172A;--c-text-muted:#475569;--c-text-inverse:#F8FAFC;--c-border:#E2E8F0;
+--c-sea:#0E7490;--c-green-soft:#DCFCE7;--c-green-text:#166534;
+--c-footer-bg:#0E1A23;--c-footer-text:#9aa9b2;--c-footer-border:#233642;--c-footer-muted:#7d8b95;
+--font-display:"Be Vietnam Pro",system-ui,sans-serif;
+--font-ui:"Plus Jakarta Sans",system-ui,-apple-system,sans-serif;
+--fw-500:500;--fw-600:600;--fw-700:700;--fw-800:800;--fw-900:900;
+--fs-badge:0.6875rem;--fs-xs:0.75rem;--fs-label:0.875rem;--fs-sm:0.9375rem;--fs-base:1.0625rem;
+--fs-card-title:1.125rem;--fs-nav:1.125rem;--fs-h5:1.25rem;--fs-h4:1.625rem;--fs-section:1.75rem;
+--fs-h3:2rem;--fs-h2:2.5rem;--fs-h1:2.625rem;--fs-hero:2.875rem;
+--lh-heading:1.16;--lh-body:1.68;
+--underline-width:28px;--underline-height:3px;--card-lift:-3px;
+--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px;--s8:64px;--s9:96px;
+--radius-sm:8px;--radius-md:12px;--radius-lg:18px;--radius-pill:999px;
+--shadow-card:0 1px 3px rgba(15,23,42,0.08);
+--shadow-raised:0 6px 24px -8px rgba(0,91,150,.15),0 2px 6px rgba(26,32,44,.05);
+--shadow-lg:0 16px 48px -12px rgba(0,91,150,.22),0 4px 12px rgba(26,32,44,.06);
+--container:1200px;--container-padding:24px;--header-h:68px;
+--m-fast:180ms;--m-base:300ms;--m-ease:ease;
+/* ĐỀ XUẤT (chờ duyệt) — đánh dấu rõ, chưa có trong tokens.css */
+--fs-display:3.75rem;--lh-display:1.22;--ls-eyebrow:0.08em;--lh-eyebrow:1.5;
+}
+[data-theme='cat-bien']{--c-surface:#FDFAF5;--c-primary:#155E75;--c-accent:#B45309;--c-text:#1C1917;--c-text-muted:#57534E;--c-primary-strong:#0E4A5C;--c-accent-strong:#92400E}
+[data-theme='ngoc-lam']{--c-surface:#FFFFFF;--c-primary:#0F766E;--c-accent:#BE123C;--c-text:#0F172A;--c-text-muted:#475569;--c-primary-strong:#0B5A54;--c-accent-strong:#9F1239}
+[data-display='lora']{--font-display:"Lora",Georgia,serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#e8ecef;font-family:var(--font-ui);font-weight:var(--fw-500);line-height:var(--lh-body);color:var(--c-text);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+a{color:var(--c-primary);text-decoration:none}
+a:hover{color:var(--c-primary-strong)}
+h1,h2,h3,h4{font-family:var(--font-display);line-height:var(--lh-heading);letter-spacing:0;font-weight:var(--fw-700)}
+p{text-wrap:pretty}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0ms !important;transition-duration:0ms !important}}
+</style></helmet>
+
+<div data-theme="{{ theme }}" data-display="{{ displayFont }}" style="width:1280px;margin:0 auto;background:var(--c-surface)">
+
+<div style="display:flex;align-items:center;gap:var(--s4);padding:var(--s3) var(--s5);background:var(--c-text);color:var(--c-text-inverse)">
+  <span style="font-family:var(--font-ui);font-size:var(--fs-badge);font-weight:var(--fw-700);letter-spacing:var(--ls-eyebrow);opacity:.62">BỘ GIAO DIỆN</span>
+  <div style="display:flex;gap:var(--s2)">
+    <button type="button" onClick="{{ setBienSau }}" style="font-family:var(--font-ui);font-size:var(--fs-label);font-weight:var(--fw-600);padding:var(--s1) var(--s3);border-radius:var(--radius-sm);border:1px solid rgba(248,250,252,.28);background:rgba(248,250,252,.10);color:var(--c-text-inverse);cursor:pointer">biển sâu</button>
+    <button type="button" onClick="{{ setCatBien }}" style="font-family:var(--font-ui);font-size:var(--fs-label);font-weight:var(--fw-600);padding:var(--s1) var(--s3);border-radius:var(--radius-sm);border:1px solid rgba(248,250,252,.28);background:rgba(248,250,252,.10);color:var(--c-text-inverse);cursor:pointer">cát biển</button>
+    <button type="button" onClick="{{ setNgocLam }}" style="font-family:var(--font-ui);font-size:var(--fs-label);font-weight:var(--fw-600);padding:var(--s1) var(--s3);border-radius:var(--radius-sm);border:1px solid rgba(248,250,252,.28);background:rgba(248,250,252,.10);color:var(--c-text-inverse);cursor:pointer">ngọc lam</button>
+  </div>
+  <span style="width:1px;height:20px;background:rgba(248,250,252,.22)"></span>
+  <span style="font-family:var(--font-ui);font-size:var(--fs-badge);font-weight:var(--fw-700);letter-spacing:var(--ls-eyebrow);opacity:.62">CHỮ TIÊU ĐỀ</span>
+  <div style="display:flex;gap:var(--s2)">
+    <button type="button" onClick="{{ setFontToken }}" style="font-family:var(--font-ui);font-size:var(--fs-label);font-weight:var(--fw-600);padding:var(--s1) var(--s3);border-radius:var(--radius-sm);border:1px solid rgba(248,250,252,.28);background:rgba(248,250,252,.10);color:var(--c-text-inverse);cursor:pointer">Be Vietnam Pro · token</button>
+    <button type="button" onClick="{{ setFontLora }}" style="font-family:var(--font-ui);font-size:var(--fs-label);font-weight:var(--fw-600);padding:var(--s1) var(--s3);border-radius:var(--radius-sm);border:1px solid rgba(248,250,252,.28);background:rgba(248,250,252,.10);color:var(--c-text-inverse);cursor:pointer">Lora · đề xuất</button>
+  </div>
+  <span style="margin-left:auto;font-family:var(--font-ui);font-size:var(--fs-badge);font-weight:var(--fw-500);opacity:.5">{{ themeLabel }}</span>
+</div>
+
+<header style="position:relative;z-index:100;background:var(--c-surface);border-bottom:1px solid var(--c-border)">
+  <div style="max-width:var(--container);margin:0 auto;padding:0 var(--container-padding);height:var(--header-h);display:flex;align-items:center;gap:var(--s6)">
+    <a href="#" style="display:flex;align-items:center;gap:var(--s3);font-family:var(--font-display);font-weight:var(--fw-800);font-size:var(--fs-nav);color:var(--c-primary-strong);flex-shrink:0">
+      <svg viewBox="0 0 40 40" fill="none" aria-hidden="true" style="width:34px;height:34px;flex:none">
+        <circle cx="20" cy="20" r="19" fill="var(--c-primary)"></circle>
+        <path d="M14 26 L20 9 L20 26 Z" fill="var(--c-sand)"></path>
+        <path d="M20 9 L26 26 L20 26 Z" fill="var(--c-sand-soft)"></path>
+        <path d="M8 30 Q 12 27 16 30 T 24 30 T 32 30" stroke="var(--c-surface)" stroke-width="1.4" fill="none" stroke-linecap="round"></path>
+      </svg>
+      <span>Tour Đảo</span>
+    </a>
+    <nav style="display:flex;align-items:center;gap:var(--s2);flex:1">
+      <a href="#" style="display:inline-flex;align-items:center;gap:var(--s1);padding:var(--s3);border-radius:var(--radius-sm);font-size:var(--fs-sm);font-weight:var(--fw-600);color:var(--c-primary);background:var(--c-primary-soft)">Tour &amp; Vé
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </a>
+      <a href="#" style="padding:var(--s3);border-radius:var(--radius-sm);font-size:var(--fs-sm);font-weight:var(--fw-600);color:var(--c-text-muted)">Kinh nghiệm du lịch</a>
+      <a href="#" style="padding:var(--s3);border-radius:var(--radius-sm);font-size:var(--fs-sm);font-weight:var(--fw-600);color:var(--c-text-muted)">Hỗ trợ</a>
+      <a href="#" style="padding:var(--s3);border-radius:var(--radius-sm);font-size:var(--fs-sm);font-weight:var(--fw-600);color:var(--c-text-muted)">Liên hệ</a>
+    </nav>
+    <a href="#" style="display:inline-flex;align-items:center;min-height:44px;padding:0 var(--s5);border-radius:var(--radius-pill);background:var(--c-accent);color:var(--c-text-inverse);font-size:var(--fs-sm);font-weight:var(--fw-700)">Đặt vé trực tuyến</a>
+  </div>
+</header>
+
+<section data-screen-label="01 Hero" style="position:relative;min-height:560px;display:flex;align-items:flex-end;background:var(--c-primary);overflow:hidden">
+  <div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(15,23,42,.05) 0 22px,rgba(15,23,42,.10) 22px 44px);display:flex;align-items:flex-start;justify-content:flex-end;padding:var(--s5) var(--container-padding) 0 0">
+    <span style="font-family:var(--font-ui);font-size:var(--fs-label);font-weight:var(--fw-600);color:var(--c-text-inverse);background:rgba(8,47,73,.55);border:1px dashed rgba(248,250,252,.42);border-radius:var(--radius-sm);padding:var(--s3) var(--s4);text-align:center;line-height:1.5">Ảnh thật từ chuyến đi — thả ảnh vào đây<br><span style="opacity:.7;font-weight:var(--fw-500)">touristDestination.mainImage · 1800px · bắt buộc có alt</span></span>
+  </div>
+  <div style="position:absolute;inset:0;background:linear-gradient(to top,var(--c-primary-strong) 0%,rgba(12,74,110,.62) 46%,rgba(12,74,110,.18) 100%)"></div>
+  <div style="position:relative;z-index:2;max-width:var(--container);width:100%;margin:0 auto;padding:var(--s9) var(--container-padding) var(--s8)">
+    <p style="font-family:var(--font-ui);font-size:var(--fs-label);font-weight:var(--fw-700);letter-spacing:var(--ls-eyebrow);line-height:var(--lh-eyebrow);text-transform:uppercase;color:var(--c-text-inverse);opacity:.78;margin-bottom:var(--s4)">Tour biển đảo Nha Trang</p>
+    <h1 style="font-size:var(--fs-hero);font-weight:var(--fw-900);line-height:var(--lh-display);color:var(--c-text-inverse);max-width:19ch;text-wrap:balance;margin-bottom:var(--s5)">Một đầu mối cho cả chuyến biển đảo Nha Trang</h1>
+    <p style="font-size:var(--fs-base);line-height:var(--lh-body);color:var(--c-text-inverse);opacity:.9;max-width:58ch">Tour đảo Nha Trang, lặn biển, vé VinWonders, khách sạn và xe đưa đón sân bay. Nhận khách lẻ và khách đoàn, có hướng dẫn viên đi cùng, đặt nhanh qua Zalo.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:var(--s3);margin-top:var(--s6)">
+      <a href="#" style="display:inline-flex;align-items:center;min-height:44px;padding:0 var(--s6);border-radius:var(--radius-pill);background:var(--c-accent);color:var(--c-text-inverse);font-size:var(--fs-base);font-weight:var(--fw-700)">Đặt vé qua Zalo</a>
+      <a href="#" style="display:inline-flex;align-items:center;min-height:44px;padding:0 var(--s6);border-radius:var(--radius-pill);background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.42);color:var(--c-text-inverse);font-size:var(--fs-base);font-weight:var(--fw-700)">Tour đảo Nha Trang</a>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="02 Dải số liệu" style="background:var(--c-primary)">
+  <div style="max-width:var(--container);margin:0 auto;padding:var(--s7) var(--container-padding)">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0">
+      <div style="display:flex;flex-direction:column;gap:var(--s2);padding-right:var(--s6)">
+        <span style="width:var(--underline-width);height:var(--underline-height);background:var(--c-sand);border-radius:2px"></span>
+        <span style="font-family:var(--font-display);font-size:var(--fs-h1);font-weight:var(--fw-900);line-height:1.05;color:var(--c-text-inverse)">2026</span>
+        <span style="font-size:var(--fs-sm);font-weight:var(--fw-600);color:var(--c-text-inverse)">Năm thành lập công ty</span>
+        <span style="font-size:var(--fs-label);color:var(--c-text-inverse);opacity:.7">Công ty TNHH Tour Đảo</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:var(--s2);padding-left:var(--s6);padding-right:var(--s6);border-left:1px solid rgba(248,250,252,.24)">
+        <span style="width:var(--underline-width);height:var(--underline-height);background:var(--c-sand);border-radius:2px"></span>
+        <span style="font-family:var(--font-display);font-size:var(--fs-h1);font-weight:var(--fw-900);line-height:1.05;color:var(--c-text-inverse)">50.000+</span>
+        <span style="font-size:var(--fs-sm);font-weight:var(--fw-600);color:var(--c-text-inverse)">Khách đã phục vụ</span>
+        <span style="font-size:var(--fs-label);color:var(--c-text-inverse);opacity:.7">Khách lẻ và khách đoàn</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:var(--s2);padding-left:var(--s6);padding-right:var(--s6);border-left:1px solid rgba(248,250,252,.24)">
+        <span style="width:var(--underline-width);height:var(--underline-height);background:var(--c-sand);border-radius:2px"></span>
+        <span style="font-family:var(--font-display);font-size:var(--fs-h1);font-weight:var(--fw-900);line-height:1.05;color:var(--c-text-inverse)">4,9/5</span>
+        <span style="font-size:var(--fs-sm);font-weight:var(--fw-600);color:var(--c-text-inverse)">Điểm đánh giá trên OTA</span>
+        <span style="font-size:var(--fs-label);color:var(--c-text-inverse);opacity:.7">1.204 lượt đánh giá</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:var(--s2);padding-left:var(--s6);border-left:1px solid rgba(248,250,252,.24)">
+        <span style="width:var(--underline-width);height:var(--underline-height);background:var(--c-sand);border-radius:2px"></span>
+        <span style="font-family:var(--font-display);font-size:var(--fs-h1);font-weight:var(--fw-900);line-height:1.05;color:var(--c-text-inverse)">56/2026</span>
+        <span style="font-size:var(--fs-sm);font-weight:var(--fw-600);color:var(--c-text-inverse)">Giấy phép lữ hành quốc tế</span>
+        <span style="font-size:var(--fs-label);color:var(--c-text-inverse);opacity:.7">Do Sở Du lịch cấp</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="03 Tour đang bán" style="background:var(--c-surface)">
+  <div style="max-width:var(--container);margin:0 auto;padding:var(--s9) var(--container-padding)">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:var(--s6);margin-bottom:var(--s7)">
+      <div style="display:flex;flex-direction:column;gap:var(--s3)">
+        <h2 style="font-size:var(--fs-h3);font-weight:var(--fw-800);color:var(--c-primary);text-wrap:balance">Tour đang bán</h2>
+        <span style="width:var(--underline-width);height:var(--underline-height);background:var(--c-sand);border-radius:2px"></span>
+        <p style="font-size:var(--fs-base);color:var(--c-text-muted);max-width:52ch">Giá và lịch trình trên trang là giá chúng tôi bán. Chốt chỗ qua Zalo, có người thật trả lời.</p>
+      </div>
+      <a href="#" style="font-size:var(--fs-sm);font-weight:var(--fw-600);color:var(--c-primary);white-space:nowrap">Xem tất cả tour →</a>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s5)">
+
+      <a href="#" style="display:flex;flex-direction:column;background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-card);color:inherit">
+        <div style="aspect-ratio:4/3;background:var(--c-primary-soft);display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--c-border)"><span style="font-size:var(--fs-badge);font-weight:var(--fw-600);color:var(--c-primary);text-align:center;padding:var(--s3)">ảnh tour<br>mainImage</span></div>
+        <div style="padding:var(--s4);flex:1;display:flex;flex-direction:column;gap:var(--s2)">
+          <h3 style="font-size:var(--fs-h5);font-weight:var(--fw-700);line-height:1.2;color:var(--c-text)">Tour 3 đảo Nha Trang</h3>
+          <p style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:1.55;flex:1">Hòn Mun, Hòn Một, Làng Chài — lặn ngắm san hô, ăn trưa trên đảo, xe đón tận khách sạn.</p>
+          <div style="display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap;margin-top:var(--s2)">
+            <span style="padding:var(--s1) var(--s3);border-radius:var(--radius-pill);background:var(--c-primary-soft);color:var(--c-primary);font-size:var(--fs-badge);font-weight:var(--fw-600)">Ghép đoàn</span>
+            <span style="margin-left:auto;padding:var(--s1) var(--s3);border-radius:var(--radius-sm);background:var(--c-accent-soft);color:var(--c-accent-strong);font-size:var(--fs-sm);font-weight:var(--fw-700)">1.190k/khách</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" style="display:flex;flex-direction:column;background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-card);color:inherit">
+        <div style="aspect-ratio:4/3;background:var(--c-primary-soft);display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--c-border)"><span style="font-size:var(--fs-badge);font-weight:var(--fw-600);color:var(--c-primary);text-align:center;padding:var(--s3)">ảnh tour<br>mainImage</span></div>
+        <div style="padding:var(--s4);flex:1;display:flex;flex-direction:column;gap:var(--s2)">
+          <h3 style="font-size:var(--fs-h5);font-weight:var(--fw-700);line-height:1.2;color:var(--c-text)">Tour lặn biển Hòn Mun</h3>
+          <p style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:1.55;flex:1">Lặn bình khí có huấn luyện viên kèm một-một, hai điểm lặn trong khu bảo tồn.</p>
+          <div style="display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap;margin-top:var(--s2)">
+            <span style="padding:var(--s1) var(--s3);border-radius:var(--radius-pill);background:var(--c-primary-soft);color:var(--c-primary);font-size:var(--fs-badge);font-weight:var(--fw-600)">Ghép đoàn</span>
+            <span style="margin-left:auto;padding:var(--s1) var(--s3);border-radius:var(--radius-sm);background:var(--c-accent-soft);color:var(--c-accent-strong);font-size:var(--fs-sm);font-weight:var(--fw-700)">1.450k/khách</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" style="display:flex;flex-direction:column;background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-card);color:inherit">
+        <div style="aspect-ratio:4/3;background:var(--c-primary-soft);display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--c-border)"><span style="font-size:var(--fs-badge);font-weight:var(--fw-600);color:var(--c-primary);text-align:center;padding:var(--s3)">ảnh tour<br>mainImage</span></div>
+        <div style="padding:var(--s4);flex:1;display:flex;flex-direction:column;gap:var(--s2)">
+          <h3 style="font-size:var(--fs-h5);font-weight:var(--fw-700);line-height:1.2;color:var(--c-text)">Tour đảo riêng cho đoàn</h3>
+          <p style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:1.55;flex:1">Tàu riêng, lịch trình đặt theo nhóm, hướng dẫn viên đi cùng suốt chuyến.</p>
+          <div style="display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap;margin-top:var(--s2)">
+            <span style="padding:var(--s1) var(--s3);border-radius:var(--radius-pill);background:var(--c-primary-soft);color:var(--c-primary);font-size:var(--fs-badge);font-weight:var(--fw-600)">Tour riêng</span>
+            <span style="margin-left:auto;padding:var(--s1) var(--s3);border-radius:var(--radius-sm);background:var(--c-accent-soft);color:var(--c-accent-strong);font-size:var(--fs-sm);font-weight:var(--fw-700)">từ 2.400k</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" style="display:flex;flex-direction:column;background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-card);color:inherit">
+        <div style="aspect-ratio:4/3;background:var(--c-primary-soft);display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--c-border)"><span style="font-size:var(--fs-badge);font-weight:var(--fw-600);color:var(--c-primary);text-align:center;padding:var(--s3)">ảnh tour<br>mainImage</span></div>
+        <div style="padding:var(--s4);flex:1;display:flex;flex-direction:column;gap:var(--s2)">
+          <h3 style="font-size:var(--fs-h5);font-weight:var(--fw-700);line-height:1.2;color:var(--c-text)">Vé VinWonders Nha Trang</h3>
+          <p style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:1.55;flex:1">Vé vào cổng trọn ngày, có xe đưa đón từ trung tâm. Đơn vị vận hành do đối tác đảm nhiệm.</p>
+          <div style="display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap;margin-top:var(--s2)">
+            <span style="padding:var(--s1) var(--s3);border-radius:var(--radius-pill);background:var(--c-primary-soft);color:var(--c-primary);font-size:var(--fs-badge);font-weight:var(--fw-600)">Vé vào cổng</span>
+            <span style="margin-left:auto;font-size:var(--fs-badge);color:var(--c-text-muted);font-weight:var(--fw-600)">chưa nối giá</span>
+          </div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="04 Vì sao chọn" style="background:var(--c-surface-alt);border-top:1px solid var(--c-border);border-bottom:1px solid var(--c-border)">
+  <div style="max-width:var(--container);margin:0 auto;padding:var(--s9) var(--container-padding)">
+    <div style="display:flex;flex-direction:column;gap:var(--s3);margin-bottom:var(--s7)">
+      <h2 style="font-size:var(--fs-h3);font-weight:var(--fw-800);color:var(--c-primary);text-wrap:balance">Vì sao chọn Tour Đảo</h2>
+      <span style="width:var(--underline-width);height:var(--underline-height);background:var(--c-sand);border-radius:2px"></span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s6) var(--s7)">
+      <div style="display:flex;gap:var(--s4)">
+        <div style="width:var(--s7);height:var(--s7);flex:none;border-radius:var(--radius-md);background:var(--c-primary-soft);display:flex;align-items:center;justify-content:center;font-size:var(--fs-h4)">🚐</div>
+        <div style="display:flex;flex-direction:column;gap:var(--s1)">
+          <h3 style="font-size:var(--fs-card-title);font-weight:var(--fw-700);color:var(--c-text)">Xe đưa đón tận nơi</h3>
+          <p style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body)">Không bắt khách tự ra bến. Tài xế nhận khách ngay tại khách sạn theo giờ đã hẹn.</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:var(--s4)">
+        <div style="width:var(--s7);height:var(--s7);flex:none;border-radius:var(--radius-md);background:var(--c-primary-soft);display:flex;align-items:center;justify-content:center;font-size:var(--fs-h4)">🧭</div>
+        <div style="display:flex;flex-direction:column;gap:var(--s1)">
+          <h3 style="font-size:var(--fs-card-title);font-weight:var(--fw-700);color:var(--c-text)">Hướng dẫn viên đi cùng</h3>
+          <p style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body)">Có người chịu trách nhiệm suốt chuyến, từ lúc lên xe đến lúc về lại khách sạn.</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:var(--s4)">
+        <div style="width:var(--s7);height:var(--s7);flex:none;border-radius:var(--radius-md);background:var(--c-primary-soft);display:flex;align-items:center;justify-content:center;font-size:var(--fs-h4)">🏷️</div>
+        <div style="display:flex;flex-direction:column;gap:var(--s1)">
+          <h3 style="font-size:var(--fs-card-title);font-weight:var(--fw-700);color:var(--c-text)">Giá tốt</h3>
+          <p style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body)">Báo giá trọn gói, không phụ thu phát sinh trong ngày. Giá trên trang là giá bạn trả.</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:var(--s4)">
+        <div style="width:var(--s7);height:var(--s7);flex:none;border-radius:var(--radius-md);background:var(--c-primary-soft);display:flex;align-items:center;justify-content:center;font-size:var(--fs-h4)">💬</div>
+        <div style="display:flex;flex-direction:column;gap:var(--s1)">
+          <h3 style="font-size:var(--fs-card-title);font-weight:var(--fw-700);color:var(--c-text)">Thanh toán linh hoạt</h3>
+          <p style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body)">Chốt qua Zalo với người thật, thống nhất cách thanh toán trước khi giữ chỗ.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="05 Logo đối tác" style="background:var(--c-surface)">
+  <div style="max-width:var(--container);margin:0 auto;padding:var(--s9) var(--container-padding)">
+    <div style="display:flex;flex-direction:column;gap:var(--s3);margin-bottom:var(--s6)">
+      <h2 style="font-size:var(--fs-h3);font-weight:var(--fw-800);color:var(--c-primary);text-wrap:balance">Chúng tôi làm việc cùng</h2>
+      <span style="width:var(--underline-width);height:var(--underline-height);background:var(--c-sand);border-radius:2px"></span>
+      <p style="font-size:var(--fs-base);color:var(--c-text-muted);max-width:56ch">Sàn đặt phòng, hãng tàu, khách sạn và đại lý mà công ty nối sản phẩm trực tiếp.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s4)">
+      <div style="height:var(--s9);border:1px solid var(--c-border);border-radius:var(--radius-md);background:var(--c-surface-alt);display:flex;align-items:center;justify-content:center;font-size:var(--fs-badge);font-weight:var(--fw-600);color:var(--c-text-muted)">logo đối tác</div>
+      <div style="height:var(--s9);border:1px solid var(--c-border);border-radius:var(--radius-md);background:var(--c-surface-alt);display:flex;align-items:center;justify-content:center;font-size:var(--fs-badge);font-weight:var(--fw-600);color:var(--c-text-muted)">logo đối tác</div>
+      <div style="height:var(--s9);border:1px solid var(--c-border);border-radius:var(--radius-md);background:var(--c-surface-alt);display:flex;align-items:center;justify-content:center;font-size:var(--fs-badge);font-weight:var(--fw-600);color:var(--c-text-muted)">logo đối tác</div>
+      <div style="height:var(--s9);border:1px solid var(--c-border);border-radius:var(--radius-md);background:var(--c-surface-alt);display:flex;align-items:center;justify-content:center;font-size:var(--fs-badge);font-weight:var(--fw-600);color:var(--c-text-muted)">logo đối tác</div>
+      <div style="height:var(--s9);border:1px solid var(--c-border);border-radius:var(--radius-md);background:var(--c-surface-alt);display:flex;align-items:center;justify-content:center;font-size:var(--fs-badge);font-weight:var(--fw-600);color:var(--c-text-muted)">logo đối tác</div>
+      <div style="height:var(--s9);border:1px solid var(--c-border);border-radius:var(--radius-md);background:var(--c-surface-alt);display:flex;align-items:center;justify-content:center;font-size:var(--fs-badge);font-weight:var(--fw-600);color:var(--c-text-muted)">logo đối tác</div>
+      <div style="height:var(--s9);border:1px solid var(--c-border);border-radius:var(--radius-md);background:var(--c-surface-alt);display:flex;align-items:center;justify-content:center;font-size:var(--fs-badge);font-weight:var(--fw-600);color:var(--c-text-muted)">logo đối tác</div>
+      <div style="height:var(--s9);border:1px solid var(--c-border);border-radius:var(--radius-md);background:var(--c-surface-alt);display:flex;align-items:center;justify-content:center;font-size:var(--fs-badge);font-weight:var(--fw-600);color:var(--c-text-muted)">logo đối tác</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:var(--s5);margin-top:var(--s7);padding-top:var(--s6);border-top:1px solid var(--c-border)">
+      <div style="display:flex;flex-direction:column;gap:var(--s1);flex:none;width:24ch">
+        <span style="font-family:var(--font-display);font-size:var(--fs-card-title);font-weight:var(--fw-700);color:var(--c-text)">Chứng nhận &amp; giải thưởng</span>
+        <span style="font-size:var(--fs-label);color:var(--c-text-muted)">cùng nguồn partners[], phân biệt bằng kind</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s4);flex:1">
+        <div style="height:var(--s8);border:1px dashed var(--c-sand-border);border-radius:var(--radius-md);background:var(--c-surface);display:flex;align-items:center;justify-content:center;font-size:var(--fs-badge);font-weight:var(--fw-600);color:var(--c-text-muted)">giải thưởng</div>
+        <div style="height:var(--s8);border:1px dashed var(--c-sand-border);border-radius:var(--radius-md);background:var(--c-surface);display:flex;align-items:center;justify-content:center;font-size:var(--fs-badge);font-weight:var(--fw-600);color:var(--c-text-muted)">chứng nhận</div>
+        <div style="height:var(--s8);border:1px dashed var(--c-sand-border);border-radius:var(--radius-md);background:var(--c-surface);display:flex;align-items:center;justify-content:center;font-size:var(--fs-badge);font-weight:var(--fw-600);color:var(--c-text-muted)">chứng nhận</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="06 Đánh giá khách" style="background:var(--c-primary-soft)">
+  <div style="max-width:var(--container);margin:0 auto;padding:var(--s9) var(--container-padding)">
+    <div style="display:flex;flex-direction:column;gap:var(--s3);margin-bottom:var(--s7)">
+      <h2 style="font-size:var(--fs-h3);font-weight:var(--fw-800);color:var(--c-primary);text-wrap:balance">Khách đã đi nói gì</h2>
+      <span style="width:var(--underline-width);height:var(--underline-height);background:var(--c-sand);border-radius:2px"></span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s5);align-items:stretch">
+
+      <figure style="display:flex;flex-direction:column;gap:var(--s4);background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--s6);box-shadow:var(--shadow-card)">
+        <span style="font-family:var(--font-display);font-size:var(--fs-h2);font-weight:var(--fw-800);line-height:.6;color:var(--c-sand)">”</span>
+        <blockquote style="font-size:var(--fs-base);line-height:var(--lh-body);color:var(--c-text);flex:1">Xe đến đúng giờ hẹn, hướng dẫn viên đi cùng cả ngày nên bố mẹ tôi không phải lo gì. Bữa trưa trên đảo ăn được thật, không phải kiểu nấu cho đông người.</blockquote>
+        <figcaption style="display:flex;flex-direction:column;gap:var(--s1);border-top:1px solid var(--c-border);padding-top:var(--s4)">
+          <span style="font-size:var(--fs-sm);font-weight:var(--fw-700);color:var(--c-text)">Nguyễn Thu Hà</span>
+          <span style="font-size:var(--fs-label);color:var(--c-text-muted)">đi tour 3 đảo, gia đình 6 người</span>
+          <a href="#" style="font-size:var(--fs-label);font-weight:var(--fw-600);text-decoration:underline;margin-top:var(--s1)">Đánh giá trên TripAdvisor</a>
+        </figcaption>
+      </figure>
+
+      <figure style="display:flex;flex-direction:column;gap:var(--s4);background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--s6);box-shadow:var(--shadow-card)">
+        <span style="font-family:var(--font-display);font-size:var(--fs-h2);font-weight:var(--fw-800);line-height:.6;color:var(--c-sand)">”</span>
+        <blockquote style="font-size:var(--fs-base);line-height:var(--lh-body);color:var(--c-text);flex:1">Đoàn công ty 42 người, báo giá gửi trong buổi chiều và giữ nguyên đến lúc đi. Không có khoản nào phát sinh thêm.</blockquote>
+        <figcaption style="display:flex;flex-direction:column;gap:var(--s1);border-top:1px solid var(--c-border);padding-top:var(--s4)">
+          <span style="font-size:var(--fs-sm);font-weight:var(--fw-700);color:var(--c-text)">Trần Quốc Bảo</span>
+          <span style="font-size:var(--fs-label);color:var(--c-text-muted)">phòng hành chính, đoàn 42 khách</span>
+          <a href="#" style="font-size:var(--fs-label);font-weight:var(--fw-600);text-decoration:underline;margin-top:var(--s1)">Đánh giá trên Klook</a>
+        </figcaption>
+      </figure>
+
+      <figure style="display:flex;flex-direction:column;gap:var(--s4);background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--s6);box-shadow:var(--shadow-card)">
+        <span style="font-family:var(--font-display);font-size:var(--fs-h2);font-weight:var(--fw-800);line-height:.6;color:var(--c-sand)">”</span>
+        <blockquote style="font-size:var(--fs-base);line-height:var(--lh-body);color:var(--c-text);flex:1">Nhắn Zalo lúc mười giờ đêm vẫn có người trả lời, đổi ngày đi trước một hôm cũng xong.</blockquote>
+        <figcaption style="display:flex;flex-direction:column;gap:var(--s1);border-top:1px solid var(--c-border);padding-top:var(--s4)">
+          <span style="font-size:var(--fs-sm);font-weight:var(--fw-700);color:var(--c-text)">Lê Minh Khoa</span>
+          <span style="font-size:var(--fs-label);color:var(--c-text-muted)">đi lặn Hòn Mun, hai người</span>
+        </figcaption>
+      </figure>
+
+    </div>
+    <p style="font-size:var(--fs-label);color:var(--c-text-muted);margin-top:var(--s5)">Đánh giá do khách gửi trực tiếp, dẫn nguồn bằng liên kết. Không phát dữ liệu có cấu trúc cho phần này.</p>
+  </div>
+</section>
+
+<section data-screen-label="07 Cẩm nang" style="background:var(--c-surface)">
+  <div style="max-width:var(--container);margin:0 auto;padding:var(--s9) var(--container-padding)">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:var(--s6);margin-bottom:var(--s7)">
+      <div style="display:flex;flex-direction:column;gap:var(--s3)">
+        <h2 style="font-size:var(--fs-h3);font-weight:var(--fw-800);color:var(--c-primary);text-wrap:balance">Kinh nghiệm du lịch</h2>
+        <span style="width:var(--underline-width);height:var(--underline-height);background:var(--c-sand);border-radius:2px"></span>
+      </div>
+      <a href="#" style="font-size:var(--fs-sm);font-weight:var(--fw-600);color:var(--c-primary);white-space:nowrap">Xem tất cả bài →</a>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s5)">
+      <a href="#" style="display:flex;flex-direction:column;background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-card);color:inherit">
+        <div style="aspect-ratio:16/9;background:var(--c-surface-alt);display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--c-border)"><span style="font-size:var(--fs-badge);font-weight:var(--fw-600);color:var(--c-text-muted)">ảnh bài viết</span></div>
+        <div style="padding:var(--s5);display:flex;flex-direction:column;gap:var(--s3)">
+          <h3 style="font-size:var(--fs-card-title);font-weight:var(--fw-700);line-height:1.25;color:var(--c-text)">Tour 3 đảo Nha Trang: đi những đâu, giá bao nhiêu</h3>
+          <span style="font-size:var(--fs-label);color:var(--c-text-muted)">Lưu Tuấn Vũ</span>
+        </div>
+      </a>
+      <a href="#" style="display:flex;flex-direction:column;background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-card);color:inherit">
+        <div style="aspect-ratio:16/9;background:var(--c-surface-alt);display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--c-border)"><span style="font-size:var(--fs-badge);font-weight:var(--fw-600);color:var(--c-text-muted)">ảnh bài viết</span></div>
+        <div style="padding:var(--s5);display:flex;flex-direction:column;gap:var(--s3)">
+          <h3 style="font-size:var(--fs-card-title);font-weight:var(--fw-700);line-height:1.25;color:var(--c-text)">Từ sân bay Cam Ranh vào trung tâm mất bao lâu</h3>
+          <span style="font-size:var(--fs-label);color:var(--c-text-muted)">Lưu Tuấn Vũ</span>
+        </div>
+      </a>
+      <a href="#" style="display:flex;flex-direction:column;background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-card);color:inherit">
+        <div style="aspect-ratio:16/9;background:var(--c-surface-alt);display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--c-border)"><span style="font-size:var(--fs-badge);font-weight:var(--fw-600);color:var(--c-text-muted)">ảnh bài viết</span></div>
+        <div style="padding:var(--s5);display:flex;flex-direction:column;gap:var(--s3)">
+          <h3 style="font-size:var(--fs-card-title);font-weight:var(--fw-700);line-height:1.25;color:var(--c-text)">Mùa nào biển Nha Trang lặng nhất để ra đảo</h3>
+          <span style="font-size:var(--fs-label);color:var(--c-text-muted)">Lưu Tuấn Vũ</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="08 Báo giá đoàn" style="background:var(--c-primary)">
+  <div style="max-width:var(--container);margin:0 auto;padding:var(--s8) var(--container-padding);display:flex;align-items:center;justify-content:space-between;gap:var(--s8)">
+    <div style="display:flex;flex-direction:column;gap:var(--s3);max-width:60ch">
+      <h2 style="font-size:var(--fs-h3);font-weight:var(--fw-800);color:var(--c-text-inverse);text-wrap:balance">Đi đoàn? Gửi số người và ngày đi, chúng tôi báo giá trong ngày</h2>
+      <p style="font-size:var(--fs-base);line-height:var(--lh-body);color:var(--c-text-inverse);opacity:.86">Xe, vé, phòng, hướng dẫn viên gộp về một báo giá trọn gói. Một đầu mối lo cả chuyến.</p>
+    </div>
+    <a href="#" style="display:inline-flex;align-items:center;flex:none;min-height:44px;padding:0 var(--s7);border-radius:var(--radius-pill);background:var(--c-accent);color:var(--c-text-inverse);font-size:var(--fs-base);font-weight:var(--fw-700)">Nhận báo giá qua Zalo</a>
+  </div>
+</section>
+
+<footer style="background:var(--c-footer-bg);color:var(--c-footer-text);padding:var(--s7) 0 var(--s5);font-size:var(--fs-sm)">
+  <div style="max-width:var(--container);margin:0 auto;padding:0 var(--container-padding)">
+    <div style="display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr;gap:var(--s6);margin-bottom:var(--s6)">
+      <div>
+        <a href="#" style="display:flex;align-items:center;gap:var(--s3);font-family:var(--font-display);font-weight:var(--fw-800);font-size:var(--fs-nav);color:var(--c-text-inverse);margin-bottom:var(--s3)">
+          <svg viewBox="0 0 40 40" fill="none" aria-hidden="true" style="width:34px;height:34px;flex:none">
+            <circle cx="20" cy="20" r="19" fill="var(--c-primary)"></circle>
+            <path d="M14 26 L20 9 L20 26 Z" fill="var(--c-sand)"></path>
+            <path d="M20 9 L26 26 L20 26 Z" fill="var(--c-sand-soft)"></path>
+            <path d="M8 30 Q 12 27 16 30 T 24 30 T 32 30" stroke="var(--c-surface)" stroke-width="1.4" fill="none" stroke-linecap="round"></path>
+          </svg>
+          <span>Tour Đảo</span>
+        </a>
+        <p style="max-width:36ch;line-height:1.6">Đầu mối trọn gói cho chuyến biển đảo Nha Trang — tour, vé, phòng, xe đưa đón.</p>
+      </div>
+      <div>
+        <h4 style="color:var(--c-text-inverse);font-family:var(--font-ui);font-size:var(--fs-label);font-weight:var(--fw-600);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:var(--s3)">Tour &amp; Vé</h4>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:var(--s2)">
+          <li><a href="#" style="color:var(--c-footer-text)">Tour đảo Nha Trang</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color:var(--c-text-inverse);font-family:var(--font-ui);font-size:var(--fs-label);font-weight:var(--fw-600);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:var(--s3)">Dịch vụ</h4>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:var(--s2)">
+          <li><a href="#" style="color:var(--c-footer-text)">Kinh nghiệm du lịch</a></li>
+          <li><a href="#" style="color:var(--c-footer-text)">Đặt vé trực tuyến</a></li>
+          <li><a href="#" style="color:var(--c-footer-text)">Hỗ trợ</a></li>
+          <li><a href="#" style="color:var(--c-footer-text)">Liên hệ</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color:var(--c-text-inverse);font-family:var(--font-ui);font-size:var(--fs-label);font-weight:var(--fw-600);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:var(--s3)">Về chúng tôi</h4>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:var(--s2)">
+          <li><a href="#" style="color:var(--c-footer-text)">Zalo</a></li>
+          <li><a href="#" style="color:var(--c-footer-text)">siteSettings.contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--c-footer-border);padding-top:var(--s4);display:flex;justify-content:space-between;gap:var(--s3);flex-wrap:wrap;font-size:var(--fs-badge);color:var(--c-footer-muted)">
+      <span>© 2026 Công ty TNHH Tour Đảo</span>
+      <span>Đặt chỗ qua Zalo, người thật trả lời.</span>
+    </div>
+  </div>
+</footer>
+
+<section data-screen-label="Ghi chú token" style="background:var(--c-surface-alt);border-top:1px solid var(--c-border)">
+  <div style="max-width:var(--container);margin:0 auto;padding:var(--s8) var(--container-padding);display:flex;flex-direction:column;gap:var(--s6)">
+    <div style="display:flex;flex-direction:column;gap:var(--s3)">
+      <h2 style="font-size:var(--fs-h4);font-weight:var(--fw-800);color:var(--c-text)">Chữ tiếng Việt — bốn quyết định và bốn đề xuất token</h2>
+      <span style="width:var(--underline-width);height:var(--underline-height);background:var(--c-sand);border-radius:2px"></span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s5)">
+      <div style="background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--s5);display:flex;flex-direction:column;gap:var(--s2)">
+        <span style="font-size:var(--fs-badge);font-weight:var(--fw-700);letter-spacing:var(--ls-eyebrow);color:var(--c-sea)">GIỮ THEO TOKEN</span>
+        <h3 style="font-size:var(--fs-card-title);font-weight:var(--fw-700);color:var(--c-text)">Be Vietnam Pro cho tiêu đề, weight 800–900</h3>
+        <p style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body)">Font này thiết kế riêng cho bộ dấu tiếng Việt: dấu hỏi, dấu ngã và dấu mũ chồng nhau vẫn tách được ở cỡ lớn. Đẩy weight lên 900 ở h1 và ở số của dải số liệu là cách tăng độ “chắc chắn” mà không cần thêm font nào.</p>
+      </div>
+      <div style="background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--s5);display:flex;flex-direction:column;gap:var(--s2)">
+        <span style="font-size:var(--fs-badge);font-weight:var(--fw-700);letter-spacing:var(--ls-eyebrow);color:var(--c-sea)">GIỮ THEO TOKEN</span>
+        <h3 style="font-size:var(--fs-card-title);font-weight:var(--fw-700);color:var(--c-text)">letter-spacing 0, không tracking âm</h3>
+        <p style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body)">Tracking âm ép chữ có dấu vào nhau và làm dấu của chữ này chạm thân chữ bên cạnh. Chỉ eyebrow chữ hoa mới nới ra, và nới thì phải kèm line-height rộng hơn.</p>
+      </div>
+      <div style="background:var(--c-card);border:1px solid var(--c-sand-border);border-radius:var(--radius-md);padding:var(--s5);display:flex;flex-direction:column;gap:var(--s2)">
+        <span style="font-size:var(--fs-badge);font-weight:var(--fw-700);letter-spacing:var(--ls-eyebrow);color:var(--c-accent-strong)">ĐỀ XUẤT — CHỜ DUYỆT</span>
+        <h3 style="font-size:var(--fs-card-title);font-weight:var(--fw-700);color:var(--c-text)">--lh-display: 1,22 cho chữ hiển thị lớn</h3>
+        <p style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body)">Token hiện tại là 1,16 cho mọi heading; bản đang chạy còn ép h1 xuống 1,05. Ở cỡ hero, 1,05 làm dấu ngã dòng dưới chạm dấu nặng dòng trên. 1,22 tách hai dòng ra mà không làm tiêu đề rời rạc. Đây là một bậc mới, chỉ dùng cho h1 và số của dải số liệu.</p>
+      </div>
+      <div style="background:var(--c-card);border:1px solid var(--c-sand-border);border-radius:var(--radius-md);padding:var(--s5);display:flex;flex-direction:column;gap:var(--s2)">
+        <span style="font-size:var(--fs-badge);font-weight:var(--fw-700);letter-spacing:var(--ls-eyebrow);color:var(--c-accent-strong)">ĐỀ XUẤT — CHỜ DUYỆT</span>
+        <h3 style="font-size:var(--fs-card-title);font-weight:var(--fw-700);color:var(--c-text)">--fs-display: 60px, một bậc trên --fs-hero</h3>
+        <p style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body)">Thang chữ hiện dừng ở 46px. Trên khung 1200px, 46px là cỡ của một tiêu đề mục, không phải cỡ của câu định vị. Hero trong mockup này đang dùng đúng 46px để không vi phạm R1 — bật lên 60px thì màn đầu mới đủ nặng.</p>
+      </div>
+      <div style="background:var(--c-card);border:1px solid var(--c-sand-border);border-radius:var(--radius-md);padding:var(--s5);display:flex;flex-direction:column;gap:var(--s2)">
+        <span style="font-size:var(--fs-badge);font-weight:var(--fw-700);letter-spacing:var(--ls-eyebrow);color:var(--c-accent-strong)">ĐỀ XUẤT — CHỜ DUYỆT</span>
+        <h3 style="font-size:var(--fs-card-title);font-weight:var(--fw-700);color:var(--c-text)">--ls-eyebrow: 0,08em + --lh-eyebrow: 1,5</h3>
+        <p style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body)">Chữ hoa tiếng Việt vẫn mang dấu, nên nhãn chữ hoa cần cả giãn ngang lẫn giãn dòng, nếu không dấu bị cắt bởi dòng trên. Hai giá trị này đang dùng ở eyebrow của hero và ở nhãn trong khối này.</p>
+      </div>
+      <div style="background:var(--c-card);border:1px solid var(--c-sand-border);border-radius:var(--radius-md);padding:var(--s5);display:flex;flex-direction:column;gap:var(--s2)">
+        <span style="font-size:var(--fs-badge);font-weight:var(--fw-700);letter-spacing:var(--ls-eyebrow);color:var(--c-accent-strong)">ĐỀ XUẤT — CHỜ DUYỆT</span>
+        <h3 style="font-size:var(--fs-card-title);font-weight:var(--fw-700);color:var(--c-text)">Lora cho chữ hiển thị — bấm thử ở thanh trên</h3>
+        <p style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:var(--lh-body)">Một chữ có chân đủ bộ dấu tiếng Việt. Nó đổi tông từ “công ty công nghệ” sang “công ty lâu năm”, phù hợp bài toán vòng này. Đổi lại là thêm một file font, tức thêm một vòng QA hiệu năng theo ghi chú §2 của tài liệu token. Nếu duyệt, chỉ dùng cho h1 và h2, không chạm body.</p>
+      </div>
+    </div>
+    <div style="background:var(--c-accent-soft);border:1px solid var(--c-sand-border);border-radius:var(--radius-md);padding:var(--s5);display:flex;flex-direction:column;gap:var(--s2)">
+      <h3 style="font-size:var(--fs-card-title);font-weight:var(--fw-700);color:var(--c-accent-strong)">Chỗ vẫn cần chủ dự án chốt</h3>
+      <p style="font-size:var(--fs-sm);color:var(--c-text);line-height:var(--lh-body)">Một: <strong>partners[].kind</strong> để tách hàng chứng nhận &amp; giải thưởng — hàng đó trong mockup đang giả định có field này. Hai: bốn key mới cho <strong>siteSettings.sections</strong> (stats, partners, testimonials, groupQuote), nếu không biên tập viên không kéo thả được bốn khối mới. Ba: bốn đề xuất token ở trên. Chưa duyệt thì phần dựng thật phải bỏ chúng, và hero sẽ nhỏ hơn bản này một bậc.</p>
+    </div>
+  </div>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;bien-sau&quot;,&quot;cat-bien&quot;,&quot;ngoc-lam&quot;],&quot;default&quot;:&quot;bien-sau&quot;,&quot;tsType&quot;:&quot;'bien-sau' | 'cat-bien' | 'ngoc-lam'&quot;,&quot;section&quot;:&quot;Bộ giao diện&quot;},&quot;displayFont&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;token&quot;,&quot;lora&quot;],&quot;default&quot;:&quot;token&quot;,&quot;tsType&quot;:&quot;'token' | 'lora'&quot;,&quot;section&quot;:&quot;Bộ giao diện&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, displayFont: null };
+
+  get theme() { return this.state.theme ?? this.props.theme ?? 'bien-sau'; }
+  get displayFont() { return this.state.displayFont ?? this.props.displayFont ?? 'token'; }
+
+  renderVals() {
+    const labels = {
+      'bien-sau': 'bien-sau · trắng/primary 9.46 · trắng/accent 5.44',
+      'cat-bien': 'cat-bien · trắng/primary 7.27 · trắng/accent 5.02',
+      'ngoc-lam': 'ngoc-lam · trắng/primary 5.47 · trắng/accent 6.29',
+    };
+    const set = (theme) => () => this.setState({ theme });
+    const setFont = (displayFont) => () => this.setState({ displayFont });
+    return {
+      theme: this.theme,
+      displayFont: this.displayFont,
+      themeLabel: labels[this.theme],
+      setBienSau: set('bien-sau'),
+      setCatBien: set('cat-bien'),
+      setNgocLam: set('ngoc-lam'),
+      setFontToken: setFont('token'),
+      setFontLora: setFont('lora'),
+    };
+  }
+}
+</script>
+</body>
+</html>
