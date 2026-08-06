@@ -86,19 +86,33 @@ Thêm bộ mới: thêm một dòng ở đây, một khối `:root[data-theme=".
 
 | Token | Giá trị | Dùng cho |
 |---|---|---|
-| font.family.heading | "Be Vietnam Pro", system-ui, sans-serif | heading mọi cấp |
+| font.family.heading | "Lora", "Be Vietnam Pro", Georgia, serif | heading mọi cấp — đổi sang chữ có chân 2026-08-06, xem ghi chú dưới bảng |
 | font.family.body | "Plus Jakarta Sans", system-ui, -apple-system, sans-serif | body, card, nhãn, breadcrumb, meta, nav |
-| font.weight | 500, 600, 700, 800, 900 | body 500; nhãn, nút, nhãn phụ card 600; heading chung 700; display đặc biệt 800/900 khi thật cần |
+| font.weight | 500, 600, 700, 800, 900 | body 500; nhãn, nút, nhãn phụ card 600; heading 700. **800 và 900 không còn tác dụng trên heading**: Lora chỉ có 400–700, trình duyệt kẹp về 700. Hai bậc này giữ lại cho `font.family.body` |
 | font.size.base | 17px (1.0625rem) | body; không nhỏ hơn 17px trên nội dung chính |
-| font.size.scale | 1,2-1,25 | bậc thang runtime: 17 / 22 / 26 / 32 / 40 / 42 / 46 |
+| font.size.scale | 1,2-1,25 | bậc thang runtime: 17 / 22 / 26 / 32 / 40 / 42 / 46 / 60 |
+| font.size.display | 60px (3,75rem) | **chỉ** câu định vị ở hero trang chủ. Trên khung 1200px, 46px là cỡ của một tiêu đề mục chứ không phải cỡ của câu định vị. Cấm dùng cho heading khác |
 | font.size.sm | 15px (0.9375rem) | nhãn phụ card, breadcrumb, ngày cập nhật; không nhỏ hơn cỡ này trong UI chính |
 | font.size.label | 14px (0.875rem) | nhãn, chip, meta ngắn |
 | font.size.badge | 12px (0.75rem) | badge ngắn; không dùng cho đoạn văn |
 | line-height | 1,16 heading; 1,68 body | tối ưu đọc tiếng Việt có dấu, tránh dòng quá đặc |
+| line-height.display | 1,22 | **chỉ** chữ hiển thị lớn: h1 và số của dải số liệu. Ở cỡ hero, 1,16 vẫn làm dấu ngã dòng dưới chạm dấu nặng dòng trên. Cấm dùng ở cỡ thường — 1,22 ở cỡ nhỏ làm tiêu đề rời rạc |
 | letter-spacing | 0 | không dùng tracking âm cho heading tiếng Việt |
+| letter-spacing.eyebrow | 0,08em | **chỉ** nhãn chữ hoa. Chữ hoa tiếng Việt vẫn mang dấu nên nhãn chữ hoa cần giãn ngang. Phải đi kèm `line-height.eyebrow`, không dùng rời |
+| line-height.eyebrow | 1,5 | đi kèm `letter-spacing.eyebrow`: giãn ngang mà không giãn dòng thì dấu bị dòng trên cắt |
 | measure | tối đa 70ch | cột chữ thân bài Article và đoạn mở; ảnh và bảng được tràn rộng hơn |
 
-Tải font hiện tại: self-host woff2 trên Cloudflare cùng origin. File đang có: Be Vietnam Pro 700/800 và Plus Jakarta Sans 500/600/700, đều có latin + vietnamese subset. `font-display: swap`, preload Be Vietnam Pro 700 và Plus Jakarta Sans 500. Không gọi Google Fonts runtime. Nợ có chủ ý: chưa có Be Vietnam Pro 400/500 nên chưa chuyển body sang Be Vietnam Pro toàn site; thêm font weight mới là thay đổi hiệu năng cần QA LCP.
+Tải font hiện tại: self-host woff2 trên Cloudflare cùng origin. File đang có: **Lora biến thiên 400–700**, Be Vietnam Pro 700/800, và Plus Jakarta Sans 500/600/700 — tất cả đều có latin + vietnamese subset. `font-display: swap`, preload Lora latin và Plus Jakarta Sans 500. Không gọi Google Fonts runtime.
+
+**Đổi chữ hiển thị sang Lora (duyệt 2026-08-06, QĐ-2026-08-06-10).** Lý do: bài toán của vòng thiết kế thứ hai là *site mới trông vững như công ty lâu năm khi hàng còn mỏng*, và chữ có chân đổi tông từ "công ty công nghệ" sang "công ty lâu năm". Lora có đủ bộ dấu tiếng Việt.
+
+Ba hệ quả phải biết, không được quên khi sửa sau này:
+
+1. **Mất hai bậc weight.** Lora dừng ở 700. Mọi chỗ trước đây dùng `--fw-800`/`--fw-900` để tạo cảm giác "chắc chắn" trên heading nay bị kẹp về 700. Bù bằng cỡ chữ (`font.size.display`) chứ không bù bằng weight.
+2. **Be Vietnam Pro ở lại làm lớp dự phòng**, đứng ngay sau Lora trong `--font-display`. Lora hỏng thì chữ rơi về một font vẫn có dấu tiếng Việt tử tế, không rơi thẳng về `system-ui`. Vì vậy **không được xoá** file Be Vietnam Pro dù nó không còn là font chính.
+3. **Cân nặng font tăng.** Lora là font biến thiên nên chỉ thêm 2 file (~47 KB) chứ không phải 6, nhưng tổng thư mục `public/fonts` lên khoảng 220 KB. Đây là thay đổi hiệu năng — phải đo lại LCP theo ngưỡng `00-PROJECT_BRIEF` mục 6 trước khi công bố.
+
+Nợ có chủ ý: chưa có Be Vietnam Pro 400/500 nên body vẫn là Plus Jakarta Sans; thêm font weight mới là thay đổi hiệu năng cần QA LCP.
 
 ## 3. Khoảng cách, bo góc, bóng
 

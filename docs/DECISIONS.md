@@ -614,3 +614,28 @@ Chủ dự án chọn **làm đủ**, và đặt mốc mới hơn mốc cũ **m�
 **Đánh giá không serialize.** Google cấm rich snippet đánh giá tự phục vụ. Phát `Review`/`AggregateRating` cho nội dung tự đăng là rủi ro phạt thủ công, mà I6 là cổng mức `fail`. Đánh giá hiện cho người đọc; dẫn nguồn qua `sourceName`/`sourceUrl`.
 
 **`stats.value` là chuỗi.** Kiểu số không diễn tả được "50.000+", "4,9/5", "24/7" — những dạng mà một dải số liệu thật cần.
+
+---
+
+## QĐ-2026-08-06-10 — Bốn token chữ mới, và Lora làm chữ hiển thị
+
+**Chốt.** Chủ dự án duyệt cả bốn token Claude Design đề xuất ở vòng thiết kế thứ hai, cộng font Lora:
+
+| Token | Giá trị | Phạm vi dùng |
+|---|---|---|
+| `--fs-display` | 3,75rem (60px) | **chỉ** câu định vị ở hero trang chủ |
+| `--lh-display` | 1,22 | **chỉ** h1 và số của dải số liệu |
+| `--ls-eyebrow` | 0,08em | **chỉ** nhãn chữ hoa, luôn đi kèm `--lh-eyebrow` |
+| `--lh-eyebrow` | 1,5 | đi kèm `--ls-eyebrow`, không dùng rời |
+
+**Vì sao cần bậc mới.** Thang chữ trước dừng ở 46px. Trên khung 1200px, 46px là cỡ của một tiêu đề mục chứ không phải cỡ của câu định vị. Về line-height: bản đang chạy ép h1 xuống 1,05–1,06, giá trị nằm ngoài token, và ở cỡ hero nó làm dấu ngã dòng dưới chạm dấu nặng dòng trên. Về eyebrow: chữ hoa tiếng Việt vẫn mang dấu, nên nhãn chữ hoa cần cả giãn ngang lẫn giãn dòng — giãn ngang mà không giãn dòng thì dấu bị dòng trên cắt.
+
+**Lora làm chữ hiển thị.** Bài toán của vòng này là *site mới trông vững như công ty lâu năm khi hàng còn mỏng*. Chữ có chân đổi tông từ "công ty công nghệ" sang "công ty lâu năm". Lora đủ bộ dấu tiếng Việt và là font biến thiên 400–700, nên chỉ thêm 2 file (~47 KB).
+
+**Ba cái giá đã biết và chấp nhận:**
+
+1. **Mất hai bậc weight trên heading.** Lora dừng ở 700; `--fw-800` và `--fw-900` bị trình duyệt kẹp về 700, không có gì để tổng hợp giả. Bù độ "chắc chắn" bằng cỡ chữ, không bằng weight.
+2. **Be Vietnam Pro không được xoá.** Nó lùi về vai lớp dự phòng, đứng ngay sau Lora trong `--font-display`, để Lora hỏng thì chữ vẫn rơi về một font có dấu tiếng Việt tử tế.
+3. **Cân nặng font lên ~220 KB.** Đây là thay đổi hiệu năng: phải đo lại LCP theo ngưỡng `00-PROJECT_BRIEF` mục 6 trước khi công bố. Chưa đo tại thời điểm chốt.
+
+**Nguồn token vẫn là một.** Bốn giá trị mới sống ở `src/styles/tokens.css` và `07-DESIGN_TOKENS.md` §2, không ở component. Mọi phạm vi dùng ghi trong bảng trên là ràng buộc, không phải gợi ý: `--lh-display` ở cỡ chữ thường làm tiêu đề rời rạc.

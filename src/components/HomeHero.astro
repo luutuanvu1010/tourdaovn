@@ -105,9 +105,9 @@ const cleanStampText = stampText?.trim()
     font-family: var(--font-ui);
     font-size: var(--fs-badge);
     font-weight: var(--fw-700);
-    letter-spacing: 0;
+    letter-spacing: var(--ls-eyebrow);
     text-transform: uppercase;
-    line-height: 1.4;
+    line-height: var(--lh-eyebrow);
     white-space: pre-line;
   }
 
@@ -138,7 +138,8 @@ const cleanStampText = stampText?.trim()
   .hero-eyebrow {
     font-weight: var(--fw-600);
     font-size: var(--fs-label);
-    letter-spacing: 0;
+    letter-spacing: var(--ls-eyebrow);
+    line-height: var(--lh-eyebrow);
     text-transform: uppercase;
     color: var(--c-text-inverse);
     opacity: 0.65;

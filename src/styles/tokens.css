@@ -47,8 +47,17 @@
   --c-hero-overlay-light:   rgba(255,255,255,.18);
 
   /* §2 Typography — Vietnamese-readable, token-first */
-  --font-display: "Be Vietnam Pro", system-ui, sans-serif;
+  /* Lora làm chữ hiển thị, duyệt 2026-08-06 (QĐ-2026-08-06-10). Một chữ có
+     chân đủ bộ dấu tiếng Việt; nó đổi tông từ "công ty công nghệ" sang "công ty
+     lâu năm". Be Vietnam Pro ở lại làm lớp dự phòng ngay sau nó, nên Lora hỏng
+     thì chữ vẫn rơi về một font có dấu tiếng Việt tử tế chứ không rơi về
+     system-ui. Lora dừng ở weight 700 — xem ghi chú --fw-800/--fw-900 dưới. */
+  --font-display: "Lora", "Be Vietnam Pro", Georgia, serif;
   --font-ui:      "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  /* --fw-800 và --fw-900 vẫn còn vì `--font-ui` (Plus Jakarta Sans) và các lớp
+     dự phòng dùng được. Nhưng Lora chỉ có 400–700, nên ở chữ hiển thị hai bậc
+     này bị trình duyệt kẹp về 700 — không có weight nào để tổng hợp giả. Đó là
+     cái giá đã biết của việc đổi sang chữ có chân. */
   --fw-500: 500; --fw-600: 600; --fw-700: 700; --fw-800: 800; --fw-900: 900;
   --fs-badge: 0.6875rem;  /* 11px */
   --fs-xs:   0.75rem;     /* 12px */
@@ -70,8 +79,22 @@
   --fs-h2:    2.5rem;     /* 40px */
   --fs-h1:    2.625rem;   /* 42px */
   --fs-hero:  2.875rem;   /* 46px — override hero homepage */
+  --fs-display: 3.75rem;  /* 60px — bậc trên --fs-hero, chỉ cho câu định vị ở
+                             hero trang chủ. Thang chữ trước dừng ở 46px, mà
+                             trên khung 1200px thì 46px là cỡ của một tiêu đề
+                             mục, không phải cỡ của câu định vị. */
   --lh-heading: 1.16;
   --lh-body:    1.68;
+  --lh-display: 1.22;     /* chỉ cho chữ hiển thị lớn: h1 và số của dải số liệu.
+                             Ở cỡ hero, 1.16 vẫn làm dấu ngã dòng dưới chạm dấu
+                             nặng dòng trên. Cấm dùng cho heading cỡ thường —
+                             1.22 ở cỡ nhỏ làm tiêu đề rời rạc. */
+  --ls-eyebrow: 0.08em;   /* nhãn chữ hoa. Chữ hoa tiếng Việt vẫn mang dấu nên
+                             phải giãn ngang, và giãn ngang thì phải kèm
+                             --lh-eyebrow, nếu không dấu bị dòng trên cắt.
+                             Ngoài eyebrow thì letter-spacing luôn là 0:
+                             tracking âm ép dấu của chữ này vào thân chữ bên. */
+  --lh-eyebrow: 1.5;      /* đi kèm --ls-eyebrow, không dùng rời */
 
   /* §3 Spacing */
   --s1: 4px;   --s2: 8px;   --s3: 12px;

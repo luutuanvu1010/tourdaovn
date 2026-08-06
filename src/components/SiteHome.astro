@@ -270,18 +270,19 @@ const activeSections = rawSections.filter((s) => !s.hidden)
     color: var(--c-text-inverse);
     font-size: var(--fs-label);
     font-weight: var(--fw-700);
-    letter-spacing: 0;
+    letter-spacing: var(--ls-eyebrow);
+    line-height: var(--lh-eyebrow);
     text-transform: uppercase;
-    opacity: .72;
-    margin-bottom: var(--s3);
+    opacity: .78;
+    margin-bottom: var(--s4);
   }
 
   .site-home-title {
     color: var(--c-text-inverse);
     font-family: var(--font-display);
-    font-size: clamp(var(--fs-h1), 5vw, var(--fs-hero));
-    line-height: var(--lh-heading);
-    font-weight: var(--fw-900);
+    font-size: clamp(var(--fs-h1), 5vw, var(--fs-display));
+    line-height: var(--lh-display);
+    font-weight: var(--fw-700);
     max-width: 19ch;
     text-wrap: balance;
     margin-bottom: var(--s5);
