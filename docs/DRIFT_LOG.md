@@ -460,7 +460,13 @@ Liên quan `ND-007` (khách sạn và resort chưa có lối vào từ menu) —
 
 ## DR-031 — Mười sáu chỗ vẫn xin cấp đậm 800/900 mà Lora không có
 
-**Trạng thái:** mở. Phát hiện 2026-08-06 ngay sau khi đổi chữ hiển thị sang Lora (QĐ-2026-08-06-10).
+**Trạng thái:** **thu hẹp còn một chỗ, 2026-08-06.** Chữ đổi từ Lora sang Nunito trong cùng ngày (QĐ-2026-08-06-11). Nunito biến thiên **400–800**, nên mười lăm chỗ xin `--fw-800` nay **chạy đúng** — không còn lệch. Ba chỗ đã hạ xuống `--fw-700` cũng trả về `--fw-800`.
+
+Còn đúng **một** chỗ lệch: `HomeHubGrid.hubs-title` xin `--fw-900`, mà Nunito dừng ở 800 nên trình duyệt kẹp xuống. Sửa là đổi một dòng thành `--fw-800`; để lại vì chưa rõ có đổi chữ lần nữa không.
+
+Nguyên văn phần dưới giữ lại làm bản ghi lịch sử.
+
+**Trạng thái cũ:** mở. Phát hiện 2026-08-06 ngay sau khi đổi chữ hiển thị sang Lora (QĐ-2026-08-06-10).
 
 Lora là font biến thiên **400–700**. Mọi khai báo `font-weight: var(--fw-800)` hay `var(--fw-900)` đi cùng `font-family: var(--font-display)` nay bị trình duyệt kẹp về 700 — CSS không tổng hợp giả cấp đậm khi đã có 700 thật. Nghĩa là mã nguồn nói 800/900 còn màn hình hiện 700.
 

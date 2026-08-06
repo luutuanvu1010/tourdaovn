@@ -47,17 +47,18 @@
   --c-hero-overlay-light:   rgba(255,255,255,.18);
 
   /* §2 Typography — Vietnamese-readable, token-first */
-  /* Lora làm chữ hiển thị, duyệt 2026-08-06 (QĐ-2026-08-06-10). Một chữ có
-     chân đủ bộ dấu tiếng Việt; nó đổi tông từ "công ty công nghệ" sang "công ty
-     lâu năm". Be Vietnam Pro ở lại làm lớp dự phòng ngay sau nó, nên Lora hỏng
-     thì chữ vẫn rơi về một font có dấu tiếng Việt tử tế chứ không rơi về
-     system-ui. Lora dừng ở weight 700 — xem ghi chú --fw-800/--fw-900 dưới. */
-  --font-display: "Lora", "Be Vietnam Pro", Georgia, serif;
-  --font-ui:      "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
-  /* --fw-800 và --fw-900 vẫn còn vì `--font-ui` (Plus Jakarta Sans) và các lớp
-     dự phòng dùng được. Nhưng Lora chỉ có 400–700, nên ở chữ hiển thị hai bậc
-     này bị trình duyệt kẹp về 700 — không có weight nào để tổng hợp giả. Đó là
-     cái giá đã biết của việc đổi sang chữ có chân. */
+  /* MỘT chữ cho cả trang: Nunito, duyệt 2026-08-06 (QĐ-2026-08-06-11).
+     Chữ tròn đầu nét nên mềm, và là một trong những chữ được dùng nhiều nhất
+     nên mắt người Việt đã quen — không thấy lạ. Đủ bộ dấu tiếng Việt.
+     Hai token vẫn tách làm hai vì chúng là hai VAI (tiêu đề và giao diện), dù
+     hôm nay cùng trỏ một font: đổi vai này không kéo theo vai kia.
+     Be Vietnam Pro là lớp dự phòng duy nhất — Nunito hỏng thì chữ rơi về một
+     font vẫn dựng dấu tiếng Việt tử tế, không rơi thẳng về system-ui. */
+  --font-display: "Nunito", "Be Vietnam Pro", system-ui, sans-serif;
+  --font-ui:      "Nunito", "Be Vietnam Pro", system-ui, sans-serif;
+  /* Nunito biến thiên 400–800, nên --fw-800 CHẠY THẬT. Chỉ còn --fw-900 là bị
+     trình duyệt kẹp về 800 — không có cấp nào cao hơn để tổng hợp giả. Xem
+     DR-031. */
   --fw-500: 500; --fw-600: 600; --fw-700: 700; --fw-800: 800; --fw-900: 900;
   --fs-badge: 0.6875rem;  /* 11px */
   --fs-xs:   0.75rem;     /* 12px */

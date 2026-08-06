@@ -639,3 +639,23 @@ Chủ dự án chọn **làm đủ**, và đặt mốc mới hơn mốc cũ **m�
 3. **Cân nặng font lên ~220 KB.** Đây là thay đổi hiệu năng: phải đo lại LCP theo ngưỡng `00-PROJECT_BRIEF` mục 6 trước khi công bố. Chưa đo tại thời điểm chốt.
 
 **Nguồn token vẫn là một.** Bốn giá trị mới sống ở `src/styles/tokens.css` và `07-DESIGN_TOKENS.md` §2, không ở component. Mọi phạm vi dùng ghi trong bảng trên là ràng buộc, không phải gợi ý: `--lh-display` ở cỡ chữ thường làm tiêu đề rời rạc.
+
+---
+
+## QĐ-2026-08-06-11 — Nunito làm chữ cho cả trang, thay Lora
+
+**Chốt.** Một font duy nhất cho toàn site: **Nunito**. Cả `--font-display` lẫn `--font-ui` cùng trỏ nó. Gỡ hẳn Lora và Plus Jakarta Sans.
+
+**Vì sao đổi.** Chủ dự án nhìn bản dựng thật rồi yêu cầu "một phông tiếng Việt phổ thông, mềm mại hơn". Lora vừa chốt sáng cùng ngày (QĐ-2026-08-06-10) đọc ra cứng — chữ có chân hợp toà soạn hơn hợp một công ty bán tour biển. Đây là quyết định thẩm mỹ của người có quyền, sau khi thấy hàng thật; ghi lại để không ai đọc lịch sử rồi tưởng là lật lọng.
+
+**Vì sao Nunito.** Ba điều kiện cùng lúc: bo tròn đầu nét nên mềm thật; nằm trong nhóm chữ được dùng nhiều nhất nên mắt người Việt đã quen; đủ bộ dấu tiếng Việt. Á quân là Mulish — cùng nhóm mềm nhưng tiết chế hơn, đổi mất một dòng.
+
+**Vì sao vẫn giữ hai token chữ dù cùng một font.** `--font-display` và `--font-ui` là hai **vai**, không phải hai giá trị. Gộp làm một thì lần sau muốn đổi riêng chữ tiêu đề sẽ phải tách lại từ đầu.
+
+**Ba hệ quả:**
+
+1. **Lấy lại cấp đậm 800.** Nunito biến thiên 400–800, Lora dừng ở 700. Ba chỗ phải hạ xuống 700 hồi đổi sang Lora nay trả về 800. `--fw-900` vẫn bị kẹp — DR-031 thu hẹp chứ chưa đóng.
+2. **Nhẹ đi.** Gỡ Lora và Plus Jakarta Sans vì không còn chỗ nào gọi tới. Thư mục font từ ~220 KB xuống **~104 KB**, thấp hơn cả mốc ~140 KB trước cả hai lần đổi chữ.
+3. **Be Vietnam Pro ở lại làm lớp dự phòng duy nhất**, không được xoá.
+
+**Còn nợ.** Chưa đo LCP sau hai lần đổi chữ. Lần này cân nặng giảm nên chiều gió thuận, nhưng vẫn phải đo trước khi công bố.

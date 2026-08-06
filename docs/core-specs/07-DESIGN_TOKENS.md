@@ -86,9 +86,9 @@ Thêm bộ mới: thêm một dòng ở đây, một khối `:root[data-theme=".
 
 | Token | Giá trị | Dùng cho |
 |---|---|---|
-| font.family.heading | "Lora", "Be Vietnam Pro", Georgia, serif | heading mọi cấp — đổi sang chữ có chân 2026-08-06, xem ghi chú dưới bảng |
-| font.family.body | "Plus Jakarta Sans", system-ui, -apple-system, sans-serif | body, card, nhãn, breadcrumb, meta, nav |
-| font.weight | 500, 600, 700, 800, 900 | body 500; nhãn, nút, nhãn phụ card 600; heading 700. **800 và 900 không còn tác dụng trên heading**: Lora chỉ có 400–700, trình duyệt kẹp về 700. Hai bậc này giữ lại cho `font.family.body` |
+| font.family.heading | "Nunito", "Be Vietnam Pro", system-ui, sans-serif | heading mọi cấp |
+| font.family.body | "Nunito", "Be Vietnam Pro", system-ui, sans-serif | body, card, nhãn, breadcrumb, meta, nav |
+| font.weight | 500, 600, 700, 800, 900 | body 500; nhãn, nút, nhãn phụ card 600; heading 700; chữ hiển thị 800. **900 không có tác dụng**: Nunito dừng ở 800, trình duyệt kẹp xuống — xem DR-031 |
 | font.size.base | 17px (1.0625rem) | body; không nhỏ hơn 17px trên nội dung chính |
 | font.size.scale | 1,2-1,25 | bậc thang runtime: 17 / 22 / 26 / 32 / 40 / 42 / 46 / 60 |
 | font.size.display | 60px (3,75rem) | **chỉ** câu định vị ở hero trang chủ. Trên khung 1200px, 46px là cỡ của một tiêu đề mục chứ không phải cỡ của câu định vị. Cấm dùng cho heading khác |
@@ -102,17 +102,20 @@ Thêm bộ mới: thêm một dòng ở đây, một khối `:root[data-theme=".
 | line-height.eyebrow | 1,5 | đi kèm `letter-spacing.eyebrow`: giãn ngang mà không giãn dòng thì dấu bị dòng trên cắt |
 | measure | tối đa 70ch | cột chữ thân bài Article và đoạn mở; ảnh và bảng được tràn rộng hơn |
 
-Tải font hiện tại: self-host woff2 trên Cloudflare cùng origin. File đang có: **Lora biến thiên 400–700**, Be Vietnam Pro 700/800, và Plus Jakarta Sans 500/600/700 — tất cả đều có latin + vietnamese subset. `font-display: swap`, preload Lora latin và Plus Jakarta Sans 500. Không gọi Google Fonts runtime.
+Tải font hiện tại: self-host woff2 trên Cloudflare cùng origin. File đang có: **Nunito biến thiên 400–800** và Be Vietnam Pro 700/800, đều có latin + vietnamese subset. `font-display: swap`, preload đúng một file (Nunito latin). Không gọi Google Fonts runtime.
 
-**Đổi chữ hiển thị sang Lora (duyệt 2026-08-06, QĐ-2026-08-06-10).** Lý do: bài toán của vòng thiết kế thứ hai là *site mới trông vững như công ty lâu năm khi hàng còn mỏng*, và chữ có chân đổi tông từ "công ty công nghệ" sang "công ty lâu năm". Lora có đủ bộ dấu tiếng Việt.
+**Một chữ cho cả trang: Nunito (duyệt 2026-08-06, QĐ-2026-08-06-11).** Lý do chủ dự án nêu: cần một chữ tiếng Việt **phổ thông và mềm mại hơn**. Nunito bo tròn đầu nét nên mềm, và nằm trong nhóm chữ được dùng nhiều nhất nên mắt người Việt đã quen — không thấy lạ. Đủ bộ dấu tiếng Việt.
 
-Ba hệ quả phải biết, không được quên khi sửa sau này:
+Bốn điều cần biết:
 
-1. **Mất hai bậc weight.** Lora dừng ở 700. Mọi chỗ trước đây dùng `--fw-800`/`--fw-900` để tạo cảm giác "chắc chắn" trên heading nay bị kẹp về 700. Bù bằng cỡ chữ (`font.size.display`) chứ không bù bằng weight.
-2. **Be Vietnam Pro ở lại làm lớp dự phòng**, đứng ngay sau Lora trong `--font-display`. Lora hỏng thì chữ rơi về một font vẫn có dấu tiếng Việt tử tế, không rơi thẳng về `system-ui`. Vì vậy **không được xoá** file Be Vietnam Pro dù nó không còn là font chính.
-3. **Cân nặng font tăng.** Lora là font biến thiên nên chỉ thêm 2 file (~47 KB) chứ không phải 6, nhưng tổng thư mục `public/fonts` lên khoảng 220 KB. Đây là thay đổi hiệu năng — phải đo lại LCP theo ngưỡng `00-PROJECT_BRIEF` mục 6 trước khi công bố.
+1. **Hai token vẫn tách làm hai.** `font.family.heading` và `font.family.body` hôm nay cùng trỏ Nunito, nhưng không gộp làm một: chúng là hai **vai**, và đổi vai này không được kéo theo vai kia.
+2. **Lấy lại được cấp đậm 800.** Nunito biến thiên 400–800, trong khi Lora dừng ở 700. Ba chỗ phải hạ xuống 700 hồi đổi sang Lora nay trả về 800. Chỉ `--fw-900` là vẫn bị kẹp.
+3. **Be Vietnam Pro là lớp dự phòng duy nhất.** Không được xoá — Nunito hỏng thì chữ rơi về một font vẫn dựng dấu tiếng Việt tử tế thay vì rơi thẳng về `system-ui`.
+4. **Nhẹ đi đáng kể.** Gỡ hẳn Lora và Plus Jakarta Sans vì không còn chỗ nào gọi tới. Thư mục font từ ~220 KB xuống **~104 KB**, thấp hơn cả mốc ~140 KB trước đợt đổi chữ. Vẫn cần đo lại LCP theo ngưỡng `00-PROJECT_BRIEF` mục 6, nhưng lần này chiều gió thuận.
 
-Nợ có chủ ý: chưa có Be Vietnam Pro 400/500 nên body vẫn là Plus Jakarta Sans; thêm font weight mới là thay đổi hiệu năng cần QA LCP.
+Bản ghi lịch sử: vòng thiết kế thứ hai từng chốt Lora (QĐ-2026-08-06-10) rồi thay ngay trong ngày sau khi chủ dự án nhìn bản thật — chữ có chân đọc ra cứng, không hợp một công ty bán tour biển.
+
+Nợ có chủ ý: chưa đo LCP sau hai lần đổi chữ.
 
 ## 3. Khoảng cách, bo góc, bóng
 
