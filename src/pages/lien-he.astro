@@ -61,18 +61,18 @@ const jsonLd = [
     </p>
 
     {rows.length > 0 ? (
-      <dl class="contact-list">
+      <div class="channel-grid">
         {rows.map(row => (
-          <div class="contact-row">
-            <dt>{row.label}</dt>
-            <dd>
-              {row.href
-                ? <a href={row.href} {...(row.href.startsWith('http') ? { target: '_blank', rel: 'noopener' } : {})}>{row.value}</a>
-                : row.value}
-            </dd>
-          </div>
+          <a
+            class="channel-card"
+            href={row.href ?? undefined}
+            {...(row.href?.startsWith('http') ? { target: '_blank', rel: 'noopener' } : {})}
+          >
+            <span class="channel-label">{row.label}</span>
+            <span class="channel-value">{row.value}</span>
+          </a>
         ))}
-      </dl>
+      </div>
     ) : (
       <p class="lead">Kênh liên hệ đang được cập nhật.</p>
     )}
@@ -89,36 +89,46 @@ const jsonLd = [
     margin-bottom: var(--s5);
   }
 
-  .contact-list {
+  /* Thẻ kênh liên hệ — cùng ngôn ngữ thị giác với card ở bàn giao bước 7.
+     Design không vẽ trang Liên hệ (bàn giao chỉ có 7 loại trang), nên chỗ này
+     áp lại pattern card thay vì tự nghĩ một kiểu riêng. */
+  .channel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--s4);
     max-width: var(--container-editorial);
-    margin-bottom: var(--s6);
+    margin-bottom: var(--s7);
   }
 
-  .contact-row {
+  .channel-card {
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--s2) var(--s4);
-    padding: var(--s4) 0;
-    border-bottom: 1px solid var(--c-border);
+    flex-direction: column;
+    gap: var(--s1);
+    padding: var(--s5);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    background: var(--c-card);
+    box-shadow: var(--shadow-card);
+    transition: transform var(--m-fast) var(--m-ease), box-shadow var(--m-fast) var(--m-ease), border-color var(--m-fast) var(--m-ease);
   }
 
-  .contact-row dt {
-    min-width: 140px;
+  .channel-card:hover {
+    transform: translateY(var(--card-lift));
+    box-shadow: var(--shadow-raised);
+    border-color: var(--c-primary);
+  }
+
+  .channel-label {
+    font-size: var(--fs-label);
     font-weight: var(--fw-600);
     color: var(--c-text-muted);
-    font-size: var(--fs-sm);
   }
 
-  .contact-row dd {
-    font-weight: var(--fw-600);
-    color: var(--c-text);
-  }
-
-  .contact-row a {
-    color: var(--c-primary);
-  }
-
-  .contact-row a:hover {
-    text-decoration: underline;
+  .channel-value {
+    font-family: var(--font-display);
+    font-size: var(--fs-h5);
+    font-weight: var(--fw-700);
+    color: var(--c-primary-strong);
+    word-break: break-word;
   }
 </style>
