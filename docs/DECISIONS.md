@@ -565,3 +565,21 @@ Chủ dự án **chấp nhận mở cổng với 15 cảnh báo ở điều ki�
 **Ranh giới vai giữ nguyên** (`PLAYBOOK` Phần 2): Design ra mockup và đề xuất token, **không** sửa `src/`, `cms/`, `scripts/`. Dựng thật là bước 8.
 
 **Sản phẩm giao ở:** `docs/design/mockups/` và `docs/design/PHA-F-BAN-GIAO.md`.
+
+---
+
+## QĐ-2026-08-06-07 — Duyệt bốn trang đã dựng theo bàn giao bước 7
+
+**Chốt.** Chủ dự án xem trực tiếp bản build thật (`dist/`) ngày 2026-08-06 và duyệt bốn trang: trang chủ, tour chi tiết, địa điểm chi tiết, liên hệ.
+
+**Ba quyết định nội dung nằm trong đợt này:**
+
+- **Tiêu đề trang chủ** đổi từ tên thương hiệu sang câu định vị *"Một đầu mối cho cả chuyến biển đảo Nha Trang"*. Khai ở `brand.headline` trong `site.config.ts` — một nơi duy nhất.
+- **Thanh tin cậy** đổi sang bốn điểm khác biệt chủ dự án chốt ở `00-PROJECT_BRIEF` §3, thay câu của engine gốc.
+- **Thứ tự khối trang chủ**: sản phẩm trước, nội dung sau. `tours` từ vị trí 12/14 lên vị trí 2. Đây chỉ là mặc định trong code; `siteSettings.sections` vẫn là nơi chốt thật, chủ dự án đổi được trong Studio.
+
+**Một chỗ tác nhân không viết theo nguyên văn, chủ dự án đã biết và duyệt.** Điểm khác biệt thứ ba viết *"Giá tốt — báo giá trọn gói, không phụ thu"* thay vì *"giá tốt nhất thị trường"*. Căn cứ: Luật Quảng cáo 2012 Điều 8.11 cấm quảng cáo so sánh trực tiếp với sản phẩm cùng loại của đơn vị khác. Ghi ở `00-PROJECT_BRIEF` §3.
+
+**Phạm vi chưa dựng, ghi để không rơi.** Bàn giao bước 7 có bảy loại trang; đợt này dựng bốn. Còn: điểm tham quan, trải nghiệm, cẩm nang, danh sách tour. Và Design **không vẽ** trang Liên hệ — trang đó áp lại pattern card của bàn giao, không có mockup để bám.
+
+**Trạng thái cổng lúc duyệt:** `astro check` 0 lỗi 0 cảnh báo · `npm run build` đi hết · `check:theme` 3 bộ đạt AA · `gate:all` 9 xanh / 1 đỏ đúng `deferred-gate` (ND-004).
