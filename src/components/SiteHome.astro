@@ -28,6 +28,8 @@ const copy = HOME_COPY[lang]
 
 // Nút phụ ở hero lấy mục đầu tiên của menu (ADR-0023) thay vì hardcode hub-kham-pha.
 // Menu đổi thì nút này đổi theo, không còn hai nơi khai điều hướng (DR-007).
+const zaloUrl = config?.contact?.zaloUrl || ''
+
 const firstNavItem = resolveNav(lang, config?.contact?.zaloUrl)
   .flatMap(item => (item.children.length > 0 ? item.children : [item]))
   .find(item => item.href)
@@ -132,8 +134,13 @@ const activeSections = rawSections.filter((s) => !s.hidden)
     <h1 class="site-home-title">{siteCopy.title}</h1>
     <p class="site-home-summary">{siteCopy.summary}</p>
     <div class="site-home-actions">
-      <a href={destinationHref} class="primary-action">{siteCopy.destinationCta}</a>
-      {firstNavItem?.href && <a href={firstNavItem.href} class="secondary-action">{firstNavItem.label}</a>}
+      {/* Nút chính là Zalo — kênh đặt chỗ duy nhất của site (00 §3). Chưa nhập
+          zaloUrl thì rơi về nút trỏ trang điểm đến, không để hero mất hành động. */}
+      {zaloUrl
+        ? <a href={zaloUrl} class="primary-action" target="_blank" rel="noopener">{copy.heroBookCta}</a>
+        : <a href={destinationHref} class="primary-action">{siteCopy.destinationCta}</a>}
+      {zaloUrl && <a href={destinationHref} class="secondary-action">{siteCopy.destinationCta}</a>}
+      {!zaloUrl && firstNavItem?.href && <a href={firstNavItem.href} class="secondary-action">{firstNavItem.label}</a>}
     </div>
   </div>
 </section>
@@ -236,7 +243,7 @@ const activeSections = rawSections.filter((s) => !s.hidden)
     background: var(--c-primary);
     overflow: hidden;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
   }
 
   .site-home-bg {
@@ -273,16 +280,19 @@ const activeSections = rawSections.filter((s) => !s.hidden)
     color: var(--c-text-inverse);
     font-family: var(--font-display);
     font-size: clamp(var(--fs-h1), 5vw, var(--fs-hero));
-    line-height: 1.05;
-    font-weight: var(--fw-800);
-    margin-bottom: var(--s4);
+    line-height: var(--lh-heading);
+    font-weight: var(--fw-900);
+    max-width: 19ch;
+    text-wrap: balance;
+    margin-bottom: var(--s5);
   }
 
   .site-home-summary {
     color: var(--c-text-inverse);
     font-size: var(--fs-base);
     line-height: var(--lh-body);
-    opacity: .84;
+    max-width: 58ch;
+    opacity: .9;
   }
 
   .site-home-actions {
@@ -298,8 +308,8 @@ const activeSections = rawSections.filter((s) => !s.hidden)
     align-items: center;
     min-height: 44px;
     border-radius: var(--radius-pill);
-    padding: var(--s3) var(--s5);
-    font-size: var(--fs-sm);
+    padding: var(--s3) var(--s6);
+    font-size: var(--fs-base);
     font-weight: var(--fw-700);
   }
 

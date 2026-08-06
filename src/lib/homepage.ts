@@ -35,6 +35,8 @@ export const HOME_COPY: Record<Lang, {
   viewAll: string
   updatedAt: string
   safety: string
+  /** Nhãn nút chính ở hero — đặt chỗ qua Zalo (00 §3). */
+  heroBookCta: string
 }> = {
   vi: {
     heroEyebrow: 'Cẩm nang địa phương',
@@ -75,6 +77,7 @@ export const HOME_COPY: Record<Lang, {
     viewAll: 'Xem tất cả',
     updatedAt: 'Cập nhật',
     safety: 'Lưu ý an toàn',
+    heroBookCta: 'Đặt vé qua Zalo',
   },
   en: {
     heroEyebrow: 'Local travel guide',
@@ -115,6 +118,7 @@ export const HOME_COPY: Record<Lang, {
     viewAll: 'View all',
     updatedAt: 'Updated',
     safety: 'Safety note',
+    heroBookCta: 'Book on Zalo',
   },
   zh: {
     heroEyebrow: '本地旅行指南',
@@ -155,6 +159,7 @@ export const HOME_COPY: Record<Lang, {
     viewAll: '查看全部',
     updatedAt: '更新',
     safety: '安全提示',
+    heroBookCta: '通过 Zalo 预订',
   },
   ko: {
     heroEyebrow: '현지 여행 가이드',
@@ -195,6 +200,7 @@ export const HOME_COPY: Record<Lang, {
     viewAll: '전체 보기',
     updatedAt: '업데이트',
     safety: '안전 안내',
+    heroBookCta: 'Zalo로 예약',
   },
   ru: {
     heroEyebrow: 'Местный путеводитель',
@@ -235,6 +241,7 @@ export const HOME_COPY: Record<Lang, {
     viewAll: 'Смотреть все',
     updatedAt: 'Обновлено',
     safety: 'Совет по безопасности',
+    heroBookCta: 'Забронировать в Zalo',
   },
 }
 
