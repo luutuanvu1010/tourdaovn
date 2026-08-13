@@ -24,7 +24,7 @@ const homeHref = uiLang === 'vi' ? '/' : `/${uiLang}/`
 // zaloUrl lấy từ Sanity: chưa điền thì mục "Đặt vé trực tuyến" tự biến mất,
 // không render nút chết.
 const contact = await fetchSiteContact()
-const navItems = resolveNav(uiLang, contact?.zaloUrl)
+const navItems = resolveNav(uiLang, contact?.zaloUrl, 'header')
 
 /** Mục đang mở? Dùng cho cả mục lẻ lẫn nhóm có con. */
 function isActive(href: string | null, children: { href: string | null }[]): boolean {

@@ -12,6 +12,7 @@ import {
   langs,
   defaultLang,
   type NavItem,
+  type NavKind,
 } from '../site.config'
 
 /** Mọi mục ĐÃ ĐƯỢC KHAI trong site.config, kể cả mục đang để false. */
@@ -115,6 +116,8 @@ export function isTermEntity(entity: string): boolean {
 /** Một mục menu đã phân giải xong, sẵn sàng render. */
 export interface ResolvedNavItem {
   label: string
+  /** Loại đích đã khai. `null` với mục chỉ là nhóm chứa con. */
+  kind: NavKind | null
   /** Địa chỉ đích. `null` với mục 'zalo' chưa điền link, và với mục có children. */
   href: string | null
   /** Địa chỉ nội bộ phải tồn tại trong build. `null` nếu đích nằm ngoài site. */
@@ -181,21 +184,30 @@ function resolveInternalPath(item: NavItem, lang: Lang): string | null {
   return `${prefix}/${seg}/${slug}/`
 }
 
+/** Nơi menu được render. Header và chân trang lấy hai lát cắt khác nhau của cùng một `nav`. */
+export type NavSurface = 'header' | 'footer' | 'all'
+
 /**
  * Menu đã phân giải, cho một ngôn ngữ.
  *
  * `zaloUrl` lấy từ siteSettings lúc build. Chưa điền thì mục 'zalo' bị bỏ hẳn
  * khỏi menu — không render nút chết.
  */
-export function resolveNav(lang: Lang, zaloUrl?: string | null): ResolvedNavItem[] {
+export function resolveNav(
+  lang: Lang,
+  zaloUrl?: string | null,
+  surface: NavSurface = 'all',
+): ResolvedNavItem[] {
   const walk = (items: NavItem[]): ResolvedNavItem[] =>
     items.flatMap(item => {
       if (item.kind === 'zalo' && !zaloUrl) return []
+      if (surface === 'header' && item.footerOnly) return []
       const children = item.children?.length ? walk(item.children) : []
       if (item.children?.length && children.length === 0) return []
       const internalPath = resolveInternalPath(item, lang)
       return [{
         label: item.label,
+        kind: item.kind ?? null,
         href: item.kind === 'zalo' ? (zaloUrl ?? null) : internalPath,
         internalPath,
         children,

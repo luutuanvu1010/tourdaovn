@@ -25,7 +25,7 @@ const footerChannels = [
 // Chân trang đọc cùng một `nav` với menu chính (ADR-0023, DR-007). Trước đây hai
 // danh sách entity viết cứng ở đây, nên chân trang và menu lệch nhau mà không ai
 // thấy. Nay sửa một chỗ là cả hai đổi theo.
-const navItems = resolveNav(uiLang, contact?.zaloUrl)
+const navItems = resolveNav(uiLang, contact?.zaloUrl, 'footer')
 const navGroups = navItems.filter(i => i.children.length > 0)
 const navFlat = navItems.filter(i => i.children.length === 0 && i.href)
 
