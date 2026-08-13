@@ -25,6 +25,8 @@
 # 302 chứ không phải 301 — tạm thời, gỡ dòng là hoàn nguyên ngay, không đốt SEO.
 # Chỉ khớp đúng "/" nên trang con không bị đụng, sitemap không đổi, R3/R4 vẫn pass.
 #
-# GỠ KHI: site công bố. Mốc ra mắt 2026-08-09 theo QĐ-2026-08-06-01.
+# ĐÃ GỠ 2026-08-13: site công bố, trang chủ phục vụ nội dung thật và đã lên menu
+# chính với mục "Trang chủ" (SPEC-2026-08-13-menu-chinh-bon-muc). Giữ dòng đã ghi
+# chú lại làm dấu vết, không xoá hẳn.
 
-/    https://tourdaonhatrang.com/    302
+#/    https://tourdaonhatrang.com/    302
