@@ -30,9 +30,11 @@ const copy = HOME_COPY[lang]
 // Menu đổi thì nút này đổi theo, không còn hai nơi khai điều hướng (DR-007).
 const zaloUrl = config?.contact?.zaloUrl || ''
 
+// Bỏ qua mục 'home': nó đứng đầu menu, nên lấy nguyên xi sẽ ra một nút trỏ về chính
+// trang đang đứng.
 const firstNavItem = resolveNav(lang, config?.contact?.zaloUrl)
   .flatMap(item => (item.children.length > 0 ? item.children : [item]))
-  .find(item => item.href)
+  .find(item => item.href && item.kind !== 'home')
 
 const SITE_COPY: Record<Lang, {
   eyebrow: string

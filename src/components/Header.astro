@@ -26,10 +26,20 @@ const homeHref = uiLang === 'vi' ? '/' : `/${uiLang}/`
 const contact = await fetchSiteContact()
 const navItems = resolveNav(uiLang, contact?.zaloUrl, 'header')
 
-/** Mục đang mở? Dùng cho cả mục lẻ lẫn nhóm có con. */
-function isActive(href: string | null, children: { href: string | null }[]): boolean {
-  if (href && href !== '/' && currentPath.startsWith(href)) return true
-  return children.some(c => c.href && c.href !== '/' && currentPath.startsWith(c.href))
+type NavHit = { kind: string | null; href: string | null }
+
+/**
+ * Mục đang mở? Dùng cho cả mục lẻ lẫn nhóm có con.
+ *
+ * Trang chủ so khớp CHÍNH XÁC: `startsWith('/')` đúng với mọi đường dẫn, nên dùng nó ở
+ * đây sẽ tô sáng "Trang chủ" trên khắp site. Trước đây hàm này chặn cứng `href !== '/'`,
+ * viết từ thời chưa mục nào có href là '/', nên thêm mục 'home' vào thì trang chủ không
+ * bao giờ được tô sáng.
+ */
+function isActive(item: NavHit & { children: NavHit[] }): boolean {
+  const hit = (i: NavHit) =>
+    i.href !== null && (i.kind === 'home' ? currentPath === i.href : currentPath.startsWith(i.href))
+  return hit(item) || item.children.some(hit)
 }
 
 // Danh sách nút chuyển ngôn ngữ đọc từ `langs` trong site.config.ts (PHA 4, GÓI 2) —
@@ -58,7 +68,7 @@ const languages = langs.map(code => ({ code, label: LANG_LABELS[code] }));
         <div class="nav-group">
           <button
             type="button"
-            class={`nav-link nav-toggle${isActive(item.href, item.children) ? ' active' : ''}`}
+            class={`nav-link nav-toggle${isActive(item) ? ' active' : ''}`}
             aria-expanded="false"
           >
             {item.label}
@@ -77,7 +87,7 @@ const languages = langs.map(code => ({ code, label: LANG_LABELS[code] }));
       ) : (
         <a
           href={item.href}
-          class={`nav-link${isActive(item.href, item.children) ? ' active' : ''}`}
+          class={`nav-link${isActive(item) ? ' active' : ''}`}
           {...(item.href?.startsWith('http') ? { rel: 'noopener', target: '_blank' } : {})}
         >
           {item.label}
