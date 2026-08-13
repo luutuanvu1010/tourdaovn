@@ -245,11 +245,12 @@ export const primaryDestinationSlug = 'nha-trang'
 //   dòng sai. Đây là cố ý: thà đỏ trên máy còn hơn khách bấm vào trang trắng.
 //
 //  ─────────────────────────────────────────────────────────────────────────
-//  SÁU LOẠI ĐÍCH  (`kind`)
+//  BẢY LOẠI ĐÍCH  (`kind`)
 //  ─────────────────────────────────────────────────────────────────────────
 //
 //   kind        target là gì                         Ví dụ
 //   ─────────   ─────────────────────────────────    ──────────────────────
+//   'home'      KHÔNG có target — trang chủ của site
 //   'index'     tên danh mục → trang danh sách       'article'
 //   'hub'       tên hub → trang gom nhiều danh mục   'hub-luu-tru'
 //   'term'      '<danh mục>/<đường dẫn danh mục con>' 'experience/lan-bien'
@@ -262,27 +263,30 @@ export const primaryDestinationSlug = 'nha-trang'
 //   Riêng 'zalo': chưa điền Liên kết Zalo trong Studio thì mục này tự ẩn.
 //   Không có nút chết.
 
-export type NavKind = 'index' | 'hub' | 'term' | 'detail' | 'static' | 'zalo'
+export type NavKind = 'home' | 'index' | 'hub' | 'term' | 'detail' | 'static' | 'zalo'
 
 export interface NavItem {
   /** Chữ hiện trên menu */
   label: string
   /** Loại đích. Mục có `children` thì bỏ trống. */
   kind?: NavKind
-  /** Địa chỉ đích, theo bảng sáu loại ở trên. */
+  /** Địa chỉ đích, theo bảng bảy loại ở trên. */
   target?: string
   /** Danh sách con — mục này thành menu thả xuống. */
   children?: NavItem[]
+  /** Chỉ hiện ở chân trang, không lên menu chính. Mặc định là hiện cả hai nơi. */
+  footerOnly?: boolean
 }
 
 export const nav: NavItem[] = [
+  { label: 'Trang chủ', kind: 'home' },
   {
-    label: 'Tour & Vé',
+    label: 'Tour',
     children: [
       // Trang danh mục con: liệt kê MỌI tour mang tour-type "Tour đảo", không
       // phải một tour cụ thể. Trước đây khai 'detail' trỏ đúng một tour, nên
       // vỡ build khi tour ấy đổi slug (sự cố 2026-08-13).
-      { label: 'Tour đảo Nha Trang', kind: 'term', target: 'tour/tour-dao' },
+      { label: 'Tour đảo', kind: 'term', target: 'tour/tour-dao' },
 
       // ── CHƯA CÓ NỘI DUNG ─────────────────────────────────────────────
       //  Nhập document trong Sanity Studio rồi bỏ dấu // ở đầu dòng tương
@@ -298,8 +302,10 @@ export const nav: NavItem[] = [
   },
   { label: 'Kinh nghiệm du lịch', kind: 'index',  target: 'article' },
   { label: 'Đặt vé trực tuyến',   kind: 'zalo' },
-  { label: 'Hỗ trợ',              kind: 'static', target: 'ho-tro' },
-  { label: 'Liên hệ',             kind: 'static', target: 'lien-he' },
+
+  // Hai mục dưới chỉ hiện ở chân trang — menu chính giữ đúng bốn mục bán hàng.
+  { label: 'Hỗ trợ',              kind: 'static', target: 'ho-tro',  footerOnly: true },
+  { label: 'Liên hệ',             kind: 'static', target: 'lien-he', footerOnly: true },
 ]
 
 /**

@@ -141,6 +141,10 @@ function resolveInternalPath(item: NavItem, lang: Lang): string | null {
   if (item.kind === 'zalo') return null
 
   const prefix = langPrefix(lang)
+  // Trang chủ không có `target`: đích của nó là gốc site, không phải một document.
+  // Miễn phép kiểm "phải có target" đúng như 'zalo' đang được miễn.
+  if (item.kind === 'home') return `${prefix}/`
+
   const bad = (msg: string) => {
     throw new Error(`\n\n[site.config] Mục menu "${item.label}": ${msg}\n`)
   }
@@ -236,6 +240,11 @@ export function assertNavTargetsExist(generatedPaths: Iterable<string>): void {
   for (const key of staticPages) {
     for (const lang of langs) have.add(norm(`${langPrefix(lang)}/${key}`))
   }
+
+  // Trang chủ do `src/pages/index.astro` sinh, nằm ngoài cả `staticPages` lẫn danh sách
+  // trang động, nên cũng thuộc diện "được TIN là có" như chú thích trên. Không khai ở đây
+  // thì mục menu `kind: 'home'` bị chính cổng này báo là trang không tồn tại.
+  for (const lang of langs) have.add(norm(`${langPrefix(lang)}/`))
 
   const missing = navInternalPaths().filter(p => !have.has(norm(p)))
   if (missing.length === 0) return
