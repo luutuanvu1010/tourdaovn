@@ -1,7 +1,7 @@
 ---
 import RouteDispatch from '../components/RouteDispatch.astro'
-import { fetchAllSlugs, fetchAllTerms, fetchAllDestinationSlugs } from '../lib/sanity'
-import { ROUTE_MAP, assertNavTargetsExist } from '../lib/routes'
+import { fetchAllSlugs, scanTerms, fetchAllDestinationSlugs } from '../lib/sanity'
+import { ROUTE_MAP, assertNavTargetsExist, assertNavTermsHaveSlug, reportTermSlugGaps } from '../lib/routes'
 import type { Lang } from '../lib/types'
 
 // Disambiguation term vs detail: quyết ngay tại đây qua props.kind, không đoán ở render.
@@ -10,10 +10,16 @@ import type { Lang } from '../lib/types'
 export async function getStaticPaths() {
   const lang: Lang = 'vi'
 
-  const [slugs, terms] = await Promise.all([
+  const [slugs, termScan] = await Promise.all([
     fetchAllSlugs(lang),
-    fetchAllTerms(lang),
+    scanTerms(),
   ])
+  const terms = termScan.terms
+
+  // Category thiếu `slug` thì không có trang danh mục con. Chặn cứng cái nào
+  // đang bị menu trỏ vào, báo warn cho phần còn lại.
+  assertNavTermsHaveSlug(termScan.gaps)
+  reportTermSlugGaps(termScan.gaps)
 
   const paths: { params: { path: string }; props: { kind: string; entity: string; slug?: string } }[] = []
 

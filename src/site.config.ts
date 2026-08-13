@@ -279,7 +279,10 @@ export const nav: NavItem[] = [
   {
     label: 'Tour & Vé',
     children: [
-      { label: 'Tour đảo Nha Trang', kind: 'detail', target: 'tour/tour-3-dao-nha-trang-review-chi-tiet' },
+      // Trang danh mục con: liệt kê MỌI tour mang tour-type "Tour đảo", không
+      // phải một tour cụ thể. Trước đây khai 'detail' trỏ đúng một tour, nên
+      // vỡ build khi tour ấy đổi slug (sự cố 2026-08-13).
+      { label: 'Tour đảo Nha Trang', kind: 'term', target: 'tour/tour-dao' },
 
       // ── CHƯA CÓ NỘI DUNG ─────────────────────────────────────────────
       //  Nhập document trong Sanity Studio rồi bỏ dấu // ở đầu dòng tương

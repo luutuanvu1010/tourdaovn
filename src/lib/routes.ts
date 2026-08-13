@@ -1,4 +1,7 @@
 import type { Lang } from './types'
+// `import type` bị xoá lúc biên dịch, nên routes.ts KHÔNG kéo theo client Sanity
+// vào mọi component đang dùng nó. Giữ đúng một nguồn cho kiểu này.
+import type { TermSlugGap } from './sanity'
 import {
   enabledRoutes,
   isRouteEnabled,
@@ -244,5 +247,69 @@ export function assertNavTargetsExist(generatedPaths: Iterable<string>): void {
       'Sanity Studio, hoặc đường dẫn (slug) trong `nav` không khớp document thật.\n\n' +
       'Sửa: nhập nội dung trước, hoặc tạm ghi chú dòng đó lại trong\n' +
       'src/site.config.ts mục 7, rồi build lại.\n',
+  )
+}
+
+/** Mọi mục menu `kind: 'term'`, đã phẳng hoá qua các cấp con. */
+function navTermItems(): NavItem[] {
+  const out: NavItem[] = []
+  const walk = (items: NavItem[]) => {
+    for (const item of items) {
+      if (item.children?.length) { walk(item.children); continue }
+      if (item.kind === 'term' && item.target) out.push(item)
+    }
+  }
+  walk(nav)
+  return out
+}
+
+/**
+ * BỘ KIỂM: mục menu `kind: 'term'` trỏ vào một category CÓ THẬT nhưng chưa
+ * điền `slug`. Mức `fail`. Gọi từ getStaticPaths, TRƯỚC assertNavTargetsExist.
+ *
+ * Vì sao cần riêng một cổng nữa khi đã có assertNavTargetsExist: cổng kia chỉ
+ * biết "trang không tồn tại" nên nó đoán sai bệnh — nó bảo chủ dự án đi nhập
+ * nội dung, trong khi nội dung đã có đủ và cái thiếu chỉ là một ô `slug` trong
+ * category. Sự cố 2026-08-13 mất một vòng chẩn đoán vì đúng câu đoán sai đó.
+ *
+ * Giới hạn đã biết: cổng này khớp `target` của menu với `termCode`. Hai giá trị
+ * ấy trùng nhau khi slug sinh tự động từ tên (mặc định của Studio). Nếu chủ dự
+ * án cố ý đặt slug khác termCode thì cổng này im, và assertNavTargetsExist vẫn
+ * bắt được — chỉ là với câu đoán chung chung như cũ.
+ */
+export function assertNavTermsHaveSlug(gaps: Iterable<TermSlugGap>): void {
+  const byCode = new Map<string, TermSlugGap>()
+  for (const g of gaps) byCode.set(g.termCode, g)
+  if (byCode.size === 0) return
+
+  const hits: string[] = []
+  for (const item of navTermItems()) {
+    const target = item.target as string
+    const gap = byCode.get(target.slice(target.indexOf('/') + 1))
+    if (gap) hits.push(`  • "${item.label}" → ${target}   (category "${gap.name}", bộ ${gap.inDefinedTermSet})`)
+  }
+  if (hits.length === 0) return
+
+  throw new Error(
+    '\n\n[site.config] Mục menu trỏ vào category CHƯA ĐIỀN SLUG:\n' +
+      hits.join('\n') +
+      '\n\nCategory có thật và đã publish, nhưng ô `slug` (nhóm SEO) còn trống.\n' +
+      'Trang danh mục con sinh ra từ `slug`, không phải từ `termCode`, nên thiếu\n' +
+      'ô đó thì không có trang nào để menu trỏ vào.\n\n' +
+      'Sửa: mở category trong Sanity Studio, điền ô `slug`, publish, rồi build lại.\n',
+  )
+}
+
+/**
+ * BÁO CÁO mức `warn`: category term-set còn trống `slug`. Build vẫn chạy —
+ * đây là mô tả hiện trạng để chủ dự án rà, không phải danh sách bắt buộc.
+ * Cái nào đang bị menu trỏ vào thì assertNavTermsHaveSlug đã chặn cứng ở trên.
+ */
+export function reportTermSlugGaps(gaps: TermSlugGap[]): void {
+  if (gaps.length === 0) return
+  console.warn(
+    `\n[danh mục con] ${gaps.length} category chưa điền slug — không có trang danh mục con:\n` +
+      gaps.map(g => `  ${g.inDefinedTermSet.padEnd(16)} ${g.name} (termCode: ${g.termCode})`).join('\n') +
+      '\n',
   )
 }

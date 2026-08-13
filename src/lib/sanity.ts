@@ -181,14 +181,50 @@ export interface TermEntry {
   inDefinedTermSet: string
 }
 
-export async function fetchAllTerms(_lang: string): Promise<TermEntry[]> {
+/** Category thuộc hai bộ term nhưng CHƯA điền `slug` — nên không có trang danh mục con. */
+export interface TermSlugGap {
+  termCode: string
+  name: string
+  inDefinedTermSet: string
+}
+
+export interface TermScan {
+  terms: TermEntry[]
+  gaps: TermSlugGap[]
+}
+
+/**
+ * Quét mọi category thuộc hai bộ term, TÁCH làm hai: cái đã điền `slug` (có
+ * trang danh mục con) và cái chưa (không có trang).
+ *
+ * Vì sao phải tách thay vì lọc thẳng trong GROQ như trước: `slug` là field tuỳ
+ * chọn trong `cms/schemas/category.ts` (nhóm seo), còn `termCode` mới là field
+ * bắt buộc. Lọc `defined(slug.current)` ngay trong truy vấn làm category thiếu
+ * slug BIẾN MẤT CÂM khỏi build — không trang, không cảnh báo, không ai biết.
+ * Đó chính là cách trang danh mục "Tour đảo" vắng mặt cho tới 2026-08-13.
+ * Nay cái thiếu vẫn bị loại khỏi danh sách trang, nhưng được trả về để gọi ở
+ * ngoài dựng cổng trên nó.
+ */
+export async function scanTerms(): Promise<TermScan> {
   const c = getClient()
-  const query = `*[_type == "category" && inDefinedTermSet in ["experience-type", "tour-type"] && defined(slug.current)]{
-    termCode,
+  const query = `*[_type == "category" && inDefinedTermSet in ["experience-type", "tour-type"]]{
+    "termCode": termCode.current,
     "slug": slug.current,
+    "name": coalesce(name.vi, termCode.current),
     inDefinedTermSet
   }`
-  return c.fetch(query) as Promise<TermEntry[]>
+  const rows = (await c.fetch<Array<TermEntry & { name: string }>>(query)) ?? []
+
+  return {
+    terms: rows.filter(r => typeof r.slug === 'string' && r.slug !== ''),
+    gaps: rows
+      .filter(r => typeof r.slug !== 'string' || r.slug === '')
+      .map(({ termCode, name, inDefinedTermSet }) => ({ termCode, name, inDefinedTermSet })),
+  }
+}
+
+export async function fetchAllTerms(_lang: string): Promise<TermEntry[]> {
+  return (await scanTerms()).terms
 }
 
 export async function fetchAllDestinationSlugs(): Promise<string[]> {

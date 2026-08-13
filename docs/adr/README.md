@@ -58,6 +58,10 @@ Nhóm cần tổng quát hóa (có GHI CHÚ CORE — nguyên tắc engine, hằn
   phải catalogue**. Khuôn tái dùng: khi catalogue mỏng, chuyển gánh nặng thuyết phục sang dữ
   liệu singleton không phụ thuộc số lượng sản phẩm. Kèm luật cứng: đánh giá tự đăng KHÔNG
   serialize ra JSON-LD.
+- [ADR-0025](ADR-0025-trang-danh-muc-con-khoa-vao-slug.md) — **Trang danh mục con khoá vào
+  `slug`**, không khoá vào `termCode`, kèm hai cổng chặn category thiếu slug. Khuôn tái dùng:
+  trang sinh ra từ một field TUỲ CHỌN thì phải có cổng, nếu không nó biến mất câm. Bổ sung
+  cho ADR-0023.
 
 ## ADR gốc KHÔNG mang vào Core (và vì sao)
 
