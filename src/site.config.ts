@@ -278,32 +278,25 @@ export interface NavItem {
   footerOnly?: boolean
 }
 
+// Menu chính khai TAY, không sinh tự động — thứ tự và nhãn là quyết định biên tập.
+// "Tour" phải đứng đầu vì đó là dòng sản phẩm chính; "Trang chủ" và "Đặt vé trực
+// tuyến" không phải entity nên không sinh từ ROUTE_MAP được.
+//
+// Chân trang thì NGƯỢC LẠI: `Footer.astro` nối thêm danh sách tự sinh từ ROUTE_MAP
+// (`autoRouteLinks`), nên bật một entity mới là nó tự có lối vào, không ai phải nhớ
+// khai thêm ở đây. Xem SPEC-2026-08-14-menu-day-du-entity.md.
 export const nav: NavItem[] = [
-  { label: 'Trang chủ', kind: 'home' },
-  {
-    label: 'Tour',
-    children: [
-      // Trang danh mục con: liệt kê MỌI tour mang tour-type "Tour đảo", không
-      // phải một tour cụ thể. Trước đây khai 'detail' trỏ đúng một tour, nên
-      // vỡ build khi tour ấy đổi slug (sự cố 2026-08-13).
-      { label: 'Tour đảo', kind: 'term', target: 'tour/tour-dao' },
-
-      // ── CHƯA CÓ NỘI DUNG ─────────────────────────────────────────────
-      //  Nhập document trong Sanity Studio rồi bỏ dấu // ở đầu dòng tương
-      //  ứng, sửa lại phần sau dấu / cho khớp đường dẫn thật.
-      //
-      // { label: 'Tour Hòn Tằm',    kind: 'detail', target: 'tour/tour-hon-tam' },
-      // { label: 'Tour Mini Beach', kind: 'detail', target: 'tour/tour-mini-beach' },
-      // { label: 'Vé VinWonders',   kind: 'detail', target: 'attraction/vinwonders-nha-trang' },
-      // { label: 'KongForest',      kind: 'detail', target: 'attraction/kongforest' },
-      // { label: 'Tắm bùn Tháp Bà', kind: 'detail', target: 'attraction/tam-bun-thap-ba' },
-      // { label: 'i-Resort',        kind: 'detail', target: 'attraction/i-resort' },
-    ],
-  },
+  { label: 'Trang chủ',           kind: 'home' },
+  { label: 'Tour',                kind: 'index',  target: 'tour' },
+  { label: 'Điểm tham quan',      kind: 'index',  target: 'attraction' },
+  { label: 'Trải nghiệm',         kind: 'index',  target: 'experience' },
+  { label: 'Địa danh',            kind: 'index',  target: 'place' },
+  // Nhãn menu khác nhãn kỹ thuật trong ROUTE_TABLE ('Cẩm nang') — nhãn trên menu là
+  // chuyện bán hàng, hai thứ được phép khác nhau.
   { label: 'Kinh nghiệm du lịch', kind: 'index',  target: 'article' },
   { label: 'Đặt vé trực tuyến',   kind: 'zalo' },
 
-  // Hai mục dưới chỉ hiện ở chân trang — menu chính giữ đúng bốn mục bán hàng.
+  // Hai mục dưới chỉ hiện ở chân trang — menu chính giữ đúng bảy mục bán hàng.
   { label: 'Hỗ trợ',              kind: 'static', target: 'ho-tro',  footerOnly: true },
   { label: 'Liên hệ',             kind: 'static', target: 'lien-he', footerOnly: true },
 ]

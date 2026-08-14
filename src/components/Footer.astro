@@ -1,6 +1,6 @@
 ---
 import type { Lang } from '../lib/types'
-import { resolveNav } from '../lib/routes'
+import { resolveNav, autoRouteLinks } from '../lib/routes'
 import { uiCopy } from '../lib/uiCopy'
 import { fetchSiteContact } from '../lib/siteContact'
 import { brand } from '../site.config'
@@ -28,6 +28,13 @@ const footerChannels = [
 const navItems = resolveNav(uiLang, contact?.zaloUrl, 'footer')
 const navGroups = navItems.filter(i => i.children.length > 0)
 const navFlat = navItems.filter(i => i.children.length === 0 && i.href)
+
+// Nhóm thứ hai: MỌI trang danh sách đang bật, sinh thẳng từ ROUTE_MAP. Menu chính chỉ
+// mang năm entity bán hàng, nên nếu không có nhóm này thì Khách sạn, Resort và bốn hub
+// thành trang mồ côi — sống, nằm trong sitemap, mà không lối vào nào từ site.
+// Bỏ đường dẫn đã có ở nhóm khai tay để không hiện hai lần.
+const manualHrefs = new Set(navItems.flatMap(i => [i.href, ...i.children.map(c => c.href)]))
+const browseLinks = autoRouteLinks(uiLang).filter(l => !manualHrefs.has(l.href))
 
 const currentYear = new Date().getFullYear()
 const copyrightYear = brand.foundedYear < currentYear ? `${brand.foundedYear}–${currentYear}` : `${currentYear}`
@@ -72,6 +79,17 @@ const copyrightYear = brand.foundedYear < currentYear ? `${brand.foundedYear}–
                   rel={item.href?.startsWith('http') ? 'noopener' : undefined}
                 >{item.label}</a>
               </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {browseLinks.length > 0 && (
+        <div class="foot-col">
+          <h4>{t('footerBrowse')}</h4>
+          <ul>
+            {browseLinks.map(link => (
+              <li><a href={link.href}>{link.label}</a></li>
             ))}
           </ul>
         </div>

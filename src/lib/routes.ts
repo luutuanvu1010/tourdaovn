@@ -187,6 +187,33 @@ function resolveInternalPath(item: NavItem, lang: Lang): string | null {
 /** Nơi menu được render. Header và chân trang lấy hai lát cắt khác nhau của cùng một `nav`. */
 export type NavSurface = 'header' | 'footer' | 'all'
 
+/** Một lối vào tự sinh từ bảng địa chỉ, cho chân trang. */
+export interface AutoRouteLink {
+  label: string
+  href: string
+}
+
+/**
+ * MỌI trang danh sách đang bật, sinh thẳng từ `ROUTE_MAP` — không khai tay.
+ *
+ * Vì sao chân trang tự sinh còn menu chính khai tay: menu chính là quyết định biên tập
+ * (thứ tự, nhãn bán hàng, hai mục không phải entity). Chân trang chỉ cần ĐỦ. Trước đây
+ * site có 11 trang danh sách sống trên production mà menu dẫn tới đúng một — mười trang
+ * còn lại mồ côi, Google lập chỉ mục nhưng không liên kết nội bộ nào trỏ vào.
+ *
+ * Bật một entity mới trong site.config là nó tự có mặt ở đây; tắt đi thì tự biến mất.
+ * Không cần cổng canh: hàm này và `getStaticPaths` cùng lọc một `ROUTE_MAP` theo cùng
+ * điều kiện, nên không lệch được.
+ *
+ * `person` và `organization` không lên vì khai `hasIndex: false` — không có trang danh
+ * sách để trỏ tới.
+ */
+export function autoRouteLinks(lang: Lang): AutoRouteLink[] {
+  return ROUTE_MAP
+    .filter(r => r.hasIndex || r.entity.startsWith('hub-'))
+    .map(r => ({ label: r.labels[lang], href: `${langPrefix(lang)}/${r.segments[lang]}/` }))
+}
+
 /**
  * Menu đã phân giải, cho một ngôn ngữ.
  *
