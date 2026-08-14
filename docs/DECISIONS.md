@@ -713,3 +713,38 @@ Ai định đưa **chữ** thương hiệu vào Studio sau này thì đó là vi
 **Chưa cưỡng chế.** Không có kiểm máy nào bắt được việc schema Studio lệch với bản đã deploy. Đang dựa kỷ luật, cùng hạng với phiếu nợ `favicon.svg` ở `QĐ-2026-08-14-01`.
 
 **Một điều đã kiểm, không phải đoán.** Hai lần deploy đầu chạy `npx wrangler deploy` trần, thiếu cờ chặn nạp biến môi trường mà script cũ có. Kho có file biến môi trường ở gốc. Đã kiểm sau đó: `npx wrangler secret list` trả `[]`, version đã deploy không mang binding nào — `wrangler.toml` không khai `vars` nên không có gì để nạp. **Không có gì lộ.** Cờ `--env-file /dev/null` giữ lại trong lệnh mới làm lớp thứ hai (N10, P21), phòng ngày ai đó thêm một `vars` vào `wrangler.toml`.
+
+---
+
+## QĐ-2026-08-14-03 — Chữ người đọc vào Sanity, chữ máy đọc ở lại config
+
+**Chốt.** Thêm hai field object `hero` và `footer` vào `siteSettings` (`01-CONTENT_MODEL` §2.15 v1.0.18) cho biên tập viên tự đổi **chữ và ảnh** của Hero trang chủ và của chân trang. Kèm theo: kéo `heroText` cũ vào thành `hero.eyebrow`. Cửa hai chiều về schema; phần chuyển dữ liệu phải sao lưu trước. Spec: `docs/specs/SPEC-2026-08-14-hero-footer-tuy-bien.md`.
+
+**Vì sao cần.** Truy nguồn từng chỗ trên Hero và Footer ra bảy chỗ biên tập viên **không** sửa được: H1 trang chủ, đoạn mô tả Hero, chữ hai nút Hero, tagline chân trang, disclaimer chân trang, dòng bản quyền, và không có chỗ nào treo được giấy phép lữ hành. Đổi câu chào trên trang chủ hay đổi ảnh bìa theo mùa đều phải mở một pull request.
+
+**Ranh giới với `QĐ-2026-08-14-01`, không nới.** Quyết định hôm qua chốt: **chữ** thương hiệu ở lại `site.config.ts` vì nó vào JSON-LD và meta của mọi trang. Quyết định này **không đảo** điều đó. Nó tách một thứ mà quyết định trước gộp làm một — **chữ máy đọc** và **chữ người đọc**:
+
+| Chuỗi | Ở đâu | Vì sao |
+|---|---|---|
+| `brand.name`, `brand.legalName` | `site.config.ts`, không đổi | `og:site_name`, `Organization` JSON-LD |
+| `brand.description` khi làm `<meta name="description">` | `site.config.ts`, không đổi | Google đọc, phải cố định lúc build |
+| Đoạn mô tả **hiện trên** Hero | Sanity, rơi về `brand.description` | chỉ người đọc thấy |
+| `brand.headline` | Sanity, rơi về `brand.headline` | chỉ là H1, không vào meta hay JSON-LD |
+| `brand.tagline` | Sanity, rơi về `brand.tagline` | chỉ là một dòng ở chân trang |
+
+**Đánh đổi ghi thẳng:** sau quyết định này, mô tả trên trang chủ **có thể lệch** meta description. Cố ý — giữ meta cố định lúc build chính là điều kiện để không nới `QĐ-2026-08-14-01`. Không có kiểm máy nào bắt hai câu lệch nhau.
+
+**Ô chữ một tầng, không phải 5 ngôn ngữ.** `site.config.ts:130` khai `langs = ['vi']`; bốn ngôn ngữ kia chưa build ra trang nào, nên 5 tầng cho mỗi ô là Studio rậm mà không đổi lấy gì. Kèm một luật render bắt buộc để lúc bật tiếng Anh không phải nhớ lại: sáu ô chữ chỉ áp khi `lang === 'vi'`; ngôn ngữ khác thì code **bỏ qua** giá trị Sanity và dùng bản dịch trong `HOME_COPY`/`uiCopy`. Ảnh và `alt` của ảnh thì áp mọi ngôn ngữ — ảnh không có giọng văn, còn alt tiếng Việt vẫn hơn không có alt.
+
+**Một mảng badge gộp, không ba mảng riêng.** Chứng nhận, logo thanh toán, biểu tượng mạng xã hội cùng hình dạng: ảnh + alt + link. Ba mảng riêng là ba khuôn nhập liệu giống hệt phải bảo trì song song và ba vòng lặp trong code. Ô `kind` gánh việc phân nhóm.
+
+**Ba thứ cố ý KHÔNG đưa vào Studio:** tiêu đề cột chân trang (sinh từ `ROUTE_MAP` — đưa vào Studio là dựng lại nguồn thứ hai cho điều hướng, đúng thứ DR-007 vừa dọn); liên kết mạng xã hội đổ vào `Organization.sameAs` (chạm JSON-LD, cần quyết định riêng); dòng bản quyền (tên pháp nhân là chữ máy đọc).
+
+**Hai đường đọc, không ba.** Hero chỉ có ở trang chủ → thêm vào `siteSettingsQuery()` đã gọi sẵn. Footer render ở **mọi** trang → helper riêng `src/lib/siteFooter.ts`, đúng khuôn `siteBranding.ts` và `siteContact.ts`. Đây là bài học N7 mà `QĐ-2026-08-14-01` đã trả giá một lần để học.
+
+**Hai chỗ cưỡng chế ở tầng render, không trông vào kỷ luật biên tập viên:**
+
+- Ảnh nền chân trang phủ một lớp `--c-footer-bg` đục **88%** ở trên. Ngưỡng là số: tương phản chữ chân trang trên ảnh **sáng nhất** phải ≥ **4.5:1**.
+- Badge thiếu `alt` mà **có** link → lấy nhãn `kind` làm alt. Một link không nhãn là lỗi trợ năng thật. Không im lặng bỏ ảnh đi — mất nội dung không ai biết còn tệ hơn.
+
+**Còn nợ.** (1) Mô tả Hero lệch meta description — không có kiểm máy, dựa kỷ luật. (2) `Organization.sameAs` chưa lấy từ badge mạng xã hội, bỏ lỡ một lợi ích SEO thật. (3) Bốn ngôn ngữ của `heroText` bị bỏ khi migrate, chỉ lấy lại được từ bản sao lưu.

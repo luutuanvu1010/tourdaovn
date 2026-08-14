@@ -98,8 +98,30 @@ const SITE_COPY: Record<Lang, {
 }
 
 const siteCopy = SITE_COPY[lang]
-const heroEyebrow = config?.heroText?.[lang] || siteCopy.eyebrow
-const heroImage = imageUrl(td?.mainImage, { width: 1800 })
+
+// QĐ-2026-08-14-03 — sáu ô chữ trong `siteSettings.hero`/`footer` là TIẾNG VIỆT,
+// một tầng, không phải object 5 ngôn ngữ như `heroText` cũ. Với ngôn ngữ khác
+// phải BỎ QUA giá trị Sanity và dùng bản dịch trong code; để câu tiếng Việt rơi
+// lên trang tiếng Anh còn tệ hơn là dùng bản mặc định.
+//
+// Hôm nay `site.config.ts` khai `langs = ['vi']` nên chưa trang nào chạm nhánh
+// này. Viết ra ngay để lúc bật thêm ngôn ngữ không phải nhớ lại luật.
+const viOnly = (value?: string) => (lang === 'vi' ? value?.trim() || undefined : undefined)
+
+const hero = config?.hero
+const heroEyebrow = viOnly(hero?.eyebrow) || siteCopy.eyebrow
+const heroTitle = viOnly(hero?.heading) || siteCopy.title
+// `siteCopy.summary` là `brand.description` — cũng là <meta name="description">
+// của trang chủ. Ô Sanity chỉ đè phần NGƯỜI ĐỌC thấy; thẻ meta trong
+// `index.astro` vẫn đọc thẳng `brand.description`, cố định lúc build. Hai câu có
+// thể lệch nhau, và đó là điều kiện để không nới QĐ-2026-08-14-01.
+const heroSummary = viOnly(hero?.summary) || siteCopy.summary
+// Ảnh riêng của trang chủ thắng; để trống thì rơi về ảnh Điểm đến chính đúng như
+// trước spec này, nên trang chủ không có đường nào mất ảnh nền.
+const heroImage = imageUrl(hero?.image, { width: 1800 }) || imageUrl(td?.mainImage, { width: 1800 })
+const heroCredit = viOnly(hero?.imageCredit)
+const heroPrimaryLabel = viOnly(hero?.ctaPrimaryLabel) || copy.heroBookCta
+const heroSecondaryLabel = viOnly(hero?.ctaSecondaryLabel) || siteCopy.destinationCta
 
 // Thứ tự mặc định theo bàn giao bước 7: SẢN PHẨM trước, nội dung sau. Trước đây
 // `tours` đứng thứ 12/14 — sau cả `specialties` là danh mục đã tắt — nên trang
@@ -138,18 +160,23 @@ const activeSections = rawSections.filter((s) => !s.hidden)
   <div class="site-home-gradient" aria-hidden="true"></div>
   <div class="container site-home-inner">
     <p class="site-home-eyebrow">{heroEyebrow}</p>
-    <h1 class="site-home-title">{siteCopy.title}</h1>
-    <p class="site-home-summary">{siteCopy.summary}</p>
+    <h1 class="site-home-title">{heroTitle}</h1>
+    <p class="site-home-summary">{heroSummary}</p>
     <div class="site-home-actions">
       {/* Nút chính là Zalo — kênh đặt chỗ duy nhất của site (00 §3). Chưa nhập
-          zaloUrl thì rơi về nút trỏ trang điểm đến, không để hero mất hành động. */}
+          zaloUrl thì rơi về nút trỏ trang điểm đến, không để hero mất hành động.
+          Nút thay thế đó mang nhãn PHỤ, không phải nhãn chính: nó dẫn tới trang
+          điểm đến chứ không phải tới Zalo, gắn nhãn "Đặt vé qua Zalo" lên nó là
+          nói dối chỗ bấm sẽ tới. */}
       {zaloUrl
-        ? <a href={zaloUrl} class="primary-action" target="_blank" rel="noopener">{copy.heroBookCta}</a>
-        : <a href={destinationHref} class="primary-action">{siteCopy.destinationCta}</a>}
-      {zaloUrl && <a href={destinationHref} class="secondary-action">{siteCopy.destinationCta}</a>}
+        ? <a href={zaloUrl} class="primary-action" target="_blank" rel="noopener">{heroPrimaryLabel}</a>
+        : <a href={destinationHref} class="primary-action">{heroSecondaryLabel}</a>}
+      {zaloUrl && <a href={destinationHref} class="secondary-action">{heroSecondaryLabel}</a>}
       {!zaloUrl && firstNavItem?.href && <a href={firstNavItem.href} class="secondary-action">{firstNavItem.label}</a>}
     </div>
   </div>
+
+  {heroCredit && <div class="site-home-credit">{heroCredit}</div>}
 </section>
 
 {/* Khối "Tour nổi bật" đứng NGAY SAU hero — SPEC-2026-08-14-be-mat-vong-3 §3.4.
@@ -312,6 +339,21 @@ const activeSections = rawSections.filter((s) => !s.hidden)
     flex-wrap: wrap;
     gap: var(--s3);
     margin-top: var(--s6);
+  }
+
+  /* Cùng vị trí và cùng token với `.hero-credit` trong HomeHero.astro. Hai
+     component không dùng chung style được (style Astro có phạm vi riêng), nên
+     sửa một bên thì sửa cả bên kia. */
+  .site-home-credit {
+    position: absolute;
+    bottom: var(--s4);
+    right: var(--s5);
+    z-index: 3;
+    font-family: var(--font-ui);
+    font-size: var(--fs-badge);
+    font-style: italic;
+    color: var(--c-text-inverse);
+    opacity: 0.45;
   }
 
   .primary-action,

@@ -551,14 +551,61 @@ export interface SiteBranding {
   ogImage?: ImageAsset
 }
 
-// `branding` CỐ Ý không có trong kiểu này — nó được đọc qua đúng một đường,
-// `fetchSiteBranding()`, không qua `siteSettingsQuery()`. Xem ghi chú ở
-// BRANDING_PROJECTION trong src/lib/queries/siteSettings.ts.
+/**
+ * Chữ và ảnh của Hero trang chủ (CONTENT_MODEL §2.15 v1.0.18, QĐ-2026-08-14-03).
+ *
+ * Ranh giới với `brand` trong `src/site.config.ts`: đây là chữ NGƯỜI ĐỌC thấy.
+ * Chữ MÁY đọc — `brand.name`, `brand.legalName`, và `brand.description` khi nó
+ * làm `<meta name="description">` — vẫn cố định lúc build. Hệ quả có chủ ý:
+ * `summary` ở đây CÓ THỂ khác meta description của trang chủ.
+ *
+ * Sáu ô chữ trong `hero`/`footer` là TIẾNG VIỆT (một tầng, không phải object 5
+ * ngôn ngữ). Nơi render phải bỏ qua chúng khi `lang !== 'vi'` và dùng bản dịch
+ * trong HOME_COPY/uiCopy — xem `heroCopy()` trong SiteHome.astro.
+ */
+export interface SiteHero {
+  eyebrow?: string
+  heading?: string
+  summary?: string
+  image?: ImageAsset
+  imageCredit?: string
+  ctaPrimaryLabel?: string
+  ctaSecondaryLabel?: string
+}
+
+/** Một huy hiệu ở chân trang: chứng nhận, logo thanh toán, hoặc mạng xã hội. */
+export interface SiteFooterBadge {
+  _key: string
+  kind?: 'chung-nhan' | 'thanh-toan' | 'mang-xa-hoi'
+  image?: ImageAsset
+  alt?: string
+  url?: string
+}
+
+/**
+ * Chữ và ảnh chân trang (CONTENT_MODEL §2.15 v1.0.18, QĐ-2026-08-14-03).
+ *
+ * Tiêu đề cột và danh sách liên kết CỐ Ý không có ở đây — chúng sinh từ
+ * `ROUTE_MAP` (ADR-0023). Đưa vào Sanity là dựng nguồn thứ hai cho điều hướng.
+ */
+export interface SiteFooter {
+  tagline?: string
+  disclaimer?: string
+  backgroundImage?: ImageAsset
+  badges?: SiteFooterBadge[]
+}
+
+// `branding` và `footer` CỐ Ý không có trong kiểu này — chúng được đọc qua đúng
+// một đường, `fetchSiteBranding()` / `fetchSiteFooter()`, không qua
+// `siteSettingsQuery()`. Lý do: cả hai render ở MỌI trang, còn truy vấn đầy đủ
+// chỉ chạy ở trang chủ. `hero` thì ngược lại — chỉ trang chủ có, nên đi cùng
+// truy vấn đầy đủ, không cần đường đọc riêng. Xem ghi chú ở BRANDING_PROJECTION
+// trong src/lib/queries/siteSettings.ts.
 export interface SiteSettingsResult {
   title: string
   theme: SiteTheme | null
   sections: SiteSettingsSection[] | null
-  heroText: Record<'vi' | 'en' | 'zh' | 'ko' | 'ru', string | undefined> | null
+  hero: SiteHero | null
   contact: SiteContact | null
   pickupPoints: PickupPoint[] | null
   support: SiteSupport | null

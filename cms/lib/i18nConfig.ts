@@ -23,7 +23,9 @@ export const TRANSLATABLE_FIELDS = [
   'licenseInfo',
   'beachAccess',
   'servesCuisine',
-  'heroText',
+  // 'heroText' đã rời danh sách này: nó thành `hero.eyebrow` một tầng theo
+  // QĐ-2026-08-14-03. Sáu ô chữ của `hero`/`footer` là tiếng Việt, không dịch ở
+  // tầng dữ liệu — ngôn ngữ khác dùng bản dịch trong HOME_COPY/uiCopy.
   'keyFacts',
   'howTo',
   'seo'
@@ -79,6 +81,8 @@ export const SHARED_FIELDS = [
   'homepageBanners',
   'relatedDestinations',
   'sections',
+  'hero',        // QĐ-2026-08-14-03 — ô chữ một tầng (tiếng Việt) + ảnh
+  'footer',      // QĐ-2026-08-14-03 — nt
   'bookingRef',
   'officialSource',
   'url',

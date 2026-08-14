@@ -23,8 +23,6 @@ const SECTION_KEYS = [
   { title: '📋 Thanh meta (Wikidata + ngày cập nhật)', value: 'meta' },
 ] as const
 
-const LANGUAGES = ['vi', 'en', 'zh', 'ko', 'ru'] as const
-
 export default defineType({
   name: 'siteSettings',
   title: 'Cấu hình Trang chủ',
@@ -105,6 +103,190 @@ export default defineType({
         }),
       ],
     }),
+    // CONTENT_MODEL §2.15 v1.0.18 — chữ và ảnh của Hero trang chủ (QĐ-2026-08-14-03).
+    //
+    // Ranh giới với src/site.config.ts: đây là chữ NGƯỜI ĐỌC thấy. Chữ MÁY đọc —
+    // tên site, tên pháp nhân, và `brand.description` khi nó làm <meta description>
+    // — vẫn ở file config, cố định lúc build (ADR-0021 QĐ8, QĐ-2026-08-14-01).
+    // Hệ quả có chủ ý: mô tả trên Hero có thể khác meta description.
+    //
+    // Ô chữ MỘT TẦNG, không phải object 5 ngôn ngữ như `heroText` cũ: site.config
+    // khai `langs = ['vi']`, bốn ngôn ngữ kia chưa build ra trang nào. Luật render
+    // kèm theo: sáu ô chữ chỉ áp khi lang === 'vi'; ngôn ngữ khác dùng bản dịch
+    // trong code, không để câu tiếng Việt rơi lên trang tiếng Anh.
+    defineField({
+      name: 'hero',
+      title: 'Hero trang chủ',
+      description:
+        'Khối lớn nhất đầu trang chủ. Để trống ô nào thì site dùng chữ và ảnh mặc định ' +
+        'trong code — không ô nào bắt buộc, không ô nào để trống làm vỡ trang.',
+      type: 'object',
+      options: { collapsible: true, collapsed: false },
+      fields: [
+        defineField({
+          name: 'eyebrow',
+          title: 'Dòng nhỏ phía trên tiêu đề',
+          description: 'Chữ in hoa nhỏ, ví dụ "Tour biển đảo Nha Trang".',
+          type: 'string',
+        }),
+        defineField({
+          name: 'heading',
+          title: 'Tiêu đề lớn (H1)',
+          description:
+            'Câu định vị của site. Nói site BÁN GÌ, đừng chỉ lặp lại tên thương hiệu. ' +
+            'Để trống thì dùng câu mặc định trong code.',
+          type: 'string',
+        }),
+        defineField({
+          name: 'summary',
+          title: 'Đoạn mô tả dưới tiêu đề',
+          description:
+            'Hai tới ba dòng cho người đọc. Ô này KHÔNG phải thẻ mô tả cho Google — ' +
+            'thẻ đó cố định lúc build, sửa ở đây không đổi nó.',
+          type: 'text',
+          rows: 3,
+        }),
+        defineField({
+          name: 'image',
+          title: 'Ảnh nền',
+          description:
+            'Ảnh ngang, tối thiểu 1800px chiều rộng. Để trống thì dùng ảnh đại diện ' +
+            'của Điểm đến chính như hiện nay.',
+          type: 'image',
+          options: { hotspot: true },
+          // CỐ Ý KHÔNG có ô "alt": đây là ảnh trang trí, nội dung nằm ở tiêu đề H1
+          // ngay trên nó. Thêm alt là trình đọc màn hình đọc hai lần cùng một ý.
+          // Cùng lý do đã bỏ alt khỏi `branding.logo`.
+        }),
+        defineField({
+          name: 'imageCredit',
+          title: 'Ghi nguồn ảnh',
+          description: 'Dòng chữ nhỏ ở góc ảnh, ví dụ "Ảnh: Nguyễn Văn A". Để trống thì không hiện.',
+          type: 'string',
+        }),
+        defineField({
+          name: 'ctaPrimaryLabel',
+          title: 'Chữ trên nút chính',
+          description:
+            'Nút dẫn tới Zalo. Đích đến lấy từ "Kênh liên hệ" bên dưới, không đổi được ở đây. ' +
+            'Để trống thì dùng chữ mặc định.',
+          type: 'string',
+        }),
+        defineField({
+          name: 'ctaSecondaryLabel',
+          title: 'Chữ trên nút phụ',
+          description: 'Nút dẫn tới trang Điểm đến chính. Để trống thì dùng chữ mặc định.',
+          type: 'string',
+        }),
+      ],
+    }),
+    // CONTENT_MODEL §2.15 v1.0.18 — chữ và ảnh chân trang (QĐ-2026-08-14-03).
+    //
+    // KHÔNG có tiêu đề cột ở đây: các cột chân trang sinh tự động từ ROUTE_MAP
+    // (ADR-0023). Đưa tiêu đề vào Studio là dựng lại nguồn thứ hai cho điều hướng,
+    // đúng thứ DR-007 vừa dọn xong.
+    defineField({
+      name: 'footer',
+      title: 'Chân trang',
+      description:
+        'Chữ và ảnh ở chân trang. Tên cột và danh sách liên kết KHÔNG nằm ở đây — ' +
+        'chúng sinh tự động từ menu, sửa menu là chân trang đổi theo.',
+      type: 'object',
+      options: { collapsible: true, collapsed: true },
+      fields: [
+        defineField({
+          name: 'tagline',
+          title: 'Câu giới thiệu dưới logo',
+          description: 'Một tới hai dòng. Để trống thì dùng câu mặc định trong code.',
+          type: 'text',
+          rows: 2,
+        }),
+        defineField({
+          name: 'disclaimer',
+          title: 'Dòng miễn trừ trách nhiệm',
+          description:
+            'Dòng cuối chân trang, cạnh dòng bản quyền. Để trống thì dùng câu mặc định. ' +
+            'Dòng bản quyền và tên pháp nhân KHÔNG sửa được ở đây.',
+          type: 'text',
+          rows: 2,
+        }),
+        defineField({
+          name: 'backgroundImage',
+          title: 'Ảnh nền chân trang',
+          description:
+            'Ảnh ngang, mờ phía sau chân trang. Site tự phủ một lớp màu đậm lên trên ' +
+            'để chữ vẫn đọc được, nên ảnh sáng cũng không làm mất chữ. Để trống thì nền màu trơn.',
+          type: 'image',
+          options: { hotspot: true },
+        }),
+        defineField({
+          name: 'badges',
+          title: 'Huy hiệu, thanh toán, mạng xã hội',
+          description:
+            'Kéo thả để sắp thứ tự. Site tự gom theo Loại và hiện thành từng dải: ' +
+            'chứng nhận trước, rồi thanh toán, rồi mạng xã hội. Để trống thì không hiện dải nào.',
+          type: 'array',
+          of: [
+            {
+              type: 'object',
+              fields: [
+                defineField({
+                  name: 'kind',
+                  title: 'Loại',
+                  type: 'string',
+                  options: {
+                    list: [
+                      { title: '🏅 Chứng nhận, giấy phép', value: 'chung-nhan' },
+                      { title: '💳 Thanh toán', value: 'thanh-toan' },
+                      { title: '🔗 Mạng xã hội', value: 'mang-xa-hoi' },
+                    ],
+                    layout: 'radio',
+                  },
+                  validation: (Rule) => Rule.required(),
+                }),
+                defineField({
+                  name: 'image',
+                  title: 'Ảnh',
+                  description: 'Ảnh nền trong suốt (PNG hoặc SVG) hiện đẹp nhất. Cao khoảng 40px là đủ nét.',
+                  type: 'image',
+                  options: { accept: 'image/svg+xml,image/png,image/webp' },
+                }),
+                defineField({
+                  name: 'alt',
+                  title: 'Mô tả ảnh (alt)',
+                  type: 'string',
+                  description:
+                    'Bắt buộc khi có ảnh — người dùng trình đọc màn hình cần nó. Để trống ' +
+                    'mà có liên kết thì site tạm lấy tên Loại, nhưng đó là bản vá, không phải bản đúng.',
+                }),
+                defineField({
+                  name: 'url',
+                  title: 'Liên kết',
+                  type: 'url',
+                  description: 'Để trống thì ảnh không thành link.',
+                  validation: (Rule) => Rule.uri({ scheme: ['http', 'https'] }),
+                }),
+              ],
+              preview: {
+                select: { alt: 'alt', kind: 'kind', media: 'image' },
+                prepare({ alt, kind, media }: { alt?: string; kind?: string; media?: unknown }) {
+                  const kindLabel: Record<string, string> = {
+                    'chung-nhan': 'Chứng nhận, giấy phép',
+                    'thanh-toan': 'Thanh toán',
+                    'mang-xa-hoi': 'Mạng xã hội',
+                  }
+                  return {
+                    title: alt || '(chưa có mô tả ảnh)',
+                    subtitle: kind ? kindLabel[kind] ?? kind : '(chưa chọn loại)',
+                    media,
+                  }
+                },
+              },
+            },
+          ],
+        }),
+      ],
+    }),
     defineField({
       name: 'sections',
       title: 'Section trên Trang chủ',
@@ -141,21 +323,8 @@ export default defineType({
         },
       ],
     }),
-    defineField({
-      name: 'heroText',
-      title: 'Lời chào (Hero)',
-      description: 'Bấm chọn ngôn ngữ ở trên để nhập cho từng ngôn ngữ. Để trống → dùng mặc định trong code.',
-      type: 'object',
-      // Bỏ `title: lang.toUpperCase()` (sinh ra "VI", "EN"...) để từ điển nhãn ở
-      // cms/lib/fieldLabels.ts điền "Tiếng Việt", "Tiếng Anh"... — một nguồn tên
-      // ngôn ngữ duy nhất cho cả Studio.
-      fields: LANGUAGES.map((lang) =>
-        defineField({
-          name: lang,
-          type: 'string',
-        })
-      ),
-    }),
+    // `heroText` (object 5 ngôn ngữ) đã chuyển thành `hero.eyebrow` một tầng —
+    // QĐ-2026-08-14-03, migration ở cms/_migrate-hero-footer.mjs.
     defineField({
       name: 'contact',
       title: 'Kênh liên hệ',

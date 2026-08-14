@@ -12,3 +12,6 @@ cms/.sanity/
 
 # Phiên brainstorm của skill superpowers — không đưa vào kho
 .superpowers/
+
+# Bản sao lưu dữ liệu Sanity (cms/_export-backup.mjs) — nội dung thật, không vào git
+backups/

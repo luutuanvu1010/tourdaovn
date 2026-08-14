@@ -20,6 +20,29 @@ export const BRANDING_PROJECTION = `branding {
     }`
 
 /**
+ * Hình chiếu chân trang (CONTENT_MODEL §2.15 v1.0.18, QĐ-2026-08-14-03).
+ *
+ * CỐ Ý KHÔNG nằm trong `siteSettingsQuery()`, đúng lý do của `BRANDING_PROJECTION`
+ * ngay trên: `Footer.astro` render ở MỌI trang, còn truy vấn đầy đủ chỉ chạy ở
+ * trang chủ. Đọc qua đúng một đường — `src/lib/siteFooter.ts`.
+ *
+ * `hero` thì ngược lại: chỉ trang chủ mới có Hero, nên nó đi thẳng trong truy vấn
+ * đầy đủ bên dưới, không đẻ thêm đường đọc nào.
+ */
+export const FOOTER_PROJECTION = `footer {
+      tagline,
+      disclaimer,
+      backgroundImage { _type, asset->{ _id, url, mimeType }, hotspot },
+      badges[] {
+        _key,
+        kind,
+        image { _type, asset->{ _id, url, mimeType } },
+        alt,
+        url
+      }
+    }`
+
+/**
  * GROQ query lay document siteSettings duy nhat.
  */
 export function siteSettingsQuery(): string {
@@ -31,12 +54,14 @@ export function siteSettingsQuery(): string {
       key,
       hidden
     },
-    heroText {
-      vi,
-      en,
-      zh,
-      ko,
-      ru
+    hero {
+      eyebrow,
+      heading,
+      summary,
+      image { _type, asset->{ _id, url, mimeType }, hotspot },
+      imageCredit,
+      ctaPrimaryLabel,
+      ctaSecondaryLabel
     },
     contact {
       hotline,

@@ -1,0 +1,111 @@
+---
+// Dải huy hiệu ở chân trang — chứng nhận, thanh toán, mạng xã hội.
+// CONTENT_MODEL §2.15 v1.0.18, QĐ-2026-08-14-03, SPEC-2026-08-14-hero-footer-tuy-bien §3.3.
+//
+// MỘT mảng gộp trong Sanity, phân nhóm bằng ô `kind`, chứ không ba mảng riêng:
+// ba mảng là ba khuôn nhập liệu giống hệt nhau phải bảo trì song song và ba vòng
+// lặp ở đây. Biên tập viên vẫn kéo thả sắp thứ tự tự do trong nhóm của mình.
+import { imageUrl } from '../lib/sanity-image'
+import type { SiteFooterBadge } from '../lib/types'
+
+export interface Props {
+  badges?: SiteFooterBadge[] | null
+}
+
+const { badges } = Astro.props
+
+// Thứ tự nhóm cố định ở code, không để biên tập viên đảo: logo thanh toán xen
+// giữa hai giấy phép là dải badge trông như một mớ ảnh rời.
+const KIND_ORDER = [
+  { kind: 'chung-nhan', label: 'Chứng nhận, giấy phép' },
+  { kind: 'thanh-toan', label: 'Hình thức thanh toán' },
+  { kind: 'mang-xa-hoi', label: 'Mạng xã hội' },
+] as const
+
+const items = (badges || []).filter((badge) => Boolean(badge?.image?.asset?.url))
+
+const groups = KIND_ORDER.map((group) => ({
+  ...group,
+  items: items.filter((badge) => badge.kind === group.kind),
+})).filter((group) => group.items.length > 0)
+
+/**
+ * Ảnh thiếu `alt`: KHÔNG im lặng bỏ ảnh đi — mất nội dung mà không ai biết còn
+ * tệ hơn. Có link thì lấy nhãn nhóm làm alt, vì một link không nhãn là lỗi trợ
+ * năng thật; không có link thì `alt=""`, coi như ảnh trang trí. Schema đã ghi
+ * `alt` là bắt buộc khi có ảnh — đây là bản vá, không phải bản đúng.
+ */
+function altFor(badge: SiteFooterBadge, groupLabel: string): string {
+  const clean = badge.alt?.trim()
+  if (clean) return clean
+  return badge.url ? groupLabel : ''
+}
+---
+
+{groups.length > 0 && (
+  <div class="foot-badges">
+    {groups.map((group) => (
+      <ul class="badge-row" aria-label={group.label}>
+        {group.items.map((badge) => {
+          const src = imageUrl(badge.image, { width: 240 })
+          const alt = altFor(badge, group.label)
+          return (
+            <li>
+              {badge.url
+                ? (
+                  <a href={badge.url} target="_blank" rel="noopener">
+                    <img src={src} alt={alt} loading="lazy" decoding="async" />
+                  </a>
+                )
+                : <img src={src} alt={alt} loading="lazy" decoding="async" />}
+            </li>
+          )
+        })}
+      </ul>
+    ))}
+  </div>
+)}
+
+<style>
+  .foot-badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s5);
+    padding-bottom: var(--s5);
+  }
+
+  .badge-row {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s4);
+  }
+
+  .badge-row img {
+    display: block;
+    max-height: 40px;
+    width: auto;
+    /* Chân trang là nền tối; nhiều logo đối tác là ảnh nền trong suốt màu tối
+       nên sẽ chìm. Hạ độ đậm một chút để dải badge không hút mắt hơn nội dung,
+       trả lại đủ khi rê chuột. */
+    opacity: 0.85;
+    transition: opacity var(--m-fast) var(--m-ease);
+  }
+
+  .badge-row a:hover img,
+  .badge-row a:focus-visible img {
+    opacity: 1;
+  }
+
+  @media (max-width: 480px) {
+    .foot-badges {
+      gap: var(--s4);
+    }
+
+    .badge-row img {
+      max-height: 32px;
+    }
+  }
+</style>

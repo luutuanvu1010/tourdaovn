@@ -1,9 +1,9 @@
 {
-  "ranAt": "2026-08-14T02:31:00.541Z",
+  "ranAt": "2026-08-14T06:49:44.633Z",
   "summary": {
-    "total": 15,
+    "total": 14,
     "fail": 0,
-    "warn": 15
+    "warn": 14
   },
   "drifts": [
     {
@@ -33,13 +33,6 @@
       "diff": "in_content_model_not_in_schema",
       "severity": "warn",
       "detail": "Field \"slug\" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement"
-    },
-    {
-      "entityType": "siteSettings",
-      "field": "summary",
-      "diff": "in_content_model_not_in_schema",
-      "severity": "warn",
-      "detail": "Field \"summary\" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement"
     },
     {
       "entityType": "siteSettings",

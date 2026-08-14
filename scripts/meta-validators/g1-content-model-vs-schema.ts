@@ -78,6 +78,20 @@ const SUB_FIELD_IGNORE = new Set([
   // top-level là `logo` thì G1 coi nó là sub-field và bỏ qua IM LẶNG, cổng mất
   // tác dụng đúng chỗ cần nó nhất.
   'favicon', 'ogImage', 'hideWordmark',
+  // siteSettings.hero sub-fields (CONTENT_MODEL §2.15 v1.0.18, QĐ-2026-08-14-03).
+  // `heading` đã có ở dòng v1.0.16 bên trên. `image` KHÔNG thêm ở đây — nó vào
+  // AMBIGUOUS_SUB_FIELDS.siteSettings, cùng cách xử với `logo`.
+  //
+  // `summary` cố ý KHÔNG thêm, và đây là một CHỖ MÙ đã biết: `summary` là field
+  // chung ở CONTENT_MODEL_COMMON_ALL, nên `hero.summary` làm G1 tưởng siteSettings
+  // có field top-level `summary` và tắt một cảnh báo lẽ ra vẫn nên kêu. Đúng cơ
+  // chế đã buộc field ảnh phải mang tên `branding` chứ không phải `logo`
+  // (QĐ-2026-08-14-01). Ở đây hậu quả bằng không — `summary` không bắt buộc với
+  // siteSettings và không cổng nào dựa vào nó — nên giữ tên đúng nghĩa cho biên
+  // tập viên, và ghi chỗ mù ra đây thay vì để nó im lặng.
+  'eyebrow', 'imageCredit', 'ctaPrimaryLabel', 'ctaSecondaryLabel',
+  // siteSettings.footer sub-fields (CONTENT_MODEL §2.15 v1.0.18)
+  'tagline', 'disclaimer', 'backgroundImage', 'badges', 'kind',
 ])
 
 // Fields that exist as both top-level and sub-field in different entities
@@ -96,7 +110,8 @@ const AMBIGUOUS_SUB_FIELDS: Record<string, string[]> = {
   // "faq" là top-level ở nhiều entity khác, nhưng ở đây là sub-field của support (v1.0.14).
   // Bốn field v1.0.16 mang sub-field trùng tên với field top-level của entity
   // khác: `name`/`logo`/`url` (partners[]), `value` (stats[]).
-  siteSettings: ['hidden', 'geo', 'faq', 'name', 'logo', 'url', 'value'],
+  // `image` thêm v1.0.18: sub-field của `hero` và của `badges[]` (QĐ-2026-08-14-03).
+  siteSettings: ['hidden', 'geo', 'faq', 'name', 'logo', 'url', 'value', 'image'],
 }
 
 // Common fields from CONTENT_MODEL §2.0
@@ -271,7 +286,11 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
     // AMBIGUOUS_SUB_FIELDS bên trên.
     branding: { required: false },
     sections: { required: false },
-    heroText: { required: false },
+    // hero + footer thêm v1.0.18 (QĐ-2026-08-14-03) — chữ và ảnh Hero trang chủ
+    // và chân trang. `heroText` (object 5 ngôn ngữ) đã bị gỡ: nó thành
+    // `hero.eyebrow` một tầng, migration ở cms/_migrate-hero-footer.mjs.
+    hero: { required: false },
+    footer: { required: false },
     contact: { required: false },
     // pickupPoints thêm v1.0.13 — lộ trình đón khách, nguồn cho /lo-trinh-don-khach
     pickupPoints: { required: false },

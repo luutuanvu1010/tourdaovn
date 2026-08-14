@@ -1,9 +1,12 @@
 ---
 import type { Lang } from '../lib/types'
 import SiteLogo from './SiteLogo.astro'
+import FooterBadges from './FooterBadges.astro'
 import { resolveNav, autoRouteLinks } from '../lib/routes'
 import { uiCopy } from '../lib/uiCopy'
 import { fetchSiteContact } from '../lib/siteContact'
+import { fetchSiteFooter } from '../lib/siteFooter'
+import { imageUrl } from '../lib/sanity-image'
 import { brand } from '../site.config'
 
 export interface Props {
@@ -39,16 +42,39 @@ const browseLinks = autoRouteLinks(uiLang).filter(l => !manualHrefs.has(l.href))
 
 const currentYear = new Date().getFullYear()
 const copyrightYear = brand.foundedYear < currentYear ? `${brand.foundedYear}–${currentYear}` : `${currentYear}`
+
+// Chữ và ảnh chân trang do biên tập viên nhập (QĐ-2026-08-14-03). Đọc qua đúng
+// một đường `fetchSiteFooter()` — Footer render ở MỌI trang nên không đi nhờ
+// `config` của trang chủ được.
+const footerConfig = await fetchSiteFooter()
+
+// Sáu ô chữ là TIẾNG VIỆT một tầng: ngôn ngữ khác thì bỏ qua giá trị Sanity và
+// dùng bản dịch trong `uiCopy`. Cùng luật với `viOnly()` ở SiteHome.astro.
+const viOnly = (value?: string) => (uiLang === 'vi' ? value?.trim() || undefined : undefined)
+
+const footerTagline = viOnly(footerConfig?.tagline) || t('footerTagline')
+const footerDisclaimer = viOnly(footerConfig?.disclaimer) || t('footerDisclaimer')
+const footerBg = imageUrl(footerConfig?.backgroundImage, { width: 1800 })
 ---
 
-<footer class="site-footer">
+<footer class:list={['site-footer', footerBg && 'site-footer--image']}>
+  {/* Ảnh nền nằm DƯỚI một lớp phủ màu chân trang đục 88%: màu chữ ở đây được
+      chọn để tương phản với nền đặc, giữ 88% màu đó thì tỉ lệ gần như không đổi,
+      nên ảnh sáng cũng không nuốt mất chữ. Ngưỡng nghiệm thu là số — tương phản
+      chữ chân trang trên ảnh sáng nhất phải ≥ 4.5:1 (WCAG AA). */}
+  {footerBg && (
+    <>
+      <img class="foot-bg" src={footerBg} alt="" loading="lazy" decoding="async" />
+      <div class="foot-bg-veil" aria-hidden="true"></div>
+    </>
+  )}
   <div class="container">
     <div class="foot-grid">
       <div class="foot-brand">
         <a href={homeHref} class="logo" aria-label={t('homeAria')}>
           <SiteLogo />
         </a>
-        <p>{t('footerTagline')}</p>
+        <p>{footerTagline}</p>
       </div>
 
       {navGroups.map(group => (
@@ -100,9 +126,13 @@ const copyrightYear = brand.foundedYear < currentYear ? `${brand.foundedYear}–
       </div>
     </div>
 
+    <FooterBadges badges={footerConfig?.badges} />
+
     <div class="foot-bottom">
+      {/* Tên pháp nhân là chữ MÁY đọc — nó cũng là `Organization.legalName` trong
+          JSON-LD, nên ở lại `site.config.ts`, cố định lúc build (QĐ-2026-08-14-01). */}
       <span>&copy; {copyrightYear} {brand.legalName}</span>
-      <span>{t('footerDisclaimer')}</span>
+      <span>{footerDisclaimer}</span>
     </div>
   </div>
 </footer>
@@ -113,6 +143,36 @@ const copyrightYear = brand.foundedYear < currentYear ? `${brand.foundedYear}–
     color: var(--c-footer-text);
     padding: var(--s7) 0 var(--s5);
     font-size: var(--fs-sm);
+  }
+
+  /* Chỉ bật `position: relative` khi CÓ ảnh nền: không ảnh thì chân trang giữ
+     nguyên hình cũ, không thêm ngữ cảnh xếp lớp nào. */
+  .site-footer--image {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .foot-bg {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* 88% — xem ghi chú ở phần markup. Đây là lớp giữ tương phản, không phải hiệu
+     ứng thẩm mỹ: hạ con số này xuống là hạ tỉ lệ tương phản của chữ chân trang. */
+  .foot-bg-veil {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--c-footer-bg);
+    opacity: 0.88;
+  }
+
+  .site-footer--image .container {
+    position: relative;
   }
 
   .foot-grid {

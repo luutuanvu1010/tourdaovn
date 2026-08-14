@@ -17,7 +17,7 @@ Phần KHÔNG nhãn (cơ chế field 2.0, ba họ gate, quy tắc giá, khối q
 > 🔧 **SITE-SPECIFIC:** danh mục 14 entity và mọi ví dụ (Specialty, TouristDestination, 5 ngôn ngữ) là của nhatrangtravel. Giữ *cơ chế* (field 2.0, ba họ gate, quy tắc bookingRef, khối quản trị); thay *danh mục entity* theo site.
 
 - **Trạng thái:** đã duyệt. Founder soát toàn văn theo cụm 2026-06-11 (rà phản biện độc lập, 7 vết chốt qua trắc nghiệm), bước 1 đóng.
-- **Phiên bản:** v1.0.17   **Ngày:** 2026-08-14   **Người soạn:** Cowork (tác nhân điều phối).
+- **Phiên bản:** v1.0.18   **Ngày:** 2026-08-14   **Người soạn:** Cowork (tác nhân điều phối).
 - **Nguồn quyết định:** brief mục 5-6 cộng các lựa chọn founder 2026-06-10 và 2026-06-11 (xem `DECISIONS.md` và `project/adr/` từ ADR-0002 đến ADR-0006).
 - **Kế thừa ràng buộc:** CONSTITUTION v2.2.0, PROJECT_OVERLAY v1.0.2 (S2.2 bất biến dữ liệu, S2.3 ngưỡng, S2.4 SEO/GEO, S2.5 đa ngôn ngữ).
 - **Override hiện hành:** từ 2026-06-30, `imageProvenance` là dữ liệu nội bộ tùy chọn, ẩn khỏi layout biên tập và không còn nằm trong gate publish I12. Từ 2026-07-02, `Attraction.containedInPlace` có thể trỏ `Place` hoặc `TouristDestination` khi Nha Trang là container thực tế; không khôi phục `seed.trung-tam-nha-trang`. Các dòng lịch sử bên dưới ghi "có khi có ảnh", "cộng imageProvenance khi có ảnh", hoặc "Attraction Place-only" chỉ còn là bối cảnh cũ, đã bị supersede bởi `DECISIONS.md`.
@@ -528,14 +528,17 @@ Gate publish (I12, I17): title, slug, summary, specialtyType, sameAs; cộng ima
 
 ### 2.15 siteSettings (singleton)
 
-Cấu hình toàn site. Toàn bộ dataset chỉ có đúng 1 document. i18n field-level (ADR-0004): `heroText` là object localized `{vi,en,zh,ko,ru}`. Không dùng plugin `document-internationalization`. Dùng `@sanity/language-filter` để UX chọn ngôn ngữ khi nhập heroText.
+Cấu hình toàn site. Toàn bộ dataset chỉ có đúng 1 document. Không dùng plugin `document-internationalization`.
+
+**Không còn field localized nào ở document này** kể từ v1.0.18: `heroText` (object `{vi,en,zh,ko,ru}`, field localized duy nhất) đã thành `hero.eyebrow` một tầng. Sáu ô chữ trong `hero`/`footer` là **tiếng Việt**, và tầng render phải bỏ qua chúng khi `lang !== 'vi'` — xem ghi chú dưới bảng.
 
 | Field | Kiểu | Bắt buộc? | Dịch? | Bất biến / quy tắc | Ai cung cấp |
 |---|---|---|---|---|---|
 | title | string | tùy | không | mặc định "Trang chủ", hiển thị trên document header | hệ thống |
 | branding | object | tùy | không | ảnh nhận diện thương hiệu; 4 field con, ô nào trống thì lớp dự phòng trong code gánh (guard rỗng). **CHỮ** thương hiệu KHÔNG vào đây — tên site, tên pháp nhân, mô tả vẫn ở `src/site.config.ts` (ADR-0021 QĐ8, QĐ-2026-08-14-01) | founder |
 | sections | array object | tùy | không | thứ tự render là thứ tự trong mảng; `key` là enum đóng 19 giá trị; `hidden` mặc định false. Thiếu field `sections` hoặc mảng rỗng → homepage dùng DEFAULT_SECTIONS. | founder |
-| heroText | object {vi,en,zh,ko,ru} | tùy | có (field-level) | ghi đè dòng eyebrow của hero; để trống → dùng SITE_COPY | founder |
+| hero | object | tùy | không (tiếng Việt) | chữ và ảnh Hero trang chủ; 7 ô con, ô nào trống thì lớp dự phòng trong code gánh. `summary` chỉ đè phần NGƯỜI ĐỌC thấy — `<meta description>` vẫn là `brand.description` cố định lúc build (QĐ-2026-08-14-03) | founder |
+| footer | object | tùy | không (tiếng Việt) | chữ và ảnh chân trang; 4 ô con. Tiêu đề cột và danh sách liên kết KHÔNG ở đây — sinh từ `ROUTE_MAP` (ADR-0023) | founder |
 | contact | object | tùy | không | 4 field con, dữ liệu trung lập ngôn ngữ; field con nào trống thì kênh đó không render (guard rỗng, không nút chết) | founder |
 | pickupPoints | array object | tùy | không | lộ trình đón khách của công ty; thứ tự render là thứ tự trong mảng; mảng rỗng hoặc thiếu → trang lộ trình không render bản đồ (guard rỗng) | founder |
 | theme | string | tùy | không | bộ giao diện đang bật; enum đóng, giá trị hợp lệ khai ở `07-DESIGN_TOKENS` §1b; để trống → dùng bộ mặc định `bien-sau` | founder |
@@ -554,6 +557,26 @@ Field `branding` (thêm v1.0.17 — ảnh nhận diện, QĐ-2026-08-14-01):
 Ranh giới với `src/site.config.ts` (ADR-0021 QĐ8): **chữ** thương hiệu ở lại file config vì nó vào JSON-LD và thẻ meta của mọi trang, phải cố định lúc build; **ảnh** ở Sanity vì site chỉ tham chiếu chúng bằng URL, đổi ảnh không đổi cấu trúc trang nào. Biên tập viên đổi được ảnh, không đổi được chữ.
 
 Lớp dự phòng là **file thật**, không phải chuỗi rỗng: `src/components/SiteLogo.astro` giữ khối SVG mặc định, `public/favicon.svg` giữ bản favicon mặc định. Chưa nhập gì thì site dựng đúng như trước khi có field này.
+
+Field `hero` (thêm v1.0.18 — chữ và ảnh Hero trang chủ, QĐ-2026-08-14-03):
+- `eyebrow`: string — dòng in hoa nhỏ trên tiêu đề. **Thay cho `heroText` cũ**; để trống → `SITE_COPY[lang].eyebrow`.
+- `heading`: string — tiêu đề H1. Để trống → `brand.headline`. Không vào meta hay JSON-LD, nên đây là chữ **người đọc**, hợp lệ để nằm ở Sanity.
+- `summary`: text — đoạn mô tả dưới H1. Để trống → `brand.description`. **Không** phải `<meta name="description">`: thẻ đó đọc thẳng `brand.description` lúc build. Hai câu có thể lệch nhau — cố ý, xem ghi chú ranh giới dưới đây.
+- `image`: image — ảnh nền. Để trống → `touristDestination.mainImage` như trước v1.0.18. **Không có `alt`**, cùng ngoại lệ I12 với `branding.logo`: ảnh trang trí, nội dung nằm ở H1 ngay trên nó.
+- `imageCredit`: string — dòng ghi nguồn ở góc ảnh; trống thì không render.
+- `ctaPrimaryLabel` / `ctaSecondaryLabel`: string — chữ trên hai nút. **Đích đến không sửa được ở Studio**: nút chính là `contact.zaloUrl`, nút phụ là trang Điểm đến chính. Điều hướng có nguồn riêng là `ROUTE_MAP` (ADR-0023, DR-007).
+
+Field `footer` (thêm v1.0.18 — chữ và ảnh chân trang, QĐ-2026-08-14-03):
+- `tagline`: text — câu dưới logo. Để trống → `uiCopy(lang).footerTagline`.
+- `disclaimer`: text — dòng miễn trừ cạnh bản quyền. Để trống → `uiCopy(lang).footerDisclaimer`. **Dòng bản quyền và tên pháp nhân không sửa được ở Studio** — `brand.legalName` là chữ máy đọc.
+- `backgroundImage`: image — ảnh nền chân trang. Cưỡng chế ở tầng render: một lớp `--c-footer-bg` đục **88%** phủ lên trên. Ngưỡng là số — tương phản chữ chân trang trên ảnh **sáng nhất** phải ≥ **4.5:1** (WCAG AA).
+- `badges[]`: array — huy hiệu, gồm `kind` (enum đóng: `chung-nhan` | `thanh-toan` | `mang-xa-hoi`, **bắt buộc**), `image`, `alt`, `url` (chỉ http/https). **Một mảng gộp, không ba mảng riêng**: ba loại cùng hình dạng dữ liệu, tách ra là ba khuôn nhập liệu phải bảo trì song song. Render gom theo `kind` thứ tự cố định chứng nhận → thanh toán → mạng xã hội; nhóm rỗng không render. Ảnh thiếu `alt` mà **có** `url` → lấy nhãn `kind` làm alt (link không nhãn là lỗi trợ năng thật); không có `url` → `alt=""`. Thiếu `image` → không render phần tử.
+
+**Ranh giới chữ máy đọc / chữ người đọc** (QĐ-2026-08-14-03, không nới QĐ-2026-08-14-01): `brand.name`, `brand.legalName`, và `brand.description` **khi nó làm thẻ meta** vẫn ở `src/site.config.ts`, cố định lúc build vì Google đọc chúng ở mọi trang. Chữ chỉ người đọc thấy — H1, mô tả Hero, nhãn nút, tagline, disclaimer — ở Sanity. Hệ quả có chủ ý: mô tả trên trang chủ có thể khác meta description, và không có kiểm máy nào bắt việc đó.
+
+**Luật ngôn ngữ:** sáu ô chữ (`hero.eyebrow`, `hero.heading`, `hero.summary`, hai nhãn nút, `footer.tagline`, `footer.disclaimer`) là tiếng Việt một tầng. Tầng render **bỏ qua** chúng khi `lang !== 'vi'` và dùng bản dịch trong `HOME_COPY`/`uiCopy` — không để câu tiếng Việt rơi lên trang tiếng Anh. Ảnh và `badges[].alt` áp cho **mọi** ngôn ngữ. Hôm nay `site.config.ts` khai `langs = ['vi']` nên chưa trang nào chạm luật này.
+
+**Hai đường đọc:** `hero` đi trong `siteSettingsQuery()` (chỉ trang chủ có Hero). `footer` đọc qua `src/lib/siteFooter.ts`, cùng lý do với `branding` — `Footer.astro` render ở **mọi** trang còn truy vấn đầy đủ chỉ chạy ở trang chủ (N7).
 
 Field `sections[]`:
 - `key`: string enum đóng 19 giá trị — hero | stats | trustBar | partners | testimonials | editorialBody | banners | hubGrid | areas | attractions | experiences | guides | stays | specialties | tours | faq | safety | groupQuote | meta
@@ -851,5 +874,6 @@ Lý do chi tiết và phương án đã loại của từng thay đổi nằm �
 - v1.0.16 (2026-08-06): thêm bốn field vào siteSettings (§2.15) — `stats`, `partners`, `testimonials`, `groupQuote` — phục vụ trang chủ theo `SPEC-2026-08-06-trang-chu-xung-tam`. Bối cảnh: doanh thu công ty đến từ offline/đại lý/OTA, site là kênh mới với 4 sản phẩm lúc ra mắt, nên trang chủ phải để BẰNG CHỨNG gánh thay vì catalogue. Ràng buộc kèm theo: `testimonials` KHÔNG serialize ra JSON-LD (Google cấm rich snippet tự phục vụ, I6 là cổng fail). Không thêm document type mới nên là cửa hai chiều theo §5.3. Bản ghi DECISIONS cùng ngày.
 
 - v1.0.17 (2026-08-14): thêm field `branding` vào siteSettings (§2.15) — bốn ô ảnh nhận diện: `logo`, `hideWordmark`, `favicon`, `ogImage`. Trước đó logo là SVG viết cứng **chép hai bản** ở `Header.astro` và `Footer.astro`, biên tập viên không đổi được nếu không có lập trình viên; `BaseLayout` lại trỏ `/favicon.svg` mà file đó không tồn tại, favicon 404 trên mọi trang. Đợt này gom dấu hiệu thương hiệu về một component `SiteLogo.astro` và thêm `public/favicon.svg` thật làm lớp dự phòng. Ranh giới với ADR-0021 QĐ8 được vẽ rõ: **chữ** thương hiệu ở `src/site.config.ts` (vào JSON-LD và meta mọi trang, phải cố định lúc build), **ảnh** ở Sanity (chỉ tham chiếu bằng URL). Kèm theo: `Organization.logo` nay được phát trong JSON-LD trang chủ khi đã tải logo. Không thêm document type mới nên là cửa hai chiều theo §5.3. Bản ghi `QĐ-2026-08-14-01`, spec `SPEC-2026-08-14-logo-tuy-bien.md`.
+- v1.0.18 (2026-08-14): thêm hai field `hero` và `footer` vào siteSettings (§2.15), và **gỡ `heroText`** — nó thành `hero.eyebrow` một tầng, nên document này không còn field localized nào. Trước đợt này bảy chỗ trên Hero và chân trang biên tập viên không sửa được: H1 trang chủ (`brand.headline`), mô tả Hero (`brand.description`), chữ hai nút Hero, tagline và disclaimer chân trang, dòng bản quyền, và không có chỗ nào treo giấy phép lữ hành. Ranh giới với `QĐ-2026-08-14-01` được vẽ thêm một đường, **không nới**: chữ **máy đọc** (`brand.name`, `brand.legalName`, và `brand.description` khi làm thẻ meta) ở lại `src/site.config.ts` cố định lúc build; chữ **người đọc** vào Sanity. Hệ quả có chủ ý: mô tả trên trang chủ có thể lệch meta description. Sáu ô chữ là tiếng Việt một tầng vì `site.config.ts` khai `langs = ['vi']`; tầng render bỏ qua chúng khi `lang !== 'vi'`. `badges[]` là **một mảng gộp** phân nhóm bằng `kind`, không ba mảng riêng. Hai chỗ cưỡng chế ở tầng render: lớp phủ 88% giữ tương phản chữ chân trang ≥ 4.5:1 trên ảnh nền, và badge thiếu `alt` mà có link thì lấy nhãn `kind` thay vì im lặng bỏ ảnh. Phần chuyển dữ liệu `heroText` → `hero.eyebrow` ở `cms/_migrate-hero-footer.mjs`, phải sao lưu trước. Không thêm document type mới nên là cửa hai chiều theo §5.3. Bản ghi `QĐ-2026-08-14-03`, spec `SPEC-2026-08-14-hero-footer-tuy-bien.md`.
 
 Mỗi bảng field có cột "dịch được" để quyết i18n field-level, field bất biến không nhân bản (ADR-0004). Khi dựng một trang, tách rõ ba tầng: field của entity, rollup suy ở build từ entity liên quan, và trình bày của template. Đừng biến layout thành field (N1).
