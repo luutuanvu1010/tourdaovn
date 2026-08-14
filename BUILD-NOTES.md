@@ -61,12 +61,10 @@ thời" ngay phía trên nó. Giữ nguyên Phần 1 — đó là phần R3, kh�
 **2.** Deploy:
 
 ```
-npm run build && npx wrangler deploy
+npm run deploy
 ```
 
-⚠️ **Phải là `npx wrangler deploy`.** Không dùng `npm run deploy` — script đó trỏ vào Pages
-project `tourdaovn` không tồn tại, sẽ hỏi "Would you like to create it?"; chọn Create là sai.
-Site này chạy trên **Worker** tên `tourdaovn`, không phải Pages.
+Xem mục "Deploy" ở cuối file này.
 
 **3.** Kiểm:
 
@@ -82,3 +80,40 @@ Gỡ xong khi trả `200` thay vì `302`. Không cần purge cache, không cần
 
 Đã thử hai lần, thất bại cả hai. `tourdao.vn` do Worker phục vụ nên Cloudflare vô hiệu hoá
 `Forwarding URL` (`Client → Worker = Rule Ignored`). Chi tiết cơ chế ở `SETUP-NEW-SITE.md` mục 10.
+
+---
+
+## Deploy
+
+```
+npm run deploy            # dựng lại rồi đưa lên production
+npm run deploy:preview    # dựng lại rồi tải lên một version, KHÔNG đổi bản đang chạy
+```
+
+### Site này chạy trên Worker, không phải Pages
+
+Đây là chỗ đã từng gài bẫy. Tới 2026-08-14, hai script trên còn là `wrangler pages deploy`
+trỏ vào một Pages project tên `tourdaovn` **không tồn tại**; chạy `npm run deploy` sẽ được hỏi
+"Would you like to create it?", và bấm Create là dựng một site thứ hai song song với site
+thật. `BUILD-NOTES.md` khi đó dặn "đừng dùng `npm run deploy`, gõ tay `npx wrangler deploy`"
+— tức là **sửa người thay vì sửa lệnh**. Nay lệnh đã đúng nên lời dặn đó bỏ.
+
+### Vì sao mỗi mảnh trong lệnh có mặt ở đó
+
+`package.json` không mang được chú thích, nên lý do nằm ở đây.
+
+| Mảnh | Lý do |
+|---|---|
+| `npm run build &&` | thiếu nó thì `wrangler deploy` đẩy nguyên `dist/` cũ lên mà **không báo gì** — deploy "thành công" trong khi hàng thật là bản cũ. Đúng loại hỏng im lặng, nên gộp build vào lệnh thay vì trông vào việc người gõ nhớ chạy trước |
+| `env -u CLOUDFLARE_API_TOKEN -u CF_API_TOKEN` | máy này còn dự án Cloudflare khác. Biến token lảng vảng trong shell sẽ **thắng** phiên đăng nhập OAuth, và wrangler lặng lẽ deploy vào nhầm tài khoản |
+| `--env-file /dev/null` | chặn wrangler tự nạp file biến môi trường ở gốc kho. Hiện `wrangler.toml` không khai `vars` nào nên không có gì bị nạp — đã kiểm bằng `npx wrangler secret list` (trả `[]`) sau lần deploy 2026-08-14. Giữ cờ này làm lớp thứ hai: ngày nào đó ai thêm một `vars` vào `wrangler.toml`, secret sẽ tự chui lên Worker mà không ai gõ lệnh nào (N10, P21) |
+| `wrangler versions upload` | bản Worker của "deploy thử": tải code lên thành một version, **không** đổi bản đang phục vụ khách. Không phải `wrangler deploy` |
+
+### Kiểm sau khi deploy
+
+```
+npx wrangler versions list | head -20     # version mới nhất có đúng bản vừa đẩy không
+curl -sI https://tourdao.vn/ | head -1    # phải 200
+```
+
+Lùi về bản trước: `npx wrangler rollback`.

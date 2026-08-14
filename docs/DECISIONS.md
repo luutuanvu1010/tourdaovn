@@ -695,3 +695,21 @@ Ai định đưa **chữ** thương hiệu vào Studio sau này thì đó là vi
 **Cố ý không có ô `alt` cho `logo`.** Khác `partners[].logo` ngay dưới nó. Logo nằm trong thẻ `<a>` đã mang `aria-label` về trang chủ; thêm alt là trình đọc màn hình đọc hai lần cùng một thứ. Ghi ra đây để lần rà I12 sau không tưởng là sót.
 
 **Còn nợ.** Chưa có kiểm máy nào bắt được việc `public/favicon.svg` bị xoá — nó sẽ lại thành 404 im lặng đúng như trước. Đang dựa kỷ luật.
+
+---
+
+## QĐ-2026-08-14-02 — Site và Studio là hai bản dựng riêng; lệnh deploy trỏ Worker
+
+**Chốt.** `npm run deploy` và `npm run deploy:preview` nay trỏ đúng Worker (`wrangler deploy` / `wrangler versions upload`), có gộp `npm run build` vào đầu. Chi tiết từng mảnh lệnh ở mục "Deploy" cuối `BUILD-NOTES.md`.
+
+**Hai sai lầm trong ngày, ghi lại để không lặp.**
+
+**1. Sửa người thay vì sửa lệnh.** Script `deploy` trỏ vào một Cloudflare **Pages** project tên `tourdaovn` **không tồn tại** — site này chạy trên **Worker**. Chạy `npm run deploy` sẽ được hỏi "Would you like to create it?", bấm Create là dựng một site thứ hai song song với site thật. Cách xử lý cũ là thêm một dòng cảnh báo vào `BUILD-NOTES.md` dặn "đừng dùng `npm run deploy`, gõ tay `npx wrangler deploy`". Đó là đặt hàng rào lên trí nhớ người dùng thay vì lên cái lệnh — nghịch P16. Nay lệnh đúng, cảnh báo bỏ.
+
+**2. Deploy site KHÔNG deploy Studio.** Đợt logo tuỳ biến đã đẩy site lên production **hai lần** rồi báo "vào Studio mà tải logo lên", trong khi Studio vẫn chạy bundle dựng ngày 2026-08-04 — field mới **không tồn tại** ở đó. Chủ dự án mở Studio, không tìm thấy, và đó là câu báo lỗi duy nhất phát hiện ra chuyện này.
+
+**Luật rút ra:** đổi bất cứ thứ gì trong `cms/schemas/` hay `cms/lib/` thì **phải chạy thêm `npm --prefix cms run deploy`**. Hai bản dựng, hai lệnh, không cái nào kéo theo cái nào. Webhook Sanity dựng lại *site* khi nội dung đổi — nó không bao giờ dựng lại *Studio* khi schema đổi.
+
+**Chưa cưỡng chế.** Không có kiểm máy nào bắt được việc schema Studio lệch với bản đã deploy. Đang dựa kỷ luật, cùng hạng với phiếu nợ `favicon.svg` ở `QĐ-2026-08-14-01`.
+
+**Một điều đã kiểm, không phải đoán.** Hai lần deploy đầu chạy `npx wrangler deploy` trần, thiếu cờ chặn nạp biến môi trường mà script cũ có. Kho có file biến môi trường ở gốc. Đã kiểm sau đó: `npx wrangler secret list` trả `[]`, version đã deploy không mang binding nào — `wrangler.toml` không khai `vars` nên không có gì để nạp. **Không có gì lộ.** Cờ `--env-file /dev/null` giữ lại trong lệnh mới làm lớp thứ hai (N10, P21), phòng ngày ai đó thêm một `vars` vào `wrangler.toml`.

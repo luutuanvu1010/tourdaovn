@@ -15,8 +15,8 @@
     "check": "astro check",
     "gate": "astro check && npm --prefix scripts run gate:all",
     "audit:spec": "npm --prefix scripts run audit:spec",
-    "deploy": "env -u CLOUDFLARE_API_TOKEN -u CF_API_TOKEN wrangler pages deploy dist --project-name tourdaovn --branch main --env-file /dev/null",
-    "deploy:preview": "env -u CLOUDFLARE_API_TOKEN -u CF_API_TOKEN wrangler pages deploy dist --project-name tourdaovn --env-file /dev/null"
+    "deploy": "npm run build && env -u CLOUDFLARE_API_TOKEN -u CF_API_TOKEN wrangler deploy --env-file /dev/null",
+    "deploy:preview": "npm run build && env -u CLOUDFLARE_API_TOKEN -u CF_API_TOKEN wrangler versions upload --env-file /dev/null"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.0.0",
