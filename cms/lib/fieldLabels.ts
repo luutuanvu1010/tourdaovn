@@ -50,6 +50,15 @@ export const FIELD_LABELS: Record<string, string> = {
   logo: 'Logo',
   imageProvenance: 'Nguồn ảnh (nội bộ)',
 
+  // ── Nhận diện thương hiệu (siteSettings.branding, CONTENT_MODEL §2.15 v1.0.17) ──
+  // Bốn nhãn dưới đây bị `title:` khai thẳng trong cms/schemas/siteSettings.ts
+  // ghi đè, vì ở đó chúng cần thêm bối cảnh ("Logo (header và chân trang)").
+  // Vẫn khai ở đây để trường cùng tên xuất hiện ở nơi khác không bị trống nhãn.
+  branding: 'Nhận diện thương hiệu',
+  favicon: 'Favicon',
+  ogImage: 'Ảnh chia sẻ mạng xã hội',
+  hideWordmark: 'Ẩn chữ tên site bên cạnh logo',
+
   // ── SEO ──
   seo: 'SEO',
   metaTitle: 'Tiêu đề SEO (metaTitle)',

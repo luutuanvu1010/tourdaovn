@@ -6,10 +6,11 @@ import { touristDestinationBySlugQuery, siteSettingsQuery } from '../lib/queries
 import { allToursQuery } from '../lib/queries/tour'
 import { homeAlternates } from '../lib/sitemap'
 import { destinationHref } from '../lib/homepage'
-import { jsonLdScriptContent } from '../lib/serialize/utils'
+import { jsonLdScriptContent, imageToLd } from '../lib/serialize/utils'
 import type { TouristDestinationResult, SiteSettingsResult, Lang } from '../lib/types'
 import { brand, primaryDestinationSlug } from '../site.config'
 import { siteBaseUrl } from '../lib/siteUrl'
+import { fetchSiteBranding } from '../lib/siteBranding'
 
 export async function getStaticPaths() {
   return [{ params: {} }]
@@ -60,6 +61,15 @@ const orgNode: Record<string, unknown> = {
 }
 if (config?.contact?.hotline) orgNode.telephone = config.contact.hotline
 if (config?.contact?.email) orgNode.email = config.contact.email
+// Logo tải lên trong Studio (siteSettings.branding.logo). Google dùng thuộc tính
+// này cho nhận diện thương hiệu trong kết quả tìm kiếm. Chưa tải thì KHÔNG phát
+// thuộc tính rỗng — guard rỗng, giống telephone/email ngay trên.
+//
+// Đọc qua CÙNG helper mà Header và Footer dùng, không qua `siteSettingsQuery()`:
+// một đường đọc thì không có đường nào lệch đường nào (N7).
+const branding = await fetchSiteBranding()
+const orgLogoLd = imageToLd(branding?.logo, lang)
+if (orgLogoLd) orgNode.logo = orgLogoLd
 const jsonLd = [
   {
     '@context': 'https://schema.org',

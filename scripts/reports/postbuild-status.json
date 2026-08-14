@@ -1,10 +1,18 @@
 {
-  "ranAt": "2026-08-06T03:21:01.926Z",
+  "ranAt": "2026-08-14T02:30:59.124Z",
   "items": [
     {
       "id": "I6",
-      "status": "pass",
-      "errors": []
+      "status": "fail",
+      "errors": [
+        "tour/tour-3-dao-hon-mun/index.html: JSON-LD @id trỏ URL null \"https://tourdao.vn/dia-danh/null/\"",
+        "tour/tour-3-dao-hon-mun/index.html: JSON-LD @id trỏ URL null \"https://tourdao.vn/dia-danh/null/\"",
+        "tour/tour-3-dao-hon-mun/index.html: JSON-LD @id trỏ URL null \"https://tourdao.vn/diem-tham-quan/null/\"",
+        "tour/tour-3-dao-hon-mun/index.html: JSON-LD @id trỏ URL null \"https://tourdao.vn/diem-tham-quan/null/\"",
+        "tour/tour-hon-tam-tron-goi/index.html: JSON-LD @id trỏ URL null \"https://tourdao.vn/dia-danh/null/\"",
+        "tour/ve-hon-tam-tron-goi/index.html: JSON-LD @id trỏ URL null \"https://tourdao.vn/dia-danh/null/\"",
+        "tour/ve-hon-tam-tron-goi/index.html: JSON-LD @id trỏ URL null \"https://tourdao.vn/dia-danh/null/\""
+      ]
     },
     {
       "id": "PY8",
@@ -23,8 +31,12 @@
     },
     {
       "id": "R4",
-      "status": "pass",
-      "errors": []
+      "status": "fail",
+      "errors": [
+        "R4: /cam-nang/tour-3-dao-nha-trang-lich-trinh-chi-tiet/ thiếu hreflang self cho ngôn ngữ \"vi\"",
+        "R4: hreflang không đối xứng: /cam-nang/tour-3-dao-nha-trang-lich-trinh-chi-tiet/ → /cam-nang/mua-ve-hon-tam-nha-trang-o-dau/ (lang=vi) nhưng ngược lại không trỏ về",
+        "R4: hreflang không đối xứng: /cam-nang/tour-3-dao-nha-trang-lich-trinh-chi-tiet/ → /cam-nang/mua-ve-hon-tam-nha-trang-o-dau/ (lang=x-default) nhưng ngược lại không trỏ về"
+      ]
     }
   ]
 }

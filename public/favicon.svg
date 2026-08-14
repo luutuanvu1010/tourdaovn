@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none">
+  <!-- Favicon dự phòng — dùng khi siteSettings.branding.favicon còn trống.
+       Cùng một hình với lớp dự phòng trong src/components/SiteLogo.astro.
+       Màu ghi thẳng (không dùng biến CSS): file này được trình duyệt tải rời,
+       ngoài mọi ngữ cảnh token của trang. Giá trị lấy từ bộ mặc định "Biển sâu"
+       trong src/styles/tokens.css. -->
+  <circle cx="20" cy="20" r="19" fill="#0C4A6E"/>
+  <path d="M14 26 L20 9 L20 26 Z" fill="#F5A623"/>
+  <path d="M20 9 L26 26 L20 26 Z" fill="#FBE3B3"/>
+  <path d="M8 30 Q 12 27 16 30 T 24 30 T 32 30" stroke="#FFFFFF" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+</svg>

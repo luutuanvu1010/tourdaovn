@@ -5,10 +5,11 @@ import { getClient } from '../../lib/sanity'
 import { touristDestinationBySlugQuery, siteSettingsQuery } from '../../lib/queries'
 import { homeAlternates } from '../../lib/sitemap'
 import { destinationHref } from '../../lib/homepage'
-import { jsonLdScriptContent } from '../../lib/serialize/utils'
+import { jsonLdScriptContent, imageToLd } from '../../lib/serialize/utils'
 import type { TouristDestinationResult, SiteSettingsResult, Lang } from '../../lib/types'
 import { brand, primaryDestinationSlug, langs, defaultLang } from '../../site.config'
 import { siteBaseUrl } from '../../lib/siteUrl'
+import { fetchSiteBranding } from '../../lib/siteBranding'
 
 // Ngôn ngữ khác mặc định đang bật — đọc từ `langs` (PHA 4, GÓI 2). Hiện `langs = ['vi']`
 // nên danh sách này rỗng, route [lang]/ không sinh trang nào — tự bật lại khi thêm ngôn ngữ.
@@ -70,6 +71,12 @@ const orgNode: Record<string, unknown> = {
 }
 if (config?.contact?.hotline) orgNode.telephone = config.contact.hotline
 if (config?.contact?.email) orgNode.email = config.contact.email
+// Cùng logo với trang chủ vi — một thương hiệu, một node Organization. Trang này
+// hiện KHÔNG được sinh (`langs = ['vi']`), nhưng để thiếu ở đây là gài sẵn một
+// vết lệch bật ra đúng ngày ai đó mở thêm ngôn ngữ.
+const branding = await fetchSiteBranding()
+const orgLogoLd = imageToLd(branding?.logo, lang)
+if (orgLogoLd) orgNode.logo = orgLogoLd
 const jsonLd = [
   {
     '@context': 'https://schema.org',

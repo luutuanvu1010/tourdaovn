@@ -72,6 +72,12 @@ const SUB_FIELD_IGNORE = new Set([
   'bookingGuide', 'cancellationPolicy',
   // siteSettings.stats[] / partners[] / testimonials[] / groupQuote (v1.0.16)
   'authorName', 'authorNote', 'sourceName', 'sourceUrl', 'ctaLabel', 'quote', 'heading',
+  // siteSettings.branding sub-fields (CONTENT_MODEL §2.15 v1.0.17).
+  // `logo` KHÔNG thêm ở đây — nó đã nằm trong AMBIGUOUS_SUB_FIELDS.siteSettings
+  // bên dưới, và chính vì thế field cha phải mang tên `branding`: đặt tên field
+  // top-level là `logo` thì G1 coi nó là sub-field và bỏ qua IM LẶNG, cổng mất
+  // tác dụng đúng chỗ cần nó nhất.
+  'favicon', 'ogImage', 'hideWordmark',
 ])
 
 // Fields that exist as both top-level and sub-field in different entities
@@ -260,6 +266,10 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
   // §2.15 (v1.0.6): singleton config, không phải content entity — không gate publish
   // contact thêm v1.0.11 (CONV-01, DECISIONS 2026-07-13)
   siteSettings: {
+    // branding thêm v1.0.17 (QĐ-2026-08-14-01) — ảnh nhận diện thương hiệu.
+    // Sub-field logo/favicon/ogImage/hideWordmark xử ở SUB_FIELD_IGNORE và
+    // AMBIGUOUS_SUB_FIELDS bên trên.
+    branding: { required: false },
     sections: { required: false },
     heroText: { required: false },
     contact: { required: false },

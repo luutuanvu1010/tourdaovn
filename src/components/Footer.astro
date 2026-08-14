@@ -1,5 +1,6 @@
 ---
 import type { Lang } from '../lib/types'
+import SiteLogo from './SiteLogo.astro'
 import { resolveNav, autoRouteLinks } from '../lib/routes'
 import { uiCopy } from '../lib/uiCopy'
 import { fetchSiteContact } from '../lib/siteContact'
@@ -45,13 +46,7 @@ const copyrightYear = brand.foundedYear < currentYear ? `${brand.foundedYear}–
     <div class="foot-grid">
       <div class="foot-brand">
         <a href={homeHref} class="logo" aria-label={t('homeAria')}>
-          <svg class="logo-svg" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-            <circle cx="20" cy="20" r="19" fill="var(--c-primary)"/>
-            <path d="M14 26 L20 9 L20 26 Z" fill="var(--c-sand)"/>
-            <path d="M20 9 L26 26 L20 26 Z" fill="var(--c-sand-soft)"/>
-            <path d="M8 30 Q 12 27 16 30 T 24 30 T 32 30" stroke="var(--c-surface)" stroke-width="1.4" fill="none" stroke-linecap="round"/>
-          </svg>
-          <span>{brand.name}</span>
+          <SiteLogo />
         </a>
         <p>{t('footerTagline')}</p>
       </div>
@@ -139,11 +134,8 @@ const copyrightYear = brand.foundedYear < currentYear ? `${brand.foundedYear}–
     margin-bottom: var(--s3);
   }
 
-  .logo-svg {
-    width: 34px;
-    height: 34px;
-    flex: none;
-  }
+  /* Cỡ và hình của dấu hiệu thương hiệu nằm trong SiteLogo.astro — style Astro
+     có phạm vi theo component nên không đặt được từ đây. */
 
   .foot-brand p {
     font-size: var(--fs-sm);

@@ -39,6 +39,72 @@ export default defineType({
       description: 'Chỉ dùng để hiển thị trên header của Studio',
       validation: (Rule) => Rule.required(),
     }),
+    // CONTENT_MODEL §2.15 v1.0.17 — ảnh nhận diện thương hiệu (QĐ-2026-08-14-01).
+    //
+    // Ranh giới với src/site.config.ts (ADR-0021 QĐ8): CHỮ thương hiệu — tên site,
+    // tên pháp nhân, mô tả — ở lại file config vì nó vào JSON-LD và thẻ meta của
+    // mọi trang, phải cố định lúc build. ẢNH ở đây vì site chỉ tham chiếu chúng
+    // bằng URL; biên tập viên đổi ảnh không đổi cấu trúc trang nào.
+    defineField({
+      name: 'branding',
+      title: 'Nhận diện thương hiệu',
+      description:
+        'Logo, favicon và ảnh chia sẻ. Để trống ô nào thì site dùng hình mặc định ' +
+        'trong code — không có ô nào bắt buộc, không ô nào để trống làm vỡ trang.',
+      type: 'object',
+      options: { collapsible: true, collapsed: false },
+      fields: [
+        defineField({
+          name: 'logo',
+          title: 'Logo (header và chân trang)',
+          description:
+            'Nên là ảnh nền trong suốt (PNG hoặc SVG), cao khoảng 68px là đủ nét. ' +
+            'Để trống thì site dùng hình mặc định.',
+          type: 'image',
+          options: { accept: 'image/svg+xml,image/png,image/webp' },
+          // CỐ Ý KHÔNG có ô "alt", khác partners[].logo ngay dưới. Logo nằm trong
+          // thẻ <a> đã mang aria-label "về trang chủ"; thêm alt là trình đọc màn
+          // hình đọc hai lần cùng một thứ. Logo đối tác thì ngược lại — đó là ảnh
+          // nội dung, đứng một mình, nên phải có alt.
+        }),
+        defineField({
+          name: 'hideWordmark',
+          title: 'Ẩn chữ tên site bên cạnh logo',
+          description:
+            'Bật khi ảnh logo đã có sẵn chữ thương hiệu, để chữ không hiện hai lần. ' +
+            'Chưa tải logo lên thì công tắc này không có tác dụng — site vẫn hiện chữ, ' +
+            'không để trống cụm thương hiệu.',
+          type: 'boolean',
+          initialValue: false,
+        }),
+        defineField({
+          name: 'favicon',
+          title: 'Favicon (biểu tượng trên tab trình duyệt)',
+          description:
+            'Ảnh VUÔNG, tối thiểu 512×512. PNG nét hơn trên iPhone; SVG nhẹ hơn nhưng ' +
+            'iPhone không đọc được nên sẽ dùng hình mặc định cho biểu tượng màn hình chính.',
+          type: 'image',
+          options: { accept: 'image/svg+xml,image/png' },
+        }),
+        defineField({
+          name: 'ogImage',
+          title: 'Ảnh chia sẻ mặc định (Facebook, Zalo)',
+          description:
+            'Ảnh hiện khi dán link site lên mạng xã hội. Tỉ lệ 1200×630. Trang nào có ' +
+            'ảnh riêng thì ảnh đó thắng; ảnh này chỉ đỡ những trang không có.',
+          type: 'image',
+          options: { hotspot: true },
+          fields: [
+            defineField({
+              name: 'alt',
+              title: 'Mô tả ảnh (alt)',
+              type: 'string',
+              description: 'Mạng xã hội đọc cho người dùng trình đọc màn hình.',
+            }),
+          ],
+        }),
+      ],
+    }),
     defineField({
       name: 'sections',
       title: 'Section trên Trang chủ',

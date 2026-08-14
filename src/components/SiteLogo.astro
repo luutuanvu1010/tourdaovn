@@ -1,0 +1,60 @@
+---
+// SiteLogo — dấu hiệu thương hiệu, NGUỒN DUY NHẤT (06-BINDING_MAP §2).
+//
+// Trước đây khối SVG này bị chép hai bản, ở Header.astro và Footer.astro. Đúng
+// loại trùng lặp đã sinh ra DR-007 (menu viết cứng ba chỗ rồi lệch nhau): sửa
+// một chỗ, quên chỗ kia, không ai thấy.
+//
+// Ảnh lấy từ `siteSettings.branding.logo` — biên tập viên tự tải lên trong
+// Studio, không cần lập trình viên. Chưa tải thì khối SVG dưới đây gánh, site
+// giữ nguyên hình cũ (guard rỗng).
+//
+// Chữ tên site KHÔNG lấy từ Sanity — `brand.name` ở src/site.config.ts là nguồn
+// duy nhất (ADR-0021 QĐ8). Xem ghi chú ranh giới chữ/ảnh ở `SiteBranding`.
+import { imageUrl } from '../lib/sanity-image'
+import { fetchSiteBranding } from '../lib/siteBranding'
+import { brand } from '../site.config'
+
+const branding = await fetchSiteBranding()
+const logoSrc = imageUrl(branding?.logo, { width: 320 })
+
+// Công tắc "Ẩn chữ tên site" chỉ có hiệu lực KHI ĐÃ CÓ LOGO. Bật công tắc mà
+// chưa tải logo thì cụm thương hiệu trắng trơn — chặn ở đây chứ không trông vào
+// việc biên tập viên nhớ tắt lại.
+const showWordmark = !(logoSrc && branding?.hideWordmark)
+---
+
+{logoSrc ? (
+  <img class="logo-mark" src={logoSrc} alt="" loading="eager" decoding="async" />
+) : (
+  <svg class="logo-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+    <circle cx="20" cy="20" r="19" fill="var(--c-primary)"/>
+    <path d="M14 26 L20 9 L20 26 Z" fill="var(--c-sand)"/>
+    <path d="M20 9 L26 26 L20 26 Z" fill="var(--c-sand-soft)"/>
+    <path d="M8 30 Q 12 27 16 30 T 24 30 T 32 30" stroke="var(--c-surface)" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+  </svg>
+)}
+
+{showWordmark && <span>{brand.name}</span>}
+
+<style>
+  /* Kiểu nằm ở ĐÂY chứ không ở Header/Footer: style của Astro có phạm vi theo
+     component, nên `.logo-svg` cũ trong hai file kia không với tới được thẻ do
+     component này sinh ra. Cỡ giữ đúng 34px như bản cũ.
+
+     Thẻ <a class="logo"> bọc bên ngoài vẫn nằm ở Header/Footer và vẫn quy định
+     font, màu, khoảng cách — <span> dưới đây thừa hưởng, không cần kiểu riêng. */
+  .logo-mark {
+    width: 34px;
+    height: 34px;
+    flex: none;
+  }
+
+  /* Logo tải lên hiếm khi vuông. Khoá chiều cao, thả chiều ngang, chặn trần để
+     một file quá rộng không đẩy vỡ thanh điều hướng. */
+  img.logo-mark {
+    width: auto;
+    max-width: 180px;
+    object-fit: contain;
+  }
+</style>

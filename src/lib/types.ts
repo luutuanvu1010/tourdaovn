@@ -66,6 +66,10 @@ export interface ImageAsset {
   asset: {
     _id: string
     url: string
+    // Chỉ những truy vấn cần phân biệt SVG với ảnh raster mới deref field này
+    // (siteSettings.branding). Sanity CDN KHÔNG biến đổi được SVG, nên
+    // `imageUrl()` phải biết để không gắn tham số vô nghĩa vào URL.
+    mimeType?: string
     metadata?: { dimensions?: { width: number; height: number } }
   }
   hotspot?: { x: number; y: number; width: number; height: number }
@@ -528,6 +532,28 @@ export interface SiteGroupQuote {
   ctaLabel?: string
 }
 
+/**
+ * Ảnh nhận diện thương hiệu (CONTENT_MODEL §2.15 v1.0.17).
+ *
+ * Ranh giới với `brand` trong `src/site.config.ts` (ADR-0021 QĐ8): CHỮ thương
+ * hiệu — tên, tên pháp nhân, mô tả — ở lại file config vì nó vào JSON-LD và thẻ
+ * meta của mọi trang, phải cố định lúc build. ẢNH thương hiệu ở Sanity vì site
+ * chỉ tham chiếu chúng bằng URL; biên tập viên đổi ảnh không đổi cấu trúc trang
+ * nào. Xem QĐ-2026-08-14-01.
+ *
+ * Field nào trống thì lớp dự phòng trong code gánh — site không vỡ.
+ */
+export interface SiteBranding {
+  logo?: ImageAsset
+  /** Ẩn chữ tên site cạnh logo. Chỉ có hiệu lực khi ĐÃ có `logo`. */
+  hideWordmark?: boolean
+  favicon?: ImageAsset
+  ogImage?: ImageAsset
+}
+
+// `branding` CỐ Ý không có trong kiểu này — nó được đọc qua đúng một đường,
+// `fetchSiteBranding()`, không qua `siteSettingsQuery()`. Xem ghi chú ở
+// BRANDING_PROJECTION trong src/lib/queries/siteSettings.ts.
 export interface SiteSettingsResult {
   title: string
   theme: SiteTheme | null

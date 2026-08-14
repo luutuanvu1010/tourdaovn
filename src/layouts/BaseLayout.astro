@@ -5,6 +5,8 @@ import '../styles/tokens.css';
 import { brand } from '../site.config';
 import { siteBaseUrl } from '../lib/siteUrl';
 import { fetchSiteTheme } from '../lib/siteTheme';
+import { fetchSiteBranding } from '../lib/siteBranding';
+import { imageUrl, isSvg } from '../lib/sanity-image';
 
 export interface Props {
   title: string;
@@ -29,6 +31,33 @@ const selfUrl = siteBase + pathWithSlash;
 // Bộ giao diện chọn trong Sanity Studio (siteSettings.theme). Giá trị lạ hoặc
 // trống → bộ mặc định, trang vẫn dựng. Xem 07-DESIGN_TOKENS §1b.
 const theme = await fetchSiteTheme();
+
+// Ảnh nhận diện tải lên trong Studio (siteSettings.branding) — 06-BINDING_MAP §2.
+const branding = await fetchSiteBranding();
+
+// ── Favicon ──
+// Chưa tải lên thì rơi về /favicon.svg trong public/. File đó BẮT BUỘC phải tồn
+// tại: trước 2026-08-14 hai dòng <link> dưới đây trỏ vào hư không, favicon 404
+// trên mọi trang mà không cổng nào bắt được.
+const faviconSrc = imageUrl(branding?.favicon, { width: 64 });
+const faviconHref = faviconSrc ?? '/favicon.svg';
+const faviconType = faviconSrc && !isSvg(branding?.favicon) ? undefined : 'image/svg+xml';
+// apple-touch-icon phải là ảnh raster — iOS không đọc SVG. Favicon raster thì ép
+// PNG 180px; SVG hoặc chưa tải thì giữ file dự phòng (iOS bỏ qua, không hỏng gì).
+const appleTouchHref =
+  branding?.favicon && !isSvg(branding.favicon)
+    ? imageUrl(branding.favicon, { width: 180, format: 'png', autoFormat: false })!
+    : '/favicon.svg';
+
+// ── Ảnh chia sẻ mạng xã hội ──
+// Prop `ogImage` của từng trang THẮNG: ảnh riêng của một tour sát nội dung hơn
+// ảnh chung. Ảnh chung chỉ đỡ những trang không có ảnh riêng — trước đây các
+// trang đó dán lên Facebook/Zalo ra thẻ trắng.
+const fallbackOgImage = imageUrl(branding?.ogImage, { width: 1200, height: 630, fit: 'crop' });
+const shareImage = ogImage
+  ? (ogImage.startsWith('http') ? ogImage : siteBase + ogImage)
+  : fallbackOgImage;
+const shareImageAlt = ogImage ? undefined : branding?.ogImage?.alt;
 ---
 
 <!DOCTYPE html>
@@ -37,8 +66,8 @@ const theme = await fetchSiteTheme();
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#C2410C" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link rel="icon" href={faviconHref} type={faviconType} />
+    <link rel="apple-touch-icon" href={appleTouchHref} />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
 
@@ -49,13 +78,14 @@ const theme = await fetchSiteTheme();
     <meta property="og:type" content={ogType} />
     <meta property="og:locale" content={lang === 'vi' ? 'vi_VN' : lang === 'en' ? 'en_US' : lang === 'zh' ? 'zh_CN' : lang === 'ko' ? 'ko_KR' : 'ru_RU'} />
     <meta property="og:site_name" content={brand.name} />
-    {ogImage && <meta property="og:image" content={ogImage.startsWith('http') ? ogImage : siteBase + ogImage} />}
+    {shareImage && <meta property="og:image" content={shareImage} />}
+    {shareImageAlt && <meta property="og:image:alt" content={shareImageAlt} />}
 
     <!-- Twitter Card -->
-    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:card" content={shareImage ? 'summary_large_image' : 'summary'} />
     <meta name="twitter:title" content={title} />
     {description && <meta name="twitter:description" content={description} />}
-    {ogImage && <meta name="twitter:image" content={ogImage.startsWith('http') ? ogImage : siteBase + ogImage} />}
+    {shareImage && <meta name="twitter:image" content={shareImage} />}
 
     <link rel="canonical" href={selfUrl} />
 
