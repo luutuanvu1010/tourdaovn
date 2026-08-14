@@ -9,3 +9,6 @@ cms/.sanity/
 !.env.example
 .DS_Store
 .wrangler/
+
+# Phiên brainstorm của skill superpowers — không đưa vào kho
+.superpowers/
