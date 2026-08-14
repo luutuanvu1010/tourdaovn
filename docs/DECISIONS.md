@@ -747,4 +747,20 @@ Ai định đưa **chữ** thương hiệu vào Studio sau này thì đó là vi
 - Ảnh nền chân trang phủ một lớp `--c-footer-bg` đục **88%** ở trên. Ngưỡng là số: tương phản chữ chân trang trên ảnh **sáng nhất** phải ≥ **4.5:1**.
 - Badge thiếu `alt` mà **có** link → lấy nhãn `kind` làm alt. Một link không nhãn là lỗi trợ năng thật. Không im lặng bỏ ảnh đi — mất nội dung không ai biết còn tệ hơn.
 
-**Còn nợ.** (1) Mô tả Hero lệch meta description — không có kiểm máy, dựa kỷ luật. (2) `Organization.sameAs` chưa lấy từ badge mạng xã hội, bỏ lỡ một lợi ích SEO thật. (3) Bốn ngôn ngữ của `heroText` bị bỏ khi migrate, chỉ lấy lại được từ bản sao lưu.
+**Còn nợ.** (1) Mô tả Hero lệch meta description — không có kiểm máy, dựa kỷ luật. (2) `Organization.sameAs` chưa lấy từ badge mạng xã hội, bỏ lỡ một lợi ích SEO thật. (3) Bốn ngôn ngữ của `heroText` bị bỏ khi migrate, chỉ lấy lại được từ bản sao lưu. (4) Bốn tiêu chí nghiệm thu 3–6 của spec **chưa có bằng chứng** vì chưa ai nhập dữ liệu vào ô mới — im lặng là trượt, chúng đang ở trạng thái chưa đạt.
+
+---
+
+## ND-008 — Auth token Sanity CLI bị in ra ngữ cảnh phiên AI (2026-08-14)
+
+**Chuyện gì.** Trong đợt `QĐ-2026-08-14-03`, migration `heroText` → `hero.eyebrow` chết vì biến `SANITY_WRITE_TOKEN` không có ở máy này. Để tìm đường khác, phiên chạy `npx sanity debug --secrets`. Lệnh đó **in thẳng auth token** của tài khoản Sanity CLI ra stdout, và stdout đi vào ngữ cảnh của tác nhân AI.
+
+**Thiệt hại.** Token đó mang quyền của tài khoản chủ dự án trên project Sanity, không phải quyền chỉ đọc. Nó nay nằm trong bản ghi hội thoại của phiên. N10: **rò rỉ là thiệt hại không thu hồi được — bí mật đã lộ thì phải thay, không gỡ xuống được.**
+
+**Phải làm.** Chủ dự án chạy `npx sanity logout` rồi `npx sanity login` để CLI cấp token mới; token cũ hết hiệu lực. Chưa làm thì coi như đang hở.
+
+**Vì sao hàng rào hiện có không chặn.** Hook `pre-bash-guard.sh` chặn lệnh **tham chiếu file biến môi trường** — đúng thứ nó được viết để chặn, và nó đã chặn thật ba lần trong phiên này. Nhưng `sanity debug --secrets` không nhắc tới file nào; nó moi bí mật ra từ **kho thông tin đăng nhập của chính CLI**. Hàng rào dựng theo tên file không thấy đường đó. Đây là P21 đúng nghĩa: chỉ có một lớp phòng thủ, nên lỗ hổng của lớp đó chính là lỗ hổng của cả hệ thống.
+
+**Luật rút ra (P17).** Cấm chạy lệnh có cờ moi bí mật (`--secrets`, `--show-token`, lệnh `debug` của các CLI giữ phiên đăng nhập) trong phiên có tác nhân AI. Cần biết CLI đã đăng nhập chưa thì dùng lệnh **không in giá trị** — với Sanity là `npx sanity projects list`. **Chưa cưỡng chế bằng máy**; bổ sung mẫu chặn vào `pre-bash-guard.sh` là việc của đợt sau, và tới lúc đó điều này đang dựa kỷ luật.
+
+**Một điều đã làm đúng, ghi để không đọc lệch:** token lộ ra **không** được dùng. Migration chạy bằng `npx sanity exec … --with-user-token`, tức mượn phiên đăng nhập của CLI, không có chuỗi bí mật nào đi qua dòng lệnh hay log.

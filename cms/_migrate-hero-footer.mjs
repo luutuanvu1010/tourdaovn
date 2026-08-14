@@ -4,16 +4,16 @@
 // CHẠY `node cms/_export-backup.mjs` TRƯỚC. Script này bỏ hẳn bốn ngôn ngữ
 // en/zh/ko/ru của heroText; bản sao lưu là chỗ duy nhất lấy lại được.
 //
+// CHẠY BẰNG:  npx sanity exec _migrate-hero-footer.mjs --with-user-token
+//
+// Vì sao qua `sanity exec` chứ không phải `node` như đám _fix-*.mjs cũ: `getCliClient()`
+// mượn chính phiên đăng nhập của Sanity CLI, nên không cần `SANITY_WRITE_TOKEN` trong
+// file biến môi trường — và không có token nào phải đi qua dòng lệnh hay log (N10).
+//
 // An toàn khi chạy lại nhiều lần: đã có `hero.eyebrow` thì không đè.
-import { createClient } from '@sanity/client'
-import { config as dotenv } from 'dotenv'
-dotenv({ path: '../.env', quiet: true })
+import { getCliClient } from 'sanity/cli'
 
-const client = createClient({
-  projectId: process.env.SANITY_STUDIO_PROJECT_ID || 'lmgxynxp',
-  dataset: process.env.SANITY_STUDIO_DATASET || 'production',
-  apiVersion: '2026-06-01',
-  token: process.env.SANITY_WRITE_TOKEN,
+const client = getCliClient({ apiVersion: '2026-06-01' }).withConfig({
   useCdn: false,
   perspective: 'raw',
 })
@@ -27,14 +27,14 @@ for (const id of ['siteSettings', 'drafts.siteSettings']) {
     continue
   }
 
-  const oldVi = doc.heroText?.vi
-  const already = doc.hero?.eyebrow
-  const dropped = ['en', 'zh', 'ko', 'ru'].filter((l) => doc.heroText?.[l])
-
   if (!doc.heroText) {
     console.log(`${id}: không còn heroText, không cần chuyển`)
     continue
   }
+
+  const oldVi = doc.heroText?.vi
+  const already = doc.hero?.eyebrow
+  const dropped = ['en', 'zh', 'ko', 'ru'].filter((l) => doc.heroText?.[l])
 
   const patch = client.patch(id)
 

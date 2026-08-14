@@ -159,9 +159,21 @@ trên một document, cùng hạng với đám `cms/_fix-*.mjs` đã có trong r
 Thứ tự bắt buộc:
 
 1. `node cms/_export-backup.mjs` — sao lưu trước khi đụng dữ liệu.
-2. `node cms/_migrate-hero-footer.mjs` — đọc `heroText.vi`, ghi vào `hero.eyebrow`, rồi
-   `unset` `heroText`. Chạy cho cả `siteSettings` và `drafts.siteSettings`.
+2. `cd cms && npx sanity exec _migrate-hero-footer.mjs --with-user-token` — đọc
+   `heroText.vi`, ghi vào `hero.eyebrow`, rồi `unset` `heroText`. Chạy cho cả
+   `siteSettings` và `drafts.siteSettings`.
 3. Script phải **không đè** nếu `hero.eyebrow` đã có giá trị, và phải in ra rõ nó làm gì.
+
+**Vì sao `sanity exec` chứ không `node` như đám `cms/_fix-*.mjs` cũ.** Những script đó
+đọc `SANITY_WRITE_TOKEN` từ file biến môi trường ở gốc kho — biến đó **không tồn tại** ở
+máy này, nên bản đầu của migration chết ở `insufficientPermissionsError`. `getCliClient()`
+mượn chính phiên đăng nhập của Sanity CLI, nên không cần token nào trong file, và không
+token nào phải đi qua dòng lệnh hay log (N10). Đây là khuôn nên dùng cho migration sau.
+
+**Trang chủ prerender lúc build.** Chạy migration xong site **chưa** đổi: `/index.html`
+nằm trong đám file dựng sẵn. Phải `npm run deploy` lại sau khi sửa nội dung, hoặc đợi
+webhook Sanity dựng lại. Đã kiểm chứng trong đợt này: eyebrow chỉ trở về đúng chữ sau
+lần deploy thứ hai.
 
 **Bốn ngôn ngữ kia của `heroText` bị bỏ.** `langs = ['vi']` nên chúng không lên trang nào;
 bản sao lưu ở bước 1 là chỗ lấy lại nếu cần. Kèm theo: gỡ `'heroText'` khỏi
@@ -205,6 +217,25 @@ Kiểm được, đặt ra trước khi thi công:
 7. Sau migration: `heroText` không còn trong document; eyebrow trên trang chủ vẫn đúng chữ cũ.
 8. Studio deploy xong, mở `tourdao.sanity.studio` thấy hai nhóm "Hero trang chủ" và
    "Chân trang"; `heroText` không còn.
+
+## 4b. Kết quả nghiệm thu (chạy 2026-08-14)
+
+| # | Tiêu chí | Kết quả |
+|---|---|---|
+| 1 | `npm run build` xanh | **đạt** — `Result (136 files): 0 errors` |
+| 2 | Để trống mọi ô mới → render y hệt trước | **đạt** — soi HTML thật trên dev server: tagline, disclaimer, bản quyền, H1, mô tả, hai nút đều rơi về bản mặc định; không có `foot-badges`, `foot-bg`, `site-home-credit` |
+| 3 | `hero.heading` đè H1, meta description không đổi | **chưa kiểm** — cần nhập dữ liệu thật |
+| 4 | `hero.image` đè ảnh Hero, ảnh `/nha-trang/` không đổi | **chưa kiểm** — nt |
+| 5 | 3 badge khác `kind` → 3 nhóm đúng thứ tự; xoá hết → không còn dải | **chưa kiểm** — nt |
+| 6 | Ảnh nền chân trang sáng → tương phản chữ ≥ 4.5:1 | **chưa kiểm** — nt |
+| 7 | Sau migration `heroText` biến mất, eyebrow vẫn đúng chữ cũ | **đạt** — `sanity documents get siteSettings` cho `hero.eyebrow = "Tour Đảo Nha Trang"`, không còn `heroText`; production hiện đúng chữ đó |
+| 8 | Studio deploy xong thấy hai nhóm mới | **đạt** — `Deployed 1/1 schemas` → `https://tourdaovn.sanity.studio/` |
+
+Ngoài bảng: `npm run audit:spec` **3/3 xanh** (G1 từ 12 fail về 0). Production
+`https://tourdao.vn/` trả HTTP 200, Hero và chân trang đúng.
+
+Bốn tiêu chí 3–6 **chưa có bằng chứng** vì chưa ai nhập dữ liệu vào ô mới. Im lặng là
+trượt: chúng đang ở trạng thái *chưa đạt*, không phải *đạt*.
 
 ## 5. Còn nợ
 
