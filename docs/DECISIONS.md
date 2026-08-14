@@ -659,3 +659,39 @@ Chủ dự án chọn **làm đủ**, và đặt mốc mới hơn mốc cũ **m�
 3. **Be Vietnam Pro ở lại làm lớp dự phòng duy nhất**, không được xoá.
 
 **Còn nợ.** Chưa đo LCP sau hai lần đổi chữ. Lần này cân nặng giảm nên chiều gió thuận, nhưng vẫn phải đo trước khi công bố.
+
+---
+
+## QĐ-2026-08-14-01 — Ảnh thương hiệu ở Sanity, chữ thương hiệu ở lại config
+
+**Chốt.** Thêm field `branding` vào `siteSettings` (`01-CONTENT_MODEL` §2.15 v1.0.17) cho biên tập viên tự tải lên **logo, favicon, ảnh chia sẻ**, cộng một công tắc ẩn chữ tên site cạnh logo. Cửa hai chiều: không thêm document type, không đổi URL nào.
+
+**Vì sao cần.** Logo đang là khối SVG viết cứng, **chép hai bản** ở `Header.astro` và `Footer.astro`. Đổi logo phải nhờ lập trình viên, và sửa một bản quên bản kia là lệch — đúng cơ chế đã sinh ra DR-007 với menu viết cứng ba chỗ.
+
+**Ranh giới với ADR-0021 QĐ8.** ADR-0021 nói tên site **không** nằm trong Sanity. Quyết định này không nới điều đó; nó vẽ rõ thêm một đường đã ngầm tồn tại:
+
+| | Ở đâu | Vì sao |
+|---|---|---|
+| **Chữ** thương hiệu — `name`, `legalName`, `description`, `tagline` | `src/site.config.ts` | vào JSON-LD và thẻ meta của **mọi** trang, phải cố định lúc build; biên tập viên không có quyền git nên không chạm tới |
+| **Ảnh** thương hiệu — logo, favicon, og:image | Sanity `siteSettings.branding` | site chỉ tham chiếu bằng URL; đổi ảnh không đổi cấu trúc trang nào, không đổi chuỗi nào trong JSON-LD |
+
+Ai định đưa **chữ** thương hiệu vào Studio sau này thì đó là vi phạm ADR-0021, không phải mở rộng quyết định này.
+
+**Vì sao field tên `branding` chứ không phải `logo`.** `scripts/meta-validators/g1` có danh sách `AMBIGUOUS_SUB_FIELDS.siteSettings` chứa sẵn `'logo'` (vì `partners[].logo`). Đặt tên field top-level là `logo` thì G1 coi nó là sub-field và **bỏ qua im lặng** — cổng "schema phải khớp CONTENT_MODEL" mất tác dụng đúng ở field mới thêm. Tên khác giữ cổng còn răng.
+
+**Hệ quả kèm theo, không phải phạm vi nở ra:**
+
+1. **Đóng một lỗi đang sống trên production.** `BaseLayout.astro` trỏ `/favicon.svg` nhưng `public/` không có file đó — favicon 404 mọi trang. Nay có `public/favicon.svg` thật làm lớp dự phòng, nên lỗi đóng **kể cả khi chưa ai tải favicon lên**.
+2. **`Organization.logo` vào JSON-LD** trang chủ khi đã có logo (guard rỗng như `telephone`/`email`). Google dùng thuộc tính này cho nhận diện thương hiệu.
+3. **`og:image` mặc định.** Trước đây trang nào không tự truyền `ogImage` thì dán link lên Facebook/Zalo ra thẻ trắng. Ảnh riêng của trang vẫn thắng ảnh chung.
+
+**Một đường đọc, không hai.** `branding` **không** nằm trong `siteSettingsQuery()`; mọi nơi — Header, Footer, BaseLayout, JSON-LD trang chủ — đọc qua đúng `src/lib/siteBranding.ts`. Bản đầu của đợt này để nó ở cả hai nơi, và nghiệm thu bắt ngay: header hiện logo mà `Organization.logo` trong JSON-LD trống, vì trang chủ đọc bản này còn header đọc bản kia. Ghi lại vì đây là N7 lệch **thật**, không phải rủi ro giả định.
+
+**Hai chỗ cưỡng chế ở tầng render, không trông vào kỷ luật biên tập viên:**
+
+- Bật `hideWordmark` mà chưa tải logo → chữ tên site **vẫn hiện**. Không có đường nào ra header trắng.
+- Logo SVG → `imageUrl()` trả URL gốc, không gắn `?w=`/`?auto=format`. Sanity CDN không biến đổi được SVG; tham số ở đó chỉ làm người đọc tưởng ảnh đã được đổi cỡ.
+
+**Cố ý không có ô `alt` cho `logo`.** Khác `partners[].logo` ngay dưới nó. Logo nằm trong thẻ `<a>` đã mang `aria-label` về trang chủ; thêm alt là trình đọc màn hình đọc hai lần cùng một thứ. Ghi ra đây để lần rà I12 sau không tưởng là sót.
+
+**Còn nợ.** Chưa có kiểm máy nào bắt được việc `public/favicon.svg` bị xoá — nó sẽ lại thành 404 im lặng đúng như trước. Đang dựa kỷ luật.

@@ -47,6 +47,9 @@ Phần KHÔNG nhãn (triết lý binding, chính sách vùng rỗng, khung chung
 | Header điều hướng | config (build): khối `nav` trong `src/site.config.ts` | có | mục `kind: 'zalo'` chưa có `zaloUrl` thì tự ẩn; mục trỏ tới trang không tồn tại làm **dừng build** | ADR-0023. Sáu loại đích: index, hub, term, detail, static, zalo. Mục có `children` thành nhóm thả xuống. Đây là nguồn duy nhất — Header, Footer và nút phụ ở hero trang chủ đều đọc từ đó (đóng DR-007) |
 | Chuyển ngôn ngữ | bản dịch tồn tại của trang: field-level theo slug ngôn ngữ có giá trị; Article theo translationGroup (I7) | có | ngôn ngữ chưa có bản dịch không hiện trong switcher | khớp hreflang hai chiều, không link trang chưa tồn tại (R4) |
 | Footer | config (build) cộng decor | có | — | không field Sanity phase 1 |
+| Logo header và chân trang | `siteSettings.branding.logo`; chữ tên site vẫn từ config (build): `brand.name` | có | chưa tải logo → khối SVG mặc định trong `SiteLogo.astro`, đúng hình như trước 2026-08-14 | **một component `SiteLogo.astro` cho cả hai nơi** — trước đây SVG chép hai bản ở Header và Footer, đúng loại trùng lặp đã sinh ra DR-007. `branding.hideWordmark` ẩn chữ cạnh logo, **chỉ có hiệu lực khi đã có logo** — thêm v1.0.17 |
+| Favicon | `siteSettings.branding.favicon` | có | `/favicon.svg` trong `public/` — file thật, không phải đường dẫn treo | trước 2026-08-14 hai thẻ `<link>` trỏ vào file không tồn tại, favicon 404 mọi trang mà không cổng nào bắt. `apple-touch-icon` cần ảnh raster; favicon SVG hoặc trống thì rơi về file dự phòng — thêm v1.0.17 |
+| Ảnh chia sẻ mặc định (`og:image`) | `siteSettings.branding.ogImage` | tùy | trang không có ảnh riêng và chưa tải ảnh chung → **không phát** thẻ `og:image`, thẻ Twitter hạ về `summary` | prop `ogImage` của từng trang THẮNG ảnh chung (ảnh riêng của một tour sát nội dung hơn); `og:image:alt` phát theo alt của ảnh chung — thêm v1.0.17 |
 | Kênh liên hệ (sidebar booking + footer) | siteSettings.contact | tùy | field con nào trống thì kênh đó không render; cả 3 kênh sidebar (zaloUrl/hotline/whatsapp) trống thì cả cụm ẩn; footer bớt kênh đó, còn 0 kênh thì bỏ hẳn mục liên hệ | sidebar chỉ render trên Tour, Hotel, Resort, Experience (component ContactChannels); footer render mọi trang; telephone/email cùng nguồn dùng cho Organization JSON-LD trang chủ (guard rỗng §5.1) — thêm v1.0.11 (CONV-01) |
 | Meta title, description | seo.metaTitle, seo.metaDescription | nên có | fallback title và summary | trang listing và term sinh từ name, description (2.13) |
 | hreflang, canonical | build từ bản dịch tồn tại; canonical host apex, URL có `/` cuối | có | — | 05 mục 1.1, R4 |
@@ -277,7 +280,7 @@ Lý do: doanh thu công ty đến từ offline/đại lý/OTA, site là kênh m�
 | Báo giá đoàn | `siteSettings.groupQuote`: `heading`, `text`, `ctaLabel` | tùy | ẩn khối | nút đọc `contact.zaloUrl`, không khai số thứ hai |
 | Vì sao chọn | config (build) | tùy | ẩn khối | bốn điểm khác biệt; xem việc 12 của kế hoạch 2026-08-06 |
 | Các khối nội dung | như §4.1 (trust bar, banner, hub grid, areas, guides, featured, faq, safety) | tùy | khối rỗng tự ẩn dù `hidden = false` | empty guard là cổng cứng, xem §4.1 |
-| JSON-LD | `WebSite` cộng `Organization`; `telephone`/`email` từ `siteSettings.contact` | có | field liên hệ trống thì không phát thuộc tính đó | guard rỗng §5.1 |
+| JSON-LD | `WebSite` cộng `Organization`; `telephone`/`email` từ `siteSettings.contact`, `logo` từ `siteSettings.branding.logo` | có | field liên hệ trống thì không phát thuộc tính đó; chưa tải logo thì không phát `logo` | guard rỗng §5.1; `logo` thêm v1.0.17 — Google dùng cho nhận diện thương hiệu |
 
 ### 5.8 Trang tĩnh `/ho-tro/` và `/lien-he/`
 

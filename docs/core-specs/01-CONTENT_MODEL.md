@@ -17,7 +17,7 @@ Phần KHÔNG nhãn (cơ chế field 2.0, ba họ gate, quy tắc giá, khối q
 > 🔧 **SITE-SPECIFIC:** danh mục 14 entity và mọi ví dụ (Specialty, TouristDestination, 5 ngôn ngữ) là của nhatrangtravel. Giữ *cơ chế* (field 2.0, ba họ gate, quy tắc bookingRef, khối quản trị); thay *danh mục entity* theo site.
 
 - **Trạng thái:** đã duyệt. Founder soát toàn văn theo cụm 2026-06-11 (rà phản biện độc lập, 7 vết chốt qua trắc nghiệm), bước 1 đóng.
-- **Phiên bản:** v1.0.16   **Ngày:** 2026-08-06   **Người soạn:** Cowork (tác nhân điều phối).
+- **Phiên bản:** v1.0.17   **Ngày:** 2026-08-14   **Người soạn:** Cowork (tác nhân điều phối).
 - **Nguồn quyết định:** brief mục 5-6 cộng các lựa chọn founder 2026-06-10 và 2026-06-11 (xem `DECISIONS.md` và `project/adr/` từ ADR-0002 đến ADR-0006).
 - **Kế thừa ràng buộc:** CONSTITUTION v2.2.0, PROJECT_OVERLAY v1.0.2 (S2.2 bất biến dữ liệu, S2.3 ngưỡng, S2.4 SEO/GEO, S2.5 đa ngôn ngữ).
 - **Override hiện hành:** từ 2026-06-30, `imageProvenance` là dữ liệu nội bộ tùy chọn, ẩn khỏi layout biên tập và không còn nằm trong gate publish I12. Từ 2026-07-02, `Attraction.containedInPlace` có thể trỏ `Place` hoặc `TouristDestination` khi Nha Trang là container thực tế; không khôi phục `seed.trung-tam-nha-trang`. Các dòng lịch sử bên dưới ghi "có khi có ảnh", "cộng imageProvenance khi có ảnh", hoặc "Attraction Place-only" chỉ còn là bối cảnh cũ, đã bị supersede bởi `DECISIONS.md`.
@@ -533,6 +533,7 @@ Cấu hình toàn site. Toàn bộ dataset chỉ có đúng 1 document. i18n fie
 | Field | Kiểu | Bắt buộc? | Dịch? | Bất biến / quy tắc | Ai cung cấp |
 |---|---|---|---|---|---|
 | title | string | tùy | không | mặc định "Trang chủ", hiển thị trên document header | hệ thống |
+| branding | object | tùy | không | ảnh nhận diện thương hiệu; 4 field con, ô nào trống thì lớp dự phòng trong code gánh (guard rỗng). **CHỮ** thương hiệu KHÔNG vào đây — tên site, tên pháp nhân, mô tả vẫn ở `src/site.config.ts` (ADR-0021 QĐ8, QĐ-2026-08-14-01) | founder |
 | sections | array object | tùy | không | thứ tự render là thứ tự trong mảng; `key` là enum đóng 19 giá trị; `hidden` mặc định false. Thiếu field `sections` hoặc mảng rỗng → homepage dùng DEFAULT_SECTIONS. | founder |
 | heroText | object {vi,en,zh,ko,ru} | tùy | có (field-level) | ghi đè dòng eyebrow của hero; để trống → dùng SITE_COPY | founder |
 | contact | object | tùy | không | 4 field con, dữ liệu trung lập ngôn ngữ; field con nào trống thì kênh đó không render (guard rỗng, không nút chết) | founder |
@@ -543,6 +544,16 @@ Cấu hình toàn site. Toàn bộ dataset chỉ có đúng 1 document. i18n fie
 | testimonials | array object | tùy | không | đánh giá khách; **KHÔNG** serialize ra JSON-LD, xem ghi chú dưới bảng | founder |
 | groupQuote | object | tùy | không | khối báo giá đoàn cuối trang chủ; nút dùng lại `contact.zaloUrl`, không khai số thứ hai | founder |
 | support | object | tùy | không | nội dung trang `/ho-tro/`; 3 phần con độc lập nhau, phần nào trống thì khối đó không render (guard rỗng); cả object trống hoặc thiếu → trang vẫn dựng, chỉ còn tiêu đề và kênh liên hệ | founder |
+
+Field `branding` (thêm v1.0.17 — ảnh nhận diện, QĐ-2026-08-14-01):
+- `logo`: image (SVG/PNG/WebP) — dấu hiệu thương hiệu ở header và chân trang. **Không có `alt`**, khác `partners[].logo`: logo nằm trong thẻ `<a>` đã mang `aria-label` về trang chủ, thêm alt là trình đọc màn hình đọc hai lần. Đây là ngoại lệ có chủ ý của I12, không phải sót.
+- `hideWordmark`: boolean, mặc định false — ẩn chữ tên site cạnh logo, dùng khi ảnh logo đã có sẵn chữ. **Chỉ có hiệu lực khi đã có `logo`**: bật công tắc mà chưa tải ảnh thì chữ vẫn hiện, cưỡng chế ở tầng render chứ không trông vào việc biên tập viên nhớ tắt lại.
+- `favicon`: image (PNG/SVG) vuông ≥ 512px — biểu tượng tab trình duyệt. `apple-touch-icon` chỉ dùng được ảnh raster (iOS không đọc SVG), nên favicon SVG thì biểu tượng màn hình chính rơi về file dự phòng.
+- `ogImage`: image 1200×630, có `alt` (đây là ảnh nội dung, `og:image:alt` là thẻ thật) — ảnh chia sẻ mặc định. Prop `ogImage` của từng trang **thắng** ảnh này.
+
+Ranh giới với `src/site.config.ts` (ADR-0021 QĐ8): **chữ** thương hiệu ở lại file config vì nó vào JSON-LD và thẻ meta của mọi trang, phải cố định lúc build; **ảnh** ở Sanity vì site chỉ tham chiếu chúng bằng URL, đổi ảnh không đổi cấu trúc trang nào. Biên tập viên đổi được ảnh, không đổi được chữ.
+
+Lớp dự phòng là **file thật**, không phải chuỗi rỗng: `src/components/SiteLogo.astro` giữ khối SVG mặc định, `public/favicon.svg` giữ bản favicon mặc định. Chưa nhập gì thì site dựng đúng như trước khi có field này.
 
 Field `sections[]`:
 - `key`: string enum đóng 19 giá trị — hero | stats | trustBar | partners | testimonials | editorialBody | banners | hubGrid | areas | attractions | experiences | guides | stays | specialties | tours | faq | safety | groupQuote | meta
@@ -838,5 +849,7 @@ Lý do chi tiết và phương án đã loại của từng thay đổi nằm �
 - v1.0.15 (2026-08-06): thêm field `theme` vào siteSettings (§2.15) — chọn bộ giao diện, enum đóng 3 giá trị khai ở `07-DESIGN_TOKENS` §1b. Studio CHỈ chọn, không nhập giá trị màu, nên không sinh nguồn sự thật thứ hai: màu vẫn chỉ sống ở `tokens.css`. Giá trị lạ hoặc trống → bộ mặc định, trang không vỡ. Mọi bộ phải qua WCAG AA, có kiểm máy `npm --prefix scripts run check:theme`. Không thêm document type mới nên là cửa hai chiều theo §5.3. Bản ghi DECISIONS cùng ngày.
 
 - v1.0.16 (2026-08-06): thêm bốn field vào siteSettings (§2.15) — `stats`, `partners`, `testimonials`, `groupQuote` — phục vụ trang chủ theo `SPEC-2026-08-06-trang-chu-xung-tam`. Bối cảnh: doanh thu công ty đến từ offline/đại lý/OTA, site là kênh mới với 4 sản phẩm lúc ra mắt, nên trang chủ phải để BẰNG CHỨNG gánh thay vì catalogue. Ràng buộc kèm theo: `testimonials` KHÔNG serialize ra JSON-LD (Google cấm rich snippet tự phục vụ, I6 là cổng fail). Không thêm document type mới nên là cửa hai chiều theo §5.3. Bản ghi DECISIONS cùng ngày.
+
+- v1.0.17 (2026-08-14): thêm field `branding` vào siteSettings (§2.15) — bốn ô ảnh nhận diện: `logo`, `hideWordmark`, `favicon`, `ogImage`. Trước đó logo là SVG viết cứng **chép hai bản** ở `Header.astro` và `Footer.astro`, biên tập viên không đổi được nếu không có lập trình viên; `BaseLayout` lại trỏ `/favicon.svg` mà file đó không tồn tại, favicon 404 trên mọi trang. Đợt này gom dấu hiệu thương hiệu về một component `SiteLogo.astro` và thêm `public/favicon.svg` thật làm lớp dự phòng. Ranh giới với ADR-0021 QĐ8 được vẽ rõ: **chữ** thương hiệu ở `src/site.config.ts` (vào JSON-LD và meta mọi trang, phải cố định lúc build), **ảnh** ở Sanity (chỉ tham chiếu bằng URL). Kèm theo: `Organization.logo` nay được phát trong JSON-LD trang chủ khi đã tải logo. Không thêm document type mới nên là cửa hai chiều theo §5.3. Bản ghi `QĐ-2026-08-14-01`, spec `SPEC-2026-08-14-logo-tuy-bien.md`.
 
 Mỗi bảng field có cột "dịch được" để quyết i18n field-level, field bất biến không nhân bản (ADR-0004). Khi dựng một trang, tách rõ ba tầng: field của entity, rollup suy ở build từ entity liên quan, và trình bày của template. Đừng biến layout thành field (N1).
