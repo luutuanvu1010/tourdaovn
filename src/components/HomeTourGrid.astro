@@ -1,0 +1,176 @@
+---
+// Khối "Tour nổi bật" trên trang chủ — SPEC-2026-08-14-be-mat-vong-3 §3.4.
+//
+// Vì sao khối này tồn tại: trang chủ trước đây có chín khối và KHÔNG khối nào bán
+// tour. Khách vào trang chủ của một công ty bán tour biển đảo phải bấm menu mới
+// thấy sản phẩm. Đó là hệ quả có chủ ý của ADR-0024, quyết khi kho chỉ có 1 tour;
+// nay đã 7 nên tiền đề ấy hết hiệu lực (xem ADR-0026).
+//
+// Đây cũng là dải màu đậm đầu tiên của trang (--c-band-bg): thẻ trắng nổi lên trên
+// nền xanh, cắt mạch trắng liền vốn làm cả trang trôi thành một mảng.
+import { imageUrl } from '../lib/sanity-image'
+import type { Lang } from '../lib/types'
+
+export interface Props {
+  tours: any[]
+  lang: Lang
+  /** Đường dẫn trang danh sách tour, ví dụ `/tour/`. */
+  indexHref: string
+  /** Tổng số tour đang có — dùng cho nhãn "Xem tất cả N tour". */
+  total: number
+}
+
+const { tours, indexHref, total } = Astro.props
+
+const COPY = {
+  eyebrow: 'TOUR BIỂN ĐẢO',
+  heading: 'Tour nổi bật',
+  sub: 'Khởi hành hằng ngày từ Nha Trang, có xe đón tận khách sạn nội thành.',
+  all: (n: number) => `Xem tất cả ${n} tour`,
+}
+---
+
+{tours.length > 0 && (
+  <section class="home-tours">
+    <div class="container">
+      <p class="tours-eyebrow">{COPY.eyebrow}</p>
+      <h2 class="tours-heading">{COPY.heading}</h2>
+      <p class="tours-sub">{COPY.sub}</p>
+
+      <ul class="tours-grid">
+        {tours.map(tour => (
+          <li class="tour-card">
+            <a href={`/tour/${tour.slug}/`}>
+              {imageUrl(tour.mainImage, { width: 480 }) ? (
+                <img
+                  class="tour-thumb"
+                  src={imageUrl(tour.mainImage, { width: 480 })}
+                  alt={tour.mainImage?.alt ?? ''}
+                  loading="lazy"
+                  decoding="async"
+                  width="480"
+                  height="280"
+                />
+              ) : (
+                <div class="tour-thumb tour-thumb-empty" aria-hidden="true"></div>
+              )}
+              <div class="tour-body">
+                <h3 class="tour-title">{tour.title}</h3>
+                {tour.duration && <p class="tour-meta">{tour.duration}</p>}
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <a class="tours-all" href={indexHref}>{COPY.all(total)}</a>
+    </div>
+  </section>
+)}
+
+<style>
+  .home-tours {
+    background: var(--c-band-bg);
+    padding: var(--s7) 0;
+  }
+
+  .tours-eyebrow {
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-800);
+    letter-spacing: 0.12em;
+    color: var(--c-sand);
+    margin: 0;
+  }
+
+  .tours-heading {
+    font-family: var(--font-display);
+    font-size: var(--fs-section);
+    font-weight: var(--fw-800);
+    letter-spacing: -0.015em;
+    line-height: var(--lh-heading);
+    color: var(--c-band-text);
+    margin: var(--s1) 0 var(--s1);
+  }
+
+  .tours-sub {
+    font-size: var(--fs-base);
+    line-height: var(--lh-body);
+    color: var(--c-band-muted);
+    margin: 0 0 var(--s4);
+    max-width: 56ch;
+  }
+
+  .tours-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--s3);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .tour-card {
+    background: var(--c-card);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .tour-card a {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .tour-thumb {
+    display: block;
+    width: 100%;
+    aspect-ratio: 12 / 7;
+    object-fit: cover;
+  }
+
+  .tour-thumb-empty {
+    background: linear-gradient(135deg, var(--c-hero-fallback-top-teal), var(--c-hero-fallback-bottom-teal));
+  }
+
+  .tour-body { padding: var(--s3); }
+
+  .tour-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-card-title);
+    font-weight: var(--fw-700);
+    letter-spacing: -0.01em;
+    line-height: 1.24;
+    color: var(--c-text);
+    margin: 0;
+  }
+
+  .tour-meta {
+    font-size: var(--fs-label);
+    color: var(--c-text-muted);
+    margin: var(--s1) 0 0;
+  }
+
+  /* Nút vàng cát, KHÔNG dùng --c-accent: trên nền xanh đậm thì đỏ gạch chìm, và
+     --c-accent còn là màu của giá — hai vai khác nhau không nên cùng màu. */
+  .tours-all {
+    display: inline-block;
+    margin-top: var(--s4);
+    background: var(--c-sand);
+    color: var(--c-sand-text-strong);
+    font-family: var(--font-display);
+    font-weight: var(--fw-700);
+    font-size: var(--fs-base);
+    padding: var(--s2) var(--s4);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+  }
+
+  @media (max-width: 900px) {
+    .tours-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 600px) {
+    .tours-grid { grid-template-columns: 1fr; }
+  }
+</style>

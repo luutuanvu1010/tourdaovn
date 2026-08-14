@@ -35,6 +35,14 @@
   --c-sand-border:    #e9d3a4;
   --c-sand-text:      #5a4109;
   --c-sand-text-strong: #3d2a05;
+  /* Dải màu đậm cho khối quan trọng (SPEC-2026-08-14-be-mat-vong-3 §3.3).
+     KHÔNG phải màu mới — ba token này chỉ là tổ hợp trỏ về màu sẵn có. Bệnh cần
+     chữa là thiếu DIỆN TÍCH màu, không phải thiếu màu: --c-surface #FFFFFF và
+     --c-surface-alt #F8FAFC lệch nhau ~4% độ sáng nên cả trang đọc thành một
+     mảng trắng liền. Khối nào lấy nền này thì thẻ trắng nổi hẳn lên trên nó. */
+  --c-band-bg:        var(--c-primary);
+  --c-band-text:      #FFFFFF;
+  --c-band-muted:     #c5dcea;
   --c-footer-bg:      #0E1A23;
   --c-footer-text:    #9aa9b2;
   --c-footer-border:  #233642;
@@ -54,18 +62,30 @@
      hôm nay cùng trỏ một font: đổi vai này không kéo theo vai kia.
      Be Vietnam Pro là lớp dự phòng duy nhất — Nunito hỏng thì chữ rơi về một
      font vẫn dựng dấu tiếng Việt tử tế, không rơi thẳng về system-ui. */
-  --font-display: "Nunito", "Be Vietnam Pro", system-ui, sans-serif;
+  /* SPEC-2026-08-14-be-mat-vong-3 §3.1: đảo thứ tự ở --font-display. Trước đây
+     Nunito đứng đầu ở CẢ HAI biến, nên bốn file Be Vietnam Pro trong
+     public/fonts/ được tải mỗi lần khách vào site mà không bao giờ hiện ra.
+     Nay tiêu đề dùng Be Vietnam Pro (vuông vắn, dứt khoát), nội dung giữ Nunito.
+     Tương phản giữa hai bộ tạo phân cấp mà không phải tăng cỡ chữ.
+     KHÔNG tải thêm file nào — cả hai bộ đã nằm sẵn trong repo. */
+  --font-display: "Be Vietnam Pro", "Nunito", system-ui, sans-serif;
   --font-ui:      "Nunito", "Be Vietnam Pro", system-ui, sans-serif;
   /* Nunito biến thiên 400–800, nên --fw-800 CHẠY THẬT. Chỉ còn --fw-900 là bị
      trình duyệt kẹp về 800 — không có cấp nào cao hơn để tổng hợp giả. Xem
-     DR-031. */
+     DR-031.
+     Be Vietnam Pro chỉ tự lưu trữ cấp 700 và 800. Đã rà toàn bộ: mọi khối đặt
+     --font-display đều khai độ đậm, và đều là 700 hoặc 800 (riêng .hubs-title
+     đặt 900, trình duyệt chọn 800 — cấp có thật, không tổng hợp giả). */
   --fw-500: 500; --fw-600: 600; --fw-700: 700; --fw-800: 800; --fw-900: 900;
   --fs-badge: 0.6875rem;  /* 11px */
   --fs-xs:   0.75rem;     /* 12px */
   --fs-label: 0.875rem;   /* 14px */
   --fs-sm:    0.9375rem;  /* 15px */
   --fs-base:  1.0625rem;  /* 17px */
-  --fs-card-title: 1.125rem; /* 18px — card title, nav link */
+  /* 21px — đẩy lên từ 18px. Thang cũ dồn cục ở khoảng giữa: nội dung 17, tiêu đề
+     thẻ 18, chữ menu 18, tiêu đề nhỏ 20 — bốn bậc trong 3px nên mắt không phân
+     biệt được cấp. Đây là gốc của "chữ đều đều, không phân cấp". */
+  --fs-card-title: 1.3125rem; /* 21px — card title */
   --fs-nav:   1.125rem;   /* 18px — nav link, footer heading */
   --fs-h5:    1.25rem;    /* 20px — được đẩy lên từ 22px, khớp hub name */
   /* ── Shared component tokens (trích từ DESIGN.md §5) ── */
@@ -75,7 +95,8 @@
   --badge-px: 10px;
   --card-lift: -3px;
   --fs-h4:    1.625rem;   /* 26px */
-  --fs-section: 1.75rem;  /* 28px — section heading trong multi-section layout */
+  --fs-section: 2rem;     /* 32px — đẩy lên từ 28px, để tiêu đề mục tách hẳn
+                             khỏi tiêu đề thẻ (21px) và nội dung (17px) */
   --fs-h3:    2rem;       /* 32px */
   --fs-h2:    2.5rem;     /* 40px */
   --fs-h1:    2.625rem;   /* 42px */

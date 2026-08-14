@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import SiteHome from '../components/SiteHome.astro'
 import { getClient } from '../lib/sanity'
 import { touristDestinationBySlugQuery, siteSettingsQuery } from '../lib/queries'
+import { allToursQuery } from '../lib/queries/tour'
 import { homeAlternates } from '../lib/sitemap'
 import { destinationHref } from '../lib/homepage'
 import { jsonLdScriptContent } from '../lib/serialize/utils'
@@ -30,6 +31,14 @@ if (!td) {
 }
 
 const config: SiteSettingsResult | null = await client.fetch(siteSettingsQuery())
+
+// Tour cho khối "Tour nổi bật" trên trang chủ (SPEC-2026-08-14-be-mat-vong-3 §3.4).
+// Dùng ĐÚNG truy vấn mà trang /tour/ đang dùng, không viết truy vấn mới — một nguồn
+// sự thật cho "tour nào được hiển thị". Cắt 3 mục đầu; `homeTourTotal` giữ tổng thật
+// để nhãn "Xem tất cả N tour" không nói dối.
+const allTours: any[] = (await client.fetch<any[]>(allToursQuery(lang), { lang })) ?? []
+const homeTours = allTours.filter(t => t.slug && t.title).slice(0, 3)
+const homeTourTotal = allTours.filter(t => t.slug && t.title).length
 
 const siteBase = siteBaseUrl(Astro.site)
 
@@ -69,5 +78,12 @@ const jsonLd = [
 
 <BaseLayout title={metaTitle} description={metaDescription} lang="vi" currentPath="/" alternates={alternates}>
   {jsonLd && <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)} />}
-  <SiteHome td={td} lang={lang} destinationHref={destinationUrl} config={config} />
+  <SiteHome
+    td={td}
+    lang={lang}
+    destinationHref={destinationUrl}
+    config={config}
+    homeTours={homeTours}
+    homeTourTotal={homeTourTotal}
+  />
 </BaseLayout>

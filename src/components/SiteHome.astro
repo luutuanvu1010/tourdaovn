@@ -16,14 +16,19 @@ import HomeStatsBand from './HomeStatsBand.astro'
 import HomePartners from './HomePartners.astro'
 import HomeTestimonials from './HomeTestimonials.astro'
 import HomeGroupQuote from './HomeGroupQuote.astro'
+import HomeTourGrid from './HomeTourGrid.astro'
 export interface Props {
   td: TouristDestinationResult | null
   lang: Lang
   destinationHref: string
   config: SiteSettingsResult | null
+  /** Tour cho khối "Tour nổi bật" ngay dưới hero. Rỗng thì khối tự ẩn. */
+  homeTours?: any[]
+  /** Tổng số tour thật, cho nhãn "Xem tất cả N tour". */
+  homeTourTotal?: number
 }
 
-const { td, lang, destinationHref, config } = Astro.props
+const { td, lang, destinationHref, config, homeTours = [], homeTourTotal = 0 } = Astro.props
 const copy = HOME_COPY[lang]
 
 // Nút phụ ở hero lấy mục đầu tiên của menu (ADR-0023) thay vì hardcode hub-kham-pha.
@@ -146,6 +151,10 @@ const activeSections = rawSections.filter((s) => !s.hidden)
     </div>
   </div>
 </section>
+
+{/* Khối "Tour nổi bật" đứng NGAY SAU hero — SPEC-2026-08-14-be-mat-vong-3 §3.4.
+    Không xoá và không đảo thứ tự khối nào phía dưới. Rỗng thì tự ẩn. */}
+<HomeTourGrid tours={homeTours} lang={lang} indexHref="/tour/" total={homeTourTotal} />
 
 {
   activeSections.map((section) => {

@@ -62,6 +62,10 @@ Nhóm cần tổng quát hóa (có GHI CHÚ CORE — nguyên tắc engine, hằn
   `slug`**, không khoá vào `termCode`, kèm hai cổng chặn category thiếu slug. Khuôn tái dùng:
   trang sinh ra từ một field TUỲ CHỌN thì phải có cổng, nếu không nó biến mất câm. Bổ sung
   cho ADR-0023.
+- [ADR-0026](ADR-0026-trang-chu-ganh-ca-san-pham.md) — **Trang chủ gánh cả sản phẩm**, không
+  chỉ bằng chứng; supersede ADR-0024 mục catalogue (phần luật JSON-LD của ADR-0024 vẫn hiệu
+  lực). Khuôn tái dùng: quyết định dựa trên trạng thái dữ liệu phải khai NGƯỠNG SỐ để biết
+  khi nào nó hết hiệu lực.
 
 ## ADR gốc KHÔNG mang vào Core (và vì sao)
 

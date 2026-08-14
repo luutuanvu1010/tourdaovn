@@ -124,10 +124,14 @@ const badgeClass = badgeVariant === 'author' ? 'badge-author'
   .card-title {
     font-family: var(--font-display);
     font-weight: var(--fw-700);
-    font-size: var(--fs-h5);
+    /* Dùng đúng token của chính nó thay vì mượn --fs-h5. Trước đây hai thứ cùng
+       20px nên không ai thấy sự nhầm vai; nay --fs-card-title lên 21px và h5 vẫn
+       20px, mượn nhầm sẽ làm thẻ không nhận được đợt giãn thang. */
+    font-size: var(--fs-card-title);
     color: var(--c-text);
     margin-bottom: var(--s2);
     line-height: 1.20;
+    letter-spacing: -0.01em;
   }
 
   .card-summary {
@@ -192,8 +196,10 @@ const badgeClass = badgeVariant === 'author' ? 'badge-author'
     padding: var(--s1) var(--s3);
     background: var(--c-accent-soft);
     color: var(--c-accent-strong);
-    font-size: var(--fs-sm);
-    font-weight: var(--fw-700);
+    /* Giá phải bật lên gần ngang tiêu đề thẻ — đây là trang bán tour. Tăng trong
+       khuôn huy hiệu sẵn có thay vì đổi sang chữ trần, để không phá ngôn ngữ thẻ. */
+    font-size: var(--fs-base);
+    font-weight: var(--fw-800);
     border-radius: var(--radius-sm);
     margin-left: auto;
   }
