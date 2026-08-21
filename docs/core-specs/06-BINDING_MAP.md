@@ -166,6 +166,7 @@ Một delta chung, khớp 2.0b. Khác nhau chỉ ở ba vùng cuối.
 | Phù hợp với | `touristType` | tùy | ẩn | |
 | Lưu ý mùa | `seasonNote` | tùy | ẩn | |
 | Vùng giá cộng CTA | `prices.yaml` qua `bookingRef` | nên có | ẩn cả vùng | perPax mọi hình thức (I14); tour riêng hiện tiers theo cỡ nhóm từ nguồn giá |
+| Form đặt tour | `prices.yaml` qua `bookingRef` (`amount`, `paxRates`, hoặc `tiers`); `siteSettings.contact` (`zaloUrl`, `hotline`); `title`, `slug` của tour | chỉ khi có giá | không giá → không form, giữ `ContactChannels` (quyết định nền 3) | component `BookingForm`, thay `BookingCTA` trên Tour; tạm tính tính từ số nướng lúc build; gửi tới `/api/dat-tour` (ADR-0027); vùng ghi duy nhất của site, không phải field Sanity; nút Zalo và hotline guard rỗng như §2 — thêm 2026-08-21 |
 
 ### 4.10 Article `/cam-nang/{slug}`
 

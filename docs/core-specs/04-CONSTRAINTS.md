@@ -62,12 +62,12 @@ Nguồn sự thật của phát biểu bất biến là CONTENT_MODEL mục 4; f
 | Mã | Luật | Validator | Mức |
 |---|---|---|---|
 | PY1 | `unit` thuộc enum đóng perPax, perRoomNight, perTicket | parse YAML, kiểm enum từng dòng | fail |
-| PY2 | hình dạng theo unit: perPax có đúng một trong `amount` hoặc `tiers[]` ({maxPax, amount}); perRoomNight có `from` cộng `asOf`; perTicket có `tickets[]` ≥ 1 hạng ({name, amount}) | schema check theo unit | fail |
+| PY2 | hình dạng theo unit: perPax có đúng một trong `amount` hoặc `tiers[]` ({maxPax, amount}); perPax có `amount` được kèm `paxRates` tuỳ chọn ({child / senior / infant: {amount, note}}), cấm kèm `tiers` (ADR-0027, 2026-08-21); perRoomNight có `from` cộng `asOf`; perTicket có `tickets[]` ≥ 1 hạng ({name, amount}) | schema check theo unit | fail |
 | PY3 | mọi Tour có `bookingRef` thì dòng giá tương ứng phải unit = perPax, bất kể tourFormat (I14, content model v1.0.1) | join dataset Sanity với prices.yaml theo bookingRef | fail |
 | PY4 | toàn vẹn tham chiếu hai phía: `bookingRef` trỏ hụt (không có dòng giá) chặn deploy; dòng giá mồ côi (không entity nào trỏ) báo để dọn | join hai phía theo bookingRef | fail (hụt); warn (mồ côi) |
 | PY5 | entity thương mại (Experience, Tour, Hotel, Resort, Attraction, Event) thiếu cả `bookingRef` lẫn dấu miễn phí (`isAccessibleForFree`; Event thêm `ticketUrl`) là dấu hiệu quên gắn giá | quét entity publish theo `_type`, kiểm tổ hợp field | warn |
 | PY6 | `asOf` của perRoomNight cũ quá 60 ngày so với ngày build (founder chốt 2026-06-11, chặt hơn đề xuất 90) | so ngày lúc build | warn |
-| PY7 | file chỉ chứa giá bán công khai VND, số nguyên dương; cấm giá vốn, hoa hồng, dữ liệu khách, khóa bí mật (S2.8 ràng buộc 8) | kiểm kiểu và dấu của amount, from; danh sách khóa cho phép đóng theo lược đồ SAD 3.1, khóa lạ thì fail | fail |
+| PY7 | file chỉ chứa giá bán công khai VND, số nguyên dương; cấm giá vốn, hoa hồng, dữ liệu khách, khóa bí mật (S2.8 ràng buộc 8) | kiểm kiểu và dấu của amount, from; danh sách khóa cho phép đóng theo lược đồ SAD 3.1, khóa lạ thì fail; `paxRates` chỉ nhận ba khoá con enum đóng với {amount, note}, `amount` hạng phụ là số nguyên ≥ 0 (0 = miễn phí), `note` ≤ 40 ký tự (ADR-0027, 2026-08-21) | fail |
 | PY8 | giá vào JSON-LD đúng map SAD 3.3: giá đơn ra Offer; tiers và tickets ra AggregateOffer (lowPrice, highPrice, offerCount); perRoomNight ra Offer price = from; priceCurrency luôn VND; không phát Offer khi không có giá; không phát priceValidUntil khi nguồn giá chưa có dữ liệu hiệu lực | snapshot test trên output JSON-LD của build | fail |
 
 Ghi chú: `bookingRef` không nằm trong gate publish; entity không có bookingRef vẫn publish bình thường, PY4 và PY5 không đụng tới chúng ngoài mức warn của PY5.
@@ -81,11 +81,25 @@ Ghi chú: `bookingRef` không nằm trong gate publish; entity không có bookin
 | R3 | URL từng tồn tại không được biến mất câm: đổi slug hay gỡ trang phải có dòng xử lý trong `public/_redirects` (301 về nơi thay thế, hoặc 410 khi gỡ hẳn) | so sitemap của production hiện hành với sitemap build mới; URL mất mà không có dòng redirect thì fail | fail |
 | R4 | hreflang hai chiều đầy đủ giữa các bản ngôn ngữ của một trang; URL đúng bộ prefix ngôn ngữ của nó (cấm trộn ngôn ngữ trong một cây, S2.5); sitemap chỉ chứa trang thật của build | quét output: cặp hreflang đối xứng, prefix khớp bảng 1.2 của 05, diff sitemap với danh sách trang build | fail |
 
+## 1d. Ràng buộc module đặt tour (thi hành ADR-0027, thêm 2026-08-21)
+
+Endpoint `/api/dat-tour` là đường ghi duy nhất lúc runtime. Nó không phải API giá và không nới điều cấm 2.3. Chi tiết ở `docs/specs/SPEC-2026-08-21-dat-tour.md` §4.11.
+
+| Mã | Luật | Validator | Mức |
+|---|---|---|---|
+| BK1 | endpoint và form không đọc giá lúc runtime: `src/pages/api/dat-tour.ts` và `src/lib/booking/*` không import `src/lib/prices.ts`, `src/lib/sanity.ts`, `src/lib/resolver.ts`; client không `fetch` giá; tạm tính lấy từ số nướng lúc build | `grep` trong QA2 cộng review | fail |
+| BK2 | endpoint không ghi Sanity, không ghi `prices.yaml`, không ghi file; chỉ ghi D1 | review; `wrangler secret list` không có token ghi Sanity | fail |
+| BK3 | PII (tên, SĐT, email, điểm đón, ghi chú) chỉ ở D1 và hai tin báo; cấm `console.log` PII; cấm vào Sanity, `prices.yaml`, repo, log | review mã; `git grep` mẫu SĐT | fail |
+| BK4 | bí mật chỉ ở `wrangler secret`; `wrangler.toml` không `[vars]`; `.dev.vars`, `.env*` trong `.gitignore` | `git grep` tên biến kèm giá trị; `wrangler secret list` | fail |
+| BK5 | tạm tính client và kiểm server dùng một hàm `quote.ts`; lệch `total` → 400 | vitest | fail |
+
+Chưa có dòng trong `docs/governance/control-registry.yaml` vì chưa có executor script; thêm khi có kiểm máy (nợ ghi ở SPEC §8).
+
 ## 2. Điều cấm theo stack
 
 1. Cấm `_type` ngoài danh mục 14 entity của CONTENT_MODEL (hệ quả ADR-0006, chặn Transfer và mọi entity tự phát trước thủ tục 5.3). Kiểm: quét dataset và schema Sanity, _type lạ thì fail. Cổng: QA2 cộng hook.
 2. Cấm field ngoài CONTENT_MODEL mục 2 (CLAUDE.md mục 8): muốn field mới thì sửa CONTENT_MODEL trước, ghi DECISIONS, rồi mới code. Kiểm: diff schema Sanity với danh mục field đã duyệt, field lạ thì fail. Cổng: QA2 cộng hook.
-3. Trang không gọi API giá lúc runtime, không fetch giá phía client; giá chỉ vào trang lúc build (SAD mục 5). Kiểm: audit bundle output không chứa endpoint giá; review code. Mức: fail. Cổng: QA2.
+3. Trang không gọi API giá lúc runtime, không fetch giá phía client; giá chỉ vào trang lúc build (SAD mục 5). Kiểm: audit bundle output không chứa endpoint giá; review code. Mức: fail. Cổng: QA2. Endpoint đặt tour `/api/dat-tour` (ADR-0027, 2026-08-21) không phải API giá: không đọc `prices.yaml` hay Sanity lúc runtime (BK1), chỉ nhận yêu cầu và lưu D1 — điều cấm này không nới.
 4. Build không ghi vào `prices.yaml`, không ghi ngược Sanity (S2.2, dòng dữ liệu một chiều). Kiểm: token Sanity cấp cho build chỉ quyền đọc; CI kiểm working tree sạch sau build (build sinh ra ghi đè file nguồn thì diff lộ). Mức: fail. Cổng: QA2.
 5. `DECISIONS.md` chỉ thêm, không sửa hay xóa bản ghi cũ; ADR accepted không sửa nội dung (chỉ ADR mới được supersede). Kiểm: git-governance diff guard trên vùng đã có của hai loại file này trong mỗi commit; hook chặn lúc soạn. Mức: fail. Cổng: QA2 cộng hook.
 6. Không sửa `playbook/CONSTITUTION.md` từ phiên làm việc dự án (CLAUDE.md mục 6). Kiểm: hook chặn ghi vào đường dẫn playbook; git-governance diff guard. Mức: fail. Cổng: QA2 cộng hook.
@@ -110,8 +124,9 @@ Kế thừa toàn bộ S2.8 của overlay (6 control của `playbook/governance/
 - Token Sanity cấp cho build chỉ quyền đọc dataset (đồng thời là cơ chế kiểm của điều cấm 2.4).
 - `prices.yaml` chỉ giá bán công khai (S2.8 ràng buộc 8), thi hành bằng PY7.
 - GROQ dùng tham số, cấm nối chuỗi từ đầu vào người dùng; chống XSS ở mọi điểm render nội dung động (S2.8). Kiểm: lint cộng review, artifact review là điều kiện cổng QA2.
+- Module đặt tour (ADR-0027, 2026-08-21): bí mật Resend, Zalo Bot, Turnstile chỉ ở `wrangler secret`, cấm `[vars]`; PII chỉ ở D1 và tin báo, không log; IP chỉ lưu dạng băm có muối; D1 dùng prepared statement tham số hoá; ba lớp chống lạm dụng (Turnstile, honeypot cộng giới hạn tần suất, luật WAF); `Origin` phải cùng host. Thi hành BK3, BK4.
 
-> **Nới ràng buộc — ghi theo §5.** Gỡ I15 là *nới*, nên cần chủ dự án phê chuẩn kèm lý do ghi vào `DECISIONS.md`. Đã có: chủ dự án chốt 2026-08-06, bản ghi QĐ-2026-08-06-01. Không control nào khác bị hạ mức.
+> **Nới ràng buộc — ghi theo §5.** Gỡ I15 là *nới*, nên cần chủ dự án phê chuẩn kèm lý do ghi vào `DECISIONS.md`. Đã có: chủ dự án chốt 2026-08-06, bản ghi QĐ-2026-08-06-01. Không control nào khác bị hạ mức. Mở rộng lược đồ `prices.yaml` bằng `paxRates` (PY2, PY7, 2026-08-21) là đổi hình dạng khoá, chủ dự án duyệt trong phiên 2026-08-21, bản ghi `QĐ-2026-08-21-01` và `ADR-0027`; mức của PY2/PY7 giữ nguyên fail.
 
 ## 5. Quy tắc sửa file này
 

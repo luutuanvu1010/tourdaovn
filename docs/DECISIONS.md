@@ -764,3 +764,51 @@ Ai định đưa **chữ** thương hiệu vào Studio sau này thì đó là vi
 **Luật rút ra (P17).** Cấm chạy lệnh có cờ moi bí mật (`--secrets`, `--show-token`, lệnh `debug` của các CLI giữ phiên đăng nhập) trong phiên có tác nhân AI. Cần biết CLI đã đăng nhập chưa thì dùng lệnh **không in giá trị** — với Sanity là `npx sanity projects list`. **Chưa cưỡng chế bằng máy**; bổ sung mẫu chặn vào `pre-bash-guard.sh` là việc của đợt sau, và tới lúc đó điều này đang dựa kỷ luật.
 
 **Một điều đã làm đúng, ghi để không đọc lệch:** token lộ ra **không** được dùng. Migration chạy bằng `npx sanity exec … --with-user-token`, tức mượn phiên đăng nhập của CLI, không có chuỗi bí mật nào đi qua dòng lệnh hay log.
+
+---
+
+## QĐ-2026-08-21-01 — Mở module đặt tour: form trên trang Tour, đơn về email + Zalo, lưu D1
+
+**Chốt.** Trang chi tiết Tour có **form đặt tour**: ngày khởi hành bất kỳ, số người theo ba
+hạng người lớn / trẻ em / người cao tuổi, tạm tính, tên và số điện thoại. Đơn gửi về **email
+công ty và Zalo** (Zalo Bot tới nhân viên), **bản ghi gốc ở Cloudflare D1** kèm mã đơn. Chỉ
+trang chi tiết Tour; menu "Đặt vé trực tuyến" vẫn trỏ Zalo. Không thanh toán, không giữ chỗ
+— đơn là yêu cầu, nhân viên gọi lại xác nhận. Đóng gói theo **phương án A**: route on-demand
+của Astro chạy trên cùng Worker (`main` trỏ `dist/_worker.js/index.js`). Spec:
+`docs/specs/SPEC-2026-08-21-dat-tour.md`. ADR: `docs/adr/ADR-0027-module-dat-tour.md`
+(chủ dự án phê chuẩn toàn văn 2026-08-22, **accepted**).
+
+**Ai chốt.** Chủ dự án, qua bốn câu trắc nghiệm (đích nhận đơn, ngày đi, hạng khách, phạm
+vi) và duyệt thiết kế trong phiên 2026-08-21. Cowork ghi chép.
+
+**Ba cửa một chiều mở bằng quyết định này.** (1) Container runtime đầu tiên của hệ —
+endpoint `/api/dat-tour` và D1 `tourdao-booking`. (2) Lược đồ `prices.yaml` thêm `paxRates`
+cho `perPax` có `amount` (PY2, PY7 mở đúng hình dạng này, mức giữ `fail`) — đây là đổi hình
+dạng khoá, `05-URL_MAP` §4 đòi ADR, nên nằm trong ADR-0027 thay vì supersede toàn bộ
+ADR-0007. (3) `wrangler.toml` có `main`, Worker không còn là asset thuần.
+
+**Bốn bất biến không nới, thành luật BK1–BK5 ở `04-CONSTRAINTS` §1d.** Không đọc giá lúc
+runtime (tạm tính từ số nướng lúc build, một hàm `quote.ts` dùng chung client/server);
+không ghi Sanity hay `prices.yaml`; PII chỉ ở D1 và tin báo, không log; bí mật chỉ ở
+`wrangler secret`, không `[vars]`.
+
+**Vì sao D1, không Sanity, không bên thứ ba.** Dữ liệu khách là dữ liệu vận hành;
+`01-CONTENT_MODEL` §5.2 tiêu chí 5 đặt nó ngoài Sanity; thêm `_type` là cửa một chiều chạm
+`04` §2.1 và cần token ghi lúc runtime; dataset công khai lộ PII. Sheet hay dịch vụ form đưa
+PII ra ngoài và không có mã đơn.
+
+**Phương án đã loại.** Worker riêng (B — đường lùi hợp lệ), Sanity `booking`, Google Sheet,
+dịch vụ form, Telegram, ZNS cho khách ngay v1, thanh toán online, lịch khởi hành cố định.
+Chi tiết ở ADR-0027.
+
+**Đánh đổi ghi thẳng.** Không JavaScript thì không gửi được (Turnstile cần JS); `<noscript>`
+chỉ sang Zalo/hotline. Astro thành hybrid với đúng một route động.
+
+**Tài liệu đã sửa theo.** `00-PROJECT_BRIEF` v2.0.1 (§3, §5); `02-SAD` §1 §2 §3.1 §4 §5;
+`04-CONSTRAINTS` §1b PY2/PY7, §1d mới, §2.3, §4, ghi chú nới; `06-BINDING_MAP` §4.8;
+`docs/adr/README.md`. `01-CONTENT_MODEL` **không đổi** — không field Sanity mới, không deploy Studio.
+
+**Còn nợ.** ZNS/email xác nhận cho khách; trang quản trị đơn sau Cloudflare Access; gửi lại
+khi báo tin hỏng; job dọn dữ liệu 24 tháng; `control-registry` cho BK1–BK5; xác minh Zalo Bot
+gửi nhóm và giới hạn tần suất; phối hợp với audit giao diện vòng 4 (DR-033, DR-036) vì chạm
+cùng `Sidebar.astro` / `TourDetail.astro`.

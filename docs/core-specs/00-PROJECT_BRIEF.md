@@ -10,7 +10,7 @@ Bản v1 (nhatrangtravel) xem lịch sử git — không giữ song song để k
 >
 > **Bước 0 là bước của chủ dự án.** `PLAYBOOK` Phần 2: *"quyết định chiến lược là của người"* — Cowork chỉ ghi chép. Mọi mục dưới đây đều truy được về một câu chủ dự án đã nói (2026-08-05 và 2026-08-06). Không mục nào do tác nhân tự nghĩ ra.
 
-- **Phiên bản:** v2.0.0 (viết lại toàn bộ cho tourdaovn)   **Trạng thái:** đã chốt — chủ dự án trả lời trọn năm câu 2026-08-06. Bước 0 đóng.
+- **Phiên bản:** v2.0.1 (v2.0.0 viết lại toàn bộ cho tourdaovn 2026-08-06; v2.0.1 bổ sung kênh đặt qua form 2026-08-21, `QĐ-2026-08-21-01`)   **Trạng thái:** đã chốt — chủ dự án trả lời trọn năm câu 2026-08-06. Bước 0 đóng.
 - **Ngày:** v1 (nhatrangtravel) 2026-06-10; v2 soạn 2026-08-06   **Người soạn:** Cowork   **Người duyệt:** Lưu Tuấn Vũ
 - **Nguồn dữ kiện v2:** phiên làm việc 2026-08-05 — chủ dự án khai sáu dòng dịch vụ và chốt menu; `src/site.config.ts` (thương hiệu, tên miền, ngôn ngữ, danh mục); `siteSettings` trong Sanity (kênh liên hệ); ADR-0021, ADR-0023.
 - **Đóng:** DR-006 phần đặc tả.
@@ -48,6 +48,8 @@ Nỗi đau: thông tin tour đảo trôi nổi trên Facebook và các trang tru
 
 Và **cách khách đặt**: nút "Đặt vé trực tuyến" dẫn thẳng sang Zalo, lấy từ `siteSettings.contact.zaloUrl`. Không có giỏ hàng, không thanh toán trên site.
 
+> **Bổ sung 2026-08-21 (`QĐ-2026-08-21-01`, ADR-0027):** trang chi tiết Tour có thêm **form đặt tour** — chọn ngày, số người theo hạng (người lớn / trẻ em / người cao tuổi), tạm tính, tên và số điện thoại — gửi về email và Zalo của công ty, lưu bản ghi ở Cloudflare D1 kèm mã đơn. Đơn là *yêu cầu đặt*, nhân viên gọi lại xác nhận. Vẫn không giỏ hàng, không thanh toán; Zalo vẫn là kênh tư vấn và là đích của menu "Đặt vé trực tuyến". Spec: `docs/specs/SPEC-2026-08-21-dat-tour.md`.
+
 **Bốn điểm khác biệt** chủ dự án chốt 2026-08-06:
 
 - **Xe đưa đón tận nơi** — không bắt khách tự ra bến.
@@ -79,7 +81,7 @@ Dữ kiện chắc chắn, đọc từ `src/site.config.ts`.
 - Chín danh mục đang bật: `place`, `attraction`, `experience`, `hotel`, `resort`, `tour`, `article`, `person`, `organization`.
 - Bốn hub: `/kham-pha/`, `/luu-tru/`, `/di-lai/`, `/tat-ca/`.
 - Hai trang tĩnh: `/ho-tro/`, `/lien-he/` (ADR-0023).
-- Đặt chỗ qua Zalo; site không xử lý thanh toán.
+- Đặt chỗ qua Zalo, **và từ 2026-08-21 qua form đặt tour trên trang chi tiết Tour** (ADR-0027: đơn về email + Zalo, lưu D1); site không xử lý thanh toán.
 - Stack Sanity + Astro + Cloudflare (ADR-0001), không đổi.
 
 **Ngoài phạm vi:**

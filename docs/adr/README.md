@@ -66,6 +66,11 @@ Nhóm cần tổng quát hóa (có GHI CHÚ CORE — nguyên tắc engine, hằn
   chỉ bằng chứng; supersede ADR-0024 mục catalogue (phần luật JSON-LD của ADR-0024 vẫn hiệu
   lực). Khuôn tái dùng: quyết định dựa trên trạng thái dữ liệu phải khai NGƯỠNG SỐ để biết
   khi nào nó hết hiệu lực.
+- [ADR-0027](ADR-0027-module-dat-tour.md) — **Module đặt tour**: container runtime đầu tiên
+  (route on-demand `/api/dat-tour` trên cùng Worker + D1), báo tin email + Zalo Bot, và mở
+  rộng lược đồ `prices.yaml` bằng `paxRates` (sửa ADR-0007 phần perPax). Accepted 2026-08-22.
+  Khuôn tái dùng: *đơn* tách khỏi *giá* và *nội dung*, không lớp
+  nào ghi chéo; bản ghi gốc ở D1, báo tin hỏng không hỏng đơn.
 
 ## ADR gốc KHÔNG mang vào Core (và vì sao)
 
