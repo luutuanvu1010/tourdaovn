@@ -30,7 +30,6 @@ const infoBarItems = [
   { field: 'servesCuisine', icon: '🍽️', label: t('cuisine'), value: data.servesCuisine?.[0] || '', visible: !!(data.servesCuisine && data.servesCuisine.length > 0) },
   { field: 'openingHours', icon: '🕐', label: t('hours'), value: data.openingHours ? `${data.openingHours.open || ''} - ${data.openingHours.close || ''}` : '', visible: !!data.openingHours },
   { field: 'telephone', icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
-  { field: 'distance', icon: '📍', label: t('distance'), value: '', visible: false },
 ]
 
 const sidebarRows = [
