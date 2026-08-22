@@ -90,6 +90,49 @@ npm run deploy            # dựng lại rồi đưa lên production
 npm run deploy:preview    # dựng lại rồi tải lên một version, KHÔNG đổi bản đang chạy
 ```
 
+### Có đường thứ hai: Cloudflare tự dựng từ GitHub
+
+Lệnh trên **không phải** đường duy nhất đưa bit lên `tourdao.vn`. Worker `tourdaovn` có
+**nối git** (Workers Builds ↔ `luutuanvu1010/tourdaovn`, nhánh `main`). Mỗi lần đẩy lên
+`main` là Cloudflare tự clone, dựng và thay bản đang chạy.
+
+Điểm phải nhớ, vì nó đã cắn một lần rồi (DR-041): **bản dựng đó lấy code từ `origin/main`
+trên GitHub, không lấy từ máy ông.** Commit chưa push thì không có mặt trong đó. Và nó
+**thay thế** version đang chạy — kể cả version vừa `npm run deploy` bằng tay. Ngày
+2026-08-22, cả đợt 4A đã "deploy thành công" rồi bị một bản dựng phía Cloudflare (code
+ngày 14-08) đè mất; `wrangler` in `Success`, `curl` trả `200`, chỉ nội dung là của hai
+tuần trước. Không có tín hiệu hỏng nào.
+
+Nên luật là: **push trước, deploy tay sau.** Ngược lại thì công deploy có thể bốc hơi.
+
+Kiểm hai bên có khớp không:
+
+```
+git status -sb | head -1                  # phải KHÔNG có "ahead"
+```
+
+### Bấm Publish trong Sanity KHÔNG còn dựng lại site
+
+**Từ 2026-08-22** (`QĐ-2026-08-22-03`). Webhook `Cloudflare rebuild` trong Sanity đã
+**tắt** — tắt chứ không xoá, URL và rule còn nguyên, bật lại là đảo một cờ.
+
+Trước đó, publish một document sẽ POST vào một Deploy Hook của Cloudflare và kích một lần
+dựng lại toàn site. Ngắt vì mỗi lần dựng đọc lại **toàn bộ** nội dung qua Sanity Content
+API, mà hook không có debounce (25 lần bắn trong một ngày, 4 lần trong 6 giây).
+
+**Hệ quả trực tiếp cho người vận hành:** sửa nội dung trong Studio, bấm Publish, rồi mở
+`tourdao.vn` sẽ **không thấy gì đổi**. Đó không phải lỗi. Phải chạy:
+
+```
+npm run deploy
+```
+
+Đây là loại lệch im lặng, không có kiểm máy nào nhắc. Cùng hạng nợ với `favicon.svg`
+(`QĐ-2026-08-14-01`) và schema Studio lệch bản đã deploy (`QĐ-2026-08-14-02`).
+
+Muốn bật lại: xử DR-042 trước (rule hiện chỉ nghe `create`, không lọc type, không
+debounce), push hết commit đang treo, rồi mới bật.
+
 ### Site này chạy trên Worker, không phải Pages
 
 Đây là chỗ đã từng gài bẫy. Tới 2026-08-14, hai script trên còn là `wrangler pages deploy`

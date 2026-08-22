@@ -567,3 +567,52 @@ Sửa ở đợt 4A: đọc từ token/bộ giao diện đang bật.
 `Card.astro` `.card-summary` vừa `display:-webkit-box; -webkit-line-clamp:2; overflow:hidden` vừa `flex:1`. Khi thẻ không có huy hiệu/giá (hàng meta rỗng), `flex:1` kéo ô mô tả cao hơn hai dòng, trình duyệt vẽ dấu "…" ở dòng 2 **và** vẫn hiện dòng 3 phía dưới. Thấy ngay ở `/diem-tham-quan/`, thẻ "Hòn Chồng Hòn Vợ" (ảnh `ev-index-attraction-cards.jpg`): 8/15 thẻ không huy hiệu nên chiều cao không đều.
 
 Sửa ở đợt 4A: bỏ `flex:1` khỏi `.card-summary`, đẩy `margin-top:auto` sang `.card-meta`.
+
+---
+
+## DR-040 — Đường phát hành tự động là Workers Builds, tài liệu ghi Cloudflare Pages
+
+**Trạng thái:** **đã xử 2026-08-22** ở `BUILD-NOTES.md` (mục Deploy nay mô tả đúng chuỗi thật). Còn **mở** ở `README.md:66`, `SETUP-NEW-SITE.md:109–111`, `ADR-0009`, `ADR-0022` mục "Muốn quay lại" — đó là văn bản lõi/multi-site, sửa phải có quyết định riêng.
+
+`tourdao.vn` do **Cloudflare Worker** `tourdaovn` phục vụ, và Worker đó **có nối git**: GitHub App `cloudflare-workers-and-pages` đặt check-run tên `Workers Builds: tourdaovn` trên `luutuanvu1010/tourdaovn`, lần gần nhất `success` ngày 2026-08-14 (build `dbdf066a…`, account `381557e4…`). Không có Pages project nào tên `tourdaovn` — đã ghi ở `QĐ-2026-08-14-02`.
+
+Nhưng mọi tài liệu mô tả đường tự động đều viết **Cloudflare Pages**, và `ADR-0009` thì viết cho `nhatrangtravel` chứ không phải site này. Hệ quả thực tế: `BUILD-NOTES.md` — file người vận hành thật sự mở ra khi deploy — **không hề nhắc** rằng site có đường tự động. Đọc nó xong sẽ tưởng `npm run deploy` là đường duy nhất, và không hiểu vì sao bản deploy tay biến mất (xem DR-041).
+
+---
+
+## DR-041 — Bấm Publish trong Sanity dựng lại từ `origin/main`, đè lên bản deploy tay
+
+**Trạng thái:** **đã xử 2026-08-22** theo `QĐ-2026-08-22-03` — ngắt hook + đẩy `main`. Cơ chế vẫn còn nguyên, sẽ trở lại nếu bật hook lại mà chưa push.
+
+Webhook Sanity không mang nội dung; nó chỉ bấm chuông, rồi Cloudflare **clone `origin/main` trên GitHub** và dựng từ đó. Máy local không tham gia. Nên bất cứ commit nào chưa push đều không có mặt trong bản dựng do Publish kích, và bản dựng đó **thay thế** version đang chạy — kể cả version vừa `wrangler deploy` bằng tay.
+
+Đã xảy ra thật ngày 2026-08-22. Lúc phát hiện: `main` local đi trước `origin/main` **7 commit** (`origin/main` = `1416363`, ngày 2026-08-14), trong đó có `472610a` = toàn bộ đợt 4A. Webhook bắn **25 lần**, tất cả `200`, cụm gần nhất 03:02–03:04 UTC; version production mới nhất tạo 03:06:55 UTC. Đối chiếu `https://tourdao.vn/diem-tham-quan/vin-harbour/` (đã phá cache) với `dist/` cùng lúc:
+
+| Dấu hiệu | Production | `dist/` local |
+|---|---|---|
+| `--sticky-bar-h` (DR-033) | không có | có |
+| "Có thu phí" (4A đã bỏ) | **còn** | đã bỏ |
+| `theme-color` (DR-037) | `#C2410C` cứng | `#FFFFFF` từ token |
+
+Chỉ có hai đường đưa bit lên Worker này: tải tay từ `dist/`, hoặc build phía Cloudflare từ git. Bản đang chạy không khớp `dist/` (kể cả `dist/` của hai worktree — cả hai đều không có `dist/`), nên nó đến từ đường thứ hai. Đợt 4A đã "deploy xong" mà chưa từng lên tới khách.
+
+Cạm bẫy nằm ở chỗ **không có tín hiệu hỏng nào**: `wrangler deploy` in `Success`, `curl` trả `200`, chỉ nội dung là của hai tuần trước.
+
+---
+
+## DR-042 — Webhook Sanity lệch `ADR-0009` mục 3 và 4
+
+**Trạng thái:** mở. Phát hiện 2026-08-22. Hook đang tắt (`QĐ-2026-08-22-03`) nên chưa gây hại; phải xử **trước** khi bật lại.
+
+Cấu hình thật của hook `Cloudflare rebuild` (id `UCT8eZl6s8SXBtKP`, tạo 2026-07-27), đọc bằng management API `v2021-10-04`:
+
+```
+dataset: "*"        rule: { on: ["create"], filter: "!(_id in path(\"drafts.**\"))" }
+url: https://api.cloudflare.com/client/v4/workers/builds/deploy_hooks/1017098…   (URL đầy đủ là bí mật, không chép vào kho — 04-CONSTRAINTS)
+```
+
+Ba chỗ lệch:
+
+1. **Chỉ nghe `create`.** `ADR-0009` mục 3 đòi "create/update/delete". Sửa một trang đã publish rồi publish lại là `update` — theo cấu hình này thì **không kích build**. Nghĩa là hook vừa bắn quá nhiều lần cho việc không cần (DR-041), vừa có thể **không bắn** đúng lúc cần nhất.
+2. **`dataset: "*"`, không lọc type.** `ADR-0009` mục 3 đòi "lọc theo các type có render trang". Mọi document ở mọi dataset đều kích một lần dựng toàn site.
+3. **Không có debounce.** `ADR-0009` mục 4 dự trù một Worker gom sự kiện (im 120 giây mới bắn), và tự ghi "MVP có thể bỏ qua". Thực tế vẫn là MVP: 4 lần bắn trong 6 giây (02:55:17→23 UTC). Mỗi lần dựng lại là một lượt đọc **toàn bộ** nội dung qua Sanity Content API — đây chính là khoản API request mà `QĐ-2026-08-22-03` cắt.

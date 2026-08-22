@@ -841,3 +841,19 @@ cùng `Sidebar.astro` / `TourDetail.astro`.
 - `06` v2.1.0 có hiệu lực: bước 7 (Design hi-fi cho 4 entity) được chạy trên đó; QA1 đối chiếu mockup với §3.1; Code chỉ chạy sau QA1.
 - Hai commit: `feat:` đợt 4A (22 file `src/`), `docs:` audit + kế hoạch vòng 4 + QĐ/DR + `06` v2.1 + canvas/evidence. Báo cáo cổng ở `scripts/reports/` đi cùng commit docs như các đợt trước.
 - Còn mở như QĐ-2026-08-22-01: §6 mục 4, 5, 6 của kế hoạch; lỗi dữ liệu cổng lộ ra (slug `null` trong `itinerary` 3 tour, R3 hai URL, R4 hreflang cẩm nang, S24 người duyệt).
+
+---
+
+## QĐ-2026-08-22-03 — Tạm ngắt hook Sanity → Cloudflare; đường phát hành về thủ công
+
+**Chốt.** Chủ dự án quyết (2026-08-22) ba việc, trả lời cho báo cáo cơ chế auto-deploy: (a) đẩy `main` lên GitHub để đợt 4A thật sự lên production; (b) ghi ba mục lệch vào `DRIFT_LOG` và sửa mục Deploy của `BUILD-NOTES.md`; (c) **tạm ngắt** việc bấm Publish trong Sanity kích build Cloudflare, quay về dựng bằng lệnh tay, **lý do là tiết kiệm API request của Sanity**.
+
+**Đã thi hành.** Webhook `Cloudflare rebuild` (id `UCT8eZl6s8SXBtKP`, project `pgedy374`) đặt `isDisabledByUser: true` qua management API `v2021-10-04`. Đây là **tắt, không xoá**: URL deploy hook, rule, dataset giữ nguyên trong Sanity; bật lại là đảo đúng một cờ, không cần biết lại URL bí mật. Đã kiểm bằng một lượt `GET` sau khi sửa.
+
+**Vì sao ngắt là hợp lý, không chỉ vì tiền.** Mỗi lần webhook bắn là một lần Cloudflare dựng lại **toàn site**, và mỗi lần dựng đọc lại **toàn bộ** nội dung qua Sanity Content API. Ngày 2026-08-22 có 25 lần bắn, 4 lần trong 6 giây (DR-042 mục 3). Ngắt hook cắt đúng khoản đó. Nhưng nó cũng đóng luôn cạm bẫy ở DR-041: chừng nào `main` local còn đi trước `origin/main`, mỗi lần Publish là một lần **tự động lùi code** production về bản đã push gần nhất.
+
+**Đánh đổi, ghi thẳng.** Từ nay **publish trong Sanity không còn đủ để nội dung lên trang**. Phải chạy `npm run deploy` ở máy. Không có kiểm máy nào nhắc việc này — cùng hạng nợ với `favicon.svg` (`QĐ-2026-08-14-01`) và schema Studio lệch (`QĐ-2026-08-14-02`). Ai sửa nội dung mà quên deploy thì Sanity và trang live lệch nhau im lặng, đúng loại hỏng mà `ADR-0009` dựng webhook lên để tránh.
+
+**Chưa đụng, cố ý.** Nối git của Workers Builds **giữ nguyên**: `git push` lên `main` vẫn kích một lần dựng phía Cloudflare. Đó chính là đường đưa đợt 4A lên live ở mục (a). Muốn thành thủ công hoàn toàn thì phải gỡ nối git trên dashboard Cloudflare — việc đó chưa được yêu cầu và là cửa riêng, cần một QĐ khác.
+
+**Điều kiện bật lại.** Không bật lại trước khi xử DR-042 (rule chỉ nghe `create`, không lọc type, không debounce) và trước khi `main` local đã push hết — bật lại lúc còn commit chưa push là mời lại đúng sự cố DR-041.
