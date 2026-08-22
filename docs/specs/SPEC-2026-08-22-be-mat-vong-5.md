@@ -2,7 +2,7 @@
 
 - **Trạng thái:** nháp, **chờ chủ dự án duyệt**. Hướng đã chốt qua năm câu hỏi trong phiên brainstorm 2026-08-22; giá trị cụ thể chưa chốt và cố ý chưa điền.
 - **Ngày soạn:** 2026-08-22   **Người soạn:** Cowork   **Người duyệt:** Lưu Tuấn Vũ
-- **Loại quyết định:** cửa hai chiều ở phần token (chữ, cỡ, màu — revert bằng một commit). **Cửa một chiều ở `06-BINDING_MAP` v2.2**: đổi vùng của `summary` và thêm Luật 4 kéo theo mockup và code phải dựng lại.
+- **Loại quyết định:** cửa hai chiều ở phần token (chữ, cỡ, màu — revert bằng một commit). **Cửa một chiều ở `06-BINDING_MAP` v2.2**: đổi vùng của `summary` và thêm Luật 4 kéo theo mockup và code phải dựng lại. **Cửa một chiều ở V0b**: thêm một cổng vào `gate:all` và buộc component gắn `data-field`/`data-region` — gỡ ra sau này là gỡ một hàng rào.
 - **Repo lúc soạn:** `main` tại `ab24aa5`
 - **Liên quan:** `SPEC-2026-08-14-be-mat-vong-3` (vòng trước, cùng bốn than phiền), `docs/plans/2026-08-21-audit-va-ke-hoach-giao-dien-vong-4.md` (vòng 4 đang dở), `06-BINDING_MAP` v2.1.0, `07-DESIGN_TOKENS` (đã duyệt 2026-06-12, bổ sung 2026-08-06)
 
@@ -31,26 +31,44 @@ Vòng 3 chọn hướng đóng khung, và ghi rõ lý do loại các hướng r�
 
 Vòng 3 cũng đã tự ghi sẵn lối thoát này ở §4: *"Bày lại trọn trang chủ theo mạch bán hàng — để dành vòng sau nếu vòng này chưa đủ."* Vòng này chưa đủ. Nhưng bố cục trang chủ vẫn **ngoài phạm vi** vòng 5 (§9) vì chủ dự án nêu bốn điều về trang chi tiết, không về trang chủ.
 
-## 2. Chẩn đoán — sáu dữ kiện đo được
+## 2. Chẩn đoán — bảy dữ kiện đo được
 
-### 2.1 Ý (4) là drift code ↔ spec, không phải lỗi thiết kế
+### 2.1 Ý (4) không phải một trang hỏng — 44/58 trang chi tiết đang lặp vùng
 
-Đo trên production `https://tourdao.vn/diem-tham-quan/chua-long-son/` ngày 2026-08-22, đếm trong HTML trả về (58 719 byte): chuỗi "Miễn phí" xuất hiện **đúng 4 lần**, ở bốn component khác nhau:
+Chủ dự án viết "**kiểm tra lại** việc trùng lặp ánh xạ dữ liệu trên trang, **ví dụ** … Chùa Long Sơn". Chữ "kiểm tra lại" và "ví dụ" là đúng: đã quét toàn bộ, và ca Chùa Long Sơn nằm trong hai kiểu **ít gặp nhất** trong chín kiểu lặp.
 
-| # | Selector | Vùng | Nhãn hiển thị |
-|---|---|---|---|
-| 1 | `.sticky-bar__price` | thanh dính | *(không nhãn)* |
-| 2 | `.info-value` | `InfoBar` | **Giá vé** |
-| 3 | `.booking-price-value` | `BookingCTA` trong sidebar | *(không nhãn)* |
-| 4 | `.info-row-value` | `InfoCard` trong sidebar | **Phí vào cửa** |
+**Phương pháp.** Tải cả 58 trang chi tiết từ `sitemap-vi.xml` ngày 2026-08-22, tách giá trị của bốn vùng theo class ổn định (`.info-value` = `InfoBar`, `.info-row-value` = `InfoCard`, `.sticky-bar__price` = thanh dính, `.booking-price-value` = `BookingCTA`), rồi đếm mỗi *giá trị* xuất hiện ở mấy vùng. Script và kết quả đầy đủ: `docs/evidence/2026-08-22-trung-vung-truoc-4B/`.
 
-Nguồn trong mã: `src/components/AttractionDetail.astro` dòng 68 (`infoBarItems`), dòng 79 (`sidebarRows`), dòng 95 (`priceLabel`), và slot `booking`. Cả bốn đều lấy từ `resolvePrice(...)` → `resolver.ts:25-26` trả `label = "Miễn phí"` khi `isAccessibleForFree` bật.
+**Kết quả: 44/58 trang (76 %) có ít nhất một giá trị hiện ở hơn một vùng.**
 
-**Nặng hơn "lặp bốn lần": hai nhãn khác nhau cho cùng một sự thật.** Khách đọc "Giá vé: Miễn phí" ở dải trên và "Phí vào cửa: Miễn phí" ở sidebar sẽ hiểu là hai khoản phí khác nhau, cùng bằng không — chứ không phải một khoản bị in hai lần.
+| Loại trang | Trang lặp / tổng |
+|---|---|
+| Điểm tham quan | **20 / 21** |
+| Địa danh | 6 / 7 |
+| Trải nghiệm | 7 / 10 |
+| Tour | 11 / 20 |
 
-**Đặc tả đã xử việc này rồi.** `06-BINDING_MAP` v2.1 §3.1 khai `isAccessibleForFree` của Điểm tham quan → **"Thông tin nhanh, chỉ khi true"**, một vùng duy nhất; §6 Luật 1 viết "một thông tin, một vùng, một lần", và ghi rõ ngoại lệ duy nhất là **giá** (thanh dính + khối hành động). `InfoBar` và `InfoCard` **không còn là vùng** ở v2.1.
+Chín kiểu lặp, đếm theo số trang:
 
-Nên đây là việc của **Code đợt 4B bước 4**, không phải việc của Design. Đưa vào prompt Design là sai vai theo `CLAUDE.md` §3.
+| Nhãn hiển thị | Số trang | Các vùng lặp |
+|---|---|---|
+| Giờ mở cửa | **22** | `InfoBar` + `InfoCard` |
+| Điện thoại | **20** | `InfoBar` + `InfoCard` |
+| Thời lượng | **18** | `InfoBar` + `InfoCard` |
+| Hình thức | 11 | `InfoBar` + `InfoCard` |
+| Phù hợp | 7 | `InfoBar` + `InfoCard` |
+| Loại | 6 | `InfoBar` + `InfoCard` |
+| Thuộc | 6 | `InfoBar` + `InfoCard` |
+| **Giá vé / Phí vào cửa** | 5 | `InfoBar` + `InfoCard` + thanh dính + `BookingCTA` |
+| Khởi hành / Xuất phát | 5 | `InfoBar` + `InfoCard` |
+
+**Ca chủ dự án bắt được là ca nặng nhất, nhưng ít gặp nhất (5/58 trang, ngang với "Khởi hành / Xuất phát").** Trên `/diem-tham-quan/chua-long-son/` chuỗi "Miễn phí" ra **bốn vùng**, và tệ hơn "lặp bốn lần": **hai nhãn khác nhau cho cùng một sự thật** — "Giá vé" ở `InfoBar`, "Phí vào cửa" ở `InfoCard`. Khách đọc ra hai khoản phí cùng bằng không, không phải một khoản in hai lần. Cùng lỗi ấy ở Tour: "Khởi hành" và "Xuất phát" là hai nhãn cho một field.
+
+**Gốc không nằm ở `isAccessibleForFree`, cũng không nằm ở `AttractionDetail.astro`.** Tám trong chín kiểu lặp là cặp `InfoBar` + `InfoCard` in lại **cùng một bộ field** — đúng DR-032. Mọi trang chi tiết đều dựng cả hai vùng đó qua `DetailLayout`, nên lỗi không phải của một template mà của **cặp vùng**.
+
+**Đặc tả đã đóng việc này ở tầng chữ.** `06` v2.1 §3.1 khai mỗi field đúng một vùng (`isAccessibleForFree` của Điểm tham quan → "Thông tin nhanh, chỉ khi true"), §6 Luật 1 viết "một thông tin, một vùng, một lần", ngoại lệ duy nhất là **giá** (thanh dính + khối hành động), và `InfoBar` cùng `InfoCard` **không còn là vùng**. Vùng mới "Thông tin nhanh" thay cả cặp.
+
+Nên đây là việc của **Code đợt 4B bước 4**, không phải việc của Design. Đưa vào prompt Design là sai vai theo `CLAUDE.md` §3. Nhưng sửa code thôi thì chưa đóng được gốc — xem §2.7.
 
 ### 2.2 `tokens.css` chạy ngược với `07-DESIGN_TOKENS` §2
 
@@ -94,6 +112,28 @@ Canvas vòng 4 có sáu artboard trang chi tiết: `Main` + `DiDong` (Điểm th
 
 Đề xuất bộ chữ thứ tư mà không đóng nợ này là mở nợ chồng nợ.
 
+### 2.7 Gốc: Luật 1 là luật duy nhất trong `06` không có bộ kiểm máy
+
+Câu hỏi phải trả lời không phải "vì sao Chùa Long Sơn hiện bốn lần Miễn phí", mà **"vì sao 76 % trang lặp vùng mà không cổng nào đỏ, và điều gì ngăn nó quay lại sau khi Code sửa"**.
+
+`06` §3.1 tự khai câu trả lời, nguyên văn:
+
+> *"Cột này không phải cột 'Dữ liệu nuôi' nên bộ kiểm `g3` không đọc; nó là hợp đồng cho bước 7 và bước 8."*
+
+Đối chiếu với những gì đang chạy:
+
+| Bộ kiểm | Kiểm gì | Có bắt được lặp vùng không |
+|---|---|---|
+| `g3-binding-map-vs-template` | field khai trong `06` **có được template render không**; field template dùng mà `06` không khai | **Không.** Kiểm *có/không*, không kiểm *mấy lần* |
+| `entity-layout-post` | entity detail có đi qua primitive chung; Hotel/Resort có delegate; mọi element có nằm trong container | **Không.** Kiểm chọn component và bao bọc, không kiểm field |
+| `i1-i19`, `py1-py8`, `r1-r4` | gate publish, ref integrity, redirect, hreflang | **Không.** Không đụng tầng trình bày |
+
+Không bộ kiểm nào đếm số vùng của một field. Luật 2 và Luật 3 cũng vậy, nhưng chúng ít bị vi phạm im lặng hơn vì hệ quả nhìn thấy ngay; Luật 1 thì lặp một dòng ở sidebar không ai để ý cho tới khi có người đọc kỹ một trang.
+
+**Hệ quả: Luật 1 hiện chỉ được thi hành bằng mắt người, ở QA1, và chỉ trên mockup — không trên HTML đã dựng.** Mockup 4B qua QA1 sạch Luật 1; production thì 44/58 trang vi phạm. Hai thứ đó không mâu thuẫn, vì **không có cổng nào nối chúng lại**.
+
+Nên phương án "Code sửa `AttractionDetail.astro` và `DetailLayout`" chữa được 44 trang hôm nay và **không ngăn được trang thứ 59**. Entity mới, delta mới, hay một lần refactor `DetailLayout` là drift quay lại, im lặng như lần này. Đóng gốc nghĩa là **đưa Luật 1 xuống tầng máy kiểm** — hiện vật V0b ở §4, hợp đồng ở §5.4.
+
 ## 3. Quyết định đã chốt trong phiên brainstorm 2026-08-22
 
 Năm câu hỏi, năm câu trả lời của chủ dự án. Ghi lại để bước sau không phải đoán lại.
@@ -114,13 +154,16 @@ Năm câu hỏi, năm câu trả lời của chủ dự án. Ghi lại để bư
 
 | # | Hiện vật | Vai | Cổng | Chặn bởi |
 |---|---|---|---|---|
-| **V0** | Phiếu Code đợt 4B, gồm ý (4): gỡ "Miễn phí" khỏi `InfoBar`, thanh dính và `BookingCTA`; chỉ giữ ở Thông tin nhanh theo `06` v2.1 §3.1 | Code | QA2 | chủ dự án chốt cổng QA1 4B **và** chốt N3/N15 |
+| **V0a** | Phiếu Code đợt 4B, gồm ý (4): thay cặp `InfoBar` + `InfoCard` bằng vùng **Thông tin nhanh** theo `06` v2.1 §3.1, đóng cả **chín** kiểu lặp ở §2.1 — không chỉ ca giá của Chùa Long Sơn | Code | QA2 | chủ dự án chốt cổng QA1 4B **và** chốt N3/N15 |
+| **V0b** | **Bộ kiểm Luật 1** (§5.4): validator hậu dựng đếm số vùng mỗi field, đỏ khi > 1 ngoài ngoại lệ đã khai. Kèm việc gắn `data-field` / `data-region` vào component vùng | Code | QA2 · vào `gate:all` | V0a **hoặc** chạy cùng V0a |
 | **V1** | Hai phiếu drift: font-stack ngược (§2.2), thang 14 bậc vs 8 bậc khai (§2.3) | Cowork | ghi vào `DRIFT_LOG.md` | — |
 | **V2** | `06-BINDING_MAP` **v2.2** (§5) | Cowork | chủ dự án chốt + QĐ mới | — |
 | **V3** | Prompt bàn giao Design vòng 5 (§6) | Cowork | tự kiểm P1–P6 | V1 + V2 |
 | **V4** | Mockup vòng 5 (§6) | Design | QA1 do tác nhân độc lập chạy | V3 |
 | **V5** | `07-DESIGN_TOKENS` **v2** — điền giá trị chủ dự án đã chọn | Cowork | chủ dự án chốt + QĐ | V4 |
 | **V6** | Code vòng 5 | Code | QA2 | V5 |
+
+**V0b là đề xuất của Cowork, chưa phải quyết định của chủ dự án.** Sáu quyết định ở §3 do chủ dự án chốt trong phiên brainstorm; V0b ra đời sau, khi yêu cầu "sửa root reason" dẫn tới cuộc quét ở §2.1 và chẩn đoán ở §2.7. Nó thêm một cổng vào `gate:all` và buộc mọi component vùng gắn thuộc tính — cửa một chiều, nên phải được chốt riêng, không đi kèm theo cùng V0a.
 
 **Vì sao thang cỡ do Design đề xuất chứ không do Cowork dọn.** V1 chỉ *ghi* rằng con số chạy thật lệch con số khai. Chọn tám bậc nào là quyết định thẩm mỹ, thuộc bước 7; `07` §0 ghi "Design đề xuất, chủ dự án duyệt (vai A ở RACI)".
 
@@ -159,6 +202,37 @@ Giữ nguyên: `summary` vẫn là nguồn `speakable` (§3 hàng speakable, S2.
 Luật 3 "giá trước, chữ sau" đòi màn đầu của entity thương mại có giá hoặc nhãn miễn phí. Với lựa chọn §3.6, thanh dính giữ nguyên vị trí ngay dưới hero, nên giá không tụt xuống dòng nào. Trên di động, §3.1 vốn đã khai "thanh đáy giá + CTA luôn thấy" — thanh đáy không phụ thuộc vị trí đoạn mở.
 
 **Ghi rõ trong v2.2 rằng Luật 3 đã được kiểm và không đổi**, để QA1 không phải suy lại.
+
+### 5.4 Làm §3.1 đọc được bằng máy — hợp đồng cho bộ kiểm Luật 1
+
+Đây là phần đóng gốc §2.7. `06` v2.2 phải bổ sung ba thứ để một validator đọc được §3.1, thay vì để nó là bảng chỉ người đọc.
+
+**a. Đặt tên định danh cho từng vùng.** §3 hiện gọi vùng bằng tên tiếng Việt tự do ("Thông tin nhanh", "thanh dính", "khối hành động"). v2.2 thêm một cột hoặc một bảng phụ gán mỗi vùng một `id` ổn định:
+
+| Vùng | `id` |
+|---|---|
+| huy hiệu hero | `hero-badge` |
+| breadcrumb | `breadcrumb` |
+| dải đoạn mở | `summary-band` |
+| Thông tin nhanh | `fact-strip` |
+| thanh dính | `sticky-bar` |
+| khối hành động | `action-block` |
+| thẻ bản đồ | `map-card` |
+| mục thân bài | `section-<tên mục>` |
+
+**b. Khai ngoại lệ thành dữ liệu, không thành câu văn.** Luật 1 hiện ghi ngoại lệ bằng văn xuôi ("hiện chỉ có giá"). v2.2 khai thành bảng máy đọc được: field `giá` → `["sticky-bar", "action-block"]`. Thêm ngoại lệ về sau là thêm một dòng, và validator tự nới theo — không phải sửa mã validator.
+
+**c. Buộc component gắn nhãn vùng.** Mỗi component vùng render `data-region="<id>"`, mỗi ô dữ liệu render `data-field="<tên field trong 01>"`. Không có hai thuộc tính này thì không có cách nào đếm vùng trên HTML đã dựng mà không đoán qua class — mà class thì đổi theo mỗi lần sửa CSS.
+
+**Bộ kiểm V0b khi đó làm đúng ba việc:**
+
+1. Đọc §3.1 của `06` (thẳng từ Markdown, như `g3` đã làm từ 2026-08-05 sau DR-027 — **không chép tay bảng vào mã**).
+2. Quét `dist/**/*.html`, gom `(field, region)` theo từng trang.
+3. Đỏ khi một `field` xuất hiện ở nhiều hơn một `region` mà cặp đó không có trong bảng ngoại lệ; đỏ khi `field` render ở `region` khác với vùng §3.1 khai.
+
+Thêm vào `gate:all`. Mốc nghiệm thu: chạy trên bản dựng hiện tại phải **đỏ với đúng 44 trang** ở §2.1 — nếu chạy mà xanh thì bộ kiểm sai, không phải trang sạch. Sau V0a phải **xanh**.
+
+**Vì sao đọc §3.1 chứ không chép tay.** DR-027 đã ghi đúng bài học này: trước 2026-08-05, `g3` mang tên bản ánh xạ nhưng bảng trong mã là bản chép tay và `BINDING_MAP_PATH` chưa từng được mở — sửa `06` không làm đổi gì máy kiểm, nên tài liệu và bộ kiểm thành hai nguồn sự thật song song (N7, P6). V0b không được lặp lại lỗi đó.
 
 ## 6. Prompt bàn giao Design vòng 5 chứa gì
 
@@ -215,13 +289,15 @@ Mỗi artboard chặng 2 kèm **bảng đối chiếu vùng ↔ dòng nào trong
 | Phương án | Loại vì | Ai loại |
 |---|---|---|
 | Một prompt Design ôm cả bốn ý | Design đi trước cấu trúc, và Design không được sửa `06` hay chạm code. `CLAUDE.md` §3 và `GOVERNANCE` 4.2 — QA1 sẽ trả lại | Chủ dự án, §3.1 |
-| Hoãn vòng 5 tới khi đóng xong vòng 4 | Chậm hơn mức cần; ý (4) đã có đường đi riêng qua V0 | Chủ dự án, §3.1 |
+| Hoãn vòng 5 tới khi đóng xong vòng 4 | Chậm hơn mức cần; ý (4) đã có đường đi riêng qua V0a + V0b | Chủ dự án, §3.1 |
 | Gộp đợt 4B vào vòng 5 | Bug giá trùng sống thêm nguyên một vòng thiết kế; đợt đã qua QA1 sau ba vòng bị mở lại | Chủ dự án, §3.5 |
 | Hai prompt Design song song (token trước, bố cục sau) | QA1 phải chạy hai lượt, và mockup token sẽ lệch ngay khi bố cục đổi | Chủ dự án, §3.5 |
 | Đóng khung: chỉ dùng hai font đã có | Đúng hướng vòng 3 đã chạy và chưa giải được "chữ không hợp ngành" (§1) | Chủ dự án, §3.4 |
 | Mở: Design tự dựng bộ nhận diện mới | Phải viết lại phần lớn `07`, dựng lại toàn bộ mockup 4B vừa qua QA1, chạy lại QA1 từ đầu | Chủ dự án, §3.4 |
 | Đoạn mở lên trên hero, cùng dải breadcrumb | Trên di động 390px ảnh bị đẩy xuống ~160px; màn đầu toàn chữ, mất cú hích cảm xúc của site du lịch | Chủ dự án, §3.6 |
 | Đoạn mở chen giữa hero và thanh dính | Đẩy giá và CTA trên desktop tụt thêm ~110px, phải mở lại Luật 3 | Chủ dự án, §3.6 |
+| Chỉ sửa `AttractionDetail.astro` cho hết ca Chùa Long Sơn | Chữa 5/58 trang và bỏ sót 39 trang còn lại; và không có bộ kiểm thì trang thứ 59 lặp lại im lặng (§2.7) | Cowork, §2.1 |
+| Sửa cả 44 trang nhưng không làm bộ kiểm V0b | Đóng hiện trạng, không đóng gốc. Luật 1 vẫn là luật duy nhất trong `06` không có máy kiểm; drift quay lại ở lần refactor `DetailLayout` kế tiếp | Cowork, §2.7 |
 | Lưới thẻ thành dải ngang cuộn trên di động | Không phải điều chủ dự án muốn; và với 4 tour thì dễ thành dải một thẻ lơ lửng | Chủ dự án, §3.2 |
 
 ## 9. Ngoài phạm vi vòng 5
@@ -240,6 +316,8 @@ Mỗi artboard chặng 2 kèm **bảng đối chiếu vùng ↔ dòng nào trong
 
 **R-3 — `06` v2.2 làm sáu mockup 4B lỗi thời.** Sáu mockup đó vừa đạt QA1 sau ba vòng. Sau v2.2 chúng sai ở vùng đoạn mở. Chấp nhận có chủ ý: chặng 2 dựng lại toàn bộ, và QA1 vòng 5 chạy trên bản mới. Bằng chứng QA1 4B **không bị xoá** — nó vẫn là bằng chứng của thứ đã kiểm tại `e4e1d8a`.
 
-**R-4 — V0 phụ thuộc hai quyết định chưa chốt.** Code 4B không chạy được cho tới khi chủ dự án chốt cổng QA1 4B và chốt N3/N15 (`docs/specs/DE-XUAT-2026-08-22-go-N3-N15.md`). Nếu hai việc đó kẹt, bug bốn lần "Miễn phí" kẹt theo. Đây là lý do §3.5 xếp V0 đi trước.
+**R-4 — V0a phụ thuộc hai quyết định chưa chốt.** Code 4B không chạy được cho tới khi chủ dự án chốt cổng QA1 4B và chốt N3/N15 (`docs/specs/DE-XUAT-2026-08-22-go-N3-N15.md`). Nếu hai việc đó kẹt, 44 trang lặp vùng kẹt theo. Đây là lý do §3.5 xếp V0a đi trước.
+
+**R-5 — V0b có thể bị hoãn vì "đằng nào V0a cũng sửa xong rồi".** Đây đúng là cách drift quay lại: 44 trang sạch thì áp lực làm bộ kiểm biến mất, và trang thứ 59 lặp lại im lặng. Cách phòng: V0b có mốc nghiệm thu đo được ở §5.4 (chạy trên bản dựng **trước** V0a phải đỏ đúng 44 trang), nên nó phải được viết **trước hoặc cùng lúc** với V0a — sau V0a thì không còn gì để đối chứng bộ kiểm.
 
 **Nợ mở ra, chưa xử, ghi để khỏi rơi.** `SPEC-2026-08-14-be-mat-vong-3` §3.3 đổi nút chính từ `--c-accent` sang `--c-sand`, trong khi `07` §1 viết "Quy tắc dùng accent: accent chỉ xuất hiện ở vùng hành động và nhãn giá". Nút chính **là** vùng hành động nhưng nay không mang màu accent — quy tắc "hai accent hai vùng" của `07` có thể đã lệch so với thứ đang chạy. Chưa kiểm bản dựng, nên đây là **việc phải kiểm**, không phải phiếu drift. Kiểm trong lượt V1.
