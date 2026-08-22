@@ -32,7 +32,10 @@ function fakeFetch(opts: { resendStatus?: number; zaloThrows?: boolean } = {}) {
 }
 
 function mkEnv(over: Partial<BookingEnv> = {}): BookingEnv {
-  return { BOOKING_DB: env.BOOKING_DB, TURNSTILE_SECRET_KEY: 'secret', RESEND_API_KEY: 'rk', BOOKING_NOTIFY_EMAIL: 'ops@tourdao.vn', ZALO_BOT_TOKEN: 'zt', ZALO_BOT_CHAT_IDS: '111', ...over }
+  // IP_HASH_SALT: thêm ở review Task 8 (F4) — handler nay đòi muối RIÊNG cho ip_hash, không
+  // còn tụt về hằng số 'dev' khi thiếu. Không đặt thì ca "tần suất" bên dưới sẽ không còn ai
+  // đếm được (ipHash luôn null), phá vỡ khẳng định 429.
+  return { BOOKING_DB: env.BOOKING_DB, TURNSTILE_SECRET_KEY: 'secret', RESEND_API_KEY: 'rk', BOOKING_NOTIFY_EMAIL: 'ops@tourdao.vn', ZALO_BOT_TOKEN: 'zt', ZALO_BOT_CHAT_IDS: '111', IP_HASH_SALT: 'test-salt', ...over }
 }
 
 function mkCtx() {
@@ -49,15 +52,18 @@ function req(body: unknown, h: Record<string, string> = {}, opts: { form?: boole
 describe('handleBooking', () => {
   // Lệch so với brief (ghi rõ, không im lặng sửa): bản @cloudflare/vitest-pool-workers@0.22.0
   // cài trong repo này KHÔNG cô lập D1 theo từng it() trong cùng file — trạng thái dính giữa
-  // các ca (đã xác nhận thực nghiệm ở Task 6, xem ghi chú tương tự tại test/booking/store.test.ts).
-  // Ghi chú ngược lại ở test/setup/apply-migrations.ts ("isolatedStorage mặc định") là sai.
-  // Nhiều ca dưới đây CỐ Ý dùng lại đúng phone/tourSlug/departDate/IP mặc định giống ca khác
-  // (đề bài yêu cầu dùng nguyên văn payload()/req() mặc định) — ví dụ ca trùng đơn cần hai lần
-  // gọi cùng phone+tour+ngày, ca tần suất cần cùng một IP xuyên suốt 6 lần gọi trong chính nó.
-  // Nếu không dọn bảng, dữ liệu insert ở ca trước sẽ làm sai số đếm/đối chiếu trùng của ca sau.
-  // Chọn dọn bảng `booking` trước MỖI ca (thay vì đổi phone/tourSlug/IP của từng ca) vì cách
-  // này không đụng tới bất kỳ giá trị hay khẳng định nào trong đoạn test cho sẵn — chỉ thêm một
-  // beforeEach bao ngoài. Không đổi vitest.config.ts / test/setup/ (bị cấm sửa).
+  // các ca (đã xác nhận thực nghiệm ở Task 6). Ghi chú ngược lại ở test/setup/apply-migrations.ts
+  // ("isolatedStorage mặc định") là sai.
+  // M13 (review Task 8, sửa chú thích cho đúng — bản trước dẫn nhầm): Task 6 GẶP đúng vấn đề
+  // này ở test/booking/store.test.ts nhưng giải bằng cách KHÁC — đặt code/phone/ipHash RIÊNG
+  // cho từng ca, KHÔNG có beforeEach/DELETE ở đó. Ở đây không dùng cách đó vì nhiều ca dưới
+  // đây CỐ Ý dùng lại đúng phone/tourSlug/departDate/IP mặc định giống ca khác (đề bài yêu cầu
+  // dùng nguyên văn payload()/req() mặc định) — ví dụ ca trùng đơn cần hai lần gọi cùng
+  // phone+tour+ngày, ca tần suất cần cùng một IP xuyên suốt 6 lần gọi trong chính nó. Nếu
+  // không dọn bảng, dữ liệu insert ở ca trước sẽ làm sai số đếm/đối chiếu trùng của ca sau.
+  // Chọn dọn bảng `booking` trước MỖI ca (thay vì đổi phone/tourSlug/IP của từng ca như Task 6)
+  // vì cách này không đụng tới bất kỳ giá trị hay khẳng định nào trong đoạn test cho sẵn — chỉ
+  // thêm một beforeEach bao ngoài. Không đổi vitest.config.ts / test/setup/ (bị cấm sửa).
   beforeEach(async () => {
     await env.BOOKING_DB.prepare('DELETE FROM booking').run()
   })
@@ -88,7 +94,10 @@ describe('handleBooking', () => {
     const j = await res.json() as any
     expect(j.ok).toBe(true)
     await flush()
-    expect(await getBookingByCode(env.BOOKING_DB, j.code)).toBeNull()
+    // F5 (review Task 8): tra theo j.code (mã GIẢ, chưa chắc trùng mã thật lỡ được lưu) không
+    // thể đỏ nếu handler lỡ lưu dưới một mã khác — đếm cả bảng mới thật sự khẳng định "không lưu".
+    const n = await env.BOOKING_DB.prepare('SELECT COUNT(*) AS n FROM booking').first<{ n: number }>()
+    expect(Number(n?.n)).toBe(0)
     expect(calls.length).toBe(0)
   })
 
@@ -110,7 +119,7 @@ describe('handleBooking', () => {
   })
 
   it(`${RATE_MAX} đơn/10 phút cùng IP → đơn thứ ${RATE_MAX + 1} nhận 429`, async () => {
-    const { f } = fakeFetch(); const { ctx } = mkCtx()
+    const { f } = fakeFetch(); const { ctx, flush } = mkCtx()
     for (let i = 0; i < RATE_MAX; i++) {
       const r = await handleBooking(req(payload({ phone: `090500000${i}` })), mkEnv(), ctx, { fetchImpl: f, now: () => NOW })
       expect(r.status).toBe(201)
@@ -118,6 +127,9 @@ describe('handleBooking', () => {
     const r6 = await handleBooking(req(payload({ phone: '0905999999' })), mkEnv(), ctx, { fetchImpl: f, now: () => NOW })
     expect(r6.status).toBe(429)
     expect(((await r6.json()) as any).message).toBe(MSG.rateLimited)
+    // M11 (review Task 8): 5 đơn thành công ở trên đều lên lịch báo tin qua ctx.waitUntil —
+    // đợi cho xong trước khi ca kết thúc, tránh promise trôi qua ranh giới sang ca sau.
+    await flush()
   })
 
   it('trùng phone+tour+ngày trong 24h → 200 duplicate, trả mã cũ, không thêm dòng', async () => {
@@ -156,7 +168,7 @@ describe('handleBooking', () => {
   })
 
   it('form-urlencoded + Accept text/html → trang HTML có mã đơn', async () => {
-    const { f } = fakeFetch(); const { ctx } = mkCtx()
+    const { f } = fakeFetch(); const { ctx, flush } = mkCtx()
     const flat = { tourSlug: 'tour-3-dao-nha-trang', tourTitle: 'Tour 3 đảo', bookingRef: 'tour-3-dao', departDate: '2026-09-05', 'pax.adult': '2', 'pax.child': '1', 'quoted.perPax.adult': '550000', 'quoted.perPax.child': '350000', 'quoted.total': '1450000', 'quoted.quotedAt': 'x', name: 'Nguyễn Văn A', phone: '0905123456', 'cf-turnstile-response': TOK }
     const res = await handleBooking(req(flat, { Accept: 'text/html,application/xhtml+xml' }, { form: true }), mkEnv(), ctx, { fetchImpl: f, now: () => NOW })
     expect(res.status).toBe(201)
@@ -165,6 +177,15 @@ describe('handleBooking', () => {
     expect(html).toMatch(/TD-260901-[A-Z2-9]{4}/)
     expect(html).toContain('/tour/tour-3-dao-nha-trang/')
     expect(html).toContain('/lien-he/')
+    // M11 (review Task 8): đơn này 201 thật, cũng lên lịch báo tin qua ctx.waitUntil — đợi
+    // cho xong trước khi ca kết thúc.
+    await flush()
+  })
+
+  it('body form-urlencoded quá 16KB → 413 (F1, review Task 8: nhánh form từng không có test)', async () => {
+    const { f } = fakeFetch(); const { ctx } = mkCtx()
+    const res = await handleBooking(req({ note: 'x'.repeat(17 * 1024) }, {}, { form: true }), mkEnv(), ctx, { fetchImpl: f, now: () => NOW })
+    expect(res.status).toBe(413)
   })
 
   it('GET → 405; Origin khác host → 403; body quá 16KB → 413; JSON hỏng → 400', async () => {

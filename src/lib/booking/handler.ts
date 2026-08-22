@@ -22,6 +22,9 @@ export type BookingEnv = {
   ZALO_BOT_TOKEN?: string
   ZALO_BOT_CHAT_IDS?: string
   TURNSTILE_SECRET_KEY?: string
+  /** Muối băm IP cho tần suất (F4, review Task 8) — vòng đời RIÊNG với TURNSTILE_SECRET_KEY:
+   *  xoay khoá Turnstile không được kéo theo việc mọi ip_hash đã lưu bỗng vô nghĩa. */
+  IP_HASH_SALT?: string
 }
 export type WaitUntilCtx = { waitUntil(p: Promise<unknown>): void }
 export type HandlerDeps = {
@@ -67,21 +70,24 @@ async function sha256Hex(s: string): Promise<string> {
 async function readBody(request: Request): Promise<{ data: unknown } | { error: Reply }> {
   const len = Number(request.headers.get('content-length') ?? 0)
   if (len > LIMITS.BODY_MAX_BYTES) return { error: errorReply(413, MSG.bodyTooLarge) }
+  // F1 (review Task 8): PHẢI đọc bằng text() cho CẢ HAI loại thân rồi tự kiểm kích thước trước
+  // khi parse — không được đọc form-urlencoded bằng formData() mà bỏ qua kiểm kích thước, vì
+  // đây là đường ghi D1 DUY NHẤT của site và honeypot/validate/Turnstile/tần suất đều nằm SAU
+  // bước đọc thân. Đổi lại có cảnh báo console của workerd ("Called .text() on an HTTP body
+  // which does not appear to be text... Content-Type is application/x-www-form-urlencoded") ở
+  // ca test form-urlencoded — chấp nhận cảnh báo đó, không đánh đổi lớp chặn kích thước lấy im
+  // lặng console (xem báo cáo).
+  const text = await request.text()
+  // F2 (review Task 8): đo bằng byte (TextEncoder), không phải .length (đơn vị UTF-16) — tên
+  // hằng là BODY_MAX_BYTES, chuỗi tiếng Việt nhiều dấu có thể dài hơn nhiều byte so với số ký tự.
+  if (new TextEncoder().encode(text).byteLength > LIMITS.BODY_MAX_BYTES) return { error: errorReply(413, MSG.bodyTooLarge) }
   const ct = request.headers.get('content-type') ?? ''
   try {
-    // form-urlencoded: đọc bằng formData() thay vì text() — workerd cảnh báo (không phải lỗi)
-    // khi gọi .text() trên thân có Content-Type form/multipart; formData() là API đúng chỗ.
-    if (ct.includes('application/x-www-form-urlencoded')) {
-      const form = await request.formData()
-      const data: Record<string, string> = {}
-      for (const [k, v] of form.entries()) data[k] = String(v)
-      return { data }
-    }
-    const text = await request.text()
-    if (text.length > LIMITS.BODY_MAX_BYTES) return { error: errorReply(413, MSG.bodyTooLarge) }
+    if (ct.includes('application/x-www-form-urlencoded')) return { data: Object.fromEntries(new URLSearchParams(text)) }
     return { data: JSON.parse(text) }
   } catch {
-    return { error: errorReply(400, MSG.bodyInvalid) }
+    // M9 (review Task 8): thêm khoá `error` để phân biệt với hai loại 400 kia (validation/turnstile).
+    return { error: errorReply(400, MSG.bodyInvalid, { error: 'body' }) }
   }
 }
 
@@ -116,7 +122,10 @@ export async function handleBooking(request: Request, env: BookingEnv, ctx: Wait
     if (origin) {
       let originHost = ''
       try { originHost = new URL(origin).host } catch { /* Origin hỏng → coi như khác host */ }
-      if (originHost !== (request.headers.get('host') ?? new URL(request.url).host)) {
+      const host = request.headers.get('host') ?? new URL(request.url).host
+      // M10 (review Task 8): host không phân biệt hoa/thường (RFC 3986 §3.2.2); so nguyên văn
+      // trước đây khiến Host viết hoa (vd. "TourDao.vn") bị chặn 403 nhầm.
+      if (originHost.toLowerCase() !== host.toLowerCase()) {
         return reply(request, errorReply(403, MSG.forbiddenOrigin), '')
       }
     }
@@ -143,7 +152,16 @@ export async function handleBooking(request: Request, env: BookingEnv, ctx: Wait
     const ts = await verifyTurnstile({ secret: env.TURNSTILE_SECRET_KEY, token: input.turnstileToken, ip, fetchImpl: deps.fetchImpl })
     if (!ts.ok) return reply(request, errorReply(400, MSG.turnstileFailed, { error: 'turnstile' }), tourSlug)
 
-    const ipHash = ip ? await sha256Hex(`${ip}|${env.TURNSTILE_SECRET_KEY ?? 'dev'}`) : null
+    // F4 (review Task 8): muối RIÊNG cho ip_hash, không dùng chung TURNSTILE_SECRET_KEY — xoay
+    // khoá Turnstile không được kéo theo việc mọi ip_hash đã lưu bỗng vô nghĩa (hai vòng đời bí
+    // mật khác nhau). Thiếu muối (dev) → ipHash = null, KHÔNG tụt về hằng số đoán được: một
+    // hằng cố định làm "băm có muối" chỉ còn danh nghĩa (IPv4 dò ngược được trong vài giây).
+    const ipHash = ip && env.IP_HASH_SALT ? await sha256Hex(`${ip}|${env.IP_HASH_SALT}`) : null
+    // F3 (review Task 8, quyết định controller — KHÔNG đổi kiến trúc): bộ đếm dưới đây đếm số
+    // ĐƠN ĐÃ TẠO (đã qua Turnstile, đã INSERT) trong RATE_WINDOW_MS, đúng nghĩa "số đơn/10 phút"
+    // của SPEC §4.4 — KHÔNG phải giới hạn số LƯỢT YÊU CẦU. Chặn theo lượt yêu cầu (10 yêu
+    // cầu/10 giây/IP) là một lớp riêng: luật WAF Rate Limiting trên /api/dat-tour, xem SPEC
+    // §4.10 và runbook Task 13 bước 7 — không thuộc phạm vi endpoint này.
     if (ipHash) {
       const recent = await countRecentByIp(env.BOOKING_DB, ipHash, new Date(t.getTime() - RATE_WINDOW_MS).toISOString())
       if (recent >= RATE_MAX) return reply(request, errorReply(429, MSG.rateLimited), tourSlug)
@@ -169,9 +187,17 @@ export async function handleBooking(request: Request, env: BookingEnv, ctx: Wait
 
     const notifiers = deps.notifiers ?? defaultNotifiers(env, deps)
     ctx.waitUntil((async () => {
-      const status = await notifyAll(notifiers, record)
-      await updateNotifyStatus(env.BOOKING_DB, record.code, status)
-      console.log(`[dat-tour] ${record.code} email=${status.email ?? '-'} zalo=${status.zalo ?? '-'}`)
+      // M6 (review Task 8): bọc try/catch — nếu updateNotifyStatus (hoặc notifyAll) ném, đơn
+      // vẫn đã nằm trong D1 (không hỏng nghiệp vụ), nhưng thiếu try/catch thì mất luôn dòng
+      // console.log mã đơn, tín hiệu quan sát duy nhất của tác vụ nền này.
+      try {
+        const status = await notifyAll(notifiers, record)
+        await updateNotifyStatus(env.BOOKING_DB, record.code, status)
+        console.log(`[dat-tour] ${record.code} email=${status.email ?? '-'} zalo=${status.zalo ?? '-'}`)
+      } catch (e) {
+        // Chỉ log mã đơn + lý do lỗi, không log PII (BK3).
+        console.error(`[dat-tour] ${record.code} lỗi báo tin:`, e instanceof Error ? e.message : String(e))
+      }
     })())
 
     return reply(request, { status: 201, body: { ok: true, code: record.code, summary: { tourTitle: v.tourTitle, departDate: v.departDate, pax: v.pax, total: v.quoted.total } }, heading: 'Đã nhận yêu cầu đặt tour', lines: summaryLines(v, record.code), ok: true }, tourSlug)

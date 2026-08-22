@@ -11,6 +11,10 @@ interface Env {
   ZALO_BOT_TOKEN?: string
   ZALO_BOT_CHAT_IDS?: string
   TURNSTILE_SECRET_KEY?: string
+  // Muối băm IP cho tần suất — RIÊNG với TURNSTILE_SECRET_KEY (F4, review Task 8): xoay khoá
+  // Turnstile không được kéo theo việc mọi ip_hash đã lưu bỗng vô nghĩa. Runbook Task 13 nay
+  // là 6 bí mật (thêm biến này).
+  IP_HASH_SALT?: string
 }
 
 type Runtime = import('@astrojs/cloudflare').Runtime<Env>;

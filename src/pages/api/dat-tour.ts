@@ -5,13 +5,13 @@ import { handleBooking } from '../../lib/booking/handler'
 
 export const prerender = false
 
-export const POST: APIRoute = ({ request, locals }) => {
+const handle: APIRoute = ({ request, locals }) => {
   const { env, ctx } = locals.runtime
   return handleBooking(request, env, ctx)
 }
 
-export const ALL: APIRoute = () =>
-  new Response(JSON.stringify({ ok: false, message: 'Chỉ nhận POST.' }), {
-    status: 405,
-    headers: { 'Content-Type': 'application/json; charset=utf-8', Allow: 'POST' },
-  })
+export const POST = handle
+// M8 (review Task 8): mọi phương thức khác cũng đi qua handleBooking thay vì tự trả 405 tại
+// đây — trước kia ALL gõ cứng JSON, lệch với 405 của handleBooking vốn tôn trọng Accept
+// (HTML khi Accept không có application/json). Giữ MỘT nguồn sự thật cho phản hồi 405.
+export const ALL = handle
