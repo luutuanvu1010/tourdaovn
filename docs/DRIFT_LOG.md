@@ -481,3 +481,20 @@ Ba chỗ **đã** hạ xuống `--fw-700` trong cùng đợt (`site-home-title`,
 **Vì sao không tự quét hết.** Hạ cả mười sáu chỗ xuống `--fw-700` làm mã trung thực, nhưng nếu sau này quay lại Be Vietnam Pro thì tiêu đề sẽ nhẹ hơn bản đã duyệt và phải sửa lại từng chỗ. Đây là đánh đổi ở tầng token, không phải việc dọn dẹp.
 
 **Điều kiện xử.** Chủ dự án chọn một: (a) hạ cả mười sáu chỗ xuống `--fw-700` cho mã khớp thứ render; (b) giữ nguyên và chấp nhận mã nói một đằng render một nẻo, đổi lại giữ được đường lùi về Be Vietnam Pro; (c) khai một token ngữ nghĩa kiểu "cấp đậm nhất mà chữ hiển thị có" để cả hai font cùng đúng — cách này sạch nhất nhưng là token mới, phải duyệt.
+
+---
+
+## DR-039 — `bookingRef.key` của 8 tour chứa chuỗi giá thay vì khoá
+
+**Trạng thái:** mở. Phát hiện 2026-08-22 khi chuẩn bị module đặt tour (SPEC-2026-08-21-dat-tour).
+
+`01-CONTENT_MODEL` §2.8: `bookingRef` là con trỏ tới dòng giá, "không lưu số, I1, I16".
+Dataset production có 8 document `tour` approved (và 6 bản nháp của chúng) mang
+`bookingRef.key` dạng `"Người lớn: 850.000 VNĐ | Trẻ em: 600.000 VNĐ"`. Hệ quả: (1) vi phạm
+I1 — con số giá nằm trong Sanity; (2) `resolvePrice()` không tra được dòng nào trong
+`data/prices.yaml` (file đang trống) nên không tour nào hiện giá; PY4 sẽ báo trỏ hụt nếu
+chạy. Không cổng nào bắt vì validator đã rời đường phát hành (ADR-0022).
+
+Xử ở kế hoạch `docs/plans/2026-08-22-dat-tour.md` Task 11: khoá = slug tiếng Việt của tour,
+con số chuyển sang `data/prices.yaml` (`amount` + `paxRates`). Không sửa mục này; đóng bằng
+một dòng "đã xử" khi Task 11 xong.
