@@ -1,0 +1,20 @@
+{
+  "artboards": [
+    { "file": "HienTrang.dc.html", "title": "Hiện trạng — ảnh chụp & số đo", "x": 0, "y": 0, "w": 1280, "h": 2600 },
+    { "file": "BanDoThongTin.dc.html", "title": "Bản đồ thông tin — một field một vùng", "x": 1360, "y": 0, "w": 1280, "h": 2300 },
+    { "file": "Main.dc.html", "title": "Điểm tham quan — hướng A (đã chọn) · desktop 1280", "x": 0, "y": 2760, "w": 1280, "h": 3100 },
+    { "file": "DiDong.dc.html", "title": "Điểm tham quan — hướng A · di động 390", "x": 1360, "y": 2760, "w": 924, "h": 1180 },
+    { "file": "HuongB.dc.html", "title": "Hướng B — mọi fact vào sidebar (không chọn)", "x": 1360, "y": 4080, "w": 640, "h": 940 },
+    { "file": "HuongC.dc.html", "title": "Hướng C — một cột, không sidebar (không chọn)", "x": 2080, "y": 4080, "w": 640, "h": 940 }
+  ],
+  "annotations": [
+    { "id": "doc-ke-hoach", "x": -300, "y": 0, "w": 260, "text": "Đọc kèm: docs/plans/2026-08-21-audit-va-ke-hoach-giao-dien-vong-4.md\n\nChủ dự án chốt 2026-08-22 (QĐ-2026-08-22-01): hướng A, thang chữ về spec, chạy đợt 4A. Canvas này là bản PHÁC; hi-fi cho QA1 dựng ở đợt 4B." },
+    { "id": "main-hero", "x": -300, "y": 2900, "w": 260, "text": "Hero: breadcrumb ra khỏi ảnh (dải sáng). Trên ảnh chỉ còn huy hiệu LOẠI (nơi duy nhất), h1 ≤ 2 dòng, đoạn mở." },
+    { "id": "main-ttn", "x": -300, "y": 3400, "w": 260, "text": "THÔNG TIN NHANH thay cặp InfoBar + InfoCard: mỗi field đúng một ô, tối đa 6, icon SVG, KHÔNG chứa giá. ≤ 2 ô thì không trải dải." },
+    { "id": "main-sidebar", "x": -300, "y": 3640, "w": 260, "text": "Sidebar chỉ còn KHỐI HÀNH ĐỘNG (giá + Zalo + hotline) và BẢN ĐỒ. Giá là field duy nhất được lặp (thanh dính + đây). Dính ở top = header + thanh dính + 16 (DR-033, đã sửa ở 4A)." },
+    { "id": "main-toc", "x": -300, "y": 3960, "w": 260, "text": "Thân bài có MỤC LỤC sinh từ h2; 'cách đi' chỉ sống ở Cách tới nơi (luật 2). Tiêu đề trong bài là h3 26px màu chữ, thấp hơn tiêu đề mục 32px màu biển sâu." },
+    { "id": "gia-mau", "x": 2320, "y": 2760, "w": 300, "text": "Giá 'từ 540.000₫' là con số tham khảo trong chính bài Hòn Tằm, dùng làm MẪU để thấy vùng giá — prices.yaml hiện rỗng (F2)." },
+    { "id": "huong-bc", "x": 2760, "y": 4080, "w": 300, "text": "Hai hướng thay thế, vẽ thô để so bố cục. Chủ dự án đã chọn A (QĐ-2026-08-22-01); giữ lại để truy vết vì sao không chọn B/C." }
+  ],
+  "launch": { "view": "canvas" }
+}

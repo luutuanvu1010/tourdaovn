@@ -812,3 +812,32 @@ chỉ sang Zalo/hotline. Astro thành hybrid với đúng một route động.
 khi báo tin hỏng; job dọn dữ liệu 24 tháng; `control-registry` cho BK1–BK5; xác minh Zalo Bot
 gửi nhóm và giới hạn tần suất; phối hợp với audit giao diện vòng 4 (DR-033, DR-036) vì chạm
 cùng `Sidebar.astro` / `TourDetail.astro`.
+
+---
+
+## QĐ-2026-08-22-01 — Duyệt audit giao diện vòng 4: hướng A, thang chữ về spec, chạy đợt 4A
+
+**Chốt.** Chủ dự án trả lời `docs/plans/2026-08-21-audit-va-ke-hoach-giao-dien-vong-4.md` §6 ngày 2026-08-22, ba quyết định:
+
+1. **Hướng A** cho khung trang chi tiết (§5 của kế hoạch; artboard `Main` + `DiDong` ở `docs/design/vong4/`): vùng **Thông tin nhanh** dưới hero thay cặp `InfoBar` + `InfoCard`; sidebar chỉ còn khối hành động + bản đồ; luật "một field — một vùng — một lần", giá là ngoại lệ duy nhất (thanh dính + khối hành động). Áp cho cả bốn entity; Địa danh không có giá thì sidebar chỉ còn bản đồ và Thông tin nhanh ≤ 2 ô gộp vào sidebar — **không** dùng hướng C riêng.
+2. **Thang chữ về đúng spec** (DR-034 cách a): `html` về `font-size: 100%`, `body` nhận `--fs-base`; mọi token rem về đúng con số `07-DESIGN_TOKENS` §2 (17 / 21 / 32 / 46…). Site nhỏ lại ~6 % so với hôm nay — chủ dự án chấp nhận, duyệt lại bằng mắt sau khi dựng. Cửa hai chiều.
+3. **Chạy đợt 4A** ngay trên bảng §4 "Đợt 4A" của kế hoạch (A1–A8) làm spec; đây là việc sửa lỗi thật, không đổi bố cục, không cần mockup. Đợt 4B (khung v3) vẫn chờ Cowork sửa `06-BINDING_MAP` §3 rồi qua Design → QA1 → Code.
+
+**Một câu hỏi của §6 đã được trả lời ở chỗ khác.** §6.8 (ảnh tham chiếu `docs/design/giaodiendatve.png`) trùng với `QĐ-2026-08-21-01` / `ADR-0027` — form đặt tour trên trang Tour. Không hỏi lại. Hệ quả cho vòng 4: khối hành động của trang Tour ở đợt 4B **là** `BookingForm` của ADR-0027, không phải `BookingCTA`; bản đồ thông tin §3.1 và artboard `BanDoThongTin` ghi nhận điều này khi Cowork sửa `06`.
+
+**Phối hợp hai luồng cùng file** (theo `SPEC-2026-08-21-dat-tour` §8): 4A vào trước, chạm `Sidebar.astro`, `DetailLayout.astro`, `TourDetail.astro` ở mức nhỏ nhất (A1, A4, A6); luồng đặt tour vào sau, rebase lên 4A.
+
+**Còn mở ở §6:** 4 (`/kham-pha/`, `/tat-ca/`), 5 (ai nhập `prices.yaml`, nay có thêm `paxRates` theo ADR-0027), 6 (công cụ Lighthouse cho QA2), 7 (xác nhận DR-032 → DR-038 — 4A sẽ đóng DR-033, 034, 035, 036, 037, 038; DR-032 chờ 4B).
+
+**Giả định bề mặt ghi lại (P8):** A7 `theme-color` — kế hoạch ghi "đọc token accent"; khi thi hành Code lấy **`--c-surface` của bộ giao diện đang bật** thay vì accent, vì thanh địa chỉ di động nằm sát header nền trắng; tô màu san hô lên đó là lệch với chính trang. Đổi lại accent là sửa một tên token nếu chủ dự án muốn.
+
+---
+
+## QĐ-2026-08-22-02 — Duyệt `06-BINDING_MAP` v2.1, mở bước 2 của đợt 4B; commit 4A
+
+**Chốt.** Chủ dự án trả lời "ok" (2026-08-22) cho danh sách chờ duyệt gồm hai mục: (1) duyệt `06-BINDING_MAP` v2.1.0 — vùng "Thông tin nhanh", ma trận §3.1 một-field-một-vùng, ba luật ở §6; (2) commit đợt 4A và tài liệu theo hai commit đã đề xuất. Cowork hiểu "ok" là đồng ý cả hai và ghi lại ở đây để truy được; nếu ý chủ dự án khác, sửa bằng một QĐ mới, không sửa mục này.
+
+**Hệ quả.**
+- `06` v2.1.0 có hiệu lực: bước 7 (Design hi-fi cho 4 entity) được chạy trên đó; QA1 đối chiếu mockup với §3.1; Code chỉ chạy sau QA1.
+- Hai commit: `feat:` đợt 4A (22 file `src/`), `docs:` audit + kế hoạch vòng 4 + QĐ/DR + `06` v2.1 + canvas/evidence. Báo cáo cổng ở `scripts/reports/` đi cùng commit docs như các đợt trước.
+- Còn mở như QĐ-2026-08-22-01: §6 mục 4, 5, 6 của kế hoạch; lỗi dữ liệu cổng lộ ra (slug `null` trong `itinerary` 3 tour, R3 hai URL, R4 hreflang cẩm nang, S24 người duyệt).
