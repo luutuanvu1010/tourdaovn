@@ -88,12 +88,22 @@ function chuanHoa(s: string): string {
   return s.toLowerCase().replace(/\(.*?\)/g, '').replace(/[`*]/g, '').trim()
 }
 
+// Thứ tự thử "chứa cụm" trong idTuTenVung phải là DÀI NHẤT TRƯỚC, không phải
+// thứ tự khai báo trong ALIAS. Lý do: nếu một alias ngắn (vd "hero") lại là
+// chuỗi con của một alias dài hơn xuất hiện cùng ô ("huy hiệu hero"), thử theo
+// thứ tự khai báo có thể khớp nhầm alias ngắn trước — sai âm thầm, không lỗi.
+// Hôm nay không cell nào rơi vào ca đó (mọi ô khớp bằng-hệt trước khi tới
+// nhánh này), nhưng đây là bảo đảm mà comment idTuTenVung/ktraVungLa hứa:
+// "tên vùng lạ ⇒ đỏ" chỉ đúng nếu match không phụ thuộc thứ tự khai báo.
+const ALIAS_DAI_TOI_NGAN = Object.entries(ALIAS).sort((a, b) => b[0].length - a[0].length)
+
 /** Tên vùng → id ngắn. So bằng hệt trước; rồi "chứa cụm ALIAS đã biết" cho
- *  văn xuôi dài hơn (vd "ghi chú trong khối hành động" chứa "khối hành động"). */
+ *  văn xuôi dài hơn (vd "ghi chú trong khối hành động" chứa "khối hành động"),
+ *  thử alias DÀI NHẤT trước để khớp không phụ thuộc thứ tự khai báo ALIAS. */
 function idTuTenVung(key: string): string | null {
   if (ALIAS[key]) return ALIAS[key]
   if (key.startsWith('mục') || key.startsWith('dòng')) return 'section'
-  for (const [aliasKey, id] of Object.entries(ALIAS)) {
+  for (const [aliasKey, id] of ALIAS_DAI_TOI_NGAN) {
     if (key.includes(aliasKey)) return id
   }
   return null
@@ -155,7 +165,12 @@ function moiTrangHtml(dir: string, acc: string[] = []): string[] {
 /** Gom (field, vùng) của một trang. Vùng là data-region gần nhất bao ô đó. */
 function docTrang(html: string): Map<string, Set<string>> {
   const out = new Map<string, Set<string>>()
-  const rx = /data-region="([a-z-]+)"|data-field="([A-Za-z]+)"/g
+  // Nhóm field CỐ Ý rộng ([^"]+), không phải [A-Za-z]+: §3.1 (06-BINDING_MAP.md
+  // dòng 122) khai `_updatedAt` · `updatedAt`, tên field có gạch dưới đứng đầu —
+  // [A-Za-z]+ không khớp, data-field="_updatedAt" sẽ bị bỏ qua ÂM THẦM, không lỗi,
+  // không đếm, không lên báo cáo. Đây đúng kiểu lỗi rơi-lặng mà nhánh ALIAS đã
+  // cố tình dựng để nổ ra (ktraVungLa) — không được để mở lại ở phía HTML.
+  const rx = /data-region="([a-z-]+)"|data-field="([^"]+)"/g
   let vungHienTai = ''
   let m: RegExpExecArray | null
   while ((m = rx.exec(html))) {
