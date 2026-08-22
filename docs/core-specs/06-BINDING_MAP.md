@@ -14,7 +14,7 @@ Phần KHÔNG nhãn (triết lý binding, chính sách vùng rỗng, khung chung
 >
 > 🔧 **SITE-SPECIFIC:** các bảng delta theo entity cụ thể là của nhatrangtravel. Giữ *triết lý binding + khung chung + container policy*; thay *bảng delta* theo entity của site.
 
-- **Phiên bản:** v2.2.0   **Trạng thái:** v2.0.0 là bản mở cổng bước 7 ngày 2026-08-06 (QĐ-2026-08-06-06); v2.1.0 (đợt 4B) duyệt 2026-08-22, QĐ-2026-08-22-02; **v2.2.0 duyệt 2026-08-22, QĐ-2026-08-22-05** — chỉ §3, §3.1, §6 đổi
+- **Phiên bản:** v2.2.0   **Trạng thái:** v2.0.0 là bản mở cổng bước 7 ngày 2026-08-06 (QĐ-2026-08-06-06); v2.1.0 (đợt 4B) duyệt 2026-08-22, QĐ-2026-08-22-02; **v2.2.0 duyệt 2026-08-22, QĐ-2026-08-22-05** — đổi ở §3, §3.1, §6, §4.8, §4.10, §7 và §7.1 (sửa theo N18: bản đầu của dòng này khai thiếu bốn mục sau)
 - **Ngày:** v1 soạn và phê chuẩn 2026-06-12; v2 soạn 2026-08-05; v2.1 và v2.2 soạn 2026-08-22   **Người soạn:** Cowork   **Người phê chuẩn:** Lưu Tuấn Vũ
 - **Liên quan:** `01-CONTENT_MODEL.md` v1.0.19 (nguồn sự thật field), `05-URL_MAP-and-DB_SCHEMA.md` (cây trang), `02-SAD.md` 3.1 (prices.yaml), `04-CONSTRAINTS.md` (I6, I16, PY, R), `src/site.config.ts` (phạm vi site, ADR-0021), ADR-0003, ADR-0004, ADR-0007, ADR-0023 (điều hướng).
 
