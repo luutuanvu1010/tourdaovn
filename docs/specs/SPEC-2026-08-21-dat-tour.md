@@ -45,6 +45,11 @@ Ba điều kiến trúc đang chi phối:
 3. **Không có field lịch khởi hành**, và `01-CONTENT_MODEL` §2.8 nói rõ "lịch thật thuộc
    booking, không ở Sanity". Chủ dự án chốt tour chạy **hằng ngày**, khách chọn ngày bất kỳ.
 
+Phát hiện thêm khi lập kế hoạch (2026-08-22, DR-039): `data/prices.yaml` **trống**, và 8 tour
+approved đang chứa **chuỗi giá** trong `bookingRef.key` ("Người lớn: 850.000 VNĐ | Trẻ em:
+600.000 VNĐ") — trái I1 và trái nghĩa khoá. Kế hoạch Task 11 chuyển khoá = slug và đưa số sang
+`prices.yaml` (`amount` + `paxRates`); không chuyển thì không tour nào có form.
+
 ## 3. Bốn quyết định đầu vào (chủ dự án chốt 2026-08-21)
 
 | Câu hỏi | Chốt | Hệ quả thiết kế |
@@ -132,7 +137,8 @@ Giá hạng phụ là dữ liệu cho form, không vào JSON-LD (không có prop
 **Điều kiện render.** Chỉ khi `priceView` khác `null` (tour có `bookingRef` trỏ đúng dòng
 giá). Tour không giá **giữ nguyên như hôm nay** — `ContactChannels`, không form, không CTA
 giả (`06-BINDING_MAP` quyết định nền 3). `BookingCTA` thôi dùng ở Tour (giữ file cho
-entity khác).
+entity khác). **Khi form render, `ContactChannels` không render trong slot booking** — nút Zalo
+và hotline đã nằm trong thẻ; WhatsApp còn ở chân trang (`06` §2).
 
 **Bố cục một thẻ, hai bước, một `<form>` duy nhất** (`id="dat-tour"`, `method="post"`,
 `action="/api/dat-tour"`):
@@ -324,8 +330,11 @@ migrations_dir = "migrations"
 command = "npm run build:ci"
 ```
 
-Kiểu `Env` cho `locals.runtime.env`: chạy `npx wrangler types` sinh `worker-configuration.d.ts`
-(commit; chỉ chứa **tên** binding/secret, không giá trị), `src/env.d.ts` tham chiếu nó.
+Kiểu `Env` cho `locals.runtime.env`: khai tay `interface Env` toàn cục trong `src/env.d.ts`, kiểu
+`D1Database` lấy bằng `import type` từ `@cloudflare/workers-types` (thêm làm devDependency).
+**Không** dùng `wrangler types`: runtime types nó sinh ra xung đột với lib DOM mà Astro đang bật;
+adapter cũng chỉ `import type` từ workers-types (`dist/utils/handler.d.ts`). Chỉ **tên** binding/secret,
+không giá trị. (Sửa 2026-08-22 khi lập kế hoạch; thay cho câu "chạy `wrangler types`" ở bản đầu.)
 
 ### 4.8 Xem và quản lý đơn (v1)
 
@@ -387,12 +396,12 @@ thế luôn có.
 | `src/components/DetailLayout.astro` | bỏ `target="_blank"` khi `ctaHref` là neo `#` |
 | `src/components/Sidebar.astro` | kiểu `Slot.component` thêm `'BookingForm'` |
 | `src/lib/uiCopy.ts` | nhãn §4.3 |
-| `src/env.d.ts`, `worker-configuration.d.ts` | kiểu `Env` |
+| `src/env.d.ts` | khai `interface Env` toàn cục (binding D1 + 5 secret) |
 | `wrangler.toml` | §4.7 |
 | `migrations/0001_booking.sql` | §4.5 |
 | `.gitignore` | `.dev.vars` |
-| `package.json`, `vitest.config.ts` | `vitest`, `@cloudflare/vitest-pool-workers` (dev); script `test` |
-| `src/lib/booking/__tests__/*.test.ts` | §5 |
+| `package.json`, `vitest.config.ts` | `vitest` ^4.1, `@cloudflare/vitest-pool-workers` ^0.22, `@cloudflare/workers-types` (dev); script `test` |
+| `test/booking/*.test.ts`, `test/setup/apply-migrations.ts`, `test/env.d.ts`, `scripts/validators/__tests__/py-paxrates.test.ts` | §5 — `test/` ở gốc, ngoài `include` của `tsconfig.json` nên `astro check` không quét |
 | `docs/core-specs/02-SAD.md` | §1 §2 §4 §5 thêm container và dòng dữ liệu đơn |
 | `docs/core-specs/04-CONSTRAINTS.md` | §1b PY2/PY7; §1d BK1–BK5; §4 bảo mật |
 | `docs/core-specs/06-BINDING_MAP.md` | §4.8 thêm vùng "Form đặt tour" |
@@ -407,7 +416,9 @@ thế luôn có.
 ## 5. Kiểm thử
 
 Dựng hạ tầng test tối thiểu ở gốc repo: `vitest` + `@cloudflare/vitest-pool-workers`
-(D1 chạy trong miniflare; `applyD1Migrations` trong setup). Đây là dependency dev mới, được
+(D1 chạy trong miniflare; `applyD1Migrations` trong setup). Test đặt ở thư mục `test/` gốc
+(ngoài `include` của `tsconfig.json`); cấu hình vitest **không** trỏ `wrangler.toml` (vì `main`
+của nó chỉ có sau khi build) mà khai thẳng binding D1 và cờ tương thích. Đây là dependency dev mới, được
 phép theo ADR-0027. Test gọi thẳng `handleBooking()` với `env.BOOKING_DB` từ `cloudflare:test`,
 không cần build Astro; `fetch` ra Resend/Zalo/Turnstile được **stub** trong test.
 
@@ -478,6 +489,8 @@ Kiểm được, đặt ra trước khi thi công. Im lặng là trượt.
   executor script); thêm khi có kiểm máy.
 - **Lịch khởi hành cố định**, **mã tour hiển thị**, **đa ngôn ngữ cho form** — ngoài phạm vi
   theo ba quyết định §3; mở lại là quyết định mới.
+- **Nhãn `zh`/`ko`/`ru` của form đang chép nguyên tiếng Anh** (kiểu `Record<UIKey,string>` buộc đủ
+  khoá; site chạy `langs = ['vi']`). Dịch khi mở ngôn ngữ mới.
 - **Phối hợp với audit giao diện vòng 4** (`docs/plans/2026-08-21-audit-va-ke-hoach-giao-dien-vong-4.md`,
   đang chờ duyệt cùng ngày): DR-033 (sidebar dính bị header và thanh dính che) và DR-036
   (CTA dự phòng trang tour) chạm đúng `Sidebar.astro`, `DetailLayout.astro`, `TourDetail.astro`.
