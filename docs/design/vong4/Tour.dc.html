@@ -158,11 +158,10 @@ input,button{font:inherit}
       <section id="ct">
         <h2 class="sec-title">Chi tiết</h2><span class="underline"></span>
         <div style="max-width:70ch;display:flex;flex-direction:column;gap:var(--s4)">
-          <div class="toc" style="background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-lg);padding:var(--s4) var(--s5);box-shadow:var(--shadow-card)">
-            <div class="lbl" style="margin-bottom:var(--s2)">Trong bài này</div>
-            <a href="#tt-1">Vì sao gọi là Deluxe</a>
-            <a href="#tt-2">Chính sách hủy đặt chỗ</a>
-          </div>
+          <!-- KHÔNG có mục lục: bài chỉ còn 2 tiêu đề sau khi áp luật 2 (Lịch trình và Trải nghiệm
+               đã có vùng cấu trúc riêng), dưới ngưỡng >= 3 của 06 §3. Bỏ theo QĐ-2026-08-22-05 Chốt 2
+               (N15a phương án A: đặc tả đúng, mockup sai). Thanh dính neo vào mục (#hl #lt #bg #ct #mua #faq),
+               chưa từng trỏ #tt-1/#tt-2, nên bỏ mục lục không làm hụt neo nào. -->
           <h3 id="tt-1" style="font-size:var(--fs-h4);font-weight:700">Vì sao gọi là Deluxe</h3>
           <p data-placeholder="đoạn văn thật nằm ở `body` trong Sanity">[Đoạn văn từ <code>body</code>. Bài không mở lại mục "Lịch trình chi tiết" — từng điểm dừng đã nằm ở khối Lịch trình phía trên (luật 2).]</p>
           <h3 id="tt-2" style="font-size:var(--fs-h4);font-weight:700">Chính sách hủy đặt chỗ</h3>
@@ -181,7 +180,7 @@ input,button{font:inherit}
           <details open><summary>Tour cano 3 đảo bắt đầu và kết thúc lúc mấy giờ?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg></summary><div class="a">Tour trong ngày, đón khách từ 8h sáng và kết thúc khoảng 15h30 – 16h00.</div></details>
           <details><summary>Có đón khách tận nơi không?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg></summary><div class="a">Có — tại khách sạn, bến xe hoặc địa chỉ đã đăng ký trước. Vui lòng có mặt đúng giờ.</div></details>
           <details><summary>Đoàn đông có được tách tour hay đặt tour riêng không?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg></summary><div class="a">Được. Đoàn lớn có nhu cầu lịch trình riêng sẽ được thiết kế gói tour phù hợp.</div></details>
-          <details><summary>Chính sách giá vé cho trẻ em?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg></summary><div class="a">Dưới 1 m miễn phí; 1 m – 1,3 m tính 70 % giá vé; trên 1,3 m tính như người lớn.</div></details>
+          <details><summary>Chính sách giá vé cho trẻ em?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg></summary><div class="a">Dưới 1 m miễn phí; 1 m – 1,3 m tính 70 % giá vé; trên 1,3 m tính như người lớn. <span data-placeholder="hình dạng bắt buộc của luật 4 — ngày và nguồn do biên tập điền" style="color:var(--c-text-muted);font-size:var(--fs-sm)">(cập nhật 08/2026 · nguồn: bảng giá <code>prices.yaml</code>)</span></div></details>
         </div>
       </section>
 

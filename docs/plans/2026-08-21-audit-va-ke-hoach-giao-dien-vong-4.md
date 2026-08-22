@@ -260,6 +260,18 @@ Thi hành đúng bảng §4 "Đợt 4A" sau `QĐ-2026-08-22-01`. Chưa commit �
 
 **Cổng QA1 ĐÃ CHỐT 2026-08-22** (`QĐ-2026-08-22-05` Chốt 0) — `GOVERNANCE` 3.1 đủ cả hai vế. Bước 4 (Code) mở sau khi `06` lên v2.2.
 
+**Đợt 4B — bước 4a (Cowork sửa đặc tả) và 4b (Design sửa mockup) xong 2026-08-22.**
+
+`06-BINDING_MAP` lên **v2.2.0** (commit `44393e7`): §3 tách hàng Breadcrumb làm hai (N3), thêm hàng "Dải liên quan" (N4), sửa hàng Thân bài cho `headingOffset` (N15b); §3.1 đổi hàng `containedInPlace` thành mắt cha; §6 ghi phạm vi luật 1 (N11) và thêm luật 4 (N13). `01-CONTENT_MODEL` lên **v1.0.19** — đúng một ô, `durationAtStop` không còn khai ISO 8601 (Chốt 7).
+
+Hai chỗ lệch khỏi chữ đã duyệt, ghi rõ để chủ dự án rà: (a) hàng "Dải liên quan" khai cho **mọi** entity chi tiết chứ không chỉ Place/Experience/Tour như Chốt 4 ghi — vì mã cho thấy vùng này dùng chung qua `DetailLayout`, chỉ đổi nhãn; (b) bốn hàng rollup có tên riêng ở §3 là **cùng một vùng** dưới nhãn khác, đánh dấu ⚠️ để mở, chưa gộp.
+
+Baseline cảnh báo `g3` **15 → 24** (§7.1 cập nhật): cả 9 cái mới từ đúng hàng N4, cùng nhóm giới hạn công cụ đã ghi (prop `nearby`, không phải `data.<field>`). 0 fail; `astro check` 0 lỗi 0 cảnh báo.
+
+**Design sửa mockup:** `Tour.dc.html` bỏ mục lục (N15a — bài còn 2 tiêu đề, dưới ngưỡng ≥ 3); `Main.dc.html` **giữ** mục lục vì có 5 mục, đạt ngưỡng. Thanh dính neo vào mục (`#hl #lt #bg #ct #mua #faq`), chưa từng trỏ `#tt-1/#tt-2`, nên không hụt neo nào. Luật 4 mới kéo theo hai chỗ chưa nằm trong danh sách sửa ban đầu: `DiaDanh` "22.000 đồng" và `Tour` "70 % giá vé" nay mang ngày cập nhật và tên nguồn ngay tại chỗ.
+
+**Bước 5 — QA1 vòng xác minh ngắn** trên đúng phần đổi, do tác nhân QA độc lập chạy. Chưa chạy.
+
 **Sáu nợ đã gỡ 2026-08-22** (`QĐ-2026-08-22-05`), đề xuất ở `docs/specs/DE-XUAT-2026-08-22-go-N3-N15.md`: **N3** phương án A (tách hàng breadcrumb thành *điều hướng* + *mắt cha*; không sửa dòng code nào) · **N15a** A (giữ ngưỡng ≥ 3 h2, sửa mockup Tour) · **N15b** A (`Body` thêm `headingOffset`, trang chi tiết hạ một cấp; Article giữ nguyên) · **N4** thêm hàng "Dải liên quan" vào §3 · **N11** luật 1 ràng buộc *field*, không ràng buộc chuỗi · **N13** cho phép giá trong `faq` kèm ngày + nguồn + danh sách rà · **N14** đặc tả nhận khung giờ, **kèm bắt buộc sửa `serialize/tour.ts:61-63`** (structured data đang sai kiểu trên production).
 
 **Việc dữ liệu lộ ra khi chạy cổng (thêm vào 4D):** sửa `itinerary` của 3 tour đang trỏ điểm tham quan chưa có slug; redirect hoặc khôi phục hai URL R3; người duyệt cho 6 trang S24; `translationGroup` của bài cẩm nang.
