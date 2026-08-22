@@ -1,5 +1,9 @@
 ---
 export interface InfoBarItem {
+  /** Tên field trong 01-CONTENT_MODEL nuôi ô này. Bộ kiểm Luật 1 đếm theo đây,
+   *  không đếm theo `label` hay `value` — 06 v2.2 N11: luật ràng buộc field,
+   *  không ràng buộc chuỗi. Vùng giá dùng tên quy ước 'gia'. */
+  field: string
   icon: string
   label: string
   value: string
@@ -21,9 +25,9 @@ const cols = Math.min(visible.length, 4)
 {visible.length > 0 && (
   <section class="info-bar">
     <div class="container">
-      <div class="info-bar-grid" style={`--info-cols:${cols}`}>
+      <div class="info-bar-grid" style={`--info-cols:${cols}`} data-region="info-bar">
         {visible.map((item) => (
-          <div class="info-slot">
+          <div class="info-slot" data-field={item.field}>
             <span class="info-icon" aria-hidden="true">{item.icon}</span>
             <div class="info-text">
               <span class="info-label">{item.label}</span>

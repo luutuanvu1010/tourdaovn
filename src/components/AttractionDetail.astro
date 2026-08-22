@@ -65,20 +65,20 @@ const bookingHref = contact?.zaloUrl || ''
 // Ô nào không có dữ liệu thì không vào lưới — InfoBar co theo số ô thật, nên
 // ở đây bỏ ô "khoảng cách" chết cứng và bỏ luôn giá trị "không có" giả.
 const infoBarItems = [
-  { icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : '', visible: !!data.openingHours },
-  { icon: '🎫', label: t('ticketPrice'), value: priceView?.label || '', visible: !!(priceView?.label) },
-  { icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
+  { field: 'openingHours', icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : '', visible: !!data.openingHours },
+  { field: 'gia', icon: '🎫', label: t('ticketPrice'), value: priceView?.label || '', visible: !!(priceView?.label) },
+  { field: 'telephone', icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
 ]
 
 const sidebarRows = [
-  { icon: '📍', label: t('address'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
-  { icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : '', visible: !!data.openingHours },
-  { icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
-  { icon: '🔗', label: t('officialWebsite'), value: hostLabel(data.officialSource), href: data.officialSource || undefined, visible: !!data.officialSource },
+  { field: 'address', icon: '📍', label: t('address'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
+  { field: 'openingHours', icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : '', visible: !!data.openingHours },
+  { field: 'telephone', icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
+  { field: 'officialSource', icon: '🔗', label: t('officialWebsite'), value: hostLabel(data.officialSource), href: data.officialSource || undefined, visible: !!data.officialSource },
   // "Có thu phí" không có giá kèm là thông tin rỗng (kế hoạch vòng 4, F6): chỉ hiện khi miễn phí.
-  { icon: '🎫', label: t('admission'), value: t('free'), visible: data.isAccessibleForFree === true },
-  { icon: '🗺️', label: t('map'), value: t('openMap'), href: data.hasMap, visible: !!data.hasMap },
-  { icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
+  { field: 'isAccessibleForFree', icon: '🎫', label: t('admission'), value: t('free'), visible: data.isAccessibleForFree === true },
+  { field: 'hasMap', icon: '🗺️', label: t('map'), value: t('openMap'), href: data.hasMap, visible: !!data.hasMap },
+  { field: 'sameAs', icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
 ]
 ---
 

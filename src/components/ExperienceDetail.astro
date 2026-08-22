@@ -41,10 +41,10 @@ const jsonLd = entityPageGraphToLd(entityJsonLd, data, siteBase, lang)
 const hasContactChannel = !!(contact?.zaloUrl || contact?.hotline || contact?.whatsapp)
 
 const infoBarItems = [
-  { icon: '⏱️', label: t('duration'), value: data.duration || '', visible: !!data.duration },
-  { icon: '👤', label: t('suitableFor'), value: data.touristType?.join(', ') || '', visible: !!(data.touristType && data.touristType.length > 0) },
-  { icon: '🎫', label: t('price'), value: data.isAccessibleForFree ? t('free') : priceView?.label || '', visible: !!(data.isAccessibleForFree || priceView?.label) },
-  { icon: '📋', label: t('includes'), value: data.includes?.slice(0, 2).join(', ') || '', visible: !!(data.includes && data.includes.length > 0) },
+  { field: 'duration', icon: '⏱️', label: t('duration'), value: data.duration || '', visible: !!data.duration },
+  { field: 'touristType', icon: '👤', label: t('suitableFor'), value: data.touristType?.join(', ') || '', visible: !!(data.touristType && data.touristType.length > 0) },
+  { field: 'gia', icon: '🎫', label: t('price'), value: data.isAccessibleForFree ? t('free') : priceView?.label || '', visible: !!(data.isAccessibleForFree || priceView?.label) },
+  { field: 'includes', icon: '📋', label: t('includes'), value: data.includes?.slice(0, 2).join(', ') || '', visible: !!(data.includes && data.includes.length > 0) },
 ]
 
 // Phù hiệu trong hero: loại trải nghiệm (§4.4 `experienceType`) và thời lượng.
@@ -69,10 +69,10 @@ const stickyPriceLabel = data.isAccessibleForFree ? t('free') : (priceView?.labe
 const zaloHref = contact?.zaloUrl || ''
 
 const sidebarRows = [
-  { icon: '🏷️', label: t('type'), value: data.experienceType?.name || '', visible: !!data.experienceType?.name },
-  { icon: '📍', label: t('venue'), value: data.venue?.title || '', visible: !!data.venue?.title },
-  { icon: '⏱️', label: t('duration'), value: data.duration || '', visible: !!data.duration },
-  { icon: '👤', label: t('suitableFor'), value: data.touristType?.join(', ') || '', visible: !!(data.touristType && data.touristType.length > 0) },
+  { field: 'experienceType', icon: '🏷️', label: t('type'), value: data.experienceType?.name || '', visible: !!data.experienceType?.name },
+  { field: 'venue', icon: '📍', label: t('venue'), value: data.venue?.title || '', visible: !!data.venue?.title },
+  { field: 'duration', icon: '⏱️', label: t('duration'), value: data.duration || '', visible: !!data.duration },
+  { field: 'touristType', icon: '👤', label: t('suitableFor'), value: data.touristType?.join(', ') || '', visible: !!(data.touristType && data.touristType.length > 0) },
 ]
 ---
 

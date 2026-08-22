@@ -27,21 +27,21 @@ function hasPtContent(blocks: unknown[] | undefined | null): boolean {
 }
 
 const infoBarItems = [
-  { icon: '🍽️', label: t('cuisine'), value: data.servesCuisine?.[0] || '', visible: !!(data.servesCuisine && data.servesCuisine.length > 0) },
-  { icon: '🕐', label: t('hours'), value: data.openingHours ? `${data.openingHours.open || ''} - ${data.openingHours.close || ''}` : '', visible: !!data.openingHours },
-  { icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
-  { icon: '📍', label: t('distance'), value: '', visible: false },
+  { field: 'servesCuisine', icon: '🍽️', label: t('cuisine'), value: data.servesCuisine?.[0] || '', visible: !!(data.servesCuisine && data.servesCuisine.length > 0) },
+  { field: 'openingHours', icon: '🕐', label: t('hours'), value: data.openingHours ? `${data.openingHours.open || ''} - ${data.openingHours.close || ''}` : '', visible: !!data.openingHours },
+  { field: 'telephone', icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
+  { field: 'distance', icon: '📍', label: t('distance'), value: '', visible: false },
 ]
 
 const sidebarRows = [
-  { icon: '📍', label: t('address'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
-  { icon: '🍽️', label: t('cuisine'), value: data.servesCuisine?.join(', ') || '', visible: !!(data.servesCuisine && data.servesCuisine.length > 0) },
-  { icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : '', visible: !!data.openingHours },
-  { icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
-  { icon: '📅', label: t('reservations'), value: data.acceptsReservations ? t('acceptsReservations') : t('no'), visible: data.acceptsReservations !== undefined },
-  { icon: '📋', label: t('menu'), value: t('view'), href: data.hasMenu, visible: !!data.hasMenu },
-  { icon: '🔗', label: t('officialWebsite'), value: hostLabel(data.officialSource), href: data.officialSource || undefined, visible: !!data.officialSource },
-  { icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
+  { field: 'address', icon: '📍', label: t('address'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
+  { field: 'servesCuisine', icon: '🍽️', label: t('cuisine'), value: data.servesCuisine?.join(', ') || '', visible: !!(data.servesCuisine && data.servesCuisine.length > 0) },
+  { field: 'openingHours', icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : '', visible: !!data.openingHours },
+  { field: 'telephone', icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
+  { field: 'acceptsReservations', icon: '📅', label: t('reservations'), value: data.acceptsReservations ? t('acceptsReservations') : t('no'), visible: data.acceptsReservations !== undefined },
+  { field: 'hasMenu', icon: '📋', label: t('menu'), value: t('view'), href: data.hasMenu, visible: !!data.hasMenu },
+  { field: 'officialSource', icon: '🔗', label: t('officialWebsite'), value: hostLabel(data.officialSource), href: data.officialSource || undefined, visible: !!data.officialSource },
+  { field: 'sameAs', icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
 ]
 
 const siteBase = siteBaseUrl(Astro.site)

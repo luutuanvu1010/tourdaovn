@@ -78,23 +78,23 @@ const entityJsonLd = applyPriceToJsonLd(
 const jsonLd = entityPageGraphToLd(entityJsonLd, data, siteBase, lang)
 
 const infoBarItems = [
-  { icon: '⏱️', label: t('duration'), value: data.duration || '', visible: !!data.duration },
-  { icon: '👥', label: t('format'), value: formatLabel, visible: true },
-  { icon: '🎫', label: t('priceFrom'), value: priceView?.label || '', visible: !!priceView?.label },
-  { icon: '🚐', label: t('departure'), value: data.departureNote || '', visible: !!data.departureNote },
+  { field: 'duration', icon: '⏱️', label: t('duration'), value: data.duration || '', visible: !!data.duration },
+  { field: 'tourFormat', icon: '👥', label: t('format'), value: formatLabel, visible: true },
+  { field: 'gia', icon: '🎫', label: t('priceFrom'), value: priceView?.label || '', visible: !!priceView?.label },
+  { field: 'departureNote', icon: '🚐', label: t('departure'), value: data.departureNote || '', visible: !!data.departureNote },
 ]
 
 const sidebarRows = [
-  { icon: '🏢', label: t('operator'), value: data.operator?.title || '', visible: !!data.operator?.title },
+  { field: 'operator', icon: '🏢', label: t('operator'), value: data.operator?.title || '', visible: !!data.operator?.title },
   // Giấy phép lữ hành đứng ngay dưới tên đơn vị vận hành: đây là trang khách
   // quyết chuyển tiền, nên tín hiệu tin cậy phải ở cạnh nút đặt chứ không chỉ
   // ở trang chủ. Dùng field có sẵn `Organization.licenseInfo` (§4.12).
-  { icon: '📋', label: t('license'), value: data.operator?.licenseInfo || '', visible: !!data.operator?.licenseInfo },
-  { icon: '👥', label: t('format'), value: formatLabel, visible: true },
-  { icon: '📍', label: t('tripOrigin'), value: data.tripOrigin?.title || '', visible: !!data.tripOrigin?.title },
-  { icon: '⏱️', label: t('duration'), value: data.duration || '', visible: !!data.duration },
-  { icon: '👤', label: t('suitableFor'), value: data.touristType?.join(', ') || '', visible: !!(data.touristType && data.touristType.length > 0) },
-  { icon: '📅', label: t('season'), value: data.seasonNote || '', visible: !!data.seasonNote },
+  { field: 'licenseInfo', icon: '📋', label: t('license'), value: data.operator?.licenseInfo || '', visible: !!data.operator?.licenseInfo },
+  { field: 'tourFormat', icon: '👥', label: t('format'), value: formatLabel, visible: true },
+  { field: 'tripOrigin', icon: '📍', label: t('tripOrigin'), value: data.tripOrigin?.title || '', visible: !!data.tripOrigin?.title },
+  { field: 'duration', icon: '⏱️', label: t('duration'), value: data.duration || '', visible: !!data.duration },
+  { field: 'touristType', icon: '👤', label: t('suitableFor'), value: data.touristType?.join(', ') || '', visible: !!(data.touristType && data.touristType.length > 0) },
+  { field: 'seasonNote', icon: '📅', label: t('season'), value: data.seasonNote || '', visible: !!data.seasonNote },
 ]
 ---
 

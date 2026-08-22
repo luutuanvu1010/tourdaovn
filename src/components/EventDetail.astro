@@ -51,20 +51,20 @@ const jsonLd = entityPageGraphToLd(entityJsonLd, data, siteBase, lang)
 
 const ticketLabel = priceView?.label || (data.ticketUrl ? t('viewTickets') : data.isAccessibleForFree ? t('free') : '')
 
-const infoBarItems: { icon: string; label: string; value: string; visible: boolean }[] = [
-  { icon: '📅', label: t('date'), value: formatDateShort(data.startDate, lang), visible: true },
-  { icon: '🏷️', label: t('status'), value: isPast ? t('past') : (data.eventStatus && data.eventStatus !== 'EventScheduled' ? (statusLabel || '') : ''), visible: isPast || (!!data.eventStatus && data.eventStatus !== 'EventScheduled') },
-  { icon: '🎫', label: t('tickets'), value: ticketLabel || '', visible: !!ticketLabel },
-  { icon: '📍', label: t('locationAt'), value: data.location?.title || '', visible: !!data.location?.title },
+const infoBarItems: { field: string; icon: string; label: string; value: string; visible: boolean }[] = [
+  { field: 'startDate', icon: '📅', label: t('date'), value: formatDateShort(data.startDate, lang), visible: true },
+  { field: 'eventStatus', icon: '🏷️', label: t('status'), value: isPast ? t('past') : (data.eventStatus && data.eventStatus !== 'EventScheduled' ? (statusLabel || '') : ''), visible: isPast || (!!data.eventStatus && data.eventStatus !== 'EventScheduled') },
+  { field: 'gia', icon: '🎫', label: t('tickets'), value: ticketLabel || '', visible: !!ticketLabel },
+  { field: 'location', icon: '📍', label: t('locationAt'), value: data.location?.title || '', visible: !!data.location?.title },
 ]
 
-const sidebarRows: { icon: string; label: string; value: string; href?: string; visible: boolean }[] = [
-  { icon: '📅', label: t('start'), value: formatDate(data.startDate, lang), visible: true },
-  { icon: '📅', label: t('end'), value: data.endDate ? formatDate(data.endDate, lang) : '', visible: !!data.endDate },
-  { icon: '🏷️', label: t('status'), value: statusLabel || '', visible: !!data.eventStatus },
-  { icon: '📍', label: t('locationAt'), value: data.location?.title || '', visible: !!data.location?.title },
-  { icon: '🏢', label: t('organizer'), value: data.organizer?.title || '', visible: !!data.organizer?.title },
-  { icon: '🏷️', label: t('eventType'), value: eventTypeLabel, visible: true },
+const sidebarRows: { field: string; icon: string; label: string; value: string; href?: string; visible: boolean }[] = [
+  { field: 'startDate', icon: '📅', label: t('start'), value: formatDate(data.startDate, lang), visible: true },
+  { field: 'endDate', icon: '📅', label: t('end'), value: data.endDate ? formatDate(data.endDate, lang) : '', visible: !!data.endDate },
+  { field: 'eventStatus', icon: '🏷️', label: t('status'), value: statusLabel || '', visible: !!data.eventStatus },
+  { field: 'location', icon: '📍', label: t('locationAt'), value: data.location?.title || '', visible: !!data.location?.title },
+  { field: 'organizer', icon: '🏢', label: t('organizer'), value: data.organizer?.title || '', visible: !!data.organizer?.title },
+  { field: 'eventType', icon: '🏷️', label: t('eventType'), value: eventTypeLabel, visible: true },
 ]
 ---
 

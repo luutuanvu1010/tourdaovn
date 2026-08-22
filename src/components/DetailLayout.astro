@@ -71,7 +71,7 @@ const t = uiCopy(lang)
         {jumps.map(j => <a href={j.href}>{j.label}</a>)}
       </nav>
       <div class="sticky-bar__action">
-        {priceLabel && <span class="sticky-bar__price">{priceLabel}</span>}
+        {priceLabel && <span class="sticky-bar__price" data-region="sticky-bar" data-field="gia">{priceLabel}</span>}
         {ctaHref && ctaLabel && (
           <a class="sticky-bar__cta" href={ctaHref} target="_blank" rel="noopener">{ctaLabel}</a>
         )}

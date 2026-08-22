@@ -66,33 +66,37 @@ const landArea = isResort ? (data as ResortResult).landArea : undefined
 const onSiteActivities = isResort ? (data as ResortResult).onSiteActivities : undefined
 
 const infoBarItems = isHotel ? [
-  { icon: '⭐', label: t('stars'), value: data.starRating != null ? `${starEmoji(data.starRating)} ${data.starRating}★` : '', visible: data.starRating != null },
-  { icon: '🎫', label: t('priceFrom'), value: priceView?.label || '', visible: !!priceView?.label },
-  { icon: '🏖️', label: t('beach'), value: data.beachAccess || '', visible: !!data.beachAccess },
-  { icon: '🕐', label: t('checkin'), value: data.checkinTime || '', visible: !!data.checkinTime },
+  { field: 'starRating', icon: '⭐', label: t('stars'), value: data.starRating != null ? `${starEmoji(data.starRating)} ${data.starRating}★` : '', visible: data.starRating != null },
+  { field: 'gia', icon: '🎫', label: t('priceFrom'), value: priceView?.label || '', visible: !!priceView?.label },
+  { field: 'beachAccess', icon: '🏖️', label: t('beach'), value: data.beachAccess || '', visible: !!data.beachAccess },
+  { field: 'checkinTime', icon: '🕐', label: t('checkin'), value: data.checkinTime || '', visible: !!data.checkinTime },
 ] : [
-  { icon: '⭐', label: t('stars'), value: data.starRating != null ? `${starEmoji(data.starRating)} ${data.starRating}★` : '', visible: data.starRating != null },
-  { icon: '🎫', label: t('priceFrom'), value: priceView?.label || '', visible: !!priceView?.label },
-  { icon: '🏖️', label: t('beachfront'), value: beachfront === true ? t('beachfront') : (data.beachAccess || ''), visible: !!(beachfront === true || data.beachAccess) },
-  { icon: '🕐', label: t('checkin'), value: data.checkinTime || '', visible: !!data.checkinTime },
+  { field: 'starRating', icon: '⭐', label: t('stars'), value: data.starRating != null ? `${starEmoji(data.starRating)} ${data.starRating}★` : '', visible: data.starRating != null },
+  { field: 'gia', icon: '🎫', label: t('priceFrom'), value: priceView?.label || '', visible: !!priceView?.label },
+  // Ô này đọc `beachfront` khi true, ngược lại đọc `data.beachAccess` (đúng như
+  // `value` bên dưới) — field theo cùng nhánh, không cố định một tên, để không
+  // gán nhầm field khi hai field thật khác nhau thay nhau nuôi cùng một ô.
+  { field: beachfront === true ? 'beachfront' : 'beachAccess', icon: '🏖️', label: t('beachfront'), value: beachfront === true ? t('beachfront') : (data.beachAccess || ''), visible: !!(beachfront === true || data.beachAccess) },
+  { field: 'checkinTime', icon: '🕐', label: t('checkin'), value: data.checkinTime || '', visible: !!data.checkinTime },
 ]
 
-const sidebarRows: { icon: string; label: string; value: string; href?: string; visible: boolean }[] = [
-  { icon: '⭐', label: t('starRating'), value: data.starRating != null ? `${data.starRating}★` : '', visible: data.starRating != null },
-  { icon: '📍', label: t('address'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
-  { icon: '🕐', label: t('checkin'), value: data.checkinTime || '', visible: !!data.checkinTime },
-  { icon: '🕐', label: t('checkout'), value: data.checkoutTime || '', visible: !!data.checkoutTime },
-  { icon: '🛏️', label: t('rooms'), value: data.numberOfRooms != null ? `${data.numberOfRooms} ${t('roomsUnit')}` : '', visible: data.numberOfRooms != null },
-  { icon: '🐾', label: t('pets'), value: data.petsAllowed ? t('allowed') : t('no'), visible: data.petsAllowed !== undefined },
-  { icon: '🏖️', label: t('beach'), value: data.beachAccess || '', visible: !!data.beachAccess },
-  { icon: '✈️', label: t('airport'), value: airportDist != null ? `~${airportDist} km` : '', visible: airportDist != null },
-  { icon: '🔗', label: t('officialWebsite'), value: hostLabel(data.officialSource), href: data.officialSource || undefined, visible: !!data.officialSource },
-  { icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
+const sidebarRows: { field: string; icon: string; label: string; value: string; href?: string; visible: boolean }[] = [
+  { field: 'starRating', icon: '⭐', label: t('starRating'), value: data.starRating != null ? `${data.starRating}★` : '', visible: data.starRating != null },
+  { field: 'address', icon: '📍', label: t('address'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
+  { field: 'checkinTime', icon: '🕐', label: t('checkin'), value: data.checkinTime || '', visible: !!data.checkinTime },
+  { field: 'checkoutTime', icon: '🕐', label: t('checkout'), value: data.checkoutTime || '', visible: !!data.checkoutTime },
+  { field: 'numberOfRooms', icon: '🛏️', label: t('rooms'), value: data.numberOfRooms != null ? `${data.numberOfRooms} ${t('roomsUnit')}` : '', visible: data.numberOfRooms != null },
+  { field: 'petsAllowed', icon: '🐾', label: t('pets'), value: data.petsAllowed ? t('allowed') : t('no'), visible: data.petsAllowed !== undefined },
+  { field: 'beachAccess', icon: '🏖️', label: t('beach'), value: data.beachAccess || '', visible: !!data.beachAccess },
+  // airportDist tính từ data.geo (computeAirportDist nhận data.geo làm tham số) — lấy field gốc, không lấy tên biến cục bộ.
+  { field: 'geo', icon: '✈️', label: t('airport'), value: airportDist != null ? `~${airportDist} km` : '', visible: airportDist != null },
+  { field: 'officialSource', icon: '🔗', label: t('officialWebsite'), value: hostLabel(data.officialSource), href: data.officialSource || undefined, visible: !!data.officialSource },
+  { field: 'sameAs', icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
 ]
 if (isResort) {
-  if (beachfront !== undefined) sidebarRows.push({ icon: '🏖️', label: t('beachfront'), value: beachfront ? t('yes') : t('no'), visible: true })
-  if (landArea != null) sidebarRows.push({ icon: '📐', label: t('area'), value: `${formatNumber(landArea, lang)} m²`, visible: true })
-  if (onSiteActivities && onSiteActivities.length > 0) sidebarRows.push({ icon: '🎯', label: t('activities'), value: onSiteActivities.join(', '), visible: true })
+  if (beachfront !== undefined) sidebarRows.push({ field: 'beachfront', icon: '🏖️', label: t('beachfront'), value: beachfront ? t('yes') : t('no'), visible: true })
+  if (landArea != null) sidebarRows.push({ field: 'landArea', icon: '📐', label: t('area'), value: `${formatNumber(landArea, lang)} m²`, visible: true })
+  if (onSiteActivities && onSiteActivities.length > 0) sidebarRows.push({ field: 'onSiteActivities', icon: '🎯', label: t('activities'), value: onSiteActivities.join(', '), visible: true })
 }
 ---
 

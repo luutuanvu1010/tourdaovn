@@ -47,19 +47,19 @@ function hasPtContent(blocks: unknown[] | undefined | null): boolean {
 // Ô nào không có dữ liệu thì không vào lưới — InfoBar co theo số ô thật, nên
 // ở đây bỏ ô "khoảng cách" chết cứng.
 const infoBarItems = [
-  { icon: '🏷️', label: t('type'), value: typeLabel, visible: true },
-  { icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : t('freeAccess'), visible: true },
-  { icon: '🗺️', label: t('partOf'), value: data.containedInPlace?.title || '', visible: !!data.containedInPlace?.title },
+  { field: 'placeType', icon: '🏷️', label: t('type'), value: typeLabel, visible: true },
+  { field: 'openingHours', icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : t('freeAccess'), visible: true },
+  { field: 'containedInPlace', icon: '🗺️', label: t('partOf'), value: data.containedInPlace?.title || '', visible: !!data.containedInPlace?.title },
 ]
 
 const sidebarRows = [
-  { icon: '📍', label: t('address'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
-  { icon: '🗺️', label: t('partOf'), value: data.containedInPlace?.title || '', href: parentHref, visible: !!data.containedInPlace?.title },
-  { icon: '🏷️', label: t('type'), value: typeLabel, visible: true },
-  { icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : '', visible: !!data.openingHours },
-  { icon: '🎫', label: t('admission'), value: data.isAccessibleForFree ? t('free') : '', visible: !!data.isAccessibleForFree },
-  { icon: '🗺️', label: t('map'), value: t('openMap'), href: data.hasMap, visible: !!data.hasMap },
-  { icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
+  { field: 'address', icon: '📍', label: t('address'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
+  { field: 'containedInPlace', icon: '🗺️', label: t('partOf'), value: data.containedInPlace?.title || '', href: parentHref, visible: !!data.containedInPlace?.title },
+  { field: 'placeType', icon: '🏷️', label: t('type'), value: typeLabel, visible: true },
+  { field: 'openingHours', icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : '', visible: !!data.openingHours },
+  { field: 'isAccessibleForFree', icon: '🎫', label: t('admission'), value: data.isAccessibleForFree ? t('free') : '', visible: !!data.isAccessibleForFree },
+  { field: 'hasMap', icon: '🗺️', label: t('map'), value: t('openMap'), href: data.hasMap, visible: !!data.hasMap },
+  { field: 'sameAs', icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
 ]
 
 const siteBase = siteBaseUrl(Astro.site)
