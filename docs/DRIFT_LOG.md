@@ -616,3 +616,17 @@ Ba chỗ lệch:
 1. **Chỉ nghe `create`.** `ADR-0009` mục 3 đòi "create/update/delete". Sửa một trang đã publish rồi publish lại là `update` — theo cấu hình này thì **không kích build**. Nghĩa là hook vừa bắn quá nhiều lần cho việc không cần (DR-041), vừa có thể **không bắn** đúng lúc cần nhất.
 2. **`dataset: "*"`, không lọc type.** `ADR-0009` mục 3 đòi "lọc theo các type có render trang". Mọi document ở mọi dataset đều kích một lần dựng toàn site.
 3. **Không có debounce.** `ADR-0009` mục 4 dự trù một Worker gom sự kiện (im 120 giây mới bắn), và tự ghi "MVP có thể bỏ qua". Thực tế vẫn là MVP: 4 lần bắn trong 6 giây (02:55:17→23 UTC). Mỗi lần dựng lại là một lượt đọc **toàn bộ** nội dung qua Sanity Content API — đây chính là khoản API request mà `QĐ-2026-08-22-03` cắt.
+
+---
+
+## DR-043 — `BUILD-NOTES.md` báo chuyển hướng trang chủ "ĐANG BẬT" chín ngày sau khi đã gỡ
+
+**Trạng thái:** **đã xử 2026-08-22**. Mục đổi tên thành "ĐÃ GỠ", ghi ngày + commit + bằng chứng kiểm; khối "Cách gỡ" bỏ; giữ lại phần "vì sao không dùng Page Rules" vì cơ chế đó còn đúng cho mọi lần chuyển hướng sau.
+
+Luật `/ → https://tourdaonhatrang.com/ 302` gỡ khỏi `public/_redirects` ngày **2026-08-13** (commit `541ec26`, căn cứ `SPEC-2026-08-13-menu-chinh-bon-muc`). Tới **2026-08-22**, `BUILD-NOTES.md` vẫn mở đầu bằng "**ĐANG BẬT**" và "**Trạng thái: đang chạy trên production** từ 2026-08-06", kèm nguyên một quy trình bốn bước "Cách gỡ" cho thứ đã gỡ.
+
+Kiểm thực tế cùng ngày: `curl -sI https://tourdao.vn/` trả `200`, không `302`.
+
+Đây là loại lệch nguy hiểm hơn vẻ ngoài: file này là thứ người vận hành mở ra khi deploy, và nó đang mô tả **hành vi production sai**. Ai đọc để trả lời "trang chủ tourdao.vn có chuyển hướng không" sẽ trả lời sai.
+
+**Gốc rễ đi kèm:** `QĐ-2026-08-06-04` **bước 6** đòi "ghi mục mới trong sổ để đóng `QĐ-2026-08-06-02`". Bước đó **chưa từng được thi hành** — không có mục nào trong `DECISIONS.md` đóng `QĐ-2026-08-06-02`. Code đổi, sổ không đổi, nên `BUILD-NOTES` không có tín hiệu nào để phải cập nhật theo. Đóng ở `QĐ-2026-08-22-04`.

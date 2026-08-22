@@ -857,3 +857,21 @@ cùng `Sidebar.astro` / `TourDetail.astro`.
 **Chưa đụng, cố ý.** Nối git của Workers Builds **giữ nguyên**: `git push` lên `main` vẫn kích một lần dựng phía Cloudflare. Đó chính là đường đưa đợt 4A lên live ở mục (a). Muốn thành thủ công hoàn toàn thì phải gỡ nối git trên dashboard Cloudflare — việc đó chưa được yêu cầu và là cửa riêng, cần một QĐ khác.
 
 **Điều kiện bật lại.** Không bật lại trước khi xử DR-042 (rule chỉ nghe `create`, không lọc type, không debounce) và trước khi `main` local đã push hết — bật lại lúc còn commit chưa push là mời lại đúng sự cố DR-041.
+
+---
+
+## QĐ-2026-08-22-04 — Đóng `QĐ-2026-08-06-02`; giữ nối git của Workers Builds
+
+**Mục này đóng `QĐ-2026-08-06-02`**, đúng bước 6 mà `QĐ-2026-08-06-04` đã đòi và chưa ai thi hành. Không sửa hai mục cũ (`04-CONSTRAINTS` §2.5).
+
+**Chốt 1 — chuyển hướng trang chủ: đã gỡ, xác nhận.** Luật `/ → https://tourdaonhatrang.com/ 302` gỡ khỏi `public/_redirects` ngày 2026-08-13, commit `541ec26`, căn cứ `SPEC-2026-08-13-menu-chinh-bon-muc` (site công bố, trang chủ có nội dung thật và đã lên menu chính). Dòng luật bị ghi chú lại chứ không xoá, giữ làm dấu vết.
+
+Bằng chứng kiểm 2026-08-22: `curl -sI https://tourdao.vn/` → `200`. Trạng thái tạm thời mà `QĐ-2026-08-06-02` mở ra nay đóng lại.
+
+Sổ không được cập nhật suốt chín ngày, kéo theo `BUILD-NOTES.md` mô tả sai hành vi production (DR-043). Chủ dự án quyết sửa; đã sửa cùng đợt này.
+
+**Chốt 2 — giữ nối git của Workers Builds.** Chủ dự án quyết (2026-08-22) **không** gỡ kết nối GitHub ↔ Worker `tourdaovn`. `git push` lên `main` vẫn kích một lần dựng và thay bản đang chạy. Đây là phần mà `QĐ-2026-08-22-03` để mở.
+
+**Lý do.** Tần suất push code thấp hơn hẳn tần suất publish nội dung, nên khoản Sanity API request tiết kiệm được đã lấy gần hết ở việc ngắt hook. Đổi lại giữ được một đường phát hành không phụ thuộc máy local — chính nó đưa đợt 4A lên live ngày 2026-08-22 (deployment `3211f541`, 04:30:01 UTC, kiểm bằng trang `/diem-tham-quan/vin-harbour/` khớp `dist/` đúng 55 690 byte).
+
+**Đánh đổi còn nguyên:** bản dựng phía Cloudflare lấy code từ `origin/main` và **đè** lên version deploy tay. Luật vận hành **push trước, deploy tay sau** (DR-041, `BUILD-NOTES` mục Deploy) vẫn bắt buộc, và vẫn không có kiểm máy nào cưỡng chế.

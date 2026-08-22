@@ -39,47 +39,27 @@ build-verify được trong sandbox.
 `RouteDispatch` HUB_PARTS_CONFIG `hub-am-thuc` + `hub-all` liệt kê restaurant/specialty/event;
 `uiCopy.ts` giữ copy các entity đã gỡ. Không route nên không render, không gãy build.
 
-## ĐANG BẬT: trang chủ chuyển hướng sang tourdaonhatrang.com
+## ĐÃ GỠ: trang chủ từng chuyển hướng sang tourdaonhatrang.com
 
-**Trạng thái: đang chạy trên production** từ 2026-08-06. Căn cứ `QĐ-2026-08-06-02` và
-`QĐ-2026-08-06-04` trong `docs/DECISIONS.md`.
+**Trạng thái: đã gỡ 2026-08-13**, commit `541ec26` ("go chuyen huong tam cua trang chu"),
+căn cứ `SPEC-2026-08-13-menu-chinh-bon-muc` — site công bố, trang chủ phục vụ nội dung
+thật và đã lên menu chính. Bật từ 2026-08-06 theo `QĐ-2026-08-06-02` / `QĐ-2026-08-06-04`.
 
-Vào `https://tourdao.vn/` sẽ bị đưa sang `https://tourdaonhatrang.com/` bằng `302`. Trang con
-(`/nha-trang/`, `/lien-he/`...) và `/sitemap.xml` **không** bị đụng, vẫn trả `200`.
+Kiểm 2026-08-22: `curl -sI https://tourdao.vn/` trả `200`. Dòng luật trong
+`public/_redirects` đã bị ghi chú lại (`#/    https://tourdaonhatrang.com/    302`), giữ
+làm dấu vết chứ không xoá hẳn.
 
-Luật nằm ở dòng cuối `public/_redirects`:
+> **Mục này từng ghi "ĐANG BẬT ... đang chạy trên production" tới tận 2026-08-22** — chín
+> ngày sau khi luật đã gỡ khỏi code, kèm nguyên một quy trình "Cách gỡ" cho thứ đã gỡ rồi.
+> Xem DR-043. Cùng lúc đó phát hiện `QĐ-2026-08-06-04` **bước 6** — "ghi mục mới trong sổ
+> để đóng `QĐ-2026-08-06-02`" — chưa từng được thi hành; nay đóng ở `QĐ-2026-08-22-04`.
 
-```
-/    https://tourdaonhatrang.com/    302
-```
+### Vì sao khi đó không làm bằng Page Rules
 
-### Cách gỡ
-
-**1.** Xoá dòng trên trong `public/_redirects`, xoá luôn khối chú thích "Phần 2. Điều hướng tạm
-thời" ngay phía trên nó. Giữ nguyên Phần 1 — đó là phần R3, không liên quan.
-
-**2.** Deploy:
-
-```
-npm run deploy
-```
-
-Xem mục "Deploy" ở cuối file này.
-
-**3.** Kiểm:
-
-```
-curl -sI https://tourdao.vn/ | head -1
-```
-
-Gỡ xong khi trả `200` thay vì `302`. Không cần purge cache, không cần đụng dashboard Cloudflare.
-
-**4.** Ghi một mục mới trong `docs/DECISIONS.md` để đóng `QĐ-2026-08-06-02`. Không sửa mục cũ.
-
-### Vì sao không làm bằng Page Rules
-
-Đã thử hai lần, thất bại cả hai. `tourdao.vn` do Worker phục vụ nên Cloudflare vô hiệu hoá
-`Forwarding URL` (`Client → Worker = Rule Ignored`). Chi tiết cơ chế ở `SETUP-NEW-SITE.md` mục 10.
+Giữ lại vì cơ chế còn đúng cho mọi lần chuyển hướng sau. Đã thử hai lần, thất bại cả hai:
+`tourdao.vn` do Worker phục vụ nên Cloudflare vô hiệu hoá `Forwarding URL`
+(`Client → Worker = Rule Ignored`). Mọi luật chuyển hướng của site này phải nằm ở
+`public/_redirects`. Chi tiết cơ chế ở `SETUP-NEW-SITE.md` mục 10.
 
 ---
 
