@@ -66,6 +66,7 @@ describe('zalo', () => {
     const f = okFetch()
     expect(await createZaloNotifier({ token: '', chatIds: '1', fetchImpl: f }).send(b)).toBe('skipped')
     expect(await createZaloNotifier({ token: 't', chatIds: '', fetchImpl: f }).send(b)).toBe('skipped')
+    expect(f).not.toHaveBeenCalled()
   })
   it('gửi tới từng chat_id, URL có token, body {chat_id, text} → sent', async () => {
     const f = okFetch(200, { ok: true, result: {} })
@@ -82,6 +83,15 @@ describe('zalo', () => {
     let i = 0
     const f = vi.fn(async () => new Response(JSON.stringify(i++ === 0 ? { ok: true } : { ok: false, error_code: 400, description: 'bad' }), { status: 200 })) as unknown as typeof fetch
     expect(await createZaloNotifier({ token: 't', chatIds: '1,2', fetchImpl: f }).send(b)).toBe('failed:1/2 chat lỗi')
+  })
+  it('một chat ném lỗi mạng vẫn tiếp tục gửi chat còn lại → failed:<n>/<tổng>', async () => {
+    let i = 0
+    const f = vi.fn(async () => {
+      if (i++ === 0) throw new Error('zalo down')
+      return new Response(JSON.stringify({ ok: true }), { status: 200 })
+    }) as unknown as typeof fetch
+    expect(await createZaloNotifier({ token: 't', chatIds: '1,2', fetchImpl: f }).send(b)).toBe('failed:1/2 chat lỗi')
+    expect(f).toHaveBeenCalledTimes(2)
   })
 })
 
