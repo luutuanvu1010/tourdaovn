@@ -51,7 +51,7 @@ export default defineType({
             ]
           }),
           defineField({ name: 'note', type: 'text', rows: 2 }),
-          defineField({ name: 'durationAtStop', type: 'string', description: 'ISO 8601, vd PT1H30M' })
+          defineField({ name: 'durationAtStop', type: 'string', description: 'Mốc giờ dự kiến của chặng, viết cho người đọc — vd "8:00 – 8:45". Không phải ISO 8601, không phải lịch chỗ trống (01 §2.8, QĐ-2026-08-22-05 Chốt 7)' })
         ]
       }],
     }),
