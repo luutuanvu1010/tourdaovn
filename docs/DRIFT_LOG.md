@@ -486,7 +486,9 @@ Ba chỗ **đã** hạ xuống `--fw-700` trong cùng đợt (`site-home-title`,
 
 ## DR-039 — `bookingRef.key` của 8 tour chứa chuỗi giá thay vì khoá
 
-**Trạng thái:** mở. Phát hiện 2026-08-22 khi chuẩn bị module đặt tour (SPEC-2026-08-21-dat-tour).
+**Trạng thái:** đã xử 2026-08-22 — khoá = slug (16 document kể cả nháp; kế hoạch dự kiến 14,
+thực tế cả 8 tour approved đều đang có bản nháp mở nên 8+8, không phải 8+6 — xem
+task-11-report.md), giá sang data/prices.yaml; xem QĐ-2026-08-21-01.
 
 `01-CONTENT_MODEL` §2.8: `bookingRef` là con trỏ tới dòng giá, "không lưu số, I1, I16".
 Dataset production có 8 document `tour` approved (và 6 bản nháp của chúng) mang
