@@ -2,11 +2,27 @@
 
 - **Trạng thái:** nháp, **chờ chủ dự án duyệt**. Hướng đã chốt qua năm câu hỏi trong phiên brainstorm 2026-08-22; giá trị cụ thể chưa chốt và cố ý chưa điền.
 - **Ngày soạn:** 2026-08-22   **Người soạn:** Cowork   **Người duyệt:** Lưu Tuấn Vũ
-- **Loại quyết định:** cửa hai chiều ở phần token (chữ, cỡ, màu — revert bằng một commit). **Cửa một chiều ở `06-BINDING_MAP` v2.2**: đổi vùng của `summary` và thêm Luật 4 kéo theo mockup và code phải dựng lại. **Cửa một chiều ở V0b**: thêm một cổng vào `gate:all` và buộc component gắn `data-field`/`data-region` — gỡ ra sau này là gỡ một hàng rào.
-- **Repo lúc soạn:** `main` tại `ab24aa5`
-- **Liên quan:** `SPEC-2026-08-14-be-mat-vong-3` (vòng trước, cùng bốn than phiền), `docs/plans/2026-08-21-audit-va-ke-hoach-giao-dien-vong-4.md` (vòng 4 đang dở), `06-BINDING_MAP` v2.1.0, `07-DESIGN_TOKENS` (đã duyệt 2026-06-12, bổ sung 2026-08-06)
+- **Loại quyết định:** cửa hai chiều ở phần token (chữ, cỡ, màu — revert bằng một commit). **Cửa một chiều ở `06-BINDING_MAP` v2.3**: đổi vùng của `summary` và thêm Luật 5 kéo theo mockup và code phải dựng lại. **Cửa một chiều ở V0b**: thêm một cổng vào `gate:all` và buộc component gắn `data-field`/`data-region` — gỡ ra sau này là gỡ một hàng rào.
+- **Repo lúc soạn:** khởi thảo tại `ab24aa5`; **soát lại tại `6e2d57e`** sau khi một phiên song song phát hành `06` v2.2.0 (`44393e7`) và chốt cổng QA1 đợt 4B (`1c20f17`) — xem §0.
+- **Liên quan:** `SPEC-2026-08-14-be-mat-vong-3` (vòng trước, cùng bốn than phiền), `docs/plans/2026-08-21-audit-va-ke-hoach-giao-dien-vong-4.md` (vòng 4 đang dở), `06-BINDING_MAP` **v2.2.0** (`QĐ-2026-08-22-05`), `07-DESIGN_TOKENS` (đã duyệt 2026-06-12, bổ sung 2026-08-06)
 
 ---
+
+## 0. Điều đã đổi dưới chân spec này trong lúc soạn
+
+Spec này khởi thảo lúc `main` ở `ab24aa5`. Trong cùng buổi, **một phiên Claude khác** (`session_01Jk4vyPPGJpHsWpRcMbwwZK`) chạy song song trên đợt 4B và đã phát hành ba thứ chồng lên nền của spec:
+
+| Commit | Đổi gì | Ảnh hưởng tới spec này |
+|---|---|---|
+| `1c20f17` | Chủ dự án **chốt cổng QA1 đợt 4B** và gỡ sáu nợ (`QĐ-2026-08-22-05`): N3, N4, N11, N13, N14, N15a, N15b | V0a **không còn bị chặn** — §4 đã sửa |
+| `44393e7` | `06-BINDING_MAP` lên **v2.2.0**; `01-CONTENT_MODEL` lên v1.0.19 | Mọi thay đổi của spec này nay nhắm **v2.3**, không phải v2.2 |
+| `def5b47` | Design sửa mockup Tour (N15a) và hai chỗ giá trong `faq` (N13) | Không xung đột; nhưng xem hai mục dưới |
+
+**Hai va chạm thật, đã xử:**
+
+**a. Tên "Luật 4" đã có chủ.** `06` v2.2 §6 đặt **Luật 4 (N13)** cho "số giá viết trong chữ phải có hạn dùng". Luật cột→hàng của spec này vì vậy đổi tên thành **Luật 5 (v2.3)** ở §5.1. Nếu không đổi, hai luật khác nhau mang cùng số trong cùng một tài liệu — đúng loại nguồn sự thật thứ hai mà `CLAUDE.md` §5 bắt dừng.
+
+**b. Cách đo trùng lặp của bản nháp đầu sai so với N11.** `06` v2.2 bổ sung phạm vi Luật 1: *"luật này ràng buộc **field**, không ràng buộc **chuỗi ký tự** … Đo trùng lặp bằng cách hỏi *field nào nuôi ô này*, không bằng cách so chuỗi trên trang."* Bản nháp đầu đo bằng cách so chuỗi. Đã đo lại ở tầng field — §2.1 mục "Đo lại theo N11".
 
 ## 1. Bốn điều chủ dự án nêu, và vì sao vòng này không lặp lại vòng 3
 
@@ -39,7 +55,7 @@ Chủ dự án viết "**kiểm tra lại** việc trùng lặp ánh xạ dữ l
 
 **Phương pháp.** Tải cả 58 trang chi tiết từ `sitemap-vi.xml` ngày 2026-08-22, tách giá trị của bốn vùng theo class ổn định (`.info-value` = `InfoBar`, `.info-row-value` = `InfoCard`, `.sticky-bar__price` = thanh dính, `.booking-price-value` = `BookingCTA`), rồi đếm mỗi *giá trị* xuất hiện ở mấy vùng. Script và kết quả đầy đủ: `docs/evidence/2026-08-22-trung-vung-truoc-4B/`.
 
-**Kết quả: 44/58 trang (76 %) có ít nhất một giá trị hiện ở hơn một vùng.**
+**Kết quả sơ bộ: 44/58 trang (76 %) có ít nhất một giá trị hiện ở hơn một vùng.** Phép đo này so chuỗi; xem mục "Đo lại theo N11" ngay dưới để có con số đúng ở tầng field.
 
 | Loại trang | Trang lặp / tổng |
 |---|---|
@@ -62,11 +78,32 @@ Chín kiểu lặp, đếm theo số trang:
 | **Giá vé / Phí vào cửa** | 5 | `InfoBar` + `InfoCard` + thanh dính + `BookingCTA` |
 | Khởi hành / Xuất phát | 5 | `InfoBar` + `InfoCard` |
 
+### Đo lại theo N11 — hỏi field, không so chuỗi
+
+Bảng trên đếm **giá trị trùng**. `06` v2.2 (N11) nói rõ đó không phải phép đo đúng: Luật 1 ràng buộc *field*. Đã đo lại bằng cách đọc thẳng `infoBarItems` và `sidebarRows` của từng `*Detail.astro` và so **biểu thức field**, không so chuỗi hiển thị (script: `docs/evidence/2026-08-22-trung-vung-truoc-4B/quet-field-trung-vung.py`).
+
+**Kết quả: 15 cặp field-trùng-vùng, ở 6 template.**
+
+| Template | Field nuôi cả `InfoBar` lẫn `InfoCard` |
+|---|---|
+| `AttractionDetail` | `openingHours`, `telephone` |
+| `PlaceDetail` | `placeType`, `openingHours`, `containedInPlace` |
+| `ExperienceDetail` | `duration`, `touristType` |
+| `TourDetail` | `duration`, `tourFormat` |
+| `RestaurantDetail` | `servesCuisine`, `openingHours`, `telephone` |
+| `SpecialtyDetail` | `specialtyType`, `originNote`, `season` |
+
+**Một dương tính giả bị loại.** "Khởi hành / Xuất phát" là **hai field khác nhau** — `departureNote` ở `InfoBar`, `tripOrigin` ở `InfoCard` — tình cờ cùng mang chuỗi "Cảng du lịch Nha Trang". N11 nêu đúng ví dụ này. **Không** vi phạm Luật 1.
+
+**Số trang không đổi: vẫn 44/58**, vì mọi trang dính dương tính giả đó đều còn ít nhất một cặp thật (`duration`, `tourFormat`).
+
+**Và một ca mà phép đo tự động bỏ sót — đây chính là luận cứ cho V0b.** Ca giá của Chùa Long Sơn *không* lọt vào bảng 15 cặp, vì `InfoBar` đọc `priceView` còn `InfoCard` đọc `data.isAccessibleForFree` — hai **biểu thức** khác nhau của **cùng một field**, do `resolver.ts:25-26` biến `isAccessibleForFree` thành `label = "Miễn phí"`. So biểu thức không thấy; so chuỗi thì thấy nhưng lại dính dương tính giả. **Không phép đo tĩnh nào đúng cả hai chiều** — chỉ có cách để chính component khai `data-field` mình đang render, rồi đếm trên HTML đã dựng. Đó là §5.4.
+
 **Ca chủ dự án bắt được là ca nặng nhất, nhưng ít gặp nhất (5/58 trang, ngang với "Khởi hành / Xuất phát").** Trên `/diem-tham-quan/chua-long-son/` chuỗi "Miễn phí" ra **bốn vùng**, và tệ hơn "lặp bốn lần": **hai nhãn khác nhau cho cùng một sự thật** — "Giá vé" ở `InfoBar`, "Phí vào cửa" ở `InfoCard`. Khách đọc ra hai khoản phí cùng bằng không, không phải một khoản in hai lần. Cùng lỗi ấy ở Tour: "Khởi hành" và "Xuất phát" là hai nhãn cho một field.
 
 **Gốc không nằm ở `isAccessibleForFree`, cũng không nằm ở `AttractionDetail.astro`.** Tám trong chín kiểu lặp là cặp `InfoBar` + `InfoCard` in lại **cùng một bộ field** — đúng DR-032. Mọi trang chi tiết đều dựng cả hai vùng đó qua `DetailLayout`, nên lỗi không phải của một template mà của **cặp vùng**.
 
-**Đặc tả đã đóng việc này ở tầng chữ.** `06` v2.1 §3.1 khai mỗi field đúng một vùng (`isAccessibleForFree` của Điểm tham quan → "Thông tin nhanh, chỉ khi true"), §6 Luật 1 viết "một thông tin, một vùng, một lần", ngoại lệ duy nhất là **giá** (thanh dính + khối hành động), và `InfoBar` cùng `InfoCard` **không còn là vùng**. Vùng mới "Thông tin nhanh" thay cả cặp.
+**Đặc tả đã đóng việc này ở tầng chữ.** `06` §3.1 (v2.1, giữ nguyên ở v2.2) khai mỗi field đúng một vùng (`isAccessibleForFree` của Điểm tham quan → "Thông tin nhanh, chỉ khi true"), §6 Luật 1 viết "một thông tin, một vùng, một lần", ngoại lệ duy nhất là **giá** (thanh dính + khối hành động), và `InfoBar` cùng `InfoCard` **không còn là vùng**. Vùng mới "Thông tin nhanh" thay cả cặp.
 
 Nên đây là việc của **Code đợt 4B bước 4**, không phải việc của Design. Đưa vào prompt Design là sai vai theo `CLAUDE.md` §3. Nhưng sửa code thôi thì chưa đóng được gốc — xem §2.7.
 
@@ -98,7 +135,7 @@ Bốn bậc nằm sát nhau trong khoảng 15–21px (15 · 17 · 18 · 20 · 21
 
 ### 2.4 Đoạn mở đang nằm trên ảnh, và đó là nguồn rủi ro tương phản
 
-`src/components/DetailLayout.astro:62` render `summary` vào `slot="overlay"` của `Hero` — tức chữ đè lên ảnh. `06` v2.1 §3.1 khai đúng như vậy (`summary` → hero cho cả bốn entity), nên **code không sai spec**; muốn đổi thì phải sửa spec trước.
+`src/components/DetailLayout.astro:62` render `summary` vào `slot="overlay"` của `Hero` — tức chữ đè lên ảnh. `06` §3.1 khai đúng như vậy (`summary` → hero cho cả bốn entity), nên **code không sai spec**; muốn đổi thì phải sửa spec trước.
 
 QA1 đợt 4B vòng 3 đo tương phản đoạn mở trên ảnh ở bộ xấu nhất `ngoc-lam`: **6,6:1** — đạt AA nhưng phải dựa vào lớp phủ. Đưa đoạn mở khỏi ảnh thì rủi ro đó biến mất hẳn, không phải canh lớp phủ theo từng ảnh nữa.
 
@@ -154,10 +191,10 @@ Năm câu hỏi, năm câu trả lời của chủ dự án. Ghi lại để bư
 
 | # | Hiện vật | Vai | Cổng | Chặn bởi |
 |---|---|---|---|---|
-| **V0a** | Phiếu Code đợt 4B, gồm ý (4): thay cặp `InfoBar` + `InfoCard` bằng vùng **Thông tin nhanh** theo `06` v2.1 §3.1, đóng cả **chín** kiểu lặp ở §2.1 — không chỉ ca giá của Chùa Long Sơn | Code | QA2 | chủ dự án chốt cổng QA1 4B **và** chốt N3/N15 |
+| **V0a** | Phiếu Code đợt 4B, gồm ý (4): thay cặp `InfoBar` + `InfoCard` bằng vùng **Thông tin nhanh** theo `06` §3.1, đóng cả **chín** kiểu lặp ở §2.1 — không chỉ ca giá của Chùa Long Sơn | Code | QA2 | ~~chốt cổng QA1 4B, chốt N3/N15~~ — **đã chốt 2026-08-22** (`QĐ-2026-08-22-05`, `1c20f17`). Không còn bị chặn |
 | **V0b** | **Bộ kiểm Luật 1** (§5.4): validator hậu dựng đếm số vùng mỗi field, đỏ khi > 1 ngoài ngoại lệ đã khai. Kèm việc gắn `data-field` / `data-region` vào component vùng | Code | QA2 · vào `gate:all` | V0a **hoặc** chạy cùng V0a |
 | **V1** | Hai phiếu drift: font-stack ngược (§2.2), thang 14 bậc vs 8 bậc khai (§2.3) | Cowork | ghi vào `DRIFT_LOG.md` | — |
-| **V2** | `06-BINDING_MAP` **v2.2** (§5) | Cowork | chủ dự án chốt + QĐ mới | — |
+| **V2** | `06-BINDING_MAP` **v2.3** (§5) | Cowork | chủ dự án chốt + QĐ mới | — |
 | **V3** | Prompt bàn giao Design vòng 5 (§6) | Cowork | tự kiểm P1–P6 | V1 + V2 |
 | **V4** | Mockup vòng 5 (§6) | Design | QA1 do tác nhân độc lập chạy | V3 |
 | **V5** | `07-DESIGN_TOKENS` **v2** — điền giá trị chủ dự án đã chọn | Cowork | chủ dự án chốt + QĐ | V4 |
@@ -169,17 +206,17 @@ Năm câu hỏi, năm câu trả lời của chủ dự án. Ghi lại để bư
 
 **Vì sao `07` tách làm hai lượt (V1 rồi V5).** Chủ dự án đã chọn mức tự do "Design đề xuất kèm bằng chứng" (§3.4), nên không thể chốt giá trị font trước khi Design dựng ba ứng viên. Viết `07` v2 ngay bây giờ thì hoặc bịa giá trị, hoặc để chỗ trống — cả hai đều trượt cổng theo `CLAUDE.md` §6.
 
-## 5. `06-BINDING_MAP` v2.2 sửa gì
+## 5. `06-BINDING_MAP` v2.3 sửa gì
 
-### 5.1 Luật 4 — ô cạnh nhau trên desktop, mỗi ô một hàng trên di động
+### 5.1 Luật 5 — ô cạnh nhau trên desktop, mỗi ô một hàng trên di động
 
 Thêm vào §6:
 
-> **Luật 4 (v2.2) — ô cạnh nhau trên desktop, mỗi ô một hàng trên di động.** Mọi vùng trình bày nhiều ô ngang hàng ở desktop — Thông tin nhanh, khối hành động, dòng meta, thẻ thông tin — ở `≤ 640px` chuyển thành **mỗi ô một hàng chiếm hết bề rộng**, nhãn bên trái, giá trị bên phải. Cấm bóp cột: không ô nào được hẹp hơn 100% bề rộng vùng chứa, trừ khi nội dung của nó ngắn hơn một dòng.
+> **Luật 5 (v2.3) — ô cạnh nhau trên desktop, mỗi ô một hàng trên di động.** Mọi vùng trình bày nhiều ô ngang hàng ở desktop — Thông tin nhanh, khối hành động, dòng meta, thẻ thông tin — ở `≤ 640px` chuyển thành **mỗi ô một hàng chiếm hết bề rộng**, nhãn bên trái, giá trị bên phải. Cấm bóp cột: không ô nào được hẹp hơn 100% bề rộng vùng chứa, trừ khi nội dung của nó ngắn hơn một dòng.
 >
-> **Loại trừ: lưới thẻ không thuộc luật này.** Thẻ Tour, Gần đây, Trải nghiệm tại đây mang ảnh và tiêu đề, không phải cặp nhãn/giá trị. Chúng xếp chồng dọc, mỗi thẻ một khối, như hiện nay. Luật 4 chỉ áp cho vùng dữ liệu dạng nhãn/giá trị.
+> **Loại trừ: lưới thẻ không thuộc luật này.** Thẻ Tour, Gần đây, Trải nghiệm tại đây mang ảnh và tiêu đề, không phải cặp nhãn/giá trị. Chúng xếp chồng dọc, mỗi thẻ một khối, như hiện nay. Luật 5 chỉ áp cho vùng dữ liệu dạng nhãn/giá trị.
 
-Loại trừ này phải viết ra. Không viết thì Design sẽ áp Luật 4 lên lưới thẻ và biến thẻ có ảnh thành dòng nhãn/giá trị.
+Loại trừ này phải viết ra. Không viết thì Design sẽ áp Luật 5 lên lưới thẻ và biến thẻ có ảnh thành dòng nhãn/giá trị.
 
 Ngưỡng `640px` lấy theo breakpoint đang dùng trong `PriceDisplay.astro` và họ component cùng nhóm, không mở breakpoint mới.
 
@@ -187,7 +224,7 @@ Ngưỡng `640px` lấy theo breakpoint đang dùng trong `PriceDisplay.astro` v
 
 Sửa ba chỗ, cho **cả bốn** entity:
 
-| Chỗ | v2.1 | v2.2 |
+| Chỗ | v2.2 (đang hiệu lực) | v2.3 |
 |---|---|---|
 | §3 hàng "Đoạn mở" | *(ngầm hiểu trong hero)* | dải sáng **dưới hero, sau thanh dính**, trên Thông tin nhanh |
 | §3.1 ma trận, dòng `summary` | `hero` × 4 entity | `dải đoạn mở` × 4 entity |
@@ -201,13 +238,13 @@ Giữ nguyên: `summary` vẫn là nguồn `speakable` (§3 hàng speakable, S2.
 
 Luật 3 "giá trước, chữ sau" đòi màn đầu của entity thương mại có giá hoặc nhãn miễn phí. Với lựa chọn §3.6, thanh dính giữ nguyên vị trí ngay dưới hero, nên giá không tụt xuống dòng nào. Trên di động, §3.1 vốn đã khai "thanh đáy giá + CTA luôn thấy" — thanh đáy không phụ thuộc vị trí đoạn mở.
 
-**Ghi rõ trong v2.2 rằng Luật 3 đã được kiểm và không đổi**, để QA1 không phải suy lại.
+**Ghi rõ trong v2.3 rằng Luật 3 đã được kiểm và không đổi**, để QA1 không phải suy lại.
 
 ### 5.4 Làm §3.1 đọc được bằng máy — hợp đồng cho bộ kiểm Luật 1
 
-Đây là phần đóng gốc §2.7. `06` v2.2 phải bổ sung ba thứ để một validator đọc được §3.1, thay vì để nó là bảng chỉ người đọc.
+Đây là phần đóng gốc §2.7. `06` v2.3 phải bổ sung ba thứ để một validator đọc được §3.1, thay vì để nó là bảng chỉ người đọc.
 
-**a. Đặt tên định danh cho từng vùng.** §3 hiện gọi vùng bằng tên tiếng Việt tự do ("Thông tin nhanh", "thanh dính", "khối hành động"). v2.2 thêm một cột hoặc một bảng phụ gán mỗi vùng một `id` ổn định:
+**a. Đặt tên định danh cho từng vùng.** §3 hiện gọi vùng bằng tên tiếng Việt tự do ("Thông tin nhanh", "thanh dính", "khối hành động"). v2.3 thêm một cột hoặc một bảng phụ gán mỗi vùng một `id` ổn định:
 
 | Vùng | `id` |
 |---|---|
@@ -220,7 +257,7 @@ Luật 3 "giá trước, chữ sau" đòi màn đầu của entity thương mạ
 | thẻ bản đồ | `map-card` |
 | mục thân bài | `section-<tên mục>` |
 
-**b. Khai ngoại lệ thành dữ liệu, không thành câu văn.** Luật 1 hiện ghi ngoại lệ bằng văn xuôi ("hiện chỉ có giá"). v2.2 khai thành bảng máy đọc được: field `giá` → `["sticky-bar", "action-block"]`. Thêm ngoại lệ về sau là thêm một dòng, và validator tự nới theo — không phải sửa mã validator.
+**b. Khai ngoại lệ thành dữ liệu, không thành câu văn.** Luật 1 hiện ghi ngoại lệ bằng văn xuôi ("hiện chỉ có giá"). v2.3 khai thành bảng máy đọc được: field `giá` → `["sticky-bar", "action-block"]`. Thêm ngoại lệ về sau là thêm một dòng, và validator tự nới theo — không phải sửa mã validator.
 
 **c. Buộc component gắn nhãn vùng.** Mỗi component vùng render `data-region="<id>"`, mỗi ô dữ liệu render `data-field="<tên field trong 01>"`. Không có hai thuộc tính này thì không có cách nào đếm vùng trên HTML đã dựng mà không đoán qua class — mà class thì đổi theo mỗi lần sửa CSS.
 
@@ -230,7 +267,13 @@ Luật 3 "giá trước, chữ sau" đòi màn đầu của entity thương mạ
 2. Quét `dist/**/*.html`, gom `(field, region)` theo từng trang.
 3. Đỏ khi một `field` xuất hiện ở nhiều hơn một `region` mà cặp đó không có trong bảng ngoại lệ; đỏ khi `field` render ở `region` khác với vùng §3.1 khai.
 
-Thêm vào `gate:all`. Mốc nghiệm thu: chạy trên bản dựng hiện tại phải **đỏ với đúng 44 trang** ở §2.1 — nếu chạy mà xanh thì bộ kiểm sai, không phải trang sạch. Sau V0a phải **xanh**.
+Thêm vào `gate:all`. **Ba mốc nghiệm thu, cả ba phải đạt** — nếu không, bộ kiểm sai chứ không phải trang sạch:
+
+1. Chạy trên bản dựng **trước** V0a: đỏ ở **44 trang**, phủ đủ **15 cặp** field ở §2.1.
+2. Bắt được ca `isAccessibleForFree` của Điểm tham quan — ca mà cả so-chuỗi lẫn so-biểu-thức đều đo sai (§2.1). Đây là bài kiểm thật của thiết kế `data-field`.
+3. **Không** đỏ ở cặp `departureNote` / `tripOrigin` — hai field khác nhau trùng chuỗi. Đỏ ở đây là vi phạm N11, tức bộ kiểm đang so chuỗi trá hình.
+
+Sau V0a phải **xanh** cả ba.
 
 **Vì sao đọc §3.1 chứ không chép tay.** DR-027 đã ghi đúng bài học này: trước 2026-08-05, `g3` mang tên bản ánh xạ nhưng bảng trong mã là bản chép tay và `BINDING_MAP_PATH` chưa từng được mở — sửa `06` không làm đổi gì máy kiểm, nên tài liệu và bộ kiểm thành hai nguồn sự thật song song (N7, P6). V0b không được lặp lại lỗi đó.
 
@@ -254,7 +297,7 @@ Kèm **bảng chi phí font**: từng ứng viên, số byte woff2 từng file, 
 
 ### Chặng 2 — áp vào trang (8 artboard)
 
-Bốn entity × desktop 1280 + di động 390, theo bộ đã chốt và theo `06` v2.2:
+Bốn entity × desktop 1280 + di động 390, theo bộ đã chốt và theo `06` v2.3:
 
 | Entity | Desktop | Di động |
 |---|---|---|
@@ -263,7 +306,7 @@ Bốn entity × desktop 1280 + di động 390, theo bộ đã chốt và theo `0
 | Địa danh | dựng lại từ `DiaDanh` | **mới — chưa từng có** |
 | Trải nghiệm | dựng lại từ `TraiNghiem` | **mới — chưa từng có** |
 
-Mỗi artboard chặng 2 kèm **bảng đối chiếu vùng ↔ dòng nào trong `06` v2.2**. Vùng không đối chiếu được là vùng phải bỏ.
+Mỗi artboard chặng 2 kèm **bảng đối chiếu vùng ↔ dòng nào trong `06` v2.3**. Vùng không đối chiếu được là vùng phải bỏ.
 
 **Vì sao tách hai chặng.** Gộp lại thì Design phải dựng 8 artboard × 3 ứng viên chữ = 24 bản, phần lớn vứt đi. Tách ra thì chủ dự án chốt chữ trên một màn hình rồi mới trả giá cho tám bản.
 
@@ -314,7 +357,7 @@ Mỗi artboard chặng 2 kèm **bảng đối chiếu vùng ↔ dòng nào trong
 
 **R-2 — Đổi chữ lần thứ tư.** Be Vietnam Pro → Lora → Nunito (cả hai trong ngày 06/08) → đảo vai (14/08) → nay có thể là bộ mới. Cách phòng: R4 đặt trần byte, R5 bắt đo LCP trước khi lên live, và ứng viên A luôn là bộ đang chạy để chủ dự án thấy rõ mình đang đánh đổi cái gì.
 
-**R-3 — `06` v2.2 làm sáu mockup 4B lỗi thời.** Sáu mockup đó vừa đạt QA1 sau ba vòng. Sau v2.2 chúng sai ở vùng đoạn mở. Chấp nhận có chủ ý: chặng 2 dựng lại toàn bộ, và QA1 vòng 5 chạy trên bản mới. Bằng chứng QA1 4B **không bị xoá** — nó vẫn là bằng chứng của thứ đã kiểm tại `e4e1d8a`.
+**R-3 — `06` v2.3 làm sáu mockup 4B lỗi thời.** Sáu mockup đó vừa đạt QA1 sau ba vòng. Sau v2.3 chúng sai ở vùng đoạn mở. Chấp nhận có chủ ý: chặng 2 dựng lại toàn bộ, và QA1 vòng 5 chạy trên bản mới. Bằng chứng QA1 4B **không bị xoá** — nó vẫn là bằng chứng của thứ đã kiểm tại `e4e1d8a`.
 
 **R-4 — V0a phụ thuộc hai quyết định chưa chốt.** Code 4B không chạy được cho tới khi chủ dự án chốt cổng QA1 4B và chốt N3/N15 (`docs/specs/DE-XUAT-2026-08-22-go-N3-N15.md`). Nếu hai việc đó kẹt, 44 trang lặp vùng kẹt theo. Đây là lý do §3.5 xếp V0a đi trước.
 

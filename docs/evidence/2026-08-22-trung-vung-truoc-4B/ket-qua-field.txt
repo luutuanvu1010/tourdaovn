@@ -1,0 +1,19 @@
+template                 field nuoi CA HAI vung                               nhan
+────────────────────────────────────────────────────────────────────────────────────────────────────────
+  AttractionDetail       openingHours                                       hours
+  AttractionDetail       telephone                                          phone
+  ExperienceDetail       duration                                           duration
+  ExperienceDetail       touristType                                        suitableFor
+  PlaceDetail            typeLabel                                          type
+  PlaceDetail            openingHours                                       hours
+  PlaceDetail            containedInPlace                                   partOf
+  RestaurantDetail       servesCuisine                                      cuisine
+  RestaurantDetail       openingHours                                       hours
+  RestaurantDetail       telephone                                          phone
+  SpecialtyDetail        typeLabel                                          type
+  SpecialtyDetail        originNote                                         origin
+  SpecialtyDetail        season                                             season
+  TourDetail             duration                                           duration
+  TourDetail             formatLabel                                        format
+
+Tong cap field-trung-vung o tang template: 15
