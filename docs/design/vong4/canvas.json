@@ -1,6 +1,10 @@
 {
   "pages": [
     {
+      "id": "page-0",
+      "name": "Xem thử — ảnh thật"
+    },
+    {
       "id": "page-1",
       "name": "Audit & hướng"
     },
@@ -10,6 +14,15 @@
     }
   ],
   "artboards": [
+    {
+      "file": "XemThu.dc.html",
+      "title": "Xem thử với ảnh thật — Điểm tham quan + Tour (desktop 1280)",
+      "x": 0,
+      "y": 0,
+      "w": 1280,
+      "h": 2500,
+      "page": "page-0"
+    },
     {
       "file": "HienTrang.dc.html",
       "title": "Hiện trạng — ảnh chụp & số đo",
@@ -102,6 +115,14 @@
     }
   ],
   "annotations": [
+    {
+      "id": "xemthu",
+      "page": "page-0",
+      "x": -320,
+      "y": 0,
+      "w": 280,
+      "text": "Bản XEM THỬ: ảnh thật lấy từ Sanity của chính hai trang đó, để thấy giao diện sẽ ra sao khi có ảnh.\n\nChỉ dựng phần quyết định: hero, thanh dính, Thông tin nhanh, khối hành động, form đặt tour, lịch trình.\n\nBản đầy đủ 4 entity ở trang 'Hi-fi 4B' — đó mới là hiện vật đã qua QA1, cố ý giữ ô kẻ chéo thay ảnh."
+    },
     {
       "id": "doc-ke-hoach",
       "page": "page-1",
@@ -201,6 +222,6 @@
   ],
   "launch": {
     "view": "canvas",
-    "page": "page-2"
+    "page": "page-0"
   }
 }
