@@ -4,12 +4,16 @@ import type { ValidatorResult } from './i1-i19.js'
 const VALID_UNITS = new Set(['perPax', 'perRoomNight', 'perTicket'])
 const COMMERCIAL_TYPES = new Set(['experience', 'tour', 'hotel', 'resort', 'attraction', 'event'])
 const ALLOWED_TOP_KEYS: Record<string, Set<string>> = {
-  perPax: new Set(['unit', 'amount', 'tiers']),
+  perPax: new Set(['unit', 'amount', 'tiers', 'paxRates']),   // paxRates — ADR-0027
   perRoomNight: new Set(['unit', 'from', 'asOf']),
   perTicket: new Set(['unit', 'tickets']),
 }
 const ALLOWED_TIER_KEYS = new Set(['maxPax', 'amount'])
 const ALLOWED_TICKET_KEYS = new Set(['name', 'amount'])
+// paxRates: khoá con enum đóng, mỗi khoá {amount, note} — SPEC-2026-08-21-dat-tour §4.2
+const ALLOWED_PAX_CODES = new Set(['child', 'senior', 'infant'])
+const ALLOWED_PAX_RATE_KEYS = new Set(['amount', 'note'])
+const PAX_NOTE_MAX = 40
 const FORBIDDEN_KEYS = /^(cost|commission|gia_von|hoa_hong|profit|margin|chiet_khau|wholesale|retail_price)$/i
 
 // ── PY1: unit thuộc enum perPax/perRoomNight/perTicket ──
@@ -43,6 +47,21 @@ export function validatePY2(prices: Map<string, PriceEntry>): ValidatorResult {
           const t = tiers[i]
           if (typeof t.maxPax !== 'number' || typeof t.amount !== 'number') {
             errors.push(`${key}: tiers[${i}] thiếu maxPax hoặc amount (PY2)`)
+          }
+        }
+      }
+      if ('paxRates' in entry) {
+        const pr = (entry as any).paxRates
+        if (hasTiers) {
+          errors.push(`${key}: paxRates không được đi cùng tiers[] (PY2)`)
+        }
+        if (pr === null || typeof pr !== 'object' || Array.isArray(pr)) {
+          errors.push(`${key}: paxRates phải là object {child|senior|infant: {amount, note}} (PY2)`)
+        } else {
+          for (const [code, rate] of Object.entries(pr as Record<string, any>)) {
+            if (!rate || typeof rate !== 'object' || typeof rate.amount !== 'number') {
+              errors.push(`${key}: paxRates.${code} thiếu amount (PY2)`)
+            }
           }
         }
       }
@@ -205,6 +224,28 @@ export function validatePY7(prices: Map<string, PriceEntry>): ValidatorResult {
           if (!ALLOWED_TICKET_KEYS.has(k)) {
             errors.push(`${key}: tickets[${i}] có khóa lạ "${k}" không thuộc lược đồ (PY7)`)
           }
+        }
+      }
+    }
+
+    // Kiểm paxRates: khoá con đóng, khoá trong từng hạng đóng, amount ≥ 0, note ≤ 40 ký tự
+    if (raw.paxRates && typeof raw.paxRates === 'object' && !Array.isArray(raw.paxRates)) {
+      for (const [code, rate] of Object.entries(raw.paxRates as Record<string, any>)) {
+        if (!ALLOWED_PAX_CODES.has(code)) {
+          errors.push(`${key}: paxRates.${code} không thuộc enum [child, senior, infant] (PY7)`)
+          continue
+        }
+        if (!rate || typeof rate !== 'object') continue
+        for (const k of Object.keys(rate)) {
+          if (!ALLOWED_PAX_RATE_KEYS.has(k)) {
+            errors.push(`${key}: paxRates.${code} có khóa lạ "${k}" không thuộc lược đồ (PY7)`)
+          }
+        }
+        if (typeof rate.amount === 'number' && (!Number.isInteger(rate.amount) || rate.amount < 0)) {
+          errors.push(`${key}: paxRates.${code}.amount=${rate.amount} phải là số nguyên ≥ 0 VND (PY7)`)
+        }
+        if (rate.note !== undefined && (typeof rate.note !== 'string' || rate.note.length > PAX_NOTE_MAX)) {
+          errors.push(`${key}: paxRates.${code}.note phải là chuỗi ≤ ${PAX_NOTE_MAX} ký tự (PY7)`)
         }
       }
     }
