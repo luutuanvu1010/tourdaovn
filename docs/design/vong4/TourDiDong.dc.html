@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@700;800&amp;family=Nunito:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+:root{--c-primary:#0C4A6E;--c-primary-strong:#082F49;--c-primary-soft:#F0F7FC;--c-accent:#C0392B;--c-accent-strong:#96271A;--c-accent-soft:#FEF2F0;--c-sand:#F5A623;--c-sand-soft:#FBE3B3;--c-sand-border:#e9d3a4;--c-sand-text:#5a4109;--c-surface:#FFFFFF;--c-surface-alt:#F8FAFC;--c-card:#FFFFFF;--c-text:#0F172A;--c-text-muted:#475569;--c-text-inverse:#F8FAFC;--c-border:#E2E8F0;--font-display:"Be Vietnam Pro","Nunito",system-ui,sans-serif;--font-ui:"Nunito","Be Vietnam Pro",system-ui,sans-serif;--fs-badge:11px;--fs-xs:12px;--fs-label:14px;--fs-sm:15px;--fs-base:17px;--fs-h5:20px;--fs-h4:26px;--lh-body:1.68;--lh-display:1.22;--ls-eyebrow:0.08em;--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--radius-sm:8px;--radius-md:12px;--radius-lg:18px;--radius-pill:999px;--shadow-raised:0 6px 24px -8px rgba(0,91,150,.15),0 2px 6px rgba(26,32,44,.05);--underline-width:28px;--underline-height:3px}
+[data-theme='cat-bien']{--c-surface:#FDFAF5;--c-primary:#155E75;--c-accent:#B45309;--c-text:#1C1917;--c-text-muted:#57534E;--c-primary-strong:#0E4A5C;--c-accent-strong:#92400E}
+[data-theme='ngoc-lam']{--c-surface:#FFFFFF;--c-primary:#0F766E;--c-accent:#BE123C;--c-text:#0F172A;--c-text-muted:#475569;--c-primary-strong:#0B5A54;--c-accent-strong:#9F1239}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{margin:0;background:#e8ecef;font-family:var(--font-ui);font-weight:500;font-size:var(--fs-base);line-height:var(--lh-body);color:var(--c-text);-webkit-font-smoothing:antialiased}
+a{color:var(--c-primary);text-decoration:none}
+h1,h2,h3{font-family:var(--font-display);line-height:1.16;letter-spacing:0;font-weight:700}
+.ph{background:repeating-linear-gradient(135deg,rgba(15,23,42,.06) 0 22px,rgba(15,23,42,.12) 22px 44px)}
+.phone{width:390px;background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius-lg);overflow:hidden;position:relative;box-shadow:var(--shadow-raised)}
+.hdr{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 var(--s4);border-bottom:1px solid var(--c-border);background:var(--c-surface)}
+.sec-title{font-family:var(--font-display);font-size:var(--fs-h4);font-weight:800;color:var(--c-primary);letter-spacing:-0.015em;margin-bottom:var(--s2)}
+.underline{display:block;width:var(--underline-width);height:var(--underline-height);background:var(--c-sand);border-radius:2px;margin-bottom:var(--s4)}
+.fact{display:flex;gap:var(--s2);align-items:flex-start;padding:var(--s3);min-width:0}
+.fact svg{flex:none;color:var(--c-primary);margin-top:2px}
+.fact-l{display:block;font-size:var(--fs-xs);color:var(--c-text-muted);line-height:1.3}
+.fact-v{display:block;font-family:var(--font-display);font-size:var(--fs-sm);font-weight:700;color:var(--c-text);line-height:1.3}
+.hl{display:flex;gap:var(--s3);align-items:flex-start;padding:var(--s3);background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);font-size:var(--fs-sm)}
+.hl i{flex:none;width:8px;height:8px;border-radius:50%;background:var(--c-sand);margin-top:8px}
+.badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:var(--radius-pill);font-size:var(--fs-badge);font-weight:600;background:var(--c-primary-soft);color:var(--c-primary);align-self:flex-start}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);padding:12px 20px;border-radius:var(--radius-pill);font-family:var(--font-ui);font-size:var(--fs-base);font-weight:700;background:var(--c-accent);color:var(--c-text-inverse);min-height:44px}
+.bar{position:absolute;left:0;right:0;bottom:0;height:72px;background:var(--c-surface);border-top:1px solid var(--c-border);box-shadow:0 -4px 16px rgba(15,23,42,.08);display:flex;align-items:center;justify-content:space-between;gap:var(--s3);padding:0 var(--s4)}
+.lbl{font-family:var(--font-ui);font-size:var(--fs-label);font-weight:700;color:var(--c-text-muted);text-transform:uppercase;letter-spacing:var(--ls-eyebrow);line-height:1.5;margin-bottom:var(--s3)}
+.blk{padding:var(--s3) var(--s4);border-top:1px solid var(--c-border);font-size:var(--fs-label);font-weight:700}
+.blk span{font-weight:500;color:var(--c-text-muted)}
+</style>
+</helmet>
+
+<div data-theme="{{ theme }}" style="width:924px;padding:var(--s6);display:flex;gap:80px;align-items:flex-start;font-family:var(--font-ui)">
+
+  <div style="display:flex;flex-direction:column;gap:var(--s3)">
+    <div class="lbl">Tour · màn đầu · 390 × 844 · thanh đáy dính trỏ #dat-tour</div>
+    <div class="phone" style="height:844px">
+      <div class="hdr">
+        <span style="font-family:var(--font-display);font-size:20px;font-weight:800;color:var(--c-primary)">tourdao.vn</span>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--c-text)"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg>
+      </div>
+      <div class="ph" style="height:210px;background-color:#cfe3ee"></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;height:56px"><div class="ph" style="background-color:#d9e8ef"></div><div class="ph" style="background-color:#d4e6e1"></div><div class="ph" style="background-color:#e3e9ef"></div><div class="ph" style="background-color:#cfe0ea"></div></div>
+      <div style="padding:var(--s4) var(--s4) 0;display:flex;flex-direction:column;gap:var(--s2)">
+        <div style="font-size:var(--fs-xs);color:var(--c-text-muted)">Tour</div>
+        <span class="badge">Ghép hoặc riêng</span>
+        <h1 style="font-size:24px;font-weight:800;line-height:var(--lh-display);color:var(--c-text);text-wrap:balance">Tour 3 đảo Nha Trang Deluxe — Bãi Tranh · Làng Chài · Vịnh San Hô</h1>
+        <p style="font-size:var(--fs-sm);color:var(--c-text-muted);line-height:1.5">Tour trong ngày nhẹ nhàng, thiên về vui chơi và nghỉ dưỡng trên biển — hợp với gia đình có trẻ em.</p>
+      </div>
+      <div style="margin:var(--s4);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md)">
+        <div class="fact" style="border-right:1px solid var(--c-border);border-bottom:1px solid var(--c-border)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15 14"></polyline></svg><div><span class="fact-l">Thời lượng</span><span class="fact-v">8:00 – 16:00</span></div></div>
+        <div class="fact" style="border-bottom:1px solid var(--c-border)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path><circle cx="12" cy="10" r="3"></circle></svg><div><span class="fact-l">Khởi hành</span><span class="fact-v">Cảng Du Lịch Nha Trang</span></div></div>
+        <div class="fact" style="grid-column:1/-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg><div><span class="fact-l">Phù hợp với</span><span class="fact-v">Người lớn, Trẻ em</span></div></div>
+      </div>
+      <div style="padding:0 var(--s4)">
+        <h2 class="sec-title">Điểm nổi bật</h2><span class="underline"></span>
+        <div class="hl"><i></i><span>Tắm biển và thư giãn trên bờ cát trắng mịn màng</span></div>
+      </div>
+      <div class="bar">
+        <div><div style="font-size:var(--fs-xs);color:var(--c-text-muted)">Giá từ</div><div style="font-family:var(--font-display);font-size:var(--fs-h5);font-weight:800;color:var(--c-primary-strong)">650.000₫ <span style="font-size:var(--fs-xs);font-weight:500;color:var(--c-text-muted)">/ người</span></div></div>
+        <a href="#dat-tour" class="btn" style="flex:1;max-width:200px">Đặt tour ngay</a>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:var(--s3)">
+    <div class="lbl">Tour · cả trang · thứ tự khối trên di động</div>
+    <div class="phone" style="display:flex;flex-direction:column">
+      <div style="padding:var(--s3) var(--s4);background:var(--c-primary-soft);font-size:var(--fs-label);color:var(--c-primary);font-weight:700">1 · Header · Hero · Huy hiệu "Ghép hoặc riêng" + Tiêu đề + Đoạn mở</div>
+      <div class="blk" style="background:var(--c-card)">2 · Thông tin nhanh <span>— thời lượng, khởi hành, phù hợp (2 cột)</span></div>
+      <div class="blk" style="background:var(--c-accent-soft);color:var(--c-accent-strong)">3 · Form đặt tour (#dat-tour) <span style="color:var(--c-accent-strong)">— giá từ, ngày, số người, tạm tính, "Đặt tour ngay", "Tư vấn miễn phí", hotline; đơn vị vận hành + giấy phép</span></div>
+      <div class="blk">4 · Điểm nổi bật</div>
+      <div class="blk">5 · Lịch trình <span>— timeline 6 điểm dừng</span></div>
+      <div class="blk">6 · Bao gồm / Không bao gồm</div>
+      <div class="blk">7 · Chi tiết <span>— mục lục thu gọn rồi thân bài</span></div>
+      <div class="blk">8 · Mùa nào nên đi</div>
+      <div class="blk">9 · Câu hỏi thường gặp</div>
+      <div class="blk">10 · Tour tương tự · Cập nhật · Footer</div>
+      <div class="blk" style="background:var(--c-accent-soft);color:var(--c-accent-strong)">Thanh đáy dính: "Giá từ 650.000₫" + "Đặt tour ngay" → cuộn tới form (ADR-0027: CTA di động trỏ #dat-tour)</div>
+    </div>
+    <div style="max-width:390px;font-size:var(--fs-label);color:var(--c-text-muted);line-height:1.5">Form đứng ngay sau Thông tin nhanh (06 §3 "Khối hành động — di động: nằm sau Thông tin nhanh"): khách thấy giá, chọn ngày và số người trước khi đọc dài. Không có giá → không form, thay bằng kênh Zalo/hotline (quyết định nền 3).</div>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"theme":{"editor":"enum","options":["bien-sau","cat-bien","ngoc-lam"],"default":"bien-sau","section":"Bộ giao diện"},"$preview":{"width":924,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.theme ?? 'bien-sau' };
+  }
+}
+</script>
+</body>
+</html>

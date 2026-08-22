@@ -1,0 +1,245 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@700;800&amp;family=Nunito:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+:root{--c-primary:#0C4A6E;--c-primary-strong:#082F49;--c-primary-soft:#F0F7FC;--c-accent:#C0392B;--c-accent-strong:#96271A;--c-accent-soft:#FEF2F0;--c-sand:#F5A623;--c-sand-soft:#FBE3B3;--c-sand-border:#e9d3a4;--c-sand-text:#5a4109;--c-sand-text-strong:#3d2a05;--c-surface:#FFFFFF;--c-surface-alt:#F8FAFC;--c-card:#FFFFFF;--c-text:#0F172A;--c-text-muted:#475569;--c-text-inverse:#F8FAFC;--c-border:#E2E8F0;--c-sea:#0E7490;--c-green:#0E7490;--c-green-soft:#DCFCE7;--c-green-text:#166534;--c-footer-bg:#0E1A23;--c-footer-text:#9aa9b2;--font-display:"Be Vietnam Pro","Nunito",system-ui,sans-serif;--font-ui:"Nunito","Be Vietnam Pro",system-ui,sans-serif;--fs-badge:11px;--fs-xs:12px;--fs-label:14px;--fs-sm:15px;--fs-base:17px;--fs-card-title:21px;--fs-nav:18px;--fs-h5:20px;--fs-h4:26px;--fs-section:32px;--fs-h3:32px;--fs-h2:40px;--fs-hero:46px;--lh-heading:1.16;--lh-body:1.68;--lh-display:1.22;--ls-eyebrow:0.08em;--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px;--s8:64px;--radius-sm:8px;--radius-md:12px;--radius-lg:18px;--radius-pill:999px;--shadow-card:0 1px 3px rgba(15,23,42,0.08);--shadow-raised:0 6px 24px -8px rgba(0,91,150,.15),0 2px 6px rgba(26,32,44,.05);--underline-width:28px;--underline-height:3px;--header-h:68px;--sticky-h:56px}
+[data-theme='cat-bien']{--c-surface:#FDFAF5;--c-primary:#155E75;--c-accent:#B45309;--c-text:#1C1917;--c-text-muted:#57534E;--c-primary-strong:#0E4A5C;--c-accent-strong:#92400E}
+[data-theme='ngoc-lam']{--c-surface:#FFFFFF;--c-primary:#0F766E;--c-accent:#BE123C;--c-text:#0F172A;--c-text-muted:#475569;--c-primary-strong:#0B5A54;--c-accent-strong:#9F1239}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{margin:0;background:#e8ecef;font-family:var(--font-ui);font-weight:500;font-size:var(--fs-base);line-height:var(--lh-body);color:var(--c-text);-webkit-font-smoothing:antialiased}
+a{color:var(--c-primary);text-decoration:none}a:hover{color:var(--c-primary-strong)}
+h1,h2,h3,h4{font-family:var(--font-display);line-height:var(--lh-heading);letter-spacing:0;font-weight:700}
+p{text-wrap:pretty}
+summary{cursor:pointer;list-style:none}summary::-webkit-details-marker{display:none}
+input,button{font:inherit}
+.ph{background:repeating-linear-gradient(135deg,rgba(15,23,42,.06) 0 22px,rgba(15,23,42,.12) 22px 44px)}
+.sec-title{font-family:var(--font-display);font-size:var(--fs-section);font-weight:800;color:var(--c-primary);line-height:var(--lh-heading);letter-spacing:-0.015em;margin-bottom:var(--s3)}
+.underline{display:block;width:var(--underline-width);height:var(--underline-height);background:var(--c-sand);border-radius:2px;margin-bottom:var(--s6)}
+.fact{display:flex;gap:var(--s3);align-items:flex-start;min-width:0;padding:var(--s4);border-right:1px solid var(--c-border)}
+.fact:last-child{border-right:0}
+.fact svg{flex:none;color:var(--c-primary);margin-top:2px}
+.fact-l{display:block;font-size:var(--fs-label);color:var(--c-text-muted);line-height:1.4}
+.fact-v{display:block;font-family:var(--font-display);font-size:var(--fs-base);font-weight:700;color:var(--c-text);line-height:1.35}
+.nav a{font-family:var(--font-ui);font-size:var(--fs-nav);font-weight:600;color:var(--c-text);padding:var(--s2) var(--s3);border-radius:var(--radius-sm)}
+.nav a.on{background:var(--c-primary-soft);color:var(--c-primary)}
+.crumb{display:flex;align-items:center;gap:var(--s2);font-size:var(--fs-sm);color:var(--c-text-muted);list-style:none}
+.crumb li+li::before{content:"/";color:var(--c-border);margin-right:var(--s2)}
+.crumb a{color:var(--c-text-muted)}
+.jump a{display:inline-flex;align-items:center;height:100%;font-size:var(--fs-sm);font-weight:600;color:var(--c-text-muted);border-bottom:2px solid transparent;white-space:nowrap}
+.jump a.on{color:var(--c-primary);border-bottom-color:var(--c-primary)}
+.hl{display:flex;gap:var(--s3);align-items:flex-start;padding:var(--s3) var(--s4);background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);font-size:var(--fs-base)}
+.hl i{flex:none;width:8px;height:8px;border-radius:50%;background:var(--c-sand);margin-top:10px}
+.tl{position:relative;padding-left:var(--s6);display:flex;flex-direction:column;gap:var(--s5)}
+.tl::before{content:"";position:absolute;left:17px;top:6px;bottom:6px;width:2px;background:var(--c-border)}
+.stop{position:relative;display:flex;flex-direction:column;gap:2px}
+.stop i{position:absolute;left:calc(-1 * var(--s6) + 8px);top:4px;width:20px;height:20px;border-radius:50%;background:var(--c-card);border:2px solid var(--c-primary);color:var(--c-primary);font-size:var(--fs-badge);font-weight:800;display:flex;align-items:center;justify-content:center;font-style:normal}
+.stop b{font-size:var(--fs-base);font-weight:700}
+.stop span{font-size:var(--fs-sm);color:var(--c-text-muted)}
+.stop em{font-style:normal;font-size:var(--fs-badge);color:var(--c-text-muted);background:var(--c-surface-alt);padding:2px 8px;border-radius:var(--radius-pill);align-self:flex-start}
+.chk{list-style:none;display:flex;flex-direction:column;gap:var(--s3)}
+.chk li{display:flex;gap:var(--s3);align-items:center;font-size:var(--fs-base)}
+.chk b{font-weight:700}
+.faq{border:1px solid var(--c-border);border-radius:var(--radius-md);background:var(--c-card)}
+.faq details+details{border-top:1px solid var(--c-border)}
+.faq summary{display:flex;justify-content:space-between;align-items:center;gap:var(--s4);padding:var(--s4) var(--s5);font-weight:700;font-size:var(--fs-base)}
+.faq .a{padding:0 var(--s5) var(--s4);color:var(--c-text-muted);font-size:var(--fs-base)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);padding:var(--s3) var(--s5);border-radius:var(--radius-pill);font-family:var(--font-ui);font-size:var(--fs-base);font-weight:700;background:var(--c-accent);color:var(--c-text-inverse);border:0;cursor:pointer;min-height:44px}
+.btn:hover{background:var(--c-accent-strong);color:var(--c-text-inverse)}
+.btn.o{background:transparent;color:var(--c-primary);border:1px solid var(--c-border)}
+.lbl{font-size:var(--fs-label);font-weight:700;text-transform:uppercase;letter-spacing:var(--ls-eyebrow);line-height:1.5;color:var(--c-text-muted)}
+.ctr{display:flex;align-items:center;gap:var(--s2)}
+.ctr button{width:36px;height:36px;border-radius:50%;border:1px solid var(--c-border);background:var(--c-card);color:var(--c-primary);font-size:var(--fs-h5);font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.ctr input{width:40px;text-align:center;border:0;font-weight:800;font-size:var(--fs-base);color:var(--c-text);background:transparent}
+.pax{display:flex;justify-content:space-between;align-items:center;gap:var(--s3);padding:var(--s2) 0}
+.pax .n{font-weight:700;font-size:var(--fs-sm)}
+.pax .p{font-size:var(--fs-xs);color:var(--c-text-muted)}
+.toc a{display:block;color:var(--c-primary);font-weight:500;padding:3px 0;font-size:var(--fs-sm)}
+.near{background:var(--c-card);border-radius:var(--radius-md);box-shadow:var(--shadow-card);overflow:hidden}
+.near .img{aspect-ratio:4/3}
+.near .b{padding:var(--s3);display:flex;flex-direction:column;gap:var(--s1)}
+.near h3{font-size:var(--fs-base);font-weight:700;color:var(--c-text);line-height:1.25}
+.badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:var(--radius-pill);font-size:var(--fs-badge);font-weight:600;background:var(--c-primary-soft);color:var(--c-primary);align-self:flex-start}
+</style>
+</helmet>
+
+<div data-theme="{{ theme }}" style="width:1280px;margin:0 auto;background:var(--c-surface);font-family:var(--font-ui);color:var(--c-text)">
+
+  <div style="height:68px;border-bottom:1px solid var(--c-border);background:var(--c-surface)">
+    <div style="max-width:1200px;margin:0 auto;padding:0 24px;height:100%;display:flex;align-items:center;gap:var(--s6)">
+      <div style="display:flex;align-items:center;gap:var(--s2)"><span style="width:34px;height:34px;border-radius:50%;background:var(--c-primary);display:inline-block"></span><span style="font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--c-primary)">tourdao.vn</span></div>
+      <nav class="nav" style="display:flex;align-items:center;gap:var(--s1);margin-left:var(--s4)"><a href="#">Trang chủ</a><a href="#" class="on">Tour</a><a href="#">Điểm tham quan</a><a href="#">Trải nghiệm</a><a href="#">Địa danh</a><a href="#">Kinh nghiệm du lịch</a><a href="#">Đặt vé trực tuyến</a></nav>
+    </div>
+  </div>
+
+  <div style="max-width:1200px;margin:0 auto;padding:var(--s3) 24px">
+    <ol class="crumb"><li><a href="#">Trang chủ</a></li><li><a href="#">Tour</a></li><li><span style="color:var(--c-primary);font-weight:600">Tour 3 đảo Nha Trang Deluxe</span></li></ol>
+  </div>
+
+  <!-- Hero: huy hiệu tourFormat (một bảng nhãn) chỉ ở đây; tiêu đề dài (> 48 ký tự) hạ một bậc về --fs-h2 để giữ ≤ 2 dòng -->
+  <div style="display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:4px;height:430px;background:var(--c-card)">
+    <div style="position:relative;overflow:hidden">
+      <div class="ph" style="position:absolute;inset:0;background-color:#cfe3ee"></div>
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,var(--c-primary-strong) 0%,rgba(8,47,73,.55) 40%,transparent 68%)"></div>
+      <div style="position:absolute;left:0;right:0;bottom:0;padding:var(--s7) var(--s5) var(--s5);display:flex;flex-direction:column;gap:var(--s2)">
+        <div style="display:flex;gap:var(--s2)"><span style="padding:2px 10px;border-radius:var(--radius-pill);background:rgba(248,250,252,.22);color:var(--c-text-inverse);font-size:var(--fs-label);font-weight:600;backdrop-filter:blur(4px)">Ghép hoặc riêng</span></div>
+        <h1 style="font-family:var(--font-display);font-size:var(--fs-h2);font-weight:800;line-height:var(--lh-display);color:var(--c-text-inverse);text-wrap:balance;max-width:24ch">Tour 3 đảo Nha Trang Deluxe — Bãi Tranh · Làng Chài · Vịnh San Hô</h1>
+        <p style="max-width:56ch;color:var(--c-text-inverse);font-size:var(--fs-base);line-height:1.55;opacity:.92">Tour "truyền thống nổi tiếng" trong ngày: lịch trình nhẹ nhàng, thiên về vui chơi và nghỉ dưỡng trên biển — hợp với gia đình có trẻ em.</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:4px"><div class="ph" style="background-color:#d9e8ef"></div><div class="ph" style="background-color:#d4e6e1"></div><div class="ph" style="background-color:#e3e9ef"></div><div class="ph" style="background-color:#cfe0ea"></div></div>
+  </div>
+
+  <!-- Thanh dính: neo + giá (ngoại lệ lặp) + CTA "Đặt tour ngay" → #dat-tour (ADR-0027) -->
+  <div style="height:56px;background:var(--c-surface);border-bottom:1px solid var(--c-border)">
+    <div style="max-width:1200px;margin:0 auto;padding:0 24px;height:100%;display:flex;align-items:center;justify-content:space-between;gap:var(--s5)">
+      <nav class="jump" style="display:flex;gap:var(--s5);height:100%"><a href="#hl" class="on">Điểm nổi bật</a><a href="#lt">Lịch trình</a><a href="#bg">Bao gồm</a><a href="#ct">Chi tiết</a><a href="#mua">Mùa nào nên đi</a><a href="#faq">Câu hỏi thường gặp</a></nav>
+      <div style="display:flex;align-items:center;gap:var(--s4)">
+        <span style="font-family:var(--font-display);font-size:var(--fs-h5);font-weight:800;color:var(--c-primary-strong);white-space:nowrap">từ 650.000₫</span>
+        <a href="#dat-tour" class="btn" style="padding:10px 20px;font-size:var(--fs-sm);min-height:0">Đặt tour ngay</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thông tin nhanh: 3 ô — thời lượng, khởi hành (tripOrigin), phù hợp. Không giá, không hình thức (đã ở hero) -->
+  <div style="max-width:1200px;margin:0 auto;padding:var(--s5) 24px 0">
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);box-shadow:var(--shadow-card)">
+      <div class="fact"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15 14"></polyline></svg><div><span class="fact-l">Thời lượng</span><span class="fact-v">8:00 – 16:00 (trong ngày)</span></div></div>
+      <div class="fact"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path><circle cx="12" cy="10" r="3"></circle></svg><div><span class="fact-l">Khởi hành</span><span class="fact-v">Cảng Du Lịch Nha Trang</span></div></div>
+      <div class="fact"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg><div><span class="fact-l">Phù hợp với</span><span class="fact-v">Người lớn, Trẻ em</span></div></div>
+    </div>
+  </div>
+
+  <div style="max-width:1200px;margin:0 auto;padding:var(--s6) 24px var(--s7);display:grid;grid-template-columns:1fr 340px;gap:var(--s7);align-items:start">
+    <div style="min-width:0;display:flex;flex-direction:column;gap:var(--s7)">
+
+      <section id="hl">
+        <h2 class="sec-title">Điểm nổi bật</h2><span class="underline"></span>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s3)">
+          <div class="hl"><i></i><span>Tắm biển và thư giãn trên bờ cát trắng mịn màng</span></div>
+          <div class="hl"><i></i><span>Lặn biển ngắm san hô</span></div>
+        </div>
+      </section>
+
+      <section id="lt">
+        <h2 class="sec-title">Lịch trình</h2><span class="underline"></span>
+        <div class="tl">
+          <div class="stop"><i>1</i><b>Nội thành Nha Trang</b><span>Đón khách tại điểm hẹn nội thành</span><em>8:00 – 8:45</em></div>
+          <div class="stop"><i>2</i><b>Cảng Du Lịch Nha Trang</b><span>Bến tàu du lịch Nha Trang</span><em>8:45 – 9:00</em></div>
+          <div class="stop"><i>3</i><b><a href="#">Khu du lịch Bãi Tranh</a></b><span>Bãi Tranh Nha Trang — tắm biển, thư giãn</span><em>9:00 – 11:00</em></div>
+          <div class="stop"><i>4</i><b><a href="#">Làng Chài Bích Đầm</a></b><span>Ăn trưa tại Làng Chài</span><em>11:00 – 13:30</em></div>
+          <div class="stop"><i>5</i><b><a href="#">Khu du lịch Vịnh San Hô</a></b><span>Tắm biển vui chơi</span><em>13:30 – 15:00</em></div>
+          <div class="stop"><i>6</i><b>Nội thành Nha Trang</b><span>Trả khách tại điểm hẹn nội thành</span><em>15:00 – 15:30</em></div>
+        </div>
+      </section>
+
+      <section id="bg">
+        <h2 class="sec-title">Bao gồm / Không bao gồm</h2><span class="underline"></span>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:var(--s5)">
+          <div style="background:var(--c-primary-soft);border:1px solid var(--c-primary-soft);border-radius:var(--radius-md);padding:var(--s5)">
+            <h3 style="font-size:var(--fs-card-title);margin-bottom:var(--s4)">Bao gồm</h3>
+            <ul class="chk"><li><b style="color:var(--c-green)">✓</b>Xe đưa đón tận nơi (trong TP Nha Trang)</li><li><b style="color:var(--c-green)">✓</b>Cano cao tốc</li><li><b style="color:var(--c-green)">✓</b>Hướng dẫn viên</li><li><b style="color:var(--c-green)">✓</b>Vé lên đảo Bãi Tranh + Vịnh San Hô</li><li><b style="color:var(--c-green)">✓</b>Ăn trưa set menu</li></ul>
+          </div>
+          <div style="background:var(--c-surface-alt);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--s5)">
+            <h3 style="font-size:var(--fs-card-title);margin-bottom:var(--s4)">Không bao gồm</h3>
+            <ul class="chk"><li><b style="color:var(--c-accent-strong)">✗</b>Chi phí ngoài chương trình</li></ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="ct">
+        <h2 class="sec-title">Chi tiết</h2><span class="underline"></span>
+        <div style="max-width:70ch;display:flex;flex-direction:column;gap:var(--s4)">
+          <div class="toc" style="background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-lg);padding:var(--s4) var(--s5);box-shadow:var(--shadow-card)">
+            <div class="lbl" style="margin-bottom:var(--s2)">Trong bài này</div>
+            <a href="#">Tour 3 đảo Nha Trang Deluxe — trải nghiệm trọn vẹn biển đảo trong ngày</a>
+            <a href="#">Các trải nghiệm trong tour</a>
+            <a href="#">Chính sách hủy đặt chỗ</a>
+          </div>
+          <h3 style="font-size:var(--fs-h4);font-weight:700">Tour 3 đảo Nha Trang Deluxe — trải nghiệm trọn vẹn biển đảo trong ngày</h3>
+          <p>Tour 3 đảo Nha Trang Bãi Tranh là một trong những tour "truyền thống nổi tiếng" du lịch Nha Trang trong ngày. Lịch trình nhẹ nhàng, thiên về vui chơi và nghỉ dưỡng trên biển nên phù hợp với hầu hết mọi người, kể cả gia đình có trẻ em.</p>
+          <p style="font-size:var(--fs-sm);color:var(--c-text-muted)">(Mục "Lịch trình chi tiết" của bài cũ không còn ở đây — từng điểm dừng đã vào ghi chú của lịch trình phía trên, theo luật 2.)</p>
+        </div>
+      </section>
+
+      <section id="mua">
+        <h2 class="sec-title">Mùa nào nên đi</h2><span class="underline"></span>
+        <div style="background:var(--c-sand-soft);border:1px solid var(--c-sand-border);border-radius:var(--radius-lg);padding:var(--s4) var(--s5);color:var(--c-sand-text);font-size:var(--fs-base);max-width:70ch"><p>Từ tháng 2 đến tháng 10 — biển êm, nắng đẹp; tháng 7–9 là mùa thể thao nước sôi động nhất.</p></div>
+      </section>
+
+      <section id="faq">
+        <h2 class="sec-title">Câu hỏi thường gặp</h2><span class="underline"></span>
+        <div class="faq">
+          <details open><summary>Tour cano 3 đảo bắt đầu và kết thúc lúc mấy giờ?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg></summary><div class="a">Tour trong ngày, đón khách từ 8h sáng và kết thúc khoảng 15h30 – 16h00.</div></details>
+          <details><summary>Có đón khách tận nơi không?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg></summary><div class="a">Có — tại khách sạn, bến xe hoặc địa chỉ đã đăng ký trước. Vui lòng có mặt đúng giờ.</div></details>
+          <details><summary>Đoàn đông có được tách tour hay đặt tour riêng không?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg></summary><div class="a">Được. Đoàn lớn có nhu cầu lịch trình riêng sẽ được thiết kế gói tour phù hợp.</div></details>
+          <details><summary>Chính sách giá vé cho trẻ em?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg></summary><div class="a">Dưới 1 m miễn phí; 1 m – 1,3 m tính 70 % giá vé; trên 1,3 m tính như người lớn.</div></details>
+        </div>
+      </section>
+
+      <div style="border-top:1px solid var(--c-border);padding-top:var(--s4);font-size:var(--fs-sm);color:var(--c-text-muted);display:flex;align-items:center;gap:var(--s2)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--c-primary)"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>Cập nhật 21/08/2026</div>
+    </div>
+
+    <!-- Sidebar: KHỐI HÀNH ĐỘNG = BookingForm (ADR-0027 §4.3, bước 1) + đơn vị vận hành & giấy phép. Không bản đồ (tour không có geo). -->
+    <aside style="position:sticky;top:calc(68px + 56px + 16px);display:flex;flex-direction:column;gap:var(--s4)">
+      <div id="dat-tour" style="background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-raised);overflow:hidden">
+        <div style="background:var(--c-primary);color:var(--c-text-inverse);padding:var(--s4) var(--s5)">
+          <div style="font-size:var(--fs-label);opacity:.85">Giá từ</div>
+          <div style="display:flex;align-items:baseline;gap:var(--s2)"><span style="font-family:var(--font-display);font-size:var(--fs-h3);font-weight:800">650.000₫</span><span style="font-size:var(--fs-sm);opacity:.85">/ người</span></div>
+        </div>
+        <div style="padding:var(--s4) var(--s5);display:flex;flex-direction:column;gap:var(--s4)">
+          <div>
+            <div class="lbl" style="margin-bottom:var(--s2)">Ngày khởi hành</div>
+            <div style="display:flex;align-items:center;gap:var(--s2);border:1px solid var(--c-border);border-radius:var(--radius-sm);padding:10px var(--s3);font-weight:700"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--c-primary)"><rect x="3" y="5" width="18" height="16" rx="2"></rect><line x1="3" y1="10" x2="21" y2="10"></line><line x1="8" y1="3" x2="8" y2="7"></line><line x1="16" y1="3" x2="16" y2="7"></line></svg>31/08/2026</div>
+          </div>
+          <div>
+            <div class="lbl" style="margin-bottom:var(--s1)">Số người</div>
+            <div class="pax"><div><div class="n">Người lớn</div><div class="p">650.000₫</div></div><div class="ctr"><button type="button" aria-label="Bớt người lớn">−</button><input type="number" value="2" aria-label="Số người lớn"><button type="button" aria-label="Thêm người lớn">+</button></div></div>
+            <div class="pax" style="border-top:1px solid var(--c-border)"><div><div class="n">Trẻ em (1 m – 1,3 m)</div><div class="p">455.000₫</div></div><div class="ctr"><button type="button" aria-label="Bớt trẻ em">−</button><input type="number" value="0" aria-label="Số trẻ em"><button type="button" aria-label="Thêm trẻ em">+</button></div></div>
+          </div>
+          <div style="background:var(--c-surface-alt);border-radius:var(--radius-sm);padding:var(--s3) var(--s4);display:flex;flex-direction:column;gap:var(--s1);font-size:var(--fs-sm)">
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--c-text-muted)">Người lớn × 2</span><span>1.300.000₫</span></div>
+            <div style="display:flex;justify-content:space-between;font-weight:800;font-size:var(--fs-base);border-top:1px solid var(--c-border);padding-top:var(--s1)"><span>Tạm tính</span><span style="color:var(--c-accent-strong)">1.300.000₫</span></div>
+            <div style="font-size:var(--fs-xs);color:var(--c-text-muted)">Giá tạm tính theo bảng giá công bố; nhân viên xác nhận trước khi thanh toán.</div>
+          </div>
+          <button type="button" class="btn" style="width:100%">Đặt tour ngay</button>
+          <a href="#" class="btn o" style="width:100%">Tư vấn miễn phí</a>
+          <div style="text-align:center;font-size:var(--fs-sm);color:var(--c-text-muted)">Hotline: <a href="#" style="font-weight:700">[hotline Tour Đảo]</a></div>
+        </div>
+        <div style="border-top:1px solid var(--c-border);padding:var(--s3) var(--s5);font-size:var(--fs-xs);color:var(--c-text-muted);line-height:1.5">Đơn vị vận hành: <strong style="color:var(--c-text)">Công ty TNHH Tour Đảo</strong> · Giấy phép lữ hành quốc tế 56-245/2023/TCDL-GP-LHQT</div>
+      </div>
+    </aside>
+  </div>
+
+  <div style="background:var(--c-surface-alt);padding:var(--s7) 0">
+    <div style="max-width:1200px;margin:0 auto;padding:0 24px">
+      <h2 style="font-family:var(--font-display);font-size:var(--fs-h3);font-weight:700;color:var(--c-text);margin-bottom:var(--s6)">Tour tương tự</h2>
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s5)">
+        <a href="#" class="near"><div class="img ph" style="background-color:#d9e8ef"></div><div class="b"><h3>Tour 3 đảo Hòn Mun - Mini Beach - Làng Chài</h3><span class="badge">Ghép hoặc riêng</span></div></a>
+        <a href="#" class="near"><div class="img ph" style="background-color:#e3e9ef"></div><div class="b"><h3>Tour 3 đảo Vip Nha Trang - Bãi Tranh - Làng Chài - Hòn Tằm</h3><span class="badge">Ghép hoặc riêng</span></div></a>
+        <a href="#" class="near"><div class="img ph" style="background-color:#cfe0ea"></div><div class="b"><h3>Tour 3 đảo Nha Trang: Hòn Mun - Hòn Tằm - Làng Chài</h3><span class="badge">Ghép hoặc riêng</span></div></a>
+        <a href="#" class="near"><div class="img ph" style="background-color:#d4e6e1"></div><div class="b"><h3>Tour 3 đảo Nha Trang Mini Beach - Hòn Tằm - Làng Chài</h3><span class="badge">Ghép hoặc riêng</span></div></a>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:var(--c-footer-bg);color:var(--c-footer-text);padding:var(--s6) 0"><div style="max-width:1200px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;font-size:var(--fs-sm)"><span>© 2026 Công ty TNHH Tour Đảo</span><span>Tour · Vé · Phòng · Xe đưa đón</span></div></div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"theme":{"editor":"enum","options":["bien-sau","cat-bien","ngoc-lam"],"default":"bien-sau","section":"Bộ giao diện"},"$preview":{"width":1280,"height":3300}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.theme ?? 'bien-sau' };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@700;800&amp;family=Nunito:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+:root{--c-primary:#0C4A6E;--c-primary-strong:#082F49;--c-primary-soft:#F0F7FC;--c-accent:#C0392B;--c-accent-strong:#96271A;--c-accent-soft:#FEF2F0;--c-sand:#F5A623;--c-sand-soft:#FBE3B3;--c-sand-border:#e9d3a4;--c-sand-text:#5a4109;--c-sand-text-strong:#3d2a05;--c-surface:#FFFFFF;--c-surface-alt:#F8FAFC;--c-card:#FFFFFF;--c-text:#0F172A;--c-text-muted:#475569;--c-text-inverse:#F8FAFC;--c-border:#E2E8F0;--c-sea:#0E7490;--c-green:#0E7490;--c-green-soft:#DCFCE7;--c-green-text:#166534;--c-footer-bg:#0E1A23;--c-footer-text:#9aa9b2;--font-display:"Be Vietnam Pro","Nunito",system-ui,sans-serif;--font-ui:"Nunito","Be Vietnam Pro",system-ui,sans-serif;--fs-badge:11px;--fs-xs:12px;--fs-label:14px;--fs-sm:15px;--fs-base:17px;--fs-card-title:21px;--fs-nav:18px;--fs-h5:20px;--fs-h4:26px;--fs-section:32px;--fs-h3:32px;--fs-h2:40px;--fs-hero:46px;--lh-heading:1.16;--lh-body:1.68;--lh-display:1.22;--ls-eyebrow:0.08em;--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px;--s8:64px;--radius-sm:8px;--radius-md:12px;--radius-lg:18px;--radius-pill:999px;--shadow-card:0 1px 3px rgba(15,23,42,0.08);--shadow-raised:0 6px 24px -8px rgba(0,91,150,.15),0 2px 6px rgba(26,32,44,.05);--underline-width:28px;--underline-height:3px;--header-h:68px;--sticky-h:56px}
+[data-theme='cat-bien']{--c-surface:#FDFAF5;--c-primary:#155E75;--c-accent:#B45309;--c-text:#1C1917;--c-text-muted:#57534E;--c-primary-strong:#0E4A5C;--c-accent-strong:#92400E}
+[data-theme='ngoc-lam']{--c-surface:#FFFFFF;--c-primary:#0F766E;--c-accent:#BE123C;--c-text:#0F172A;--c-text-muted:#475569;--c-primary-strong:#0B5A54;--c-accent-strong:#9F1239}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{margin:0;background:#e8ecef;font-family:var(--font-ui);font-weight:500;font-size:var(--fs-base);line-height:var(--lh-body);color:var(--c-text);-webkit-font-smoothing:antialiased}
+a{color:var(--c-primary);text-decoration:none}a:hover{color:var(--c-primary-strong)}
+h1,h2,h3,h4{font-family:var(--font-display);line-height:var(--lh-heading);letter-spacing:0;font-weight:700}
+p{text-wrap:pretty}
+summary{cursor:pointer;list-style:none}summary::-webkit-details-marker{display:none}
+.ph{background:repeating-linear-gradient(135deg,rgba(15,23,42,.06) 0 22px,rgba(15,23,42,.12) 22px 44px)}
+.sec-title{font-family:var(--font-display);font-size:var(--fs-section);font-weight:800;color:var(--c-primary);line-height:var(--lh-heading);letter-spacing:-0.015em;margin-bottom:var(--s3)}
+.underline{display:block;width:var(--underline-width);height:var(--underline-height);background:var(--c-sand);border-radius:2px;margin-bottom:var(--s6)}
+.nav a{font-family:var(--font-ui);font-size:var(--fs-nav);font-weight:600;color:var(--c-text);padding:var(--s2) var(--s3);border-radius:var(--radius-sm)}
+.nav a.on{background:var(--c-primary-soft);color:var(--c-primary)}
+.crumb{display:flex;align-items:center;gap:var(--s2);font-size:var(--fs-sm);color:var(--c-text-muted);list-style:none}
+.crumb li+li::before{content:"/";color:var(--c-border);margin-right:var(--s2)}
+.crumb a{color:var(--c-text-muted)}
+.jump a{display:inline-flex;align-items:center;height:100%;font-size:var(--fs-sm);font-weight:600;color:var(--c-text-muted);border-bottom:2px solid transparent;white-space:nowrap}
+.jump a.on{color:var(--c-primary);border-bottom-color:var(--c-primary)}
+.hl{display:flex;gap:var(--s3);align-items:flex-start;padding:var(--s3) var(--s4);background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);font-size:var(--fs-base)}
+.hl i{flex:none;width:8px;height:8px;border-radius:50%;background:var(--c-sand);margin-top:10px}
+.row{display:flex;justify-content:space-between;gap:var(--s3);padding:var(--s2) 0;border-bottom:1px solid var(--c-border);font-size:var(--fs-sm)}
+.row:last-child{border-bottom:0}
+.row .l{display:inline-flex;align-items:center;gap:var(--s2);color:var(--c-text-muted)}
+.row .l svg{color:var(--c-primary)}
+.row .v{font-weight:700;text-align:right}
+.chk{list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s3) var(--s5)}
+.chk li{display:flex;gap:var(--s3);align-items:center;font-size:var(--fs-base)}
+.chk b{color:var(--c-green);font-weight:700}
+.faq{border:1px solid var(--c-border);border-radius:var(--radius-md);background:var(--c-card)}
+.faq details+details{border-top:1px solid var(--c-border)}
+.faq summary{display:flex;justify-content:space-between;align-items:center;gap:var(--s4);padding:var(--s4) var(--s5);font-weight:700;font-size:var(--fs-base)}
+.faq .a{padding:0 var(--s5) var(--s4);color:var(--c-text-muted);font-size:var(--fs-base)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);padding:var(--s3) var(--s5);border-radius:var(--radius-pill);font-family:var(--font-ui);font-size:var(--fs-base);font-weight:700;background:var(--c-accent);color:var(--c-text-inverse)}
+.btn:hover{background:var(--c-accent-strong);color:var(--c-text-inverse)}
+.btn.o{background:transparent;color:var(--c-primary);border:1px solid var(--c-border)}
+.near{background:var(--c-card);border-radius:var(--radius-md);box-shadow:var(--shadow-card);overflow:hidden}
+.near .img{aspect-ratio:4/3}
+.near .b{padding:var(--s3);display:flex;flex-direction:column;gap:var(--s1)}
+.near h3{font-size:var(--fs-base);font-weight:700;color:var(--c-text);line-height:1.25}
+.badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:var(--radius-pill);font-size:var(--fs-badge);font-weight:600;background:var(--c-primary-soft);color:var(--c-primary);align-self:flex-start}
+</style>
+</helmet>
+
+<div data-theme="{{ theme }}" style="width:1280px;margin:0 auto;background:var(--c-surface);font-family:var(--font-ui);color:var(--c-text)">
+
+  <div style="height:68px;border-bottom:1px solid var(--c-border);background:var(--c-surface)">
+    <div style="max-width:1200px;margin:0 auto;padding:0 24px;height:100%;display:flex;align-items:center;gap:var(--s6)">
+      <div style="display:flex;align-items:center;gap:var(--s2)"><span style="width:34px;height:34px;border-radius:50%;background:var(--c-primary);display:inline-block"></span><span style="font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--c-primary)">tourdao.vn</span></div>
+      <nav class="nav" style="display:flex;align-items:center;gap:var(--s1);margin-left:var(--s4)"><a href="#">Trang chủ</a><a href="#">Tour</a><a href="#">Điểm tham quan</a><a href="#" class="on">Trải nghiệm</a><a href="#">Địa danh</a><a href="#">Kinh nghiệm du lịch</a><a href="#">Đặt vé trực tuyến</a></nav>
+    </div>
+  </div>
+
+  <div style="max-width:1200px;margin:0 auto;padding:var(--s3) 24px">
+    <ol class="crumb"><li><a href="#">Trang chủ</a></li><li><a href="#">Trải nghiệm</a></li><li><a href="#">Đảo Hòn Mun</a></li><li><span style="color:var(--c-primary);font-weight:600">Lặn biển - Scuba diving</span></li></ol>
+  </div>
+
+  <!-- Hero: huy hiệu experienceType (link trang term) chỉ ở đây; nơi diễn ra (venue) chỉ ở breadcrumb -->
+  <div style="display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:4px;height:430px;background:var(--c-card)">
+    <div style="position:relative;overflow:hidden">
+      <div class="ph" style="position:absolute;inset:0;background-color:#c9e0ea"></div>
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,var(--c-primary-strong) 0%,rgba(8,47,73,.55) 40%,transparent 68%)"></div>
+      <div style="position:absolute;left:0;right:0;bottom:0;padding:var(--s7) var(--s5) var(--s5);display:flex;flex-direction:column;gap:var(--s2)">
+        <div style="display:flex;gap:var(--s2)"><a href="#" style="padding:2px 10px;border-radius:var(--radius-pill);background:rgba(248,250,252,.22);color:var(--c-text-inverse);font-size:var(--fs-label);font-weight:600;backdrop-filter:blur(4px)">Thể thao biển</a></div>
+        <h1 style="font-family:var(--font-display);font-size:var(--fs-hero);font-weight:800;line-height:var(--lh-display);color:var(--c-text-inverse);text-wrap:balance;max-width:18ch">Lặn biển - Scuba diving</h1>
+        <p style="max-width:56ch;color:var(--c-text-inverse);font-size:var(--fs-base);line-height:1.55;opacity:.92">Trải nghiệm đặc sắc bậc nhất Nha Trang — trung tâm lặn biển hàng đầu Việt Nam với vùng biển trong xanh, khí hậu ôn hoà và hệ sinh thái phong phú.</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:4px"><div class="ph" style="background-color:#d9e8ef"></div><div class="ph" style="background-color:#d4e6e1"></div><div class="ph" style="background-color:#e3e9ef"></div><div class="ph" style="background-color:#cfe0ea"></div></div>
+  </div>
+
+  <!-- Thanh dính: chưa có giá (bookingRef chưa nối) → không vùng giá, chỉ neo + CTA Zalo -->
+  <div style="height:56px;background:var(--c-surface);border-bottom:1px solid var(--c-border)">
+    <div style="max-width:1200px;margin:0 auto;padding:0 24px;height:100%;display:flex;align-items:center;justify-content:space-between;gap:var(--s5)">
+      <nav class="jump" style="display:flex;gap:var(--s5);height:100%"><a href="#hl" class="on">Điểm nổi bật</a><a href="#ct">Chi tiết</a><a href="#bg">Bao gồm</a><a href="#faq">Câu hỏi thường gặp</a></nav>
+      <a href="#" class="btn" style="padding:10px 20px;font-size:var(--fs-sm)">Chat Zalo</a>
+    </div>
+  </div>
+
+  <!-- Thông tin nhanh chỉ có 1 ô (Phù hợp) → gộp vào sidebar -->
+  <div style="max-width:1200px;margin:0 auto;padding:var(--s6) 24px var(--s7);display:grid;grid-template-columns:1fr 340px;gap:var(--s7);align-items:start">
+    <div style="min-width:0;display:flex;flex-direction:column;gap:var(--s7)">
+      <section id="hl">
+        <h2 class="sec-title">Điểm nổi bật</h2><span class="underline"></span>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s3)">
+          <div class="hl"><i></i><span>Khám phá đại dương</span></div>
+          <div class="hl"><i></i><span>Dễ dàng tham gia</span></div>
+          <div class="hl"><i></i><span>Trải nghiệm hấp dẫn</span></div>
+          <div class="hl"><i></i><span>Quay phim, chụp ảnh</span></div>
+        </div>
+      </section>
+      <section id="ct">
+        <h2 class="sec-title">Chi tiết</h2><span class="underline"></span>
+        <div style="max-width:70ch;display:flex;flex-direction:column;gap:var(--s4)">
+          <p>Lặn biển tại Nha Trang phù hợp với nhiều đối tượng, từ người lần đầu trải nghiệm đến các thợ lặn có chứng chỉ quốc tế. Du khách có thể lựa chọn lặn bằng ống thở (snorkeling) để ngắm san hô gần mặt nước hoặc lặn bình khí (scuba diving) cùng hướng dẫn viên chuyên nghiệp.</p>
+          <p>Điểm lặn phổ biến là khu bảo tồn biển Hòn Mun — nơi tầm nhìn dưới nước tốt nhất vào mùa khô và rạn san hô được giữ gần như nguyên vẹn.</p>
+        </div>
+      </section>
+      <section id="bg">
+        <h2 class="sec-title">Bao gồm</h2><span class="underline"></span>
+        <ul class="chk"><li><b>✓</b>Huấn luyện cơ bản</li><li><b>✓</b>Trang thiết bị bảo hộ</li><li><b>✓</b>Nước uống</li><li><b>✓</b>Bảo hiểm</li></ul>
+      </section>
+      <section id="faq">
+        <h2 class="sec-title">Câu hỏi thường gặp</h2><span class="underline"></span>
+        <div class="faq">
+          <details open><summary>Trẻ em lặn biển được không?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg></summary><div class="a">Trẻ từ 7 tuổi có thể tham gia được.</div></details>
+          <details><summary>Có cần biết bơi không?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg></summary><div class="a">Không, kỹ năng bơi là không bắt buộc.</div></details>
+          <details><summary>Có thể quay phim dưới nước không?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg></summary><div class="a">Có, bạn có thể được quay phim chụp ảnh dưới nước với thiết bị chuyên dụng.</div></details>
+        </div>
+      </section>
+      <div style="border-top:1px solid var(--c-border);padding-top:var(--s4);font-size:var(--fs-sm);color:var(--c-text-muted);display:flex;align-items:center;gap:var(--s2)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--c-primary)"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>Cập nhật 19/08/2026</div>
+    </div>
+
+    <!-- Sidebar: khối hành động (không giá → chỉ kênh), Thông tin nhanh gộp, bản đồ -->
+    <aside style="position:sticky;top:calc(68px + 56px + 16px);display:flex;flex-direction:column;gap:var(--s4)">
+      <div style="background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-lg);padding:var(--s5);box-shadow:var(--shadow-raised);display:flex;flex-direction:column;gap:var(--s3)">
+        <div style="font-family:var(--font-display);font-size:var(--fs-h5);font-weight:700">Hỏi giá và giữ chỗ</div>
+        <div style="font-size:var(--fs-sm);color:var(--c-text-muted)">Giá theo gói lặn và số người — nhắn Zalo để được báo giá trọn gói, không phụ thu.</div>
+        <a href="#" class="btn" style="width:100%">Chat Zalo</a>
+        <a href="#" class="btn o" style="width:100%">Gọi hotline Tour Đảo</a>
+      </div>
+      <div style="background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--s4)">
+        <div style="font-size:var(--fs-label);font-weight:700;text-transform:uppercase;letter-spacing:var(--ls-eyebrow);line-height:1.5;color:var(--c-text-muted);margin-bottom:var(--s2)">Thông tin nhanh</div>
+        <div class="row"><span class="l"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>Phù hợp với</span><span class="v">Khám phá, Cảm giác mạnh</span></div>
+      </div>
+      <div style="background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--s4);display:flex;flex-direction:column;gap:var(--s3)">
+        <div class="ph" style="height:220px;border-radius:var(--radius-sm);background-color:#dbe9e4;position:relative"><svg width="28" height="28" viewBox="0 0 24 24" fill="var(--c-accent)" stroke="#fff" stroke-width="1.5" style="position:absolute;left:50%;top:42%;transform:translate(-50%,-50%)"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path><circle cx="12" cy="10" r="3" fill="#fff"></circle></svg></div>
+      </div>
+    </aside>
+  </div>
+
+  <div style="background:var(--c-surface-alt);padding:var(--s7) 0">
+    <div style="max-width:1200px;margin:0 auto;padding:0 24px">
+      <h2 style="font-family:var(--font-display);font-size:var(--fs-h3);font-weight:700;color:var(--c-text);margin-bottom:var(--s6)">Trải nghiệm tương tự</h2>
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s5)">
+        <a href="#" class="near"><div class="img ph" style="background-color:#d9e8ef"></div><div class="b"><h3>Snorkeling Nha Trang</h3><span class="badge">Thể thao biển</span></div></a>
+        <a href="#" class="near"><div class="img ph" style="background-color:#e3e9ef"></div><div class="b"><h3>Fly Board Nha Trang - Giày bay</h3><span class="badge">Thể thao biển</span></div></a>
+        <a href="#" class="near"><div class="img ph" style="background-color:#cfe0ea"></div><div class="b"><h3>Motor nước Nha Trang (Jetski)</h3><span class="badge">Thể thao biển</span></div></a>
+        <a href="#" class="near"><div class="img ph" style="background-color:#d4e6e1"></div><div class="b"><h3>Đi bộ dưới đáy biển - Sea Walker</h3><span class="badge">Thể thao biển</span></div></a>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:var(--c-footer-bg);color:var(--c-footer-text);padding:var(--s6) 0"><div style="max-width:1200px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;font-size:var(--fs-sm)"><span>© 2026 Công ty TNHH Tour Đảo</span><span>Tour · Vé · Phòng · Xe đưa đón</span></div></div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"theme":{"editor":"enum","options":["bien-sau","cat-bien","ngoc-lam"],"default":"bien-sau","section":"Bộ giao diện"},"$preview":{"width":1280,"height":2500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.theme ?? 'bien-sau' };
+  }
+}
+</script>
+</body>
+</html>
