@@ -1,0 +1,22 @@
+[FAIL] Luật 1 — 132 vi phạm lặp vùng trên 58 trang:
+       dist/dia-danh/ben-cang-da-chong/index.html  placeType  →  info-bar + info-card
+       dist/dia-danh/ben-cang-da-chong/index.html  openingHours  →  info-bar + info-card
+       dist/dia-danh/cang-cap-treo-vinpearl/index.html  placeType  →  info-bar + info-card
+       dist/dia-danh/cang-cap-treo-vinpearl/index.html  openingHours  →  info-bar + info-card
+       dist/dia-danh/cang-cap-treo-vinpearl/index.html  containedInPlace  →  info-bar + info-card
+       dist/dia-danh/cang-du-lich-nha-trang/index.html  placeType  →  info-bar + info-card
+       dist/dia-danh/cang-du-lich-nha-trang/index.html  openingHours  →  info-bar + info-card
+       dist/dia-danh/cang-du-lich-nha-trang/index.html  containedInPlace  →  info-bar + info-card
+       dist/dia-danh/dao-hon-mieu/index.html  placeType  →  info-bar + info-card
+       dist/dia-danh/dao-hon-mieu/index.html  openingHours  →  info-bar + info-card
+       dist/dia-danh/dao-hon-mieu/index.html  containedInPlace  →  info-bar + info-card
+       dist/dia-danh/dao-hon-mun/index.html  placeType  →  info-bar + info-card
+       dist/dia-danh/dao-hon-mun/index.html  openingHours  →  info-bar + info-card
+       dist/dia-danh/dao-hon-mun/index.html  containedInPlace  →  info-bar + info-card
+       dist/dia-danh/dao-hon-tam/index.html  placeType  →  info-bar + info-card
+       dist/dia-danh/dao-hon-tam/index.html  openingHours  →  info-bar + info-card
+       dist/dia-danh/dao-hon-tam/index.html  containedInPlace  →  info-bar + info-card
+       dist/dia-danh/noi-thanh-nha-trang/index.html  placeType  →  info-bar + info-card
+       dist/dia-danh/noi-thanh-nha-trang/index.html  containedInPlace  →  info-bar + info-card
+       dist/diem-tham-quan/bai-dai-cam-lam/index.html  gia  →  action-block + info-bar + sticky-bar
+       … và 112 vi phạm nữa (xem scripts/reports/luat1-post.json)

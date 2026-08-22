@@ -39,6 +39,7 @@ const GROUPS = {
       'validators/governance-post.ts',
       'validators/geo-knowledge-post.ts',
       'validators/entity-layout-post.ts',
+      'validators/luat1-post.ts',
       'validators/control-registry-gate.ts',
       'validators/deferred-gate.ts',
     ],
