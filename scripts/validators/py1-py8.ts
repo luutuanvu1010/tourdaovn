@@ -229,7 +229,8 @@ export function validatePY7(prices: Map<string, PriceEntry>): ValidatorResult {
     }
 
     // Kiểm paxRates: khoá con đóng, khoá trong từng hạng đóng, amount ≥ 0, note ≤ 40 ký tự
-    if (raw.paxRates && typeof raw.paxRates === 'object' && !Array.isArray(raw.paxRates)) {
+    // (chỉ perPax mới có paxRates — ALLOWED_TOP_KEYS đã chặn ở unit khác, gán rõ ở đây để không phụ thuộc thứ tự)
+    if (entry.unit === 'perPax' && raw.paxRates && typeof raw.paxRates === 'object' && !Array.isArray(raw.paxRates)) {
       for (const [code, rate] of Object.entries(raw.paxRates as Record<string, any>)) {
         if (!ALLOWED_PAX_CODES.has(code)) {
           errors.push(`${key}: paxRates.${code} không thuộc enum [child, senior, infant] (PY7)`)

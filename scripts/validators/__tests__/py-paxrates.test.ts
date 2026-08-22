@@ -26,11 +26,24 @@ test('PY7: khoá con lạ trong paxRates → fail', () => {
 })
 
 test('PY7: amount hạng phụ âm → fail; 0 → hợp lệ', () => {
-  assert.equal(validatePY7(map({ t: { unit: 'perPax', amount: 1, paxRates: { child: { amount: -1 } } } })).passed, false)
-  assert.equal(validatePY7(map({ t: { unit: 'perPax', amount: 1, paxRates: { infant: { amount: 0 } } } })).passed, true)
+  const neg = validatePY7(map({ t: { unit: 'perPax', amount: 1, paxRates: { child: { amount: -1 } } } }))
+  assert.equal(neg.passed, false)
+  assert.match(neg.errors.join('\n'), /paxRates\.child\.amount/)
+  assert.match(neg.errors.join('\n'), /số nguyên ≥ 0/)
+
+  const zero = validatePY7(map({ t: { unit: 'perPax', amount: 1, paxRates: { infant: { amount: 0 } } } }))
+  assert.equal(zero.passed, true)
+  assert.equal(zero.errors.filter((e) => e.includes('paxRates')).length, 0)
 })
 
 test('PY7: khoá lạ bên trong một hạng, note quá 40 ký tự → fail', () => {
-  assert.equal(validatePY7(map({ t: { unit: 'perPax', amount: 1, paxRates: { child: { amount: 1, cost: 2 } } } })).passed, false)
-  assert.equal(validatePY7(map({ t: { unit: 'perPax', amount: 1, paxRates: { child: { amount: 1, note: 'x'.repeat(41) } } } })).passed, false)
+  const badKey = validatePY7(map({ t: { unit: 'perPax', amount: 1, paxRates: { child: { amount: 1, cost: 2 } } } }))
+  assert.equal(badKey.passed, false)
+  assert.match(badKey.errors.join('\n'), /paxRates\.child/)
+  assert.match(badKey.errors.join('\n'), /khóa lạ/)
+
+  const longNote = validatePY7(map({ t: { unit: 'perPax', amount: 1, paxRates: { child: { amount: 1, note: 'x'.repeat(41) } } } }))
+  assert.equal(longNote.passed, false)
+  assert.match(longNote.errors.join('\n'), /paxRates\.child\.note/)
+  assert.match(longNote.errors.join('\n'), /40/)
 })
