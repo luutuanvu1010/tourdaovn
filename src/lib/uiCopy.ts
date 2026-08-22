@@ -16,6 +16,7 @@ const vi = {
   details: 'Chi tiết',
   highlights: 'Điểm nổi bật',
   map: 'Bản đồ',
+  openMap: 'Mở bản đồ',
   address: 'Địa chỉ',
   phone: 'Điện thoại',
   website: 'Website',
@@ -73,7 +74,7 @@ const vi = {
   partOf: 'Thuộc',
   locationAt: 'Diễn ra tại',
   venue: 'Diễn ra tại',
-  verifyWikidata: 'Xác minh trên Wikidata',
+  referenceSource: 'Nguồn tham khảo',
   // Lưu trú
   starRating: 'Hạng sao',
   stars: 'Hạng sao',
@@ -171,6 +172,7 @@ const en: Record<UIKey, string> = {
   details: 'Details',
   highlights: 'Highlights',
   map: 'Map',
+  openMap: 'Open map',
   address: 'Address',
   phone: 'Phone',
   website: 'Website',
@@ -225,7 +227,7 @@ const en: Record<UIKey, string> = {
   partOf: 'Part of',
   locationAt: 'Location',
   venue: 'Venue',
-  verifyWikidata: 'Verify on Wikidata',
+  referenceSource: 'Reference source',
   starRating: 'Star rating',
   stars: 'Stars',
   rooms: 'Rooms',
@@ -314,6 +316,7 @@ const zh: Record<UIKey, string> = {
   details: '详情',
   highlights: '亮点',
   map: '地图',
+  openMap: '打开地图',
   address: '地址',
   phone: '电话',
   website: '网站',
@@ -368,7 +371,7 @@ const zh: Record<UIKey, string> = {
   partOf: '所属',
   locationAt: '地点',
   venue: '场地',
-  verifyWikidata: '在 Wikidata 核实',
+  referenceSource: '参考来源',
   starRating: '星级',
   stars: '星级',
   rooms: '房间数',
@@ -457,6 +460,7 @@ const ko: Record<UIKey, string> = {
   details: '상세 정보',
   highlights: '하이라이트',
   map: '지도',
+  openMap: '지도 열기',
   address: '주소',
   phone: '전화',
   website: '웹사이트',
@@ -511,7 +515,7 @@ const ko: Record<UIKey, string> = {
   partOf: '소속',
   locationAt: '장소',
   venue: '장소',
-  verifyWikidata: 'Wikidata에서 확인',
+  referenceSource: '참고 출처',
   starRating: '성급',
   stars: '성급',
   rooms: '객실 수',
@@ -600,6 +604,7 @@ const ru: Record<UIKey, string> = {
   details: 'Подробности',
   highlights: 'Особенности',
   map: 'Карта',
+  openMap: 'Открыть карту',
   address: 'Адрес',
   phone: 'Телефон',
   website: 'Сайт',
@@ -654,7 +659,7 @@ const ru: Record<UIKey, string> = {
   partOf: 'Часть',
   locationAt: 'Место проведения',
   venue: 'Площадка',
-  verifyWikidata: 'Проверить в Wikidata',
+  referenceSource: 'Источник',
   starRating: 'Звёздность',
   stars: 'Звёзды',
   rooms: 'Номера',
@@ -808,22 +813,15 @@ export const ORG_TYPE_LABELS: LabelDict = {
   ru: { travelAgency: 'Турагентство', transportCompany: 'Транспортная компания', diveOperator: 'Дайв-центр', dmc: 'DMC', organization: 'Организация' },
 }
 
-/** Nhãn tourFormat cho trang detail (Ghép đoàn / Tour riêng / Cả hai). */
+/** Nhãn tourFormat — MỘT bảng cho cả trang chi tiết lẫn thẻ/danh sách.
+ *  Trước đây có hai bảng (LABELS cho detail, BADGES cho card) dịch cùng giá trị `both`
+ *  thành "Cả hai" và "Linh hoạt" — một sự thật hai chữ, trái P6/N7 (DR-035). */
 export const TOUR_FORMAT_LABELS: LabelDict = {
-  vi: { 'join-in': 'Ghép đoàn', private: 'Tour riêng', both: 'Cả hai' },
-  en: { 'join-in': 'Join-in', private: 'Private', both: 'Both' },
-  zh: { 'join-in': '拼团', private: '包团', both: '两者皆可' },
-  ko: { 'join-in': '조인 투어', private: '단독 투어', both: '모두 가능' },
-  ru: { 'join-in': 'Групповой', private: 'Индивидуальный', both: 'Оба варианта' },
-}
-
-/** Badge tourFormat cho card/index (Tour ghép / Tour riêng / Linh hoạt). */
-export const TOUR_FORMAT_BADGES: LabelDict = {
-  vi: { 'join-in': 'Tour ghép', private: 'Tour riêng', both: 'Linh hoạt' },
-  en: { 'join-in': 'Join-in', private: 'Private', both: 'Flexible' },
-  zh: { 'join-in': '拼团', private: '包团', both: '灵活' },
-  ko: { 'join-in': '조인 투어', private: '단독 투어', both: '유연' },
-  ru: { 'join-in': 'Групповой', private: 'Индивидуальный', both: 'Гибкий' },
+  vi: { 'join-in': 'Tour ghép', private: 'Tour riêng', both: 'Ghép hoặc riêng' },
+  en: { 'join-in': 'Join-in', private: 'Private', both: 'Join-in or private' },
+  zh: { 'join-in': '拼团', private: '包团', both: '拼团或包团' },
+  ko: { 'join-in': '조인 투어', private: '단독 투어', both: '조인 또는 단독' },
+  ru: { 'join-in': 'Групповой', private: 'Индивидуальный', both: 'Групповой или индивидуальный' },
 }
 
 /** Nhãn CTA theo entityType (PriceDisplay). */

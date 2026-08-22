@@ -1,6 +1,6 @@
 ---
 import type { RestaurantResult, Lang } from '../lib/types'
-import { siteBaseUrl } from '../lib/siteUrl'
+import { siteBaseUrl, hostLabel } from '../lib/siteUrl'
 import { uiCopy } from '../lib/uiCopy'
 import { entityPageGraphToLd, restaurantToJsonLd, jsonLdScriptContent } from '../lib/serialize'
 import DetailLayout from './DetailLayout.astro'
@@ -40,8 +40,8 @@ const sidebarRows = [
   { icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
   { icon: '📅', label: t('reservations'), value: data.acceptsReservations ? t('acceptsReservations') : t('no'), visible: data.acceptsReservations !== undefined },
   { icon: '📋', label: t('menu'), value: t('view'), href: data.hasMenu, visible: !!data.hasMenu },
-  { icon: '🔗', label: t('officialWebsite'), value: t('view'), href: data.officialSource || undefined, visible: !!data.officialSource },
-  { icon: '🔗', label: t('verifyWikidata'), value: 'Wikidata', href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
+  { icon: '🔗', label: t('officialWebsite'), value: hostLabel(data.officialSource), href: data.officialSource || undefined, visible: !!data.officialSource },
+  { icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
 ]
 
 const siteBase = siteBaseUrl(Astro.site)

@@ -42,7 +42,7 @@ const hasContactChannel = !!(contact?.zaloUrl || contact?.hotline || contact?.wh
 
 const infoBarItems = [
   { icon: '⏱️', label: t('duration'), value: data.duration || '', visible: !!data.duration },
-  { icon: '👤', label: t('suitableFor'), value: data.touristType?.[0] || '', visible: !!(data.touristType && data.touristType.length > 0) },
+  { icon: '👤', label: t('suitableFor'), value: data.touristType?.join(', ') || '', visible: !!(data.touristType && data.touristType.length > 0) },
   { icon: '🎫', label: t('price'), value: data.isAccessibleForFree ? t('free') : priceView?.label || '', visible: !!(data.isAccessibleForFree || priceView?.label) },
   { icon: '📋', label: t('includes'), value: data.includes?.slice(0, 2).join(', ') || '', visible: !!(data.includes && data.includes.length > 0) },
 ]

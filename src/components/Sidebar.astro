@@ -8,14 +8,16 @@ export interface Slot {
 
 export interface Props {
   slots: Slot[]
+  /** Trang có thanh dính dưới header (DetailLayout) → chỗ dính cộng thêm --sticky-bar-h. */
+  stickyBar?: boolean
 }
 
-const { slots } = Astro.props
+const { slots, stickyBar = false } = Astro.props
 const anyVisible = slots.some(s => s.visible)
 ---
 
 {anyVisible && (
-  <aside class="sidebar">
+  <aside class="sidebar" style={`--sidebar-offset:${stickyBar ? 'var(--sticky-bar-h)' : '0px'}`}>
     {slots.filter(s => s.visible).map((s) => (
       <div class="sidebar-card">
         {s.name === 'booking' && <slot name="booking" />}
@@ -28,10 +30,13 @@ const anyVisible = slots.some(s => s.visible)
 )}
 
 <style>
+  /* Chỗ dính = header + thanh dính (nếu DetailLayout có, qua --sidebar-offset) + 16px.
+     Trước đây top:16px chết cứng nên sidebar chui xuống dưới header và thanh dính,
+     hai dòng đầu của thẻ thông tin khuất — DR-033. */
   .sidebar {
     width: 340px;
     position: sticky;
-    top: 16px;
+    top: calc(var(--header-h) + var(--sidebar-offset, 0px) + var(--s4));
     align-self: start;
     display: flex;
     flex-direction: column;

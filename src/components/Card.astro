@@ -143,7 +143,9 @@ const badgeClass = badgeVariant === 'author' ? 'badge-author'
     -webkit-box-orient: vertical;
     overflow: hidden;
     margin-bottom: var(--s4);
-    flex: 1;
+    /* KHÔNG flex:1 ở đây: -webkit-line-clamp chỉ cắt đúng khi hộp cao bằng hai dòng.
+       Trước đây flex:1 kéo hộp cao hơn khi thẻ không có huy hiệu, trình duyệt vẽ "…"
+       ở dòng 2 rồi vẫn lòi dòng 3 — DR-038. Phần co giãn chuyển sang .card-meta. */
   }
 
   .card-meta {
@@ -151,6 +153,7 @@ const badgeClass = badgeVariant === 'author' ? 'badge-author'
     align-items: center;
     gap: var(--s2);
     flex-wrap: wrap;
+    margin-top: auto;
   }
 
   .card-badge {

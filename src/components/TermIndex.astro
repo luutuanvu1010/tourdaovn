@@ -1,7 +1,7 @@
 ---
 import type { Lang, PriceEntry } from '../lib/types'
 import { siteBaseUrl } from '../lib/siteUrl'
-import { uiCopy, TOUR_FORMAT_BADGES } from '../lib/uiCopy'
+import { uiCopy, TOUR_FORMAT_LABELS } from '../lib/uiCopy'
 import { resolvePrice } from '../lib/resolver'
 import { ROUTE_MAP } from '../lib/routes'
 import { termToJsonLd, jsonLdScriptContent } from '../lib/serialize'
@@ -49,7 +49,7 @@ function entityHref(slug: string): string {
   return `${prefix}/${seg}/${slug}/`
 }
 
-const tourFormatLabel = TOUR_FORMAT_BADGES[lang] ?? TOUR_FORMAT_BADGES.en
+const tourFormatLabel = TOUR_FORMAT_LABELS[lang] ?? TOUR_FORMAT_LABELS.en
 
 function getBadge(entity: ListingEntity): string | undefined {
   if (entityType === 'experience') return entity.experienceType

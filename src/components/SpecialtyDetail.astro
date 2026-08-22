@@ -1,6 +1,6 @@
 ---
 import type { SpecialtyResult, Lang } from '../lib/types'
-import { siteBaseUrl } from '../lib/siteUrl'
+import { siteBaseUrl, hostLabel } from '../lib/siteUrl'
 import { uiCopy, typeLabel as lookupLabel, SPECIALTY_TYPE_LABELS } from '../lib/uiCopy'
 import { entityPageGraphToLd, specialtyToJsonLd, jsonLdScriptContent } from '../lib/serialize'
 import DetailLayout from './DetailLayout.astro'
@@ -38,7 +38,7 @@ const sidebarRows = [
   { icon: '🏷️', label: t('type'), value: typeLabel, visible: true },
   { icon: '📍', label: t('origin'), value: data.originNote || '', visible: !!data.originNote },
   { icon: '📅', label: t('season'), value: data.season || '', visible: !!data.season },
-  { icon: '🔗', label: t('verifyWikidata'), value: 'Wikidata', href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
+  { icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
 ]
 
 const siteBase = siteBaseUrl(Astro.site)

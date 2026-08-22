@@ -4,7 +4,7 @@ import Footer from '../components/Footer.astro';
 import '../styles/tokens.css';
 import { brand } from '../site.config';
 import { siteBaseUrl } from '../lib/siteUrl';
-import { fetchSiteTheme } from '../lib/siteTheme';
+import { fetchSiteTheme, themeSurface } from '../lib/siteTheme';
 import { fetchSiteBranding } from '../lib/siteBranding';
 import { imageUrl, isSvg } from '../lib/sanity-image';
 
@@ -65,7 +65,10 @@ const shareImageAlt = ogImage ? undefined : branding?.ogImage?.alt;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#C2410C" />
+    {/* Màu thanh địa chỉ di động = nền trang của bộ đang bật, đọc từ tokens.css.
+        Trước đây viết cứng #C2410C — accent của site cũ, không có trong token nào (DR-037).
+        Lấy nền chứ không lấy accent vì thanh địa chỉ nằm sát header nền trắng. */}
+    <meta name="theme-color" content={themeSurface(theme)} />
     <link rel="icon" href={faviconHref} type={faviconType} />
     <link rel="apple-touch-icon" href={appleTouchHref} />
     <title>{title}</title>

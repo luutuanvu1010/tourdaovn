@@ -94,7 +94,8 @@ const t = uiCopy(lang)
     </div>
   </div>
 
-  <Sidebar slots={sidebarSlots}>
+  {/* stickyBar: Sidebar cộng chiều cao thanh dính vào chỗ dính của nó (DR-033). */}
+  <Sidebar slots={sidebarSlots} stickyBar={showStickyBar}>
     <slot name="booking" slot="booking" />
     <slot name="info" slot="info" />
     <slot name="map" slot="map" />
@@ -138,11 +139,14 @@ const t = uiCopy(lang)
     border-bottom: 1px solid var(--c-border);
   }
 
+  /* Cao cố định theo token để Sidebar tính được chỗ dính (DR-033); trước đây cao
+     theo nội dung nên không ai cộng được. */
   .sticky-bar__inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--s5);
+    height: var(--sticky-bar-h);
   }
 
   .sticky-bar__jump {
@@ -154,8 +158,15 @@ const t = uiCopy(lang)
 
   .sticky-bar__jump::-webkit-scrollbar { display: none; }
 
+  .sticky-bar__jump {
+    align-self: stretch;
+  }
+
   .sticky-bar__jump a {
-    padding: var(--s4) 0;
+    display: inline-flex;
+    align-items: center;
+    height: 100%;
+    padding: 0;
     font-size: var(--fs-sm);
     font-weight: var(--fw-600);
     color: var(--c-text-muted);

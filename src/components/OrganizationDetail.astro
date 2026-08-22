@@ -1,6 +1,6 @@
 ---
 import type { OrganizationResult, Lang } from '../lib/types'
-import { siteBaseUrl } from '../lib/siteUrl'
+import { siteBaseUrl, hostLabel } from '../lib/siteUrl'
 import { uiCopy, typeLabel as lookupLabel, ORG_TYPE_LABELS } from '../lib/uiCopy'
 import DetailLayout from './DetailLayout.astro'
 import Section from './Section.astro'
@@ -33,7 +33,7 @@ const sidebarRows = [
   { icon: '🌐', label: t('website'), value: data.url || '', visible: !!data.url, href: data.url || undefined },
   { icon: '🔗', label: t('officialSource'), value: data.officialSource || '', visible: !!data.officialSource, href: data.officialSource || undefined },
   { icon: '📋', label: t('license'), value: data.licenseInfo || '', visible: !!data.licenseInfo },
-  { icon: '🔗', label: t('verifyWikidata'), value: 'Wikidata', href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
+  { icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
 ]
 
 const siteBase = siteBaseUrl(Astro.site)
