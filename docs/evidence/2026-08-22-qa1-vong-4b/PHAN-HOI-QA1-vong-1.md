@@ -66,3 +66,20 @@ Trong đó **N3** (breadcrumb của Tour: `06` §3 tự mâu thuẫn) là thứ 
 2. Tương phản hero sau khi đổi gradient (F6+F13) — chữ và **huy hiệu**.
 3. `grep` còn sót giá trị cứng: `--sticky-h`, `-0.015em`, `rgba(8,47`, `height:68px`, `padding:10px 20px`, `width:36px` — đo được là 0 ở cả 6 file lúc soạn file này.
 4. Chuỗi lặp còn lại có rơi đúng vào N11 không, hay còn chỗ Design bỏ sót.
+
+---
+
+# Phản hồi QA1 vòng 2 (2026-08-22)
+
+Đối tượng: `QA1-mockup-4b-vong-2.md`. Vòng 2 xác nhận 3 lỗi Cao đã đóng, còn 4 mục TB. Xử như sau:
+
+| ID | Xử |
+|---|---|
+| **V1** | Đã sửa. Cờ `data-placeholder="ngày mẫu"` bị đặt nhầm lên thẻ **đóng** `</svg>` (do phép thay chuỗi khớp đúng dấu `>` của thẻ đóng). Nay cờ nằm trên `div` bọc ô ngày; quét `</thẻ thuộc-tính=` trả **0** ở cả 6 file, `Tour.dc.html` đủ **9** cờ. Ô ngày nhân tiện đạt mục tiêu chạm 44 px |
+| **V2** | Đã sửa. Gỡ "· giá trọn gói, không phụ thu" khỏi khối hành động của `Main`. Câu này là một trong bốn điểm khác biệt ở `00-PROJECT_BRIEF` §3, sống ở thanh tin cậy trang chủ (config), không phải field của trang chi tiết — QA đúng, vòng 1 tôi sửa ở `TraiNghiem` mà bỏ sót `Main` |
+| **V3** | Đã sửa. Hai bản di động nay có `<nav aria-label="Breadcrumb"><ol class="crumb-m">` đủ "Trang chủ", đặt **trên** ảnh hero đúng `06` §3 v2.1; bỏ dòng chữ "Điểm tham quan / Đảo Hòn Tằm" cũ (đó chính là breadcrumb giả); ảnh hero giảm 24 px để giữ nguyên chiều cao màn đầu; sơ đồ khối đổi thành "1 · Header · Breadcrumb · Hero…" |
+| **V4** | Không sửa — đã là nợ **N15** (mục lục đòi ≥ 3 h2 nhưng bài mẫu có 2, và tiêu đề trong bài vẽ bằng h3). Đây là xung đột giữa `06` §3 và cách dựng bài; Cowork chốt, Design không tự hoà giải |
+
+**Nhận hai đính chính của QA:** **N13** (giá nằm trong chữ `faq` là câu hỏi riêng, không gộp vào N11) và **N14** (`durationAtStop` khai kiểu ISO 8601 ở `01` §2.8 trong khi dữ liệu thật là khung giờ — kéo theo JSON-LD `serialize/tour.ts`). Cả hai là việc tầng trên, không sửa ở mockup.
+
+Nợ mở sau vòng 2: N1–N15. Chặn Code: **N3** (breadcrumb Tour), **N15** (ngưỡng mục lục).
