@@ -1,0 +1,446 @@
+---
+// BookingForm.astro — thẻ đặt tour trong sidebar trang Tour (SPEC-2026-08-21-dat-tour §4.3).
+// Một <form> hai bước: (1) ngày + số người + tạm tính, (2) thông tin khách + Turnstile.
+// Giá NƯỚNG lúc build vào data-price-table; script client chỉ tính lại bằng computeQuote()
+// (cùng hàm server kiểm — BK5). Không fetch giá (BK1). Không có nút nào không hoạt động:
+// Zalo/hotline chỉ render khi siteSettings.contact có dữ liệu.
+import type { Lang, SiteContact } from '../lib/types'
+import { uiCopy } from '../lib/uiCopy'
+import { formatPrice } from '../lib/renderer'
+import { availablePaxCodes, computeQuote, emptyPax, type PaxCode, type PriceTable } from '../lib/booking/quote'
+import { addDaysISO, todayVN } from '../lib/booking/vn-date'
+import { LIMITS } from '../lib/booking/schema'
+
+export interface Props {
+  lang: Lang
+  tourSlug: string
+  tourTitle: string
+  bookingRef: string
+  priceLabel: string
+  priceTable: PriceTable
+  contact?: SiteContact | null
+  turnstileSiteKey?: string
+}
+
+const { lang, tourSlug, tourTitle, bookingRef, priceLabel, priceTable, contact = null, turnstileSiteKey = '' } = Astro.props
+const t = uiCopy(lang)
+
+const PAX_KEY: Record<PaxCode, 'paxAdult' | 'paxChild' | 'paxSenior' | 'paxInfant'> = {
+  adult: 'paxAdult', child: 'paxChild', senior: 'paxSenior', infant: 'paxInfant',
+}
+const codes = availablePaxCodes(priceTable)
+const isTiers = priceTable.kind === 'tiers'
+function paxLabel(code: PaxCode): string {
+  return isTiers ? t('paxGuests') : t(PAX_KEY[code])
+}
+function paxNote(code: PaxCode): string {
+  return priceTable.kind === 'flat' ? (priceTable.notes?.[code] ?? '') : ''
+}
+function paxAmountLabel(code: PaxCode): string {
+  if (priceTable.kind === 'flat') {
+    const a = priceTable.perPax[code]
+    if (typeof a !== 'number') return ''
+    return a === 0 ? t('free') : formatPrice(a, lang)
+  }
+  return ''
+}
+
+// Tạm tính ban đầu (1 người lớn) render sẵn ở server để không JS vẫn thấy số.
+const initialPax = emptyPax()
+const initialQuote = computeQuote(priceTable, initialPax)
+// Thời điểm build = vintage bảng giá mà khách nhìn thấy (SPEC §4.4).
+const quotedAt = new Date().toISOString()
+const today = todayVN()
+const minDate = addDaysISO(today, 1)
+const maxDate = addDaysISO(today, LIMITS.MAX_DAYS_AHEAD)
+
+const zaloUrl = contact?.zaloUrl || ''
+const hotline = contact?.hotline || ''
+const hotlineHref = hotline ? `tel:${hotline.replace(/\s+/g, '')}` : ''
+
+if (!turnstileSiteKey) {
+  console.warn('[BookingForm] thiếu PUBLIC_TURNSTILE_SITE_KEY — widget không render; production phải có cả site key lẫn secret (SPEC §4.7)')
+}
+---
+
+<form
+  id="dat-tour"
+  class="bf"
+  method="post"
+  action="/api/dat-tour"
+  novalidate
+  data-price-table={JSON.stringify(priceTable)}
+  data-quoted-at={quotedAt}
+  data-site-key={turnstileSiteKey}
+  data-zalo={zaloUrl}
+  data-error-text={t('bookingError')}
+  data-sending-text={t('bookingSending')}
+  data-submit-text={t('bookingSubmit')}
+  data-total-max={String(LIMITS.TOTAL_MAX)}
+  data-per-type-max={String(LIMITS.PER_TYPE_MAX)}
+>
+  <input type="hidden" name="tourSlug" value={tourSlug} />
+  <input type="hidden" name="tourTitle" value={tourTitle} />
+  <input type="hidden" name="bookingRef" value={bookingRef} />
+  <input type="hidden" name="quoted.quotedAt" value={quotedAt} />
+  <input type="hidden" name="quoted.total" value={String(initialQuote?.total ?? 0)} data-quoted-total />
+  {codes.map(code => (
+    <input type="hidden" name={`quoted.perPax.${code}`} value={String(initialQuote?.perPax[code] ?? '')} data-quoted-per-pax={code} />
+  ))}
+
+  <div class="bf__head">
+    <span class="bf__eyebrow">{t('priceFrom')}</span>
+    <strong class="bf__price">{priceLabel}</strong>
+  </div>
+
+  <section class="bf__step" data-step="1">
+    <label class="bf__label" for="bf-date">{t('bookingDepartDate')}</label>
+    <input id="bf-date" class="bf__input" type="date" name="departDate" required min={minDate} max={maxDate} />
+    <p class="bf__err" data-err="departDate" aria-live="polite"></p>
+
+    <p class="bf__label" id="bf-pax-label">{t('bookingPax')}</p>
+    <div role="group" aria-labelledby="bf-pax-label">
+      {codes.map(code => (
+        <div class="bf__pax" data-code={code} data-label={paxLabel(code)}>
+          <div class="bf__pax-info">
+            <span class="bf__pax-name">{paxLabel(code)}</span>
+            {paxNote(code) && <span class="bf__pax-note">{paxNote(code)}</span>}
+            {paxAmountLabel(code) && <span class="bf__pax-price">{paxAmountLabel(code)}</span>}
+          </div>
+          <div class="bf__stepper">
+            <button type="button" class="bf__btn" data-dec aria-label={`${t('paxDecrease')} ${paxLabel(code)}`}>−</button>
+            <input
+              class="bf__count"
+              type="number"
+              inputmode="numeric"
+              name={`pax.${code}`}
+              min={code === 'adult' ? LIMITS.ADULT_MIN : 0}
+              max={LIMITS.PER_TYPE_MAX}
+              value={code === 'adult' ? LIMITS.ADULT_MIN : 0}
+              aria-label={paxLabel(code)}
+            />
+            <button type="button" class="bf__btn" data-inc aria-label={`${t('paxIncrease')} ${paxLabel(code)}`}>+</button>
+          </div>
+        </div>
+      ))}
+    </div>
+    <p class="bf__err" data-err="pax" aria-live="polite"></p>
+    <p class="bf__hint" data-large-group hidden>{t('bookingLargeGroupHint')}</p>
+
+    <div class="bf__quote" aria-live="polite">
+      <div data-quote-lines>
+        {initialQuote?.lines.map(l => (
+          <div class="bf__line"><span>{paxLabel(l.code)} × {l.count}</span><span>{formatPrice(l.subtotal, lang)}</span></div>
+        ))}
+      </div>
+      <div class="bf__total"><span>{t('bookingSubtotal')}</span><strong data-total>{initialQuote ? formatPrice(initialQuote.total, lang) : '—'}</strong></div>
+    </div>
+    <p class="bf__note">{t('bookingSubtotalNote')}</p>
+
+    <button type="button" class="bf__primary" data-open>{t('bookingBookNow')}</button>
+    {zaloUrl && <a class="bf__secondary" href={zaloUrl} target="_blank" rel="noopener">{t('bookingFreeConsult')}</a>}
+    {hotline && <p class="bf__hotline">{t('bookingHotline')}: <a href={hotlineHref}>{hotline}</a></p>}
+  </section>
+
+  <section class="bf__step" data-step="2">
+    <label class="bf__label" for="bf-name">{t('bookingName')}</label>
+    <input id="bf-name" class="bf__input" type="text" name="name" autocomplete="name" required minlength={LIMITS.NAME_MIN} maxlength={LIMITS.NAME_MAX} />
+    <p class="bf__err" data-err="name" aria-live="polite"></p>
+
+    <label class="bf__label" for="bf-phone">{t('bookingPhone')}</label>
+    <input id="bf-phone" class="bf__input" type="tel" name="phone" autocomplete="tel" inputmode="tel" required />
+    <p class="bf__err" data-err="phone" aria-live="polite"></p>
+
+    <label class="bf__label" for="bf-email">{t('bookingEmail')}</label>
+    <input id="bf-email" class="bf__input" type="email" name="email" autocomplete="email" maxlength={LIMITS.EMAIL_MAX} />
+    <p class="bf__err" data-err="email" aria-live="polite"></p>
+
+    <label class="bf__label" for="bf-pickup">{t('bookingPickup')}</label>
+    <input id="bf-pickup" class="bf__input" type="text" name="pickup" maxlength={LIMITS.PICKUP_MAX} />
+    <p class="bf__err" data-err="pickup" aria-live="polite"></p>
+
+    <label class="bf__label" for="bf-note">{t('bookingNote')}</label>
+    <textarea id="bf-note" class="bf__input" name="note" rows="3" maxlength={LIMITS.NOTE_MAX}></textarea>
+    <p class="bf__err" data-err="note" aria-live="polite"></p>
+
+    <!-- honeypot: người thật không thấy, bot điền bừa → server trả lời giả, không lưu -->
+    <div class="bf__hp" aria-hidden="true">
+      <label for="bf-website">Website</label>
+      <input id="bf-website" type="text" name="website" tabindex="-1" autocomplete="off" />
+    </div>
+
+    <div class="bf__turnstile" data-turnstile></div>
+    <input type="hidden" name="turnstileToken" data-turnstile-token />
+
+    <p class="bf__err bf__err--form" data-err="form" aria-live="polite"></p>
+    <div class="bf__actions">
+      <button type="button" class="bf__secondary" data-back>{t('bookingBack')}</button>
+      <button type="submit" class="bf__primary" data-submit>{t('bookingSubmit')}</button>
+    </div>
+  </section>
+
+  <section class="bf__done" data-done hidden role="status" tabindex="-1">
+    <h3 class="bf__done-title">{t('bookingSuccessTitle')}</h3>
+    <p class="bf__done-code">{t('bookingCode')}: <strong data-done-code></strong></p>
+    <p class="bf__done-dup" data-done-dup hidden>{t('bookingDuplicate')}</p>
+    <div class="bf__quote" data-done-summary></div>
+    <p class="bf__note">{t('bookingSuccessBody')}</p>
+    {zaloUrl && <a class="bf__primary bf__primary--link" href={zaloUrl} target="_blank" rel="noopener">{t('contactZalo')}</a>}
+  </section>
+
+  <noscript><p class="bf__noscript">{t('bookingNoScript')}</p></noscript>
+</form>
+
+<script>
+  import { PAX_ORDER, computeQuote, type PaxCode, type PaxCounts, type PriceTable, type Quote } from '../lib/booking/quote'
+  import { formatPrice } from '../lib/renderer'
+  import { addDaysISO, todayVN } from '../lib/booking/vn-date'
+  import { LIMITS } from '../lib/booking/schema'
+
+  declare global {
+    interface Window {
+      turnstile?: {
+        render(el: HTMLElement, opts: Record<string, unknown>): string
+        reset(id?: string): void
+      }
+    }
+  }
+
+  const form = document.getElementById('dat-tour') as HTMLFormElement | null
+  if (form) init(form)
+
+  function init(form: HTMLFormElement) {
+    const q = <T extends Element>(sel: string) => form.querySelector<T>(sel)
+    const table = JSON.parse(form.dataset.priceTable || 'null') as PriceTable | null
+    if (!table) return
+    const siteKey = form.dataset.siteKey || ''
+    const quotedAt = form.dataset.quotedAt || ''
+    const totalMax = Number(form.dataset.totalMax) || LIMITS.TOTAL_MAX
+    const perTypeMax = Number(form.dataset.perTypeMax) || LIMITS.PER_TYPE_MAX
+
+    const step1 = q<HTMLElement>('[data-step="1"]')!
+    const step2 = q<HTMLElement>('[data-step="2"]')!
+    const done = q<HTMLElement>('[data-done]')!
+    const openBtn = q<HTMLButtonElement>('[data-open]')!
+    const backBtn = q<HTMLButtonElement>('[data-back]')!
+    const submitBtn = q<HTMLButtonElement>('[data-submit]')!
+    const dateEl = q<HTMLInputElement>('[name="departDate"]')!
+    const linesEl = q<HTMLElement>('[data-quote-lines]')!
+    const totalEl = q<HTMLElement>('[data-total]')!
+    const hintEl = q<HTMLElement>('[data-large-group]')!
+    const totalInput = q<HTMLInputElement>('[data-quoted-total]')!
+    const tokenInput = q<HTMLInputElement>('[data-turnstile-token]')!
+    const widgetEl = q<HTMLElement>('[data-turnstile]')!
+
+    // Tăng cường dần: không JS thì bước 2 hiện sẵn; có JS thì gấp lại.
+    step2.hidden = true
+
+    // Ngày: từ ngày mai tới +365 theo giờ Việt Nam, tính lại ở client để không lệ thuộc giờ build.
+    const today = todayVN()
+    dateEl.min = addDaysISO(today, 1)
+    dateEl.max = addDaysISO(today, LIMITS.MAX_DAYS_AHEAD)
+
+    // Bộ đếm
+    const rows = new Map<PaxCode, { input: HTMLInputElement; label: string; inc: HTMLButtonElement; dec: HTMLButtonElement }>()
+    form.querySelectorAll<HTMLElement>('.bf__pax').forEach(row => {
+      const code = row.dataset.code as PaxCode
+      const input = row.querySelector<HTMLInputElement>('input')!
+      const inc = row.querySelector<HTMLButtonElement>('[data-inc]')!
+      const dec = row.querySelector<HTMLButtonElement>('[data-dec]')!
+      rows.set(code, { input, label: row.dataset.label || code, inc, dec })
+      dec.addEventListener('click', () => { input.value = String(Math.max(Number(input.min) || 0, (parseInt(input.value, 10) || 0) - 1)); update() })
+      inc.addEventListener('click', () => { input.value = String(Math.min(perTypeMax, (parseInt(input.value, 10) || 0) + 1)); update() })
+      input.addEventListener('change', update)
+    })
+
+    function readPax(): PaxCounts {
+      const pax: PaxCounts = { adult: 0, child: 0, senior: 0, infant: 0 }
+      rows.forEach((r, code) => {
+        const min = Number(r.input.min) || 0
+        const v = Math.min(perTypeMax, Math.max(min, parseInt(r.input.value, 10) || 0))
+        r.input.value = String(v)
+        pax[code] = v
+      })
+      return pax
+    }
+
+    let quote: Quote | null = null
+    function update() {
+      const pax = readPax()
+      const total = PAX_ORDER.reduce((n, c) => n + pax[c], 0)
+      quote = computeQuote(table!, pax)
+
+      linesEl.replaceChildren()
+      if (quote) {
+        for (const l of quote.lines) {
+          const div = document.createElement('div')
+          div.className = 'bf__line'
+          const a = document.createElement('span'); a.textContent = `${rows.get(l.code)?.label ?? l.code} × ${l.count}`
+          const b = document.createElement('span'); b.textContent = formatPrice(l.subtotal, 'vi')
+          div.append(a, b); linesEl.append(div)
+        }
+      }
+      totalEl.textContent = quote ? formatPrice(quote.total, 'vi') : '—'
+      totalInput.value = String(quote?.total ?? 0)
+      form.querySelectorAll<HTMLInputElement>('[data-quoted-per-pax]').forEach(el => {
+        const code = el.dataset.quotedPerPax as PaxCode
+        el.value = quote && typeof quote.perPax[code] === 'number' ? String(quote.perPax[code]) : ''
+      })
+
+      const atCap = total >= totalMax || !quote
+      rows.forEach(r => { r.inc.disabled = atCap || (parseInt(r.input.value, 10) || 0) >= perTypeMax })
+      hintEl.hidden = !(total >= totalMax || !quote)
+      openBtn.disabled = !quote
+    }
+    update()
+
+    // Lỗi theo ô
+    function showErr(field: string, msg: string) {
+      const el = form.querySelector<HTMLElement>(`[data-err="${field}"]`)
+      if (el) el.textContent = msg
+      const input = form.querySelector<HTMLElement>(`[name="${field}"]`)
+      if (input) input.setAttribute('aria-invalid', 'true')
+    }
+    function clearErrs() {
+      form.querySelectorAll<HTMLElement>('[data-err]').forEach(el => { el.textContent = '' })
+      form.querySelectorAll<HTMLElement>('[aria-invalid]').forEach(el => el.removeAttribute('aria-invalid'))
+    }
+
+    // Bước 2 + Turnstile nạp lười
+    let widgetId: string | null = null
+    let turnstileLoaded = false
+    function loadTurnstile() {
+      if (!siteKey || turnstileLoaded) return
+      turnstileLoaded = true
+      const s = document.createElement('script')
+      s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
+      s.async = true
+      s.onload = () => {
+        if (!window.turnstile) return
+        widgetId = window.turnstile.render(widgetEl, {
+          sitekey: siteKey,
+          callback: (token: string) => { tokenInput.value = token },
+          'expired-callback': () => { tokenInput.value = '' },
+          'error-callback': () => { tokenInput.value = '' },
+        })
+      }
+      document.head.appendChild(s)
+    }
+
+    openBtn.addEventListener('click', () => {
+      clearErrs()
+      if (!dateEl.value) { showErr('departDate', dateEl.validationMessage || 'Chọn ngày khởi hành.'); dateEl.focus(); return }
+      step2.hidden = false
+      openBtn.hidden = true
+      q<HTMLInputElement>('[name="name"]')?.focus()
+      loadTurnstile()
+    })
+    backBtn.addEventListener('click', () => { step2.hidden = true; openBtn.hidden = false; openBtn.focus() })
+
+    // Gửi
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault()
+      clearErrs()
+      if (!quote) return
+      const fd = new FormData(form)
+      const val = (k: string) => String(fd.get(k) ?? '').trim()
+      const payload = {
+        tourSlug: val('tourSlug'), tourTitle: val('tourTitle'), bookingRef: val('bookingRef'),
+        departDate: val('departDate'), pax: readPax(),
+        quoted: { perPax: quote.perPax, total: quote.total, quotedAt },
+        name: val('name'), phone: val('phone'), email: val('email'), pickup: val('pickup'), note: val('note'),
+        turnstileToken: tokenInput.value, website: val('website'),
+      }
+      submitBtn.disabled = true
+      const submitText = form.dataset.submitText || submitBtn.textContent || ''
+      submitBtn.textContent = form.dataset.sendingText || '…'
+      try {
+        const res = await fetch(form.action, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(payload) })
+        const data = await res.json().catch(() => null) as null | { ok?: boolean; code?: string; duplicate?: boolean; message?: string; fields?: Record<string, string>; summary?: { tourTitle: string; departDate: string; total: number } }
+        if (res.ok && data?.ok && data.code) {
+          showDone(data.code, !!data.duplicate)
+        } else if (res.status === 400 && data?.fields) {
+          for (const [k, m] of Object.entries(data.fields)) showErr(k, m)
+          showErr('form', data.message || form.dataset.errorText || '')
+          if (data.fields.departDate || data.fields.pax || data.fields.quoted) { step2.hidden = true; openBtn.hidden = false }
+        } else {
+          showErr('form', data?.message || form.dataset.errorText || '')
+        }
+      } catch {
+        showErr('form', form.dataset.errorText || '')
+      } finally {
+        submitBtn.disabled = false
+        submitBtn.textContent = submitText
+        if (window.turnstile && widgetId) { window.turnstile.reset(widgetId); tokenInput.value = '' }
+      }
+    })
+
+    function showDone(code: string, duplicate: boolean) {
+      step1.hidden = true
+      step2.hidden = true
+      q<HTMLElement>('[data-done-code]')!.textContent = code
+      q<HTMLElement>('[data-done-dup]')!.hidden = !duplicate
+      const summary = q<HTMLElement>('[data-done-summary]')!
+      summary.replaceChildren()
+      // dateEl.labels không dùng được ổn định trong kiểu lib.dom qua astro check — lấy
+      // trực tiếp nhãn <label for="bf-date"> theo id, giữ đúng ngữ nghĩa mà không đụng kiểu.
+      const dateLabel = form.querySelector('label[for="bf-date"]')?.textContent || 'Ngày'
+      const lines: [string, string][] = [[form.querySelector<HTMLInputElement>('[name="tourTitle"]')!.value, ''], [dateLabel, dateEl.value.split('-').reverse().join('/')]]
+      if (quote) for (const l of quote.lines) lines.push([`${rows.get(l.code)?.label ?? l.code} × ${l.count}`, formatPrice(l.subtotal, 'vi')])
+      if (quote) lines.push([totalEl.closest('.bf__total')?.querySelector('span')?.textContent || 'Tạm tính', formatPrice(quote.total, 'vi')])
+      for (const [a, b] of lines) {
+        const div = document.createElement('div'); div.className = 'bf__line'
+        const s1 = document.createElement('span'); s1.textContent = a
+        const s2 = document.createElement('strong'); s2.textContent = b
+        div.append(s1, s2); summary.append(div)
+      }
+      done.hidden = false
+      done.focus()
+    }
+  }
+</script>
+
+<style>
+  .bf { display: flex; flex-direction: column; gap: var(--s4); }
+  .bf__head { display: flex; flex-direction: column; gap: var(--s1); padding-bottom: var(--s4); border-bottom: 1px solid var(--c-border); }
+  .bf__eyebrow { font-family: var(--font-ui); font-size: var(--fs-label); font-weight: var(--fw-600); color: var(--c-text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .bf__price { font-family: var(--font-display); font-size: var(--fs-h4); font-weight: var(--fw-700); color: var(--c-accent-strong); }
+  .bf__step { display: flex; flex-direction: column; gap: var(--s3); }
+  .bf__label { font-family: var(--font-ui); font-size: var(--fs-label); font-weight: var(--fw-600); color: var(--c-text); margin: 0; }
+  .bf__input { width: 100%; font: inherit; font-size: var(--fs-base); padding: var(--s3) var(--s4); border: 1px solid var(--c-border); border-radius: var(--radius-md); background: var(--c-card); color: var(--c-text); }
+  .bf__input:focus { outline: 2px solid var(--c-primary); outline-offset: 1px; }
+  .bf__input[aria-invalid="true"] { border-color: var(--c-accent); }
+  .bf__pax { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); padding: var(--s2) 0; }
+  .bf__pax-info { display: flex; flex-direction: column; gap: 2px; }
+  .bf__pax-name { font-size: var(--fs-base); font-weight: var(--fw-600); color: var(--c-text); }
+  .bf__pax-note { font-size: var(--fs-sm); color: var(--c-text-muted); }
+  .bf__pax-price { font-size: var(--fs-sm); font-weight: var(--fw-600); color: var(--c-primary); }
+  .bf__stepper { display: inline-flex; align-items: center; gap: var(--s2); }
+  .bf__btn { width: 2.25rem; height: 2.25rem; border-radius: var(--radius-pill); border: 1px solid var(--c-border); background: var(--c-card); color: var(--c-primary); font-size: var(--fs-h5); font-weight: var(--fw-600); cursor: pointer; transition: background var(--m-fast) var(--m-ease), border-color var(--m-fast) var(--m-ease); }
+  .bf__btn:hover:not(:disabled) { background: var(--c-surface-alt); border-color: var(--c-primary); }
+  .bf__btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .bf__count { width: 2.75rem; text-align: center; font: inherit; font-size: var(--fs-base); font-weight: var(--fw-700); border: 0; background: transparent; color: var(--c-text); -moz-appearance: textfield; }
+  .bf__count::-webkit-outer-spin-button, .bf__count::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .bf__quote { background: var(--c-surface-alt); border-radius: var(--radius-md); padding: var(--s4); display: flex; flex-direction: column; gap: var(--s2); }
+  .bf__line { display: flex; justify-content: space-between; gap: var(--s3); font-size: var(--fs-sm); color: var(--c-text-muted); }
+  .bf__total { display: flex; justify-content: space-between; gap: var(--s3); padding-top: var(--s2); border-top: 1px solid var(--c-border); font-size: var(--fs-base); font-weight: var(--fw-700); color: var(--c-text); }
+  .bf__total strong { color: var(--c-accent-strong); }
+  .bf__note, .bf__hint, .bf__noscript, .bf__hotline { font-size: var(--fs-sm); color: var(--c-text-muted); margin: 0; }
+  .bf__hint { color: var(--c-accent-strong); }
+  .bf__err { font-size: var(--fs-sm); color: var(--c-accent-strong); margin: 0; min-height: 0; }
+  .bf__err:empty { display: none; }
+  .bf__primary { display: inline-flex; align-items: center; justify-content: center; width: 100%; background: var(--c-accent); color: var(--c-text-inverse); font-family: var(--font-ui); font-size: var(--fs-base); font-weight: var(--fw-600); padding: var(--s3) var(--s5); border: 0; border-radius: var(--radius-pill); cursor: pointer; text-decoration: none; transition: background var(--m-fast) var(--m-ease); }
+  .bf__primary:hover:not(:disabled) { background: var(--c-accent-strong); }
+  .bf__primary:disabled { opacity: 0.6; cursor: not-allowed; }
+  .bf__secondary { display: inline-flex; align-items: center; justify-content: center; width: 100%; background: var(--c-card); color: var(--c-primary); font-family: var(--font-ui); font-size: var(--fs-base); font-weight: var(--fw-600); padding: var(--s3) var(--s5); border: 2px solid var(--c-primary); border-radius: var(--radius-pill); cursor: pointer; text-decoration: none; transition: background var(--m-fast) var(--m-ease); }
+  .bf__secondary:hover { background: var(--c-primary-soft); }
+  .bf__actions { display: flex; flex-direction: column; gap: var(--s2); }
+  .bf__hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+  .bf__turnstile:empty { display: none; }
+  .bf__done { display: flex; flex-direction: column; gap: var(--s3); outline: none; }
+  .bf__done-title { font-family: var(--font-display); font-size: var(--fs-h5); font-weight: var(--fw-700); color: var(--c-primary-strong); margin: 0; }
+  .bf__done-code { font-size: var(--fs-base); margin: 0; }
+  .bf__done-code strong { font-family: var(--font-display); color: var(--c-accent-strong); }
+  .bf__done-dup { font-size: var(--fs-sm); color: var(--c-text-muted); margin: 0; }
+  .bf__hotline a { color: var(--c-primary); font-weight: var(--fw-600); }
+</style>
