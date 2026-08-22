@@ -1,0 +1,1066 @@
+{
+  "pages": 105,
+  "violations": [
+    {
+      "page": "dist/dia-danh/ben-cang-da-chong/index.html",
+      "field": "placeType",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/dia-danh/ben-cang-da-chong/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/dia-danh/cang-cap-treo-vinpearl/index.html",
+      "field": "placeType",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/dia-danh/cang-cap-treo-vinpearl/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/dia-danh/cang-cap-treo-vinpearl/index.html",
+      "field": "containedInPlace",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/dia-danh/cang-du-lich-nha-trang/index.html",
+      "field": "placeType",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/dia-danh/cang-du-lich-nha-trang/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/dia-danh/cang-du-lich-nha-trang/index.html",
+      "field": "containedInPlace",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/dia-danh/dao-hon-mieu/index.html",
+      "field": "placeType",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/dia-danh/dao-hon-mieu/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/dia-danh/dao-hon-mieu/index.html",
+      "field": "containedInPlace",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/dia-danh/dao-hon-mun/index.html",
+      "field": "placeType",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/dia-danh/dao-hon-mun/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/dia-danh/dao-hon-mun/index.html",
+      "field": "containedInPlace",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/dia-danh/dao-hon-tam/index.html",
+      "field": "placeType",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/dia-danh/dao-hon-tam/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/dia-danh/dao-hon-tam/index.html",
+      "field": "containedInPlace",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/dia-danh/noi-thanh-nha-trang/index.html",
+      "field": "placeType",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/dia-danh/noi-thanh-nha-trang/index.html",
+      "field": "containedInPlace",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/bai-dai-cam-lam/index.html",
+      "field": "gia",
+      "regions": [
+        "action-block",
+        "info-bar",
+        "sticky-bar"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/bai-dai-cam-lam/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/bai-dai-cam-lam/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/ben-du-thuyen-nha-trang/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/ben-du-thuyen-nha-trang/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/chua-long-son/index.html",
+      "field": "gia",
+      "regions": [
+        "action-block",
+        "info-bar",
+        "sticky-bar"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/chua-long-son/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/chua-long-son/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/cong-vien-giai-tri-vinwonders/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/cong-vien-giai-tri-vinwonders/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/hon-chong/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/hon-chong/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-ba-ho/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-ba-ho/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-bai-tranh/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-bai-tranh/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-diamond-bay/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-diamond-bay/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-hon-mun/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-hon-mun/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-hon-soi/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-hon-soi/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-hon-tam/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-hon-tam/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-i-resort/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-i-resort/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-kong-forest/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-kong-forest/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-mini-beach/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-mini-beach/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-suoi-tien/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-suoi-tien/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-tam-bun-thap-ba/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-tam-bun-thap-ba/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-tam-linh-hon-ba/index.html",
+      "field": "gia",
+      "regions": [
+        "action-block",
+        "info-bar",
+        "sticky-bar"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-tam-linh-hon-ba/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-tam-linh-hon-ba/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-vinh-san-ho/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-vinh-san-ho/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-yang-bay/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/khu-du-lich-yang-bay/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/lang-chai-bich-dam/index.html",
+      "field": "gia",
+      "regions": [
+        "action-block",
+        "info-bar",
+        "sticky-bar"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/lang-chai-bich-dam/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/lang-chai-bich-dam/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/lang-chai-hon-mieu/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/lang-chai-hon-mieu/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/lang-nghe-truong-son/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/lang-nghe-truong-son/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/nha-tho-nui/index.html",
+      "field": "gia",
+      "regions": [
+        "action-block",
+        "info-bar",
+        "sticky-bar"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/nha-tho-nui/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/nha-tho-nui/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/thap-ba-ponaga/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/thap-ba-ponaga/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/vien-hai-duong-hoc/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/vien-hai-duong-hoc/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/vin-harbour/index.html",
+      "field": "openingHours",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/diem-tham-quan/vin-harbour/index.html",
+      "field": "telephone",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/khach-san/comodo-nha-trang/index.html",
+      "field": "starRating",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/khach-san/comodo-nha-trang/index.html",
+      "field": "beachAccess",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/khach-san/comodo-nha-trang/index.html",
+      "field": "checkinTime",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/khach-san/la-vague-nha-trang/index.html",
+      "field": "starRating",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/khach-san/la-vague-nha-trang/index.html",
+      "field": "beachAccess",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/khach-san/la-vague-nha-trang/index.html",
+      "field": "checkinTime",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/khach-san/nha-trang-palace/index.html",
+      "field": "starRating",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/khach-san/nha-trang-palace/index.html",
+      "field": "beachAccess",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/khach-san/nha-trang-palace/index.html",
+      "field": "checkinTime",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/khach-san/vinpearl-beachfront-nha-trang/index.html",
+      "field": "starRating",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/khach-san/vinpearl-beachfront-nha-trang/index.html",
+      "field": "beachAccess",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/khach-san/vinpearl-beachfront-nha-trang/index.html",
+      "field": "checkinTime",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/khach-san/vinpearl-empire-nha-trang/index.html",
+      "field": "starRating",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/khach-san/vinpearl-empire-nha-trang/index.html",
+      "field": "beachAccess",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/khach-san/vinpearl-empire-nha-trang/index.html",
+      "field": "checkinTime",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/khach-san/xavia-nha-trang/index.html",
+      "field": "starRating",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/khach-san/xavia-nha-trang/index.html",
+      "field": "beachAccess",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/khach-san/xavia-nha-trang/index.html",
+      "field": "checkinTime",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/tour/tour-3-dao-hon-mun/index.html",
+      "field": "duration",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/tour/tour-3-dao-hon-mun/index.html",
+      "field": "tourFormat",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/tour/tour-3-dao-mini-beach/index.html",
+      "field": "duration",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/tour/tour-3-dao-mini-beach/index.html",
+      "field": "tourFormat",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/tour/tour-3-dao-nha-trang/index.html",
+      "field": "duration",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/tour/tour-3-dao-nha-trang/index.html",
+      "field": "tourFormat",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/tour/tour-3-dao-nha-trang-deluxe/index.html",
+      "field": "duration",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/tour/tour-3-dao-nha-trang-deluxe/index.html",
+      "field": "tourFormat",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/tour/tour-3-dao-vip-nha-trang/index.html",
+      "field": "duration",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/tour/tour-3-dao-vip-nha-trang/index.html",
+      "field": "tourFormat",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/tour/tour-dao-khi-suoi-hoa-lan/index.html",
+      "field": "duration",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/tour/tour-dao-khi-suoi-hoa-lan/index.html",
+      "field": "tourFormat",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/tour/tour-hon-tam-tam-bun-tam-bien/index.html",
+      "field": "duration",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/tour/tour-hon-tam-tam-bun-tam-bien/index.html",
+      "field": "tourFormat",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/tour/tour-hon-tam-tron-goi/index.html",
+      "field": "duration",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/tour/tour-hon-tam-tron-goi/index.html",
+      "field": "tourFormat",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/tour/ve-hon-tam-tam-bien/index.html",
+      "field": "duration",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/tour/ve-hon-tam-tam-bien/index.html",
+      "field": "tourFormat",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/tour/ve-hon-tam-tron-goi/index.html",
+      "field": "duration",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/tour/ve-hon-tam-tron-goi/index.html",
+      "field": "tourFormat",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/tour/ve-vinwonders-tieu-chuan/index.html",
+      "field": "duration",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/tour/ve-vinwonders-tieu-chuan/index.html",
+      "field": "tourFormat",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/trai-nghiem/cano-keo-du-bay/index.html",
+      "field": "duration",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/trai-nghiem/cano-keo-du-bay/index.html",
+      "field": "touristType",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/trai-nghiem/di-bo-duoi-day-bien-sea-walker/index.html",
+      "field": "duration",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/trai-nghiem/di-bo-duoi-day-bien-sea-walker/index.html",
+      "field": "touristType",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/trai-nghiem/fly-board-nha-trang/index.html",
+      "field": "duration",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/trai-nghiem/fly-board-nha-trang/index.html",
+      "field": "touristType",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/trai-nghiem/lan-bien-scuba-diving/index.html",
+      "field": "duration",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/trai-nghiem/lan-bien-scuba-diving/index.html",
+      "field": "touristType",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/trai-nghiem/motor-nuoc-nha-trang-jetski/index.html",
+      "field": "duration",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/trai-nghiem/motor-nuoc-nha-trang-jetski/index.html",
+      "field": "touristType",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/trai-nghiem/phao-bay/index.html",
+      "field": "duration",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/trai-nghiem/phao-bay/index.html",
+      "field": "touristType",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/trai-nghiem/phao-chuoi/index.html",
+      "field": "duration",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/trai-nghiem/phao-chuoi/index.html",
+      "field": "touristType",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/trai-nghiem/snorkeling-nha-trang/index.html",
+      "field": "duration",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    },
+    {
+      "page": "dist/trai-nghiem/snorkeling-nha-trang/index.html",
+      "field": "touristType",
+      "regions": [
+        "info-bar",
+        "info-card"
+      ]
+    }
+  ]
+}
