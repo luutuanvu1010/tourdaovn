@@ -875,3 +875,44 @@ Sổ không được cập nhật suốt chín ngày, kéo theo `BUILD-NOTES.md`
 **Lý do.** Tần suất push code thấp hơn hẳn tần suất publish nội dung, nên khoản Sanity API request tiết kiệm được đã lấy gần hết ở việc ngắt hook. Đổi lại giữ được một đường phát hành không phụ thuộc máy local — chính nó đưa đợt 4A lên live ngày 2026-08-22 (deployment `3211f541`, 04:30:01 UTC, kiểm bằng trang `/diem-tham-quan/vin-harbour/` khớp `dist/` đúng 55 690 byte).
 
 **Đánh đổi còn nguyên:** bản dựng phía Cloudflare lấy code từ `origin/main` và **đè** lên version deploy tay. Luật vận hành **push trước, deploy tay sau** (DR-041, `BUILD-NOTES` mục Deploy) vẫn bắt buộc, và vẫn không có kiểm máy nào cưỡng chế.
+
+---
+
+## QĐ-2026-08-22-05 — Chốt cổng QA1 đợt 4B và gỡ sáu nợ chạm `06`
+
+**Bối cảnh.** QA1 đợt 4B đạt ở vòng 3 (`docs/evidence/2026-08-22-qa1-vong-4b/`, ba báo cáo). QA để lại hai nợ **chặn** bước Code (N3, N15) và bốn nợ cùng chạm `06` (N4, N11, N13, N14). `CONSTITUTION` Điều 3 và `GOVERNANCE` 3.4 cấm tác nhân tự hoà giải xung đột đặc tả, nên tất cả chờ chủ dự án. Đề xuất kèm phương án: `docs/specs/DE-XUAT-2026-08-22-go-N3-N15.md`.
+
+**Chốt 0 — cổng QA1 đợt 4B: ĐẠT.** Chủ dự án chốt 2026-08-22. `GOVERNANCE` 3.1 đủ điều kiện cần (QA độc lập) và điều kiện đủ (chủ dự án). Bước 4 (Code) mở, **sau khi** `06` lên v2.2 theo các chốt dưới đây.
+
+**Chốt 1 — N3, breadcrumb trang Tour: phương án A.** Tách hàng Breadcrumb của `06` §3 làm hai: **"Breadcrumb (điều hướng)"** — nguồn `config (build)` theo nhánh URL, áp cho **mọi** trang chi tiết; và **"Mắt cha trong breadcrumb"** — nguồn `containedInPlace` (Experience dùng `venue`), không áp dụng cho article, person, organization, tour, specialty, event. §3.1 thêm một dòng cho mắt cha.
+
+*Lý do:* một hàng đang gánh hai sự thật khác nhau — vùng điều hướng (sinh từ URL) và mắt cha (sinh từ dữ liệu). Cột "không áp dụng" đúng cho mắt cha, sai cho vùng. Phương án A khớp `src/components/Breadcrumb.astro` đang chạy và khớp 5/6 mockup, **không sửa dòng code nào**. Bác C vì mất lối quay lại `/tour/` trên trang chốt đơn và mất `BreadcrumbList` trong JSON-LD.
+
+**Chốt 2 — N15a, ngưỡng mục lục: phương án A.** Giữ nguyên ngưỡng **≥ 3 h2** trong `06` §3. Mockup Tour sai so với đặc tả, không phải ngược lại — Design bỏ mục lục khỏi mockup Tour ở lần cập nhật kế tiếp. Bác B (hạ xuống ≥ 2): mục lục hai dòng cho bài ngắn là nhiễu, mà ngưỡng đặt ra chính để tránh điều đó.
+
+**Chốt 3 — N15b, cấp thẻ tiêu đề thân bài: phương án A.** Trong **trang chi tiết entity**, `Body` hạ một cấp: `h2`→`<h3>`, `h3`→`<h4>`, qua một prop `headingOffset`. Biên tập viên vẫn gõ h2 trong Sanity. **Trang Article giữ nguyên** vì ở đó thân bài là nội dung chính, không nằm dưới một tiêu đề mục. `06` §3 sửa thành "sinh từ tiêu đề cấp cao nhất của `body` (lưu là h2, render h3 trong trang chi tiết)".
+
+*Lý do:* `Body.astro:48` đang render h2 vào trong `<section>` mà tiêu đề mục cũng là h2 (`Section.astro`) → hai h2 ngang cấp, sai phân cấp tài liệu, sai cả a11y lẫn SEO. Mockup đã vẽ h3 nên đã đúng sẵn.
+
+**Chốt 4 — N4, dải cuối trang: thêm hàng vào `06` §3.** Khai một hàng "Dải liên quan" — nguồn `config (build)`, không phải field Sanity — áp cho Place/Experience/Tour, vị trí cuối thân trang. Chỉ ghi lại thứ đang chạy trên production; không đổi code. Đóng vùng mồ côi mà QA báo ở A2(d).
+
+**Chốt 5 — N11, luật 1 của `06` §6 nói về *field*.** Thêm một câu vào §6: luật 1 ràng buộc **field**, **không** cấm hai field khác nhau tình cờ mang cùng giá trị; và nội dung `faq` do biên tập viết không tính là vùng thứ hai. Đóng L16 (`tripOrigin` ↔ tên stop), L17 (`duration` ↔ `durationAtStop` ↔ FAQ), L18 (`touristType` ↔ hạng khách của form).
+
+*Lý do:* nguyên văn luật 1 nói "mỗi **field** hiển thị… đúng một vùng" — Design đọc đúng chữ. Siết thành "một chuỗi chỉ xuất hiện một lần" sẽ biến nhiều chỗ trùng hợp lý (tên bến vừa ở Thông tin nhanh vừa ở lịch trình) thành lỗi giả.
+
+**Chốt 6 — N13, giá trong chữ của `faq`: cho phép có điều kiện.** Biên tập được viết số giá trong `faq`, **kèm hai ràng buộc**: (a) ghi ngày cập nhật và tên nguồn ngay tại chỗ; (b) mỗi mục như vậy vào một danh sách rà định kỳ. Không mở rộng I1 sang mọi entity.
+
+*Lý do:* Địa danh không phải entity thương mại nên I1 không với tới, và `06` §4.2 cấm Place có vùng giá — cấm hẳn thì không còn chỗ nào nói được giá vé vào cổng, là thông tin khách thật sự cần. Đánh đổi nhận rõ: một mức giá sống ngoài `prices.yaml`, cưỡng chế bằng quy trình chứ không bằng validator.
+
+**Chốt 7 — N14, `durationAtStop`: sửa đặc tả theo dữ liệu.** `01`/`06` cho phép **khung giờ trong ngày** ("8:00 – 8:45"), nói rõ đây là **mốc giờ dự kiến**, không phải lịch chỗ trống (giữ nguyên tinh thần §4.8 và I1). **Bắt buộc kèm:** sửa `src/lib/serialize/tour.ts:61-63` để ngừng nối thẳng giá trị này vào ô chờ kiểu Duration của ItemList.
+
+*Lý do:* mốc giờ là thứ khách dễ hình dung nhất trên lịch trình tour, và là thứ đang chạy trên production. Nhưng structured data **đang sai kiểu trên production** — đó là phần phải sửa dù chọn hướng nào.
+
+**Việc phát sinh từ mục này.**
+
+1. Cowork sửa `06-BINDING_MAP` lên **v2.2**: §3 tách hàng Breadcrumb (Chốt 1), thêm hàng Dải liên quan (Chốt 4), sửa hàng Thân bài (Chốt 3); §3.1 thêm dòng mắt cha; §6 thêm câu về phạm vi luật 1 (Chốt 5). Sửa `01` cho `durationAtStop` (Chốt 7).
+2. Design bỏ mục lục khỏi mockup Tour (Chốt 2); QA1 chạy **vòng xác minh ngắn** trên đúng phần đổi.
+3. Code mới chạy sau đó: `FactStrip.astro`, `DetailLayout` v3, `Body` `headingOffset`, `serialize/tour.ts`, thứ tự khối di động.
+4. Ghi luật biên tập của Chốt 6 vào tài liệu vận hành nội dung; lập danh sách rà giá trong `faq`.
+
+**Chưa chốt, còn mở:** §6 mục 4, 5, 6 của `docs/plans/2026-08-21-audit-va-ke-hoach-giao-dien-vong-4.md` — công cụ đo QA2 (Lighthouse) và hướng xử ảnh `docs/design/giaodiendatve.png` (chỉ lấy phân cấp giá→CTA, hay mở ADR cho form đặt chỗ). Nợ dữ liệu đợt 4D cũng còn nguyên: `itinerary` 3 tour trỏ slug `null`, hai URL R3, hreflang R4, người duyệt S24.

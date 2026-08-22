@@ -258,9 +258,9 @@ Thi hành đúng bảng §4 "Đợt 4A" sau `QĐ-2026-08-22-01`. Chưa commit �
 | 2 | **Chưa đạt** — 0 Cao, 4 TB (V1–V4). QA rút F15 (Design đúng), chuyển F21 thành nợ N14, tách N13 | Sửa V1–V3; V4 giữ vì đã là nợ N15 (commit `e4e1d8a`) |
 | 3 | **ĐẠT** — 0 Cao; chỉ V4 mở và đã có phiếu nợ; không lỗi mới; tương phản hero đạt biên rộng (bộ xấu nhất `ngoc-lam`: đoạn mở 6,6:1, huy hiệu 6,1:1) | — |
 
-**Cổng QA1 vẫn chờ chủ dự án chốt** (`GOVERNANCE` 3.1: QA kiểm chứng là điều kiện cần, chủ dự án chốt là điều kiện đủ).
+**Cổng QA1 ĐÃ CHỐT 2026-08-22** (`QĐ-2026-08-22-05` Chốt 0) — `GOVERNANCE` 3.1 đủ cả hai vế. Bước 4 (Code) mở sau khi `06` lên v2.2.
 
-**Hai nợ chặn bước Code**, đề xuất cách gỡ ở `docs/specs/DE-XUAT-2026-08-22-go-N3-N15.md`: **N3** (`06` §3 tự mâu thuẫn về breadcrumb của Tour — một hàng gánh hai sự thật) và **N15** (ngưỡng mục lục ≥ 3 h2, và cấp thẻ h2/h3 của thân bài trong trang chi tiết). Nên chốt cùng lượt: N4, N11+N13, N14.
+**Sáu nợ đã gỡ 2026-08-22** (`QĐ-2026-08-22-05`), đề xuất ở `docs/specs/DE-XUAT-2026-08-22-go-N3-N15.md`: **N3** phương án A (tách hàng breadcrumb thành *điều hướng* + *mắt cha*; không sửa dòng code nào) · **N15a** A (giữ ngưỡng ≥ 3 h2, sửa mockup Tour) · **N15b** A (`Body` thêm `headingOffset`, trang chi tiết hạ một cấp; Article giữ nguyên) · **N4** thêm hàng "Dải liên quan" vào §3 · **N11** luật 1 ràng buộc *field*, không ràng buộc chuỗi · **N13** cho phép giá trong `faq` kèm ngày + nguồn + danh sách rà · **N14** đặc tả nhận khung giờ, **kèm bắt buộc sửa `serialize/tour.ts:61-63`** (structured data đang sai kiểu trên production).
 
 **Việc dữ liệu lộ ra khi chạy cổng (thêm vào 4D):** sửa `itinerary` của 3 tour đang trỏ điểm tham quan chưa có slug; redirect hoặc khôi phục hai URL R3; người duyệt cho 6 trang S24; `translationGroup` của bài cẩm nang.
 
