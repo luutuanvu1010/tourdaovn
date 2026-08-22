@@ -484,11 +484,103 @@ Ba chỗ **đã** hạ xuống `--fw-700` trong cùng đợt (`site-home-title`,
 
 ---
 
+## DR-032 — Một field đổ vào ba vùng trên trang chi tiết, trái chữ "hoặc" của `06` §3
+
+**Trạng thái:** mở. Phát hiện 2026-08-21, audit giao diện vòng 4 (`docs/plans/2026-08-21-audit-va-ke-hoach-giao-dien-vong-4.md` §2.1).
+
+`06-BINDING_MAP` §3 hàng "Nhãn loại entity" khai *"nhãn ngắn cạnh tiêu đề **hoặc** trong InfoBar"*. Code làm cả hai cộng thêm sidebar: `PlaceDetail.astro` đưa `placeType` vào `heroBadges`, `infoBarItems` và `sidebarRows`; `TourDetail.astro:67–82` đưa `tourFormat` và `duration` vào cả ba. Đo trên production: `/dia-danh/hon-mun/` hiện "Đảo" ba lần, `/tour/tour-3-dao-nha-trang-deluxe/` hiện "Cả hai" và "8:00 - 16:00" ba lần; `/diem-tham-quan/khu-du-lich-hon-tam/` hiện giờ mở cửa và điện thoại hai lần (InfoBar + InfoCard).
+
+Phần còn lại của bản ánh xạ (giờ, điện thoại, thời lượng, nơi diễn ra) **không khai vùng** — nên mỗi template tự quyết và lặp. Lệch hai chiều: code vượt spec ở hàng nhãn loại, spec thiếu cột "vùng" ở các hàng khác.
+
+**Điều kiện xử.** Sửa ở tầng `06` trước (thêm vùng "Thông tin nhanh", thêm cột vùng cho mọi field hiển thị), rồi kéo code về. Thuộc đợt 4B của kế hoạch vòng 4. Không tự sửa code trước khi `06` đổi.
+
+---
+
+## DR-033 — Sidebar dính bị header và thanh dính che
+
+**Trạng thái:** **đã xử 2026-08-22** (đợt 4A, QĐ-2026-08-22-01). Token mới `--sticky-bar-h: 56px`; `DetailLayout` ép thanh dính cao đúng token và truyền `stickyBar` cho `Sidebar`; `Sidebar` dính ở `top: calc(var(--header-h) + var(--sidebar-offset, 0px) + var(--s4))`. Bằng chứng trên `dist/`: `class="sidebar" style="--sidebar-offset:var(--sticky-bar-h)"` và CSS `top:calc(var(--header-h) + var(--sidebar-offset, 0px) + var(--s4))`. Nguyên văn phần dưới giữ làm bản ghi.
+
+**Trạng thái cũ:** mở. Phát hiện 2026-08-21.
+
+`Sidebar.astro:37–39`: `position: sticky; top: 16px`. Trên trang chi tiết, header (đo 69 px) và `.sticky-bar` (đo 61,8 px, `DetailLayout.astro` `top: var(--header-h)`) cùng dính phía trên, tổng 131 px. Khi cuộn, hai dòng đầu của `InfoCard` (Địa chỉ, Giờ mở cửa) nằm sau thanh dính. Ảnh: `docs/evidence/2026-08-21-audit-vong-4/ev-attr-sidebar-clipped.jpg`.
+
+Lỗi thi hành, không phải lệch spec. Sửa ở đợt 4A: `top` phải cộng `--header-h` và chiều cao thanh dính (xuất thành biến từ `DetailLayout`).
+
+---
+
+## DR-034 — Thang chữ render lớn hơn `07-DESIGN_TOKENS` 6,25 % ở mọi bậc
+
+**Trạng thái:** **đã xử 2026-08-22** — chủ dự án chọn cách (a) (QĐ-2026-08-22-01): `html { font-size: 100% }`, `body { font-size: var(--fs-base) }`. Bằng chứng trên `dist/`: `html{font-size:100%` và `body{…font-size:var(--fs-base)…}`. Con số trong `07-DESIGN_TOKENS` §2 nay là con số render thật; cần chủ dự án nhìn lại bản dựng vì site nhỏ đi ~6 %. Nguyên văn phần dưới giữ làm bản ghi.
+
+**Trạng thái cũ:** mở. Phát hiện 2026-08-21.
+
+`tokens.css:192–194` đặt `html { font-size: var(--fs-base) }` với `--fs-base: 1.0625rem`. Root thành 17 px, và vì mọi token cỡ chữ cũng tính bằng `rem`, chúng nhân thêm 17/16. Đo trên production: body **18,06 px** (spec 17), `--fs-section` **34 px** (spec 32), h1 trang chi tiết **48,9 px** (spec 46), `--fs-sm` **15,9 px** (spec 15), `--fs-h1` **44,6 px** (spec 42).
+
+Không phải lỗi nhìn thấy — thang vẫn đều — nhưng `07` §2 và chú thích trong `tokens.css` đang ghi những con số không còn đúng trên màn hình; vòng 3 chỉnh 28→32 và 18→21 theo con số spec trong khi thật ra là 34 và 22,3.
+
+**Điều kiện xử.** Chủ dự án chọn: (a) `html { font-size: 100% }` để mọi token về đúng spec — site nhỏ lại ~6 %, phải duyệt lại bằng mắt; (b) giữ nguyên màn hình, sửa `07` và chú thích ghi con số đang render. Cửa hai chiều, nhưng phải quyết **trước** khi đo lại bất kỳ thứ gì về cỡ chữ.
+
+---
+
+## DR-035 — Hai bảng nhãn cho một giá trị `tourFormat`
+
+**Trạng thái:** **đã xử 2026-08-22** (đợt 4A). Còn một bảng `TOUR_FORMAT_LABELS`; `both` → "Ghép hoặc riêng"; `TOUR_FORMAT_BADGES` xoá, bốn nơi dùng (`EntityIndex`, `HubIndex`, `TourIndex`, `TermIndex`) đọc chung bảng. Bằng chứng trên `dist/`: `/tour/` 10 lần "Ghép hoặc riêng", 0 lần "Linh hoạt"; trang Deluxe 0 lần "Cả hai". Nguyên văn phần dưới giữ làm bản ghi.
+
+**Trạng thái cũ:** mở. Phát hiện 2026-08-21.
+
+`src/lib/uiCopy.ts:813` (`TOUR_FORMAT_LABELS`) dịch `both` thành "Cả hai"; `:822` (`TOUR_FORMAT_BADGES`) dịch cùng giá trị thành "Linh hoạt". Danh sách `/tour/` hiện "Linh hoạt", trang chi tiết cùng tour hiện "Cả hai" — một sự thật, hai chữ, trái P6/N7. "Cả hai" đứng một mình trong huy hiệu hero không có nghĩa.
+
+Sửa ở đợt 4A: một bảng, một chữ (đề xuất "Ghép hoặc riêng"), hai nơi cùng đọc.
+
+---
+
+## DR-036 — CTA dự phòng của trang tour trỏ về chính site
+
+**Trạng thái:** **đã xử 2026-08-22** (đợt 4A). `TourDetail` bỏ qua URL cùng host với `site.url` khi chọn CTA dự phòng. Bằng chứng trên `dist/`: trang Deluxe không còn `href="https://tourdao.vn/"` trong `booking-btn`; 4 trang tour còn nút "Website chính thức" đều trỏ `hontamnhatrang.com` (đơn vị vận hành ngoài — đúng). Gốc sâu (không có giá) vẫn thuộc đợt 4D / ADR-0027. Nguyên văn phần dưới giữ làm bản ghi.
+
+**Trạng thái cũ:** mở. Phát hiện 2026-08-21.
+
+`TourDetail.astro:38–41`: khi tour chưa có giá, nút "Website chính thức" trỏ `data.operator?.url || officialSource`. Đơn vị vận hành của mọi tour là Công ty TNHH Tour Đảo, `url` là `https://tourdao.vn/` — nên trên production mọi trang tour có một nút **"Website chính thức" → trang chủ của chính nó**. Vì `data/prices.yaml` rỗng nên nhánh này đang bật ở **11/11** tour.
+
+Đây là nút không hành động, đúng loại R4 và `06` quyết định nền 3 cấm. Sửa ở đợt 4A: không render khi URL cùng host với `site.url`. Gốc sâu hơn — không có giá — thuộc đợt 4D.
+
+---
+
+## DR-037 — `theme-color` hardcode màu của site cũ ngoài nguồn token
+
+**Trạng thái:** **đã xử 2026-08-22** (đợt 4A). `siteTheme.ts` thêm `themeSurface(theme)` đọc thẳng `tokens.css` (không chép hex); `BaseLayout` phát `theme-color` = `--c-surface` của bộ đang bật — lấy nền chứ không lấy accent vì thanh địa chỉ di động nằm sát header nền trắng (giả định bề mặt, ghi ở QĐ-2026-08-22-01). Bằng chứng trên `dist/index.html`: `<meta name="theme-color" content="#FFFFFF">`. Nguyên văn phần dưới giữ làm bản ghi.
+
+**Trạng thái cũ:** mở. Phát hiện 2026-08-21.
+
+`src/layouts/BaseLayout.astro:72`: `<meta name="theme-color" content="#C2410C" />`. `#C2410C` là accent của nhatrangtravel; accent hiện hành là `#C0392B` (`tokens.css`), và còn đổi theo bộ giao diện (`cat-bien` `#B45309`, `ngoc-lam` `#BE123C`). `07-DESIGN_TOKENS` mở đầu: *"hardcode ngoài nguồn token là vi phạm P6/N7"*. Thanh địa chỉ di động đang tô màu của dự án khác.
+
+Sửa ở đợt 4A: đọc từ token/bộ giao diện đang bật.
+
+---
+
+## DR-038 — Thẻ danh sách: clamp 2 dòng nhưng vẫn lòi dòng 3
+
+**Trạng thái:** **đã xử 2026-08-22** (đợt 4A). `.card-summary` bỏ `flex:1`, `.card-meta` nhận `margin-top:auto`. Chưa có ảnh sau (trình duyệt chưa chụp lại được); kiểm bằng mắt khi duyệt bản dựng. Nguyên văn phần dưới giữ làm bản ghi.
+
+**Trạng thái cũ:** mở. Phát hiện 2026-08-21.
+
+`Card.astro` `.card-summary` vừa `display:-webkit-box; -webkit-line-clamp:2; overflow:hidden` vừa `flex:1`. Khi thẻ không có huy hiệu/giá (hàng meta rỗng), `flex:1` kéo ô mô tả cao hơn hai dòng, trình duyệt vẽ dấu "…" ở dòng 2 **và** vẫn hiện dòng 3 phía dưới. Thấy ngay ở `/diem-tham-quan/`, thẻ "Hòn Chồng Hòn Vợ" (ảnh `ev-index-attraction-cards.jpg`): 8/15 thẻ không huy hiệu nên chiều cao không đều.
+
+Sửa ở đợt 4A: bỏ `flex:1` khỏi `.card-summary`, đẩy `margin-top:auto` sang `.card-meta`.
+
+---
+
 ## DR-039 — `bookingRef.key` của 8 tour chứa chuỗi giá thay vì khoá
 
-**Trạng thái:** đã xử 2026-08-22 — khoá = slug (16 document kể cả nháp; kế hoạch dự kiến 14,
-thực tế cả 8 tour approved đều đang có bản nháp mở nên 8+8, không phải 8+6 — xem
-task-11-report.md), giá sang data/prices.yaml; xem QĐ-2026-08-21-01.
+**Trạng thái:** đã xử 2026-08-22 — giá chuyển sang `data/prices.yaml`, `bookingRef.key` thôi
+chứa chuỗi giá; xem `QĐ-2026-08-21-01`. Lúc chạy, script đặt khoá = slug cho 16 document
+(8 tour approved + 8 nháp; kế hoạch dự kiến 14 — xem `task-11-report.md`).
+
+**Đính chính cùng ngày:** câu "khoá = slug" mô tả *thời điểm chạy*, không phải một bất biến.
+Chủ dự án sửa nội dung trong Studio sau đó (đổi slug nhiều tour, thêm tour mới), nên tới tối
+2026-08-22 chỉ còn 1 document có `key == slug`. **Đây không phải hỏng:** `resolvePrice()` đọc
+thẳng `bookingRef.key` rồi tra `prices.yaml`, không suy khoá lại từ slug — 7/8 dòng giá vẫn
+trỏ đúng. Khoá là **định danh ổn định**, không buộc bằng slug; xem `DR-045`.
 
 `01-CONTENT_MODEL` §2.8: `bookingRef` là con trỏ tới dòng giá, "không lưu số, I1, I16".
 Dataset production có 8 document `tour` approved (và 6 bản nháp của chúng) mang
@@ -503,7 +595,70 @@ một dòng "đã xử" khi Task 11 xong.
 
 ---
 
-## DR-040 — `PY3`/`PY4`/`PY5` so sai kiểu `bookingRef`, ba validator giá gần như vô hiệu
+## DR-040 — Đường phát hành tự động là Workers Builds, tài liệu ghi Cloudflare Pages
+
+**Trạng thái:** **đã xử 2026-08-22** ở `BUILD-NOTES.md` (mục Deploy nay mô tả đúng chuỗi thật). Còn **mở** ở `README.md:66`, `SETUP-NEW-SITE.md:109–111`, `ADR-0009`, `ADR-0022` mục "Muốn quay lại" — đó là văn bản lõi/multi-site, sửa phải có quyết định riêng.
+
+`tourdao.vn` do **Cloudflare Worker** `tourdaovn` phục vụ, và Worker đó **có nối git**: GitHub App `cloudflare-workers-and-pages` đặt check-run tên `Workers Builds: tourdaovn` trên `luutuanvu1010/tourdaovn`, lần gần nhất `success` ngày 2026-08-14 (build `dbdf066a…`, account `381557e4…`). Không có Pages project nào tên `tourdaovn` — đã ghi ở `QĐ-2026-08-14-02`.
+
+Nhưng mọi tài liệu mô tả đường tự động đều viết **Cloudflare Pages**, và `ADR-0009` thì viết cho `nhatrangtravel` chứ không phải site này. Hệ quả thực tế: `BUILD-NOTES.md` — file người vận hành thật sự mở ra khi deploy — **không hề nhắc** rằng site có đường tự động. Đọc nó xong sẽ tưởng `npm run deploy` là đường duy nhất, và không hiểu vì sao bản deploy tay biến mất (xem DR-041).
+
+---
+
+## DR-041 — Bấm Publish trong Sanity dựng lại từ `origin/main`, đè lên bản deploy tay
+
+**Trạng thái:** **đã xử 2026-08-22** theo `QĐ-2026-08-22-03` — ngắt hook + đẩy `main`. Cơ chế vẫn còn nguyên, sẽ trở lại nếu bật hook lại mà chưa push.
+
+Webhook Sanity không mang nội dung; nó chỉ bấm chuông, rồi Cloudflare **clone `origin/main` trên GitHub** và dựng từ đó. Máy local không tham gia. Nên bất cứ commit nào chưa push đều không có mặt trong bản dựng do Publish kích, và bản dựng đó **thay thế** version đang chạy — kể cả version vừa `wrangler deploy` bằng tay.
+
+Đã xảy ra thật ngày 2026-08-22. Lúc phát hiện: `main` local đi trước `origin/main` **7 commit** (`origin/main` = `1416363`, ngày 2026-08-14), trong đó có `472610a` = toàn bộ đợt 4A. Webhook bắn **25 lần**, tất cả `200`, cụm gần nhất 03:02–03:04 UTC; version production mới nhất tạo 03:06:55 UTC. Đối chiếu `https://tourdao.vn/diem-tham-quan/vin-harbour/` (đã phá cache) với `dist/` cùng lúc:
+
+| Dấu hiệu | Production | `dist/` local |
+|---|---|---|
+| `--sticky-bar-h` (DR-033) | không có | có |
+| "Có thu phí" (4A đã bỏ) | **còn** | đã bỏ |
+| `theme-color` (DR-037) | `#C2410C` cứng | `#FFFFFF` từ token |
+
+Chỉ có hai đường đưa bit lên Worker này: tải tay từ `dist/`, hoặc build phía Cloudflare từ git. Bản đang chạy không khớp `dist/` (kể cả `dist/` của hai worktree — cả hai đều không có `dist/`), nên nó đến từ đường thứ hai. Đợt 4A đã "deploy xong" mà chưa từng lên tới khách.
+
+Cạm bẫy nằm ở chỗ **không có tín hiệu hỏng nào**: `wrangler deploy` in `Success`, `curl` trả `200`, chỉ nội dung là của hai tuần trước.
+
+---
+
+## DR-042 — Webhook Sanity lệch `ADR-0009` mục 3 và 4
+
+**Trạng thái:** mở. Phát hiện 2026-08-22. Hook đang tắt (`QĐ-2026-08-22-03`) nên chưa gây hại; phải xử **trước** khi bật lại.
+
+Cấu hình thật của hook `Cloudflare rebuild` (id `UCT8eZl6s8SXBtKP`, tạo 2026-07-27), đọc bằng management API `v2021-10-04`:
+
+```
+dataset: "*"        rule: { on: ["create"], filter: "!(_id in path(\"drafts.**\"))" }
+url: https://api.cloudflare.com/client/v4/workers/builds/deploy_hooks/1017098…   (URL đầy đủ là bí mật, không chép vào kho — 04-CONSTRAINTS)
+```
+
+Ba chỗ lệch:
+
+1. **Chỉ nghe `create`.** `ADR-0009` mục 3 đòi "create/update/delete". Sửa một trang đã publish rồi publish lại là `update` — theo cấu hình này thì **không kích build**. Nghĩa là hook vừa bắn quá nhiều lần cho việc không cần (DR-041), vừa có thể **không bắn** đúng lúc cần nhất.
+2. **`dataset: "*"`, không lọc type.** `ADR-0009` mục 3 đòi "lọc theo các type có render trang". Mọi document ở mọi dataset đều kích một lần dựng toàn site.
+3. **Không có debounce.** `ADR-0009` mục 4 dự trù một Worker gom sự kiện (im 120 giây mới bắn), và tự ghi "MVP có thể bỏ qua". Thực tế vẫn là MVP: 4 lần bắn trong 6 giây (02:55:17→23 UTC). Mỗi lần dựng lại là một lượt đọc **toàn bộ** nội dung qua Sanity Content API — đây chính là khoản API request mà `QĐ-2026-08-22-03` cắt.
+
+---
+
+## DR-043 — `BUILD-NOTES.md` báo chuyển hướng trang chủ "ĐANG BẬT" chín ngày sau khi đã gỡ
+
+**Trạng thái:** **đã xử 2026-08-22**. Mục đổi tên thành "ĐÃ GỠ", ghi ngày + commit + bằng chứng kiểm; khối "Cách gỡ" bỏ; giữ lại phần "vì sao không dùng Page Rules" vì cơ chế đó còn đúng cho mọi lần chuyển hướng sau.
+
+Luật `/ → https://tourdaonhatrang.com/ 302` gỡ khỏi `public/_redirects` ngày **2026-08-13** (commit `541ec26`, căn cứ `SPEC-2026-08-13-menu-chinh-bon-muc`). Tới **2026-08-22**, `BUILD-NOTES.md` vẫn mở đầu bằng "**ĐANG BẬT**" và "**Trạng thái: đang chạy trên production** từ 2026-08-06", kèm nguyên một quy trình bốn bước "Cách gỡ" cho thứ đã gỡ.
+
+Kiểm thực tế cùng ngày: `curl -sI https://tourdao.vn/` trả `200`, không `302`.
+
+Đây là loại lệch nguy hiểm hơn vẻ ngoài: file này là thứ người vận hành mở ra khi deploy, và nó đang mô tả **hành vi production sai**. Ai đọc để trả lời "trang chủ tourdao.vn có chuyển hướng không" sẽ trả lời sai.
+
+**Gốc rễ đi kèm:** `QĐ-2026-08-06-04` **bước 6** đòi "ghi mục mới trong sổ để đóng `QĐ-2026-08-06-02`". Bước đó **chưa từng được thi hành** — không có mục nào trong `DECISIONS.md` đóng `QĐ-2026-08-06-02`. Code đổi, sổ không đổi, nên `BUILD-NOTES` không có tín hiệu nào để phải cập nhật theo. Đóng ở `QĐ-2026-08-22-04`.
+
+---
+
+## DR-044 — `PY3`/`PY4`/`PY5` so sai kiểu `bookingRef`, ba validator giá gần như vô hiệu
 
 **Trạng thái:** mở. Phát hiện 2026-08-22, khi Task 11 (module đặt tour,
 `docs/plans/2026-08-22-dat-tour.md`) thêm 8 dòng giá thật vào `data/prices.yaml` và chạy
@@ -536,3 +691,39 @@ riêng: sửa `validatePY3`/`validatePY4`/`validatePY5` đọc `doc.bookingRef?.
 `typeof doc.bookingRef === 'string'`. Xem
 `.superpowers/sdd/2026-08-22-dat-tour/task-11-report.md` mục "Lệch so với brief" để có bằng
 chứng chi tiết (lệnh chạy, output đầy đủ).
+
+---
+
+## DR-045 — `bookingRef.key` rời khỏi slug sau đợt sửa nội dung 2026-08-22; một dòng giá mồ côi, một tour mất giá
+
+**Trạng thái:** mở. Phát hiện 2026-08-22 khi review Task 11 của module đặt tour truy vấn lại
+dataset production.
+
+Task 11 (07:58Z) đặt `bookingRef.key = slug.vi.current` cho 16 document. Sau đó có ba đợt sửa
+nội dung trong Studio: 08:07–08:14Z (thêm khoảng 7 tour vé VinWonders / Vin Harbour, không
+document nào có `bookingRef`), 12:35–12:59Z (đổi slug bốn tour cũ, thêm ba tour mới),
+14:40–14:57Z (tách nhóm Hòn Tằm). Kết quả đo lúc tối 2026-08-22 (`perspective: raw`):
+**44** document `tour`, **10** có `bookingRef.key`, **1** có `key == slug`.
+
+**Không phải hỏng, và không được "sửa" bằng cách chạy lại script.** `resolvePrice()`
+(`src/lib/resolver.ts`) đọc thẳng `bookingRef.key` rồi tra `data/prices.yaml`; nó không suy
+khoá lại từ slug. Khoá trong `prices.yaml` là slug *cũ*, và `bookingRef.key` vẫn giữ đúng giá
+trị cũ đó, nên 7/8 dòng giá vẫn trỏ đúng. Chạy lại `cms/_migrate-bookingref-keys.mjs` sẽ đặt
+khoá = slug *mới* và biến cả 7 liên kết đang sống thành mồ côi. Đề xuất "chạy lại cho khớp"
+trong báo cáo review Task 11 vì vậy bị bác.
+
+**Bài học ghi lại.** Lấy slug làm *giá trị* của khoá là gắn hai thứ có vòng đời khác nhau:
+slug đổi theo biên tập, khoá phải đứng yên theo dòng giá. `01-CONTENT_MODEL` §2.8 chỉ đòi
+`bookingRef` là con trỏ tới dòng giá — **không** đòi nó bằng slug. Luật đọc đúng là: khoá là
+định danh ổn định, phải khớp một dòng trong `prices.yaml`, không buộc bằng slug.
+
+**Hai việc còn lại, thuộc chủ dự án, chưa quyết:**
+
+1. Dòng giá `ve-hon-tam-tam-tron-goi` trong `data/prices.yaml` **mồ côi** — không document nào
+   trỏ tới (đã đếm: 0).
+2. Tour `Tour Hòn Tằm trọn gói: Cano 2 chiều - Tắm bùn - Tắm biển - Buffet`
+   (`8dda44cb`, slug `tour-hon-tam-tron-goi`) **không có `bookingRef`** nên không có giá và sẽ
+   không có form đặt tour. Nhiều khả năng dòng giá mồ côi ở trên là dành cho nó, nhưng tên
+   không khớp nên không tự nối được.
+
+Task 17 sửa `PY4`/`PY5` sẽ khiến cổng validator tự báo cả hai mục này thay vì im lặng như hiện nay.

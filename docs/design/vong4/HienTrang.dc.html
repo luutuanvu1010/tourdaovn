@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@700;800&amp;family=Nunito:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+:root{--c-primary:#0C4A6E;--c-primary-strong:#082F49;--c-primary-soft:#F0F7FC;--c-accent:#C0392B;--c-accent-strong:#96271A;--c-accent-soft:#FEF2F0;--c-sand:#F5A623;--c-sand-soft:#FBE3B3;--c-surface:#FFFFFF;--c-surface-alt:#F8FAFC;--c-card:#FFFFFF;--c-text:#0F172A;--c-text-muted:#475569;--c-border:#E2E8F0;--font-display:"Be Vietnam Pro","Nunito",system-ui,sans-serif;--font-ui:"Nunito","Be Vietnam Pro",system-ui,sans-serif;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px;--radius-sm:8px;--radius-md:12px;--shadow-card:0 1px 3px rgba(15,23,42,0.08)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{margin:0;background:#e8ecef;font-family:var(--font-ui);font-weight:500;font-size:15px;line-height:1.55;color:var(--c-text);-webkit-font-smoothing:antialiased}
+a{color:var(--c-primary);text-decoration:none}a:hover{color:var(--c-primary-strong)}
+h1,h2,h3{font-family:var(--font-display);line-height:1.16;letter-spacing:0}
+p{text-wrap:pretty}
+.ev{background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-card);display:flex;flex-direction:column}
+.ev img{width:100%;height:auto;display:block;border-bottom:1px solid var(--c-border)}
+.ev .c{padding:var(--s4);display:flex;flex-direction:column;gap:6px}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--c-accent-soft);color:var(--c-accent-strong);align-self:flex-start}
+.tag.mid{background:var(--c-sand-soft);color:#5a4109}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-muted);text-align:left;padding:8px 12px;border-bottom:2px solid var(--c-border)}
+td{padding:8px 12px;border-bottom:1px solid var(--c-border);vertical-align:top}
+td b{font-family:var(--font-display);font-weight:700}
+code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--c-surface-alt);padding:1px 5px;border-radius:4px}
+</style>
+</helmet>
+
+<div style="width:1280px;background:var(--c-surface);padding:var(--s7) 48px;font-family:var(--font-ui);display:flex;flex-direction:column;gap:var(--s6)">
+
+  <div style="display:flex;flex-direction:column;gap:var(--s2);max-width:900px">
+    <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--c-text-muted)">Audit giao diện vòng 4 · 2026-08-21 · tourdao.vn (production)</div>
+    <h1 style="font-size:36px;font-weight:800;color:var(--c-primary);letter-spacing:-0.015em">Hiện trạng — ảnh chụp và số đo</h1>
+    <p style="font-size:16px;color:var(--c-text-muted)">Ảnh chụp desktop 1440×900. Số đo lấy bằng script DOM chạy trên trang thật. Ảnh di động chưa chụp được (tiện ích trình duyệt ngắt) — phần di động suy từ CSS, ghi ở kế hoạch §2.5.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s5)">
+    <div class="ev">
+      <img src="ev-attr-hero-desktop.jpg" alt="Trang Khu Du Lịch Hòn Tằm, màn đầu desktop">
+      <div class="c">
+        <span class="tag">F1 · F9 · F10</span>
+        <b style="font-family:var(--font-display)">Hero + thanh dính + InfoBar 2 ô trải trên 1.200 px</b>
+        <span style="color:var(--c-text-muted)">Breadcrumb trắng nằm trên mái lá — khó đọc. Dải thông tin chỉ có 2 ô (Giờ, Điện thoại) nhưng chiếm trọn bề ngang; cả hai giá trị này xuất hiện lại trong thẻ bên phải ngay bên dưới.</span>
+      </div>
+    </div>
+    <div class="ev">
+      <img src="ev-attr-sidebar-clipped.jpg" alt="Sidebar bị header che khi cuộn">
+      <div class="c">
+        <span class="tag">F4 · DR-033</span>
+        <b style="font-family:var(--font-display)">Sidebar dính bị header + thanh dính che hai dòng đầu</b>
+        <span style="color:var(--c-text-muted)"><code>Sidebar.astro</code> đặt <code>top:16px</code>; header 69 px + thanh dính 62 px = 131 px. Dòng đầu còn thấy là "Điện thoại" — "Địa chỉ" và "Giờ mở cửa" khuất.</span>
+      </div>
+    </div>
+    <div class="ev">
+      <img src="ev-attr-body-seo-h2.jpg" alt="Thân bài có mục 2. Hướng dẫn lộ trình di chuyển">
+      <div class="c">
+        <span class="tag">F3</span>
+        <b style="font-family:var(--font-display)">Thân bài 1.242 từ, 7 mục đánh số — mục 2 là "cách đi", mục 4 là "trải nghiệm"</b>
+        <span style="color:var(--c-text-muted)">Cùng trang có mục cấu trúc "Cách tới nơi" (29 từ) và "Trải nghiệm tại đây" — người đọc gặp cùng một nội dung hai lần với hai độ sâu. Thanh dính không có neo nào vào 7 mục này.</span>
+      </div>
+    </div>
+    <div class="ev">
+      <img src="ev-index-attraction-cards.jpg" alt="Danh sách điểm tham quan, thẻ giữa lòi dòng 3">
+      <div class="c">
+        <span class="tag mid">F7 · DR-038</span>
+        <b style="font-family:var(--font-display)">Thẻ không huy hiệu: dấu "…" ở dòng 2 rồi vẫn lòi dòng 3</b>
+        <span style="color:var(--c-text-muted)"><code>.card-summary</code> vừa clamp 2 dòng vừa <code>flex:1</code>. 8/15 điểm tham quan không có <code>attractionType</code> nên thẻ không đều cao.</span>
+      </div>
+    </div>
+    <div class="ev">
+      <img src="ev-index-tour-cards.jpg" alt="Danh sách tour, không giá, ảnh banner chữ">
+      <div class="c">
+        <span class="tag">F2 · F12</span>
+        <b style="font-family:var(--font-display)">/tour/: 0/11 thẻ có giá; 9 chip không nhãn; ảnh là banner chữ nhúng</b>
+        <span style="color:var(--c-text-muted)"><code>data/prices.yaml</code> rỗng nên không trang nào có giá; trang chi tiết tour rơi về nút "Website chính thức" trỏ về chính tourdao.vn (DR-036).</span>
+      </div>
+    </div>
+    <div class="ev">
+      <img src="ev-attr-access-callout.jpg" alt="Mục Cách tới nơi 29 từ">
+      <div class="c">
+        <span class="tag mid">F3 · F11</span>
+        <b style="font-family:var(--font-display)">"Cách tới nơi" — 29 từ, đứng sau bài 1.242 từ đã nói về cách đi</b>
+        <span style="color:var(--c-text-muted)">Neo "Cách tới nơi" trên thanh dính dẫn tới đây, trong khi hướng dẫn thật nằm giữa bài. Sidebar cạnh bên vẫn lặp Điện thoại, "Xem" hai lần, "Wikidata" trỏ Wikipedia.</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:var(--s3)">
+    <h2 style="font-size:24px;font-weight:800;color:var(--c-primary)">Một field — mấy vùng? (đo bằng script, 4 trang)</h2>
+    <table>
+      <thead><tr><th style="width:26%">Trang</th><th style="width:22%">Giá trị</th><th>Hiện ở</th><th style="width:8%">Lần</th></tr></thead>
+      <tbody>
+        <tr><td>/dia-danh/hon-mun/</td><td><b>Đảo</b> (placeType)</td><td>huy hiệu hero · InfoBar "Loại" · sidebar "Loại"</td><td><b>3</b></td></tr>
+        <tr><td></td><td><b>Nha Trang</b> (containedInPlace)</td><td>breadcrumb · InfoBar "Thuộc" · sidebar "Thuộc"</td><td><b>3</b></td></tr>
+        <tr><td>/tour/tour-3-dao-nha-trang-deluxe/</td><td><b>Cả hai</b> (tourFormat)</td><td>huy hiệu hero · InfoBar · sidebar — danh sách lại ghi "Linh hoạt"</td><td><b>3</b></td></tr>
+        <tr><td></td><td><b>8:00 - 16:00</b> (duration)</td><td>huy hiệu hero · InfoBar · sidebar</td><td><b>3</b></td></tr>
+        <tr><td>/diem-tham-quan/khu-du-lich-hon-tam/</td><td><b>08:00 - 16:30</b> · <b>0258 6 250 250</b></td><td>InfoBar · sidebar</td><td><b>2</b></td></tr>
+        <tr><td>/trai-nghiem/lan-bien-scuba-diving/</td><td><b>Thể thao biển</b> · <b>Đảo Hòn Mun</b></td><td>huy hiệu/breadcrumb · sidebar</td><td><b>2</b></td></tr>
+        <tr><td></td><td>touristType</td><td>InfoBar "Khám phá" (cắt còn 1) · sidebar "Khám phá, Cảm giác mạnh" — cùng field, hai cách cắt</td><td><b>2</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s5)">
+    <div style="display:flex;flex-direction:column;gap:var(--s3)">
+      <h2 style="font-size:24px;font-weight:800;color:var(--c-primary)">Thang chữ đo được so với spec (DR-034)</h2>
+      <table>
+        <thead><tr><th>Token</th><th>Spec 07 §2</th><th>Đo trên site</th></tr></thead>
+        <tbody>
+          <tr><td>body (<code>--fs-base</code>)</td><td>17 px</td><td><b>18,06 px</b></td></tr>
+          <tr><td><code>--fs-section</code></td><td>32 px</td><td><b>34 px</b></td></tr>
+          <tr><td>h1 chi tiết (<code>--fs-hero</code>)</td><td>46 px</td><td><b>48,9 px</b></td></tr>
+          <tr><td><code>--fs-sm</code></td><td>15 px</td><td><b>15,9 px</b></td></tr>
+          <tr><td>h1 danh sách (<code>--fs-h1</code>)</td><td>42 px</td><td><b>44,6 px</b></td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:13px;color:var(--c-text-muted)"><code>html{font-size:var(--fs-base)}</code> với token tính bằng rem → mọi bậc ×1,0625. Các artboard đề xuất vẽ ở <strong>cỡ spec</strong>; chốt hướng nào thì đổi một dòng.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:var(--s3)">
+      <h2 style="font-size:24px;font-weight:800;color:var(--c-primary)">Trang danh sách</h2>
+      <table>
+        <thead><tr><th>URL</th><th>Thẻ</th><th>Giá</th><th>Ghi chú</th></tr></thead>
+        <tbody>
+          <tr><td>/diem-tham-quan/</td><td>15</td><td>0</td><td>7/15 có huy hiệu; không lọc theo loại</td></tr>
+          <tr><td>/tour/</td><td>11</td><td><b>0</b></td><td>9 chip không nhãn; không mô tả nhánh</td></tr>
+          <tr><td>/trai-nghiem/</td><td>9</td><td>0</td><td>chip "Ẩm thực" — site không bán ẩm thực</td></tr>
+          <tr><td>/kham-pha/</td><td>23</td><td>0</td><td><b>không h1</b>; = hai nhánh ghép</td></tr>
+          <tr><td>/tat-ca/</td><td>67</td><td>0</td><td><b>không h1</b>; cao 14.199 px</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

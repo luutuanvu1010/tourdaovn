@@ -126,3 +126,25 @@ Ba thứ ép phải quyết bằng ADR chứ không thể chỉ viết spec:
 - **Ranh giới không nới**: `00-PROJECT_BRIEF` §5 "không thanh toán, không giỏ hàng, không
   quản lý chỗ trống" còn nguyên. Ai muốn thêm tồn kho hay đặt cọc là quyết định mới, không
   phải mở rộng ADR này.
+
+---
+
+## Đính chính 2026-08-22 — kênh email là Amazon SES, không phải Resend (`QĐ-2026-08-22-07`)
+
+Mục này không đảo quyết định nào; nó thay tên một nhà cung cấp và làm rõ ranh giới của
+quyết định 7. Phần trên ở lại nguyên văn theo luật sổ chỉ-thêm (`04-CONSTRAINTS` §2.5).
+
+**Quyết định 3 đọc lại là:** email qua **Amazon SES** (SES v2 HTTP API) tới hộp thư công ty.
+Tên miền `tourdao.vn` đã verify ở SES từ trước, nên không mở thêm nhà cung cấp thứ hai chỉ
+cho một luồng thư nội bộ. Hình dạng `Notifier` và luật "kênh hỏng ghi trạng thái, không hỏng
+đơn" không đổi — chỉ thân request và cách xác thực đổi.
+
+**Quyết định 7 vẫn giữ: không dependency runtime mới.** SES khác Resend ở chỗ không nhận API
+key đơn giản; mọi lời gọi phải ký AWS Signature V4. Chữ ký được dựng bằng `crypto.subtle`
+(HMAC-SHA256 + SHA-256) có sẵn trong Workers, trong một file thuần `notify/sigv4.ts`, chứ
+**không** thêm `aws4fetch` hay SDK AWS nào. Câu "gọi bằng `fetch` thuần" trong quyết định 7
+vì vậy vẫn đúng: vẫn là `fetch`, chỉ thêm header đã ký.
+
+**Ranh giới của đính chính này.** Nếu SigV4 tự viết tỏ ra không đáng tin ở nghiệm thu Task 14,
+đường lui là thêm `aws4fetch` — nhưng đó là **sửa quyết định 7**, cần một mục ADR mới, không
+phải một dòng trong báo cáo task.

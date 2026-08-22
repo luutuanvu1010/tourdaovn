@@ -1,6 +1,6 @@
 ---
 import type { HotelResult, ResortResult, Lang, SiteContact } from '../lib/types'
-import { siteBaseUrl } from '../lib/siteUrl'
+import { siteBaseUrl, hostLabel } from '../lib/siteUrl'
 import { uiCopy } from '../lib/uiCopy'
 import DetailLayout from './DetailLayout.astro'
 import FAQ from './FAQ.astro'
@@ -86,8 +86,8 @@ const sidebarRows: { icon: string; label: string; value: string; href?: string; 
   { icon: '🐾', label: t('pets'), value: data.petsAllowed ? t('allowed') : t('no'), visible: data.petsAllowed !== undefined },
   { icon: '🏖️', label: t('beach'), value: data.beachAccess || '', visible: !!data.beachAccess },
   { icon: '✈️', label: t('airport'), value: airportDist != null ? `~${airportDist} km` : '', visible: airportDist != null },
-  { icon: '🔗', label: t('officialWebsite'), value: t('view'), href: data.officialSource || undefined, visible: !!data.officialSource },
-  { icon: '🔗', label: t('verifyWikidata'), value: 'Wikidata', href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
+  { icon: '🔗', label: t('officialWebsite'), value: hostLabel(data.officialSource), href: data.officialSource || undefined, visible: !!data.officialSource },
+  { icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
 ]
 if (isResort) {
   if (beachfront !== undefined) sidebarRows.push({ icon: '🏖️', label: t('beachfront'), value: beachfront ? t('yes') : t('no'), visible: true })

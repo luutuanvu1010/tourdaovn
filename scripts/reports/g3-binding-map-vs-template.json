@@ -1,9 +1,9 @@
 {
-  "ranAt": "2026-08-14T06:49:44.699Z",
+  "ranAt": "2026-08-22T15:30:03.480Z",
   "summary": {
-    "total": 15,
+    "total": 24,
     "fail": 0,
-    "warn": 15
+    "warn": 24
   },
   "drifts": [
     {
@@ -14,11 +14,25 @@
       "detail": "Zone tùy chọn \"Phân loại\" (source=[category]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
     },
     {
+      "entityType": "place",
+      "zone": "Dải liên quan (cuối trang)",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"Dải liên quan (cuối trang)\" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
       "entityType": "attraction",
       "zone": "Phân loại",
       "diff": "optional_zone_no_source_in_template",
       "severity": "warn",
       "detail": "Zone tùy chọn \"Phân loại\" (source=[category]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
+      "entityType": "attraction",
+      "zone": "Dải liên quan (cuối trang)",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"Dải liên quan (cuối trang)\" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
     },
     {
       "entityType": "attraction",
@@ -35,11 +49,25 @@
       "detail": "Zone tùy chọn \"Phân loại\" (source=[category]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
     },
     {
+      "entityType": "experience",
+      "zone": "Dải liên quan (cuối trang)",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"Dải liên quan (cuối trang)\" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
       "entityType": "hotel",
       "zone": "Phân loại",
       "diff": "optional_zone_no_source_in_template",
       "severity": "warn",
       "detail": "Zone tùy chọn \"Phân loại\" (source=[category]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
+      "entityType": "hotel",
+      "zone": "Dải liên quan (cuối trang)",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"Dải liên quan (cuối trang)\" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
     },
     {
       "entityType": "hotel",
@@ -57,6 +85,13 @@
     },
     {
       "entityType": "resort",
+      "zone": "Dải liên quan (cuối trang)",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"Dải liên quan (cuối trang)\" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
+      "entityType": "resort",
       "zone": "—",
       "diff": "template_field_not_in_map",
       "severity": "warn",
@@ -70,6 +105,13 @@
       "detail": "Zone tùy chọn \"Phân loại\" (source=[category]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
     },
     {
+      "entityType": "tour",
+      "zone": "Dải liên quan (cuối trang)",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"Dải liên quan (cuối trang)\" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
       "entityType": "article",
       "zone": "Phân loại",
       "diff": "optional_zone_no_source_in_template",
@@ -77,11 +119,25 @@
       "detail": "Zone tùy chọn \"Phân loại\" (source=[category]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
     },
     {
+      "entityType": "article",
+      "zone": "Dải liên quan (cuối trang)",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"Dải liên quan (cuối trang)\" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
       "entityType": "person",
       "zone": "Phân loại",
       "diff": "optional_zone_no_source_in_template",
       "severity": "warn",
       "detail": "Zone tùy chọn \"Phân loại\" (source=[category]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
+      "entityType": "person",
+      "zone": "Dải liên quan (cuối trang)",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"Dải liên quan (cuối trang)\" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
     },
     {
       "entityType": "person",
@@ -96,6 +152,13 @@
       "diff": "optional_zone_no_source_in_template",
       "severity": "warn",
       "detail": "Zone tùy chọn \"Phân loại\" (source=[category]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
+      "entityType": "organization",
+      "zone": "Dải liên quan (cuối trang)",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"Dải liên quan (cuối trang)\" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
     },
     {
       "entityType": "organization",

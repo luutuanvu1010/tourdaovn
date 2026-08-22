@@ -812,3 +812,166 @@ chỉ sang Zalo/hotline. Astro thành hybrid với đúng một route động.
 khi báo tin hỏng; job dọn dữ liệu 24 tháng; `control-registry` cho BK1–BK5; xác minh Zalo Bot
 gửi nhóm và giới hạn tần suất; phối hợp với audit giao diện vòng 4 (DR-033, DR-036) vì chạm
 cùng `Sidebar.astro` / `TourDetail.astro`.
+
+---
+
+## QĐ-2026-08-22-01 — Duyệt audit giao diện vòng 4: hướng A, thang chữ về spec, chạy đợt 4A
+
+**Chốt.** Chủ dự án trả lời `docs/plans/2026-08-21-audit-va-ke-hoach-giao-dien-vong-4.md` §6 ngày 2026-08-22, ba quyết định:
+
+1. **Hướng A** cho khung trang chi tiết (§5 của kế hoạch; artboard `Main` + `DiDong` ở `docs/design/vong4/`): vùng **Thông tin nhanh** dưới hero thay cặp `InfoBar` + `InfoCard`; sidebar chỉ còn khối hành động + bản đồ; luật "một field — một vùng — một lần", giá là ngoại lệ duy nhất (thanh dính + khối hành động). Áp cho cả bốn entity; Địa danh không có giá thì sidebar chỉ còn bản đồ và Thông tin nhanh ≤ 2 ô gộp vào sidebar — **không** dùng hướng C riêng.
+2. **Thang chữ về đúng spec** (DR-034 cách a): `html` về `font-size: 100%`, `body` nhận `--fs-base`; mọi token rem về đúng con số `07-DESIGN_TOKENS` §2 (17 / 21 / 32 / 46…). Site nhỏ lại ~6 % so với hôm nay — chủ dự án chấp nhận, duyệt lại bằng mắt sau khi dựng. Cửa hai chiều.
+3. **Chạy đợt 4A** ngay trên bảng §4 "Đợt 4A" của kế hoạch (A1–A8) làm spec; đây là việc sửa lỗi thật, không đổi bố cục, không cần mockup. Đợt 4B (khung v3) vẫn chờ Cowork sửa `06-BINDING_MAP` §3 rồi qua Design → QA1 → Code.
+
+**Một câu hỏi của §6 đã được trả lời ở chỗ khác.** §6.8 (ảnh tham chiếu `docs/design/giaodiendatve.png`) trùng với `QĐ-2026-08-21-01` / `ADR-0027` — form đặt tour trên trang Tour. Không hỏi lại. Hệ quả cho vòng 4: khối hành động của trang Tour ở đợt 4B **là** `BookingForm` của ADR-0027, không phải `BookingCTA`; bản đồ thông tin §3.1 và artboard `BanDoThongTin` ghi nhận điều này khi Cowork sửa `06`.
+
+**Phối hợp hai luồng cùng file** (theo `SPEC-2026-08-21-dat-tour` §8): 4A vào trước, chạm `Sidebar.astro`, `DetailLayout.astro`, `TourDetail.astro` ở mức nhỏ nhất (A1, A4, A6); luồng đặt tour vào sau, rebase lên 4A.
+
+**Còn mở ở §6:** 4 (`/kham-pha/`, `/tat-ca/`), 5 (ai nhập `prices.yaml`, nay có thêm `paxRates` theo ADR-0027), 6 (công cụ Lighthouse cho QA2), 7 (xác nhận DR-032 → DR-038 — 4A sẽ đóng DR-033, 034, 035, 036, 037, 038; DR-032 chờ 4B).
+
+**Giả định bề mặt ghi lại (P8):** A7 `theme-color` — kế hoạch ghi "đọc token accent"; khi thi hành Code lấy **`--c-surface` của bộ giao diện đang bật** thay vì accent, vì thanh địa chỉ di động nằm sát header nền trắng; tô màu san hô lên đó là lệch với chính trang. Đổi lại accent là sửa một tên token nếu chủ dự án muốn.
+
+---
+
+## QĐ-2026-08-22-02 — Duyệt `06-BINDING_MAP` v2.1, mở bước 2 của đợt 4B; commit 4A
+
+**Chốt.** Chủ dự án trả lời "ok" (2026-08-22) cho danh sách chờ duyệt gồm hai mục: (1) duyệt `06-BINDING_MAP` v2.1.0 — vùng "Thông tin nhanh", ma trận §3.1 một-field-một-vùng, ba luật ở §6; (2) commit đợt 4A và tài liệu theo hai commit đã đề xuất. Cowork hiểu "ok" là đồng ý cả hai và ghi lại ở đây để truy được; nếu ý chủ dự án khác, sửa bằng một QĐ mới, không sửa mục này.
+
+**Hệ quả.**
+- `06` v2.1.0 có hiệu lực: bước 7 (Design hi-fi cho 4 entity) được chạy trên đó; QA1 đối chiếu mockup với §3.1; Code chỉ chạy sau QA1.
+- Hai commit: `feat:` đợt 4A (22 file `src/`), `docs:` audit + kế hoạch vòng 4 + QĐ/DR + `06` v2.1 + canvas/evidence. Báo cáo cổng ở `scripts/reports/` đi cùng commit docs như các đợt trước.
+- Còn mở như QĐ-2026-08-22-01: §6 mục 4, 5, 6 của kế hoạch; lỗi dữ liệu cổng lộ ra (slug `null` trong `itinerary` 3 tour, R3 hai URL, R4 hreflang cẩm nang, S24 người duyệt).
+
+---
+
+## QĐ-2026-08-22-03 — Tạm ngắt hook Sanity → Cloudflare; đường phát hành về thủ công
+
+**Chốt.** Chủ dự án quyết (2026-08-22) ba việc, trả lời cho báo cáo cơ chế auto-deploy: (a) đẩy `main` lên GitHub để đợt 4A thật sự lên production; (b) ghi ba mục lệch vào `DRIFT_LOG` và sửa mục Deploy của `BUILD-NOTES.md`; (c) **tạm ngắt** việc bấm Publish trong Sanity kích build Cloudflare, quay về dựng bằng lệnh tay, **lý do là tiết kiệm API request của Sanity**.
+
+**Đã thi hành.** Webhook `Cloudflare rebuild` (id `UCT8eZl6s8SXBtKP`, project `pgedy374`) đặt `isDisabledByUser: true` qua management API `v2021-10-04`. Đây là **tắt, không xoá**: URL deploy hook, rule, dataset giữ nguyên trong Sanity; bật lại là đảo đúng một cờ, không cần biết lại URL bí mật. Đã kiểm bằng một lượt `GET` sau khi sửa.
+
+**Vì sao ngắt là hợp lý, không chỉ vì tiền.** Mỗi lần webhook bắn là một lần Cloudflare dựng lại **toàn site**, và mỗi lần dựng đọc lại **toàn bộ** nội dung qua Sanity Content API. Ngày 2026-08-22 có 25 lần bắn, 4 lần trong 6 giây (DR-042 mục 3). Ngắt hook cắt đúng khoản đó. Nhưng nó cũng đóng luôn cạm bẫy ở DR-041: chừng nào `main` local còn đi trước `origin/main`, mỗi lần Publish là một lần **tự động lùi code** production về bản đã push gần nhất.
+
+**Đánh đổi, ghi thẳng.** Từ nay **publish trong Sanity không còn đủ để nội dung lên trang**. Phải chạy `npm run deploy` ở máy. Không có kiểm máy nào nhắc việc này — cùng hạng nợ với `favicon.svg` (`QĐ-2026-08-14-01`) và schema Studio lệch (`QĐ-2026-08-14-02`). Ai sửa nội dung mà quên deploy thì Sanity và trang live lệch nhau im lặng, đúng loại hỏng mà `ADR-0009` dựng webhook lên để tránh.
+
+**Chưa đụng, cố ý.** Nối git của Workers Builds **giữ nguyên**: `git push` lên `main` vẫn kích một lần dựng phía Cloudflare. Đó chính là đường đưa đợt 4A lên live ở mục (a). Muốn thành thủ công hoàn toàn thì phải gỡ nối git trên dashboard Cloudflare — việc đó chưa được yêu cầu và là cửa riêng, cần một QĐ khác.
+
+**Điều kiện bật lại.** Không bật lại trước khi xử DR-042 (rule chỉ nghe `create`, không lọc type, không debounce) và trước khi `main` local đã push hết — bật lại lúc còn commit chưa push là mời lại đúng sự cố DR-041.
+
+---
+
+## QĐ-2026-08-22-04 — Đóng `QĐ-2026-08-06-02`; giữ nối git của Workers Builds
+
+**Mục này đóng `QĐ-2026-08-06-02`**, đúng bước 6 mà `QĐ-2026-08-06-04` đã đòi và chưa ai thi hành. Không sửa hai mục cũ (`04-CONSTRAINTS` §2.5).
+
+**Chốt 1 — chuyển hướng trang chủ: đã gỡ, xác nhận.** Luật `/ → https://tourdaonhatrang.com/ 302` gỡ khỏi `public/_redirects` ngày 2026-08-13, commit `541ec26`, căn cứ `SPEC-2026-08-13-menu-chinh-bon-muc` (site công bố, trang chủ có nội dung thật và đã lên menu chính). Dòng luật bị ghi chú lại chứ không xoá, giữ làm dấu vết.
+
+Bằng chứng kiểm 2026-08-22: `curl -sI https://tourdao.vn/` → `200`. Trạng thái tạm thời mà `QĐ-2026-08-06-02` mở ra nay đóng lại.
+
+Sổ không được cập nhật suốt chín ngày, kéo theo `BUILD-NOTES.md` mô tả sai hành vi production (DR-043). Chủ dự án quyết sửa; đã sửa cùng đợt này.
+
+**Chốt 2 — giữ nối git của Workers Builds.** Chủ dự án quyết (2026-08-22) **không** gỡ kết nối GitHub ↔ Worker `tourdaovn`. `git push` lên `main` vẫn kích một lần dựng và thay bản đang chạy. Đây là phần mà `QĐ-2026-08-22-03` để mở.
+
+**Lý do.** Tần suất push code thấp hơn hẳn tần suất publish nội dung, nên khoản Sanity API request tiết kiệm được đã lấy gần hết ở việc ngắt hook. Đổi lại giữ được một đường phát hành không phụ thuộc máy local — chính nó đưa đợt 4A lên live ngày 2026-08-22 (deployment `3211f541`, 04:30:01 UTC, kiểm bằng trang `/diem-tham-quan/vin-harbour/` khớp `dist/` đúng 55 690 byte).
+
+**Đánh đổi còn nguyên:** bản dựng phía Cloudflare lấy code từ `origin/main` và **đè** lên version deploy tay. Luật vận hành **push trước, deploy tay sau** (DR-041, `BUILD-NOTES` mục Deploy) vẫn bắt buộc, và vẫn không có kiểm máy nào cưỡng chế.
+
+---
+
+## QĐ-2026-08-22-05 — Chốt cổng QA1 đợt 4B và gỡ sáu nợ chạm `06`
+
+**Bối cảnh.** QA1 đợt 4B đạt ở vòng 3 (`docs/evidence/2026-08-22-qa1-vong-4b/`, ba báo cáo). QA để lại hai nợ **chặn** bước Code (N3, N15) và bốn nợ cùng chạm `06` (N4, N11, N13, N14). `CONSTITUTION` Điều 3 và `GOVERNANCE` 3.4 cấm tác nhân tự hoà giải xung đột đặc tả, nên tất cả chờ chủ dự án. Đề xuất kèm phương án: `docs/specs/DE-XUAT-2026-08-22-go-N3-N15.md`.
+
+**Chốt 0 — cổng QA1 đợt 4B: ĐẠT.** Chủ dự án chốt 2026-08-22. `GOVERNANCE` 3.1 đủ điều kiện cần (QA độc lập) và điều kiện đủ (chủ dự án). Bước 4 (Code) mở, **sau khi** `06` lên v2.2 theo các chốt dưới đây.
+
+**Chốt 1 — N3, breadcrumb trang Tour: phương án A.** Tách hàng Breadcrumb của `06` §3 làm hai: **"Breadcrumb (điều hướng)"** — nguồn `config (build)` theo nhánh URL, áp cho **mọi** trang chi tiết; và **"Mắt cha trong breadcrumb"** — nguồn `containedInPlace` (Experience dùng `venue`), không áp dụng cho article, person, organization, tour, specialty, event. §3.1 thêm một dòng cho mắt cha.
+
+*Lý do:* một hàng đang gánh hai sự thật khác nhau — vùng điều hướng (sinh từ URL) và mắt cha (sinh từ dữ liệu). Cột "không áp dụng" đúng cho mắt cha, sai cho vùng. Phương án A khớp `src/components/Breadcrumb.astro` đang chạy và khớp 5/6 mockup, **không sửa dòng code nào**. Bác C vì mất lối quay lại `/tour/` trên trang chốt đơn và mất `BreadcrumbList` trong JSON-LD.
+
+**Chốt 2 — N15a, ngưỡng mục lục: phương án A.** Giữ nguyên ngưỡng **≥ 3 h2** trong `06` §3. Mockup Tour sai so với đặc tả, không phải ngược lại — Design bỏ mục lục khỏi mockup Tour ở lần cập nhật kế tiếp. Bác B (hạ xuống ≥ 2): mục lục hai dòng cho bài ngắn là nhiễu, mà ngưỡng đặt ra chính để tránh điều đó.
+
+**Chốt 3 — N15b, cấp thẻ tiêu đề thân bài: phương án A.** Trong **trang chi tiết entity**, `Body` hạ một cấp: `h2`→`<h3>`, `h3`→`<h4>`, qua một prop `headingOffset`. Biên tập viên vẫn gõ h2 trong Sanity. **Trang Article giữ nguyên** vì ở đó thân bài là nội dung chính, không nằm dưới một tiêu đề mục. `06` §3 sửa thành "sinh từ tiêu đề cấp cao nhất của `body` (lưu là h2, render h3 trong trang chi tiết)".
+
+*Lý do:* `Body.astro:48` đang render h2 vào trong `<section>` mà tiêu đề mục cũng là h2 (`Section.astro`) → hai h2 ngang cấp, sai phân cấp tài liệu, sai cả a11y lẫn SEO. Mockup đã vẽ h3 nên đã đúng sẵn.
+
+**Chốt 4 — N4, dải cuối trang: thêm hàng vào `06` §3.** Khai một hàng "Dải liên quan" — nguồn `config (build)`, không phải field Sanity — áp cho Place/Experience/Tour, vị trí cuối thân trang. Chỉ ghi lại thứ đang chạy trên production; không đổi code. Đóng vùng mồ côi mà QA báo ở A2(d).
+
+**Chốt 5 — N11, luật 1 của `06` §6 nói về *field*.** Thêm một câu vào §6: luật 1 ràng buộc **field**, **không** cấm hai field khác nhau tình cờ mang cùng giá trị; và nội dung `faq` do biên tập viết không tính là vùng thứ hai. Đóng L16 (`tripOrigin` ↔ tên stop), L17 (`duration` ↔ `durationAtStop` ↔ FAQ), L18 (`touristType` ↔ hạng khách của form).
+
+*Lý do:* nguyên văn luật 1 nói "mỗi **field** hiển thị… đúng một vùng" — Design đọc đúng chữ. Siết thành "một chuỗi chỉ xuất hiện một lần" sẽ biến nhiều chỗ trùng hợp lý (tên bến vừa ở Thông tin nhanh vừa ở lịch trình) thành lỗi giả.
+
+**Chốt 6 — N13, giá trong chữ của `faq`: cho phép có điều kiện.** Biên tập được viết số giá trong `faq`, **kèm hai ràng buộc**: (a) ghi ngày cập nhật và tên nguồn ngay tại chỗ; (b) mỗi mục như vậy vào một danh sách rà định kỳ. Không mở rộng I1 sang mọi entity.
+
+*Lý do:* Địa danh không phải entity thương mại nên I1 không với tới, và `06` §4.2 cấm Place có vùng giá — cấm hẳn thì không còn chỗ nào nói được giá vé vào cổng, là thông tin khách thật sự cần. Đánh đổi nhận rõ: một mức giá sống ngoài `prices.yaml`, cưỡng chế bằng quy trình chứ không bằng validator.
+
+**Chốt 7 — N14, `durationAtStop`: sửa đặc tả theo dữ liệu.** `01`/`06` cho phép **khung giờ trong ngày** ("8:00 – 8:45"), nói rõ đây là **mốc giờ dự kiến**, không phải lịch chỗ trống (giữ nguyên tinh thần §4.8 và I1). **Bắt buộc kèm:** sửa `src/lib/serialize/tour.ts:61-63` để ngừng nối thẳng giá trị này vào ô chờ kiểu Duration của ItemList.
+
+*Lý do:* mốc giờ là thứ khách dễ hình dung nhất trên lịch trình tour, và là thứ đang chạy trên production. Nhưng structured data **đang sai kiểu trên production** — đó là phần phải sửa dù chọn hướng nào.
+
+**Việc phát sinh từ mục này.**
+
+1. Cowork sửa `06-BINDING_MAP` lên **v2.2**: §3 tách hàng Breadcrumb (Chốt 1), thêm hàng Dải liên quan (Chốt 4), sửa hàng Thân bài (Chốt 3); §3.1 thêm dòng mắt cha; §6 thêm câu về phạm vi luật 1 (Chốt 5). Sửa `01` cho `durationAtStop` (Chốt 7).
+2. Design bỏ mục lục khỏi mockup Tour (Chốt 2); QA1 chạy **vòng xác minh ngắn** trên đúng phần đổi.
+3. Code mới chạy sau đó: `FactStrip.astro`, `DetailLayout` v3, `Body` `headingOffset`, `serialize/tour.ts`, thứ tự khối di động.
+4. Ghi luật biên tập của Chốt 6 vào tài liệu vận hành nội dung; lập danh sách rà giá trong `faq`.
+
+**Chưa chốt, còn mở:** §6 mục 4, 5, 6 của `docs/plans/2026-08-21-audit-va-ke-hoach-giao-dien-vong-4.md` — công cụ đo QA2 (Lighthouse) và hướng xử ảnh `docs/design/giaodiendatve.png` (chỉ lấy phân cấp giá→CTA, hay mở ADR cho form đặt chỗ). Nợ dữ liệu đợt 4D cũng còn nguyên: `itinerary` 3 tour trỏ slug `null`, hai URL R3, hreflang R4, người duyệt S24.
+
+---
+
+## QĐ-2026-08-22-06 — Đính chính Chốt 7 của `QĐ-2026-08-22-05`: không có lỗi sai kiểu JSON-LD
+
+**Mục này không đổi quyết định nào; nó rút một khẳng định sai thực tế** khỏi hiệu lực. `QĐ-2026-08-22-05` ở lại nguyên văn theo luật sổ chỉ-thêm (`04-CONSTRAINTS` §2.5).
+
+**Điều đã ghi sai.** Chốt 7 viết: "`src/lib/serialize/tour.ts:61-63` nối thẳng giá trị này vào **ô chờ kiểu Duration** của ItemList", và đặt việc sửa file đó thành **phần bắt buộc kèm**, với lý do "structured data đang sai kiểu trên production".
+
+**Thực tế mã đang chạy.** `serialize/tour.ts:57-64` nối `durationAtStop` vào `itemData['description']`:
+
+```js
+if (stop.note) itemData['description'] = stop.note
+if (stop.durationAtStop) {
+  itemData['description'] = (itemData['description'] || '') + ` (${stop.durationAtStop})`
+}
+```
+
+`itemData` chỉ nhận `@type`, `@id`, `name`, `geo`, `sameAs`, `description`. **Không có property `Duration`.** `description` là property kiểu Text, nên chuỗi "8:00 – 8:45" nằm ở đó là **hợp lệ**.
+
+Kiểm hết bốn nơi dùng field này trong mã nguồn (bỏ bundle `cms/dist`): `src/lib/types.ts:400` khai `durationAtStop?: string`; `src/lib/queries/tour.ts:39` lấy về; `src/components/TourDetail.astro:133` in ra `<span class="tl-dur">`; `src/lib/serialize/tour.ts:61`. Không nơi nào coi nó là ISO 8601.
+
+**Nguồn của sai sót.** Báo cáo QA1 vòng 2 viết "nối thẳng giá trị này vào ItemList" — đúng chữ. Cowork suy tiếp thành "sai kiểu" và ghi vào sổ **mà không mở file kiểm**. Phần suy diễn là của Cowork, không phải của QA.
+
+**Hệ quả.**
+
+- **Chốt 7 giữ nguyên phần quyết định:** `01`/`06` vẫn sửa để nhận khung giờ trong ngày, ghi rõ là mốc giờ dự kiến chứ không phải lịch chỗ trống. Thực tế mã còn củng cố hướng này — ép về ISO 8601 thì `description` sẽ hiện "(PT45M)", khó đọc cho khách.
+- **Rút khỏi hiệu lực:** mệnh đề "bắt buộc kèm sửa `serialize/tour.ts`" và mọi mô tả về lỗi production trong Chốt 7. Không có lỗi nào phải sửa gấp. File đó **không** nằm trong danh sách việc của bước Code trừ khi có lý do khác.
+
+**Việc mở ra, chưa kiểm, không phải quyết định.** `serialize/tour.ts:115` đẩy `tour.duration` vào `description` dạng `"${L.duration}: ${tour.duration}"`, mà `01` khai `duration` đúng kiểu ISO 8601 — nên `description` có thể đang chứa "Thời lượng: PT8H". Cần một lần kiểm bản dựng thật rồi mới nói được; ghi ra đây để khỏi rơi.
+
+**Bài học ghi lại.** Khẳng định về hành vi mã trong sổ quyết định phải mở file kiểm trước khi ghi, kể cả khi lấy lại từ báo cáo của một tác nhân khác đã qua ba vòng. Báo cáo QA là bằng chứng về *hiện vật QA đã xem*, không phải bằng chứng về *mã đang chạy*.
+
+---
+
+## QĐ-2026-08-22-07 — Email của module đặt tour dùng Amazon SES thay Resend; ký SigV4 tự viết, không thêm dependency
+
+**Bối cảnh.** `SPEC-2026-08-21-dat-tour.md` §4.6 và `ADR-0027` chốt kênh email là **Resend**. Task 7 đã thi hành đúng spec: `src/lib/booking/notify/resend.ts`, secret `RESEND_API_KEY`. Ngày 2026-08-22 chủ dự án chốt lại: tên miền `tourdao.vn` **đã verify ở Amazon SES** và key SES đã có sẵn, nên không mở thêm một nhà cung cấp thứ hai chỉ cho một luồng thư nội bộ.
+
+**Chốt 1 — Kênh email là Amazon SES.** `ResendNotifier` bị thay bằng `SesNotifier`, gọi **SES v2 HTTP API**: `POST https://email.{AWS_SES_REGION}.amazonaws.com/v2/email/outbound-emails`, thân JSON `Content.Simple` (Subject + Body.Text + Body.Html), `FromEmailAddress`, `Destination.ToAddresses`, `ReplyToAddresses` là email khách nếu có.
+
+**Chốt 2 — Ký bằng SigV4 tự viết, KHÔNG thêm dependency runtime.** SES không có xác thực bằng API key đơn giản; mọi lời gọi phải ký AWS Signature V4. Hai đường:
+
+- **(A) tự ký bằng WebCrypto** (`crypto.subtle` HMAC-SHA256 + SHA-256 có sẵn trong Workers), một file thuần `notify/sigv4.ts` khoảng 70 dòng;
+- **(B) thêm `aws4fetch`** (0 dependency con, ~5KB).
+
+**Chọn (A).** Lý do là thẩm quyền, không phải khẩu vị: `ADR-0027` quyết định 5 ghi rõ "**không dependency runtime mới**", và `CLAUDE.md` §8 cấm thêm dependency khi chưa có quyết định ở tầng phù hợp. Đường (A) nằm gọn trong thẩm quyền đã có; đường (B) đòi sửa ADR. SigV4 là thuật toán tất định, ký được bằng vector kiểm cố định của AWS, nên tự viết vẫn kiểm được thật chứ không phải tin tưởng mù.
+
+**Nếu (A) sai:** SigV4 tự viết sai chữ ký thì thư không gửi được, lộ ra ở nghiệm thu Task 14 dưới dạng `notify_email = failed:http 403`. Đường lui là thêm `aws4fetch` — một thay đổi nhỏ, hai chiều, nhưng khi đó phải sửa `ADR-0027` quyết định 5 trước.
+
+**Chốt 3 — Bí mật.** Bỏ `RESEND_API_KEY`. Thêm ba: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SES_REGION`. Giữ `BOOKING_NOTIFY_EMAIL`. Thiếu bất kỳ cái nào trong ba thì kênh email trả `skipped` — đúng luật "hỏng kênh nào ghi kênh đó" của §4.6, không ném lỗi, không hỏng đơn.
+
+**Chốt 4 — Danh sách bí mật production lên 7.** `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SES_REGION`, `BOOKING_NOTIFY_EMAIL`, `ZALO_BOT_TOKEN`, `ZALO_BOT_CHAT_IDS`, `TURNSTILE_SECRET_KEY`, cộng `IP_HASH_SALT`. Trong đó `IP_HASH_SALT` **không có trong spec gốc**: nó sinh ra từ phán xét F4 của vòng review Task 8 (muối băm IP dùng chung `TURNSTILE_SECRET_KEY` là tái sử dụng bí mật sai mục đích). Mục này ghi nó vào sổ để `SPEC` §4.7 và runbook `BUILD-NOTES` khớp với mã đang chạy.
+
+**Chốt 5 — `DR-044` (mở dưới số `DR-040` trên nhánh, va với `DR-040` của `main`, đánh lại ở Task 15) xử ngay trong luồng đặt tour.** `scripts/validators/py1-py8.ts` kiểm `typeof doc.bookingRef === 'string'` trong khi lược đồ Sanity khai `bookingRef` là object có field con `key`, làm `PY3`/`PY4`/`PY5` gần như vô hiệu cho mọi entity thương mại. Bug có từ trước, Task 11 chỉ làm nó lộ ra. Sửa luôn ở đây thay vì tách task riêng, vì chính module này vừa đưa 8 dòng giá thật vào `prices.yaml` — để ba validator hỏng thì cổng giá của module mới mở ra đã rỗng.
+
+**Chốt 6 — Task 11 phải qua review như mọi task khác.** Phiên thi hành trước commit Task 11 (`798d2b2`, `f1795b9`) rồi dừng mà chưa dispatch reviewer. Không miễn cổng: task này là task duy nhất ghi vào dataset production, càng phải có cổng.
+
+**Hệ quả tài liệu.** `SPEC-2026-08-21-dat-tour.md` sửa §3, §4.6, §4.7, §5, §6 theo mục này. `ADR-0027` thêm một mục đính chính giữ nguyên phần đã ghi (`04-CONSTRAINTS` §2.5, sổ chỉ-thêm). `docs/plans/2026-08-22-dat-tour.md` thêm Task 15 (gộp `main`), Task 16 (SES), Task 17 (`DR-044`).

@@ -6,9 +6,23 @@ export interface Props {
 }
 
 const { heading, id, contained = true } = Astro.props
+
+// Mục có tiêu đề thì luôn neo được: không truyền id thì sinh từ tiêu đề (bỏ dấu
+// tiếng Việt, chữ thường, gạch nối). Trước đây mục nào quên id là thanh dính không
+// trỏ tới được — trang tour mất neo "Chi tiết" và "Mùa nào nên đi" (kế hoạch vòng 4, A6).
+function slugify(s: string): string {
+  return s
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+const sectionId = id ?? (heading ? slugify(heading) : undefined)
 ---
 
-<section class="section" {...(id ? { id } : {})}>
+<section class="section" {...(sectionId ? { id: sectionId } : {})}>
   <div class:list={{ container: contained }}>
     {heading && (
       <div class="section-head">

@@ -1,0 +1,273 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@700;800&amp;family=Nunito:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+/* ═══ TOKEN — chép từ src/styles/tokens.css (giá trị spec 07-DESIGN_TOKENS; xem DR-034 về thang rem) ═══ */
+:root{--c-primary:#0C4A6E;--c-primary-strong:#082F49;--c-primary-soft:#F0F7FC;--c-accent:#C0392B;--c-accent-strong:#96271A;--c-accent-soft:#FEF2F0;--c-sand:#F5A623;--c-sand-soft:#FBE3B3;--c-sand-border:#e9d3a4;--c-sand-text:#5a4109;--c-sand-text-strong:#3d2a05;--c-surface:#FFFFFF;--c-surface-alt:#F8FAFC;--c-card:#FFFFFF;--c-text:#0F172A;--c-text-muted:#475569;--c-text-inverse:#F8FAFC;--c-border:#E2E8F0;--c-sea:#0E7490;--c-green-soft:#DCFCE7;--c-green-text:#166534;--c-band-bg:#0C4A6E;--c-band-text:#FFFFFF;--c-band-muted:#c5dcea;--c-footer-bg:#0E1A23;--c-footer-text:#9aa9b2;--c-footer-border:#233642;--font-display:"Be Vietnam Pro","Nunito",system-ui,sans-serif;--font-ui:"Nunito","Be Vietnam Pro",system-ui,sans-serif;--fs-badge:11px;--fs-xs:12px;--fs-label:14px;--fs-sm:15px;--fs-base:17px;--fs-card-title:21px;--fs-nav:18px;--fs-h5:20px;--fs-h4:26px;--fs-section:32px;--fs-h3:32px;--fs-h2:40px;--fs-h1:42px;--fs-hero:46px;--lh-heading:1.16;--lh-body:1.68;--lh-display:1.22;--ls-eyebrow:0.08em;--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px;--s8:64px;--s9:96px;--radius-sm:8px;--radius-md:12px;--radius-lg:18px;--radius-pill:999px;--shadow-card:0 1px 3px rgba(15,23,42,0.08);--shadow-raised:0 6px 24px -8px rgba(0,91,150,.15),0 2px 6px rgba(26,32,44,.05);--underline-width:28px;--underline-height:3px;--badge-py:2px;--badge-px:10px;--lh-eyebrow:1.5;--container:1200px;--container-padding:24px;--header-h:68px;--sticky-bar-h:56px}
+[data-theme='cat-bien']{--c-surface:#FDFAF5;--c-primary:#155E75;--c-accent:#B45309;--c-text:#1C1917;--c-text-muted:#57534E;--c-primary-strong:#0E4A5C;--c-accent-strong:#92400E}
+[data-theme='ngoc-lam']{--c-surface:#FFFFFF;--c-primary:#0F766E;--c-accent:#BE123C;--c-text:#0F172A;--c-text-muted:#475569;--c-primary-strong:#0B5A54;--c-accent-strong:#9F1239}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{margin:0;background:#e8ecef;font-family:var(--font-ui);font-weight:500;font-size:var(--fs-base);line-height:var(--lh-body);color:var(--c-text);-webkit-font-smoothing:antialiased}
+a{color:var(--c-primary);text-decoration:none}
+a:hover{color:var(--c-primary-strong)}
+h1,h2,h3,h4{font-family:var(--font-display);line-height:var(--lh-heading);letter-spacing:0;font-weight:700}
+p{text-wrap:pretty}
+summary{cursor:pointer;list-style:none}
+summary::-webkit-details-marker{display:none}
+.ph{background:repeating-linear-gradient(135deg,rgba(15,23,42,.06) 0 22px,rgba(15,23,42,.12) 22px 44px)}
+.sec-title{font-family:var(--font-display);font-size:var(--fs-section);font-weight:800;color:var(--c-primary);line-height:var(--lh-heading);margin-bottom:var(--s3)}
+.underline{display:block;width:var(--underline-width);height:var(--underline-height);background:var(--c-sand);border-radius:2px;margin-bottom:var(--s6)}
+.fact{display:flex;gap:var(--s3);align-items:flex-start;min-width:0;padding:var(--s4) var(--s4);border-right:1px solid var(--c-border)}
+.fact:last-child{border-right:0}
+.fact svg{flex:none;color:var(--c-primary);margin-top:2px}
+.fact-l{display:block;font-size:var(--fs-label);color:var(--c-text-muted);line-height:1.4}
+.fact-v{display:block;font-family:var(--font-display);font-size:var(--fs-base);font-weight:700;color:var(--c-text);line-height:1.35;overflow-wrap:anywhere}
+.nav a{font-family:var(--font-ui);font-size:var(--fs-nav);font-weight:600;color:var(--c-text);padding:var(--s2) var(--s3);border-radius:var(--radius-sm)}
+.nav a.on{background:var(--c-primary-soft);color:var(--c-primary)}
+.crumb{display:flex;align-items:center;gap:var(--s2);font-size:var(--fs-sm);color:var(--c-text-muted);list-style:none}
+.crumb li+li::before{content:"/";color:var(--c-text-muted);margin-right:var(--s2)}
+.crumb a{color:var(--c-text-muted)}
+.jump a{font-size:var(--fs-sm);font-weight:600;color:var(--c-text-muted);padding:var(--s4) 0;border-bottom:2px solid transparent;white-space:nowrap}
+.jump a.on{color:var(--c-primary);border-bottom-color:var(--c-primary)}
+.hl{display:flex;gap:var(--s3);align-items:flex-start;padding:var(--s3) var(--s4);background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);font-size:var(--fs-base)}
+.hl i{flex:none;width:8px;height:8px;border-radius:50%;background:var(--c-sand);margin-top:10px}
+.toc a{display:block;color:var(--c-primary);font-weight:500;padding:var(--s1) 0;font-size:var(--fs-sm)}
+.card{display:flex;flex-direction:column;background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-card)}
+.card .img{aspect-ratio:4/3}
+.card .b{padding:var(--s4);display:flex;flex-direction:column;gap:var(--s2)}
+.card h3{font-size:var(--fs-card-title);font-weight:700;color:var(--c-text);line-height:1.2}
+.card p{font-size:var(--fs-sm);color:var(--c-text-muted);line-height:1.55}
+.card .meta{display:flex;align-items:center;gap:var(--s2);min-height:24px;margin-top:auto}
+.badge{display:inline-flex;align-items:center;padding:var(--badge-py) var(--badge-px);border-radius:var(--radius-pill);font-size:var(--fs-badge);font-weight:600;background:var(--c-primary-soft);color:var(--c-primary)}
+.faq{border:1px solid var(--c-border);border-radius:var(--radius-md);background:var(--c-card)}
+.faq details+details{border-top:1px solid var(--c-border)}
+.faq summary{display:flex;justify-content:space-between;align-items:center;gap:var(--s4);padding:var(--s4) var(--s5);font-weight:700;font-size:var(--fs-base)}
+.faq .a{padding:0 var(--s5) var(--s4);color:var(--c-text-muted);font-size:var(--fs-base)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);padding:var(--s3) var(--s5);border-radius:var(--radius-pill);font-family:var(--font-ui);font-size:var(--fs-base);font-weight:700;background:var(--c-accent);color:var(--c-text-inverse);min-height:44px}
+.btn:hover{background:var(--c-accent-strong);color:var(--c-text-inverse)}
+.note{font-size:var(--fs-xs);color:var(--c-text-muted);line-height:1.5}
+</style>
+</helmet>
+
+<div data-theme="{{ theme }}" style="width:1280px;margin:0 auto;background:var(--c-surface);font-family:var(--font-ui);color:var(--c-text)">
+
+  <!-- ── Header (68px, giữ nguyên site) ── -->
+  <div style="height:var(--header-h);border-bottom:1px solid var(--c-border);background:var(--c-surface)">
+    <div style="max-width:var(--container);margin:0 auto;padding:0 var(--container-padding);height:100%;display:flex;align-items:center;gap:var(--s6)">
+      <div style="display:flex;align-items:center;gap:var(--s2)">
+        <!-- logo: siteSettings.branding.logo (06 §2); vòng tròn này là chỗ giữ chỗ trong mockup --><span style="width:34px;height:34px;border-radius:50%;background:var(--c-primary);display:inline-block"></span>
+        <span style="font-family:var(--font-display);font-size:var(--fs-card-title);font-weight:800;color:var(--c-primary)">tourdao.vn</span>
+      </div>
+      <nav class="nav" style="display:flex;align-items:center;gap:var(--s1);margin-left:var(--s4)">
+        <a href="#">Trang chủ</a>
+        <a href="#">Tour</a>
+        <a href="#" class="on">Điểm tham quan</a>
+        <a href="#">Trải nghiệm</a>
+        <a href="#">Địa danh</a>
+        <a href="#">Kinh nghiệm du lịch</a>
+        <a href="#">Đặt vé trực tuyến</a>
+      </nav>
+    </div>
+  </div>
+
+  <!-- ── Breadcrumb: RA KHỎI ẢNH, nền sáng (sửa F10) ── -->
+  <div style="background:var(--c-surface)">
+    <div style="max-width:var(--container);margin:0 auto;padding:var(--s3) var(--container-padding)">
+      <nav aria-label="Breadcrumb"><ol class="crumb">
+        <li><a href="#">Trang chủ</a></li>
+        <li><a href="#">Điểm tham quan</a></li>
+        <li><a href="#">Đảo Hòn Tằm</a></li>
+        <li><span style="color:var(--c-primary);font-weight:600">Khu Du Lịch Hòn Tằm</span></li>
+      </ol></nav>
+    </div>
+  </div>
+
+  <!-- ── Hero mosaic (giữ P1): ảnh chính + 4 ảnh; chữ chỉ gồm huy hiệu LOẠI (nơi duy nhất), h1, đoạn mở ── -->
+  <div style="display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:4px;height:430px;background:var(--c-card)">
+    <div style="position:relative;overflow:hidden">
+      <div class="ph" style="position:absolute;inset:0;background-color:#cfe3ee"></div>
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,var(--c-primary-strong) 0%,color-mix(in srgb,var(--c-primary-strong) 88%,transparent) 45%,color-mix(in srgb,var(--c-primary-strong) 70%,transparent) 62%,transparent 82%)"></div>
+      <div style="position:absolute;left:0;right:0;bottom:0;padding:var(--s7) var(--s5) var(--s5);display:flex;flex-direction:column;gap:var(--s2)">
+        <div style="display:flex;gap:var(--s2)">
+          <span style="padding:var(--badge-py) var(--badge-px);border-radius:var(--radius-pill);background:color-mix(in srgb,var(--c-primary-strong) 58%,transparent);border:1px solid color-mix(in srgb,var(--c-text-inverse) 30%,transparent);color:var(--c-text-inverse);font-size:var(--fs-label);font-weight:600;backdrop-filter:blur(4px)">Tắm bùn</span>
+        </div>
+        <h1 style="font-family:var(--font-display);font-size:var(--fs-hero);font-weight:800;line-height:var(--lh-display);color:var(--c-text-inverse);text-wrap:balance;max-width:16ch">Khu Du Lịch Hòn Tằm</h1>
+        <p style="max-width:56ch;color:var(--c-text-inverse);font-size:var(--fs-base);line-height:1.55;opacity:.92">Hòn đảo rộng hơn 110 ha nằm giữa vịnh Nha Trang, cách đất liền khoảng 6 km.</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:4px">
+      <div class="ph" style="background-color:#d9e8ef"></div>
+      <div class="ph" style="background-color:#d4e6e1"></div>
+      <div class="ph" style="background-color:#e3e9ef"></div>
+      <div class="ph" style="background-color:#cfe0ea"></div>
+    </div>
+  </div>
+
+  <!-- ── Thanh dính: neo tới mục THẬT + mục lục bài; giá (ngoại lệ được lặp) + CTA ── -->
+  <div style="height:var(--sticky-bar-h);background:var(--c-surface);border-bottom:1px solid var(--c-border)">
+    <div style="max-width:var(--container);margin:0 auto;padding:0 var(--container-padding);height:100%;display:flex;align-items:center;justify-content:space-between;gap:var(--s5)">
+      <nav class="jump" style="display:flex;gap:var(--s5)">
+        <a href="#hl" class="on">Điểm nổi bật</a>
+        <a href="#tq">Tổng quan</a>
+        <a href="#cach">Cách tới nơi</a>
+        <a href="#tn">Trải nghiệm tại đây</a>
+        <a href="#faq">Câu hỏi thường gặp</a>
+      </nav>
+      <div style="display:flex;align-items:center;gap:var(--s4)">
+        <span data-placeholder="prices.yaml rỗng — số mẫu, không phải giá thật" style="font-family:var(--font-display);font-size:var(--fs-h5);font-weight:800;color:var(--c-primary-strong);white-space:nowrap">từ 540.000₫ <span style="font-size:var(--fs-label);font-weight:500;color:var(--c-text-muted)">/ người</span></span>
+        <a href="#" class="btn" style="padding:var(--s2) var(--s5);font-size:var(--fs-sm)">Đặt vé qua Zalo</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── THÔNG TIN NHANH — vùng mới, thay cặp InfoBar + InfoCard. Mỗi field đúng MỘT ô, tối đa 6 ô. ── -->
+  <div style="max-width:var(--container);margin:0 auto;padding:var(--s5) var(--container-padding) 0">
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);box-shadow:var(--shadow-card)">
+      <div class="fact">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15 14"></polyline></svg>
+        <div><span class="fact-l">Giờ mở cửa</span><span class="fact-v">08:00 – 16:30</span></div>
+      </div>
+      <div class="fact">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+        <div><span class="fact-l">Địa chỉ</span><span class="fact-v">Đảo Hòn Tằm, Nha Trang</span></div>
+      </div>
+      <div class="fact">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.6a2 2 0 0 1-.5 2.1L8 9.7a16 16 0 0 0 6.3 6.3l1.3-1.3a2 2 0 0 1 2.1-.5c.8.3 1.7.6 2.6.7a2 2 0 0 1 1.7 2z"></path></svg>
+        <div><span class="fact-l">Điện thoại khu du lịch</span><span class="fact-v">0258 6 250 250</span></div>
+      </div>
+      <div class="fact">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><line x1="3" y1="12" x2="21" y2="12"></line><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z"></path></svg>
+        <div><span class="fact-l">Website chính thức</span><span class="fact-v"><a href="#">hontamnhatrang.com</a></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Hai cột: nội dung 1fr · sidebar 340 (sticky dưới header + thanh dính) ── -->
+  <div style="max-width:var(--container);margin:0 auto;padding:var(--s6) var(--container-padding) var(--s7);display:grid;grid-template-columns:1fr 340px;gap:var(--s7);align-items:start">
+
+    <div style="min-width:0;display:flex;flex-direction:column;gap:var(--s7)">
+
+      <!-- Điểm nổi bật — đứng trước thân bài, lưới 2 cột (P10) -->
+      <section id="hl">
+        <h2 class="sec-title">Điểm nổi bật</h2>
+        <span class="underline"></span>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s3)">
+          <div class="hl"><i></i><span>Khu tắm bùn khoáng</span></div>
+          <div class="hl"><i></i><span>Resort nghỉ dưỡng</span></div>
+          <div class="hl"><i></i><span>Bãi biển đẹp nhất</span></div>
+        </div>
+      </section>
+
+      <!-- Tổng quan — thân bài + MỤC LỤC sinh từ h2 của bài (sửa F3) -->
+      <section id="tq">
+        <h2 class="sec-title">Tổng quan</h2>
+        <span class="underline"></span>
+        <div style="max-width:70ch;display:flex;flex-direction:column;gap:var(--s4)">
+          <div class="toc" style="background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-lg);padding:var(--s4) var(--s5);box-shadow:var(--shadow-card)">
+            <div style="font-size:var(--fs-label);font-weight:700;text-transform:uppercase;letter-spacing:var(--ls-eyebrow);line-height:var(--lh-eyebrow);color:var(--c-text-muted);margin-bottom:var(--s2)">Trong bài này</div>
+            <a href="#">1. Định vị Hòn Tằm &amp; thời điểm lý tưởng</a>
+            <a href="#">2. Ở đâu khi đến Hòn Tằm</a>
+            <a href="#">3. Tắm bùn, thể thao nước, ẩm thực</a>
+            <a href="#">4. Gợi ý lịch trình 1 ngày</a>
+            <a href="#">5. Kinh nghiệm cần nhớ</a>
+          </div>
+          <p>Nhắc đến những thiên đường biển đảo tại vịnh Nha Trang, Hòn Tằm luôn là cái tên gieo thương nhớ cho biết bao tín đồ xê dịch. Sở hữu vẻ đẹp thuần khiết, làn nước trong xanh như ngọc cùng vô số dịch vụ nghỉ dưỡng cao cấp, nơi đây hứa hẹn sẽ mang đến cho bạn một kỳ nghỉ tuyệt vời.</p>
+          <h3 style="font-size:var(--fs-h4);font-weight:700;color:var(--c-text);margin-top:var(--s3)">1. Định vị Hòn Tằm &amp; thời điểm lý tưởng</h3>
+          <p>Hòn Tằm còn có tên gọi khác là Thủy Kim Sơn. Để tận hưởng trọn vẹn cảnh sắc nơi đây, bạn nên ghé thăm vào khoảng từ <strong>tháng 1 đến tháng 9 hàng năm</strong>.</p>
+        </div>
+      </section>
+
+      <!-- Cách tới nơi — callout cát (P9), là NƠI DUY NHẤT nói về đường đi -->
+      <section id="cach">
+        <h2 class="sec-title">Cách tới nơi</h2>
+        <span class="underline"></span>
+        <div style="background:var(--c-sand-soft);border:1px solid var(--c-sand-border);border-radius:var(--radius-lg);padding:var(--s4) var(--s5);color:var(--c-sand-text);font-size:var(--fs-base);display:flex;flex-direction:column;gap:var(--s2);max-width:70ch">
+          <p><strong style="color:var(--c-sand-text-strong)">Từ đất liền:</strong> Cảng Hòn Tằm (cảng cáp treo Vinpearl) hoặc Cảng du lịch Nha Trang, đi cano cao tốc ra đảo khoảng 15 phút.</p>
+          <p><strong style="color:var(--c-sand-text-strong)">Từ sân bay Cam Ranh:</strong> taxi hoặc xe bus về trung tâm (35 km), rồi ra cảng.</p>
+        </div>
+      </section>
+
+      <!-- Trải nghiệm tại đây — rollup; hàng meta luôn giữ chỗ để thẻ đều cao (sửa F7) -->
+      <section id="tn">
+        <h2 class="sec-title">Trải nghiệm tại đây</h2>
+        <span class="underline"></span>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s5)">
+          <a href="#" class="card"><div class="img ph" style="background-color:#d9e8ef"></div><div class="b"><h3>Flyboard Nha Trang</h3><p>Bay trên mặt nước bằng áp lực phản lực, có huấn luyện viên kèm.</p><div class="meta"><span class="badge">Thể thao biển</span></div></div></a>
+          <a href="#" class="card"><div class="img ph" style="background-color:#d4e6e1"></div><div class="b"><h3>Motor nước (Jetski)</h3><p>Lướt quanh vịnh Hòn Tằm, 15–30 phút một lượt.</p><div class="meta"><span class="badge">Thể thao biển</span></div></div></a>
+          <a href="#" class="card"><div class="img ph" style="background-color:#e3e9ef"></div><div class="b"><h3>Phao bay</h3><p>Cano kéo phao, phù hợp nhóm bạn và gia đình có trẻ lớn.</p><div class="meta"><span class="badge">Thể thao biển</span></div></div></a>
+        </div>
+      </section>
+
+      <!-- Hỏi đáp -->
+      <section id="faq">
+        <h2 class="sec-title">Câu hỏi thường gặp</h2>
+        <span class="underline"></span>
+        <div class="faq">
+          <details open><summary>Cano ra đảo mất bao lâu?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg></summary><div class="a">Khoảng 15 phút từ Cảng Hòn Tằm; chuyến cuối rời đảo trước giờ đóng cửa 30 phút.</div></details>
+          <details><summary>Có cần đặt vé trước không?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg></summary><div class="a">Mùa cao điểm nên đặt trước qua Zalo để giữ chỗ cano.</div></details>
+          <details><summary>Trẻ em có tắm bùn được không?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"></polyline></svg></summary><div class="a">Trẻ từ 6 tuổi có thể tắm bùn cùng người lớn tại hồ chung.</div></details>
+        </div>
+      </section>
+
+      <div style="border-top:1px solid var(--c-border);padding-top:var(--s4);font-size:var(--fs-sm);color:var(--c-text-muted);display:flex;align-items:center;justify-content:space-between;gap:var(--s4)">
+        <span style="display:inline-flex;align-items:center;gap:var(--s2)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--c-primary)"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>Cập nhật 21/08/2026</span>
+        <span>Nguồn tham khảo: <a href="#">Wikipedia</a></span>
+      </div>
+    </div>
+
+    <!-- Sidebar: CHỈ hành động + bản đồ. Giá chỉ ở thanh dính và đây (ngoại lệ duy nhất); không lặp field nào của Thông tin nhanh. Dính ở top = header + thanh dính + 16 (DR-033) -->
+    <aside style="position:sticky;top:calc(var(--header-h) + var(--sticky-bar-h) + var(--s4));display:flex;flex-direction:column;gap:var(--s4)">
+      <div style="background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-lg);padding:var(--s5);box-shadow:var(--shadow-raised);display:flex;flex-direction:column;gap:var(--s4)">
+        <div>
+          <div style="font-size:var(--fs-label);color:var(--c-text-muted)">Vé vào cửa</div>
+          <div style="display:flex;align-items:baseline;gap:var(--s2)">
+            <span data-placeholder="prices.yaml rỗng — số mẫu, không phải giá thật" style="font-family:var(--font-display);font-size:var(--fs-h4);font-weight:800;color:var(--c-accent-strong)">từ 540.000₫</span>
+            <span style="font-size:var(--fs-sm);color:var(--c-text-muted)">/ người</span>
+          </div>
+          <div class="note" data-placeholder="ngày mẫu">Cập nhật 08/2026</div>
+        </div>
+        <a href="#" class="btn" style="width:100%">Đặt vé qua Zalo</a>
+        <div style="display:flex;flex-direction:column;gap:var(--s1);font-size:var(--fs-sm)">
+          <a href="#" style="font-weight:600">Gọi hotline Tour Đảo</a>
+          <span class="note">Xác nhận trong giờ làm việc</span>
+        </div>
+      </div>
+      <div style="background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--s4);display:flex;flex-direction:column;gap:var(--s3)">
+        <div class="ph" style="height:220px;border-radius:var(--radius-sm);background-color:#dbe9e4;position:relative">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="var(--c-primary)" stroke="var(--c-card)" stroke-width="1.5" style="position:absolute;left:50%;top:42%;transform:translate(-50%,-50%)"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path><circle cx="12" cy="10" r="3" fill="var(--c-card)"></circle></svg>
+        </div>
+        <a href="#" style="font-size:var(--fs-sm);font-weight:600">Mở trong Google Maps →</a>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Dải "Gần đây" KHÔNG render ở trang này: rollup nearby của điểm tham quan này rỗng trên production — vùng rỗng ẩn hẳn (06 §0 quyết định nền 2). Ba entity kia có dữ liệu nên có dải; tên dải theo uiCopy: "Gần đây" / "Trải nghiệm tương tự" / "Tour tương tự". -->
+  <!-- Footer rút gọn -->
+  <div style="background:var(--c-footer-bg);color:var(--c-footer-text);padding:var(--s6) 0">
+    <div style="max-width:var(--container);margin:0 auto;padding:0 var(--container-padding);display:flex;justify-content:space-between;font-size:var(--fs-sm)">
+      <span>© 2026 Công ty TNHH Tour Đảo</span>
+      <!-- decor + config (build): dòng dịch vụ ở chân trang, không phải field Sanity -->
+      <span>Tour · Vé · Phòng · Xe đưa đón</span>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"theme":{"editor":"enum","options":["bien-sau","cat-bien","ngoc-lam"],"default":"bien-sau","section":"Bộ giao diện"},"$preview":{"width":1280,"height":3100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.theme ?? 'bien-sau' };
+  }
+}
+</script>
+</body>
+</html>

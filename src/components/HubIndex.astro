@@ -1,7 +1,7 @@
 ---
 import type { Lang, PriceEntry } from '../lib/types'
 import { siteBaseUrl } from '../lib/siteUrl'
-import { ATTRACTION_TYPE_LABELS, SPECIALTY_TYPE_LABELS, ARTICLE_TYPE_LABELS, TOUR_FORMAT_BADGES } from '../lib/uiCopy'
+import { ATTRACTION_TYPE_LABELS, SPECIALTY_TYPE_LABELS, ARTICLE_TYPE_LABELS, TOUR_FORMAT_LABELS } from '../lib/uiCopy'
 import { resolvePrice } from '../lib/resolver'
 import { ROUTE_MAP } from '../lib/routes'
 import { collectionPageToJsonLd, jsonLdScriptContent } from '../lib/serialize'
@@ -63,7 +63,7 @@ function entityHref(entityType: string, slug: string): string {
 const attractionTypeLabel = ATTRACTION_TYPE_LABELS[lang] ?? ATTRACTION_TYPE_LABELS.en
 const specialtyTypeLabel = SPECIALTY_TYPE_LABELS[lang] ?? SPECIALTY_TYPE_LABELS.en
 const articleTypeLabel = ARTICLE_TYPE_LABELS[lang] ?? ARTICLE_TYPE_LABELS.en
-const tourFormatLabel = TOUR_FORMAT_BADGES[lang] ?? TOUR_FORMAT_BADGES.en
+const tourFormatLabel = TOUR_FORMAT_LABELS[lang] ?? TOUR_FORMAT_LABELS.en
 
 function getBadge(entity: ListingEntity, entityType: string): { label: string; variant?: 'default' | 'author' } | null {
   switch (entityType) {

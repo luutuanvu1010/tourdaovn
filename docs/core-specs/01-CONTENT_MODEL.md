@@ -17,7 +17,8 @@ Phần KHÔNG nhãn (cơ chế field 2.0, ba họ gate, quy tắc giá, khối q
 > 🔧 **SITE-SPECIFIC:** danh mục 14 entity và mọi ví dụ (Specialty, TouristDestination, 5 ngôn ngữ) là của nhatrangtravel. Giữ *cơ chế* (field 2.0, ba họ gate, quy tắc bookingRef, khối quản trị); thay *danh mục entity* theo site.
 
 - **Trạng thái:** đã duyệt. Founder soát toàn văn theo cụm 2026-06-11 (rà phản biện độc lập, 7 vết chốt qua trắc nghiệm), bước 1 đóng.
-- **Phiên bản:** v1.0.18   **Ngày:** 2026-08-14   **Người soạn:** Cowork (tác nhân điều phối).
+- **Phiên bản:** v1.0.19   **Ngày:** 2026-08-22   **Người soạn:** Cowork (tác nhân điều phối).
+- **Đổi ở v1.0.19:** chỉ một ô — kiểu của `durationAtStop` trong 2.8 (QĐ-2026-08-22-05 Chốt 7). Không thêm, bớt hay đổi tên field nào.
 - **Nguồn quyết định:** brief mục 5-6 cộng các lựa chọn founder 2026-06-10 và 2026-06-11 (xem `DECISIONS.md` và `project/adr/` từ ADR-0002 đến ADR-0006).
 - **Kế thừa ràng buộc:** CONSTITUTION v2.2.0, PROJECT_OVERLAY v1.0.2 (S2.2 bất biến dữ liệu, S2.3 ngưỡng, S2.4 SEO/GEO, S2.5 đa ngôn ngữ).
 - **Override hiện hành:** từ 2026-06-30, `imageProvenance` là dữ liệu nội bộ tùy chọn, ẩn khỏi layout biên tập và không còn nằm trong gate publish I12. Từ 2026-07-02, `Attraction.containedInPlace` có thể trỏ `Place` hoặc `TouristDestination` khi Nha Trang là container thực tế; không khôi phục `seed.trung-tam-nha-trang`. Các dòng lịch sử bên dưới ghi "có khi có ảnh", "cộng imageProvenance khi có ảnh", hoặc "Attraction Place-only" chỉ còn là bối cảnh cũ, đã bị supersede bởi `DECISIONS.md`.
@@ -322,7 +323,7 @@ i18n field-level (ADR-0004), cùng quy tắc slug với 2.2. Field chung (2.0) v
 
 | Field | Kiểu | Bắt buộc? | Dịch? | Bất biến / quy tắc | Ai cung cấp |
 |---|---|---|---|---|---|
-| itinerary | array object stop, có thứ tự | có (gate I14) | note có | mỗi stop hoặc trỏ place (reference Attraction hoặc Place) hoặc là externalStop {name, geo tùy, sameAs tùy} cho điểm ngoài vùng (tour Đà Lạt), không tạo entity rỗng cho điểm ngoài hub (P10); note text mô tả chặng; durationAtStop tùy (ISO 8601); serialize ItemList giữ thứ tự | người |
+| itinerary | array object stop, có thứ tự | có (gate I14) | note có | mỗi stop hoặc trỏ place (reference Attraction hoặc Place) hoặc là externalStop {name, geo tùy, sameAs tùy} cho điểm ngoài vùng (tour Đà Lạt), không tạo entity rỗng cho điểm ngoài hub (P10); note text mô tả chặng; durationAtStop tùy — **khung giờ trong ngày viết cho người đọc** ("8:00 – 8:45") hoặc thời lượng dạng chữ, **không phải ISO 8601** (sửa v1.0.19 theo QĐ-2026-08-22-05 Chốt 7: kiểu khai cũ lệch khỏi dữ liệu thật và khỏi cách render). Là mốc giờ dự kiến của chặng, không phải lịch chỗ trống — ràng buộc I1 áp y như departureNote; serialize nối vào description của ListItem, giữ thứ tự | người |
 | operator | reference đến Organization | có (gate I14) | không | đơn vị vận hành, serialize provider | người |
 | tourFormat | string enum (join-in, private, both) | có (gate I14) | không | hình thức bán: ghép đoàn, tour riêng hoặc cả hai (giá trị hiển thị cho khách); mọi hình thức tính giá perPax bên nguồn giá, tour riêng có thể dùng tiers theo cỡ nhóm; CI kiểm mọi Tour dùng perPax, xem I14 (phát biểu lại ở bước 2 SAD) | người |
 | tripOrigin | reference đến Place hoặc Attraction | nên có | không | nơi xuất phát (cảng Cầu Đá, bến du thuyền), property Trip | người |

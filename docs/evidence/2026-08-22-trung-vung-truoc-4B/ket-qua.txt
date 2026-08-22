@@ -1,0 +1,62 @@
+Trang co it nhat mot gia tri hien o >1 vung: 44/58
+  diem-tham-quan     20/21
+  tour               11/20
+  trai-nghiem        7/10
+  dia-danh           6/7
+
+Cap (nhan) x (cac vung lap) — dem theo so trang:
+   22 trang | Giờ mở cửa                             | InfoBar + InfoCard
+   20 trang | Điện thoại                             | InfoBar + InfoCard
+   18 trang | Thời lượng                             | InfoBar + InfoCard
+   11 trang | Hình thức                              | InfoBar + InfoCard
+    7 trang | Phù hợp                                | InfoBar + InfoCard
+    6 trang | Loại                                   | InfoBar + InfoCard
+    6 trang | Thuộc                                  | InfoBar + InfoCard
+    5 trang | Giá vé / Phí vào cửa                   | InfoBar + InfoCard + thanh dinh + BookingCTA
+    5 trang | Khởi hành / Xuất phát                  | InfoBar + InfoCard
+
+Chi tiet tung trang (44 trang):
+  dia-danh_cang-cap-treo-vinpearl                      Giờ mở cửa ×2; Loại ×2; Thuộc ×2
+  dia-danh_cang-du-lich-nha-trang                      Giờ mở cửa ×2; Loại ×2; Thuộc ×2
+  dia-danh_dao-hon-mieu                                Giờ mở cửa ×2; Thuộc ×2; Loại ×2
+  dia-danh_dao-hon-mun                                 Giờ mở cửa ×2; Thuộc ×2; Loại ×2
+  dia-danh_dao-hon-tam                                 Giờ mở cửa ×2; Thuộc ×2; Loại ×2
+  dia-danh_noi-thanh-nha-trang                         Thuộc ×2; Loại ×2
+  diem-tham-quan_bai-dai-cam-lam                       Điện thoại ×2; Giá vé / Phí vào cửa ×4
+  diem-tham-quan_chua-long-son                         Điện thoại ×2; Giờ mở cửa ×2; Giá vé / Phí vào cửa ×4
+  diem-tham-quan_cong-vien-giai-tri-vinwonders         Điện thoại ×2; Giờ mở cửa ×2
+  diem-tham-quan_hon-chong                             Điện thoại ×2; Giờ mở cửa ×2
+  diem-tham-quan_khu-du-lich-ba-ho                     Điện thoại ×2; Giờ mở cửa ×2
+  diem-tham-quan_khu-du-lich-bai-tranh                 Điện thoại ×2; Giờ mở cửa ×2
+  diem-tham-quan_khu-du-lich-hon-mun                   Điện thoại ×2; Giờ mở cửa ×2
+  diem-tham-quan_khu-du-lich-hon-soi                   Điện thoại ×2; Giờ mở cửa ×2
+  diem-tham-quan_khu-du-lich-hon-tam                   Điện thoại ×2; Giờ mở cửa ×2
+  diem-tham-quan_khu-du-lich-kong-forest               Điện thoại ×2; Giờ mở cửa ×2
+  diem-tham-quan_khu-du-lich-mini-beach                Điện thoại ×2; Giờ mở cửa ×2
+  diem-tham-quan_khu-du-lich-suoi-tien                 Điện thoại ×2; Giờ mở cửa ×2
+  diem-tham-quan_khu-du-lich-tam-linh-hon-ba           Điện thoại ×2; Giá vé / Phí vào cửa ×4
+  diem-tham-quan_khu-du-lich-yang-bay                  Điện thoại ×2; Giờ mở cửa ×2
+  diem-tham-quan_lang-chai-bich-dam                    Điện thoại ×2; Giá vé / Phí vào cửa ×4
+  diem-tham-quan_lang-chai-hon-mieu                    Điện thoại ×2; Giờ mở cửa ×2
+  diem-tham-quan_nha-tho-nui                           Điện thoại ×2; Giờ mở cửa ×2; Giá vé / Phí vào cửa ×4
+  diem-tham-quan_thap-ba-ponaga                        Điện thoại ×2; Giờ mở cửa ×2
+  diem-tham-quan_vien-hai-duong-hoc                    Điện thoại ×2; Giờ mở cửa ×2
+  diem-tham-quan_vin-harbour                           Điện thoại ×2; Giờ mở cửa ×2
+  tour_tour-3-dao-hon-mun-mini-beach-lang-chai         Thời lượng ×2; Hình thức ×2
+  tour_tour-3-dao-nha-trang-deluxe                     Thời lượng ×2; Hình thức ×2
+  tour_tour-3-dao-nha-trang-hon-mun-hon-tam            Thời lượng ×2; Hình thức ×2
+  tour_tour-3-dao-nha-trang-mini-beach-hon-tam         Thời lượng ×2; Hình thức ×2
+  tour_tour-3-dao-vip-nha-trang                        Thời lượng ×2; Hình thức ×2
+  tour_tour-dao-khi-suoi-hoa-lan                       Thời lượng ×2; Hình thức ×2
+  tour_tour-hon-tam-tron-goi                           Thời lượng ×2; Khởi hành / Xuất phát ×2; Hình thức ×2
+  tour_ve-hon-tam-seaday-tour-03                       Thời lượng ×2; Khởi hành / Xuất phát ×2; Hình thức ×2
+  tour_ve-hon-tam-tam-bun-tam-bien                     Thời lượng ×2; Khởi hành / Xuất phát ×2; Hình thức ×2
+  tour_ve-hon-tam-tam-tron-goi                         Thời lượng ×2; Khởi hành / Xuất phát ×2; Hình thức ×2
+  tour_ve-vinwonders-tieu-chuan                        Thời lượng ×2; Khởi hành / Xuất phát ×2; Hình thức ×2
+  trai-nghiem_cano-keo-du-bay                          Thời lượng ×2; Phù hợp ×2
+  trai-nghiem_di-bo-duoi-day-bien-sea-walker           Thời lượng ×2; Phù hợp ×2
+  trai-nghiem_fly-board-nha-trang                      Thời lượng ×2; Phù hợp ×2
+  trai-nghiem_lan-bien-scuba-diving                    Thời lượng ×2; Phù hợp ×2
+  trai-nghiem_motor-nuoc-nha-trang-jetski              Thời lượng ×2; Phù hợp ×2
+  trai-nghiem_phao-bay                                 Thời lượng ×2; Phù hợp ×2
+  trai-nghiem_snorkeling-nha-trang                     Thời lượng ×2; Phù hợp ×2

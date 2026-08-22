@@ -12,6 +12,7 @@ import Body from './Body.astro'
 import { applyPriceToJsonLd, entityPageGraphToLd, tourToJsonLd, jsonLdScriptContent } from '../lib/serialize'
 import { loadPrices } from '../lib/prices'
 import { resolvePrice } from '../lib/resolver'
+import { site } from '../site.config'
 
 export interface Props {
   data: TourResult
@@ -37,7 +38,15 @@ const priceView = resolvePrice(data.bookingRef?.key, 'tour', undefined, prices, 
 // CTA fallback khi tour chưa có giá (nợ PY8): trỏ website chính thức của operator.
 // url là website chính thức, officialSource là bằng chứng đăng ký (§2.9) — ưu tiên url.
 // Không có URL nào thì không render nút (cấm nút không hoạt động).
-const operatorUrl = data.operator?.url || data.operator?.officialSource || ''
+// Bỏ qua URL cùng host với chính site: đơn vị vận hành của mọi tour là Tour Đảo, `url`
+// là tourdao.vn, nên trước đây 11/11 trang tour có nút "Website chính thức" trỏ về
+// trang chủ của chính nó — nút không hành động, R4 cấm (DR-036).
+const siteHost = new URL(site.url).host
+function isExternal(u: string | null | undefined): u is string {
+  if (!u) return false
+  try { return new URL(u).host !== siteHost } catch { return false }
+}
+const operatorUrl = [data.operator?.url, data.operator?.officialSource].find(isExternal) || ''
 const showFallbackCta = !priceView?.label && !!operatorUrl
 const hasContactChannel = !!(contact?.zaloUrl || contact?.hotline || contact?.whatsapp)
 
@@ -51,6 +60,10 @@ const jumpLinks = [
   { id: 'itinerary', label: t('itinerary'), on: !!data.itinerary?.length },
   { id: 'includes', label: t('includesExcludes'), on: !!(data.includes?.length || data.excludes?.length) },
   { id: 'highlights', label: t('highlights'), on: !!data.highlights?.length },
+  // "Chi tiết" là mục dài nhất trang (978 từ ở tour Deluxe) mà trước đây không có neo;
+  // "Mùa nào nên đi" cũng vậy (kế hoạch vòng 4, A6).
+  { id: 'details', label: t('details'), on: hasPtContent(data.body) },
+  { id: 'season', label: t('bestSeason'), on: !!data.seasonNote },
   { id: 'faq', label: t('faqHeading'), on: !!data.faq?.length },
 ].filter(x => x.on).map(x => ({ href: `#${x.id}`, label: x.label }))
 
@@ -157,13 +170,13 @@ const sidebarRows = [
     )}
 
     {hasPtContent(data.body) && (
-      <Section heading={t('details')} contained={false}>
+      <Section heading={t('details')} contained={false} id="details">
         <Body blocks={data.body} />
       </Section>
     )}
 
     {data.seasonNote && (
-      <Section heading={t('bestSeason')} contained={false}>
+      <Section heading={t('bestSeason')} contained={false} id="season">
         <div class="info-callout">{data.seasonNote}</div>
       </Section>
     )}

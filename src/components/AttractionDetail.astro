@@ -1,6 +1,6 @@
 ---
 import type { AttractionResult, Lang, SiteContact } from '../lib/types'
-import { siteBaseUrl } from '../lib/siteUrl'
+import { siteBaseUrl, hostLabel } from '../lib/siteUrl'
 import { uiCopy, typeLabel as lookupLabel, ATTRACTION_TYPE_LABELS } from '../lib/uiCopy'
 import DetailLayout from './DetailLayout.astro'
 import Section from './Section.astro'
@@ -74,10 +74,11 @@ const sidebarRows = [
   { icon: '📍', label: t('address'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
   { icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : '', visible: !!data.openingHours },
   { icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
-  { icon: '🔗', label: t('officialWebsite'), value: t('view'), href: data.officialSource || undefined, visible: !!data.officialSource },
-  { icon: '🎫', label: t('admission'), value: data.isAccessibleForFree ? t('free') : t('paid'), visible: data.isAccessibleForFree !== undefined },
-  { icon: '🗺️', label: t('map'), value: t('view'), href: data.hasMap, visible: !!data.hasMap },
-  { icon: '🔗', label: t('verifyWikidata'), value: 'Wikidata', href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
+  { icon: '🔗', label: t('officialWebsite'), value: hostLabel(data.officialSource), href: data.officialSource || undefined, visible: !!data.officialSource },
+  // "Có thu phí" không có giá kèm là thông tin rỗng (kế hoạch vòng 4, F6): chỉ hiện khi miễn phí.
+  { icon: '🎫', label: t('admission'), value: t('free'), visible: data.isAccessibleForFree === true },
+  { icon: '🗺️', label: t('map'), value: t('openMap'), href: data.hasMap, visible: !!data.hasMap },
+  { icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
 ]
 ---
 

@@ -14,11 +14,15 @@ Phần KHÔNG nhãn (triết lý binding, chính sách vùng rỗng, khung chung
 >
 > 🔧 **SITE-SPECIFIC:** các bảng delta theo entity cụ thể là của nhatrangtravel. Giữ *triết lý binding + khung chung + container policy*; thay *bảng delta* theo entity của site.
 
-- **Phiên bản:** v2.0.0   **Trạng thái:** nháp pha E, chờ chủ dự án duyệt lại (bản v1 phê chuẩn 2026-06-12 mô tả một site khác — xem DR-005)
-- **Ngày:** v1 soạn và phê chuẩn 2026-06-12; v2 soạn 2026-08-05   **Người soạn:** Cowork   **Người phê chuẩn:** Lưu Tuấn Vũ
-- **Liên quan:** `01-CONTENT_MODEL.md` v1.0.14 (nguồn sự thật field), `05-URL_MAP-and-DB_SCHEMA.md` (cây trang), `02-SAD.md` 3.1 (prices.yaml), `04-CONSTRAINTS.md` (I6, I16, PY, R), `src/site.config.ts` (phạm vi site, ADR-0021), ADR-0003, ADR-0004, ADR-0007, ADR-0023 (điều hướng).
+- **Phiên bản:** v2.2.0   **Trạng thái:** v2.0.0 là bản mở cổng bước 7 ngày 2026-08-06 (QĐ-2026-08-06-06); v2.1.0 (đợt 4B) duyệt 2026-08-22, QĐ-2026-08-22-02; **v2.2.0 duyệt 2026-08-22, QĐ-2026-08-22-05** — đổi ở §3, §3.1, §6, §4.8, §4.10, §7 và §7.1 (sửa theo N18: bản đầu của dòng này khai thiếu bốn mục sau)
+- **Ngày:** v1 soạn và phê chuẩn 2026-06-12; v2 soạn 2026-08-05; v2.1 và v2.2 soạn 2026-08-22   **Người soạn:** Cowork   **Người phê chuẩn:** Lưu Tuấn Vũ
+- **Liên quan:** `01-CONTENT_MODEL.md` v1.0.19 (nguồn sự thật field), `05-URL_MAP-and-DB_SCHEMA.md` (cây trang), `02-SAD.md` 3.1 (prices.yaml), `04-CONSTRAINTS.md` (I6, I16, PY, R), `src/site.config.ts` (phạm vi site, ADR-0021), ADR-0003, ADR-0004, ADR-0007, ADR-0023 (điều hướng).
 
 > **Đổi gì ở v2.** Đóng DR-005 (khai loại trang không tồn tại, thiếu loại trang đang chạy), DR-007 phần đặc tả, DR-011 (`organization.sameAs`). Bốn entity `restaurant`, `specialty`, `event` đang tắt ở `site.config.ts` nên bảng của chúng chuyển xuống phụ lục §8. Thêm bảng cho trang chủ, hai trang tĩnh, trang lộ trình. §7 viết lại cho đúng sự thật.
+>
+> **Đổi gì ở v2.1 (đợt 4B, QĐ-2026-08-22-01).** Đóng DR-032 ở tầng đặc tả: mỗi field hiển thị của trang chi tiết được khai **đúng một vùng** (ma trận §3.1); vùng mới **Thông tin nhanh** thay cặp `InfoBar` + `InfoCard`; khung chung thêm ba vùng đang có trong code mà chưa có hàng (thanh dính, khối hành động, bản đồ); nhãn loại chỉ còn ở hero (bỏ chữ "hoặc"); thân bài có mục lục; luật 1–3 vào §6. Với Tour, khối hành động là `BookingForm` (ADR-0027). Không đổi field nào của `01`.
+>
+> **Đổi gì ở v2.2 (QĐ-2026-08-22-05).** Gỡ sáu nợ QA1 đợt 4B để lại. **N3:** hàng Breadcrumb của §3 tách làm hai — *vùng điều hướng* (sinh từ nhánh URL, áp cho mọi trang chi tiết) và *mắt cha* (sinh từ `containedInPlace`/`venue`, không áp dụng cho tour và họ hàng); một hàng trước đây gánh hai sự thật, đó là gốc DR-032. **N15b:** thân bài trong trang chi tiết render hạ một cấp (lưu h2, hiện h3) để không ngang cấp với tiêu đề mục; Article giữ nguyên. **N15a:** ngưỡng mục lục ≥ 3 giữ nguyên — mockup sai, không phải đặc tả sai. **N4:** thêm hàng "Dải liên quan" cho dải cuối trang đang chạy mà chưa có đặc tả. **N11:** luật 1 ghi rõ ràng buộc *field*, không ràng buộc chuỗi ký tự. **N13:** thêm luật 4 cho số giá nằm trong chữ của `faq`. Không đổi field nào của `01` ở đây; `01` sửa riêng cho `durationAtStop` theo Chốt 7 (xem `QĐ-2026-08-22-06` về phạm vi chốt đó).
 >
 > **Cảnh báo hiệu lực (DR-027).** Bộ kiểm máy `g3` **không đọc file này** — nó đối chiếu một bản chép tay nằm trong chính mã validator. Sửa file này không làm đổi thứ máy kiểm cho tới khi cơ chế được xử. Đừng coi `g3` xanh là bằng chứng file này đúng.
 
@@ -65,19 +69,59 @@ Phần KHÔNG nhãn (triết lý binding, chính sách vùng rỗng, khung chung
 
 | Vùng giao diện | Dữ liệu nuôi (entity.field) | Bắt buộc? | Khi rỗng thì hiện gì | Ghi chú |
 |---|---|---|---|---|
-| Breadcrumb | `containedInPlace` deref thành chuỗi cha (build) | có với entity có `containedInPlace` | dùng nhánh URL: tên nhánh theo 05 mục 1.2 | quan hệ là dữ liệu, breadcrumb là trình bày (05 mục 1.1). không áp dụng: article, person, organization, experience, tour, specialty, event |
+| Breadcrumb (điều hướng) | `config (build)`: nhánh URL theo 05 mục 1.2, rồi `title` của trang | có, **mọi** trang chi tiết | không có trạng thái rỗng — chuỗi tối thiểu là *Trang chủ → nhánh → tiêu đề* | **tách ra ở v2.2 (N3).** Đây là **vùng điều hướng**, sinh từ cây URL chứ không từ field entity, nên không entity nào miễn. Nằm trên dải sáng **phía trên** hero, không đè lên ảnh. Nuôi `BreadcrumbList` trong JSON-LD |
+| Mắt cha trong breadcrumb | `containedInPlace` deref thành chuỗi cha (build); Experience dùng `venue` làm cha | có với entity có `containedInPlace` hoặc `venue` | bỏ mắt cha, chuỗi còn *Trang chủ → nhánh → tiêu đề* | **tách ra ở v2.2 (N3).** Đây là **dữ liệu**, chèn thêm một mắt vào giữa chuỗi điều hướng. Là nơi **duy nhất** hiện cha (không lặp ở Thông tin nhanh hay sidebar); quan hệ là dữ liệu, breadcrumb là trình bày (05 mục 1.1). không áp dụng: article, person, organization, tour, specialty, event |
 | Hero | `title` cộng `mainImage` (kèm alt); `gallery` đủ 4 ảnh sau khi loại trùng `mainImage` thì đi qua Hero mosaic | title có (gate); mainImage nên có | thiếu mainImage thì hero thuần chữ; gallery dưới 4 ảnh thì hero ảnh đơn; không ảnh placeholder | desktop đủ 4 gallery: ảnh chính bên trái, gallery 2x2 bên phải kiểu Hotel với 4 ô bằng nhau; mobile: ảnh chính trên, thumbnail strip 4 ô đều dưới; alt bắt buộc khi có ảnh (2.0) |
 | Đoạn mở | `summary` | có (gate, I10) | — | tự đứng được như câu trả lời hoàn chỉnh; nguồn speakable |
-| Thân bài | `body` (portable text) | nên có | ẩn (mặc định) | ảnh inline trong body với Article. không áp dụng: person (dùng `bio` thay vai, xem §4.11) |
+| Thân bài | `body` (portable text) | nên có | ẩn (mặc định) | ảnh inline trong body với Article. **v2.2 (N15b):** trong trang chi tiết entity, `Body` **hạ một cấp** khi render — tiêu đề lưu h2 hiện thành `<h3>`, h3 thành `<h4>` — để không ngang cấp với tiêu đề mục của `Section` (vốn là h2). Biên tập viên vẫn gõ h2 trong Sanity; prop `headingOffset` của `Body`. **Trang Article không hạ cấp** (§4.10): ở đó thân bài là nội dung chính, không nằm dưới một tiêu đề mục. **v2.1, ngưỡng giữ nguyên ở v2.2 (N15a):** có **mục lục** sinh ở build từ tiêu đề cấp cao nhất của `body` (lưu là h2) khi bài có ≥ 3 tiêu đề đó (neo vào từng cái, thanh dính trỏ được); biên tập **không mở mục trùng vai field cấu trúc** (cách đi → `accessInfo`, lịch trình → `itinerary`, bao gồm → `includes`, trải nghiệm → rollup) — luật 2 ở §6. không áp dụng: person (dùng `bio` thay vai, xem §4.11) |
 | Gallery | `gallery` (kèm alt từng ảnh) | nên có với entity có field | ẩn | Không render gallery section rời trên detail; gallery detail phải đi qua Hero mosaic. không áp dụng: article, person, organization |
 | Điểm nổi bật | `highlights` | tùy | ẩn | không áp dụng: organization, person, article |
 | Hỏi đáp | `faq` | tùy | ẩn | nuôi FAQPage trong JSON-LD. không áp dụng: person, organization |
 | Phân loại | `category` deref Category | tùy | ẩn | chỉ term thuộc bộ có trang công khai render thành link tới trang term; general-category không render (2.13) |
-| Nhãn loại entity | `placeType`, `attractionType`, `experienceType`, `specialtyType`, `orgType`, `articleType`, `tourFormat` — mỗi entity nhiều nhất một field | tùy | ẩn | không áp dụng: hotel, resort, person, touristDestination | nhãn ngắn cạnh tiêu đề hoặc trong InfoBar; cùng field nuôi nhãn phụ của card 5.1, không khai lại |
-| Xác minh dữ liệu | `sameAs` | tùy | ẩn cả dòng, không hiện nhãn trống | link hồ sơ Wikidata/Wikipedia đầu tiên trong mảng; tín hiệu E-E-A-T. Là nguồn `sameAs` trong JSON-LD. không áp dụng: article, experience, tour |
-| Điện thoại | `telephone` | tùy | ẩn, không CTA giả | không áp dụng: place, experience, tour, article, person, touristDestination, hotel, resort |
+| Nhãn loại entity | `placeType`, `attractionType`, `experienceType`, `specialtyType`, `orgType`, `articleType`, `tourFormat` — mỗi entity nhiều nhất một field | tùy | ẩn | **v2.1:** huy hiệu trong hero cạnh tiêu đề và **chỉ ở đó** — không vào Thông tin nhanh, không vào sidebar (trước ghi "hoặc InfoBar", code làm cả ba: DR-032). `experienceType` link tới trang term khi có (R2). Cùng field nuôi nhãn phụ của card 5.1, không khai lại. `tourFormat` dùng **một** bảng nhãn (DR-035). không áp dụng: hotel, resort, person, touristDestination |
+| Xác minh dữ liệu | `sameAs` | tùy | ẩn cả dòng, không hiện nhãn trống | link hồ sơ Wikidata/Wikipedia đầu tiên trong mảng; tín hiệu E-E-A-T. Là nguồn `sameAs` trong JSON-LD. **v2.1:** dòng "Nguồn tham khảo" đứng cạnh Ngày cập nhật ở cuối nội dung, giá trị là nhãn theo host (Wikipedia / Wikidata / tên miền) — không nằm trong sidebar. không áp dụng: article, experience, tour |
+| Điện thoại | `telephone` | tùy | ẩn, không CTA giả | **v2.1:** một ô trong Thông tin nhanh, nhãn "Điện thoại <loại nơi>" (ví dụ "Điện thoại khu du lịch") để không lẫn với hotline của site trong khối hành động. không áp dụng: place, experience, tour, article, person, touristDestination, hotel, resort |
 | Ngày cập nhật | `updatedAt`, `_updatedAt` | có | — | S2.4, hiện cả HTML. `_updatedAt` là dấu thời gian hệ thống của Sanity, dùng khi `updatedAt` biên tập chưa đặt |
-| Vùng giá cộng CTA đặt | `prices.yaml` qua khóa `bookingRef` | chỉ entity thương mại | ẩn cả vùng, không CTA giả (quyết định nền 3) | hình dạng nhãn theo entity, xem delta. không áp dụng: place, article, person, organization |
+| Vùng giá cộng CTA đặt | `prices.yaml` qua khóa `bookingRef` | chỉ entity thương mại | ẩn cả vùng, không CTA giả (quyết định nền 3); không có giá thì **không** nút thay thế trỏ về chính site (DR-036) | hình dạng nhãn theo entity, xem delta. **v2.1:** giá là **field duy nhất được lặp**, đúng hai nơi: thanh dính và khối hành động — không vào Thông tin nhanh. Tour: khối hành động là `BookingForm` (ADR-0027, §4.8). không áp dụng: place, article, person, organization |
+| Thanh dính (dưới header) | neo tới các mục **thật sự render** (kể cả mục lục thân bài); giá (lặp có chủ ý); CTA chính | có khi trang có ≥ 1 neo, giá hoặc CTA | không có gì để hiện thì không render | **thêm v2.1**, hợp thức hoá thứ code đã có. Cao đúng token `--sticky-bar-h`; sidebar dính dưới nó (DR-033). Di động: ẩn neo, và thay bằng **thanh đáy** chỉ gồm giá + CTA — không còn thanh nào dưới header |
+| Thông tin nhanh | các field ngắn của entity theo ma trận §3.1 — giờ mở cửa, địa chỉ, điện thoại, website chính thức, "miễn phí" khi đúng, thời lượng, phù hợp với, khởi hành | tùy | ô rỗng không render; 0 ô thì không có vùng | **thêm v2.1**, thay cặp InfoBar + InfoCard. Mỗi field **đúng một ô**, tối đa 6 ô, icon SVG, **không chứa giá**; ≤ 2 ô thì không trải dải ngang — desktop gộp vào cạnh bản đồ ở sidebar, di động giữ lưới 2 cột. Desktop: dưới thanh dính; di động: ngay dưới tiêu đề. Component `FactStrip.astro` |
+| Khối hành động (sidebar) | giá + CTA Zalo (siteSettings.contact.zaloUrl) + hotline; Tour thêm đơn vị vận hành, giấy phép và form — field khai ở §4.8 | chỉ entity thương mại | không giá và không kênh thì không render | **thêm v2.1.** Không lặp field nào của Thông tin nhanh. Di động: nằm sau Thông tin nhanh; CTA còn lặp ở thanh đáy. không áp dụng: place, article, person, organization |
+| Bản đồ (sidebar) | `geo` để vẽ; `hasMap` là link "Mở Google Maps" trong cùng thẻ | tùy | thiếu `geo` thì không vẽ; chỉ có `hasMap` thì hiện một link | **thêm v2.1.** `hasMap` **không** vào Thông tin nhanh. Di động: ngay sau "Cách tới nơi", không ở cuối trang. không áp dụng: article, person, tour |
+| Dải liên quan (cuối trang) | `config (build)`: prop `nearby` của `RouteDispatch` — không phải field Sanity của entity | tùy | dưới 1 mục thì không render cả dải | **thêm v2.2 (N4)**, hợp thức hoá dải "Gần đây" / "tương tự" đang chạy. **Một vùng dùng chung cho mọi trang chi tiết**, đi qua `DetailLayout`; chỉ **nhãn** đổi theo entity (`nearby`, `similarExperiences`, `similarTours`, `similarStays`, `relatedArticles`, `articlesBy`, `toursAndEvents`). Đứng **sau** Cập nhật · Nguồn, là khối cuối cùng của thân trang. Thẻ theo card chuẩn §5.1. Không lặp field nào của Thông tin nhanh hay khối hành động. ⚠️ **Chồng lấn chưa gỡ:** bốn hàng rollup có tên riêng ở §3 ("Sự kiện tại đây", "Tour vận hành", "Sự kiện tổ chức", "Bài đã viết") **là chính vùng này** dưới nhãn khác — gộp hay giữ tách là câu hỏi cho chủ dự án, chưa quyết ở v2.2 |
+
+### 3.1 Ma trận vùng theo entity (thêm v2.1 — nguồn cho FactStrip và cho Design)
+
+Mỗi ô ghi **vùng duy nhất** field được hiện trên trang chi tiết. "—" là entity không có field. Ma trận này chỉ nói về **field của entity**; các vùng sinh từ `config (build)` — breadcrumb điều hướng, dải liên quan — không có hàng ở đây vì không ăn field nào (v2.2). Cột này không phải cột "Dữ liệu nuôi" nên bộ kiểm `g3` không đọc; nó là hợp đồng cho bước 7 và bước 8. Giá (`bookingRef` → `prices.yaml`) là ngoại lệ duy nhất: thanh dính + khối hành động.
+
+| Field | Điểm tham quan | Địa danh | Trải nghiệm | Tour |
+|---|---|---|---|---|
+| `attractionType` · `placeType` · `experienceType` · `tourFormat` | huy hiệu hero | huy hiệu hero | huy hiệu hero (link term) | huy hiệu hero |
+| `containedInPlace` · `venue` | mắt cha trong breadcrumb | mắt cha trong breadcrumb | mắt cha trong breadcrumb (`venue`) | — (Tour không có mắt cha; **vùng** breadcrumb vẫn có, sinh từ nhánh URL) |
+| `summary` | hero | hero | hero | hero |
+| `openingHours` | Thông tin nhanh | Thông tin nhanh | — | — |
+| `address` | Thông tin nhanh | Thông tin nhanh | — | — |
+| `telephone` | Thông tin nhanh | — | — | — |
+| `officialSource` | Thông tin nhanh (tên miền) | — | — | — |
+| `isAccessibleForFree` | Thông tin nhanh, chỉ khi true | Thông tin nhanh, chỉ khi true | thanh dính + khối hành động (nhãn "Miễn phí" thay giá) | — |
+| `duration` | — | — | Thông tin nhanh | Thông tin nhanh |
+| `touristType` | — | — | Thông tin nhanh (đủ danh sách) | Thông tin nhanh |
+| `tripOrigin` | — | — | — | Thông tin nhanh ("Khởi hành") |
+| `departureNote` | — | — | — | ghi chú trong khối hành động |
+| `operator` · `licenseInfo` | — | — | — | khối hành động (`BookingForm`); `licenseInfo` không lặp tiền tố "Giấy phép" |
+| `seasonNote` | — | — | — | mục "Mùa nào nên đi" |
+| `includes` · `excludes` | — | — | mục "Bao gồm" | mục "Bao gồm / Không bao gồm" |
+| `itinerary` | — | — | — | mục "Lịch trình" (timeline); thân bài không lặp |
+| `highlights` | mục, trước thân bài | mục, trước thân bài | mục, trước thân bài | mục, trước lịch trình |
+| `body` | mục "Tổng quan" + mục lục | mục "Chi tiết" + mục lục | mục "Chi tiết" + mục lục | mục "Chi tiết" + mục lục |
+| `accessInfo` | mục "Cách tới nơi" — nơi duy nhất nói đường đi | mục "Cách tới nơi" | — | — |
+| rollup `experiences` | mục "Trải nghiệm tại đây" | mục "Trải nghiệm tại đây" | — | — |
+| `faq` | mục | mục | mục | mục |
+| `geo` · `hasMap` | thẻ bản đồ | thẻ bản đồ | thẻ bản đồ (chỉ `geo`) | — |
+| `sameAs` | dòng "Nguồn tham khảo" cạnh Cập nhật | dòng "Nguồn tham khảo" | — | — |
+| giá (`bookingRef`) | thanh dính + khối hành động | — | thanh dính + khối hành động | thanh dính + `BookingForm` |
+| `_updatedAt` · `updatedAt` | cuối nội dung | cuối nội dung | cuối nội dung | cuối nội dung |
+
+Thứ tự mục nội dung thống nhất: Điểm nổi bật → (Tour: Lịch trình → Bao gồm) → Tổng quan/Chi tiết → Cách tới nơi → (Trải nghiệm tại đây) → Mùa nào nên đi → Câu hỏi thường gặp → Cập nhật · Nguồn → **Dải liên quan** (v2.2). Thứ tự khối di động: hero → Thông tin nhanh → nội dung theo thứ tự trên, bản đồ ngay sau Cách tới nơi → Gần đây; thanh đáy giá + CTA luôn thấy.
 
 ## 4. Delta từng loại trang chi tiết
 
@@ -109,6 +153,8 @@ Trang TouristDestination giữ vai điều phối điểm đến, nhưng không 
 | Vùng con | containsPlace rollup (build) | — | ẩn | reverse containedInPlace |
 | Trải nghiệm tại đây | rollup (build) từ `Experience.venue` ngược, GROQ chiếu ra `experiences` | — | ẩn | |
 
+*Vùng hiển thị của từng field ở trang này theo ma trận §3.1 (v2.1): nhãn loại chỉ ở hero, cha chỉ ở breadcrumb, field ngắn vào Thông tin nhanh, giá chỉ ở thanh dính + khối hành động; InfoBar và InfoCard không còn là vùng.*
+
 ### 4.3 Attraction `/diem-tham-quan/{slug}`
 
 | Vùng giao diện | Dữ liệu nuôi | Bắt buộc? | Khi rỗng thì hiện gì | Ghi chú |
@@ -121,6 +167,8 @@ Trang TouristDestination giữ vai điều phối điểm đến, nhưng không 
 | Trải nghiệm tại đây | rollup (build) từ `Experience.venue` ngược, GROQ chiếu ra `experiences` | — | ẩn | |
 | Sự kiện tại đây | rollup (build) từ Event.`location` ngược | — | ẩn | |
 
+*Vùng hiển thị của từng field ở trang này theo ma trận §3.1 (v2.1): nhãn loại chỉ ở hero, cha chỉ ở breadcrumb, field ngắn vào Thông tin nhanh, giá chỉ ở thanh dính + khối hành động; InfoBar và InfoCard không còn là vùng.*
+
 ### 4.4 Experience `/trai-nghiem/{slug}`
 
 | Vùng giao diện | Dữ liệu nuôi | Bắt buộc? | Khi rỗng thì hiện gì | Ghi chú |
@@ -132,6 +180,8 @@ Trang TouristDestination giữ vai điều phối điểm đến, nhưng không 
 | Phù hợp với | `touristType` | tùy | ẩn | |
 | Vị trí trên bản đồ | `geo` | tùy | ẩn | Experience không có `address`; chỉ toạ độ, dùng cho bản đồ nhỏ và JSON-LD |
 | Vùng giá cộng CTA | `prices.yaml` qua `bookingRef`; `isAccessibleForFree` | nên có với trải nghiệm trả phí | ẩn cả vùng; isAccessibleForFree = true hiện nhãn miễn phí thay vùng giá | giá trực tiếp kèm đơn vị kiểu "120k/người" (I16) |
+
+*Vùng hiển thị của từng field ở trang này theo ma trận §3.1 (v2.1): nhãn loại chỉ ở hero, cha chỉ ở breadcrumb, field ngắn vào Thông tin nhanh, giá chỉ ở thanh dính + khối hành động; InfoBar và InfoCard không còn là vùng.*
 
 ### 4.7 Hotel `/khach-san/{slug}` và Resort `/resort/{slug}` (LodgingBase)
 
@@ -156,7 +206,7 @@ Một delta chung, khớp 2.0b. Khác nhau chỉ ở ba vùng cuối.
 
 | Vùng giao diện | Dữ liệu nuôi | Bắt buộc? | Khi rỗng thì hiện gì | Ghi chú |
 |---|---|---|---|---|
-| Hành trình (timeline có thứ tự) | `itinerary`: mỗi stop deref Attraction hoặc Place, hoặc `externalStop` {name, `geo`, `sameAs`}; note; `durationAtStop` | có ≥1 stop (gate I14) | — | serialize ItemList giữ thứ tự; stop nội vùng link trang entity, externalStop chữ không link |
+| Hành trình (timeline có thứ tự) | `itinerary`: mỗi stop deref Attraction hoặc Place, hoặc `externalStop` {name, `geo`, `sameAs`}; note; `durationAtStop` | có ≥1 stop (gate I14) | — | serialize ItemList giữ thứ tự; stop nội vùng link trang entity, externalStop chữ không link. **v2.2 (N14):** `durationAtStop` là **khung giờ trong ngày** ("8:00 – 8:45") hoặc thời lượng, viết cho người đọc — xem `01` 2.8. Là **mốc giờ dự kiến của chặng**, không phải lịch chỗ trống; ràng buộc I1 của `departureNote` áp y nguyên. Serialize nối vào `description` của ListItem (kiểu Text), không vào ô Duration nào |
 | Đơn vị vận hành | `operator` deref Organization | có (gate I14) | — | link `/cong-ty/{slug}`; serialize provider |
 | Hình thức tour | `tourFormat` | có (gate I14) | — | join-in, private hoặc both; nhãn hiển thị cho khách |
 | Xuất phát từ | `tripOrigin` deref | nên có | ẩn | |
@@ -168,6 +218,8 @@ Một delta chung, khớp 2.0b. Khác nhau chỉ ở ba vùng cuối.
 | Vùng giá cộng CTA | `prices.yaml` qua `bookingRef` | nên có | ẩn cả vùng | perPax mọi hình thức (I14); tour riêng hiện tiers theo cỡ nhóm từ nguồn giá |
 | Form đặt tour | `prices.yaml` qua `bookingRef` (`amount`, `paxRates`, hoặc `tiers`); `siteSettings.contact` (`zaloUrl`, `hotline`); `title`, `slug` của tour | chỉ khi có giá | không giá → không form, giữ `ContactChannels` (quyết định nền 3) | component `BookingForm`, thay `BookingCTA` trên Tour; tạm tính tính từ số nướng lúc build; gửi tới `/api/dat-tour` (ADR-0027); vùng ghi duy nhất của site, không phải field Sanity; nút Zalo và hotline guard rỗng như §2 — thêm 2026-08-21 |
 
+*Vùng hiển thị của từng field ở trang này theo ma trận §3.1 (v2.1): nhãn loại chỉ ở hero, cha chỉ ở breadcrumb, field ngắn vào Thông tin nhanh, giá chỉ ở thanh dính + khối hành động; InfoBar và InfoCard không còn là vùng.*
+
 ### 4.10 Article `/cam-nang/{slug}`
 
 Không gallery (ảnh inline trong body, 2.11). Document-level: mỗi ngôn ngữ một document, switcher theo translationGroup.
@@ -177,7 +229,7 @@ Không gallery (ảnh inline trong body, 2.11). Document-level: mỗi ngôn ng�
 | Nhãn chuyên mục | `articleType` | có (gate) | — | xuất articleSection trong JSON-LD |
 | Hộp tác giả | `author` deref Person: title, `mainImage`, `summary` | có (gate I4) | — | link `/tac-gia/{slug}`, tín hiệu E-E-A-T |
 | Ngày đăng, ngày sửa | `publishedAt`, `updatedAt` | có | — | datePublished, dateModified |
-| Mục lục, thời gian đọc | suy (build) từ `body` | tùy Design | ẩn với bài ngắn | không phải field (N1, P6) |
+| Mục lục, thời gian đọc | suy (build) từ `body` | tùy Design | ẩn với bài ngắn | không phải field (N1, P6). **v2.2 (N15b):** trang Article **không** hạ cấp tiêu đề thân bài — h2 vẫn render h2, khác với trang chi tiết entity ở §3, vì ở đây `body` là nội dung chính chứ không nằm dưới một tiêu đề mục |
 | Hướng dẫn từng bước | `howTo` | gate transport-guide: ít nhất một trong howTo, faq | ẩn | serialize HowTo |
 | Nói về | `about` deref | nên có | ẩn | card link tới entity được nói tới |
 | Có nhắc tới | `mentions` deref | tùy | ẩn | nhẹ hơn `about`: entity được nhắc nhưng không phải chủ đề bài |
@@ -313,6 +365,11 @@ Sinh từ `siteSettings`, không phải entity (ADR-0023, QĐ-2026-08-05-13). Kh
 - Trạng thái rỗng và trạng thái lỗi là một phần của bản ánh xạ, không phải việc để Design tự nghĩ. Mặc định toàn file theo quyết định nền 2; bảng chỉ ghi ngoại lệ.
 - Trạng thái lỗi dữ liệu không tồn tại trên trang sống: gate publish (I12, I19) chặn entity thiếu field bắt buộc, PY4 và họ ref integrity chặn trỏ hụt từ build. Trang chỉ có hai trạng thái: vùng có dữ liệu và vùng ẩn.
 - Phần tử trang trí thuần (không mang dữ liệu) ghi rõ `decor` để khỏi tranh cãi.
+- **Luật 1 (v2.1) — một thông tin, một vùng, một lần.** Mỗi field hiển thị của trang chi tiết được khai đúng một vùng (§3.1). Nhắc lại ở vùng thứ hai phải ghi thành ngoại lệ có lý do; hiện chỉ có **giá** (thanh dính + khối hành động) vì đó là quyết định mua. Template chỉ khai dữ liệu, không tự chọn vùng; `g3` và review QA1 đối chiếu theo §3.1.
+  - **Phạm vi (v2.2, N11):** luật này ràng buộc **field**, không ràng buộc **chuỗi ký tự**. Hai field khác nhau tình cờ mang cùng giá trị thì **không** vi phạm — ví dụ `tripOrigin` ở Thông tin nhanh trùng tên với một stop của `itinerary`, hay `duration` trùng nghĩa với `durationAtStop`. Chữ do biên tập viết trong `faq` hoặc `body` **không** tính là vùng thứ hai của field nào. Đo trùng lặp bằng cách hỏi *field nào nuôi ô này*, không bằng cách so chuỗi trên trang.
+- **Luật 2 (v2.1) — cấu trúc giữ khung, bài viết giữ chiều sâu.** Field cấu trúc (`accessInfo`, `itinerary`, `includes`, `openingHours`…) là câu trả lời ngắn ở vùng cố định; `body` không mở mục cùng vai. Bài dài điều hướng bằng mục lục sinh từ h2, không bằng cách lặp mục.
+- **Luật 4 (v2.2, N13) — số giá viết trong chữ phải có hạn dùng.** Biên tập **được** viết số giá trong `faq` (vé vào cổng của Địa danh, chính sách giá trẻ em của Tour), kể cả trên entity mà §4.2 không cho có vùng giá. Đổi lại **bắt buộc**: ghi ngay tại chỗ **ngày cập nhật** và **tên nguồn**, và mỗi mục như vậy vào một danh sách rà định kỳ của vận hành nội dung. Không mở rộng I1 sang mọi entity. Nhận rõ đánh đổi: mức giá đó sống ngoài `prices.yaml`, cưỡng chế bằng quy trình chứ không bằng validator — `06` §1 "giá không bao giờ là field Sanity" vẫn đúng vì đây là **chữ**, không phải field giá.
+- **Luật 3 (v2.1) — giá trước, chữ sau.** Màn đầu của entity thương mại phải có giá hoặc nhãn "miễn phí"; không có thì ẩn vùng giá **và** không hiện nút thay thế trỏ về chính site (quyết định nền 3 + DR-036).
 
 ## 7. Điều kiện mở cổng Design
 
@@ -322,17 +379,20 @@ Cổng bước 7 chỉ mở khi **cả bốn** điều kiện dưới đây đú
 |---|---|---|
 | 1 | Mọi loại trang site **thực sự sinh ra** đều có bảng ánh xạ | ✅ 22 URL của build hiện tại phủ bởi §2–§5.9 |
 | 2 | Không bảng nào mô tả loại trang không tồn tại | ✅ `restaurant`, `specialty`, `event` chuyển xuống §8 |
-| 3 | Mọi field template truy cập đều được khai ở đây | ◐ **15 cảnh báo còn lại**, 0 lỗi — xem §7.1 |
+| 3 | Mọi field template truy cập đều được khai ở đây | ◐ **24 cảnh báo còn lại**, 0 lỗi — xem §7.1 (15 trước v2.2, +9 do một hàng thêm theo N4) |
 | 4 | Bộ kiểm máy của cổng đọc đúng file này | ✅ **đạt 2026-08-05** — `g3` nay parse thẳng bảng ở đây; DR-027 đã xử |
 
-### 7.1 Baseline 15 cảnh báo còn lại (đo 2026-08-05)
+### 7.1 Baseline 24 cảnh báo còn lại (đo lại 2026-08-22 sau v2.2)
 
 Không cảnh báo nào ở mức `fail`. Ghi ra đây để lần sau đo được là tăng hay giảm, thay vì mỗi lần lại đếm từ đầu.
+
+**Đổi ở v2.2: 15 → 24.** Chín cảnh báo mới đến **nguyên vẹn từ một hàng duy nhất** — "Dải liên quan" thêm theo N4, đếm một lần cho mỗi entity chi tiết. Chúng thuộc **đúng nhóm giới hạn công cụ đã ghi ở hàng thứ hai bảng dưới**: dữ liệu vào template qua prop `nearby` chứ không qua `data.<field>`, nên bộ dò tĩnh của `g3` không thấy nguồn. Không phải drift mới, và không phải vùng thiếu — chỉ là hợp thức hoá một vùng đang chạy thì `g3` đếm thêm.
 
 | Nhóm | Số | Bản chất |
 |---|---|---|
 | Vùng "Phân loại" (`category`) câm ở cả 9 entity | 9 | Bản ánh xạ khai vùng phân loại trên mọi trang chi tiết, **không template nào render `data.category`**. Hoặc Design dựng vùng này ở bước 7, hoặc bỏ hàng đó khỏi §3. Là quyết định bề mặt, để pha F. |
 | Vùng rollup câm: "Sự kiện tại đây", "Tour vận hành", "Sự kiện tổ chức", "Bài đã viết" | 4 | Dữ liệu vào template qua prop `nearby` của `RouteDispatch` chứ không qua `data.<field>`, nên bộ dò tĩnh của `g3` không thấy. Giới hạn công cụ, không phải vùng thiếu. Hai trong bốn thuộc `event` đang tắt. |
+| Vùng "Dải liên quan" câm ở cả 9 entity | 9 | **Thêm v2.2 (N4).** Cùng một cơ chế với hàng ngay trên: prop `nearby`, không phải `data.<field>`. Chín entity vì vùng này dùng chung cho mọi trang chi tiết. Đây cũng là bằng chứng cho ⚠️ ghi ở §3: bốn hàng rollup trên và hàng này ăn cùng một nguồn. |
 | `isAccessibleForFree` trên hotel và resort | 2 | Phát hiện thật — xem DR-028: template đọc field không tồn tại, che bằng `as any`. Cần quyết ở tầng nội dung. |
 
 **Điều kiện 4 đã đạt**, nên từ nay "g3 xanh" là bằng chứng thật cho điều kiện 3 — trong giới hạn ghi ở bảng trên. Chủ dự án chốt có mở cổng bước 7 với 15 cảnh báo này hay không; `GOVERNANCE` 4.1 để mặc định của cổng là chặn, và mức bằng chứng thuộc quyền chủ dự án.

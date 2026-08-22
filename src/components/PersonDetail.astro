@@ -1,6 +1,6 @@
 ---
 import type { PersonResult, Lang } from '../lib/types'
-import { siteBaseUrl } from '../lib/siteUrl'
+import { siteBaseUrl, hostLabel } from '../lib/siteUrl'
 import { uiCopy } from '../lib/uiCopy'
 import DetailLayout from './DetailLayout.astro'
 import Section from './Section.astro'
@@ -21,8 +21,8 @@ const t = uiCopy(lang)
 const sidebarRows = [
   { icon: '💼', label: t('role'), value: data.jobTitle || '', visible: !!data.jobTitle },
   { icon: '📚', label: t('knowsAbout'), value: data.knowsAbout?.join(', ') || '', visible: !!(data.knowsAbout && data.knowsAbout.length > 0) },
-  { icon: '🌐', label: t('website'), value: t('view'), href: data.url || undefined, visible: !!data.url },
-  { icon: '🔗', label: t('verifyWikidata'), value: 'Wikidata', href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
+  { icon: '🌐', label: t('website'), value: hostLabel(data.url), href: data.url || undefined, visible: !!data.url },
+  { icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
 ]
 
 const siteBase = siteBaseUrl(Astro.site)

@@ -39,47 +39,27 @@ build-verify được trong sandbox.
 `RouteDispatch` HUB_PARTS_CONFIG `hub-am-thuc` + `hub-all` liệt kê restaurant/specialty/event;
 `uiCopy.ts` giữ copy các entity đã gỡ. Không route nên không render, không gãy build.
 
-## ĐANG BẬT: trang chủ chuyển hướng sang tourdaonhatrang.com
+## ĐÃ GỠ: trang chủ từng chuyển hướng sang tourdaonhatrang.com
 
-**Trạng thái: đang chạy trên production** từ 2026-08-06. Căn cứ `QĐ-2026-08-06-02` và
-`QĐ-2026-08-06-04` trong `docs/DECISIONS.md`.
+**Trạng thái: đã gỡ 2026-08-13**, commit `541ec26` ("go chuyen huong tam cua trang chu"),
+căn cứ `SPEC-2026-08-13-menu-chinh-bon-muc` — site công bố, trang chủ phục vụ nội dung
+thật và đã lên menu chính. Bật từ 2026-08-06 theo `QĐ-2026-08-06-02` / `QĐ-2026-08-06-04`.
 
-Vào `https://tourdao.vn/` sẽ bị đưa sang `https://tourdaonhatrang.com/` bằng `302`. Trang con
-(`/nha-trang/`, `/lien-he/`...) và `/sitemap.xml` **không** bị đụng, vẫn trả `200`.
+Kiểm 2026-08-22: `curl -sI https://tourdao.vn/` trả `200`. Dòng luật trong
+`public/_redirects` đã bị ghi chú lại (`#/    https://tourdaonhatrang.com/    302`), giữ
+làm dấu vết chứ không xoá hẳn.
 
-Luật nằm ở dòng cuối `public/_redirects`:
+> **Mục này từng ghi "ĐANG BẬT ... đang chạy trên production" tới tận 2026-08-22** — chín
+> ngày sau khi luật đã gỡ khỏi code, kèm nguyên một quy trình "Cách gỡ" cho thứ đã gỡ rồi.
+> Xem DR-043. Cùng lúc đó phát hiện `QĐ-2026-08-06-04` **bước 6** — "ghi mục mới trong sổ
+> để đóng `QĐ-2026-08-06-02`" — chưa từng được thi hành; nay đóng ở `QĐ-2026-08-22-04`.
 
-```
-/    https://tourdaonhatrang.com/    302
-```
+### Vì sao khi đó không làm bằng Page Rules
 
-### Cách gỡ
-
-**1.** Xoá dòng trên trong `public/_redirects`, xoá luôn khối chú thích "Phần 2. Điều hướng tạm
-thời" ngay phía trên nó. Giữ nguyên Phần 1 — đó là phần R3, không liên quan.
-
-**2.** Deploy:
-
-```
-npm run deploy
-```
-
-Xem mục "Deploy" ở cuối file này.
-
-**3.** Kiểm:
-
-```
-curl -sI https://tourdao.vn/ | head -1
-```
-
-Gỡ xong khi trả `200` thay vì `302`. Không cần purge cache, không cần đụng dashboard Cloudflare.
-
-**4.** Ghi một mục mới trong `docs/DECISIONS.md` để đóng `QĐ-2026-08-06-02`. Không sửa mục cũ.
-
-### Vì sao không làm bằng Page Rules
-
-Đã thử hai lần, thất bại cả hai. `tourdao.vn` do Worker phục vụ nên Cloudflare vô hiệu hoá
-`Forwarding URL` (`Client → Worker = Rule Ignored`). Chi tiết cơ chế ở `SETUP-NEW-SITE.md` mục 10.
+Giữ lại vì cơ chế còn đúng cho mọi lần chuyển hướng sau. Đã thử hai lần, thất bại cả hai:
+`tourdao.vn` do Worker phục vụ nên Cloudflare vô hiệu hoá `Forwarding URL`
+(`Client → Worker = Rule Ignored`). Mọi luật chuyển hướng của site này phải nằm ở
+`public/_redirects`. Chi tiết cơ chế ở `SETUP-NEW-SITE.md` mục 10.
 
 ---
 
@@ -89,6 +69,49 @@ Gỡ xong khi trả `200` thay vì `302`. Không cần purge cache, không cần
 npm run deploy            # dựng lại rồi đưa lên production
 npm run deploy:preview    # dựng lại rồi tải lên một version, KHÔNG đổi bản đang chạy
 ```
+
+### Có đường thứ hai: Cloudflare tự dựng từ GitHub
+
+Lệnh trên **không phải** đường duy nhất đưa bit lên `tourdao.vn`. Worker `tourdaovn` có
+**nối git** (Workers Builds ↔ `luutuanvu1010/tourdaovn`, nhánh `main`). Mỗi lần đẩy lên
+`main` là Cloudflare tự clone, dựng và thay bản đang chạy.
+
+Điểm phải nhớ, vì nó đã cắn một lần rồi (DR-041): **bản dựng đó lấy code từ `origin/main`
+trên GitHub, không lấy từ máy ông.** Commit chưa push thì không có mặt trong đó. Và nó
+**thay thế** version đang chạy — kể cả version vừa `npm run deploy` bằng tay. Ngày
+2026-08-22, cả đợt 4A đã "deploy thành công" rồi bị một bản dựng phía Cloudflare (code
+ngày 14-08) đè mất; `wrangler` in `Success`, `curl` trả `200`, chỉ nội dung là của hai
+tuần trước. Không có tín hiệu hỏng nào.
+
+Nên luật là: **push trước, deploy tay sau.** Ngược lại thì công deploy có thể bốc hơi.
+
+Kiểm hai bên có khớp không:
+
+```
+git status -sb | head -1                  # phải KHÔNG có "ahead"
+```
+
+### Bấm Publish trong Sanity KHÔNG còn dựng lại site
+
+**Từ 2026-08-22** (`QĐ-2026-08-22-03`). Webhook `Cloudflare rebuild` trong Sanity đã
+**tắt** — tắt chứ không xoá, URL và rule còn nguyên, bật lại là đảo một cờ.
+
+Trước đó, publish một document sẽ POST vào một Deploy Hook của Cloudflare và kích một lần
+dựng lại toàn site. Ngắt vì mỗi lần dựng đọc lại **toàn bộ** nội dung qua Sanity Content
+API, mà hook không có debounce (25 lần bắn trong một ngày, 4 lần trong 6 giây).
+
+**Hệ quả trực tiếp cho người vận hành:** sửa nội dung trong Studio, bấm Publish, rồi mở
+`tourdao.vn` sẽ **không thấy gì đổi**. Đó không phải lỗi. Phải chạy:
+
+```
+npm run deploy
+```
+
+Đây là loại lệch im lặng, không có kiểm máy nào nhắc. Cùng hạng nợ với `favicon.svg`
+(`QĐ-2026-08-14-01`) và schema Studio lệch bản đã deploy (`QĐ-2026-08-14-02`).
+
+Muốn bật lại: xử DR-042 trước (rule hiện chỉ nghe `create`, không lọc type, không
+debounce), push hết commit đang treo, rồi mới bật.
 
 ### Site này chạy trên Worker, không phải Pages
 

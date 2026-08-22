@@ -151,6 +151,10 @@
 
   /* Component token */
   --header-h: 68px;
+  --sticky-bar-h: 56px;   /* thanh dính dưới header ở trang chi tiết (DetailLayout).
+                             Cao cố định để Sidebar tính được chỗ dính: trước đây thanh
+                             cao theo nội dung (~62px) còn Sidebar dính ở top:16px nên
+                             hai dòng đầu của thẻ thông tin khuất sau thanh — DR-033. */
   --hero-min-h: 480px;
   --hero-min-h-mobile: 360px;
   --card-img-h: 200px;
@@ -189,13 +193,19 @@
   padding: 0;
 }
 
+/* DR-034 (đóng 2026-08-22, QĐ-2026-08-22-01): trước đây `html { font-size: var(--fs-base) }`
+   trong khi --fs-base tính bằng rem, nên root thành 17px và MỌI token rem nhân thêm
+   17/16 — body đo 18,06px thay vì 17, tiêu đề mục 34 thay vì 32, h1 48,9 thay vì 46.
+   Root về 100% (16px, tôn trọng cỡ chữ người dùng đặt trong trình duyệt); cỡ chữ
+   nội dung đặt ở body. Từ đây con số trong 07-DESIGN_TOKENS §2 là con số render thật. */
 html {
-  font-size: var(--fs-base);
+  font-size: 100%;
   scroll-behavior: smooth;
 }
 
 body {
   font-family: var(--font-ui);
+  font-size: var(--fs-base);
   font-weight: var(--fw-500);
   line-height: var(--lh-body);
   color: var(--c-text);

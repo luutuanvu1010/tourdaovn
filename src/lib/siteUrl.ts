@@ -12,3 +12,21 @@ import { site } from '../site.config'
 export function siteBaseUrl(astroSite: URL | undefined): string {
   return (astroSite?.toString() ?? site.url).replace(/\/$/, '')
 }
+
+/**
+ * Nhãn ngắn cho một URL ngoài: "Wikipedia", "Wikidata", hoặc tên miền không `www.`.
+ * Dùng cho giá trị của dòng link trong thẻ thông tin — thay cho chữ "Xem" vô nghĩa
+ * và nhãn "Wikidata" gắn cứng dù `sameAs[0]` là Wikipedia (kế hoạch vòng 4, F6).
+ * URL hỏng hoặc rỗng → chuỗi rỗng; người gọi đã có cờ `visible` riêng.
+ */
+export function hostLabel(url: string | null | undefined): string {
+  if (!url) return ''
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, '')
+    if (/(^|\.)wikipedia\.org$/.test(host)) return 'Wikipedia'
+    if (/(^|\.)wikidata\.org$/.test(host)) return 'Wikidata'
+    return host
+  } catch {
+    return ''
+  }
+}

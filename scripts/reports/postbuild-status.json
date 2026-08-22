@@ -1,17 +1,14 @@
 {
-  "ranAt": "2026-08-14T02:30:59.124Z",
+  "ranAt": "2026-08-21T23:51:37.803Z",
   "items": [
     {
       "id": "I6",
       "status": "fail",
       "errors": [
-        "tour/tour-3-dao-hon-mun/index.html: JSON-LD @id trỏ URL null \"https://tourdao.vn/dia-danh/null/\"",
-        "tour/tour-3-dao-hon-mun/index.html: JSON-LD @id trỏ URL null \"https://tourdao.vn/dia-danh/null/\"",
-        "tour/tour-3-dao-hon-mun/index.html: JSON-LD @id trỏ URL null \"https://tourdao.vn/diem-tham-quan/null/\"",
-        "tour/tour-3-dao-hon-mun/index.html: JSON-LD @id trỏ URL null \"https://tourdao.vn/diem-tham-quan/null/\"",
-        "tour/tour-hon-tam-tron-goi/index.html: JSON-LD @id trỏ URL null \"https://tourdao.vn/dia-danh/null/\"",
-        "tour/ve-hon-tam-tron-goi/index.html: JSON-LD @id trỏ URL null \"https://tourdao.vn/dia-danh/null/\"",
-        "tour/ve-hon-tam-tron-goi/index.html: JSON-LD @id trỏ URL null \"https://tourdao.vn/dia-danh/null/\""
+        "tour/tour-3-dao-hon-mun-mini-beach-lang-chai/index.html: JSON-LD @id trỏ URL null \"https://tourdao.vn/diem-tham-quan/null/\"",
+        "tour/tour-3-dao-nha-trang-deluxe/index.html: JSON-LD @id trỏ URL null \"https://tourdao.vn/diem-tham-quan/null/\"",
+        "tour/tour-3-dao-nha-trang-deluxe/index.html: JSON-LD @id trỏ URL null \"https://tourdao.vn/diem-tham-quan/null/\"",
+        "tour/tour-3-dao-nha-trang-mini-beach-hon-tam/index.html: JSON-LD @id trỏ URL null \"https://tourdao.vn/diem-tham-quan/null/\""
       ]
     },
     {
@@ -26,16 +23,58 @@
     },
     {
       "id": "R3",
-      "status": "pass",
-      "errors": []
+      "status": "fail",
+      "errors": [
+        "R3: URL \"https://tourdao.vn/dia-danh/hon-mun/\" trong sitemap production cũ biến mất, không có redirect trong public/_redirects",
+        "R3: URL \"https://tourdao.vn/tour/ve-hon-tam-seaday-tour/\" trong sitemap production cũ biến mất, không có redirect trong public/_redirects"
+      ]
     },
     {
       "id": "R4",
       "status": "fail",
       "errors": [
+        "R4: /cam-nang/cam-nang-mua-ve-hon-tam-nha-trang-2026-bang-gia-bao-re-uy-tin-and-nhan-ve-trong-2-phut/ thiếu hreflang self cho ngôn ngữ \"vi\"",
+        "R4: hreflang không đối xứng: /cam-nang/cam-nang-mua-ve-hon-tam-nha-trang-2026-bang-gia-bao-re-uy-tin-and-nhan-ve-trong-2-phut/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=vi) nhưng ngược lại không trỏ về",
+        "R4: hreflang không đối xứng: /cam-nang/cam-nang-mua-ve-hon-tam-nha-trang-2026-bang-gia-bao-re-uy-tin-and-nhan-ve-trong-2-phut/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=x-default) nhưng ngược lại không trỏ về",
+        "R4: /cam-nang/cho-dam-nha-trang-kham-pha-khu-cho-noi-tieng-lau-doi/ thiếu hreflang self cho ngôn ngữ \"vi\"",
+        "R4: hreflang không đối xứng: /cam-nang/cho-dam-nha-trang-kham-pha-khu-cho-noi-tieng-lau-doi/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=vi) nhưng ngược lại không trỏ về",
+        "R4: hreflang không đối xứng: /cam-nang/cho-dam-nha-trang-kham-pha-khu-cho-noi-tieng-lau-doi/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=x-default) nhưng ngược lại không trỏ về",
+        "R4: /cam-nang/hai-san-nha-trang-ngon-chat-luong/ thiếu hreflang self cho ngôn ngữ \"vi\"",
+        "R4: hreflang không đối xứng: /cam-nang/hai-san-nha-trang-ngon-chat-luong/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=vi) nhưng ngược lại không trỏ về",
+        "R4: hreflang không đối xứng: /cam-nang/hai-san-nha-trang-ngon-chat-luong/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=x-default) nhưng ngược lại không trỏ về",
+        "R4: /cam-nang/hang-heo-nha-trang-toa-do-check-in-song-ao-hoang-so-dep-me-man/ thiếu hreflang self cho ngôn ngữ \"vi\"",
+        "R4: hreflang không đối xứng: /cam-nang/hang-heo-nha-trang-toa-do-check-in-song-ao-hoang-so-dep-me-man/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=vi) nhưng ngược lại không trỏ về",
+        "R4: hreflang không đối xứng: /cam-nang/hang-heo-nha-trang-toa-do-check-in-song-ao-hoang-so-dep-me-man/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=x-default) nhưng ngược lại không trỏ về",
+        "R4: /cam-nang/kinh-nghiem-kham-pha-lang-chai-ninh-thuy-2026-san-reu-xanh-xem-dong-tau-and-an-hai-san/ thiếu hreflang self cho ngôn ngữ \"vi\"",
+        "R4: hreflang không đối xứng: /cam-nang/kinh-nghiem-kham-pha-lang-chai-ninh-thuy-2026-san-reu-xanh-xem-dong-tau-and-an-hai-san/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=vi) nhưng ngược lại không trỏ về",
+        "R4: hreflang không đối xứng: /cam-nang/kinh-nghiem-kham-pha-lang-chai-ninh-thuy-2026-san-reu-xanh-xem-dong-tau-and-an-hai-san/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=x-default) nhưng ngược lại không trỏ về",
+        "R4: /cam-nang/mua-ve-hon-tam-nha-trang-o-dau/ thiếu hreflang self cho ngôn ngữ \"vi\"",
+        "R4: hreflang không đối xứng: /cam-nang/mua-ve-hon-tam-nha-trang-o-dau/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=vi) nhưng ngược lại không trỏ về",
+        "R4: hreflang không đối xứng: /cam-nang/mua-ve-hon-tam-nha-trang-o-dau/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=x-default) nhưng ngược lại không trỏ về",
+        "R4: /cam-nang/ngan-ngo-truoc-ve-dep-hoang-so-dep-quen-loi-ve-cua-dao-binh-ba-cam-ranh/ thiếu hreflang self cho ngôn ngữ \"vi\"",
+        "R4: hreflang không đối xứng: /cam-nang/ngan-ngo-truoc-ve-dep-hoang-so-dep-quen-loi-ve-cua-dao-binh-ba-cam-ranh/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=vi) nhưng ngược lại không trỏ về",
+        "R4: hreflang không đối xứng: /cam-nang/ngan-ngo-truoc-ve-dep-hoang-so-dep-quen-loi-ve-cua-dao-binh-ba-cam-ranh/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=x-default) nhưng ngược lại không trỏ về",
+        "R4: /cam-nang/nhung-bi-quyet-de-du-lich-nha-trang/ thiếu hreflang self cho ngôn ngữ \"vi\"",
+        "R4: hreflang không đối xứng: /cam-nang/nhung-bi-quyet-de-du-lich-nha-trang/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=vi) nhưng ngược lại không trỏ về",
+        "R4: hreflang không đối xứng: /cam-nang/nhung-bi-quyet-de-du-lich-nha-trang/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=x-default) nhưng ngược lại không trỏ về",
+        "R4: /cam-nang/review-mini-beach-nha-trang-2026-tron-bo-gia-ve-thue-cano-and-thuc-don-an-trua/ thiếu hreflang self cho ngôn ngữ \"vi\"",
+        "R4: hreflang không đối xứng: /cam-nang/review-mini-beach-nha-trang-2026-tron-bo-gia-ve-thue-cano-and-thuc-don-an-trua/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=vi) nhưng ngược lại không trỏ về",
+        "R4: hreflang không đối xứng: /cam-nang/review-mini-beach-nha-trang-2026-tron-bo-gia-ve-thue-cano-and-thuc-don-an-trua/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=x-default) nhưng ngược lại không trỏ về",
+        "R4: /cam-nang/thien-duong-bien-dao-khanh-hoa-nhung-dieu-chua-biet/ thiếu hreflang self cho ngôn ngữ \"vi\"",
+        "R4: hreflang không đối xứng: /cam-nang/thien-duong-bien-dao-khanh-hoa-nhung-dieu-chua-biet/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=vi) nhưng ngược lại không trỏ về",
+        "R4: hreflang không đối xứng: /cam-nang/thien-duong-bien-dao-khanh-hoa-nhung-dieu-chua-biet/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=x-default) nhưng ngược lại không trỏ về",
+        "R4: /cam-nang/top-7-ngon-nui-o-nha-trang-tuyet-dep-danh-cho-hoi-dam-me-trekking-update-2026/ thiếu hreflang self cho ngôn ngữ \"vi\"",
+        "R4: hreflang không đối xứng: /cam-nang/top-7-ngon-nui-o-nha-trang-tuyet-dep-danh-cho-hoi-dam-me-trekking-update-2026/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=vi) nhưng ngược lại không trỏ về",
+        "R4: hreflang không đối xứng: /cam-nang/top-7-ngon-nui-o-nha-trang-tuyet-dep-danh-cho-hoi-dam-me-trekking-update-2026/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=x-default) nhưng ngược lại không trỏ về",
         "R4: /cam-nang/tour-3-dao-nha-trang-lich-trinh-chi-tiet/ thiếu hreflang self cho ngôn ngữ \"vi\"",
-        "R4: hreflang không đối xứng: /cam-nang/tour-3-dao-nha-trang-lich-trinh-chi-tiet/ → /cam-nang/mua-ve-hon-tam-nha-trang-o-dau/ (lang=vi) nhưng ngược lại không trỏ về",
-        "R4: hreflang không đối xứng: /cam-nang/tour-3-dao-nha-trang-lich-trinh-chi-tiet/ → /cam-nang/mua-ve-hon-tam-nha-trang-o-dau/ (lang=x-default) nhưng ngược lại không trỏ về"
+        "R4: hreflang không đối xứng: /cam-nang/tour-3-dao-nha-trang-lich-trinh-chi-tiet/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=vi) nhưng ngược lại không trỏ về",
+        "R4: hreflang không đối xứng: /cam-nang/tour-3-dao-nha-trang-lich-trinh-chi-tiet/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=x-default) nhưng ngược lại không trỏ về",
+        "R4: /cam-nang/tron-bo-cam-nang-ben-tau-du-lich-nha-trang-gia-ve-lich-trinh-and-dich-vu-cap-nhat-2026/ thiếu hreflang self cho ngôn ngữ \"vi\"",
+        "R4: hreflang không đối xứng: /cam-nang/tron-bo-cam-nang-ben-tau-du-lich-nha-trang-gia-ve-lich-trinh-and-dich-vu-cap-nhat-2026/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=vi) nhưng ngược lại không trỏ về",
+        "R4: hreflang không đối xứng: /cam-nang/tron-bo-cam-nang-ben-tau-du-lich-nha-trang-gia-ve-lich-trinh-and-dich-vu-cap-nhat-2026/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=x-default) nhưng ngược lại không trỏ về",
+        "R4: /cam-nang/tron-bo-kinh-nghiem-du-lich-lang-chai-van-gia-vien-ngoc-cua-khanh-hoa-duong-di-an-uong-and-trai-nghiem/ thiếu hreflang self cho ngôn ngữ \"vi\"",
+        "R4: hreflang không đối xứng: /cam-nang/tron-bo-kinh-nghiem-du-lich-lang-chai-van-gia-vien-ngoc-cua-khanh-hoa-duong-di-an-uong-and-trai-nghiem/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=vi) nhưng ngược lại không trỏ về",
+        "R4: hreflang không đối xứng: /cam-nang/tron-bo-kinh-nghiem-du-lich-lang-chai-van-gia-vien-ngoc-cua-khanh-hoa-duong-di-an-uong-and-trai-nghiem/ → /cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/ (lang=x-default) nhưng ngược lại không trỏ về"
       ]
     }
   ]

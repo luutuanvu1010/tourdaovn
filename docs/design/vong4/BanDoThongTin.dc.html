@@ -1,0 +1,136 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@700;800&amp;family=Nunito:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+:root{--c-primary:#0C4A6E;--c-primary-strong:#082F49;--c-primary-soft:#F0F7FC;--c-accent:#C0392B;--c-accent-strong:#96271A;--c-accent-soft:#FEF2F0;--c-sand:#F5A623;--c-sand-soft:#FBE3B3;--c-surface:#FFFFFF;--c-surface-alt:#F8FAFC;--c-card:#FFFFFF;--c-text:#0F172A;--c-text-muted:#475569;--c-border:#E2E8F0;--c-green-soft:#DCFCE7;--c-green-text:#166534;--font-display:"Be Vietnam Pro","Nunito",system-ui,sans-serif;--font-ui:"Nunito","Be Vietnam Pro",system-ui,sans-serif;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px;--radius-md:12px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{margin:0;background:#e8ecef;font-family:var(--font-ui);font-weight:500;font-size:14px;line-height:1.5;color:var(--c-text);-webkit-font-smoothing:antialiased}
+a{color:var(--c-primary);text-decoration:none}a:hover{color:var(--c-primary-strong)}
+h1,h2,h3{font-family:var(--font-display);line-height:1.16;letter-spacing:0}
+table{border-collapse:collapse;width:100%;font-size:14px;background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-md);overflow:hidden}
+th{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-muted);text-align:left;padding:8px 12px;border-bottom:2px solid var(--c-border);background:var(--c-surface-alt)}
+td{padding:7px 12px;border-bottom:1px solid var(--c-border);vertical-align:top}
+tr:last-child td{border-bottom:0}
+code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--c-surface-alt);padding:1px 5px;border-radius:4px}
+.x{color:var(--c-accent-strong);font-weight:700}
+.ok{display:inline-block;padding:1px 8px;border-radius:999px;background:var(--c-green-soft);color:var(--c-green-text);font-weight:700;font-size:12px}
+.rm{display:inline-block;padding:1px 8px;border-radius:999px;background:var(--c-surface-alt);color:var(--c-text-muted);font-weight:700;font-size:12px;text-decoration:line-through}
+h2{font-size:20px;font-weight:800;color:var(--c-primary);margin-bottom:var(--s3)}
+</style>
+</helmet>
+
+<div style="width:1280px;background:var(--c-surface);padding:var(--s7) 48px;font-family:var(--font-ui);display:flex;flex-direction:column;gap:var(--s6)">
+
+  <div style="display:flex;flex-direction:column;gap:var(--s2);max-width:980px">
+    <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--c-text-muted)">Đề xuất sửa 06-BINDING_MAP §3 · cột "vùng" cho mọi field hiển thị</div>
+    <h1 style="font-size:36px;font-weight:800;color:var(--c-primary);letter-spacing:-0.015em">Bản đồ thông tin — một field, một vùng, một lần</h1>
+    <p style="font-size:16px;color:var(--c-text-muted)">Cột "Hiện nay" là vùng đang render trên production (đo 2026-08-21). Cột "Đề xuất" là vùng <strong>duy nhất</strong> field được phép vào. Ngoại lệ có chủ ý: <strong>giá</strong> được lặp ở thanh dính và khối hành động, vì đó là thứ khách quyết định.</p>
+    <div style="display:flex;gap:var(--s4);font-size:13px;color:var(--c-text-muted);flex-wrap:wrap">
+      <span><span class="x">×2 / ×3</span> = số vùng đang lặp</span>
+      <span><span class="ok">TTN</span> = vùng mới "Thông tin nhanh" (thay InfoBar + InfoCard)</span>
+      <span><span class="ok">KHĐ</span> = khối hành động ở sidebar</span>
+      <span><span class="rm">bỏ</span> = không render nữa</span>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s5);align-items:start">
+
+    <div>
+      <h2>Điểm tham quan · /diem-tham-quan/{slug}</h2>
+      <table>
+        <thead><tr><th style="width:30%">Field</th><th style="width:38%">Hiện nay</th><th>Đề xuất</th></tr></thead>
+        <tbody>
+          <tr><td><code>attractionType</code></td><td>huy hiệu hero</td><td>huy hiệu hero — <strong>chỉ ở đây</strong></td></tr>
+          <tr><td><code>containedInPlace</code></td><td>breadcrumb (đè lên ảnh)</td><td>breadcrumb — dải sáng phía trên hero</td></tr>
+          <tr><td><code>summary</code></td><td>hero</td><td>hero</td></tr>
+          <tr><td><code>openingHours</code></td><td>InfoBar + InfoCard <span class="x">×2</span></td><td><span class="ok">TTN</span></td></tr>
+          <tr><td><code>telephone</code></td><td>InfoBar + InfoCard <span class="x">×2</span></td><td><span class="ok">TTN</span> — nhãn "Điện thoại khu du lịch"</td></tr>
+          <tr><td><code>address</code></td><td>InfoCard</td><td><span class="ok">TTN</span></td></tr>
+          <tr><td><code>officialSource</code></td><td>InfoCard "Xem"</td><td><span class="ok">TTN</span> — hiện tên miền</td></tr>
+          <tr><td>giá vé (<code>bookingRef</code>) / <code>isAccessibleForFree</code></td><td>InfoBar + InfoCard "Có thu phí" + thanh dính + BookingCTA</td><td>thanh dính + <span class="ok">KHĐ</span> (ngoại lệ giá, <strong>không</strong> vào TTN). "Có thu phí" <span class="rm">bỏ</span>; "Miễn phí" vào TTN chỉ khi đúng</td></tr>
+          <tr><td><code>hasMap</code></td><td>InfoCard "Xem"</td><td>thẻ bản đồ — link "Mở Google Maps"</td></tr>
+          <tr><td><code>geo</code></td><td>sidebar bản đồ</td><td>thẻ bản đồ</td></tr>
+          <tr><td><code>sameAs</code></td><td>InfoCard "Xác minh trên Wikidata" (trỏ Wikipedia)</td><td>dòng "Nguồn" cạnh Cập nhật, nhãn theo host</td></tr>
+          <tr><td><code>highlights</code></td><td>mục, trước thân bài</td><td>mục, lưới 2 cột</td></tr>
+          <tr><td><code>body</code></td><td>mục "Tổng quan" (bài SEO, có mục "cách đi")</td><td>mục + <strong>mục lục</strong> sinh từ h2; bài không mở mục trùng cấu trúc</td></tr>
+          <tr><td><code>accessInfo</code></td><td>mục "Cách tới nơi"</td><td>mục — nơi <strong>duy nhất</strong> nói đường đi</td></tr>
+          <tr><td>rollup trải nghiệm · <code>faq</code> · nearby · <code>_updatedAt</code></td><td>mục · mục · dải · dòng</td><td>giữ</td></tr>
+          <tr><td>CTA Zalo</td><td>thanh dính + BookingCTA</td><td>thanh dính + <span class="ok">KHĐ</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <h2>Địa danh · /dia-danh/{slug}</h2>
+      <table>
+        <thead><tr><th style="width:30%">Field</th><th style="width:38%">Hiện nay</th><th>Đề xuất</th></tr></thead>
+        <tbody>
+          <tr><td><code>placeType</code></td><td>huy hiệu + InfoBar "Loại" + InfoCard "Loại" <span class="x">×3</span></td><td>huy hiệu hero — chỉ ở đây</td></tr>
+          <tr><td><code>containedInPlace</code></td><td>breadcrumb + InfoBar "Thuộc" + InfoCard "Thuộc" <span class="x">×3</span></td><td>breadcrumb (có link) — chỉ ở đây</td></tr>
+          <tr><td><code>openingHours</code></td><td>InfoBar + InfoCard <span class="x">×2</span> (InfoBar ghi "Tự do" khi rỗng)</td><td><span class="ok">TTN</span>; rỗng thì ẩn ô</td></tr>
+          <tr><td><code>address</code></td><td>InfoCard</td><td><span class="ok">TTN</span></td></tr>
+          <tr><td><code>isAccessibleForFree</code></td><td>InfoCard "Miễn phí"</td><td><span class="ok">TTN</span> chỉ khi true</td></tr>
+          <tr><td><code>hasMap</code> · <code>geo</code></td><td>InfoCard "Xem" · sidebar bản đồ</td><td>thẻ bản đồ</td></tr>
+          <tr><td><code>sameAs</code></td><td>InfoCard "Wikidata"</td><td>dòng "Nguồn"</td></tr>
+          <tr><td>rollup vùng con</td><td>không render</td><td>mục "Thuộc khu vực này" khi có</td></tr>
+          <tr><td><code>highlights</code> · <code>body</code> · <code>accessInfo</code> · rollup · <code>faq</code></td><td>mục</td><td>như Điểm tham quan (mục lục, luật 2)</td></tr>
+          <tr><td colspan="3" style="background:var(--c-surface-alt);color:var(--c-text-muted)">Địa danh không có giá, không CTA → sidebar chỉ còn bản đồ. Vẫn dùng hướng A như ba entity kia (QĐ-2026-08-22-01); khi TTN ≤ 2 ô thì gộp hai ô đó vào sidebar cạnh bản đồ, không trải dải.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <h2>Trải nghiệm · /trai-nghiem/{slug}</h2>
+      <table>
+        <thead><tr><th style="width:30%">Field</th><th style="width:38%">Hiện nay</th><th>Đề xuất</th></tr></thead>
+        <tbody>
+          <tr><td><code>experienceType</code></td><td>huy hiệu + InfoCard "Loại" <span class="x">×2</span></td><td>huy hiệu hero — link tới trang term</td></tr>
+          <tr><td><code>venue</code></td><td>breadcrumb + InfoCard "Diễn ra tại" <span class="x">×2</span></td><td>breadcrumb (link) — chỉ ở đây</td></tr>
+          <tr><td><code>duration</code></td><td>huy hiệu + InfoBar + InfoCard <span class="x">×3</span></td><td><span class="ok">TTN</span></td></tr>
+          <tr><td><code>touristType</code></td><td>InfoBar (cắt 1) + InfoCard (đủ) <span class="x">×2</span></td><td><span class="ok">TTN</span> — đủ danh sách</td></tr>
+          <tr><td><code>includes</code></td><td>InfoBar (2 mục đầu) + mục "Bao gồm" <span class="x">×2</span></td><td>mục "Bao gồm" — chỉ ở đây</td></tr>
+          <tr><td>giá / <code>isAccessibleForFree</code></td><td>InfoBar + thanh dính + BookingCTA</td><td>thanh dính + <span class="ok">KHĐ</span>; "Miễn phí" vào TTN chỉ khi đúng</td></tr>
+          <tr><td>kênh liên hệ (<code>siteSettings.contact</code>)</td><td>thanh dính Zalo + sidebar 3 kênh + menu "Đặt vé"</td><td>thanh dính + <span class="ok">KHĐ</span> (Zalo chính, gọi phụ)</td></tr>
+          <tr><td><code>geo</code></td><td>sidebar bản đồ</td><td>thẻ bản đồ</td></tr>
+          <tr><td><code>highlights</code> · <code>body</code> · <code>faq</code> · nearby</td><td>mục</td><td>giữ, mục lục cho body</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <h2>Tour · /tour/{slug}</h2>
+      <table>
+        <thead><tr><th style="width:30%">Field</th><th style="width:38%">Hiện nay</th><th>Đề xuất</th></tr></thead>
+        <tbody>
+          <tr><td><code>tourFormat</code></td><td>huy hiệu "Cả hai" + InfoBar + InfoCard <span class="x">×3</span>; danh sách "Linh hoạt"</td><td>huy hiệu hero — <strong>một</strong> bảng nhãn, một chữ</td></tr>
+          <tr><td><code>duration</code></td><td>huy hiệu + InfoBar + InfoCard <span class="x">×3</span></td><td><span class="ok">TTN</span></td></tr>
+          <tr><td><code>tripOrigin</code> · <code>departureNote</code></td><td>InfoCard "Xuất phát" · InfoBar "Khởi hành" (hai field, một nghĩa)</td><td><span class="ok">TTN</span> "Khởi hành" = <code>tripOrigin</code>; <code>departureNote</code> thành ghi chú trong <span class="ok">KHĐ</span></td></tr>
+          <tr><td><code>touristType</code></td><td>InfoCard</td><td><span class="ok">TTN</span></td></tr>
+          <tr><td><code>seasonNote</code></td><td>InfoCard "Mùa" + mục "Mùa nào nên đi" <span class="x">×2</span></td><td>mục "Mùa nào nên đi" — chỉ ở đây</td></tr>
+          <tr><td><code>operator</code> · <code>licenseInfo</code></td><td>InfoCard</td><td><span class="ok">KHĐ</span> — tin cậy cạnh nút đặt; bỏ tiền tố "Giấy phép kinh doanh…". Với Tour, KHĐ <strong>là</strong> <code>BookingForm</code> của ADR-0027 (QĐ-2026-08-21-01), không còn là BookingCTA</td></tr>
+          <tr><td>giá (<code>bookingRef</code>)</td><td>InfoBar "Giá từ" + thanh dính + BookingCTA; rỗng → "Website chính thức" trỏ về chính site</td><td>thanh dính + <span class="ok">KHĐ</span>; rỗng → ẩn, <strong>không</strong> nút thay thế</td></tr>
+          <tr><td><code>itinerary</code></td><td>mục "Lịch trình" (81 từ) + bài "Lịch trình chi tiết" (978 từ) <span class="x">×2</span></td><td>mục timeline — bài không lặp; chi tiết từng điểm đi vào <code>note</code> của stop</td></tr>
+          <tr><td><code>includes</code> / <code>excludes</code> · <code>highlights</code> · <code>faq</code></td><td>mục (Điểm nổi bật đứng sau Bao gồm)</td><td>thứ tự chung: Điểm nổi bật → Lịch trình → Bao gồm → Chi tiết → Mùa → FAQ</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <div style="background:var(--c-primary-soft);border-radius:var(--radius-md);padding:var(--s4) var(--s5);font-size:14px;color:var(--c-primary-strong);max-width:1100px">
+    <strong>Hợp đồng Thông tin nhanh (TTN):</strong> tối đa 6 ô; mỗi ô = icon SVG 20 px + nhãn 14 px + giá trị 17 px/700; ô rỗng không render; <strong>không chứa giá</strong> (giá chỉ ở thanh dính và khối hành động); ≤ 2 ô thì không trải dải — gộp vào sidebar (desktop) hoặc giữ 2 cột (di động). Emoji <span class="rm">bỏ</span>. Đây là một component <code>FactStrip.astro</code> thay cho <code>InfoBar</code> + <code>InfoCard</code>; bốn template chỉ còn khai <em>dữ liệu</em>, không khai vùng.
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

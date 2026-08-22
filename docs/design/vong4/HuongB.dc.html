@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&amp;display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0F172A;--mut:#475569;--line:#94A3B8;--soft:#F1F5F9;--acc:#C0392B;--pri:#0C4A6E}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{margin:0;background:#e8ecef;font-family:"Nunito",system-ui,sans-serif;font-size:13px;color:var(--ink);line-height:1.45}
+a{color:var(--pri);text-decoration:none}a:hover{color:#082F49}
+.box{border:1.5px dashed var(--line);border-radius:6px;background:#fff;display:flex;align-items:center;justify-content:center;color:var(--mut);font-weight:700;text-align:center;padding:6px}
+.fill{background:repeating-linear-gradient(135deg,rgba(15,23,42,.05) 0 10px,rgba(15,23,42,.10) 10px 20px)}
+.lbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--mut)}
+</style>
+</helmet>
+
+<div style="width:640px;background:#fff;padding:28px;display:flex;flex-direction:column;gap:14px;font-family:'Nunito',system-ui,sans-serif">
+  <div style="display:flex;flex-direction:column;gap:4px">
+    <div class="lbl">Hướng B · phác thảo</div>
+    <h2 style="font-size:22px;font-weight:800;color:var(--pri)">Mọi thông tin vào sidebar, bỏ dải dưới hero</h2>
+    <p style="color:var(--mut)">Sidebar là "thẻ hồ sơ" của điểm đến; phần giữa chỉ còn bài. Gọn nhất về mã — nhưng di động phải <strong>đổi thứ tự DOM</strong> để thẻ hồ sơ lên trước bài, nếu không tái diễn F5.</p>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div class="box" style="height:30px">Header</div>
+    <div class="box" style="height:22px;font-weight:500">Breadcrumb (nền sáng)</div>
+    <div style="display:grid;grid-template-columns:1.08fr .92fr;gap:4px;height:150px">
+      <div class="box fill" style="align-items:flex-end;justify-content:flex-start;text-align:left;color:var(--ink)">huy hiệu loại · H1 · đoạn mở</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:4px"><div class="box fill"></div><div class="box fill"></div><div class="box fill"></div><div class="box fill"></div></div>
+    </div>
+    <div class="box" style="height:30px;justify-content:space-between;padding:0 12px"><span style="font-weight:500">neo · mục lục</span><span style="color:var(--acc)">giá · Zalo</span></div>
+    <div style="display:grid;grid-template-columns:1fr 200px;gap:16px;align-items:start">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="box" style="height:60px">Điểm nổi bật</div>
+        <div class="box" style="height:150px;flex-direction:column;gap:4px"><span>Tổng quan + mục lục</span><span style="font-weight:500;font-size:12px">(thân bài dài)</span></div>
+        <div class="box" style="height:48px;background:#FBE3B3;border-color:#e9d3a4;color:#5a4109">Cách tới nơi</div>
+        <div class="box" style="height:70px">Trải nghiệm tại đây</div>
+        <div class="box" style="height:60px">FAQ</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="box" style="height:86px;border-style:solid;border-color:var(--acc);color:var(--acc)">giá · Chat Zalo</div>
+        <div class="box" style="height:150px;flex-direction:column;gap:3px;align-items:flex-start;text-align:left;font-weight:500;padding:10px">
+          <span style="font-weight:800;color:var(--ink)">Thẻ hồ sơ</span>
+          <span>Giờ mở cửa</span><span>Vé vào cửa</span><span>Địa chỉ</span><span>Điện thoại</span><span>Website</span>
+        </div>
+        <div class="box fill" style="height:110px">Bản đồ</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:12px">
+    <div style="background:#DCFCE7;color:#166534;border-radius:6px;padding:8px 10px"><strong>Được:</strong> ít đổi nhất; cột giữa thuần chữ, đọc tập trung; desktop sidebar gọn một cột.</div>
+    <div style="background:#FEF2F0;color:#96271A;border-radius:6px;padding:8px 10px"><strong>Mất:</strong> thẻ hồ sơ dài khi đủ 6 field; di động cần đảo DOM (sidebar trước nội dung) — nếu không, fact lại rơi xuống cuối.</div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

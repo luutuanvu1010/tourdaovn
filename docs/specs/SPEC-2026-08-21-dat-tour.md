@@ -8,6 +8,9 @@
   (3) `wrangler.toml` có `main`, tức Worker không còn là asset thuần. Cả ba ghi ở
   `ADR-0027`. Phần giao diện form là cửa hai chiều.
 - **Bản ghi:** `QĐ-2026-08-21-01` trong `docs/DECISIONS.md`; `docs/adr/ADR-0027-module-dat-tour.md`
+- **Bản sửa 2026-08-22 theo `QĐ-2026-08-22-07`:** kênh email đổi từ **Resend** sang **Amazon SES**
+  (ký SigV4 tự viết, không thêm dependency); thêm bí mật `IP_HASH_SALT` sinh từ phán xét F4 của
+  vòng review Task 8. Sửa ở §3, §4.6, §4.7, §5, §6. Phần còn lại giữ nguyên.
 - **Đầu vào đã đọc:** `playbook/CONSTITUTION.md`, `GOVERNANCE.md` §2–4, `00-PROJECT_BRIEF`
   §3 §5, `01-CONTENT_MODEL` §2.8 §2.15 §5.3, `02-SAD`, `04-CONSTRAINTS` §1b §2 §4,
   `05-URL_MAP` §2 §4, `06-BINDING_MAP` §0 §2 §3 §4.8, `ADR-0003`, `ADR-0007`, `ADR-0021`,
@@ -54,7 +57,7 @@ approved đang chứa **chuỗi giá** trong `bookingRef.key` ("Người lớn: 
 
 | Câu hỏi | Chốt | Hệ quả thiết kế |
 |---|---|---|
-| Đơn gửi về đâu | **Email + thông báo Zalo**; bản ghi gốc ở **Cloudflare D1** | Resend cho email; **Zalo Bot API** báo cho nhân viên (không phải ZNS cho khách — pha 2) |
+| Đơn gửi về đâu | **Email + thông báo Zalo**; bản ghi gốc ở **Cloudflare D1** | **Amazon SES** cho email (`QĐ-2026-08-22-07`; spec gốc ghi Resend); **Zalo Bot API** báo cho nhân viên (không phải ZNS cho khách — pha 2) |
 | Ngày khởi hành | **Hằng ngày**, chọn ngày bất kỳ | `<input type="date">`, không khai lịch |
 | Hạng khách | **Người lớn, trẻ em, người cao tuổi** | `prices.yaml` thêm `paxRates` tuỳ chọn theo dòng giá; hạng không khai thì không hiện |
 | Phạm vi | **Chỉ trang chi tiết Tour** | form trong sidebar `/tour/{slug}`; menu "Đặt vé trực tuyến" vẫn trỏ Zalo |
@@ -74,7 +77,7 @@ prices.yaml ──(build)──► BookingForm.astro trong sidebar /tour/{slug}
             Route on-demand của Astro (prerender = false) chạy trên Worker:
             validate → Turnstile siteverify → chống trùng → INSERT D1 `booking` → 201 {ok, code}
                                    │  ctx.waitUntil
-                                   ├─► Resend API  → hộp thư công ty
+                                   ├─► Amazon SES  → hộp thư công ty
                                    └─► Zalo Bot API → từng chat_id nhân viên
 ```
 
@@ -275,10 +278,19 @@ Endpoint gọi `ctx.waitUntil(Promise.allSettled([...]))` **sau khi** đã INSER
 201, rồi `UPDATE booking SET notify_email=?, notify_zalo=?`. Thiếu secret của kênh nào thì
 kênh đó `skipped`, không ném lỗi.
 
-- **`ResendNotifier`** — `POST https://api.resend.com/emails`, `Authorization: Bearer RESEND_API_KEY`;
-  `from: "Tour Đảo <dat-tour@tourdao.vn>"` (tên miền phải xác minh ở Resend), `to: BOOKING_NOTIFY_EMAIL`,
-  `reply_to`: email khách nếu có. Tiêu đề: `[Đặt tour] TD-260905-7K3Q · Tour 3 đảo · 05/09/2026 · 3 khách`.
-  Thân: văn bản thuần + HTML đơn giản, đủ mọi trường và tạm tính. Gói miễn phí 3.000 thư/tháng, 100/ngày — dư.
+- **`SesNotifier`** (`QĐ-2026-08-22-07`; spec gốc ghi `ResendNotifier`) — `POST
+  https://email.{AWS_SES_REGION}.amazonaws.com/v2/email/outbound-emails`, thân JSON dạng
+  `Content.Simple`: `Subject.Data`, `Body.Text.Data`, `Body.Html.Data` (charset `UTF-8`),
+  `FromEmailAddress: "Tour Đảo <dat-tour@tourdao.vn>"` (tên miền phải verify ở SES),
+  `Destination.ToAddresses: BOOKING_NOTIFY_EMAIL` tách dấu phẩy, `ReplyToAddresses`: email khách
+  nếu có. Tiêu đề: `[Đặt tour] TD-260905-7K3Q · Tour 3 đảo · 05/09/2026 · 3 khách`. Thân: văn bản
+  thuần + HTML đơn giản, đủ mọi trường và tạm tính.
+- **Ký SES: `notify/sigv4.ts` tự viết, không dependency.** SES không nhận API key đơn giản; mọi
+  lời gọi phải ký AWS Signature V4. Một hàm thuần `signRequest({ method, url, headers, body,
+  accessKeyId, secretAccessKey, region, service, now })` → trả về headers đã có `Authorization`,
+  `x-amz-date`, `x-amz-content-sha256`. Dựng bằng `crypto.subtle` (HMAC-SHA256 + SHA-256) có sẵn
+  trong Workers. Tất định theo `now` nên kiểm được bằng vector cố định — xem §5. Lý do không dùng
+  `aws4fetch`: `ADR-0027` quyết định 5 cấm dependency runtime mới; đổi ý thì phải sửa ADR trước.
 - **`ZaloBotNotifier`** — `POST https://bot-api.zaloplatforms.com/bot{ZALO_BOT_TOKEN}/sendMessage`
   (tên miền theo tài liệu chính thức `bot.zapps.me/docs`; SDK cộng đồng còn dùng
   `bot-api.zapps.me` — khai base URL thành một hằng số để đổi được một chỗ), body JSON
@@ -296,10 +308,11 @@ kênh đó `skipped`, không ném lỗi.
 
 | Tên | Loại | Ở đâu | Dùng cho |
 |---|---|---|---|
-| `RESEND_API_KEY` | secret | `wrangler secret put` | email |
+| `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SES_REGION` | secret | `wrangler secret put` | ký SigV4 và chọn điểm cuối SES; thiếu một trong ba → kênh email `skipped` (`QĐ-2026-08-22-07`; spec gốc ghi `RESEND_API_KEY`) |
 | `BOOKING_NOTIFY_EMAIL` | secret (để khỏi vào repo, đổi không cần deploy) | `wrangler secret put` | hộp thư nhận đơn, một hoặc nhiều địa chỉ phân tách dấu phẩy — **kênh nội bộ**, tách khỏi `siteSettings.contact.email` là kênh công khai; hai địa chỉ có thể trùng |
 | `ZALO_BOT_TOKEN`, `ZALO_BOT_CHAT_IDS` | secret | `wrangler secret put` | Zalo Bot |
-| `TURNSTILE_SECRET_KEY` | secret | `wrangler secret put` | siteverify + muối băm IP |
+| `TURNSTILE_SECRET_KEY` | secret | `wrangler secret put` | siteverify |
+| `IP_HASH_SALT` | secret | `wrangler secret put` | muối băm IP cho bộ đếm tần suất. **Không có trong spec gốc** — sinh từ phán xét F4 vòng review Task 8: dùng chung `TURNSTILE_SECRET_KEY` làm muối là tái dụng bí mật sai mục đích. Thiếu thì `ipHash = null` (mất đếm tần suất ở dev, không băm bằng muối đoán được) |
 | `PUBLIC_TURNSTILE_SITE_KEY` | biến build (công khai) | `.env` máy dev và biến build Cloudflare | widget; thiếu lúc build → `BookingForm` không render widget và `astro build` in một dòng cảnh báo; production **phải** có cả site key lẫn secret, thiếu một trong hai thì mọi đơn bị 400 — hỏng ồn ào, không hỏng câm |
 | `BOOKING_DB` | binding D1 | `wrangler.toml` | bảng `booking` |
 
@@ -420,7 +433,7 @@ Dựng hạ tầng test tối thiểu ở gốc repo: `vitest` + `@cloudflare/vi
 (ngoài `include` của `tsconfig.json`); cấu hình vitest **không** trỏ `wrangler.toml` (vì `main`
 của nó chỉ có sau khi build) mà khai thẳng binding D1 và cờ tương thích. Đây là dependency dev mới, được
 phép theo ADR-0027. Test gọi thẳng `handleBooking()` với `env.BOOKING_DB` từ `cloudflare:test`,
-không cần build Astro; `fetch` ra Resend/Zalo/Turnstile được **stub** trong test.
+không cần build Astro; `fetch` ra SES/Zalo/Turnstile được **stub** trong test.
 
 | Nhóm | Ca bắt buộc |
 |---|---|
@@ -428,15 +441,20 @@ không cần build Astro; `fetch` ra Resend/Zalo/Turnstile được **stub** tro
 | `schema.ts` | SĐT `0905 123 456`, `+84905123456`, `84905123456` → `0905123456`; `0123` → lỗi; ngày hôm nay → lỗi; ngày +366 → lỗi; adult 0 → lỗi; tổng 31 → lỗi; `total` lệch → lỗi; mọi thông điệp tiếng Việt |
 | `code.ts` | đúng định dạng; 1.000 mã không chứa `0 O 1 I L` |
 | `handler.ts` | hợp lệ → 201 + dòng D1; honeypot → 200 giả, không dòng; Turnstile hỏng → 400; 6 đơn/10 phút cùng IP → 429; trùng phone+tour+ngày → trả mã cũ, không INSERT; notifier ném lỗi → vẫn 201, cột `notify_*` = `failed:…`; `Accept: text/html` → HTML |
-| `py1-py8` | `paxRates` hợp lệ → xanh; `paxRates.baby` → PY7 fail; `paxRates` cùng `tiers` → PY2 fail; `child.amount: -1` → PY7 fail |
+| `sigv4.ts` | vector kiểm cố định của AWS (`aws-sig-v4-test-suite`, khoá `AKIDEXAMPLE`): cùng đầu vào → đúng chuỗi `Authorization` đã biết; đổi một byte thân → đổi chữ ký; `now` cố định nên tất định |
+| `ses.ts` | đủ ba khoá → `sent` khi 200, `failed:http 403` khi 403; thiếu `AWS_SECRET_ACCESS_KEY` → `skipped` và **không** gọi mạng; thân JSON đúng hình dạng `Content.Simple` |
+| `py1-py8` | `paxRates` hợp lệ → xanh; `paxRates.baby` → PY7 fail; `paxRates` cùng `tiers` → PY2 fail; `child.amount: -1` → PY7 fail; **`DR-044`:** tour có `bookingRef.key` trỏ đúng dòng giá → PY4 **không** báo mồ côi và PY5 **không** báo thiếu |
 
 ## 6. Vận hành: việc một lần (chép vào `BUILD-NOTES.md` khi thi hành)
 
 1. `npx wrangler d1 create tourdao-booking` → dán `database_id` vào `wrangler.toml`.
 2. `npx wrangler d1 migrations apply tourdao-booking --remote`.
-3. Resend: thêm tên miền `tourdao.vn`, tạo 3 bản ghi DNS (DKIM, SPF, return-path) trên
-   Cloudflare DNS, chờ xác minh; tạo API key → `wrangler secret put RESEND_API_KEY`;
-   `wrangler secret put BOOKING_NOTIFY_EMAIL`.
+3. Amazon SES (`QĐ-2026-08-22-07`; spec gốc ghi Resend): tên miền `tourdao.vn` đã verify sẵn.
+   Xác nhận tài khoản đã **ra khỏi sandbox** (trong sandbox SES chỉ gửi được tới địa chỉ đã
+   verify — nếu chưa ra thì verify luôn địa chỉ trong `BOOKING_NOTIFY_EMAIL`). Tạo IAM user chỉ
+   có quyền `ses:SendEmail` → `wrangler secret put AWS_ACCESS_KEY_ID`,
+   `wrangler secret put AWS_SECRET_ACCESS_KEY`, `wrangler secret put AWS_SES_REGION` (vùng đã
+   verify tên miền, ví dụ `ap-southeast-1`); `wrangler secret put BOOKING_NOTIFY_EMAIL`.
 4. Zalo: trong ứng dụng Zalo tìm OA **Zalo Bot Manager** → "Create bot" → nhận token qua
    tin nhắn → `wrangler secret put ZALO_BOT_TOKEN`. Mỗi nhân viên trực mở bot, nhắn một
    tin; chạy `GET https://bot-api.zaloplatforms.com/bot<TOKEN>/getUpdates` đọc `chat_id` →
@@ -444,6 +462,8 @@ không cần build Astro; `fetch` ra Resend/Zalo/Turnstile được **stub** tro
 5. Turnstile: dashboard Cloudflare → Turnstile → thêm site `tourdao.vn` (managed) → site key
    vào `.env` và biến build Cloudflare (`PUBLIC_TURNSTILE_SITE_KEY`), secret →
    `wrangler secret put TURNSTILE_SECRET_KEY`.
+5b. `wrangler secret put IP_HASH_SALT` — một chuỗi ngẫu nhiên đủ dài, sinh tại chỗ
+   (`openssl rand -hex 32`), không dùng lại bí mật nào khác.
 6. WAF: Security → Rate limiting rules → `/api/dat-tour`, 10 yêu cầu / 10 giây / IP, chặn.
 7. `npm run deploy:preview` → gửi một đơn thật theo §7 → `npm run deploy`.
 

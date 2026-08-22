@@ -1,0 +1,227 @@
+{
+  "pages": [
+    {
+      "id": "page-0",
+      "name": "Xem thử — ảnh thật"
+    },
+    {
+      "id": "page-1",
+      "name": "Audit & hướng"
+    },
+    {
+      "id": "page-2",
+      "name": "Hi-fi 4B — 4 entity"
+    }
+  ],
+  "artboards": [
+    {
+      "file": "XemThu.dc.html",
+      "title": "Xem thử với ảnh thật — Điểm tham quan + Tour (desktop 1280)",
+      "x": 0,
+      "y": 0,
+      "w": 1280,
+      "h": 2500,
+      "page": "page-0"
+    },
+    {
+      "file": "HienTrang.dc.html",
+      "title": "Hiện trạng — ảnh chụp & số đo",
+      "x": 0,
+      "y": 0,
+      "w": 1280,
+      "h": 2600,
+      "page": "page-1"
+    },
+    {
+      "file": "BanDoThongTin.dc.html",
+      "title": "Bản đồ thông tin — một field một vùng",
+      "x": 1360,
+      "y": 0,
+      "w": 1280,
+      "h": 2300,
+      "page": "page-1"
+    },
+    {
+      "file": "Main.dc.html",
+      "title": "Điểm tham quan — hướng A (đã chọn) · desktop 1280",
+      "x": 0,
+      "y": 2760,
+      "w": 1280,
+      "h": 3060,
+      "page": "page-1"
+    },
+    {
+      "file": "DiDong.dc.html",
+      "title": "Điểm tham quan — hướng A · di động 390",
+      "x": 1360,
+      "y": 2760,
+      "w": 924,
+      "h": 1260,
+      "page": "page-1"
+    },
+    {
+      "file": "HuongB.dc.html",
+      "title": "Hướng B — mọi fact vào sidebar (không chọn)",
+      "x": 1360,
+      "y": 4080,
+      "w": 640,
+      "h": 940,
+      "page": "page-1"
+    },
+    {
+      "file": "HuongC.dc.html",
+      "title": "Hướng C — một cột, không sidebar (không chọn)",
+      "x": 2080,
+      "y": 4080,
+      "w": 640,
+      "h": 940,
+      "page": "page-1"
+    },
+    {
+      "file": "Tour.dc.html",
+      "title": "Tour — hi-fi theo 06 v2.1 · desktop 1280 (form ADR-0027)",
+      "x": 0,
+      "y": 0,
+      "w": 1280,
+      "h": 3450,
+      "page": "page-2"
+    },
+    {
+      "file": "TourDiDong.dc.html",
+      "title": "Tour — hi-fi · di động 390",
+      "x": 1360,
+      "y": 0,
+      "w": 924,
+      "h": 1180,
+      "page": "page-2"
+    },
+    {
+      "file": "DiaDanh.dc.html",
+      "title": "Địa danh — hi-fi theo 06 v2.1 · desktop 1280",
+      "x": 0,
+      "y": 3620,
+      "w": 1280,
+      "h": 2700,
+      "page": "page-2"
+    },
+    {
+      "file": "TraiNghiem.dc.html",
+      "title": "Trải nghiệm — hi-fi theo 06 v2.1 · desktop 1280",
+      "x": 1360,
+      "y": 3620,
+      "w": 1280,
+      "h": 2500,
+      "page": "page-2"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "xemthu",
+      "page": "page-0",
+      "x": -320,
+      "y": 0,
+      "w": 280,
+      "text": "Bản XEM THỬ: ảnh thật lấy từ Sanity của chính hai trang đó, để thấy giao diện sẽ ra sao khi có ảnh.\n\nChỉ dựng phần quyết định: hero, thanh dính, Thông tin nhanh, khối hành động, form đặt tour, lịch trình.\n\nBản đầy đủ 4 entity ở trang 'Hi-fi 4B' — đó mới là hiện vật đã qua QA1, cố ý giữ ô kẻ chéo thay ảnh."
+    },
+    {
+      "id": "doc-ke-hoach",
+      "page": "page-1",
+      "x": -300,
+      "y": 0,
+      "w": 260,
+      "text": "Đọc kèm: docs/plans/2026-08-21-audit-va-ke-hoach-giao-dien-vong-4.md\n\nChủ dự án chốt 2026-08-22 (QĐ-2026-08-22-01): hướng A, thang chữ về spec, chạy đợt 4A. Trang 2 là hi-fi 4B theo 06-BINDING_MAP v2.1 (QĐ-2026-08-22-02)."
+    },
+    {
+      "id": "main-hero",
+      "page": "page-1",
+      "x": -300,
+      "y": 2900,
+      "w": 260,
+      "text": "Hero: breadcrumb ra khỏi ảnh (dải sáng). Trên ảnh chỉ còn huy hiệu LOẠI (nơi duy nhất), h1 ≤ 2 dòng, đoạn mở."
+    },
+    {
+      "id": "main-ttn",
+      "page": "page-1",
+      "x": -300,
+      "y": 3400,
+      "w": 260,
+      "text": "THÔNG TIN NHANH thay cặp InfoBar + InfoCard: mỗi field đúng một ô, tối đa 6, icon SVG, KHÔNG chứa giá. ≤ 2 ô thì không trải dải."
+    },
+    {
+      "id": "main-sidebar",
+      "page": "page-1",
+      "x": -300,
+      "y": 3640,
+      "w": 260,
+      "text": "Sidebar chỉ còn KHỐI HÀNH ĐỘNG (giá + Zalo + hotline) và BẢN ĐỒ. Giá là field duy nhất được lặp (thanh dính + đây). Dính ở top = header + thanh dính + 16 (DR-033, đã sửa ở 4A)."
+    },
+    {
+      "id": "main-toc",
+      "page": "page-1",
+      "x": -300,
+      "y": 3960,
+      "w": 260,
+      "text": "Thân bài có MỤC LỤC sinh từ h2; 'cách đi' chỉ sống ở Cách tới nơi (luật 2). Tiêu đề trong bài là h3 26px màu chữ, thấp hơn tiêu đề mục 32px màu biển sâu."
+    },
+    {
+      "id": "gia-mau",
+      "page": "page-1",
+      "x": 2320,
+      "y": 2760,
+      "w": 300,
+      "text": "Giá 'từ 540.000₫' là con số tham khảo trong chính bài Hòn Tằm, dùng làm MẪU để thấy vùng giá — prices.yaml hiện rỗng (F2)."
+    },
+    {
+      "id": "huong-bc",
+      "page": "page-1",
+      "x": 2760,
+      "y": 4080,
+      "w": 300,
+      "text": "Hai hướng thay thế, vẽ thô để so bố cục. Chủ dự án đã chọn A (QĐ-2026-08-22-01); giữ lại để truy vết vì sao không chọn B/C."
+    },
+    {
+      "id": "p2-doc",
+      "page": "page-2",
+      "x": -300,
+      "y": 0,
+      "w": 260,
+      "text": "HI-FI 4B theo 06-BINDING_MAP v2.1 §3.1. Điểm tham quan: xem artboard Main + DiDong ở trang 1 (đã là hướng A hi-fi). Ảnh là ô kẻ chéo theo quy ước vòng 2 — ảnh thật lấy từ Sanity."
+    },
+    {
+      "id": "p2-tour-form",
+      "page": "page-2",
+      "x": -300,
+      "y": 1200,
+      "w": 260,
+      "text": "Khối hành động của Tour = BookingForm theo SPEC-2026-08-21-dat-tour §4.3 (bước 1: ngày, số người theo hạng, tạm tính, Đặt tour ngay / Tư vấn miễn phí / hotline). Giá 650.000₫ và trẻ em 70% là MẪU suy từ FAQ của chính tour; hotline là placeholder."
+    },
+    {
+      "id": "p2-tour-title",
+      "page": "page-2",
+      "x": -300,
+      "y": 600,
+      "w": 260,
+      "text": "Tiêu đề tour 66 ký tự: hạ một bậc về --fs-h2 (40px) để giữ ≤ 2 dòng — đề xuất luật 'tiêu đề > 48 ký tự hạ một bậc'. Tốt hơn là biên tập đặt tên ngắn, đuôi điểm đến đưa vào summary."
+    },
+    {
+      "id": "p2-ttn-rule",
+      "page": "page-2",
+      "x": 2760,
+      "y": 3620,
+      "w": 300,
+      "text": "Địa danh (2 ô) và Trải nghiệm (1 ô): Thông tin nhanh ≤ 2 ô nên KHÔNG trải dải — gộp vào sidebar cạnh bản đồ, đúng hợp đồng TTN ở 06 §3."
+    },
+    {
+      "id": "p2-exp-price",
+      "page": "page-2",
+      "x": 2760,
+      "y": 3920,
+      "w": 300,
+      "text": "Trải nghiệm chưa nối bookingRef → không vùng giá, không nút thay thế (luật 3); khối hành động chỉ còn Zalo + hotline."
+    }
+  ],
+  "launch": {
+    "view": "canvas",
+    "page": "page-0"
+  }
+}
