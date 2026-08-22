@@ -948,3 +948,30 @@ Kiểm hết bốn nơi dùng field này trong mã nguồn (bỏ bundle `cms/dis
 **Việc mở ra, chưa kiểm, không phải quyết định.** `serialize/tour.ts:115` đẩy `tour.duration` vào `description` dạng `"${L.duration}: ${tour.duration}"`, mà `01` khai `duration` đúng kiểu ISO 8601 — nên `description` có thể đang chứa "Thời lượng: PT8H". Cần một lần kiểm bản dựng thật rồi mới nói được; ghi ra đây để khỏi rơi.
 
 **Bài học ghi lại.** Khẳng định về hành vi mã trong sổ quyết định phải mở file kiểm trước khi ghi, kể cả khi lấy lại từ báo cáo của một tác nhân khác đã qua ba vòng. Báo cáo QA là bằng chứng về *hiện vật QA đã xem*, không phải bằng chứng về *mã đang chạy*.
+
+---
+
+## QĐ-2026-08-22-07 — Email của module đặt tour dùng Amazon SES thay Resend; ký SigV4 tự viết, không thêm dependency
+
+**Bối cảnh.** `SPEC-2026-08-21-dat-tour.md` §4.6 và `ADR-0027` chốt kênh email là **Resend**. Task 7 đã thi hành đúng spec: `src/lib/booking/notify/resend.ts`, secret `RESEND_API_KEY`. Ngày 2026-08-22 chủ dự án chốt lại: tên miền `tourdao.vn` **đã verify ở Amazon SES** và key SES đã có sẵn, nên không mở thêm một nhà cung cấp thứ hai chỉ cho một luồng thư nội bộ.
+
+**Chốt 1 — Kênh email là Amazon SES.** `ResendNotifier` bị thay bằng `SesNotifier`, gọi **SES v2 HTTP API**: `POST https://email.{AWS_SES_REGION}.amazonaws.com/v2/email/outbound-emails`, thân JSON `Content.Simple` (Subject + Body.Text + Body.Html), `FromEmailAddress`, `Destination.ToAddresses`, `ReplyToAddresses` là email khách nếu có.
+
+**Chốt 2 — Ký bằng SigV4 tự viết, KHÔNG thêm dependency runtime.** SES không có xác thực bằng API key đơn giản; mọi lời gọi phải ký AWS Signature V4. Hai đường:
+
+- **(A) tự ký bằng WebCrypto** (`crypto.subtle` HMAC-SHA256 + SHA-256 có sẵn trong Workers), một file thuần `notify/sigv4.ts` khoảng 70 dòng;
+- **(B) thêm `aws4fetch`** (0 dependency con, ~5KB).
+
+**Chọn (A).** Lý do là thẩm quyền, không phải khẩu vị: `ADR-0027` quyết định 5 ghi rõ "**không dependency runtime mới**", và `CLAUDE.md` §8 cấm thêm dependency khi chưa có quyết định ở tầng phù hợp. Đường (A) nằm gọn trong thẩm quyền đã có; đường (B) đòi sửa ADR. SigV4 là thuật toán tất định, ký được bằng vector kiểm cố định của AWS, nên tự viết vẫn kiểm được thật chứ không phải tin tưởng mù.
+
+**Nếu (A) sai:** SigV4 tự viết sai chữ ký thì thư không gửi được, lộ ra ở nghiệm thu Task 14 dưới dạng `notify_email = failed:http 403`. Đường lui là thêm `aws4fetch` — một thay đổi nhỏ, hai chiều, nhưng khi đó phải sửa `ADR-0027` quyết định 5 trước.
+
+**Chốt 3 — Bí mật.** Bỏ `RESEND_API_KEY`. Thêm ba: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SES_REGION`. Giữ `BOOKING_NOTIFY_EMAIL`. Thiếu bất kỳ cái nào trong ba thì kênh email trả `skipped` — đúng luật "hỏng kênh nào ghi kênh đó" của §4.6, không ném lỗi, không hỏng đơn.
+
+**Chốt 4 — Danh sách bí mật production lên 7.** `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SES_REGION`, `BOOKING_NOTIFY_EMAIL`, `ZALO_BOT_TOKEN`, `ZALO_BOT_CHAT_IDS`, `TURNSTILE_SECRET_KEY`, cộng `IP_HASH_SALT`. Trong đó `IP_HASH_SALT` **không có trong spec gốc**: nó sinh ra từ phán xét F4 của vòng review Task 8 (muối băm IP dùng chung `TURNSTILE_SECRET_KEY` là tái sử dụng bí mật sai mục đích). Mục này ghi nó vào sổ để `SPEC` §4.7 và runbook `BUILD-NOTES` khớp với mã đang chạy.
+
+**Chốt 5 — `DR-044` (mở dưới số `DR-040` trên nhánh, va với `DR-040` của `main`, đánh lại ở Task 15) xử ngay trong luồng đặt tour.** `scripts/validators/py1-py8.ts` kiểm `typeof doc.bookingRef === 'string'` trong khi lược đồ Sanity khai `bookingRef` là object có field con `key`, làm `PY3`/`PY4`/`PY5` gần như vô hiệu cho mọi entity thương mại. Bug có từ trước, Task 11 chỉ làm nó lộ ra. Sửa luôn ở đây thay vì tách task riêng, vì chính module này vừa đưa 8 dòng giá thật vào `prices.yaml` — để ba validator hỏng thì cổng giá của module mới mở ra đã rỗng.
+
+**Chốt 6 — Task 11 phải qua review như mọi task khác.** Phiên thi hành trước commit Task 11 (`798d2b2`, `f1795b9`) rồi dừng mà chưa dispatch reviewer. Không miễn cổng: task này là task duy nhất ghi vào dataset production, càng phải có cổng.
+
+**Hệ quả tài liệu.** `SPEC-2026-08-21-dat-tour.md` sửa §3, §4.6, §4.7, §5, §6 theo mục này. `ADR-0027` thêm một mục đính chính giữ nguyên phần đã ghi (`04-CONSTRAINTS` §2.5, sổ chỉ-thêm). `docs/plans/2026-08-22-dat-tour.md` thêm Task 15 (gộp `main`), Task 16 (SES), Task 17 (`DR-044`).
