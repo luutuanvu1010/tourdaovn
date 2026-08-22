@@ -248,6 +248,8 @@ Thi hành đúng bảng §4 "Đợt 4A" sau `QĐ-2026-08-22-01`. Chưa commit �
 
 **Đợt 4B — bước 1 xong, `06` v2.1.0 được duyệt 2026-08-22 (QĐ-2026-08-22-02); bước 2 (Design hi-fi) đang chạy.** `06-BINDING_MAP` lên **v2.1.0**: §3 thêm bốn hàng (Thanh dính, Thông tin nhanh, Khối hành động, Bản đồ) và sửa sáu hàng (Breadcrumb, Thân bài + mục lục, Nhãn loại chỉ ở hero, Xác minh → "Nguồn tham khảo", Điện thoại, Vùng giá là ngoại lệ duy nhất); **§3.1 ma trận field × 4 entity → vùng duy nhất**; một dòng chú dưới §4.2/4.3/4.4/4.8; §6 thêm luật 1–3. Không đổi field nào của `01`. `g3` vẫn 0 fail / 15 warn (đúng baseline §7.1 — hàng mới viết sao cho `g3` không đọc nhầm field delta thành khung chung). Chủ dự án duyệt v2.1 thì mở bước 2 (Design hi-fi theo `Main`/`DiDong` vòng 4) → QA1 → Code `FactStrip`/`DetailLayout` v3.
 
+**Đợt 4B — bước 2 (Design hi-fi) xong 2026-08-22, commit `baed88c`.** Canvas trang "Hi-fi 4B — 4 entity": `Tour` + `TourDiDong` (khối hành động = `BookingForm` ADR-0027 bước 1), `DiaDanh`, `TraiNghiem`; Điểm tham quan dùng `Main` + `DiDong` trang 1. Áp đúng §3.1: Địa danh (2 ô) và Trải nghiệm (1 ô) gộp Thông tin nhanh vào sidebar; Trải nghiệm không giá → không vùng giá, không nút thay thế; tiêu đề tour 66 ký tự hạ về `--fs-h2` (đề xuất luật "> 48 ký tự hạ một bậc"). Giá 650.000₫ / trẻ em 70 % là **mẫu** suy từ FAQ của chính tour; hotline là placeholder. **Bước 3 QA1** do tác nhân QA độc lập chạy, báo cáo ở `docs/evidence/2026-08-22-qa1-vong-4b/QA1-mockup-4b.md`; chủ dự án chốt cổng rồi mới sang bước 4 (Code).
+
 **Việc dữ liệu lộ ra khi chạy cổng (thêm vào 4D):** sửa `itinerary` của 3 tour đang trỏ điểm tham quan chưa có slug; redirect hoặc khôi phục hai URL R3; người duyệt cho 6 trang S24; `translationGroup` của bài cẩm nang.
 
 ## 7. Ngoài phạm vi
