@@ -130,8 +130,13 @@ export function validateBooking(input: BookingInput, today: string): ValidationR
   if (total > LIMITS.TOTAL_MAX) fields.pax = MSG.totalMax
 
   // Kiểm NHẤT QUÁN tạm tính bằng đúng hàm client dùng (BK5) — không phải kiểm đúng giá.
-  const q = computeQuote({ kind: 'flat', perPax: { adult: input.quoted.perPax.adult ?? 0, ...input.quoted.perPax } }, input.pax)
-  const quotedOk = Object.values(input.quoted.perPax).every(v => Number.isInteger(v) && (v as number) >= 0)
+  // KHÔNG tự vá 'adult' bằng 0 khi client bỏ khoá này khỏi perPax: để nguyên (có thể
+  // undefined lúc chạy dù kiểu ép là number) thì computeQuote tự trả null cho pax.adult > 0
+  // thiếu giá — giống hệt cách nó xử mọi hạng khác thiếu giá, không cần nhánh riêng cho adult.
+  const quotedPerPax = input.quoted.perPax as Partial<Record<PaxCode, number>> & { adult: number }
+  const q = computeQuote({ kind: 'flat', perPax: quotedPerPax }, input.pax)
+  const quotedOk = typeof input.quoted.perPax.adult === 'number'
+    && Object.values(input.quoted.perPax).every(v => Number.isInteger(v) && (v as number) >= 0)
     && Number.isInteger(input.quoted.total) && input.quoted.total >= 0 && input.quoted.total <= LIMITS.TOTAL_MAX_VND
   if (!quotedOk || !q || q.total !== input.quoted.total) fields.quoted = MSG.quotedMismatch
 

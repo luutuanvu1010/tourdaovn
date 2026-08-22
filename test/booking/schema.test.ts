@@ -69,10 +69,27 @@ describe('validateBooking', () => {
       expect(r.message).toBe(MSG.formInvalid)
     }
   })
-  it('slug lạ, title quá dài, note quá dài → lỗi', () => {
-    expect(validateBooking(good({ tourSlug: '../x' }), TODAY).ok).toBe(false)
-    expect(validateBooking(good({ tourTitle: 'x'.repeat(LIMITS.TITLE_MAX + 1) }), TODAY).ok).toBe(false)
-    expect(validateBooking(good({ note: 'x'.repeat(LIMITS.NOTE_MAX + 1) }), TODAY).ok).toBe(false)
+  it('slug lạ, title quá dài, note quá dài → lỗi đúng ô', () => {
+    const rSlug = validateBooking(good({ tourSlug: '../x' }), TODAY)
+    expect(rSlug.ok).toBe(false); if (!rSlug.ok) expect(rSlug.fields.tour).toBe(MSG.tourInvalid)
+    const rTitle = validateBooking(good({ tourTitle: 'x'.repeat(LIMITS.TITLE_MAX + 1) }), TODAY)
+    expect(rTitle.ok).toBe(false); if (!rTitle.ok) expect(rTitle.fields.tour).toBe(MSG.tourInvalid)
+    const rNote = validateBooking(good({ note: 'x'.repeat(LIMITS.NOTE_MAX + 1) }), TODAY)
+    expect(rNote.ok).toBe(false); if (!rNote.ok) expect(rNote.fields.note).toBe(MSG.noteLong)
+  })
+  it('quoted.perPax thiếu giá cho hạng đang có người → lỗi quoted; giá 0 khai tường minh vẫn hợp lệ', () => {
+    const rMissing = validateBooking(good({
+      pax: { adult: 2, child: 0, senior: 0, infant: 0 },
+      quoted: { perPax: {}, total: 0, quotedAt: 'x' },
+    }), TODAY)
+    expect(rMissing.ok).toBe(false)
+    if (!rMissing.ok) expect(rMissing.fields.quoted).toBe(MSG.quotedMismatch)
+
+    const rFree = validateBooking(good({
+      pax: { adult: 2, child: 0, senior: 0, infant: 0 },
+      quoted: { perPax: { adult: 0 }, total: 0, quotedAt: 'x' },
+    }), TODAY)
+    expect(rFree.ok).toBe(true)
   })
 })
 
