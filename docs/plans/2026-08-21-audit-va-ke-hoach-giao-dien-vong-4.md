@@ -250,6 +250,18 @@ Thi hành đúng bảng §4 "Đợt 4A" sau `QĐ-2026-08-22-01`. Chưa commit �
 
 **Đợt 4B — bước 2 (Design hi-fi) xong 2026-08-22, commit `baed88c`.** Canvas trang "Hi-fi 4B — 4 entity": `Tour` + `TourDiDong` (khối hành động = `BookingForm` ADR-0027 bước 1), `DiaDanh`, `TraiNghiem`; Điểm tham quan dùng `Main` + `DiDong` trang 1. Áp đúng §3.1: Địa danh (2 ô) và Trải nghiệm (1 ô) gộp Thông tin nhanh vào sidebar; Trải nghiệm không giá → không vùng giá, không nút thay thế; tiêu đề tour 66 ký tự hạ về `--fs-h2` (đề xuất luật "> 48 ký tự hạ một bậc"). Giá 650.000₫ / trẻ em 70 % là **mẫu** suy từ FAQ của chính tour; hotline là placeholder. **Bước 3 QA1** do tác nhân QA độc lập chạy, báo cáo ở `docs/evidence/2026-08-22-qa1-vong-4b/QA1-mockup-4b.md`; chủ dự án chốt cổng rồi mới sang bước 4 (Code).
 
+**Đợt 4B — bước 3 (QA1) ĐẠT sau ba vòng, 2026-08-22.** Tác nhân QA độc lập chạy, báo cáo ở `docs/evidence/2026-08-22-qa1-vong-4b/` (ba file: vòng 1, vòng 2, vòng 3) cùng phản hồi của Design.
+
+| Vòng | Kết quả | Design xử |
+|---|---|---|
+| 1 | **Chưa đạt** — 3 Cao, 19 TB, 7 Thấp, 10 nợ | Sửa 3 Cao + 17/19 TB + 5 Thấp; 2 TB không sửa kèm lý do; nợ mới N11, N12 (commit `95560fd`) |
+| 2 | **Chưa đạt** — 0 Cao, 4 TB (V1–V4). QA rút F15 (Design đúng), chuyển F21 thành nợ N14, tách N13 | Sửa V1–V3; V4 giữ vì đã là nợ N15 (commit `e4e1d8a`) |
+| 3 | **ĐẠT** — 0 Cao; chỉ V4 mở và đã có phiếu nợ; không lỗi mới; tương phản hero đạt biên rộng (bộ xấu nhất `ngoc-lam`: đoạn mở 6,6:1, huy hiệu 6,1:1) | — |
+
+**Cổng QA1 vẫn chờ chủ dự án chốt** (`GOVERNANCE` 3.1: QA kiểm chứng là điều kiện cần, chủ dự án chốt là điều kiện đủ).
+
+**Hai nợ chặn bước Code**, đề xuất cách gỡ ở `docs/specs/DE-XUAT-2026-08-22-go-N3-N15.md`: **N3** (`06` §3 tự mâu thuẫn về breadcrumb của Tour — một hàng gánh hai sự thật) và **N15** (ngưỡng mục lục ≥ 3 h2, và cấp thẻ h2/h3 của thân bài trong trang chi tiết). Nên chốt cùng lượt: N4, N11+N13, N14.
+
 **Việc dữ liệu lộ ra khi chạy cổng (thêm vào 4D):** sửa `itinerary` của 3 tour đang trỏ điểm tham quan chưa có slug; redirect hoặc khôi phục hai URL R3; người duyệt cho 6 trang S24; `translationGroup` của bài cẩm nang.
 
 ## 7. Ngoài phạm vi
