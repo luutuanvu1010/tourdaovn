@@ -916,3 +916,35 @@ Sổ không được cập nhật suốt chín ngày, kéo theo `BUILD-NOTES.md`
 4. Ghi luật biên tập của Chốt 6 vào tài liệu vận hành nội dung; lập danh sách rà giá trong `faq`.
 
 **Chưa chốt, còn mở:** §6 mục 4, 5, 6 của `docs/plans/2026-08-21-audit-va-ke-hoach-giao-dien-vong-4.md` — công cụ đo QA2 (Lighthouse) và hướng xử ảnh `docs/design/giaodiendatve.png` (chỉ lấy phân cấp giá→CTA, hay mở ADR cho form đặt chỗ). Nợ dữ liệu đợt 4D cũng còn nguyên: `itinerary` 3 tour trỏ slug `null`, hai URL R3, hreflang R4, người duyệt S24.
+
+---
+
+## QĐ-2026-08-22-06 — Đính chính Chốt 7 của `QĐ-2026-08-22-05`: không có lỗi sai kiểu JSON-LD
+
+**Mục này không đổi quyết định nào; nó rút một khẳng định sai thực tế** khỏi hiệu lực. `QĐ-2026-08-22-05` ở lại nguyên văn theo luật sổ chỉ-thêm (`04-CONSTRAINTS` §2.5).
+
+**Điều đã ghi sai.** Chốt 7 viết: "`src/lib/serialize/tour.ts:61-63` nối thẳng giá trị này vào **ô chờ kiểu Duration** của ItemList", và đặt việc sửa file đó thành **phần bắt buộc kèm**, với lý do "structured data đang sai kiểu trên production".
+
+**Thực tế mã đang chạy.** `serialize/tour.ts:57-64` nối `durationAtStop` vào `itemData['description']`:
+
+```js
+if (stop.note) itemData['description'] = stop.note
+if (stop.durationAtStop) {
+  itemData['description'] = (itemData['description'] || '') + ` (${stop.durationAtStop})`
+}
+```
+
+`itemData` chỉ nhận `@type`, `@id`, `name`, `geo`, `sameAs`, `description`. **Không có property `Duration`.** `description` là property kiểu Text, nên chuỗi "8:00 – 8:45" nằm ở đó là **hợp lệ**.
+
+Kiểm hết bốn nơi dùng field này trong mã nguồn (bỏ bundle `cms/dist`): `src/lib/types.ts:400` khai `durationAtStop?: string`; `src/lib/queries/tour.ts:39` lấy về; `src/components/TourDetail.astro:133` in ra `<span class="tl-dur">`; `src/lib/serialize/tour.ts:61`. Không nơi nào coi nó là ISO 8601.
+
+**Nguồn của sai sót.** Báo cáo QA1 vòng 2 viết "nối thẳng giá trị này vào ItemList" — đúng chữ. Cowork suy tiếp thành "sai kiểu" và ghi vào sổ **mà không mở file kiểm**. Phần suy diễn là của Cowork, không phải của QA.
+
+**Hệ quả.**
+
+- **Chốt 7 giữ nguyên phần quyết định:** `01`/`06` vẫn sửa để nhận khung giờ trong ngày, ghi rõ là mốc giờ dự kiến chứ không phải lịch chỗ trống. Thực tế mã còn củng cố hướng này — ép về ISO 8601 thì `description` sẽ hiện "(PT45M)", khó đọc cho khách.
+- **Rút khỏi hiệu lực:** mệnh đề "bắt buộc kèm sửa `serialize/tour.ts`" và mọi mô tả về lỗi production trong Chốt 7. Không có lỗi nào phải sửa gấp. File đó **không** nằm trong danh sách việc của bước Code trừ khi có lý do khác.
+
+**Việc mở ra, chưa kiểm, không phải quyết định.** `serialize/tour.ts:115` đẩy `tour.duration` vào `description` dạng `"${L.duration}: ${tour.duration}"`, mà `01` khai `duration` đúng kiểu ISO 8601 — nên `description` có thể đang chứa "Thời lượng: PT8H". Cần một lần kiểm bản dựng thật rồi mới nói được; ghi ra đây để khỏi rơi.
+
+**Bài học ghi lại.** Khẳng định về hành vi mã trong sổ quyết định phải mở file kiểm trước khi ghi, kể cả khi lấy lại từ báo cáo của một tác nhân khác đã qua ba vòng. Báo cáo QA là bằng chứng về *hiện vật QA đã xem*, không phải bằng chứng về *mã đang chạy*.
