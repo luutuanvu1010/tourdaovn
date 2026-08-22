@@ -500,3 +500,39 @@ chạy. Không cổng nào bắt vì validator đã rời đường phát hành 
 Xử ở kế hoạch `docs/plans/2026-08-22-dat-tour.md` Task 11: khoá = slug tiếng Việt của tour,
 con số chuyển sang `data/prices.yaml` (`amount` + `paxRates`). Không sửa mục này; đóng bằng
 một dòng "đã xử" khi Task 11 xong.
+
+---
+
+## DR-040 — `PY3`/`PY4`/`PY5` so sai kiểu `bookingRef`, ba validator giá gần như vô hiệu
+
+**Trạng thái:** mở. Phát hiện 2026-08-22, khi Task 11 (module đặt tour,
+`docs/plans/2026-08-22-dat-tour.md`) thêm 8 dòng giá thật vào `data/prices.yaml` và chạy
+`npm run validate` để đối chiếu.
+
+`scripts/validators/py1-py8.ts`: `validatePY3` (~dòng 99-104) và `validatePY4` (~dòng 118-133)
+đọc `doc.bookingRef` rồi kiểm `typeof doc.bookingRef === 'string'` — coi `bookingRef` là một
+field CHUỖI. Nhưng schema Sanity thật (`cms/schemas/tour.ts` dòng 136, và tương tự ở
+`lodgingBase.ts`, `attraction.ts`, `experience.ts`, `event.ts`) định nghĩa `bookingRef` là
+`type: 'object'` với field con `key` — khớp với mọi component frontend
+(`src/components/TourDetail.astro`, `HubIndex.astro`, `EntityIndex.astro`, …, đều đọc
+`data.bookingRef?.key`). Vì vậy `typeof doc.bookingRef === 'string'` **luôn luôn false** với dữ
+liệu thật, bất kể `bookingRef.key` có đúng hay không — bug có từ trước Task 11, Task 11 không
+gây ra nó, chỉ làm nó lộ ra lần đầu.
+
+Bằng chứng: sau khi Task 11 chuyển đúng cả 16 document (8 tour + 8 nháp) sang
+`bookingRef.key = slug.vi.current` (xác nhận bằng truy vấn Sanity trực tiếp, khớp 100%), chạy
+`npm run validate` vẫn cho:
+- `PY4` báo "mồ côi" — `prices.yaml: dòng "<khoá>" không có entity nào trỏ bookingRef (PY4)`
+  cho cả 8 khoá mới, dù cả 8 tour đều có `bookingRef.key` đúng.
+- `PY5` báo cả 8 tour "thiếu cả bookingRef lẫn isAccessibleForFree", dù `bookingRef.key` hợp lệ.
+
+Trước Task 11 bug không hiện vì `data/prices.yaml` từng trống (0 dòng), nên vòng lặp "mồ côi"
+của PY4 không có gì để lặp; PY3 âm thầm bỏ qua mọi tour ở mọi thời điểm vì điều kiện
+`typeof === 'string'` luôn sai, bất kể nội dung `bookingRef.key`.
+
+Không sửa ở đây — nằm ngoài phạm vi 3 file của Task 11
+(`data/prices.yaml`, `cms/_migrate-bookingref-keys.mjs`, `docs/DRIFT_LOG.md`). Cần một task
+riêng: sửa `validatePY3`/`validatePY4`/`validatePY5` đọc `doc.bookingRef?.key` thay vì
+`typeof doc.bookingRef === 'string'`. Xem
+`.superpowers/sdd/2026-08-22-dat-tour/task-11-report.md` mục "Lệch so với brief" để có bằng
+chứng chi tiết (lệnh chạy, output đầy đủ).
