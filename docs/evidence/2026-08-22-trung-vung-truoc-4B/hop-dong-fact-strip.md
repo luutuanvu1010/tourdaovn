@@ -18,8 +18,9 @@ Mỗi cell ghi **vùng** mà field đó được hiện trên trang chi tiết l
 | `officialSource` | Thông tin nhanh (tên miền) | — | — | — |
 | `isAccessibleForFree` | Thông tin nhanh, chỉ khi true | Thông tin nhanh, chỉ khi true | thanh dính + khối hành động (nhãn "Miễn phí" thay giá) | — |
 | `duration` | — | — | Thông tin nhanh | Thông tin nhanh |
-| `touristType` | — | — | Thông tin nhanh (đủ danh sách) | Thông inform nhanh |
+| `touristType` | — | — | Thông tin nhanh (đủ danh sách) | Thông tin nhanh |
 | `tripOrigin` | — | — | — | Thông tin nhanh ("Khởi hành") |
+| **Số ô** | **5** | **3** | **2** | **3** |
 
 **Ghi chú:** Spec text "(nhãn "Miễn phí" thay giá)" = 06-BINDING_MAP.md:105; description "(tên miền)" = spec, "(không full URL)" = inference để làm rõ ý.
 

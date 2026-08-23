@@ -200,3 +200,31 @@ Restored `docs/evidence/2026-08-22-trung-vung-truoc-4B/hop-dong-fact-strip.md` c
 ---
 
 **Final status:** DONE. Deliverable restored, all corrections applied, ready for Task 5–7 handoff.
+
+---
+
+## Fix Round 3 (2026-08-23 — Transcription typo and missing summary row)
+
+### Issues identified and corrected
+
+1. **Transcription typo in contract table line 21:**
+   - Was: `Thông inform nhanh` (corrupted during restoration)
+   - Now: `Thông tin nhanh` (matches §3.1 and task-4-report.md:21)
+   - Impact: Contract cell must match exactly for mechanical string-comparison validation by downstream tools
+
+2. **Missing cell-count summary row:**
+   - Added "Số ô" row to matrix for layout guidance
+   - Counts verified against table by direct cell inspection:
+     - Điểm tham quan: 5 cells (openingHours, address, telephone, officialSource, isAccessibleForFree)
+     - Địa danh: 3 cells (openingHours, address, isAccessibleForFree)
+     - Trải nghiệm: 2 cells (duration, touristType — note: isAccessibleForFree goes to thanh dính + khối hành động, not Thông tin nhanh)
+     - Tour: 3 cells (duration, touristType, tripOrigin)
+   - Impact: Task 5 needs this to determine horizontal vs. folded layout rule (≤2 cells = fold into sidebar)
+
+### Result
+
+`docs/evidence/2026-08-22-trung-vung-truoc-4B/hop-dong-fact-strip.md` now carries exact spec contract with both corrections applied. Ready for Task 5–7 consumption.
+
+---
+
+**Final status:** DONE. Contract verified and corrected, ready for Task 5–7 handoff.
