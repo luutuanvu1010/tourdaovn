@@ -755,3 +755,41 @@ phòng khi sau này muốn thêm 301, và mức tin của ánh xạ đó.
 astro build`, **không gọi** `npm --prefix scripts run validate:post` — mà cổng R3 (so sitemap
 production với sitemap bản dựng) nằm ở đó. Nên đường dựng tự động không bao giờ bắt được URL biến
 mất; lần này người bắt là một tác nhân, không phải máy. Chưa quyết vá thế nào.
+
+---
+
+## DR-047 — Cổng Turnstile bị bỏ qua câm lặng khi thiếu secret; SPEC §4.4/§4.7 tự mâu thuẫn, mã sửa trước SPEC
+
+**Trạng thái:** đã xử 2026-08-23 — SPEC đã sửa theo mã ở cùng ngày
+(`docs/specs/SPEC-2026-08-21-dat-tour.md` §4.4 hàng `turnstileToken`, §4.7 hàng
+`PUBLIC_TURNSTILE_SITE_KEY`, và đoạn mã phản hồi của endpoint). Mục này ghi lại vì sao mã đi
+trước SPEC.
+
+Vòng review cuối tìm ra: thiếu bí mật thì endpoint tụt xuống chế độ không có lớp chặn nào và
+không phát tín hiệu nào. Bằng chứng thực nghiệm chứ không phải suy đoán: báo cáo Task 12 ghi một
+`curl` POST **không mang token nào** và nhận **201** kèm dòng `TD-260823-98N8` trong D1.
+
+SPEC **tự mâu thuẫn**: §4.4 (hàng `turnstileToken`) nói "thiếu secret ở môi trường → bỏ qua kiểm
+(chỉ dev)"; §4.7 (hàng `PUBLIC_TURNSTILE_SITE_KEY`) nói "production phải có cả site key lẫn
+secret, thiếu một trong hai thì mọi đơn bị 400 — hỏng ồn ào, không hỏng câm". Bản thi hành trước
+lượt sửa này theo đúng nhánh §4.4 nhưng bỏ mất phần `console.warn` mà chính §4.4 đòi — tức không
+theo trọn vẹn nhánh nào trong hai nhánh mà SPEC tự nêu.
+
+Phán quyết của controller 2026-08-23: thi hành **cả hai**. Thêm `console.warn` một lần mỗi
+isolate ở `turnstile.ts` (đúng chữ §4.4), và chặn hẳn ở production bằng một cổng cấu hình chạy
+TRƯỚC `readBody` ở `handler.ts` — thiếu `TURNSTILE_SECRET_KEY` mà không có
+`BOOKING_ALLOW_NO_TURNSTILE === '1'` thì trả **503**, không đọc thân, không chạm D1, không gọi
+mạng (đúng ý định §4.7). Cửa thoát `BOOKING_ALLOW_NO_TURNSTILE` chỉ đặt được ở `.dev.vars`, không
+khai trong `wrangler.toml` (không có `[vars]`, BK4). Đây là hoà giải **trong cùng một tài liệu**
+bằng chính triết lý nó tuyên bố — §4.4 và §4.7 không sai lẫn nhau, chỉ khác phạm vi (dev vs
+production) mà chưa từng viết rõ ranh giới đó — không phải một luật mới đặt ra ở tầng code.
+
+Vì sao mã đi trước SPEC: lỗ này chặn gộp nhánh, nên được sửa ngay trong lượt sửa cuối; SPEC theo
+sau trong cùng ngày. Ghi lại để lần sau ai thấy 503 ở `/api/dat-tour` thì biết nó có chủ ý, không
+phải hàng chưa xong.
+
+**Nợ để lại:** cờ `BOOKING_ALLOW_NO_TURNSTILE` là một chân tự bắn — đặt nó thành secret trên
+production là vô hiệu hoá đúng cổng vừa dựng. Cổng máy duy nhất canh được rủi ro đó là `SPEC` §7
+mục 7 (`wrangler secret list` phải đúng 8 tên, không thừa không thiếu, và không có
+`BOOKING_ALLOW_NO_TURNSTILE`). Không có kiểm tự động nào khác — ba lớp bảo vệ còn lại (chú thích
+trong `handler.ts`, chú thích trong `env.d.ts`, và mục này) đều chỉ là chữ.
