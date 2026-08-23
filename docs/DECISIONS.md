@@ -975,3 +975,40 @@ Kiểm hết bốn nơi dùng field này trong mã nguồn (bỏ bundle `cms/dis
 **Chốt 6 — Task 11 phải qua review như mọi task khác.** Phiên thi hành trước commit Task 11 (`798d2b2`, `f1795b9`) rồi dừng mà chưa dispatch reviewer. Không miễn cổng: task này là task duy nhất ghi vào dataset production, càng phải có cổng.
 
 **Hệ quả tài liệu.** `SPEC-2026-08-21-dat-tour.md` sửa §3, §4.6, §4.7, §5, §6 theo mục này. `ADR-0027` thêm một mục đính chính giữ nguyên phần đã ghi (`04-CONSTRAINTS` §2.5, sổ chỉ-thêm). `docs/plans/2026-08-22-dat-tour.md` thêm Task 15 (gộp `main`), Task 16 (SES), Task 17 (`DR-044`).
+
+---
+
+## QĐ-2026-08-23-01 — Đợt đổi slug 22/08 là có chủ ý; sáu URL cũ được phép chết, không viết 301
+
+**Bối cảnh.** Chuẩn bị push 15 commit tồn lên `main`, phát hiện rủi ro **không nằm ở commit nào**: nội dung Sanity đã đổi dưới chân bản dựng. Ngày 2026-08-22 có ba đợt sửa trong Studio (08:07–08:14Z, 12:35–12:59Z, 14:40–14:57Z); **19/28 tour** bị sửa, nhiều tour đổi `slug`. Push kích Workers Builds, build đọc Sanity lúc dựng, nên bản mới mang slug mới.
+
+**Đo được, bằng bản dựng thật** (phiên `tourdaovn-81` chạy `npx astro build` trong worktree riêng nên không đụng `dist/` của ai):
+
+- Production `sitemap-vi.xml`: **21** URL `/tour/`. Bản dựng mới: **20**.
+- **Đúng 6 URL biến mất**, cả 6 là trang chi tiết tour bị đổi slug. 6 URL mới xuất hiện. 14 URL giữ nguyên.
+- Chín slug ngắn (`bai-soi`, `bai-tranh`, `du-thuyen`, `hon-mun`, `hon-tam`, `lang-chai`, `mini-beach`, `vinh-san-ho`, `vinwonders`) **không** mất — có mặt trong bản dựng mới.
+
+**Sáu URL sẽ trả 404 sau khi phát hành:**
+
+`/tour/tour-3-dao-hon-mun-mini-beach-lang-chai/` · `/tour/tour-3-dao-nha-trang-hon-mun-hon-tam/` · `/tour/tour-3-dao-nha-trang-mini-beach-hon-tam/` · `/tour/ve-hon-tam-seaday-tour-03/` · `/tour/ve-hon-tam-tam-bun-tam-bien/` · `/tour/ve-hon-tam-tam-tron-goi/`
+
+**Chốt.** Chủ dự án xác nhận 2026-08-23: đợt đổi slug là **có chủ ý**, và **URL cũ bỏ được**. Push không kèm `public/_redirects`.
+
+**Đây là lệch luật R3 có ý thức.** `04-CONSTRAINTS` §1c: *"một URL đã từng tồn tại KHÔNG được biến mất câm"*. Mục này ghi lại để lần sau tra được vì sao sáu URL đó chết, thay vì ai đó phát hiện rồi coi là sự cố.
+
+**Ánh xạ cũ→mới, ghi lại phòng khi sau này muốn thêm 301.** Truy được nhờ một trùng hợp: `bookingRef.key` của các tour đó lưu chính slug **cũ** (module đặt tour đặt khoá lúc 2026-08-22 07:58Z, trước khi ai đổi slug).
+
+| URL cũ | URL mới | `_id` |
+|---|---|---|
+| `tour-3-dao-hon-mun-mini-beach-lang-chai` | `tour-3-dao-mini-beach` | `0cab212b` |
+| `tour-3-dao-nha-trang-hon-mun-hon-tam` | `tour-3-dao-hon-mun` | `5644d7a5` |
+| `tour-3-dao-nha-trang-mini-beach-hon-tam` | `tour-3-dao-vip-nha-trang` | `9ebebf78` |
+| `ve-hon-tam-seaday-tour-03` | `ve-hon-tam-tam-bien` | `702a7d9a` |
+| `ve-hon-tam-tam-bun-tam-bien` | `tour-hon-tam-tam-bun-tam-bien` | `e2cadbb4` |
+| `ve-hon-tam-tam-tron-goi` | `ve-hon-tam-tron-goi` (`41b46261`) — **chủ dự án chọn 2026-08-23**; không suy được từ dữ liệu | — |
+
+**Mức tin của bảng này thấp hơn phần còn lại của mục.** Năm dòng đầu là **suy** từ việc `key` trùng slug cũ, không phải từ một bản ghi "đã đổi tên" trong Sanity. Khớp sitemap production nên đáng tin, nhưng nếu đợt đổi slug đi kèm **gộp hoặc tách nội dung** thì ánh xạ một-đối-một sai. Ai dùng bảng này để viết 301 phải kiểm lại nội dung hai đầu trước.
+
+**Lỗ hổng cổng lộ ra, chưa vá.** `build:ci` = `npm run build` = `astro check && astro build`, **không gọi** `npm --prefix scripts run validate:post` — mà cổng R3 (so sitemap production với sitemap bản dựng) nằm ở đó. Nên Workers Builds **không bao giờ bắt được** URL biến mất; lần này người bắt là một tác nhân, không phải máy. Chưa quyết vá thế nào; ghi ra để khỏi rơi.
+
+**Cảnh báo vận hành kèm theo.** `npm run build` của repo này gãy được vì mạng: 2026-08-22 một build chết giữa chừng do `Socket timed out` khi gọi Sanity API, `dist/` tụt từ 105 trang xuống 2 mà lệnh vẫn kết thúc không báo đỏ. Sau mỗi lần phát hành phải **đếm số trang thật** trên production, không tin dấu tích xanh của Workers Builds. Mốc trước lần push này: **100 URL** trong `sitemap-vi.xml`.
