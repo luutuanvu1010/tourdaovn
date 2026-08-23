@@ -630,3 +630,64 @@ Kiểm thực tế cùng ngày: `curl -sI https://tourdao.vn/` trả `200`, khô
 Đây là loại lệch nguy hiểm hơn vẻ ngoài: file này là thứ người vận hành mở ra khi deploy, và nó đang mô tả **hành vi production sai**. Ai đọc để trả lời "trang chủ tourdao.vn có chuyển hướng không" sẽ trả lời sai.
 
 **Gốc rễ đi kèm:** `QĐ-2026-08-06-04` **bước 6** đòi "ghi mục mới trong sổ để đóng `QĐ-2026-08-06-02`". Bước đó **chưa từng được thi hành** — không có mục nào trong `DECISIONS.md` đóng `QĐ-2026-08-06-02`. Code đổi, sổ không đổi, nên `BUILD-NOTES` không có tín hiệu nào để phải cập nhật theo. Đóng ở `QĐ-2026-08-22-04`.
+
+---
+
+## DR-044 — `06` §3.1 chưa khai vùng cho bốn entity còn lại
+
+**Trạng thái:** mở. Phát hiện 2026-08-23, Task 7 (đóng Luật 1).
+
+Ma trận §3.1 (v2.2, đọc thẳng bằng `luat1-post.ts`) chỉ khai bốn entity: Điểm
+tham quan, Địa danh, Trải nghiệm, Tour. `restaurant`, `specialty`, `event`,
+`hotel`/`resort` không có hàng nào, nên tầng B (sai vùng, bật ở Task 8) sẽ
+không đối chiếu được cho chúng — chỉ tầng A (lặp vùng) áp được, và tầng A chỉ
+đếm được số vùng, không biết vùng nào "đúng".
+
+Đã dồn về một vùng `FactStrip` khi đóng Luật 1 (2026-08-23) cho ba trong bốn
+entity — `RestaurantDetail`, `SpecialtyDetail`, `EventDetail` — để không lặp
+vùng, dù cả ba không render trang nào trong `dist/` hiện tại (không có route
+`/nha-hang/`, `/dac-san/`, `/su-kien/`) nên đây là việc dọn nhất quán mã
+nguồn, không phải sửa lỗi hiển thị cho người dùng. `LodgingDetail`
+(khách sạn — 6 trang, có render) **chưa** dồn được; xem DR-045 vì sao.
+
+"Vùng nào cho field nào" ở bốn entity này vẫn là quyết định nằm trong từng
+template chứ chưa phải của bản ánh xạ `06`. Cần bổ sung vào §3.1 ở một lượt
+sửa `06` sau, do Cowork đề xuất và qua cổng duyệt — không phải việc của vai
+Code.
+
+---
+
+## DR-045 — `LodgingDetail` không dồn được vào `FactStrip`: hơn 6 field, component có trần cứng
+
+**Trạng thái:** mở. Phát hiện 2026-08-23, Task 7.
+
+`FactStrip.astro` (đã chốt, Task 7 không được sửa) tự cắt còn tối đa 6 ô hiển
+thị (`facts.filter(f => f.visible).slice(0, 6)`), đúng theo hợp đồng "tối đa
+6 ô" của `06` §3 — hợp đồng đó viết cho bốn entity có hàng ở §3.1, nơi số
+field tối đa đã được thiết kế vừa 6 (Điểm tham quan: 5).
+
+`LodgingDetail` không có hàng ở §3.1 (xem DR-044), và bộ field nó đang render
+qua cặp `InfoBar` + `InfoCard` cũ rộng hơn nhiều: tối thiểu 9 field duy nhất
+cho khách sạn (`starRating`, `beachAccess`, `checkinTime`, `address`,
+`checkoutTime`, `numberOfRooms`, `petsAllowed`, `geo` (khoảng cách sân bay),
+`officialSource` — chưa tính `sameAs` đã có vùng riêng, và chưa tính
+`beachfront`/`landArea`/`onSiteActivities` chỉ resort mới có, có thể lên tới
+12). Gộp thẳng vào `facts` rồi để `FactStrip` tự cắt sẽ **âm thầm xoá** 3+
+field khỏi 6 trang khách sạn thật — đúng loại lỗi "vùng biến mất, cổng vẫn
+xanh" mà cả việc đóng Luật 1 này được lập ra để chặn (xem cảnh báo trong
+`task-7-brief.md` và bằng chứng `hop-dong-fact-strip.md`).
+
+Task 7 **không tự chọn** một trong các hướng xử lý (nhận 6 và mất 3+ field;
+dựng thêm một khối `data-region="fact-strip"` thứ hai ngoài component để
+không bị cắt; giảm bớt field trước khi vào `facts`; sửa `FactStrip.astro` để
+nó tự cuộn/xem thêm) — mỗi hướng đổi hành vi hiển thị hoặc đổi hợp đồng của
+một component đã chốt, vượt phạm vi quyết định của vai Code. `LodgingDetail`
+**giữ nguyên** cặp `InfoBar` + `InfoCard` cũ (18 vi phạm lặp vùng không đổi,
+không tệ thêm so với trước Task 7), và do đó `InfoBar.astro`/`InfoCard.astro`
+**chưa xoá được** — cả hai vẫn là primitive thật đang dùng, không chỉ tồn tại
+vì quên dọn. `entity-layout-post.ts` giữ nguyên, chưa đổi 'InfoBar' thành
+'FactStrip', vì lý do tương tự: đổi tên trong khi Lodging còn dùng thật sẽ mô
+tả sai hiện trạng.
+
+Cần quyết định ở tầng Cowork/chủ dự án: chấp nhận hướng nào trong bốn hướng
+trên (hoặc hướng khác), rồi Task 8 (hoặc một task riêng) thực thi.

@@ -7,7 +7,6 @@ import FAQ from './FAQ.astro'
 import Section from './Section.astro'
 import BookingCTA from './BookingCTA.astro'
 import ContactChannels from './ContactChannels.astro'
-import InfoCard from './InfoCard.astro'
 import Body from './Body.astro'
 import { applyPriceToJsonLd, entityPageGraphToLd, tourToJsonLd, jsonLdScriptContent } from '../lib/serialize'
 import { loadPrices } from '../lib/prices'
@@ -77,25 +76,23 @@ const entityJsonLd = applyPriceToJsonLd(
 )
 const jsonLd = entityPageGraphToLd(entityJsonLd, data, siteBase, lang)
 
-const infoBarItems = [
-  { field: 'duration', icon: '⏱️', label: t('duration'), value: data.duration || '', visible: !!data.duration },
-  { field: 'tourFormat', icon: '👥', label: t('format'), value: formatLabel, visible: true },
-  { field: 'gia', icon: '🎫', label: t('priceFrom'), value: priceView?.label || '', visible: !!priceView?.label },
-  { field: 'departureNote', icon: '🚐', label: t('departure'), value: data.departureNote || '', visible: !!data.departureNote },
-]
-
-const sidebarRows = [
-  { field: 'operator', icon: '🏢', label: t('operator'), value: data.operator?.title || '', visible: !!data.operator?.title },
-  // Giấy phép lữ hành đứng ngay dưới tên đơn vị vận hành: đây là trang khách
-  // quyết chuyển tiền, nên tín hiệu tin cậy phải ở cạnh nút đặt chứ không chỉ
-  // ở trang chủ. Dùng field có sẵn `Organization.licenseInfo` (§4.12).
-  { field: 'licenseInfo', icon: '📋', label: t('license'), value: data.operator?.licenseInfo || '', visible: !!data.operator?.licenseInfo },
-  { field: 'tourFormat', icon: '👥', label: t('format'), value: formatLabel, visible: true },
-  { field: 'tripOrigin', icon: '📍', label: t('tripOrigin'), value: data.tripOrigin?.title || '', visible: !!data.tripOrigin?.title },
+// Vùng "Thông tin nhanh" — 06 §3.1 Tour: đúng 3 ô (`duration`, `touristType`,
+// `tripOrigin` gắn nhãn "Khởi hành"). `tourFormat` đã là huy hiệu hero (chỉ ở
+// đó); `seasonNote` đã có mục "Mùa nào nên đi" riêng trong thân bài; giá
+// không vào đây (thanh dính + khối hành động).
+const facts = [
   { field: 'duration', icon: '⏱️', label: t('duration'), value: data.duration || '', visible: !!data.duration },
   { field: 'touristType', icon: '👤', label: t('suitableFor'), value: data.touristType?.join(', ') || '', visible: !!(data.touristType && data.touristType.length > 0) },
-  { field: 'seasonNote', icon: '📅', label: t('season'), value: data.seasonNote || '', visible: !!data.seasonNote },
+  { field: 'tripOrigin', icon: '📍', label: t('tripOrigin'), value: data.tripOrigin?.title || '', visible: !!data.tripOrigin?.title },
 ]
+
+// `operator`, `licenseInfo` (06 §3.1: khối hành động) và `departureNote`
+// (06 §3.1: ghi chú trong khối hành động) — ba field khác nhau, không gộp.
+// `departureNote` và `tripOrigin` (ở trên) cũng là hai field khác nhau dù
+// đều nói về nơi/cách khởi hành — gộp là mất thông tin thật (task-7-brief
+// "chỗ dễ sai"). Cả ba render trong khối hành động (slot booking), không vào
+// `facts`, nên không lặp vùng với giá cũng đang ở đó.
+const hasActionMeta = !!(data.operator?.title || data.operator?.licenseInfo || data.departureNote)
 ---
 
 <DetailLayout
@@ -110,10 +107,9 @@ const sidebarRows = [
   priceLabel={priceView?.label ?? null}
   ctaHref={zaloHref || null}
   ctaLabel={zaloHref ? t('contactZalo') : null}
-  infoBarItems={infoBarItems}
+  facts={facts}
   sidebarSlots={[
-    { name: 'booking', component: 'BookingCTA', visible: !!priceView?.label || showFallbackCta || hasContactChannel, props: {} },
-    { name: 'info', component: 'InfoCard', visible: sidebarRows.some(r => r.visible), props: { rows: sidebarRows } },
+    { name: 'booking', component: 'BookingCTA', visible: !!priceView?.label || showFallbackCta || hasContactChannel || hasActionMeta, props: {} },
   ]}
   nearbyTitle={t('similarTours')}
   nearby={nearby}
@@ -187,7 +183,13 @@ const sidebarRows = [
   {priceView?.label && <BookingCTA slot="booking" priceText={priceView.label} ctaLabel={t('bookTour')} />}
   {showFallbackCta && <BookingCTA slot="booking" ctaUrl={operatorUrl} ctaLabel={t('officialWebsite')} />}
   {hasContactChannel && <ContactChannels slot="booking" contact={contact} lang={lang} />}
-  {sidebarRows.some(r => r.visible) && <InfoCard slot="info" rows={sidebarRows} lang={lang} />}
+  {hasActionMeta && (
+    <div class="action-meta" data-region="action-block" slot="booking">
+      {data.operator?.title && <p data-field="operator"><strong>{t('operator')}:</strong> {data.operator.title}</p>}
+      {data.operator?.licenseInfo && <p data-field="licenseInfo"><strong>{t('license')}:</strong> {data.operator.licenseInfo}</p>}
+      {data.departureNote && <p data-field="departureNote">{data.departureNote}</p>}
+    </div>
+  )}
 </DetailLayout>
 
 <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
@@ -231,6 +233,13 @@ const sidebarRows = [
   .cross-icon { color: var(--c-text-muted); font-weight: var(--fw-700); }
 
   .info-callout { background: var(--c-sand-soft); border: 1px solid var(--c-sand-border); border-radius: var(--radius-lg); padding: var(--s4) var(--s5); font-size: var(--fs-sm); color: var(--c-sand-text); }
+
+  /* Khối hành động: operator/licenseInfo/departureNote — 06 §3.1 đặt cả ba ở
+     đây, không ở Thông tin nhanh. Đứng cạnh BookingCTA trong cùng slot
+     "booking", không phải một biến thể mới của BookingCTA. */
+  .action-meta { display: flex; flex-direction: column; gap: var(--s2); font-size: var(--fs-sm); color: var(--c-text-muted); }
+  .action-meta p { margin: 0; }
+  .action-meta strong { color: var(--c-text); font-weight: var(--fw-600); }
 
   .hl-list { list-style: none; display: flex; flex-direction: column; gap: var(--s2); }
   .hl-list li { font-size: var(--fs-sm); color: var(--c-text-muted); padding-left: var(--s5); position: relative; }

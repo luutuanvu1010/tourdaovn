@@ -1,12 +1,11 @@
 ---
 import type { SpecialtyResult, Lang } from '../lib/types'
-import { siteBaseUrl, hostLabel } from '../lib/siteUrl'
+import { siteBaseUrl } from '../lib/siteUrl'
 import { uiCopy, typeLabel as lookupLabel, SPECIALTY_TYPE_LABELS } from '../lib/uiCopy'
 import { entityPageGraphToLd, specialtyToJsonLd, jsonLdScriptContent } from '../lib/serialize'
 import DetailLayout from './DetailLayout.astro'
 import FAQ from './FAQ.astro'
 import Section from './Section.astro'
-import InfoCard from './InfoCard.astro'
 import Body from './Body.astro'
 import { ROUTE_MAP } from '../lib/routes'
 
@@ -27,17 +26,15 @@ function hasPtContent(blocks: unknown[] | undefined | null): boolean {
   return blocks.some((b: any) => b._type === 'block' && b.children?.some((c: any) => (c.text || '').trim()))
 }
 
-const infoBarItems = [
+// `specialty` không có hàng ở 06 §3.1 (chỉ khai 4 entity: Điểm tham quan, Địa
+// danh, Trải nghiệm, Tour) — xem DRIFT_LOG DR-044. Quy tắc cho các entity
+// ngoài ma trận: giữ nguyên bộ field đang có (union infoBarItems ∪
+// sidebarRows cũ), dồn về một vùng FactStrip, loại `sameAs` (luôn có vùng
+// riêng — dòng "Nguồn tham khảo" cạnh Cập nhật — bất kể entity nào).
+const facts = [
   { field: 'specialtyType', icon: '🏷️', label: t('type'), value: typeLabel, visible: true },
   { field: 'originNote', icon: '📍', label: t('origin'), value: data.originNote || '', visible: !!data.originNote },
   { field: 'season', icon: '📅', label: t('season'), value: data.season || '', visible: !!data.season },
-]
-
-const sidebarRows = [
-  { field: 'specialtyType', icon: '🏷️', label: t('type'), value: typeLabel, visible: true },
-  { field: 'originNote', icon: '📍', label: t('origin'), value: data.originNote || '', visible: !!data.originNote },
-  { field: 'season', icon: '📅', label: t('season'), value: data.season || '', visible: !!data.season },
-  { field: 'sameAs', icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
 ]
 
 const siteBase = siteBaseUrl(Astro.site)
@@ -50,10 +47,9 @@ const jsonLd = entityPageGraphToLd(specialtyToJsonLd(data, siteBase, lang), data
   entityType="specialty"
   image={data.mainImage}
   gallery={data.gallery}
-  infoBarItems={infoBarItems}
-  sidebarSlots={[
-    { name: 'info', component: 'InfoCard', visible: sidebarRows.some(r => r.visible), props: { rows: sidebarRows } },
-  ]}
+  sameAs={data.sameAs}
+  facts={facts}
+  sidebarSlots={[]}
   nearbyTitle={t('whereToEat')}
   nearby={nearby}
   updatedAt={data._updatedAt}
@@ -82,8 +78,6 @@ const jsonLd = entityPageGraphToLd(specialtyToJsonLd(data, siteBase, lang), data
 
     {data.faq && data.faq.length > 0 && <FAQ faq={data.faq} lang={lang} contained={false} />}
   </Fragment>
-
-  {sidebarRows.some(r => r.visible) && <InfoCard slot="info" rows={sidebarRows} lang={lang} />}
 </DetailLayout>
 
 <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
