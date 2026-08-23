@@ -63,6 +63,37 @@ Giữ lại vì cơ chế còn đúng cho mọi lần chuyển hướng sau. Đ�
 
 ---
 
+## Module đặt tour (ADR-0027) — việc một lần và cách xem đơn
+
+Đơn từ form trên trang tour đi vào D1 `tourdao-booking` (bảng `booking`), rồi báo về email
+(**Amazon SES**) và Zalo Bot. Bí mật đặt bằng `wrangler secret put`, **8 tên**:
+`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SES_REGION`, `BOOKING_NOTIFY_EMAIL`,
+`ZALO_BOT_TOKEN`, `ZALO_BOT_CHAT_IDS`, `TURNSTILE_SECRET_KEY`, `IP_HASH_SALT`. Site key
+Turnstile là biến build `PUBLIC_TURNSTILE_SITE_KEY` trong `.env`. Chi tiết từng bước
+(D1, SES, tạo bot Zalo, Turnstile, WAF): `docs/specs/SPEC-2026-08-21-dat-tour.md` §6,
+`docs/plans/2026-08-22-dat-tour.md` Task 13.
+
+Kênh email hỏng thì đơn **vẫn vào D1** — luôn đọc cột `notify_email`, đừng chỉ nhìn HTTP 201.
+`failed:http 403` nghĩa là chữ ký/quyền IAM sai; `failed:http 400` thường là SES còn trong
+sandbox hoặc sai `AWS_SES_REGION`; `skipped` nghĩa là thiếu bí mật.
+
+Xem đơn:
+
+```
+env -u CLOUDFLARE_API_TOKEN -u CF_API_TOKEN npx wrangler d1 execute tourdao-booking --remote --env-file /dev/null \
+  --command "SELECT code, created_at, tour_title, depart_date, customer_name, phone, status, notify_email, notify_zalo FROM booking ORDER BY id DESC LIMIT 50"
+```
+
+Đơn chưa báo được: thêm `WHERE notify_email <> 'sent' AND notify_zalo <> 'sent'`.
+Sao lưu: `… wrangler d1 export tourdao-booking --remote --output backups/booking-$(date +%F).sql`.
+Đổi trạng thái: `UPDATE booking SET status='contacted' WHERE code='TD-…'`.
+
+Thêm tour có giá: thêm dòng vào `data/prices.yaml` (khoá = slug tour, `amount` + `paxRates`),
+rồi ghi đúng khoá đó vào Tour → bookingRef → key trong Studio; build lại là có form.
+
+Nhớ: đã có `main` trong `wrangler.toml` nên `npm run deploy` deploy cả Worker; `wrangler d1
+migrations apply … --remote` là bước riêng khi có migration mới.
+
 ## Deploy
 
 ```
