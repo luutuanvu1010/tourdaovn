@@ -12,6 +12,11 @@ const PHAI_CHAN = [
   'cd /tmp && git add -A',
   'git commit -am "sửa"',
   'git commit -a -m "sửa"',
+  'git  add -A',
+  'git\tadd\t-A',
+  'git   commit   -am "x"',
+  'git add -u',
+  'git add --update',
 ]
 
 for (const cmd of PHAI_CHAN) {
@@ -30,6 +35,8 @@ const PHAI_CHO_QUA = [
   'git diff --stat',
   'npm run build',
   'echo "git add -A là điều cấm"',
+  'git  add src/x.astro',
+  'git add -p',
 ]
 
 for (const cmd of PHAI_CHO_QUA) {
