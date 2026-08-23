@@ -891,6 +891,9 @@ kho hôm nay: chỉ NĂM id có mặt trong HTML — `action-block`, `fact-strip
 `sticky-bar`, `map-card` (thẻ bản đồ; vá xong trong cùng đợt sửa ghi entry
 này, xem C1 bên dưới), và bucket `'section'`. BỐN id còn lại — `hero`,
 `hero-badge`, `breadcrumb`, `footer-meta` — KHÔNG component nào từng gắn.
+(Lệnh grep trên thật ra trả về SÁU id, không phải năm: `info-card` cũng có
+mặt, nhưng đó là id cũ của `InfoCard.astro` — Article/Organization/Person,
+ngoài từ vựng ALIAS/§3.1 hoàn toàn, không tính vào con số ở đây.)
 
 Hệ quả: bốn hàng §3.1 sau nằm HOÀN TOÀN ngoài thẩm quyền của cả tầng A lẫn
 tầng B, dù field có cột hợp lệ trong ma trận:

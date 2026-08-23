@@ -43,8 +43,11 @@
  * (`grep -rhoE 'data-region="[a-z-]+"' src/components/*.astro` — tự chạy lại
  * lệnh này để xác nhận, đừng tin danh sách chép tay ở đây):
  * `action-block`, `fact-strip`, `sticky-bar`, `map-card` (thẻ bản đồ, C1 vá
- * xong cùng đợt sửa này), và bucket `'section'`. BỐN id còn lại — `hero`,
- * `hero-badge`, `breadcrumb`, `footer-meta` — không component nào gắn, nên
+ * xong cùng đợt sửa này), và bucket `'section'`. (Lệnh grep trên thật ra trả
+ * về SÁU id — `info-card` cũng có mặt, nhưng đó là id cũ của `InfoCard.astro`
+ * cho Article/Organization/Person, ngoài từ vựng ALIAS/§3.1 hoàn toàn, không
+ * tính vào NĂM id trên.) BỐN id còn lại — `hero`, `hero-badge`, `breadcrumb`,
+ * `footer-meta` — không component nào gắn, nên
  * BỐN hàng §3.1 tương ứng nằm HOÀN TOÀN ngoài thẩm quyền của cả hai tầng, dù
  * field có cột hợp lệ: hàng nhãn loại entity (`attractionType` ·
  * `placeType` · `experienceType` · `tourFormat` → `hero-badge`), hàng
