@@ -16,7 +16,7 @@ not_found_handling = "404-page"
 [[d1_databases]]
 binding = "BOOKING_DB"
 database_name = "tourdao-booking"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "554d340d-0a3d-48bd-9ee5-7f697ec1c41d"
 migrations_dir = "migrations"
 
 [build]
