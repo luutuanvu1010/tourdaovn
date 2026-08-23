@@ -21,6 +21,7 @@
     "gen:slug-redirects": "node --import ./node_modules/tsx/dist/esm/index.mjs tools/gen-slug-redirects.ts",
     "test": "tsx --test synthesis/__tests__/*.test.ts audit/__tests__/*.test.ts",
     "audit:spec": "node run-gates.mjs spec",
+    "audit:gate": "node --import ./node_modules/tsx/dist/esm/index.mjs audit/gate-audit.ts",
     "check:theme": "node ../scripts/check-theme-contrast.mjs"
   },
   "dependencies": {
