@@ -16,6 +16,12 @@ const ALLOWED_PAX_RATE_KEYS = new Set(['amount', 'note'])
 const PAX_NOTE_MAX = 40
 const FORBIDDEN_KEYS = /^(cost|commission|gia_von|hoa_hong|profit|margin|chiet_khau|wholesale|retail_price)$/i
 
+// bookingRef là object { key } trong mọi lược đồ Sanity (DR-044) — không phải chuỗi.
+function refKey(doc: any): string | null {
+  const k = doc?.bookingRef?.key
+  return typeof k === 'string' && k.length > 0 ? k : null
+}
+
 // ── PY1: unit thuộc enum perPax/perRoomNight/perTicket ──
 
 export function validatePY1(prices: Map<string, PriceEntry>): ValidatorResult {
@@ -98,8 +104,8 @@ export function validatePY3(docs: any[], prices: Map<string, PriceEntry>): Valid
   const errors: string[] = []
   for (const doc of docs) {
     if (doc._type !== 'tour') continue
-    const ref = doc.bookingRef
-    if (!ref || typeof ref !== 'string') continue
+    const ref = refKey(doc)
+    if (!ref) continue
     const entry = prices.get(ref)
     if (!entry) continue // PY4 handles missing refs
     if (entry.unit !== 'perPax') {
@@ -117,15 +123,14 @@ export function validatePY4(docs: any[], prices: Map<string, PriceEntry>): Valid
 
   const refsFromSanity = new Set<string>()
   for (const doc of docs) {
-    if (doc.bookingRef && typeof doc.bookingRef === 'string') {
-      refsFromSanity.add(doc.bookingRef)
-    }
+    const ref = refKey(doc)
+    if (ref) refsFromSanity.add(ref)
   }
 
   // Trỏ hụt: bookingRef trong Sanity nhưng không có dòng giá → fail
   for (const doc of docs) {
-    const ref = doc.bookingRef
-    if (!ref || typeof ref !== 'string') continue
+    const ref = refKey(doc)
+    if (!ref) continue
     if (!prices.has(ref)) {
       errors.push(`${doc._id}: bookingRef="${ref}" không có dòng giá tương ứng trong prices.yaml (PY4)`)
       hasFail = true
@@ -149,7 +154,7 @@ export function validatePY5(docs: any[]): ValidatorResult {
   const errors: string[] = []
   for (const doc of docs) {
     if (!COMMERCIAL_TYPES.has(doc._type)) continue
-    const hasBookingRef = doc.bookingRef && typeof doc.bookingRef === 'string'
+    const hasBookingRef = refKey(doc) !== null
     const hasFree = doc.isAccessibleForFree === true
     const hasTicketUrl = doc._type === 'event' && doc.ticketUrl && typeof doc.ticketUrl === 'string'
 

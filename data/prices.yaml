@@ -8,8 +8,10 @@
 #     paxRates:                           # tuỳ chọn, nuôi form đặt tour; khoá đóng child | senior | infant
 #       child:  { amount: <số>, note: "5–11 tuổi" }
 #       senior: { amount: <số>, note: "từ 60 tuổi" }
-# Khoá = slug tiếng Việt của tour (QĐ-2026-08-21-01, DR-039). Thêm dòng mới thì gắn đúng
-# chuỗi đó vào Tour → bookingRef → key trong Studio.
+# Khoá là ĐỊNH DANH ỔN ĐỊNH của một dòng giá, không phải slug (DR-045). Nhiều khoá hiện nay
+# trùng slug chỉ vì lịch sử (DR-039 đặt như vậy ngày 2026-08-22); ĐỪNG đổi khoá khi biên tập
+# đổi slug — đổi là làm mồ côi dòng giá. Thêm dòng mới: chọn một chuỗi ổn định, mô tả sản phẩm,
+# rồi gắn đúng chuỗi đó vào Tour → bookingRef → key trong Studio. PY4 sẽ báo nếu hai bên lệch.
 
 tour-3-dao-hon-mun-mini-beach-lang-chai:
   unit: perPax
