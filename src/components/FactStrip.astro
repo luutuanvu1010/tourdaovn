@@ -5,9 +5,20 @@
  * Vì sao gộp: hai vùng cùng ăn một bộ field là gốc của DR-032 và của 44/58 trang
  * lặp vùng đo ngày 2026-08-22. Một field một vùng thì phải có đúng MỘT component.
  *
- * Hợp đồng từ 06: tối đa 6 ô; KHÔNG chứa giá (giá chỉ ở thanh dính + khối hành
- * động); ≤ 2 ô thì không trải dải mà gộp vào sidebar — chỗ gọi quyết định điều đó
- * qua prop `inline`, component chỉ dựng.
+ * Hợp đồng từ 06: tối đa 6 ô cho bốn entity có hàng ở §3.1; KHÔNG chứa giá
+ * (giá chỉ ở thanh dính + khối hành động); ≤ 2 ô thì không trải dải mà gộp
+ * vào sidebar — chỗ gọi quyết định điều đó qua prop `inline`, component chỉ
+ * dựng.
+ *
+ * Task 7 fix round (2026-08-23, chủ dự án chỉ đạo, gỡ hạn chế "không sửa file
+ * này" CHỈ cho hai thay đổi dưới): trần 6 từng cắt LẶNG (`.slice(0, 6)`, không
+ * log, không cảnh báo) — với entity không có hàng ở §3.1 (vd khách sạn),
+ * không có gì đối chiếu để biết cắt là đúng hay là mất nội dung. Sửa hai chỗ:
+ *   1. `max` — trần tuỳ chỉnh, mặc định 6 (đúng hợp đồng cho bốn entity §3.1).
+ *      Entity không có hàng ở §3.1 không bị ràng buộc trần đó (chỉ Luật 1: một
+ *      field một vùng), nên chỗ gọi có thể truyền `max` cao hơn.
+ *   2. Cắt phải ồn: vượt `max` thì `console.warn` lúc build, nêu rõ dư bao
+ *      nhiêu và field nào bị cắt — không còn cắt câm.
  */
 export interface Fact {
   /** Tên field trong 01-CONTENT_MODEL. Bộ kiểm Luật 1 đếm theo đây. */
@@ -23,12 +34,21 @@ export interface Props {
   facts: Fact[]
   /** true = dựng dạng danh sách dọc để nhét vào sidebar (≤ 2 ô). */
   inline?: boolean
+  /** Trần số ô hiển thị. Mặc định 6 — hợp đồng 06 §3.1. Entity không có hàng
+   *  ở §3.1 (chỉ ràng buộc bởi Luật 1, không ràng buộc bởi trần 6) có thể
+   *  truyền cao hơn để không bị cắt oan. */
+  max?: number
 }
 
-const { facts, inline = false } = Astro.props
-// Trần 6 ô là hợp đồng của 06, không phải lựa chọn thẩm mỹ. Quá 6 thì cắt và
-// để chỗ gọi tự sắp thứ tự ưu tiên — component không tự đoán cái nào quan trọng.
-const visible = facts.filter(f => f.visible).slice(0, 6)
+const { facts, inline = false, max = 6 } = Astro.props
+const allVisible = facts.filter(f => f.visible)
+// Quá `max` thì cắt CÓ TIẾNG — cắt câm là đúng thất bại "vùng biến mất, cổng
+// vẫn xanh" mà việc đóng Luật 1 tồn tại để loại bỏ.
+if (allVisible.length > max) {
+  const dropped = allVisible.slice(max).map(f => f.field).join(', ')
+  console.warn(`[FactStrip] ${allVisible.length} ô hiển thị vượt trần ${max} — cắt bớt: ${dropped}`)
+}
+const visible = allVisible.slice(0, max)
 const cols = Math.min(visible.length, 3)
 ---
 

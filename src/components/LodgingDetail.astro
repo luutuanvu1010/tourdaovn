@@ -7,7 +7,6 @@ import FAQ from './FAQ.astro'
 import Section from './Section.astro'
 import BookingCTA from './BookingCTA.astro'
 import ContactChannels from './ContactChannels.astro'
-import InfoCard from './InfoCard.astro'
 import { resolvePrice } from '../lib/resolver'
 import { formatNumber } from '../lib/dates'
 import { loadPrices } from '../lib/prices'
@@ -26,7 +25,6 @@ const { data, entityType, lang, nearby = [], contact = null } = Astro.props
 
 const t = uiCopy(lang)
 const isResort = entityType === 'resort'
-const isHotel = entityType === 'hotel'
 
 function hasPtContent(blocks: unknown[] | undefined | null): boolean {
   if (!blocks || blocks.length === 0) return false
@@ -65,38 +63,39 @@ const beachfront = isResort ? (data as ResortResult).beachfront : undefined
 const landArea = isResort ? (data as ResortResult).landArea : undefined
 const onSiteActivities = isResort ? (data as ResortResult).onSiteActivities : undefined
 
-const infoBarItems = isHotel ? [
-  { field: 'starRating', icon: '⭐', label: t('stars'), value: data.starRating != null ? `${starEmoji(data.starRating)} ${data.starRating}★` : '', visible: data.starRating != null },
-  { field: 'gia', icon: '🎫', label: t('priceFrom'), value: priceView?.label || '', visible: !!priceView?.label },
+// `hotel`/`resort` không có hàng ở 06 §3.1 — xem DRIFT_LOG DR-044. Quy tắc:
+// giữ nguyên bộ field đang có (union `infoBarItems` cũ ∪ `sidebarRows` cũ),
+// dồn về một vùng FactStrip, loại `gia` (giá không bao giờ vào facts — vẫn
+// render qua BookingCTA) và `sameAs` (luôn có vùng riêng, chuyển sang prop
+// `DetailLayout`). `starRating` giữ bản đầy đủ hơn (huy hiệu sao + số, từ
+// `infoBarItems` cũ) thay vì bản chỉ có số của `sidebarRows` cũ.
+//
+// `beachAccess` và `beachfront` là HAI field khác nhau (chuỗi mô tả cách ra
+// biển vs cờ boolean "sát biển ngay") — bản `infoBarItems` cũ gộp chúng vào
+// MỘT ô đổi tên field tuỳ nhánh dữ liệu; ở đây tách lại thành hai field riêng
+// như `sidebarRows` cũ đã làm, đúng nguyên tắc "field khác nhau không gộp"
+// (task-7-brief.md, ca `departureNote`/`tripOrigin`).
+//
+// `max` cao hơn trần mặc định 6 của FactStrip: khách sạn không có hàng ở
+// §3.1 nên không bị ràng buộc trần đó (chỉ Luật 1 — một field một vùng).
+// `facts.length` = đúng số field entity này khai (9 cho hotel, tới 12 cho
+// resort có đủ ba field riêng) nên không ô nào bị FactStrip tự cắt.
+const facts: { field: string; icon: string; label: string; value: string; href?: string; visible: boolean }[] = [
+  { field: 'starRating', icon: '⭐', label: t('starRating'), value: data.starRating != null ? `${starEmoji(data.starRating)} ${data.starRating}★` : '', visible: data.starRating != null },
   { field: 'beachAccess', icon: '🏖️', label: t('beach'), value: data.beachAccess || '', visible: !!data.beachAccess },
-  { field: 'checkinTime', icon: '🕐', label: t('checkin'), value: data.checkinTime || '', visible: !!data.checkinTime },
-] : [
-  { field: 'starRating', icon: '⭐', label: t('stars'), value: data.starRating != null ? `${starEmoji(data.starRating)} ${data.starRating}★` : '', visible: data.starRating != null },
-  { field: 'gia', icon: '🎫', label: t('priceFrom'), value: priceView?.label || '', visible: !!priceView?.label },
-  // Ô này đọc `beachfront` khi true, ngược lại đọc `data.beachAccess` (đúng như
-  // `value` bên dưới) — field theo cùng nhánh, không cố định một tên, để không
-  // gán nhầm field khi hai field thật khác nhau thay nhau nuôi cùng một ô.
-  { field: beachfront === true ? 'beachfront' : 'beachAccess', icon: '🏖️', label: t('beachfront'), value: beachfront === true ? t('beachfront') : (data.beachAccess || ''), visible: !!(beachfront === true || data.beachAccess) },
-  { field: 'checkinTime', icon: '🕐', label: t('checkin'), value: data.checkinTime || '', visible: !!data.checkinTime },
-]
-
-const sidebarRows: { field: string; icon: string; label: string; value: string; href?: string; visible: boolean }[] = [
-  { field: 'starRating', icon: '⭐', label: t('starRating'), value: data.starRating != null ? `${data.starRating}★` : '', visible: data.starRating != null },
-  { field: 'address', icon: '📍', label: t('address'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
   { field: 'checkinTime', icon: '🕐', label: t('checkin'), value: data.checkinTime || '', visible: !!data.checkinTime },
   { field: 'checkoutTime', icon: '🕐', label: t('checkout'), value: data.checkoutTime || '', visible: !!data.checkoutTime },
   { field: 'numberOfRooms', icon: '🛏️', label: t('rooms'), value: data.numberOfRooms != null ? `${data.numberOfRooms} ${t('roomsUnit')}` : '', visible: data.numberOfRooms != null },
   { field: 'petsAllowed', icon: '🐾', label: t('pets'), value: data.petsAllowed ? t('allowed') : t('no'), visible: data.petsAllowed !== undefined },
-  { field: 'beachAccess', icon: '🏖️', label: t('beach'), value: data.beachAccess || '', visible: !!data.beachAccess },
+  { field: 'address', icon: '📍', label: t('address'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
   // airportDist tính từ data.geo (computeAirportDist nhận data.geo làm tham số) — lấy field gốc, không lấy tên biến cục bộ.
   { field: 'geo', icon: '✈️', label: t('airport'), value: airportDist != null ? `~${airportDist} km` : '', visible: airportDist != null },
   { field: 'officialSource', icon: '🔗', label: t('officialWebsite'), value: hostLabel(data.officialSource), href: data.officialSource || undefined, visible: !!data.officialSource },
-  { field: 'sameAs', icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
 ]
 if (isResort) {
-  if (beachfront !== undefined) sidebarRows.push({ field: 'beachfront', icon: '🏖️', label: t('beachfront'), value: beachfront ? t('yes') : t('no'), visible: true })
-  if (landArea != null) sidebarRows.push({ field: 'landArea', icon: '📐', label: t('area'), value: `${formatNumber(landArea, lang)} m²`, visible: true })
-  if (onSiteActivities && onSiteActivities.length > 0) sidebarRows.push({ field: 'onSiteActivities', icon: '🎯', label: t('activities'), value: onSiteActivities.join(', '), visible: true })
+  if (beachfront !== undefined) facts.push({ field: 'beachfront', icon: '🏖️', label: t('beachfront'), value: beachfront ? t('yes') : t('no'), visible: true })
+  if (landArea != null) facts.push({ field: 'landArea', icon: '📐', label: t('area'), value: `${formatNumber(landArea, lang)} m²`, visible: true })
+  if (onSiteActivities && onSiteActivities.length > 0) facts.push({ field: 'onSiteActivities', icon: '🎯', label: t('activities'), value: onSiteActivities.join(', '), visible: true })
 }
 ---
 
@@ -107,10 +106,11 @@ if (isResort) {
   image={data.mainImage}
   gallery={data.gallery}
   containedInPlace={data.containedInPlace}
-  infoBarItems={infoBarItems}
+  sameAs={data.sameAs}
+  facts={facts}
+  factsMax={facts.length}
   sidebarSlots={[
     { name: 'booking', component: 'BookingCTA', visible: !!hasBooking || hasContactChannel, props: {} },
-    { name: 'info', component: 'InfoCard', visible: sidebarRows.some(r => r.visible), props: { rows: sidebarRows } },
     { name: 'map', component: 'Map', visible: !!(data.geo), props: {} },
   ]}
   nearbyTitle={t('similarStays')}
@@ -172,7 +172,6 @@ if (isResort) {
 
   {hasBooking && priceView && <BookingCTA slot="booking" priceText={priceView.label} ctaLabel={t('checkAvailability')} asOf={priceView.asOf} />}
   {hasContactChannel && <ContactChannels slot="booking" contact={contact} lang={lang} />}
-  {sidebarRows.some(r => r.visible) && <InfoCard slot="info" rows={sidebarRows} lang={lang} />}
   {data.geo && <MapView slot="map" geo={data.geo} title={data.title} height={240} />}
 </DetailLayout>
 

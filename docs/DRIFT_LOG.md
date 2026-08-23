@@ -635,7 +635,14 @@ Kiểm thực tế cùng ngày: `curl -sI https://tourdao.vn/` trả `200`, khô
 
 ## DR-044 — `06` §3.1 chưa khai vùng cho bốn entity còn lại
 
-**Trạng thái:** mở. Phát hiện 2026-08-23, Task 7 (đóng Luật 1).
+**Trạng thái:** mở (phần "bổ sung vào §3.1" vẫn chờ Cowork/chủ dự án — xem
+cập nhật 2026-08-23 bên dưới cho phần đã dồn vùng xong). Phát hiện 2026-08-23,
+Task 7 (đóng Luật 1).
+
+**Cập nhật 2026-08-23 (cùng ngày, sau ruling của chủ dự án ở DR-045):**
+`LodgingDetail` cũng đã dồn về `FactStrip` — không còn là trường hợp "chưa
+dồn" như ghi ban đầu bên dưới. Chi tiết cách xử lý (đo trên build thay vì
+trên nguồn, trần `max` tuỳ biến) ở DR-045.
 
 Ma trận §3.1 (v2.2, đọc thẳng bằng `luat1-post.ts`) chỉ khai bốn entity: Điểm
 tham quan, Địa danh, Trải nghiệm, Tour. `restaurant`, `specialty`, `event`,
@@ -659,7 +666,12 @@ Code.
 
 ## DR-045 — `LodgingDetail` không dồn được vào `FactStrip`: hơn 6 field, component có trần cứng
 
-**Trạng thái:** mở. Phát hiện 2026-08-23, Task 7.
+**Trạng thái:** **đã xử 2026-08-23**, cùng ngày phát hiện — chủ dự án ra ba
+ruling, xem "Cập nhật — ruling và cách xử" ở cuối mục này. Nguyên văn phần mở
+đầu bên dưới giữ làm bản ghi (đây là lý do Task 7 dừng lại và báo cáo, không
+phải mô tả sai).
+
+Phát hiện 2026-08-23, Task 7.
 
 `FactStrip.astro` (đã chốt, Task 7 không được sửa) tự cắt còn tối đa 6 ô hiển
 thị (`facts.filter(f => f.visible).slice(0, 6)`), đúng theo hợp đồng "tối đa
@@ -691,3 +703,93 @@ tả sai hiện trạng.
 
 Cần quyết định ở tầng Cowork/chủ dự án: chấp nhận hướng nào trong bốn hướng
 trên (hoặc hướng khác), rồi Task 8 (hoặc một task riêng) thực thi.
+
+---
+
+### Cập nhật — ruling và cách xử (2026-08-23)
+
+Chủ dự án ra ba ruling sau khi đọc mục trên:
+
+1. **Số liệu ban đầu đo sai chỗ.** Ước tính "9–12 field" đếm số khai báo
+   `field:` trong mã nguồn (`infoBarItems` + `sidebarRows`), không đếm số ô
+   THẬT SỰ render. Đo lại trên `dist/khach-san/*/index.html` (6 trang, kiểm
+   độc lập bằng `grep -o 'data-field="[a-zA-Z]*"'` trước khi tin, không chỉ
+   nhận số của chủ dự án) — union `data-field` trên cả 6 trang là đúng **6**:
+   `beachAccess, checkinTime, checkoutTime, numberOfRooms, petsAllowed,
+   starRating`. Không trang nào vượt 6. `address`, `geo` (khoảng cách sân
+   bay), `officialSource` khai trong mã nhưng cả 6 khách sạn thật hiện có đều
+   không có dữ liệu nên `visible:false`, không render — không phải field bị
+   cắt, là field vốn không có gì để hiện. Không có resort nào render (3
+   document resort trong Sanity đều thiếu field, không lên trang) nên
+   `beachfront`/`landArea`/`onSiteActivities` chưa từng xuất hiện trên build.
+2. **Nhưng nằm đúng ở trần 6 mà cắt câm là lỗi thật của `FactStrip.astro`** —
+   một field nữa xuất hiện sau này (resort có dữ liệu, hoặc khách sạn thêm
+   `address`) sẽ biến mất không dấu vết. Chủ dự án gỡ hạn chế "không sửa
+   `FactStrip.astro`" **chỉ cho hai thay đổi**: (a) prop `max` tuỳ biến, mặc
+   định vẫn 6; (b) `console.warn` lúc build khi số ô hiển thị vượt `max`, nêu
+   rõ field nào bị cắt. Đã làm — xem diff `src/components/FactStrip.astro`.
+3. **Chỉ `InfoBar.astro` bị xoá, không phải cả hai.** `InfoCard.astro` còn
+   sống — `ArticleDetail`, `OrganizationDetail`, `PersonDetail` (ngoài phạm
+   vi việc đóng Luật 1, không có hàng ở §3.1) vẫn import và render nó qua
+   slot `info` của `DetailLayout`. Xoá `InfoCard.astro` sẽ vỡ ba trang đó.
+   Ghi riêng ở DR-046.
+
+**Cách xử:** `LodgingDetail.astro` gộp `infoBarItems` + `sidebarRows` cũ
+thành một mảng `facts` duy nhất (9 field cho hotel, tới 12 cho resort đủ ba
+field riêng — giữ nguyên TOÀN BỘ field từng khai trong mã, không chỉ 6 field
+đang thật sự render, để không cắt oan khi dữ liệu tương lai đủ hơn), loại
+`gia` (giá không bao giờ vào `facts`) và `sameAs` (chuyển sang prop
+`DetailLayout`, dùng lại đường đã xây ở Task 6). Truyền
+`factsMax={facts.length}` xuống `DetailLayout` → `FactStrip`, tức trần bằng
+đúng số field khai báo — không ô nào bị cắt bởi component, kể cả khi tương
+lai có đủ dữ liệu resort. Cảnh báo `console.warn` mới của `FactStrip` vẫn là
+lưới an toàn nếu sau này ai thêm field vào mảng mà quên nâng `factsMax`.
+
+`InfoBar.astro` đã xoá (`git rm`) sau khi xác minh lại — không phải tin theo
+chủ dự án — mọi tham chiếu còn lại trong `src/` chỉ là comment, không phải
+import/render (`grep -rn "InfoBar" src/` trước khi xoá). `InfoCard.astro`
+giữ nguyên. `entity-layout-post.ts` cập nhật: đổi `'InfoBar'` → `'FactStrip'`
+trong danh sách primitive tầng 1 và hợp đồng tầng 3 (đổi tên biến
+`ENTITIES_WITH_INFOBAR`/`ENTITIES_WITHOUT_INFOBAR` thành
+`ENTITIES_WITH_FACTSTRIP`/`ENTITIES_WITHOUT_FACTSTRIP` cho nhất quán), giữ
+nguyên dòng `'src/components/InfoCard.astro'` trong danh sách primitive vì
+file đó còn thật.
+
+Kết quả đo trên `dist/` sau khi convert: xem `task-7-report.md` mục "Fix
+round — Lodging convert theo ruling".
+
+---
+
+## DR-046 — `InfoCard.astro` còn sống cho ba template ngoài phạm vi đóng Luật 1
+
+**Trạng thái:** mở (có chủ đích — không phải quên dọn).
+
+Kế hoạch đóng Luật 1 (Task 5–7) chỉ bao trùm sáu entity có/không có hàng ở
+`06` §3.1 dùng cặp `InfoBar`/`InfoCard`: Điểm tham quan, Địa danh, Trải
+nghiệm, Tour, Nhà hàng, Đặc sản, Sự kiện, Khách sạn — tất cả nay đã chuyển
+sang `FactStrip` (`InfoBar.astro` xoá ở Task 7 fix round, 2026-08-23). Ba
+template KHÔNG nằm trong phạm vi này — `ArticleDetail.astro`,
+`OrganizationDetail.astro`, `PersonDetail.astro` — vẫn `import InfoCard from
+'./InfoCard.astro'` và render `<InfoCard slot="info" rows={sidebarRows}
+lang={lang} />` bên trong `DetailLayout`. Xác nhận bằng
+`grep -rn "import InfoCard\|<InfoCard" src/` (2026-08-23): đúng ba file này,
+không file nào khác.
+
+Xoá `InfoCard.astro` bây giờ sẽ vỡ ba template đó (mất hẳn vùng info hiện
+đang render tác giả/tổ chức/liên hệ). `DetailLayout.astro` giữ nguyên
+`<slot name="info" slot="info" />` (đường forward cho `InfoCard`) và prop
+`infoBarItems?: unknown[]` (kiểu lỏng, không còn phụ thuộc `InfoBar.astro`)
+chỉ để ba template này khỏi vỡ kiểu khi còn truyền `infoBarItems={[]}` — xem
+comment tại chỗ trong `DetailLayout.astro`.
+
+Ba entity này (Bài viết, Tổ chức, Người) không có hàng ở `06` §3.1 (đúng như
+`restaurant`/`specialty`/`event`/`hotel` trước khi Task 7 xử — xem DR-044),
+và Luật 1 tầng A (lặp vùng) không bắt lỗi gì ở chúng vì `InfoCard` là vùng
+DUY NHẤT chúng dùng (không có `InfoBar` đi kèm để lặp). Nên việc này không
+phải một vi phạm Luật 1 đang mở — chỉ là một loose end: `InfoCard.astro`
+không còn là một nửa của cặp trùng lặp nữa, nhưng vẫn là một component "cũ"
+sống sót ngoài kế hoạch dọn dẹp hiện tại. Cần một quyết định riêng (có thể là
+Task 8 mở rộng, hoặc một task khác) nếu muốn ba template này cũng chuyển
+sang `facts`/`FactStrip`, hoặc chấp nhận `InfoCard.astro` là primitive lâu
+dài cho nhóm entity phi-địa-lý (Article/Organization/Person) — quyết định đó
+chưa có, ghi lại ở đây để không rơi mất.

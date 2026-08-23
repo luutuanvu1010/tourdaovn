@@ -7,8 +7,6 @@ import Breadcrumb from './Breadcrumb.astro'
 import Hero from './Hero.astro'
 import FactStrip from './FactStrip.astro'
 import type { Fact } from './FactStrip.astro'
-import InfoBar from './InfoBar.astro'
-import type { InfoBarItem } from './InfoBar.astro'
 import Sidebar from './Sidebar.astro'
 import type { Slot } from './Sidebar.astro'
 import NearbySection from './NearbySection.astro'
@@ -26,11 +24,19 @@ export interface Props {
   sameAs?: string[] | null
   /** Vùng "Thông tin nhanh" — 06 §3.1. Nơi DUY NHẤT của các field ngắn. */
   facts?: Fact[]
-  /** @deprecated Thay bằng `facts` (v3). Giữ cho tới khi Task 7 chuyển nốt sáu
-   *  template còn lại — DetailLayout dùng nó để render InfoBar + forward slot
-   *  `info` (InfoCard) y hệt hành vi cũ CHỈ cho template chưa chuyển. Template
-   *  nào truyền `facts` thì coi như đã chuyển, nhánh này tắt hẳn cho nó. */
-  infoBarItems?: InfoBarItem[]
+  /** Trần số ô hiển thị ở `FactStrip`. Không truyền = mặc định 6 (hợp đồng 06
+   *  §3.1 cho bốn entity có hàng trong ma trận). Entity không có hàng ở §3.1
+   *  (vd khách sạn — chỉ ràng buộc bởi Luật 1, không ràng buộc trần 6) truyền
+   *  cao hơn qua đây. Task 7 fix round, 2026-08-23. */
+  factsMax?: number
+  /** @deprecated Không còn render gì — `InfoBar` đã gỡ (Task 7 fix round,
+   *  2026-08-23, LodgingDetail là template cuối chuyển sang `facts`). Giữ
+   *  prop này (kiểu lỏng, không còn phụ thuộc `InfoBar.astro`) chỉ để
+   *  `ArticleDetail`/`OrganizationDetail`/`PersonDetail` — ba template ngoài
+   *  phạm vi việc đóng Luật 1, vẫn dùng `InfoCard` trực tiếp qua slot `info`,
+   *  xem DRIFT_LOG DR-046 — khỏi vỡ kiểu vì vẫn truyền `infoBarItems={[]}`.
+   *  Xoá hẳn khi ba template đó cũng dọn theo. */
+  infoBarItems?: unknown[]
   sidebarSlots: Slot[]
   nearbyTitle: string
   nearby: NearbyEntity[]
@@ -52,7 +58,7 @@ export interface Props {
 }
 
 const {
-  title, lang, entityType, image, gallery, containedInPlace, sameAs, facts, infoBarItems,
+  title, lang, entityType, image, gallery, containedInPlace, sameAs, facts, factsMax,
   sidebarSlots, nearbyTitle, nearby, updatedAt,
   badges, summary, speakable = false, jumpLinks, priceLabel, ctaHref, ctaLabel,
 } = Astro.props
@@ -116,12 +122,7 @@ const t = uiCopy(lang)
   </div>
 )}
 
-{/* Hàng cũ — chỉ còn dùng bởi sáu template chưa chuyển sang `facts` (Task 7).
-   Template đã chuyển không truyền `infoBarItems` nữa nên nhánh này tắt hẳn
-   cho chúng; xoá khi Task 7 xong. */}
-{infoBarItems && infoBarItems.length > 0 && <InfoBar items={infoBarItems} />}
-
-{!factsInline && factsVisible.length > 0 && <FactStrip facts={facts!} />}
+{!factsInline && factsVisible.length > 0 && <FactStrip facts={facts!} max={factsMax} />}
 
 <div class="container two-col">
   <div class="content-main">
@@ -146,12 +147,15 @@ const t = uiCopy(lang)
   {/* stickyBar: Sidebar cộng chiều cao thanh dính vào chỗ dính của nó (DR-033). */}
   <Sidebar slots={effectiveSlots} stickyBar={showStickyBar}>
     <slot name="booking" slot="booking" />
-    {/* Forward cũ cho InfoCard — chỉ có nội dung khi template chưa chuyển còn
-       truyền <InfoCard slot="info">. Template đã chuyển không truyền gì vào
-       slot `info` của chính DetailLayout nữa nên nhánh này trống, không render
-       gì. Xoá khi Task 7 xong. */}
+    {/* Forward cho InfoCard — VẪN CẦN, không phải hàng chết. Ba template
+       ngoài phạm vi việc đóng Luật 1 (ArticleDetail, OrganizationDetail,
+       PersonDetail — không có hàng ở 06 §3.1, không dùng FactStrip) vẫn
+       truyền <InfoCard slot="info"> qua đây. Mọi template có hàng ở §3.1 đã
+       chuyển sang `facts` không truyền gì vào slot này nên nhánh trống, không
+       render thừa. Xem DRIFT_LOG DR-046 — không xoá tới khi ba template đó
+       cũng chuyển hoặc có quyết định khác. */}
     <slot name="info" slot="info" />
-    {factsInline && <FactStrip facts={facts!} inline slot="info" />}
+    {factsInline && <FactStrip facts={facts!} inline max={factsMax} slot="info" />}
     <slot name="map" slot="map" />
     <slot name="about" slot="about" />
   </Sidebar>
