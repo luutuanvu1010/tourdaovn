@@ -660,7 +660,7 @@ Kiểm thực tế cùng ngày: `curl -sI https://tourdao.vn/` trả `200`, khô
 
 ## DR-044 — `PY3`/`PY4`/`PY5` so sai kiểu `bookingRef`, ba validator giá gần như vô hiệu
 
-**Trạng thái:** đã xử 2026-08-22 — Task 17 sửa `validatePY3`/`validatePY4`/`validatePY5`
+**Trạng thái:** đã xử 2026-08-23 — Task 17 sửa `validatePY3`/`validatePY4`/`validatePY5`
 (`scripts/validators/py1-py8.ts`) đọc `bookingRef?.key` qua một hàm dùng chung `refKey()` thay
 vì `typeof doc.bookingRef === 'string'`; xem
 `.superpowers/sdd/2026-08-22-dat-tour/task-17-report.md`. Chạy lại `npm --prefix scripts run
@@ -740,48 +740,18 @@ Task 17 sửa `PY4`/`PY5` sẽ khiến cổng validator tự báo cả hai mục
 
 ---
 
-## DR-046 — Đổi slug hàng loạt 2026-08-22 làm 6 URL `/tour/` sắp biến mất, `_redirects` không có dòng R3 nào
+## DR-046 — Sáu URL `/tour/` chết sau đợt đổi slug 22/08; lệch luật R3 có ý thức
 
-**Trạng thái:** mở. Phát hiện 2026-08-23 khi luồng đặt tour dựng lại site để đối chiếu dữ liệu.
-Không thuộc phạm vi module đặt tour; ghi ở đây để không rơi, người quyết là chủ dự án.
+**Trạng thái:** đã quyết 2026-08-23 — xem `QĐ-2026-08-23-01` trong `docs/DECISIONS.md`. Mục này
+không giữ số liệu riêng; quyết định đó là bản ghi đầy đủ.
 
-`04-CONSTRAINTS` §1c luật R3: một URL đã từng tồn tại **không được biến mất câm** — đổi đường dẫn
-thì phải có một dòng 301 trong `public/_redirects`, gỡ hẳn thì 410.
+Đợt biên tập nội dung 2026-08-22 (xem `DR-045`) đổi slug nhiều tour. Sau khi phát hành, sáu URL
+`/tour/` cũ trả 404 mà `public/_redirects` không có dòng 301 nào — lệch `04-CONSTRAINTS` §1c luật
+R3 ("một URL đã từng tồn tại không được biến mất câm"). Chủ dự án xác nhận đợt đổi slug là **có
+chủ ý** và **chấp nhận bỏ** sáu URL đó; `QĐ-2026-08-23-01` giữ danh sách sáu URL, ánh xạ cũ→mới
+phòng khi sau này muốn thêm 301, và mức tin của ánh xạ đó.
 
-Đợt biên tập nội dung 2026-08-22 (xem `DR-045`) đổi slug nhiều tour. So `sitemap-vi.xml` của
-production với một bản `astro build` chạy trên nội dung Sanity hiện tại:
-
-- production: **21** URL `/tour/`; bản dựng mới: **20**; giữ nguyên **14**; **mất 6**; mới **6**.
-- Sáu URL sẽ mất: `tour-3-dao-hon-mun-mini-beach-lang-chai`, `tour-3-dao-nha-trang-hon-mun-hon-tam`,
-  `tour-3-dao-nha-trang-mini-beach-hon-tam`, `ve-hon-tam-seaday-tour-03`,
-  `ve-hon-tam-tam-bun-tam-bien`, `ve-hon-tam-tam-tron-goi`.
-- Sáu URL mới: `tour-3-dao-hon-mun`, `tour-3-dao-mini-beach`, `tour-3-dao-nha-trang`,
-  `tour-hon-tam-tam-bun-tam-bien`, `ve-hon-tam-tam-bien`, `ve-hon-tam-tron-goi`.
-- Chín slug ngắn (`bai-soi`, `bai-tranh`, `du-thuyen`, `hon-mun`, `hon-tam`, `lang-chai`,
-  `mini-beach`, `vinh-san-ho`, `vinwonders`) nằm trong nhóm **giữ nguyên** — không mất.
-- `public/_redirects` hiện có **0** dòng R3 (chính file tự ghi "Hiện chưa có dòng R3 nào").
-
-**Cổng lẽ ra bắt được nhưng sẽ không bắt.** Cổng so sitemap nằm ở `npm --prefix scripts run
-validate:post`. Đường dựng tự động chạy `build:ci`, mà `build:ci` = `npm run build` =
-`astro check && astro build` — **không gọi** `validate:post`. Nên nếu đẩy lên mà không chạy tay
-thì R3 vỡ im lặng.
-
-**Năm trong sáu cặp cũ → mới truy được**, nhờ một sự tình cờ: Task 11 của module đặt tour đặt
-`bookingRef.key` = slug vào 2026-08-22 07:58Z, *trước* khi ai đổi slug, nên `key` hiện là một
-bản ghi của slug cũ:
-
-| Slug cũ (`bookingRef.key`) | Slug mới | `_id` |
-|---|---|---|
-| `tour-3-dao-hon-mun-mini-beach-lang-chai` | `tour-3-dao-mini-beach` | `0cab212b` |
-| `tour-3-dao-nha-trang-hon-mun-hon-tam` | `tour-3-dao-hon-mun` | `5644d7a5` |
-| `tour-3-dao-nha-trang-mini-beach-hon-tam` | `tour-3-dao-vip-nha-trang` | `9ebebf78` |
-| `ve-hon-tam-seaday-tour-03` | `ve-hon-tam-tam-bien` | `702a7d9a` |
-| `ve-hon-tam-tam-bun-tam-bien` | `tour-hon-tam-tam-bun-tam-bien` | `e2cadbb4` |
-
-Cặp thứ sáu `ve-hon-tam-tam-tron-goi` **không suy được** — không document nào còn mang nó làm
-slug lẫn làm `bookingRef.key`. Đây cũng chính là dòng giá mồ côi ở `DR-045`.
-
-**Cảnh báo về độ tin của bảng trên:** năm cặp là *suy* từ việc `key` trùng slug cũ, không phải từ
-một bản ghi "đã đổi tên" trong Sanity. Nó khớp với sitemap production, nhưng nếu đợt đổi slug có
-**gộp hoặc tách** tour thì 301 một-đối-một là sai. Chủ dự án phải nhìn qua trước khi viết
-`_redirects`.
+**Phần còn mở, không thuộc quyết định trên:** `build:ci` = `npm run build` = `astro check &&
+astro build`, **không gọi** `npm --prefix scripts run validate:post` — mà cổng R3 (so sitemap
+production với sitemap bản dựng) nằm ở đó. Nên đường dựng tự động không bao giờ bắt được URL biến
+mất; lần này người bắt là một tác nhân, không phải máy. Chưa quyết vá thế nào.
