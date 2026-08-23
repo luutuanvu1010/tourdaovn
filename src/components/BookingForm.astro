@@ -9,7 +9,7 @@ import { uiCopy } from '../lib/uiCopy'
 import { formatPrice } from '../lib/renderer'
 import { availablePaxCodes, computeQuote, emptyPax, type PaxCode, type PriceTable } from '../lib/booking/quote'
 import { addDaysISO, todayVN } from '../lib/booking/vn-date'
-import { LIMITS } from '../lib/booking/schema'
+import { LIMITS, MSG } from '../lib/booking/schema'
 
 export interface Props {
   lang: Lang
@@ -78,6 +78,9 @@ if (!turnstileSiteKey) {
   data-submit-text={t('bookingSubmit')}
   data-total-max={String(LIMITS.TOTAL_MAX)}
   data-per-type-max={String(LIMITS.PER_TYPE_MAX)}
+  data-date-required={MSG.dateRequired}
+  data-date-label={t('bookingDepartDate')}
+  data-subtotal-label={t('bookingSubtotal')}
 >
   <input type="hidden" name="tourSlug" value={tourSlug} />
   <input type="hidden" name="tourTitle" value={tourTitle} />
@@ -329,7 +332,7 @@ if (!turnstileSiteKey) {
 
     openBtn.addEventListener('click', () => {
       clearErrs()
-      if (!dateEl.value) { showErr('departDate', dateEl.validationMessage || 'Chọn ngày khởi hành.'); dateEl.focus(); return }
+      if (!dateEl.value) { showErr('departDate', dateEl.validationMessage || form.dataset.dateRequired || ''); dateEl.focus(); return }
       step2.hidden = false
       openBtn.hidden = true
       q<HTMLInputElement>('[name="name"]')?.focus()
@@ -384,10 +387,10 @@ if (!turnstileSiteKey) {
       summary.replaceChildren()
       // dateEl.labels không dùng được ổn định trong kiểu lib.dom qua astro check — lấy
       // trực tiếp nhãn <label for="bf-date"> theo id, giữ đúng ngữ nghĩa mà không đụng kiểu.
-      const dateLabel = form.querySelector('label[for="bf-date"]')?.textContent || 'Ngày'
+      const dateLabel = form.querySelector('label[for="bf-date"]')?.textContent || form.dataset.dateLabel || ''
       const lines: [string, string][] = [[form.querySelector<HTMLInputElement>('[name="tourTitle"]')!.value, ''], [dateLabel, dateEl.value.split('-').reverse().join('/')]]
       if (quote) for (const l of quote.lines) lines.push([`${rows.get(l.code)?.label ?? l.code} × ${l.count}`, formatPrice(l.subtotal, 'vi')])
-      if (quote) lines.push([totalEl.closest('.bf__total')?.querySelector('span')?.textContent || 'Tạm tính', formatPrice(quote.total, 'vi')])
+      if (quote) lines.push([totalEl.closest('.bf__total')?.querySelector('span')?.textContent || form.dataset.subtotalLabel || '', formatPrice(quote.total, 'vi')])
       for (const [a, b] of lines) {
         const div = document.createElement('div'); div.className = 'bf__line'
         const s1 = document.createElement('span'); s1.textContent = a
