@@ -490,11 +490,48 @@ Kiểm được, đặt ra trước khi thi công. Im lặng là trượt.
    không phá `not_found_handling`).
 7. BK1: `grep -l "lib/prices\|lib/sanity\|lib/resolver" src/pages/api src/lib/booking` rỗng.
    BK4: `git grep -n "re_\|ZALO_BOT_TOKEN=\|TURNSTILE_SECRET_KEY="` rỗng; `wrangler secret list`
-   đủ 5 tên.
+   đủ **8** tên (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SES_REGION`,
+   `BOOKING_NOTIFY_EMAIL`, `ZALO_BOT_TOKEN`, `ZALO_BOT_CHAT_IDS`, `TURNSTILE_SECRET_KEY`,
+   `IP_HASH_SALT`). "5 tên" là con số của bản spec đầu, trước khi `QĐ-2026-08-22-07` đổi một
+   khoá nhà cung cấp email thành ba biến `AWS_*` và trước khi F4 tách `IP_HASH_SALT` ra.
 8. Lighthouse mobile trang tour có form: performance ≥ 90, accessibility ≥ 95 (`04` §3).
 9. `npm --prefix scripts run validate` (hoặc gọi tay `py1-py8`) với `prices.yaml` có
    `paxRates` → xanh; thêm khoá lạ → fail đúng mã PY7.
 10. `npm run audit:spec` không đỏ hơn baseline (G1/G3/G4).
+11. **`_worker.js` không lộ ra ngoài.** `curl -I https://<preview>/_worker.js/index.js` phải
+    trả **404** (kiểm luôn `/_routes.json`). `public/.assetsignore` đã loại hai đường dẫn này
+    khỏi lần tải asset lên, nhưng tới trước tiêu chí này **không có cổng nào canh việc đó còn
+    đúng** — một lần đổi adapter hay đổi `directory` của `[assets]` là mã Worker thành asset
+    tĩnh tải về được, kèm mọi thứ nướng trong đó.
+12. **`_redirects` còn hiệu lực sau khi `wrangler.toml` có `main`.** Luật **R3** của
+    `04-CONSTRAINTS` §1c (URL đã từng tồn tại không được biến mất câm) đứng hoàn toàn trên file
+    này, mà từ ADR-0027 site có Worker chạy trước asset — phải chứng minh Worker không nuốt mất
+    nó. Cách kiểm: thêm một dòng thử vào `public/_redirects`
+    (`/kiem-redirect-tam  /  301`), `npm run deploy:preview`,
+    `curl -sI https://<preview>/kiem-redirect-tam` phải trả **301** kèm `location: /`, rồi
+    **gỡ dòng đó ra** và deploy lại. Không để dòng thử ở lại.
+13. **Bốn hạng mục phải kiểm trên trình duyệt thật** (Task 12 không kiểm được vì extension
+    không kết nối; chúng nằm trong mục "điều còn lo ngại" của báo cáo task đó, chỗ không ai đọc
+    lại, nên đưa lên đây thì mới thành cổng):
+    a. **Bấm bộ đếm số người** — dấu +/− đổi số thật, không xuống dưới 1 người lớn, không vượt
+       20 mỗi hạng, không vượt 30 một đơn, và dòng "Tạm tính" đổi theo ngay.
+    b. **Mở bước 2 và đưa tiêu điểm** — bấm "Đặt tour" thì phần thông tin khách hiện ra và
+       tiêu điểm nhảy vào ô Họ và tên; bấm "Quay lại" thì tiêu điểm về đúng nút "Đặt tour".
+    c. **Giao diện ≤ 640px** — trên bề rộng 360px và 640px: không tràn ngang, bộ đếm không vỡ
+       hàng, nút bấm đủ lớn để chạm, thanh dính không che nút gửi.
+    d. **Tắt JavaScript bằng DevTools** — thấy dòng `<noscript>` kèm Zalo/hotline; bấm gửi thì
+       nhận **trang HTML** báo lỗi có nút Zalo (không phải JSON thô, không phải trang trắng).
+14. **Xoá dòng đơn thử khỏi D1 production sau khi nghiệm thu.** `npm run deploy:preview` dùng
+    **chung D1 thật** — không có cơ sở riêng cho bản thử — nên mọi đơn gửi ở mục 4 và mục 5 là
+    dòng thật trong bảng `booking`. Xong nghiệm thu thì xoá theo mã đơn đã ghi lại:
+
+    ```
+    env -u CLOUDFLARE_API_TOKEN -u CF_API_TOKEN npx wrangler d1 execute tourdao-booking \
+      --remote --env-file /dev/null --command "DELETE FROM booking WHERE code IN ('TD-…','TD-…')"
+    ```
+
+    Rồi `SELECT COUNT(*) FROM booking` phải về **0** trước khi mở cho khách thật. Xoá theo mã,
+    **không** `DELETE FROM booking` trần.
 
 ## 8. Còn nợ (ghi để không rơi)
 
