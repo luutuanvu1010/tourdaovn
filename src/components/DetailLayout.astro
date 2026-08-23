@@ -50,6 +50,9 @@ const jumps = jumpLinks ?? []
 // render — vùng rỗng ẩn hẳn, 06-BINDING_MAP quyết định nền 2.
 const showStickyBar = jumps.length > 0 || !!priceLabel || !!(ctaHref && ctaLabel)
 
+// CTA là neo trong trang (#dat-tour) thì không mở tab mới; link ngoài (Zalo) mới mở tab.
+const ctaExternal = !!ctaHref && !ctaHref.startsWith('#')
+
 const t = uiCopy(lang)
 ---
 
@@ -73,7 +76,7 @@ const t = uiCopy(lang)
       <div class="sticky-bar__action">
         {priceLabel && <span class="sticky-bar__price">{priceLabel}</span>}
         {ctaHref && ctaLabel && (
-          <a class="sticky-bar__cta" href={ctaHref} target="_blank" rel="noopener">{ctaLabel}</a>
+          <a class="sticky-bar__cta" href={ctaHref} {...(ctaExternal ? { target: '_blank', rel: 'noopener' } : {})}>{ctaLabel}</a>
         )}
       </div>
     </div>
