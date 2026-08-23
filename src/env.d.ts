@@ -6,14 +6,18 @@
 // không giá trị — giá trị sống ở `wrangler secret` và `.dev.vars` (BK4).
 interface Env {
   BOOKING_DB: import('@cloudflare/workers-types').D1Database
-  RESEND_API_KEY?: string
+  AWS_ACCESS_KEY_ID?: string
+  AWS_SECRET_ACCESS_KEY?: string
+  AWS_SES_REGION?: string
   BOOKING_NOTIFY_EMAIL?: string
   ZALO_BOT_TOKEN?: string
   ZALO_BOT_CHAT_IDS?: string
   TURNSTILE_SECRET_KEY?: string
   // Muối băm IP cho tần suất — RIÊNG với TURNSTILE_SECRET_KEY (F4, review Task 8): xoay khoá
   // Turnstile không được kéo theo việc mọi ip_hash đã lưu bỗng vô nghĩa. Runbook Task 13 nay
-  // là 6 bí mật (thêm biến này).
+  // là 8 giá trị phải `wrangler secret put` (thêm biến này; và QĐ-2026-08-22-07 đổi một khoá API
+  // của nhà cung cấp email cũ thành ba biến AWS ở trên — AWS_SES_REGION không bí mật nhưng vẫn
+  // phải đi đường này vì wrangler.toml không có [vars], BK4).
   IP_HASH_SALT?: string
 }
 

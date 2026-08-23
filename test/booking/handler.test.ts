@@ -17,14 +17,14 @@ function payload(over: Record<string, unknown> = {}) {
   }
 }
 
-/** fetch giả: Turnstile theo token, Resend/Zalo ghi lại lời gọi. */
-function fakeFetch(opts: { resendStatus?: number; zaloThrows?: boolean } = {}) {
+/** fetch giả: Turnstile theo token, SES/Zalo ghi lại lời gọi. */
+function fakeFetch(opts: { sesStatus?: number; zaloThrows?: boolean } = {}) {
   const calls: { url: string; body: any }[] = []
   const f = vi.fn(async (url: string, init?: RequestInit) => {
     const body = init?.body ? JSON.parse(String(init.body)) : {}
     calls.push({ url, body })
     if (url.includes('turnstile')) return new Response(JSON.stringify({ success: body.response === TOK, 'error-codes': ['invalid-input-response'] }))
-    if (url.includes('resend.com')) return new Response('{}', { status: opts.resendStatus ?? 200 })
+    if (url.includes('amazonaws.com')) return new Response('{}', { status: opts.sesStatus ?? 200 })
     if (url.includes('zaloplatforms')) { if (opts.zaloThrows) throw new Error('zalo down'); return new Response(JSON.stringify({ ok: true })) }
     return new Response('not found', { status: 404 })
   }) as unknown as typeof fetch
@@ -35,7 +35,7 @@ function mkEnv(over: Partial<BookingEnv> = {}): BookingEnv {
   // IP_HASH_SALT: thêm ở review Task 8 (F4) — handler nay đòi muối RIÊNG cho ip_hash, không
   // còn tụt về hằng số 'dev' khi thiếu. Không đặt thì ca "tần suất" bên dưới sẽ không còn ai
   // đếm được (ipHash luôn null), phá vỡ khẳng định 429.
-  return { BOOKING_DB: env.BOOKING_DB, TURNSTILE_SECRET_KEY: 'secret', RESEND_API_KEY: 'rk', BOOKING_NOTIFY_EMAIL: 'ops@tourdao.vn', ZALO_BOT_TOKEN: 'zt', ZALO_BOT_CHAT_IDS: '111', IP_HASH_SALT: 'test-salt', ...over }
+  return { BOOKING_DB: env.BOOKING_DB, TURNSTILE_SECRET_KEY: 'secret', AWS_ACCESS_KEY_ID: 'AKIDEXAMPLE', AWS_SECRET_ACCESS_KEY: 'sekret', AWS_SES_REGION: 'ap-southeast-1', BOOKING_NOTIFY_EMAIL: 'ops@tourdao.vn', ZALO_BOT_TOKEN: 'zt', ZALO_BOT_CHAT_IDS: '111', IP_HASH_SALT: 'test-salt', ...over }
 }
 
 function mkCtx() {
@@ -81,10 +81,10 @@ describe('handleBooking', () => {
     expect(row?.phone).toBe('0905123456')
     expect(row?.notify_email).toBe('sent')
     expect(row?.notify_zalo).toBe('sent')
-    expect(calls.map(c => c.url)).toEqual(expect.arrayContaining([expect.stringContaining('turnstile'), 'https://api.resend.com/emails', expect.stringContaining('/botzt/sendMessage')]))
-    const resend = calls.find(c => c.url.includes('resend'))!
-    expect(resend.body.to).toEqual(['ops@tourdao.vn'])
-    expect(resend.body.from).toContain('@tourdao.vn')
+    expect(calls.map(c => c.url)).toEqual(expect.arrayContaining([expect.stringContaining('turnstile'), 'https://email.ap-southeast-1.amazonaws.com/v2/email/outbound-emails', expect.stringContaining('/botzt/sendMessage')]))
+    const ses = calls.find(c => c.url.includes('amazonaws.com'))!
+    expect(ses.body.Destination.ToAddresses).toEqual(['ops@tourdao.vn'])
+    expect(ses.body.FromEmailAddress).toContain('@tourdao.vn')
   })
 
   it('honeypot có chữ → 200 mã giả, KHÔNG lưu, KHÔNG báo', async () => {
@@ -148,7 +148,7 @@ describe('handleBooking', () => {
   })
 
   it('notifier hỏng → vẫn 201; cột notify ghi failed', async () => {
-    const { f } = fakeFetch({ resendStatus: 500, zaloThrows: true }); const { ctx, flush } = mkCtx()
+    const { f } = fakeFetch({ sesStatus: 500, zaloThrows: true }); const { ctx, flush } = mkCtx()
     const res = await handleBooking(req(payload()), mkEnv(), ctx, { fetchImpl: f, now: () => NOW })
     expect(res.status).toBe(201)
     const code = ((await res.json()) as any).code

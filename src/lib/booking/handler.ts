@@ -7,7 +7,7 @@ import { brand, site } from '../../site.config'
 import { generateBookingCode } from './code'
 import { renderBookingPage } from './html'
 import { notifyAll, type Notifier } from './notify/index'
-import { createResendNotifier } from './notify/resend'
+import { createSesNotifier } from './notify/ses'
 import { createZaloNotifier } from './notify/zalo'
 import { LIMITS, MSG, parseBookingPayload, validateBooking, type BookingValid } from './schema'
 import { countRecentByIp, findRecentDuplicate, insertBooking, isUniqueViolation, updateNotifyStatus, type NewBooking } from './store'
@@ -17,7 +17,9 @@ import { formatPrice } from '../renderer'
 
 export type BookingEnv = {
   BOOKING_DB: D1Database
-  RESEND_API_KEY?: string
+  AWS_ACCESS_KEY_ID?: string
+  AWS_SECRET_ACCESS_KEY?: string
+  AWS_SES_REGION?: string
   BOOKING_NOTIFY_EMAIL?: string
   ZALO_BOT_TOKEN?: string
   ZALO_BOT_CHAT_IDS?: string
@@ -104,7 +106,7 @@ function summaryLines(v: BookingValid, code: string): string[] {
 function defaultNotifiers(env: BookingEnv, deps: HandlerDeps): Notifier[] {
   const host = new URL(site.url).host
   return [
-    createResendNotifier({ apiKey: env.RESEND_API_KEY, to: env.BOOKING_NOTIFY_EMAIL, from: deps.fromEmail ?? `${brand.name} <dat-tour@${host}>`, fetchImpl: deps.fetchImpl }),
+    createSesNotifier({ accessKeyId: env.AWS_ACCESS_KEY_ID, secretAccessKey: env.AWS_SECRET_ACCESS_KEY, region: env.AWS_SES_REGION, to: env.BOOKING_NOTIFY_EMAIL, from: deps.fromEmail ?? `${brand.name} <dat-tour@${host}>`, fetchImpl: deps.fetchImpl }),
     createZaloNotifier({ token: env.ZALO_BOT_TOKEN, chatIds: env.ZALO_BOT_CHAT_IDS, fetchImpl: deps.fetchImpl }),
   ]
 }

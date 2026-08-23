@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { notifyAll } from '../../src/lib/booking/notify/index'
 import { formatHtml, formatSubject, formatText } from '../../src/lib/booking/notify/format'
-import { createResendNotifier } from '../../src/lib/booking/notify/resend'
+import { createSesNotifier } from '../../src/lib/booking/notify/ses'
 import { ZALO_BOT_BASE, createZaloNotifier } from '../../src/lib/booking/notify/zalo'
 import type { NewBooking } from '../../src/lib/booking/store'
 
@@ -35,29 +35,70 @@ describe('format', () => {
   })
 })
 
-describe('resend', () => {
-  it('thiếu apiKey hoặc to → skipped, không gọi mạng', async () => {
+describe('ses', () => {
+  // QĐ-2026-08-22-07: email đi qua Amazon SES, không qua Resend. Khác biệt cốt lõi là SES không
+  // nhận API key — mọi lời gọi phải ký SigV4 (đúng đắn của chữ ký kiểm riêng ở sigv4.test.ts).
+  const creds = { accessKeyId: 'AKIDEXAMPLE', secretAccessKey: 'sekret', region: 'ap-southeast-1' }
+
+  it('thiếu bất kỳ bí mật nào, hoặc to rỗng → skipped, không gọi mạng', async () => {
     const f = okFetch()
-    expect(await createResendNotifier({ apiKey: '', to: 'x@y.z', from: 'a@b.c', fetchImpl: f }).send(b)).toBe('skipped')
-    expect(await createResendNotifier({ apiKey: 'k', to: '', from: 'a@b.c', fetchImpl: f }).send(b)).toBe('skipped')
+    expect(await createSesNotifier({ ...creds, accessKeyId: '', to: 'x@y.z', from: 'a@b.c', fetchImpl: f }).send(b)).toBe('skipped')
+    expect(await createSesNotifier({ ...creds, secretAccessKey: '', to: 'x@y.z', from: 'a@b.c', fetchImpl: f }).send(b)).toBe('skipped')
+    expect(await createSesNotifier({ ...creds, region: '', to: 'x@y.z', from: 'a@b.c', fetchImpl: f }).send(b)).toBe('skipped')
+    expect(await createSesNotifier({ ...creds, to: '', from: 'a@b.c', fetchImpl: f }).send(b)).toBe('skipped')
+    // Khẳng định quan trọng: skipped phải là "chưa hề gọi mạng", không phải "gọi rồi bỏ kết quả".
     expect(f).not.toHaveBeenCalled()
   })
-  it('gửi đúng endpoint, bearer, to nhiều địa chỉ, reply_to email khách → sent', async () => {
-    const f = okFetch()
-    const n = createResendNotifier({ apiKey: 'k', to: 'a@tourdao.vn, b@tourdao.vn', from: 'Tour Đảo <dat-tour@tourdao.vn>', fetchImpl: f })
+
+  it('gửi đúng endpoint theo vùng, ToAddresses nhiều địa chỉ, ReplyToAddresses email khách → sent', async () => {
+    const f = okFetch(200, { MessageId: 'x' })
+    const n = createSesNotifier({ ...creds, to: 'a@tourdao.vn, b@tourdao.vn', from: 'Tour Đảo <dat-tour@tourdao.vn>', fetchImpl: f })
     expect(await n.send(b)).toBe('sent')
     const [url, init] = (f as any).mock.calls[0]
-    expect(url).toBe('https://api.resend.com/emails')
-    expect(init.headers.Authorization).toBe('Bearer k')
+    expect(url).toBe('https://email.ap-southeast-1.amazonaws.com/v2/email/outbound-emails')
+    expect(init.method).toBe('POST')
+    expect(init.headers['Content-Type']).toBe('application/json')
     const body = JSON.parse(init.body)
-    expect(body.to).toEqual(['a@tourdao.vn', 'b@tourdao.vn'])
-    expect(body.reply_to).toBe('a@example.com')
-    expect(body.subject).toBe(formatSubject(b))
+    expect(body.FromEmailAddress).toBe('Tour Đảo <dat-tour@tourdao.vn>')
+    expect(body.Destination.ToAddresses).toEqual(['a@tourdao.vn', 'b@tourdao.vn'])
+    expect(body.ReplyToAddresses).toEqual(['a@example.com'])
   })
+
+  it('thân JSON đúng hình dạng Content.Simple của SES v2', async () => {
+    const f = okFetch(200, { MessageId: 'x' })
+    await createSesNotifier({ ...creds, to: 'ops@tourdao.vn', from: 'a@b.c', fetchImpl: f }).send(b)
+    const body = JSON.parse((f as any).mock.calls[0][1].body)
+    expect(body.Content.Simple).toEqual({
+      Subject: { Data: formatSubject(b), Charset: 'UTF-8' },
+      Body: {
+        Text: { Data: formatText(b), Charset: 'UTF-8' },
+        Html: { Data: formatHtml(b), Charset: 'UTF-8' },
+      },
+    })
+  })
+
+  it('request được ký SigV4: Authorization là AWS4-HMAC-SHA256 đúng phạm vi ses của vùng', async () => {
+    const f = okFetch(200, { MessageId: 'x' })
+    const n = createSesNotifier({ ...creds, to: 'ops@tourdao.vn', from: 'a@b.c', fetchImpl: f, now: () => new Date('2026-09-01T03:00:00Z') })
+    expect(await n.send(b)).toBe('sent')
+    const h = (f as any).mock.calls[0][1].headers
+    expect(h.Authorization).toMatch(/^AWS4-HMAC-SHA256 /)
+    expect(h.Authorization).toContain('Credential=AKIDEXAMPLE/20260901/ap-southeast-1/ses/aws4_request')
+    expect(h['x-amz-date']).toBe('20260901T030000Z')
+    expect(h['x-amz-content-sha256']).toMatch(/^[0-9a-f]{64}$/)
+  })
+
+  it('khách không cho email → BỎ HẲN khoá ReplyToAddresses, không gửi mảng rỗng', async () => {
+    const f = okFetch(200, { MessageId: 'x' })
+    await createSesNotifier({ ...creds, to: 'ops@tourdao.vn', from: 'a@b.c', fetchImpl: f }).send({ ...b, email: null })
+    const body = JSON.parse((f as any).mock.calls[0][1].body)
+    expect('ReplyToAddresses' in body).toBe(false)
+  })
+
   it('HTTP lỗi → failed:http <mã>; mạng ném → failed:<message>', async () => {
-    expect(await createResendNotifier({ apiKey: 'k', to: 'x@y.z', from: 'a@b.c', fetchImpl: okFetch(422, { message: 'bad' }) }).send(b)).toBe('failed:http 422')
+    expect(await createSesNotifier({ ...creds, to: 'x@y.z', from: 'a@b.c', fetchImpl: okFetch(403, { message: 'bad' }) }).send(b)).toBe('failed:http 403')
     const boom = vi.fn(async () => { throw new Error('ECONN') }) as unknown as typeof fetch
-    expect(await createResendNotifier({ apiKey: 'k', to: 'x@y.z', from: 'a@b.c', fetchImpl: boom }).send(b)).toBe('failed:ECONN')
+    expect(await createSesNotifier({ ...creds, to: 'x@y.z', from: 'a@b.c', fetchImpl: boom }).send(b)).toBe('failed:ECONN')
   })
 })
 
