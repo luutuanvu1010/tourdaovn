@@ -4,6 +4,8 @@ import { uiCopy } from '../lib/uiCopy'
 import { formatDate } from '../lib/dates'
 import Breadcrumb from './Breadcrumb.astro'
 import Hero from './Hero.astro'
+import FactStrip from './FactStrip.astro'
+import type { Fact } from './FactStrip.astro'
 import InfoBar from './InfoBar.astro'
 import type { InfoBarItem } from './InfoBar.astro'
 import Sidebar from './Sidebar.astro'
@@ -17,6 +19,12 @@ export interface Props {
   image?: string | ImageAsset
   gallery?: ImageAsset[] | null
   containedInPlace?: EntityRef
+  /** Vùng "Thông tin nhanh" — 06 §3.1. Nơi DUY NHẤT của các field ngắn. */
+  facts?: Fact[]
+  /** @deprecated Thay bằng `facts` (v3). Giữ cho tới khi Task 7 chuyển nốt sáu
+   *  template còn lại — DetailLayout dùng nó để render InfoBar + forward slot
+   *  `info` (InfoCard) y hệt hành vi cũ CHỈ cho template chưa chuyển. Template
+   *  nào truyền `facts` thì coi như đã chuyển, nhánh này tắt hẳn cho nó. */
   infoBarItems?: InfoBarItem[]
   sidebarSlots: Slot[]
   nearbyTitle: string
@@ -39,7 +47,7 @@ export interface Props {
 }
 
 const {
-  title, lang, entityType, image, gallery, containedInPlace, infoBarItems,
+  title, lang, entityType, image, gallery, containedInPlace, facts, infoBarItems,
   sidebarSlots, nearbyTitle, nearby, updatedAt,
   badges, summary, speakable = false, jumpLinks, priceLabel, ctaHref, ctaLabel,
 } = Astro.props
@@ -49,6 +57,23 @@ const jumps = jumpLinks ?? []
 // Thanh dính chỉ có nghĩa khi có ít nhất một thứ để hiện. Không có thì không
 // render — vùng rỗng ẩn hẳn, 06-BINDING_MAP quyết định nền 2.
 const showStickyBar = jumps.length > 0 || !!priceLabel || !!(ctaHref && ctaLabel)
+
+// Hợp đồng 06: "≤ 2 ô thì không trải dải" — gộp vào sidebar cạnh bản đồ.
+const factsVisible = (facts ?? []).filter(f => f.visible)
+const factsInline = factsVisible.length > 0 && factsVisible.length <= 2
+
+// Sidebar chỉ dựng một slot khi mảng `slots` có mục cùng tên VÀ visible. Truyền
+// <FactStrip slot="info"> mà không thêm mục thì slot câm — nên DetailLayout tự
+// chèn mục đó, chứ không bắt sáu template mỗi cái tự nhớ.
+const effectiveSlots = factsInline
+  ? (() => {
+      const i = sidebarSlots.findIndex(s => s.name === 'map')
+      const row = { name: 'info', component: 'custom' as const, visible: true, props: {} }
+      const out = [...sidebarSlots]
+      out.splice(i >= 0 ? i : out.length, 0, row)   // đứng ngay TRƯỚC bản đồ
+      return out
+    })()
+  : sidebarSlots
 
 const t = uiCopy(lang)
 ---
@@ -80,7 +105,12 @@ const t = uiCopy(lang)
   </div>
 )}
 
+{/* Hàng cũ — chỉ còn dùng bởi sáu template chưa chuyển sang `facts` (Task 7).
+   Template đã chuyển không truyền `infoBarItems` nữa nên nhánh này tắt hẳn
+   cho chúng; xoá khi Task 7 xong. */}
 {infoBarItems && infoBarItems.length > 0 && <InfoBar items={infoBarItems} />}
+
+{!factsInline && factsVisible.length > 0 && <FactStrip facts={facts!} />}
 
 <div class="container two-col">
   <div class="content-main">
@@ -95,9 +125,14 @@ const t = uiCopy(lang)
   </div>
 
   {/* stickyBar: Sidebar cộng chiều cao thanh dính vào chỗ dính của nó (DR-033). */}
-  <Sidebar slots={sidebarSlots} stickyBar={showStickyBar}>
+  <Sidebar slots={effectiveSlots} stickyBar={showStickyBar}>
     <slot name="booking" slot="booking" />
+    {/* Forward cũ cho InfoCard — chỉ có nội dung khi template chưa chuyển còn
+       truyền <InfoCard slot="info">. Template đã chuyển không truyền gì vào
+       slot `info` của chính DetailLayout nữa nên nhánh này trống, không render
+       gì. Xoá khi Task 7 xong. */}
     <slot name="info" slot="info" />
+    {factsInline && <FactStrip facts={facts!} inline slot="info" />}
     <slot name="map" slot="map" />
     <slot name="about" slot="about" />
   </Sidebar>

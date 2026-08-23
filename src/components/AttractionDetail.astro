@@ -7,7 +7,6 @@ import Section from './Section.astro'
 
 import FAQ from './FAQ.astro'
 import BookingCTA from './BookingCTA.astro'
-import InfoCard from './InfoCard.astro'
 import Body from './Body.astro'
 import MapView from './MapView.astro'
 import Card from './Card.astro'
@@ -62,23 +61,15 @@ const jumpLinks = [
 // đúng là "CTA giả" mà R4 cấm. Không có zaloUrl thì không render nút.
 const bookingHref = contact?.zaloUrl || ''
 
-// Ô nào không có dữ liệu thì không vào lưới — InfoBar co theo số ô thật, nên
-// ở đây bỏ ô "khoảng cách" chết cứng và bỏ luôn giá trị "không có" giả.
-const infoBarItems = [
+// Một field một vùng (06 §6 Luật 1). Template khai DỮ LIỆU, không chọn vùng —
+// trước đây cùng bộ field này đi vào cả InfoBar lẫn InfoCard, đó là DR-032.
+// Giá KHÔNG ở đây: 06 §3.1 khai giá → thanh dính + khối hành động.
+const facts = [
   { field: 'openingHours', icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : '', visible: !!data.openingHours },
-  { field: 'gia', icon: '🎫', label: t('ticketPrice'), value: priceView?.label || '', visible: !!(priceView?.label) },
-  { field: 'telephone', icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
-]
-
-const sidebarRows = [
   { field: 'address', icon: '📍', label: t('address'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
-  { field: 'openingHours', icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : '', visible: !!data.openingHours },
   { field: 'telephone', icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
-  { field: 'officialSource', icon: '🔗', label: t('officialWebsite'), value: hostLabel(data.officialSource), href: data.officialSource || undefined, visible: !!data.officialSource },
-  // "Có thu phí" không có giá kèm là thông tin rỗng (kế hoạch vòng 4, F6): chỉ hiện khi miễn phí.
   { field: 'isAccessibleForFree', icon: '🎫', label: t('admission'), value: t('free'), visible: data.isAccessibleForFree === true },
-  { field: 'hasMap', icon: '🗺️', label: t('map'), value: t('openMap'), href: data.hasMap, visible: !!data.hasMap },
-  { field: 'sameAs', icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
+  { field: 'officialSource', icon: '🔗', label: t('officialWebsite'), value: hostLabel(data.officialSource), href: data.officialSource || undefined, visible: !!data.officialSource },
 ]
 ---
 
@@ -95,10 +86,9 @@ const sidebarRows = [
   priceLabel={priceView?.label ?? null}
   ctaHref={bookingHref || null}
   ctaLabel={bookingHref ? t('contactZalo') : null}
-  infoBarItems={infoBarItems}
+  facts={facts}
   sidebarSlots={[
     { name: 'booking', component: 'BookingCTA', visible: !!priceView?.label, props: { priceText: priceView?.label || '', ctaLabel: t('bookTicket'), ctaUrl: bookingHref || undefined } },
-    { name: 'info', component: 'InfoCard', visible: sidebarRows.some(r => r.visible), props: { rows: sidebarRows } },
     { name: 'map', component: 'Map', visible: !!(data.geo), props: { geo: data.geo, title: data.title } },
   ]}
   nearbyTitle={t('nearby')}
@@ -161,7 +151,6 @@ const sidebarRows = [
   {priceView?.label && (
     <BookingCTA slot="booking" priceText={priceView.label} ctaLabel={t('bookTicket')} ctaUrl={bookingHref || undefined} />
   )}
-  {sidebarRows.some(r => r.visible) && <InfoCard slot="info" rows={sidebarRows} lang={lang} />}
   {data.geo && <MapView slot="map" geo={data.geo} title={data.title} height={240} />}
 </DetailLayout>
 
