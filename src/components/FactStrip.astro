@@ -76,7 +76,17 @@ const cols = Math.min(visible.length, 3)
 
 <style>
   .fact-strip { padding: 0 0 var(--s4); }
-  .fact-strip--inline { padding: 0; }
+
+  /* I4 fix (2026-08-23): khối gộp (≤2 ô) nay là con TRỰC TIẾP của `.two-col`
+     (DetailLayout.astro), tự nhận vùng grid-area 'facts' — không còn nằm
+     trong `.sidebar-card` (Sidebar.astro) nên không còn ăn ké nền/viền/đệm
+     của thẻ đó. `.fact-grid` bên dưới giữ nguyên nền/viền/đệm riêng (bỏ nhánh
+     từng gỡ chúng khi còn lồng trong .sidebar-card) để tự trông như một thẻ
+     độc lập, khớp các thẻ sidebar khác. */
+  .fact-strip--inline {
+    padding: 0;
+    grid-area: facts;
+  }
 
   .fact-grid {
     display: grid;
@@ -89,11 +99,15 @@ const cols = Math.min(visible.length, 3)
     padding: var(--s4);
   }
 
-  .fact-strip--inline .fact-grid {
-    grid-template-columns: 1fr;
-    background: none;
-    border: 0;
-    padding: 0;
+  /* 06 §3 hàng "Thông tin nhanh": "di động giữ lưới 2 cột" — cột đơn (danh sách
+     dọc kiểu InfoCard cũ) CHỈ áp cho desktop, nơi khối gộp nằm trong sidebar
+     340px hẹp. Trước đây rule này không có media query nên đè cả di động
+     (đặc hiệu hơn rule 2-cột bên dưới bất kể thứ tự khai) — I4, review toàn
+     nhánh: hồi quy vị trí+bố cục trên 15 trang ≤2 ô. */
+  @media (min-width: 1024px) {
+    .fact-strip--inline .fact-grid {
+      grid-template-columns: 1fr;
+    }
   }
 
   .fact { min-width: 0; }

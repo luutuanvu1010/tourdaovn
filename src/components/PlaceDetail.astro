@@ -67,7 +67,11 @@ const jsonLd = entityPageGraphToLd(placeToJsonLd(data, siteBase, lang), data, si
   sameAs={data.sameAs}
   facts={facts}
   sidebarSlots={[
-    { name: 'map', component: 'Map', visible: !!(data.geo), props: { geo: data.geo, title: data.title } },
+    // 06 §3 hàng "Bản đồ (sidebar)": "chỉ có hasMap thì hiện một link" — thẻ bản
+    // đồ phải hiện khi có geo VẼ ĐƯỢC hoặc chỉ có hasMap (không geo). Trước đây
+    // chỉ xét geo nên trang chỉ có hasMap (không geo hợp lệ) không có chỗ hiện
+    // link — hasMap bị bỏ rơi hoàn toàn, không render ở đâu.
+    { name: 'map', component: 'Map', visible: !!(data.geo) || !!(data.hasMap), props: { geo: data.geo, title: data.title } },
   ]}
   nearbyTitle={t('nearby')}
   nearby={nearby}
@@ -126,7 +130,16 @@ const jsonLd = entityPageGraphToLd(placeToJsonLd(data, siteBase, lang), data, si
     )}
   </Fragment>
 
-  {data.geo && <MapView slot="map" geo={data.geo} title={data.title} height={240} />}
+  {(data.geo || data.hasMap) && (
+    <Fragment slot="map">
+      {data.geo && <MapView geo={data.geo} title={data.title} height={240} />}
+      {data.hasMap && (
+        <a class="map-card-link" data-region="map-card" data-field="hasMap" href={data.hasMap} target="_blank" rel="noopener">
+          <span aria-hidden="true">🗺️</span> {t('openMap')}
+        </a>
+      )}
+    </Fragment>
+  )}
 </DetailLayout>
 
 <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>

@@ -73,18 +73,17 @@ const showStickyBar = jumps.length > 0 || !!priceLabel || !!(ctaHref && ctaLabel
 const factsVisible = (facts ?? []).filter(f => f.visible)
 const factsInline = factsVisible.length > 0 && factsVisible.length <= 2
 
-// Sidebar chỉ dựng một slot khi mảng `slots` có mục cùng tên VÀ visible. Truyền
-// <FactStrip slot="info"> mà không thêm mục thì slot câm — nên DetailLayout tự
-// chèn mục đó, chứ không bắt sáu template mỗi cái tự nhớ.
-const effectiveSlots = factsInline
-  ? (() => {
-      const i = sidebarSlots.findIndex(s => s.name === 'map')
-      const row = { name: 'info', component: 'custom' as const, visible: true, props: {} }
-      const out = [...sidebarSlots]
-      out.splice(i >= 0 ? i : out.length, 0, row)   // đứng ngay TRƯỚC bản đồ
-      return out
-    })()
-  : sidebarSlots
+// I4 (review toàn nhánh, 2026-08-23): trước đây bản gộp (≤2 ô) được TRUYỀN VÀO
+// `<Sidebar>` qua một slot 'info' giả lập (effectiveSlots chèn tay), nên trong
+// HTML tĩnh nó luôn nằm SAU `.content-main` — đúng vị trí desktop (cạnh bản đồ)
+// nhưng SAI vị trí di động (06 §3 đòi "ngay dưới tiêu đề"; đo bằng thứ tự byte
+// thật trong dist/, không phải thứ tự nhìn thấy sau khi CSS `order` xào lại —
+// `order` không đổi thứ tự DOM/cây accessibility, chỉ đổi thứ tự vẽ). Sửa: bản
+// gộp nay là con TRỰC TIẾP của `.two-col`, đứng TRƯỚC `.content-main` trong mã
+// nguồn (đúng thứ tự tài liệu cho di động), và tự nhận vùng `facts` của
+// grid-template-areas bên dưới để desktop vẫn xếp nó vào cột sidebar — không
+// còn đi qua slot 'info' của Sidebar (slot đó nay chỉ còn InfoCard hợp lệ của
+// Article/Organization/Person, DR-046).
 
 // "Nguồn tham khảo" — 06 §3.1: hàng riêng cạnh Cập nhật ở cuối nội dung, KHÔNG
 // vào Thông tin nhanh (đã tách khỏi `facts` ở AttractionDetail/PlaceDetail),
@@ -125,6 +124,8 @@ const t = uiCopy(lang)
 {!factsInline && factsVisible.length > 0 && <FactStrip facts={facts!} max={factsMax} />}
 
 <div class="container two-col">
+  {factsInline && <FactStrip facts={facts!} inline max={factsMax} />}
+
   <div class="content-main">
     <slot name="content" />
 
@@ -145,7 +146,7 @@ const t = uiCopy(lang)
   </div>
 
   {/* stickyBar: Sidebar cộng chiều cao thanh dính vào chỗ dính của nó (DR-033). */}
-  <Sidebar slots={effectiveSlots} stickyBar={showStickyBar}>
+  <Sidebar slots={sidebarSlots} stickyBar={showStickyBar}>
     <slot name="booking" slot="booking" />
     {/* Forward cho InfoCard — VẪN CẦN, không phải hàng chết. Ba template
        ngoài phạm vi việc đóng Luật 1 (ArticleDetail, OrganizationDetail,
@@ -155,7 +156,6 @@ const t = uiCopy(lang)
        render thừa. Xem DRIFT_LOG DR-046 — không xoá tới khi ba template đó
        cũng chuyển hoặc có quyết định khác. */}
     <slot name="info" slot="info" />
-    {factsInline && <FactStrip facts={facts!} inline max={factsMax} slot="info" />}
     <slot name="map" slot="map" />
     <slot name="about" slot="about" />
   </Sidebar>
@@ -288,10 +288,27 @@ const t = uiCopy(lang)
   .two-col {
     display: grid;
     grid-template-columns: 1fr 340px;
+    /* I4 fix: ba vùng đặt tên — 'facts' (bản gộp Thông tin nhanh ≤2 ô, rỗng khi
+       không có), 'main' (content-main), 'sidebar' (Sidebar.astro, tự khai
+       grid-area:sidebar). 'facts' đứng ở CỘT SIDEBAR, hàng riêng phía trên
+       'sidebar' — không đụng hàng của 'main' nên 'main' không trải dài qua
+       nhiều hàng chia sẻ track với các thẻ sidebar nhỏ (tránh track bị "kéo
+       giãn" theo main — bug CSS Grid có thật khi một item trải hàng cao hơn
+       nhiều so với các track nó chia sẻ). 'sidebar' vẫn cùng hàng với 'main'
+       như trước — position:sticky của Sidebar không đổi hành vi. Ô 'facts' của
+       cột 'main' để trống (".", không field nào chiếm) — track rỗng co về 0,
+       không tốn chỗ khi factsInline=false (đa số trang). */
+    grid-template-areas:
+      '.    facts'
+      'main sidebar';
     gap: var(--s7);
     align-items: start;
     padding-top: var(--s6);
     padding-bottom: var(--s7);
+  }
+
+  .content-main {
+    grid-area: main;
   }
 
   .updated-section {
@@ -336,6 +353,16 @@ const t = uiCopy(lang)
   @media (max-width: 1023px) {
     .two-col {
       grid-template-columns: 1fr;
+      /* I4 fix (06 §3 hàng "Thông tin nhanh": di động "ngay dưới tiêu đề"):
+         'facts' đứng hàng ĐẦU TIÊN — khớp đúng thứ tự nó đã đứng trong mã
+         nguồn (ngay trước .content-main ở markup phía trên), không cần
+         `order` để xào lại — `order` chỉ đổi thứ tự VẼ, không đổi thứ tự
+         DOM/accessibility tree mà bộ kiểm tài liệu tĩnh (và trình đọc màn
+         hình) thấy. */
+      grid-template-areas:
+        'facts'
+        'main'
+        'sidebar';
     }
   }
 </style>

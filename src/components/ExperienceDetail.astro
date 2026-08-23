@@ -47,9 +47,12 @@ const facts = [
   { field: 'touristType', icon: '👤', label: t('suitableFor'), value: data.touristType?.join(', ') || '', visible: !!(data.touristType && data.touristType.length > 0) },
 ]
 
-// Phù hiệu trong hero: loại trải nghiệm (§4.4 `experienceType`) và thời lượng.
-// Cả hai là gate của §4.4 nhưng trước đây không đọc được trên màn đầu.
-const heroBadges = [data.experienceType?.name, data.duration].filter((x): x is string => !!x)
+// Phù hiệu trong hero: loại trải nghiệm (§4.4 `experienceType`), và CHỈ loại —
+// 06 §3.1 khai `duration` → Thông tin nhanh MỘT MÌNH ("chỉ ở đó" áp cho nhãn
+// loại, không áp cho duration). Trước đây `data.duration` cũng vào đây, nên
+// thời lượng hiện cả huy hiệu hero LẪN fact-strip — hai vùng cho một field,
+// sống sót qua Luật 1 chỉ vì huy hiệu hero không mang data-region/data-field.
+const heroBadges = [data.experienceType?.name].filter((x): x is string => !!x)
 
 // Thanh dính: neo tới đúng những mục THẬT SỰ render. Trước đây ExperienceDetail
 // không truyền jumpLinks/priceLabel/ctaHref nào, nên showStickyBar luôn sai và

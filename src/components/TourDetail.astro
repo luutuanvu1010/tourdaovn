@@ -49,9 +49,12 @@ const operatorUrl = [data.operator?.url, data.operator?.officialSource].find(isE
 const showFallbackCta = !priceView?.label && !!operatorUrl
 const hasContactChannel = !!(contact?.zaloUrl || contact?.hotline || contact?.whatsapp)
 
-// Phù hiệu trong hero: hình thức tour (§4.8 `tourFormat`) và thời lượng (§4.8
-// `duration`). Chỉ đưa cái nào có dữ liệu — vùng rỗng ẩn hẳn.
-const heroBadges = [formatLabel, data.duration].filter((x): x is string => !!x)
+// Phù hiệu trong hero: CHỈ hình thức tour (§4.8 `tourFormat`) — 06 §3.1 khai
+// `duration` → Thông tin nhanh một mình. `data.duration` từng vào đây cùng
+// formatLabel nên thời lượng hiện cả hero-badge lẫn fact-strip, hai vùng cho
+// một field; huy hiệu hero không mang data-region/data-field nên Luật 1 tầng
+// A/B đều không thấy cặp này.
+const heroBadges = [formatLabel].filter((x): x is string => !!x)
 
 // Thanh dính: neo tới đúng những mục THẬT SỰ render, nên phải tính sau khi biết
 // khối nào có dữ liệu. Khối vắng mà vẫn để neo là link chết.
