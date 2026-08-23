@@ -2,6 +2,7 @@
 import type { Lang, EntityRef, ImageAsset, NearbyEntity } from '../lib/types'
 import { uiCopy } from '../lib/uiCopy'
 import { formatDate } from '../lib/dates'
+import { hostLabel } from '../lib/siteUrl'
 import Breadcrumb from './Breadcrumb.astro'
 import Hero from './Hero.astro'
 import FactStrip from './FactStrip.astro'
@@ -19,6 +20,10 @@ export interface Props {
   image?: string | ImageAsset
   gallery?: ImageAsset[] | null
   containedInPlace?: EntityRef
+  /** Dòng "Nguồn tham khảo" cạnh Cập nhật — 06 §3.1: `sameAs` chỉ render Ở ĐÂY,
+   *  KHÔNG vào Thông tin nhanh, KHÔNG vào sidebar. Chỉ mục đầu mảng; rỗng thì
+   *  ẩn cả dòng. */
+  sameAs?: string[] | null
   /** Vùng "Thông tin nhanh" — 06 §3.1. Nơi DUY NHẤT của các field ngắn. */
   facts?: Fact[]
   /** @deprecated Thay bằng `facts` (v3). Giữ cho tới khi Task 7 chuyển nốt sáu
@@ -47,7 +52,7 @@ export interface Props {
 }
 
 const {
-  title, lang, entityType, image, gallery, containedInPlace, facts, infoBarItems,
+  title, lang, entityType, image, gallery, containedInPlace, sameAs, facts, infoBarItems,
   sidebarSlots, nearbyTitle, nearby, updatedAt,
   badges, summary, speakable = false, jumpLinks, priceLabel, ctaHref, ctaLabel,
 } = Astro.props
@@ -74,6 +79,12 @@ const effectiveSlots = factsInline
       return out
     })()
   : sidebarSlots
+
+// "Nguồn tham khảo" — 06 §3.1: hàng riêng cạnh Cập nhật ở cuối nội dung, KHÔNG
+// vào Thông tin nhanh (đã tách khỏi `facts` ở AttractionDetail/PlaceDetail),
+// KHÔNG vào sidebar. Giá trị là nhãn theo host, y hệt InfoCard cũ đã làm.
+const sameAsHref = sameAs && sameAs.length > 0 ? sameAs[0] : null
+const sameAsLabel = sameAsHref ? hostLabel(sameAsHref) : ''
 
 const t = uiCopy(lang)
 ---
@@ -117,9 +128,17 @@ const t = uiCopy(lang)
     <slot name="content" />
 
     <div class="updated-section">
-      <div class="updated">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        {t('updated')} {formatDate(updatedAt, lang)}
+      <div class="updated-row">
+        <div class="updated">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          {t('updated')} {formatDate(updatedAt, lang)}
+        </div>
+        {sameAsHref && (
+          <div class="reference-source" data-region="section" data-field="sameAs">
+            <span aria-hidden="true">🔗</span>
+            {t('referenceSource')}: <a href={sameAsHref} target="_blank" rel="noopener">{sameAsLabel}</a>
+          </div>
+        )}
       </div>
     </div>
   </div>
@@ -275,11 +294,22 @@ const t = uiCopy(lang)
     padding-top: var(--s4);
   }
 
-  .updated {
-    font-size: var(--fs-sm);
-    color: var(--c-text-muted);
+  /* Một hàng chung border-top cho cả "Cập nhật" và "Nguồn tham khảo" — 06 §3.1
+     đặt hai dòng này cạnh nhau ở cuối nội dung. */
+  .updated-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s4);
     padding: var(--s4) 0;
     border-top: 1px solid var(--c-border);
+  }
+
+  .updated,
+  .reference-source {
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
     display: flex;
     align-items: center;
     gap: var(--s2);
@@ -287,6 +317,16 @@ const t = uiCopy(lang)
 
   .updated svg {
     color: var(--c-primary);
+  }
+
+  .reference-source a {
+    color: var(--c-primary);
+    text-decoration: none;
+    font-weight: var(--fw-600);
+  }
+
+  .reference-source a:hover {
+    text-decoration: underline;
   }
 
   @media (max-width: 1023px) {

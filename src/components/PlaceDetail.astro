@@ -1,6 +1,6 @@
 ---
 import type { PlaceResult, Lang } from '../lib/types'
-import { siteBaseUrl, hostLabel } from '../lib/siteUrl'
+import { siteBaseUrl } from '../lib/siteUrl'
 import { uiCopy, typeLabel as lookupLabel, PLACE_TYPE_LABELS } from '../lib/uiCopy'
 import DetailLayout from './DetailLayout.astro'
 import Section from './Section.astro'
@@ -64,6 +64,7 @@ const jsonLd = entityPageGraphToLd(placeToJsonLd(data, siteBase, lang), data, si
   image={data.mainImage}
   gallery={data.gallery}
   containedInPlace={data.containedInPlace}
+  sameAs={data.sameAs}
   facts={facts}
   sidebarSlots={[
     { name: 'map', component: 'Map', visible: !!(data.geo), props: { geo: data.geo, title: data.title } },
