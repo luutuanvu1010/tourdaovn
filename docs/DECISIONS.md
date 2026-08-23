@@ -1012,3 +1012,49 @@ Kiểm hết bốn nơi dùng field này trong mã nguồn (bỏ bundle `cms/dis
 **Lỗ hổng cổng lộ ra, chưa vá.** `build:ci` = `npm run build` = `astro check && astro build`, **không gọi** `npm --prefix scripts run validate:post` — mà cổng R3 (so sitemap production với sitemap bản dựng) nằm ở đó. Nên Workers Builds **không bao giờ bắt được** URL biến mất; lần này người bắt là một tác nhân, không phải máy. Chưa quyết vá thế nào; ghi ra để khỏi rơi.
 
 **Cảnh báo vận hành kèm theo.** `npm run build` của repo này gãy được vì mạng: 2026-08-22 một build chết giữa chừng do `Socket timed out` khi gọi Sanity API, `dist/` tụt từ 105 trang xuống 2 mà lệnh vẫn kết thúc không báo đỏ. Sau mỗi lần phát hành phải **đếm số trang thật** trên production, không tin dấu tích xanh của Workers Builds. Mốc trước lần push này: **100 URL** trong `sitemap-vi.xml`.
+
+---
+
+## QĐ-2026-08-23-02 — `06-BINDING_MAP` v2.3: đoạn mở rời hero, và Luật 5 cột→hàng ở di động
+
+**Trạng thái:** **NHÁP — chờ chủ dự án chốt.** Bản `06` đã sửa sẵn ở nhánh `worktree-binding-map-v2-3`, chưa gộp. Không dùng làm căn cứ cho bất kỳ bước nào cho tới khi chốt.
+
+**Bối cảnh.** Chủ dự án nêu bốn việc bề mặt ngày 2026-08-22. Qua phiên brainstorm, hai trong bốn việc được chốt bằng lựa chọn trực tiếp (ghi ở `SPEC-2026-08-22-be-mat-vong-5` §3.2 và §3.6), nhưng **chưa được ghi vào đặc tả**. Bước 7 (Design) không mở được chặng 2 khi `06` chưa nói điều Design sắp vẽ — đó là "Design đi trước cấu trúc", `CLAUDE.md` §5 chặn. Phiếu này ghi hai quyết định đó thành đặc tả.
+
+**Chốt 1 — `summary` rời hero.** Đoạn mở chuyển từ hero xuống **dải sáng dưới hero, sau thanh dính**, trên Thông tin nhanh. Hero còn **huy hiệu loại + h1**.
+
+Lý do chủ dự án chọn phương án này thay vì đưa lên trên hero: đưa lên trên đẩy ảnh xuống khoảng 160px trên di động, làm màn đầu toàn chữ — mất cú hích cảm xúc của một site du lịch. Đặt sau thanh dính thay vì trước cũng có lý do đo được: chen trước thanh dính đẩy giá và CTA trên desktop tụt thêm ~110px, buộc mở lại Luật 3 "giá trước, chữ sau".
+
+Lợi ích kèm theo, đo được: QA1 đợt 4B vòng 3 đo tương phản đoạn mở **trên ảnh** ở bộ xấu nhất `ngoc-lam` là 6,6:1 — đạt AA nhưng phải dựa vào lớp phủ canh theo từng ảnh. Đưa xuống dải sáng thì rủi ro đó biến mất hẳn.
+
+Sửa ở `06`: §3 hàng "Đoạn mở" và hàng "Hero"; §3.1 ô `summary` cho cả bốn entity; dòng thứ tự khối di động.
+
+**Chốt 2 — Luật 5: ô cạnh nhau trên desktop, mỗi ô một hàng trên di động.** Vùng nào trình bày nhiều ô ngang hàng ở desktop thì ở `≤ 640px` chuyển thành mỗi ô một hàng chiếm hết bề rộng, nhãn trái, giá trị phải. **Lưới thẻ loại trừ** — thẻ mang ảnh và tiêu đề, không phải cặp nhãn/giá trị.
+
+**⚠ Chốt 2 có một xung đột phải chủ dự án gỡ, không phải chuyện hình thức.**
+
+`06` §3 hàng "Thông tin nhanh" (v2.1) đã có một luật di động: *"di động **giữ lưới 2 cột**"*. Câu đó **không tương thích** với Luật 5: lưới 2 cột giữ hai ô cạnh nhau, Luật 5 tách mỗi ô một hàng.
+
+Bản nháp này cho Luật 5 **thay** câu cũ, vì đó là điều chủ dự án chọn khi được xem hai bố cục cạnh nhau. Nhưng hệ quả phải nói rõ:
+
+- `FactStrip.astro` **vừa được sửa ngày 2026-08-23** để theo đúng câu cũ ("giữ lưới 2 cột"), trong đợt sửa của review toàn nhánh nhánh `feat/dong-luat-1` (PR #1).
+- Áp Luật 5 nghĩa là **sửa lại CSS của đúng file đó** sau khi PR #1 gộp.
+- Chi phí nhỏ — một khối `@media` trong một file — nhưng nó là công làm hai lần, và chủ dự án nên biết trước khi chốt.
+
+**Ba lựa chọn:**
+
+| # | Phương án | Hệ quả |
+|---|---|---|
+| **A (đề xuất)** | Luật 5 thay câu cũ. Giữ đúng điều chủ dự án đã chọn | Sửa lại CSS `FactStrip.astro` một lần sau khi PR #1 gộp |
+| B | Giữ "lưới 2 cột", thu Luật 5 lại chỉ áp cho các vùng khác | Mã không phải sửa, nhưng Thông tin nhanh — vùng chính của yêu cầu — lại nằm ngoài luật |
+| C | Hoãn Luật 5 sang vòng sau | Chặng 2 của Design vẫn mở được nhờ Chốt 1, nhưng ý (3) của chủ dự án chưa được xử |
+
+**Không đổi gì khác.** Không field nào của `01-CONTENT_MODEL` đổi. §3.1 vẫn bốn cột; Organization và Person vẫn không có hàng (DR-046). Luật 1–4 giữ nguyên.
+
+**Kiểm sau khi chốt.** `06` lên v2.3.0 chính thức, rồi mở chặng 2 của `docs/prompts/VONG-5-CLAUDE-DESIGN.md`.
+
+**Một việc mã bắt buộc đi kèm, đã kiểm chứ không đoán.** Chốt 1 đưa vào §3.1 một **tên vùng mới**: `dải đoạn mở`. Bộ kiểm `luat1-post` (nhánh `feat/dong-luat-1`, PR #1) tra tên vùng qua bảng `ALIAS`; `dải đoạn mở` không có trong bảng, không bắt đầu bằng "mục"/"dòng", và không chứa alias nào đã biết — nên `idTuTenVung()` trả `null`, `ktraVungLa()` bắt được, và validator **exit 1 với "§3.1 có tên vùng chưa khai trong ALIAS"** trước khi quét trang nào.
+
+Đó là bộ kiểm **chạy đúng thiết kế**: vùng lạ làm nó đỏ to thay vì bị bỏ qua im lặng. Nhưng nghĩa là chốt phiếu này kéo theo **hai dòng mã**: thêm `'dải đoạn mở': 'summary-band'` vào `ALIAS`, và gắn `data-region="summary-band"` lên dải đoạn mở khi Code dựng nó.
+
+Ghi ra đây để không ai chốt phiếu rồi ngạc nhiên vì cổng đỏ.
