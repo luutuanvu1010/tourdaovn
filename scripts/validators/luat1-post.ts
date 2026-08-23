@@ -7,9 +7,18 @@
  *   §3.1 khai, dù không lặp (vd chỉ render đúng 1 lần nhưng ở nhầm vùng).
  *   Tầng B chỉ bật sau khi tầng A đã xanh trên toàn kho — bật sớm hơn thì mọi
  *   trang đỏ vì `info-bar`/`info-card` không phải vùng §3.1 khai, baseline
- *   thật bị chìm trong nhiễu.
+ *   thật bị chìm trong nhiễu. Tầng B XÉT THEO CỘT ENTITY của §3.1 (bốn cột:
+ *   Điểm tham quan, Địa danh, Trải nghiệm, Tour) — chỉ phán một trang khi
+ *   entity của trang đó có cột thật trong §3.1; entity không có cột (vd
+ *   Organization, Person, Khách sạn) nằm ngoài thẩm quyền của tầng B, dù
+ *   field cùng tên có cột ở entity khác (xem docMaTran/entityCuaTrang, và
+ *   phần "Sửa entity-scope" bên dưới cho lý do).
  *
- * GIỚI HẠN CỦA TẦNG B — đọc trước khi coi tầng B là "bắt hết sai vùng":
+ * GIỚI HẠN CỦA TẦNG B — đọc trước khi coi tầng B là "bắt hết sai vùng". Một
+ * giới hạn vẫn còn (bucket `'section'` bên dưới); một defect khác đã có
+ * trong lần bật đầu tiên nay đã vá (đoạn "SỬA ENTITY-SCOPE" bên dưới) —
+ * đọc cả hai để biết đúng biên hiện tại của tầng B.
+ *
  *   §3.1 đặt tên nhiều vùng bằng văn xuôi trỏ vào một MỤC NỘI DUNG cụ thể
  *   (`highlights`, `body`, `accessInfo`, `faq`, `seasonNote`, `includes`,
  *   `excludes`, `itinerary`, `sameAs`, rollup `experiences` — mỗi ô đọc
@@ -26,19 +35,32 @@
  *   đang chờ chủ dự án duyệt bản sửa spec, chưa có ở đây). Tầng B vẫn có giá
  *   trị thật trong biên đã nêu; chỉ đừng đọc nó rộng hơn biên đó.
  *
- *   Giới hạn thứ hai, phát hiện khi chạy thật lần đầu (Task 8, 2026-08-23):
- *   docMaTran() gộp vùng theo TÊN FIELD, không theo entity/cột. §3.1 chỉ có
- *   cột cho 4 entity (Điểm tham quan, Địa danh, Trải nghiệm, Tour) —
- *   Organization và Person KHÔNG có hàng nào ở §3.1 (xem DR-046). Nhưng
- *   `OrganizationDetail.astro`/`PersonDetail.astro` dùng lại đúng TÊN field
- *   (`address`, `telephone`, `officialSource`, `licenseInfo`, `sameAs`) mà
- *   §3.1 đã khai vùng cho các entity khác — nên tầng B đọc nhầm "field này có
- *   vùng đã khai" và đỏ khi trang Organization/Person render chúng ở
- *   `info-card` (vùng InfoCard hợp lệ cho hai entity này, vì chúng chưa nằm
- *   trong phạm vi đóng Luật 1 của Task 5–7). Tầng B KHÔNG có trục entity để
- *   phân biệt "field X ở entity A" với "field X (trùng tên) ở entity B chưa
- *   có hàng trong §3.1" — thêm trục đó là mở rộng parser, ngoài phạm vi Task
- *   8. Xem DR-046 (đã cập nhật) cho danh sách cụ thể và cách đọc kết quả này.
+ *   SỬA ENTITY-SCOPE (Task 8, cùng ngày, sau khi phát hiện thật ở trên).
+ *   Lần bật đầu tiên, docMaTran() gộp vùng theo TÊN FIELD, không theo
+ *   entity/cột — nên khi `OrganizationDetail.astro`/`PersonDetail.astro`
+ *   dùng lại đúng TÊN field (`address`, `telephone`, `officialSource`,
+ *   `licenseInfo`, `sameAs`) mà §3.1 đã khai vùng cho Điểm tham quan/Địa
+ *   danh/Tour, tầng B mượn NHẦM ràng buộc của entity khác — đỏ giả 15 lần
+ *   trên 5 trang Organization/Person dù `info-card` là vùng hợp lệ (duy
+ *   nhất) cho hai entity đó, vì chúng không có hàng nào ở §3.1 (DR-046).
+ *   Đây là defect có sẵn từ Task 2 review (deferred minor: "allowed region
+ *   count is a union across entity columns rather than per-entity cell"),
+ *   tầng A chịu được vì nó chỉ ĐẾM, tầng B thì không vì nó SO SÁNH vùng cụ
+ *   thể.
+ *
+ *   Bản vá: docMaTran() nay trả thêm `theoEntity` (Field → entity key →
+ *   đúng vùng CỦA CỘT đó) và `entityCoCot` (tập entity có cột thật trong
+ *   §3.1). `entityCuaTrang()` suy entity của một trang từ segment URL đầu,
+ *   tra qua `ROUTE_MAP` (src/lib/routes.ts) — KHÔNG tự liệt "4 tiền tố URL"
+ *   bằng tay (đúng loại lỗi DR-027: một bản sao thứ hai của ánh xạ đã có
+ *   chủ). Tầng B nay chỉ phán một field khi (a) field có cột trong §3.1 VÀ
+ *   (b) entity của trang có cột trong §3.1 (`entityCoCot`); ở đó nó tra
+ *   đúng `theoEntity` của CỘT đó, không lấy hợp nhất nữa. Entity không có
+ *   cột — Organization, Person, Khách sạn, Resort, Nhà hàng, Đặc sản, Sự
+ *   kiện, Bài viết — nằm ngoài thẩm quyền tầng B, y hệt cách field không có
+ *   hàng nào trong §3.1 đã luôn nằm ngoài thẩm quyền (`if (chophep)`). Tầng
+ *   A KHÔNG đổi — vẫn dùng map hợp nhất `hopNhat`, vẫn chỉ đếm số vùng.
+ *   Xem DR-046 (đoạn cập nhật Task 8) cho log đầy đủ của lần đỏ giả này.
  *
  * Vì sao có file này: Luật 1 là luật duy nhất trong 06 không có bộ kiểm máy.
  * g3 kiểm field CÓ được render không, không kiểm được render MẤY LẦN — và §3.1
@@ -73,6 +95,13 @@
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync } from 'node:fs'
 import { dirname, resolve, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
+// Nguồn DUY NHẤT cho "entity nào có URL nào" — không tự liệt tiền tố URL ở
+// đây (đúng loại lỗi DR-027 cảnh báo: một bản sao thứ hai của một ánh xạ đã
+// có chủ). g3-binding-map-vs-template.ts đã đặt tiền lệ import thẳng từ
+// src/ cho việc này; scripts/tsconfig.json cũng đã khai riêng
+// `../src/lib/**/*.ts` cho đúng mục đích này.
+import { ROUTE_MAP } from '../../src/lib/routes'
+import { langs, defaultLang } from '../../src/site.config'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..', '..')
@@ -144,41 +173,123 @@ function idTuTenVung(key: string): string | null {
   return null
 }
 
-/** Đọc ma trận §3.1 → Map<field, Set<vùng>>. */
-function docMaTran(): Map<string, Set<string>> {
+/**
+ * Lớp phiên dịch entity, cùng tinh thần ALIAS ở trên nhưng cho trục entity
+ * thay vì trục vùng: §3.1 đặt tên cột bằng nhãn tiếng Việt ("Điểm tham
+ * quan"…), HTML/URL gọi bằng entity key ngắn ("attraction"…). Nguồn DUY NHẤT
+ * là `ROUTE_MAP` (src/lib/routes.ts) — không gán tay cặp nhãn↔entity ở đây.
+ * Nhãn cột nào không khớp `labels.vi` của ROUTE_MAP thì đỏ to (xem cotLa
+ * trong docMaTran/main), không âm thầm bỏ qua — cùng nguyên tắc ktraVungLa.
+ */
+const ENTITY_BY_LABEL = new Map(ROUTE_MAP.map(r => [r.labels.vi, r.entity]))
+
+/**
+ * Segment URL đầu tiên (sau tiền tố ngôn ngữ nếu có) → entity key. Cũng lấy
+ * thẳng từ `ROUTE_MAP`, gộp mọi ngôn ngữ đang bật (`langs`) — không tự liệt
+ * "4 tiền tố URL" bằng tay (đúng loại lỗi DR-027).
+ */
+// Set<string> (không phải Set<Lang>) có chủ đích: vế kiểm là một segment URL
+// bất kỳ đọc từ tên thư mục thật (string trần), không phải một giá trị đã
+// được xác nhận là Lang hợp lệ — đó chính là điều .has() ở entityCuaTrang()
+// đang hỏi.
+const LANG_PREFIXES = new Set<string>(langs.filter(l => l !== defaultLang))
+const ENTITY_BY_SEGMENT = new Map<string, string>()
+for (const r of ROUTE_MAP) for (const lang of langs) ENTITY_BY_SEGMENT.set(r.segments[lang], r.entity)
+
+/** Entity key của một trang, suy từ đường dẫn file trong dist/. `null` nếu
+ *  segment đầu không khớp entity nào trong ROUTE_MAP (vd trang tĩnh, hub). */
+function entityCuaTrang(p: string): string | null {
+  const parts = relative(DIST, p).split(/[\\/]/)
+  const seg = LANG_PREFIXES.has(parts[0]) ? parts[1] : parts[0]
+  return seg ? (ENTITY_BY_SEGMENT.get(seg) ?? null) : null
+}
+
+interface KetQuaMaTran {
+  /** Field → hợp của MỌI vùng được khai qua mọi cột entity — tầng A (đếm số
+   *  vùng) dùng nguyên map này, KHÔNG đổi so với trước Task 8. */
+  hopNhat: Map<string, Set<string>>
+  /** Field → entity key → đúng vùng §3.1 khai CHO ĐÚNG CỘT đó — tầng B dùng,
+   *  để không mượn nhầm ràng buộc của entity khác (điều làm tầng B sai ở lần
+   *  bật đầu tiên). */
+  theoEntity: Map<string, Map<string, Set<string>>>
+  /** Entity key nào có cột thật trong §3.1 hôm nay (Điểm tham quan, Địa danh,
+   *  Trải nghiệm, Tour). Entity không có mặt ở đây — Organization, Person,
+   *  Khách sạn, … — §3.1 không nói gì về vùng của chúng, nên tầng B không có
+   *  thẩm quyền phán trên trang thuộc entity đó. */
+  entityCoCot: Set<string>
+  /** Nhãn cột đọc được từ dòng tiêu đề mà KHÔNG map được sang entity key nào
+   *  qua ENTITY_BY_LABEL — phải luôn rỗng; khác rỗng nghĩa là §3.1 đổi tên
+   *  cột hoặc ROUTE_MAP thiếu entity, main() phải đỏ to, không âm thầm bỏ cột. */
+  cotLa: string[]
+}
+
+/** Đọc ma trận §3.1 → vừa map hợp nhất (tầng A) vừa map theo cột entity (tầng B). */
+function docMaTran(): KetQuaMaTran {
   const doc = readFileSync(BINDING_MAP, 'utf-8')
   const m = doc.match(/### 3\.1[\s\S]*?\n(\|[\s\S]*?)\n\n/)
   if (!m) throw new Error('Khong doc duoc ma tran §3.1 trong 06-BINDING_MAP.md')
-  const out = new Map<string, Set<string>>()
+
+  const hopNhat = new Map<string, Set<string>>()
+  const theoEntity = new Map<string, Map<string, Set<string>>>()
+  const cotLa: string[] = []
+  // cotEntity[i] = entity key của cột giá trị thứ i (0-based, sau cột Field),
+  // đọc một lần từ dòng tiêu đề rồi dùng lại cho mọi dòng field bên dưới.
+  let cotEntity: (string | null)[] = []
+
   for (const line of m[1].split('\n')) {
     if (!line.startsWith('|')) continue
     const cells = line.split('|').slice(1, -1).map(c => c.trim())
-    if (cells.length < 2 || cells[0] === 'Field') continue
+    if (cells.length < 2) continue
+
+    if (cells[0] === 'Field') {
+      cotEntity = cells.slice(1).map(nhan => {
+        const ent = ENTITY_BY_LABEL.get(nhan) ?? null
+        if (!ent) cotLa.push(nhan)
+        return ent
+      })
+      continue
+    }
     // Dòng phân cách markdown: mọi ô chỉ gồm dấu gạch ngang (có thể kèm ':').
     if (cells.every(c => /^:?-+:?$/.test(c))) continue
+
     // Cột 0 có thể gộp nhiều field: "`a` · `b` · `c`"; có thể kèm chú thích
     // trong ngoặc đơn ("giá (`bookingRef`)") — phải bỏ ngoặc trước khi so.
     const fields = cells[0]
       .split('·')
       .map(f => f.replace(/\(.*?\)/g, '').replace(/[`*]/g, '').trim())
       .filter(Boolean)
-    const vungs = new Set<string>()
-    for (const cell of cells.slice(1)) {
+
+    const vungsHopNhat = new Set<string>()
+    const vungsTheoCot: Set<string>[] = cells.slice(1).map(cell => {
+      const vungsOCay = new Set<string>()
       const oChuan = chuanHoa(cell)
-      if (!oChuan || oChuan === '—') continue // "—" hoặc "— (chú thích)" đều là không có vùng
-      for (const phan of oChuan.split('+')) {
-        const key = phan.replace(/,.*$/, '').trim()
-        if (!key || key === '—') continue
-        const id = idTuTenVung(key)
-        vungs.add(id ?? `?${key}`)
+      if (oChuan && oChuan !== '—') { // "—" hoặc "— (chú thích)" đều là không có vùng
+        for (const phan of oChuan.split('+')) {
+          const key = phan.replace(/,.*$/, '').trim()
+          if (!key || key === '—') continue
+          const id = idTuTenVung(key)
+          vungsOCay.add(id ?? `?${key}`)
+          vungsHopNhat.add(id ?? `?${key}`)
+        }
       }
-    }
+      return vungsOCay
+    })
+
     for (const f of fields) {
       const k = f === 'giá' ? 'gia' : f
-      out.set(k, new Set([...(out.get(k) ?? []), ...vungs]))
+      hopNhat.set(k, new Set([...(hopNhat.get(k) ?? []), ...vungsHopNhat]))
+
+      if (!theoEntity.has(k)) theoEntity.set(k, new Map())
+      const theoCotCuaField = theoEntity.get(k)!
+      cotEntity.forEach((ent, i) => {
+        if (!ent) return
+        theoCotCuaField.set(ent, new Set([...(theoCotCuaField.get(ent) ?? []), ...vungsTheoCot[i]]))
+      })
     }
   }
-  return out
+
+  const entityCoCot = new Set(cotEntity.filter((e): e is string => !!e))
+  return { hopNhat, theoEntity, entityCoCot, cotLa }
 }
 
 function ktraVungLa(maTran: Map<string, Set<string>>): string[] {
@@ -219,12 +330,24 @@ function docTrang(html: string): Map<string, Set<string>> {
 }
 
 function main() {
-  const maTran = docMaTran()
+  const { hopNhat: maTran, theoEntity, entityCoCot, cotLa } = docMaTran()
+
   const la = ktraVungLa(maTran)
   if (la.length > 0) {
     console.log(`[FAIL] §3.1 có ${la.length} tên vùng chưa khai trong ALIAS:`)
     for (const x of la) console.log(`       ${x}`)
     console.log('       Sửa ALIAS trong luat1-post.ts, KHÔNG sửa 06 để né bộ kiểm.')
+    process.exit(1)
+  }
+
+  // Cùng nguyên tắc với ktraVungLa ở trên, áp cho trục entity: tên cột lạ
+  // (§3.1 đổi tên, hoặc ROUTE_MAP thiếu entity) phải đỏ to, không âm thầm
+  // rớt cột đó khỏi tầng B.
+  if (cotLa.length > 0) {
+    console.log(`[FAIL] §3.1 có ${cotLa.length} tên cột chưa map được sang entity trong ROUTE_MAP:`)
+    for (const x of cotLa) console.log(`       "${x}"`)
+    console.log('       Sửa ENTITY_BY_LABEL/ROUTE_MAP (src/lib/routes.ts) cho khớp §3.1,')
+    console.log('       KHÔNG đổi tên cột trong 06 để né bộ kiểm.')
     process.exit(1)
   }
 
@@ -245,17 +368,32 @@ function main() {
 
   const viPham: { page: string; field: string; regions: string[] }[] = []
   for (const p of trangs) {
+    const pageEntity = entityCuaTrang(p)
     const duLieu = docTrang(readFileSync(p, 'utf-8'))
     for (const [field, vungs] of duLieu) {
       const chophep = maTran.get(field)
       // Vùng cũ chưa có trong §3.1 vẫn tính vào số vùng — đó là điểm của tầng A.
+      // Tầng A giữ nguyên map hợp nhất theo TÊN field (không theo entity) —
+      // không đổi so với trước Task 8.
       const soVungChoPhep = chophep ? chophep.size : 1
       if (vungs.size > soVungChoPhep)
         viPham.push({ page: relative(REPO_ROOT, p), field, regions: [...vungs].sort() })
 
-      // Tầng B — SAI VÙNG. Field render ở vùng khác vùng §3.1 khai.
-      if (chophep) {
-        const sai = [...vungs].filter(v => !chophep.has(v))
+      // Tầng B — SAI VÙNG, đúng theo CỘT ENTITY của §3.1 (không lấy hợp nhất
+      // như tầng A). Chỉ phán khi (a) field có ít nhất một cột khai trong
+      // §3.1 (chophep) VÀ (b) entity của trang này có cột trong §3.1
+      // (entityCoCot). Entity không có cột — Organization, Person, Khách
+      // sạn, … — §3.1 không nói gì về vùng của chúng, nên tầng B không có
+      // thẩm quyền phán, y hệt lý do `if (chophep)` tránh phán field §3.1
+      // chưa từng nhắc tới. Đây là bản vá cho phát hiện Task 8: trước bản vá
+      // này, tầng B mượn nhầm ràng buộc của Điểm tham quan/Địa danh/Tour cho
+      // field trùng TÊN trên Organization/Person (15 vi phạm giả — xem
+      // DR-046). Field có cột nhưng Ô cụ thể ghi "—" (không có vùng) vẫn
+      // đúng đắn: `chophepEntity` rỗng, field render ở BẤT KỲ vùng nào cũng
+      // là sai — đúng nghĩa "§3.1 nói field này không có mặt ở entity đó".
+      if (chophep && pageEntity && entityCoCot.has(pageEntity)) {
+        const chophepEntity = theoEntity.get(field)?.get(pageEntity) ?? new Set<string>()
+        const sai = [...vungs].filter(v => !chophepEntity.has(v))
         if (sai.length > 0)
           viPham.push({ page: relative(REPO_ROOT, p), field, regions: [`SAI VUNG: ${sai.sort().join(' + ')}`] })
       }

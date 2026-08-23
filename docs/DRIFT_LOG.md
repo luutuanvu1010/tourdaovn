@@ -820,6 +820,31 @@ Quyết định vẫn treo y như đoạn trên: nếu chủ dự án chốt Org
 chuyển sang `FactStrip`/`facts`, gap này tự đóng cùng lúc; nếu chốt giữ
 `InfoCard` làm primitive lâu dài, tầng B cần trục entity để hết báo nhầm.
 
+**Cập nhật thứ hai, cùng ngày — controller chốt: 15 vi phạm ở trên là ĐỎ
+GIẢ do defect của validator, không phải một phát hiện Luật 1 thật, và đã
+vá.** `docMaTran()` gộp vùng cho phép theo TÊN field trên toàn bộ ma trận
+§3.1, không tách theo cột entity — đây là defect có sẵn từ bản review Task 2
+(deferred minor: "the allowed region count is a union across entity columns
+rather than the per-entity cell"), tầng A chịu được vì chỉ ĐẾM số vùng, tầng
+B thì không vì nó SO SÁNH đúng-sai vùng cụ thể. Đã vá trong `luat1-post.ts`:
+`docMaTran()` nay trả thêm `theoEntity` (Field → entity key → đúng vùng của
+CỘT đó) và `entityCoCot` (tập entity có cột thật trong §3.1); hàm mới
+`entityCuaTrang()` suy entity của một trang từ segment URL đầu, tra qua
+`ROUTE_MAP` (`src/lib/routes.ts` — theo đúng tiền lệ import từ `src/` mà
+`scripts/meta-validators/g3-binding-map-vs-template.ts` đã đặt, không tự
+liệt tiền tố URL bằng tay). Tầng B nay chỉ phán một trang khi entity của
+trang đó CÓ cột trong §3.1 — Organization và Person (không có cột) nằm
+ngoài thẩm quyền tầng B, nên 15 vi phạm ở trên KHÔNG còn xuất hiện. Xác
+minh tầng B vẫn sống (không phải "hết đỏ vì thôi không kiểm nữa"): tạm đổi
+`data-region="fact-strip"` thành `"breadcrumb"` trên
+`dist/diem-tham-quan/chua-long-son/index.html` (entity `attraction`, CÓ cột
+trong §3.1) — tầng B bắt đúng 5 vi phạm `SAI VUNG: breadcrumb`
+(`openingHours`, `address`, `telephone`, `isAccessibleForFree`,
+`officialSource`); phục hồi file gốc, xác nhận giống hệt bằng `diff`, chạy
+lại về `[pass]`. Câu hỏi chính sách ở đoạn trên (Organization/Person có nên
+chuyển sang `FactStrip` không) vẫn treo — DR-046 vẫn ở trạng thái mở — chỉ
+riêng phần "tầng B báo nhầm" đã đóng.
+
 ---
 
 ## DR-047 — Tầng B của `luat1-post.ts` không tách được các mục nội dung, chỉ tách được id vùng
