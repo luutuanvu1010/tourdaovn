@@ -1,0 +1,108 @@
+---
+/**
+ * Vùng "Thông tin nhanh" (06-BINDING_MAP §3, v2.1) — thay cặp InfoBar + InfoCard.
+ *
+ * Vì sao gộp: hai vùng cùng ăn một bộ field là gốc của DR-032 và của 44/58 trang
+ * lặp vùng đo ngày 2026-08-22. Một field một vùng thì phải có đúng MỘT component.
+ *
+ * Hợp đồng từ 06: tối đa 6 ô; KHÔNG chứa giá (giá chỉ ở thanh dính + khối hành
+ * động); ≤ 2 ô thì không trải dải mà gộp vào sidebar — chỗ gọi quyết định điều đó
+ * qua prop `inline`, component chỉ dựng.
+ */
+export interface Fact {
+  /** Tên field trong 01-CONTENT_MODEL. Bộ kiểm Luật 1 đếm theo đây. */
+  field: string
+  icon: string
+  label: string
+  value: string
+  href?: string
+  visible: boolean
+}
+
+export interface Props {
+  facts: Fact[]
+  /** true = dựng dạng danh sách dọc để nhét vào sidebar (≤ 2 ô). */
+  inline?: boolean
+}
+
+const { facts, inline = false } = Astro.props
+// Trần 6 ô là hợp đồng của 06, không phải lựa chọn thẩm mỹ. Quá 6 thì cắt và
+// để chỗ gọi tự sắp thứ tự ưu tiên — component không tự đoán cái nào quan trọng.
+const visible = facts.filter(f => f.visible).slice(0, 6)
+const cols = Math.min(visible.length, 3)
+---
+
+{visible.length > 0 && (
+  <section class:list={['fact-strip', inline && 'fact-strip--inline']}>
+    <div class:list={[!inline && 'container']}>
+      <dl class="fact-grid" style={`--fact-cols:${cols}`} data-region="fact-strip">
+        {visible.map((f) => (
+          <div class="fact" data-field={f.field}>
+            <dt class="fact-label">
+              <span class="fact-icon" aria-hidden="true">{f.icon}</span>
+              {f.label}
+            </dt>
+            <dd class="fact-value">
+              {f.href ? (
+                <a href={f.href} {...(f.href.startsWith('http') ? { target: '_blank', rel: 'noopener' } : {})}>{f.value}</a>
+              ) : f.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+)}
+
+<style>
+  .fact-strip { padding: 0 0 var(--s4); }
+  .fact-strip--inline { padding: 0; }
+
+  .fact-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--fact-cols, 3), 1fr);
+    gap: var(--s3);
+    margin: 0;
+    background: var(--c-surface-alt);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    padding: var(--s4);
+  }
+
+  .fact-strip--inline .fact-grid {
+    grid-template-columns: 1fr;
+    background: none;
+    border: 0;
+    padding: 0;
+  }
+
+  .fact { min-width: 0; }
+
+  .fact-label {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    font-family: var(--font-ui);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-500);
+    color: var(--c-text-muted);
+  }
+
+  .fact-icon { font-size: 1.25rem; line-height: 1; flex: none; }
+
+  .fact-value {
+    margin: 2px 0 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-base);
+    font-weight: var(--fw-700);
+    color: var(--c-text);
+    overflow-wrap: anywhere;
+  }
+
+  /* Luật 5 (cột→hàng ở di động) CHƯA được duyệt — vòng 5 đang chờ chủ dự án.
+     Hôm nay giữ hành vi của InfoBar: hạ xuống 2 cột. Nếu Luật 5 được duyệt,
+     chỗ phải sửa là đúng khối này. */
+  @media (max-width: 1023px) {
+    .fact-grid { grid-template-columns: repeat(min(var(--fact-cols, 3), 2), 1fr); }
+  }
+</style>
