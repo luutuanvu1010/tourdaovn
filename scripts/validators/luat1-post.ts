@@ -1,9 +1,44 @@
 /**
  * Luật 1 (06-BINDING_MAP §6) — một thông tin, một vùng, một lần.
  *
- * Tầng A (task này) — LẶP VÙNG: một field xuất hiện ở nhiều vùng hơn mức §3.1
- *   cho phép. Ngoại lệ duy nhất là giá (thanh dính + khối hành động).
- * Tầng B (bật ở Task 8) — SAI VÙNG: field render ở vùng khác vùng §3.1 khai.
+ * Tầng A (bật ở Task 2) — LẶP VÙNG: một field xuất hiện ở nhiều vùng hơn mức
+ *   §3.1 cho phép. Ngoại lệ duy nhất là giá (thanh dính + khối hành động).
+ * Tầng B (bật ở Task 8, 2026-08-23) — SAI VÙNG: field render ở vùng khác vùng
+ *   §3.1 khai, dù không lặp (vd chỉ render đúng 1 lần nhưng ở nhầm vùng).
+ *   Tầng B chỉ bật sau khi tầng A đã xanh trên toàn kho — bật sớm hơn thì mọi
+ *   trang đỏ vì `info-bar`/`info-card` không phải vùng §3.1 khai, baseline
+ *   thật bị chìm trong nhiễu.
+ *
+ * GIỚI HẠN CỦA TẦNG B — đọc trước khi coi tầng B là "bắt hết sai vùng":
+ *   §3.1 đặt tên nhiều vùng bằng văn xuôi trỏ vào một MỤC NỘI DUNG cụ thể
+ *   (`highlights`, `body`, `accessInfo`, `faq`, `seasonNote`, `includes`,
+ *   `excludes`, `itinerary`, `sameAs`, rollup `experiences` — mỗi ô đọc
+ *   "mục ..." hoặc "dòng ..."). idTuTenVung() gom TẤT CẢ các ô đó về một id
+ *   chung duy nhất là `'section'` (nhánh `key.startsWith('mục')` /
+ *   `startsWith('dòng')` bên dưới) — HTML cũng không tách mục nào ra id
+ *   riêng. Hệ quả: tầng B phân biệt được field render ở `fact-strip` thay vì
+ *   `hero-badge` (id khác nhau), nhưng KHÔNG phân biệt được field render ở
+ *   mục "Câu hỏi thường gặp" thay vì mục "Nguồn tham khảo" — cả hai đều chỉ
+ *   là `'section'`, nên một field cho sai mục nội dung này sang mục nội dung
+ *   khác sẽ lọt qua tầng B mà không hiện đỏ. Đây không phải lỗi cần vá ở đợt
+ *   này: mở rộng parser để tách id cho từng mục nội dung là việc khác phạm
+ *   vi Task 8 (chờ §3.1 được sửa để gán id riêng cho từng mục — đề xuất đó
+ *   đang chờ chủ dự án duyệt bản sửa spec, chưa có ở đây). Tầng B vẫn có giá
+ *   trị thật trong biên đã nêu; chỉ đừng đọc nó rộng hơn biên đó.
+ *
+ *   Giới hạn thứ hai, phát hiện khi chạy thật lần đầu (Task 8, 2026-08-23):
+ *   docMaTran() gộp vùng theo TÊN FIELD, không theo entity/cột. §3.1 chỉ có
+ *   cột cho 4 entity (Điểm tham quan, Địa danh, Trải nghiệm, Tour) —
+ *   Organization và Person KHÔNG có hàng nào ở §3.1 (xem DR-046). Nhưng
+ *   `OrganizationDetail.astro`/`PersonDetail.astro` dùng lại đúng TÊN field
+ *   (`address`, `telephone`, `officialSource`, `licenseInfo`, `sameAs`) mà
+ *   §3.1 đã khai vùng cho các entity khác — nên tầng B đọc nhầm "field này có
+ *   vùng đã khai" và đỏ khi trang Organization/Person render chúng ở
+ *   `info-card` (vùng InfoCard hợp lệ cho hai entity này, vì chúng chưa nằm
+ *   trong phạm vi đóng Luật 1 của Task 5–7). Tầng B KHÔNG có trục entity để
+ *   phân biệt "field X ở entity A" với "field X (trùng tên) ở entity B chưa
+ *   có hàng trong §3.1" — thêm trục đó là mở rộng parser, ngoài phạm vi Task
+ *   8. Xem DR-046 (đã cập nhật) cho danh sách cụ thể và cách đọc kết quả này.
  *
  * Vì sao có file này: Luật 1 là luật duy nhất trong 06 không có bộ kiểm máy.
  * g3 kiểm field CÓ được render không, không kiểm được render MẤY LẦN — và §3.1
@@ -217,6 +252,13 @@ function main() {
       const soVungChoPhep = chophep ? chophep.size : 1
       if (vungs.size > soVungChoPhep)
         viPham.push({ page: relative(REPO_ROOT, p), field, regions: [...vungs].sort() })
+
+      // Tầng B — SAI VÙNG. Field render ở vùng khác vùng §3.1 khai.
+      if (chophep) {
+        const sai = [...vungs].filter(v => !chophep.has(v))
+        if (sai.length > 0)
+          viPham.push({ page: relative(REPO_ROOT, p), field, regions: [`SAI VUNG: ${sai.sort().join(' + ')}`] })
+      }
     }
   }
 
@@ -228,14 +270,19 @@ function main() {
 
   if (viPham.length > 0) {
     const soTrang = new Set(viPham.map(v => v.page)).size
-    console.log(`[FAIL] Luật 1 — ${viPham.length} vi phạm lặp vùng trên ${soTrang} trang:`)
+    // Tách đếm theo tầng chỉ để in đúng chữ — không đổi cách tính viPham.
+    const soSaiVung = viPham.filter(v => v.regions[0]?.startsWith('SAI VUNG:')).length
+    const soLapVung = viPham.length - soSaiVung
+    console.log(
+      `[FAIL] Luật 1 — ${viPham.length} vi phạm (${soLapVung} lặp vùng, ${soSaiVung} sai vùng) trên ${soTrang} trang:`,
+    )
     for (const v of viPham.slice(0, 20))
       console.log(`       ${v.page}  ${v.field}  →  ${v.regions.join(' + ')}`)
     if (viPham.length > 20) console.log(`       … và ${viPham.length - 20} vi phạm nữa (xem scripts/reports/luat1-post.json)`)
     process.exit(1)
   }
 
-  console.log(`[pass] Luật 1 — ${trangs.length} trang, 0 field lặp vùng`)
+  console.log(`[pass] Luật 1 — ${trangs.length} trang, 0 field lặp vùng, 0 field sai vùng`)
 }
 
 main()

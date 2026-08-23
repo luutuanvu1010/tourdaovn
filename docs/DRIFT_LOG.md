@@ -793,3 +793,58 @@ Task 8 mở rộng, hoặc một task khác) nếu muốn ba template này cũng
 sang `facts`/`FactStrip`, hoặc chấp nhận `InfoCard.astro` là primitive lâu
 dài cho nhóm entity phi-địa-lý (Article/Organization/Person) — quyết định đó
 chưa có, ghi lại ở đây để không rơi mất.
+
+**Cập nhật Task 8 (2026-08-23) — tầng B của `luat1-post.ts` làm lộ đúng gap
+này bằng máy, không phải drift mới.** Bật tầng B (SAI VÙNG — field render ở
+vùng khác vùng §3.1 khai) cho ra 15 vi phạm thật trên 5 trang, toàn bộ đều là
+Organization/Person: `cong-ty/cong-ty-co-phan-hon-tam-bien-nha-trang` (5:
+`address`, `telephone`, `officialSource`, `licenseInfo`, `sameAs`),
+`cong-ty/cong-ty-co-phan-vinpearl` (4: thiếu `officialSource`),
+`cong-ty/cong-ty-tnhh-tour-dao` (4: thiếu `sameAs`), `tac-gia/ho-dac-duy` (1:
+`sameAs`), `tac-gia/nguyen-phu-hai` (1: `sameAs`) — tất cả đọc ra `SAI VUNG:
+info-card`. Lý do kỹ thuật: `docMaTran()` trong `luat1-post.ts` gộp vùng theo
+TÊN field, không theo entity/cột — nên khi `OrganizationDetail.astro`/
+`PersonDetail.astro` dùng lại đúng tên field mà §3.1 đã khai vùng cho Điểm
+tham quan/Địa danh/Tour (`address`, `telephone`, `officialSource`,
+`licenseInfo`, `sameAs`), tầng B đọc nhầm thành "field này có vùng đã khai"
+và đỏ khi thấy chúng ở `info-card` — dù `info-card` là vùng hợp lệ (duy nhất)
+cho hai entity chưa nằm trong phạm vi đóng Luật 1. Đây KHÔNG phải một vi
+phạm Luật 1 mới (Luật 1 vẫn giữ đúng: mỗi field một vùng, không lặp) — nó là
+tầng B đang thiếu trục entity để phân biệt "field X ở entity đã khai" với
+"field trùng tên ở entity chưa có hàng trong §3.1". Thêm trục đó là mở rộng
+parser, ngoài phạm vi Task 8 (xem comment đầu `luat1-post.ts`). Task 8 KHÔNG
+sửa `src/components/**` và KHÔNG entity-hoá validator để ép xanh — giữ
+`luat1-post.ts` đỏ thật trên 5 trang này, ghi vào bằng chứng nghiệm thu
+(`docs/evidence/2026-08-22-trung-vung-truoc-4B/luat1-sau-khi-sua-xanh.txt`).
+Quyết định vẫn treo y như đoạn trên: nếu chủ dự án chốt Organization/Person
+chuyển sang `FactStrip`/`facts`, gap này tự đóng cùng lúc; nếu chốt giữ
+`InfoCard` làm primitive lâu dài, tầng B cần trục entity để hết báo nhầm.
+
+---
+
+## DR-047 — Tầng B của `luat1-post.ts` không tách được các mục nội dung, chỉ tách được id vùng
+
+**Trạng thái:** chấp nhận (giới hạn đã biết, ghi lại để không ai đọc tầng B
+rộng hơn biên thật của nó).
+
+Task 8 (2026-08-23) bật tầng B (SAI VÙNG) của `luat1-post.ts`: field render ở
+vùng khác vùng §3.1 khai thì đỏ, kể cả khi không lặp. Nhưng `idTuTenVung()`
+trong file đó gom TẤT CẢ các ô §3.1 mở đầu bằng "mục" hoặc "dòng" — tức
+`highlights`, `body`, `accessInfo`, `faq`, `seasonNote`, `includes`,
+`excludes`, `itinerary`, `sameAs`, và rollup `experiences` — về một id ngắn
+DUY NHẤT là `'section'`. HTML cũng không tách data-region riêng cho từng mục
+nội dung (chỉ có `data-region="section"` chung, xem `DetailLayout.astro:138`
+cho `sameAs`). Hệ quả: tầng B phân biệt được field render ở `fact-strip` khi
+§3.1 khai `hero-badge` (id khác nhau), nhưng KHÔNG phân biệt được field
+render ở mục "Câu hỏi thường gặp" khi §3.1 khai mục "Nguồn tham khảo" — cả
+hai đều chỉ là `'section'`. Một field cho sai mục nội dung này sang mục nội
+dung khác (trong số 9 field kể trên) sẽ lọt qua tầng B mà không hiện đỏ.
+
+Đây không phải một lỗi tầng B viết sai — nó là biên thật của những gì tầng B
+đo được với id vùng hiện có. Không vá trong đợt này: mở rộng `idTuTenVung()`
+(và data-region trong HTML) để tách id cho từng mục nội dung là việc khác
+phạm vi Task 8 — chờ §3.1 được sửa để gán id riêng cho từng mục (đề xuất đó
+đang chờ chủ dự án duyệt bản sửa spec, chưa có ở thời điểm ghi entry này).
+Xem comment đầu `scripts/validators/luat1-post.ts` cho chi tiết kỹ thuật;
+entry này là bản ghi chính thức để giới hạn không rơi mất khi có người sau
+này đọc tầng B và tưởng nó bắt hết mọi kiểu sai vùng.

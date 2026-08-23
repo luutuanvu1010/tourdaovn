@@ -1,0 +1,16 @@
+[FAIL] Luật 1 — 15 vi phạm (0 lặp vùng, 15 sai vùng) trên 5 trang:
+       dist/cong-ty/cong-ty-co-phan-hon-tam-bien-nha-trang/index.html  address  →  SAI VUNG: info-card
+       dist/cong-ty/cong-ty-co-phan-hon-tam-bien-nha-trang/index.html  telephone  →  SAI VUNG: info-card
+       dist/cong-ty/cong-ty-co-phan-hon-tam-bien-nha-trang/index.html  officialSource  →  SAI VUNG: info-card
+       dist/cong-ty/cong-ty-co-phan-hon-tam-bien-nha-trang/index.html  licenseInfo  →  SAI VUNG: info-card
+       dist/cong-ty/cong-ty-co-phan-hon-tam-bien-nha-trang/index.html  sameAs  →  SAI VUNG: info-card
+       dist/cong-ty/cong-ty-co-phan-vinpearl/index.html  address  →  SAI VUNG: info-card
+       dist/cong-ty/cong-ty-co-phan-vinpearl/index.html  telephone  →  SAI VUNG: info-card
+       dist/cong-ty/cong-ty-co-phan-vinpearl/index.html  licenseInfo  →  SAI VUNG: info-card
+       dist/cong-ty/cong-ty-co-phan-vinpearl/index.html  sameAs  →  SAI VUNG: info-card
+       dist/cong-ty/cong-ty-tnhh-tour-dao/index.html  address  →  SAI VUNG: info-card
+       dist/cong-ty/cong-ty-tnhh-tour-dao/index.html  telephone  →  SAI VUNG: info-card
+       dist/cong-ty/cong-ty-tnhh-tour-dao/index.html  officialSource  →  SAI VUNG: info-card
+       dist/cong-ty/cong-ty-tnhh-tour-dao/index.html  licenseInfo  →  SAI VUNG: info-card
+       dist/tac-gia/ho-dac-duy/index.html  sameAs  →  SAI VUNG: info-card
+       dist/tac-gia/nguyen-phu-hai/index.html  sameAs  →  SAI VUNG: info-card
