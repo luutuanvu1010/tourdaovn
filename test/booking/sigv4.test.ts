@@ -26,8 +26,6 @@ describe('signRequest — đối chiếu vector chính thức của AWS', () => 
       'AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20150830/us-east-1/service/aws4_request, SignedHeaders=host;x-amz-date, Signature=5fa00fa31553b73ebf1942676e86291e8372ff2a2260956d9b8aae1d763fbf31',
     )
     expect(h['x-amz-date']).toBe('20150830T123600Z')
-    // Băm thân rỗng — dòng cuối của get-vanilla/get-vanilla.creq.
-    expect(h['x-amz-content-sha256']).toBe('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855')
   })
 
   it('ca post-x-www-form-urlencoded (POST có thân): Authorization khớp nguyên văn .authz', async () => {
@@ -52,8 +50,8 @@ describe('signRequest — đối chiếu vector chính thức của AWS', () => 
     expect(h.Authorization).toBe(
       'AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20150830/us-east-1/service/aws4_request, SignedHeaders=content-type;host;x-amz-date, Signature=ff11897932ad3f4e8b18135d722051e5ac45fc38421b1da7b9d196a0fe09473a',
     )
-    // Băm thân `Param1=value1` — dòng cuối của post-x-www-form-urlencoded.creq.
-    expect(h['x-amz-content-sha256']).toBe('9095672bbd1f56dfc5b65f3e153adc8731a4a654192329106275f4c7b24d0b6e')
+    // Không khẳng định riêng băm thân `9095672b…` nữa: chữ ký khớp nguyên văn vector đã bao hàm
+    // nó rồi — sai một bit trong băm payload thì Authorization không thể trùng.
     // Header gọi vào giữ nguyên để đưa thẳng cho fetch.
     expect(h['Content-Type']).toBe('application/x-www-form-urlencoded')
   })
@@ -89,14 +87,40 @@ describe('signRequest — đối chiếu vector chính thức của AWS', () => 
     )
   })
 
-  it('x-amz-content-sha256 được TRẢ VỀ nhưng KHÔNG nằm trong SignedHeaders', async () => {
-    // Chốt lại lựa chọn thiết kế, vì nó là điều kiện để hai ca vector trên khớp: SignedHeaders
-    // đúng bằng `host` + `x-amz-date` + những header người gọi truyền vào. Header băm payload
-    // vẫn gửi kèm (một số dịch vụ soi nó) nhưng không ký — AWS bỏ qua header ngoài SignedHeaders.
-    const h = await signRequest({ ...base, method: 'GET', url: 'https://example.amazonaws.com/', headers: {}, body: '' })
-    expect(h.Authorization).toContain('SignedHeaders=host;x-amz-date,')
-    expect(h.Authorization).not.toContain('x-amz-content-sha256')
-    expect(h['x-amz-content-sha256']).toBeTruthy()
+  it('ca get-unreserved: đường dẫn KHÁC `/` (giống đường dẫn SES thật)', async () => {
+    // Ba ca trên đều đánh vào `/`. Request thật lại là POST /v2/email/outbound-emails, nên phần
+    // canonical URI của đường dẫn không rỗng chưa hề có vector ngoài nào phủ. Ca này phủ chỗ đó.
+    const h = await signRequest({
+      ...base,
+      method: 'GET',
+      url: 'https://example.amazonaws.com/-._~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+      headers: {},
+      body: '',
+    })
+    // get-unreserved/get-unreserved.authz
+    expect(h.Authorization).toBe(
+      'AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20150830/us-east-1/service/aws4_request, SignedHeaders=host;x-amz-date, Signature=07ef7494c76fa4850883e2b006601f940f8a34d404d0cfa977f52a65bbf5f24f',
+    )
+  })
+
+  it('mặc định KHÔNG gửi x-amz-content-sha256; bật thì header phải nằm TRONG SignedHeaders', async () => {
+    // Sửa theo review Task 16 (Important 1). Bản trước gửi header này mà không ký, và biện minh
+    // rằng vector `get-vanilla` ép buộc như vậy — lập luận đó SAI: vector chỉ ràng buộc rằng một
+    // request KHÔNG mang header đó thì SignedHeaders phải là `host;x-amz-date`; nó không nói gì
+    // về việc có nên gửi header hay không. Tài liệu AWS thì nói rõ: mọi header `x-amz-*` có mặt
+    // trong request đều phải được ký. Nên chỉ còn hai nhánh hợp lệ: không gửi (mặc định, đủ cho
+    // SES), hoặc gửi VÀ ký (S3).
+    const off = await signRequest({ ...base, method: 'GET', url: 'https://example.amazonaws.com/', headers: {}, body: '' })
+    expect('x-amz-content-sha256' in off).toBe(false)
+    expect(off.Authorization).toContain('SignedHeaders=host;x-amz-date,')
+
+    const on = await signRequest({ ...base, method: 'GET', url: 'https://example.amazonaws.com/', headers: {}, body: '', signPayloadHeader: true })
+    // Băm thân rỗng — dòng cuối của get-vanilla/get-vanilla.creq.
+    expect(on['x-amz-content-sha256']).toBe('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855')
+    // Gửi thì phải ký: header có mặt trong SignedHeaders, đúng thứ tự chữ cái.
+    expect(on.Authorization).toContain('SignedHeaders=host;x-amz-content-sha256;x-amz-date,')
+    // Và vì bộ header ký khác đi nên chữ ký phải khác — không phải cùng một chữ ký gắn hai nhãn.
+    expect(on.Authorization).not.toBe(off.Authorization)
   })
 })
 
@@ -113,7 +137,6 @@ describe('signRequest — tính chất', () => {
     const a = await signRequest(o)
     const b = await signRequest({ ...o, body: '{"a":2}' })
     expect(b.Authorization).not.toBe(a.Authorization)
-    expect(b['x-amz-content-sha256']).not.toBe(a['x-amz-content-sha256'])
   })
 
   it('đổi now → x-amz-date và chữ ký đổi theo', async () => {
@@ -127,7 +150,8 @@ describe('signRequest — tính chất', () => {
 
   it('thân tiếng Việt được băm theo byte UTF-8, không theo mã đơn vị UTF-16', async () => {
     // Chuỗi 1 ký tự nhưng 3 byte UTF-8 — nếu băm nhầm theo UTF-16 thì chữ ký sẽ khác với AWS.
-    const o = { ...base, method: 'POST', url: 'https://example.amazonaws.com/', headers: {}, body: 'đ' }
+    // Bật signPayloadHeader chỉ để ĐỌC được băm payload ra mà đối chiếu; đường SES thật không bật.
+    const o = { ...base, method: 'POST', url: 'https://example.amazonaws.com/', headers: {}, body: 'đ', signPayloadHeader: true }
     const h = await signRequest(o)
     // SHA-256 của byte UTF-8 của 'đ' (0xC4 0x91). Giá trị lấy từ công cụ ngoài, không do mã này
     // sinh: `printf 'đ' | shasum -a 256` và `printf 'đ' | openssl dgst -sha256` cho cùng kết quả.

@@ -47,18 +47,24 @@ function canonicalQuery(u: URL): string {
 
 /**
  * Ký một request và trả về bộ header để đưa thẳng cho `fetch`: header gọi vào, cộng
- * `x-amz-date`, `x-amz-content-sha256` và `Authorization`.
+ * `x-amz-date` và `Authorization`.
  *
  * Tất định theo `now` — cùng đầu vào, cùng `now` thì cùng chữ ký; đó là điều làm nó kiểm được.
  *
  * Hai điểm dễ hiểu nhầm, ghi rõ ở đây:
  *
- * 1. SignedHeaders đúng bằng `host` + `x-amz-date` + những header người gọi truyền vào.
- *    `x-amz-content-sha256` được TRẢ VỀ để gửi kèm nhưng KHÔNG được ký. Đây không phải chỗ cắt
- *    ngắn: chính hai ca vector của AWS (`get-vanilla` → `host;x-amz-date`,
- *    `post-x-www-form-urlencoded` → `content-type;host;x-amz-date`) chỉ khớp khi làm đúng như
- *    vậy. AWS bỏ qua header không nằm trong SignedHeaders; riêng S3 mới bắt buộc phải ký header
- *    này — nếu sau này dùng hàm cho S3 thì phải sửa chỗ này.
+ * 1. SignedHeaders đúng bằng `host` + `x-amz-date` + những header người gọi truyền vào. Mặc định
+ *    KHÔNG gửi kèm `x-amz-content-sha256`, vì tài liệu AWS
+ *    ("Create a signed AWS API request") nói rõ hai lần: "any `x-amz-*` headers that you plan to
+ *    include in your request must also be added" vào CanonicalHeaders, và phải đưa mọi header
+ *    `x-amz-*` vào chữ ký. Gửi header `x-amz-*` mà không ký là tổ hợp tài liệu cấm. SES không
+ *    cần header này (chỉ S3 mới bắt buộc), nên đường mặc định là không gửi.
+ *
+ *    Bật `signPayloadHeader` thì header vừa được gửi VỪA được ký — đúng cách S3 đòi. Đừng thêm
+ *    một nhánh thứ ba "gửi mà không ký".
+ *
+ *    Lưu ý: thân request LUÔN được chữ ký bảo vệ dù có gửi header hay không, vì băm payload là
+ *    dòng cuối của canonical request. Header đó chỉ là bản sao công khai của cùng giá trị.
  * 2. Không trả `host` trong bộ header. Workers tự đặt Host theo URL và không cho ghi đè; ta ký
  *    đúng `new URL(url).host` nên giá trị gửi đi và giá trị đã ký luôn khớp nhau.
  */
@@ -72,6 +78,8 @@ export async function signRequest(o: {
   region: string
   service: string
   now: Date
+  /** Gửi kèm VÀ ký `x-amz-content-sha256` (S3 bắt buộc; SES không cần). Mặc định `false`. */
+  signPayloadHeader?: boolean
 }): Promise<Record<string, string>> {
   const u = new URL(o.url)
   const amz = amzDate(o.now)
@@ -81,6 +89,7 @@ export async function signRequest(o: {
   // Giá trị header: cắt khoảng trắng đầu/cuối và ép dãy khoảng trắng về một dấu cách, theo
   // "Elements of an AWS API request signature". Tên header hạ về chữ thường và sắp xếp.
   const signed: Record<string, string> = { host: u.host, 'x-amz-date': amz }
+  if (o.signPayloadHeader) signed['x-amz-content-sha256'] = payloadHash
   for (const [k, v] of Object.entries(o.headers)) signed[k.toLowerCase()] = v.trim().replace(/\s+/g, ' ')
   const names = Object.keys(signed).sort()
   const signedHeaders = names.join(';')
@@ -110,7 +119,7 @@ export async function signRequest(o: {
   return {
     ...o.headers,
     'x-amz-date': amz,
-    'x-amz-content-sha256': payloadHash,
+    ...(o.signPayloadHeader ? { 'x-amz-content-sha256': payloadHash } : {}),
     Authorization: `${ALGO} Credential=${o.accessKeyId}/${scope}, SignedHeaders=${signedHeaders}, Signature=${signature}`,
   }
 }

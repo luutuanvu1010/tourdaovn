@@ -85,7 +85,10 @@ describe('ses', () => {
     expect(h.Authorization).toMatch(/^AWS4-HMAC-SHA256 /)
     expect(h.Authorization).toContain('Credential=AKIDEXAMPLE/20260901/ap-southeast-1/ses/aws4_request')
     expect(h['x-amz-date']).toBe('20260901T030000Z')
-    expect(h['x-amz-content-sha256']).toMatch(/^[0-9a-f]{64}$/)
+    // Không gửi kèm x-amz-content-sha256: tài liệu AWS đòi mọi header `x-amz-*` có mặt đều phải
+    // được ký, mà SES thì không cần header này (review Task 16, Important 1). Thân thư vẫn được
+    // chữ ký bảo vệ qua dòng băm payload trong canonical request.
+    expect('x-amz-content-sha256' in h).toBe(false)
   })
 
   it('khách không cho email → BỎ HẲN khoá ReplyToAddresses, không gửi mảng rỗng', async () => {
