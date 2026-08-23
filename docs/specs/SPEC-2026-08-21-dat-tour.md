@@ -319,7 +319,7 @@ kênh đó `skipped`, không ném lỗi.
 | `ZALO_BOT_TOKEN`, `ZALO_BOT_CHAT_IDS` | secret | `wrangler secret put` | Zalo Bot |
 | `TURNSTILE_SECRET_KEY` | secret | `wrangler secret put` | siteverify |
 | `IP_HASH_SALT` | secret | `wrangler secret put` | muối băm IP cho bộ đếm tần suất. **Không có trong spec gốc** — sinh từ phán xét F4 vòng review Task 8: dùng chung `TURNSTILE_SECRET_KEY` làm muối là tái dụng bí mật sai mục đích. Thiếu thì `ipHash = null` (mất đếm tần suất ở dev, không băm bằng muối đoán được) |
-| `PUBLIC_TURNSTILE_SITE_KEY` | biến build (công khai) | `.env` máy dev và biến build Cloudflare | widget; thiếu lúc build → `BookingForm` không render widget và `astro build` in một dòng cảnh báo; production **phải** có cả site key lẫn secret, thiếu một trong hai thì mọi đơn bị **503** — hỏng ồn ào, không hỏng câm (`DR-047`) |
+| `PUBLIC_TURNSTILE_SITE_KEY` | biến build (công khai) | `.env` máy dev và biến build Cloudflare | widget; thiếu lúc build → `BookingForm` không render widget và `astro build` in một dòng cảnh báo; production **phải** có cả site key lẫn secret. Hai đường hỏng khác nhau, **cả hai đều ồn ào, không cái nào hỏng câm** (`DR-047`): thiếu **secret** → cổng cấu hình chặn ngay, mọi đơn bị **503**, không đọc thân, không chạm D1, không gọi mạng; thiếu **site key** mà vẫn có secret → widget không render nên client không gửi token, mọi đơn bị **400** `missing-token` |
 | `BOOKING_DB` | binding D1 | `wrangler.toml` | bảng `booking` |
 
 Cục bộ: `.dev.vars` (thêm vào `.gitignore`) cho `astro dev` và vitest; `platformProxy` của
