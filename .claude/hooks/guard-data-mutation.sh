@@ -9,6 +9,14 @@
 #
 # Mở khoá: tạo .claude/.cho-phep-ghi-du-lieu trong dự án. Cờ hết hiệu lực sau 30
 # phút — một cờ bỏ quên là một cổng mở vĩnh viễn.
+#
+# Nhánh MCP Sanity: dùng danh sách CHO PHÉP (chỉ-đọc), không dùng danh sách
+# chặn. Vòng sửa 1 (2026-08-24): reviewer phát hiện danh sách chặn theo tiền tố
+# (create_/patch_/delete_/publish_/...) để lọt run_sanity_cli, add_cors_origin,
+# cors_origins_delete, generate_image — bất cứ công cụ ghi nào không khớp một
+# tiền tố quen thuộc đều lọt qua. Đảo chiều: mặc định CHẶN mọi tool_name bắt
+# đầu bằng mcp__Sanity, trừ danh sách chỉ-đọc liệt kê dưới đây. Tool Sanity mới
+# xuất hiện sau này mặc định bị chặn thay vì mặc định lọt.
 set -euo pipefail
 
 INPUT=$(cat)
@@ -37,13 +45,24 @@ co_the_ghi() {
   return 0
 }
 
-# --- Công cụ MCP Sanity ---
+# --- Công cụ MCP Sanity: danh sách CHO PHÉP (chỉ-đọc); mặc định CHẶN phần còn lại ---
 case "$TOOL" in
-  mcp__Sanity__create_*|mcp__Sanity__patch_*|mcp__Sanity__delete_*|mcp__Sanity__publish_*|\
-  mcp__Sanity__unpublish_*|mcp__Sanity__discard_*|mcp__Sanity__update_*|mcp__Sanity__version_*|\
-  mcp__Sanity__deploy_*|mcp__Sanity__dataset_assets_upload)
-    co_the_ghi || deny "$LY_DO Công cụ bị chặn: $TOOL."
-    exit 0
+  mcp__Sanity*)
+    case "$TOOL" in
+      mcp__Sanity___get_ui_context|mcp__Sanity__whoami|mcp__Sanity__get_document|\
+      mcp__Sanity__get_schema|mcp__Sanity__get_project_studios|mcp__Sanity__get_sanity_rules|\
+      mcp__Sanity__query_documents|mcp__Sanity__semantic_search|mcp__Sanity__search_docs|\
+      mcp__Sanity__read_docs|mcp__Sanity__list_datasets|mcp__Sanity__list_projects|\
+      mcp__Sanity__list_organizations|mcp__Sanity__list_releases|mcp__Sanity__list_sanity_rules|\
+      mcp__Sanity__list_workspace_schemas|mcp__Sanity__list_embeddings_indices|\
+      mcp__Sanity__cors_origins_list|mcp__Sanity__give_sanity_feedback)
+        exit 0
+        ;;
+      *)
+        co_the_ghi || deny "$LY_DO Công cụ bị chặn: $TOOL."
+        exit 0
+        ;;
+    esac
     ;;
 esac
 
@@ -52,7 +71,12 @@ esac
 CMD=$(printf '%s' "$INPUT" | jq -r '.tool_input.command // ""')
 
 # Danh sách lấy từ scripts/package.json — đúng những script đụng dữ liệu thật.
-MAU_GHI='(publish:drafts|publish-drafts\.ts|patch:n5|patch-n5-[a-z0-9-]+\.ts|backfill:seo-meta|backfill-seo-meta\.ts|scripts/migrate/|(^|[[:space:]])migrate/[a-z0-9-]+\.ts|sanity[[:space:]]+documents[[:space:]]+(create|delete|replace)|sanity[[:space:]]+dataset[[:space:]]+delete)'
+# Vòng sửa 1: thêm translate (ghi Sanity thật qua scripts/translate/batch.ts,
+# chặn không điều kiện bất kể --live hay --dry-run, cờ mở khoá vẫn là đường
+# thoát duy nhất); cho phép @<phiên bản> ghim ngay sau `sanity` (npx
+# sanity@latest ...); migrate/ và seed/ khớp MỌI đuôi file, có hoặc không tiền
+# tố scripts/ (seed/ ghi dữ liệu thật qua client.createOrReplace()).
+MAU_GHI='(publish:drafts|publish-drafts\.ts|patch:n5|patch-n5-[a-z0-9-]+\.ts|backfill:seo-meta|backfill-seo-meta\.ts|(^|[[:space:]])translate([[:space:]/]|$)|(^|[[:space:]])(scripts/)?(migrate|seed)/[A-Za-z0-9_.-]+|sanity(@[^[:space:]]+)?[[:space:]]+documents[[:space:]]+(create|delete|replace)|sanity(@[^[:space:]]+)?[[:space:]]+dataset[[:space:]]+delete)'
 
 if printf '%s' "$CMD" | grep -Eq "$MAU_GHI"; then
   co_the_ghi || deny "$LY_DO"
