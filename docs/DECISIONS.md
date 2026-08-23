@@ -1017,7 +1017,7 @@ Kiểm hết bốn nơi dùng field này trong mã nguồn (bỏ bundle `cms/dis
 
 ## QĐ-2026-08-23-02 — `06-BINDING_MAP` v2.3: đoạn mở rời hero, và Luật 5 cột→hàng ở di động
 
-**Trạng thái:** **NHÁP — chờ chủ dự án chốt.** Bản `06` đã sửa sẵn ở nhánh `worktree-binding-map-v2-3`, chưa gộp. Không dùng làm căn cứ cho bất kỳ bước nào cho tới khi chốt.
+**Trạng thái:** **chốt 2026-08-24.** Chủ dự án chọn **phương án A kèm chỉnh câu chữ** ở phần xung đột. `06` lên v2.3.0 chính thức. Nhánh `worktree-binding-map-v2-3`, chưa gộp vào `main`.
 
 **Bối cảnh.** Chủ dự án nêu bốn việc bề mặt ngày 2026-08-22. Qua phiên brainstorm, hai trong bốn việc được chốt bằng lựa chọn trực tiếp (ghi ở `SPEC-2026-08-22-be-mat-vong-5` §3.2 và §3.6), nhưng **chưa được ghi vào đặc tả**. Bước 7 (Design) không mở được chặng 2 khi `06` chưa nói điều Design sắp vẽ — đó là "Design đi trước cấu trúc", `CLAUDE.md` §5 chặn. Phiếu này ghi hai quyết định đó thành đặc tả.
 
@@ -1045,9 +1045,17 @@ Bản nháp này cho Luật 5 **thay** câu cũ, vì đó là điều chủ dự
 
 | # | Phương án | Hệ quả |
 |---|---|---|
-| **A (đề xuất)** | Luật 5 thay câu cũ. Giữ đúng điều chủ dự án đã chọn | Sửa lại CSS `FactStrip.astro` một lần sau khi PR #1 gộp |
+| **A — ĐÃ CHỌN** | Luật 5 thay câu cũ | Sửa lại CSS `FactStrip.astro` một lần sau khi PR #1 gộp |
 | B | Giữ "lưới 2 cột", thu Luật 5 lại chỉ áp cho các vùng khác | Mã không phải sửa, nhưng Thông tin nhanh — vùng chính của yêu cầu — lại nằm ngoài luật |
-| C | Hoãn Luật 5 sang vòng sau | Chặng 2 của Design vẫn mở được nhờ Chốt 1, nhưng ý (3) của chủ dự án chưa được xử |
+| C | Hoãn Luật 5 sang vòng sau | Chặng 2 của Design vẫn mở được nhờ Chốt 1, nhưng ý (3) chưa được xử |
+
+**Chỉnh câu chữ đi kèm khi chốt A.** Bản nháp ghi *"nhãn trái, giá trị phải"*. Đo 272 ô trên bản dựng thật trước khi chốt cho thấy câu đó tự làm yếu chính mình: nhãn cũng chiếm chỗ ("Website chính thức" đã 18 ký tự), nên chia đôi hàng chỉ cho giá trị ~190–215px — hơn lưới 2 cột chừng 15–25%, không phải gấp đôi. Với `address` 78 ký tự thì vẫn vắt nhiều dòng.
+
+Nên Luật 5 nay **chọn kiểu theo độ dài giá trị**: vừa một dòng thì nhãn trái / giá trị phải; dài hơn một dòng thì nhãn trên / giá trị full-width (~358px). Số đo và lý lẽ ghi ngay trong §6 để lần sau không phải đo lại.
+
+**Số đo dùng để chốt:** trung vị **13 ký tự**; **28% số ô (75/272) dài quá 20 ký tự**; ở 390px lưới 2 cột cho mỗi ô ~170px ≈ 20–24 ký tự. Tức **72% số ô vốn đã vừa khít** — luật này tồn tại cho 28% còn lại, và cho ô địa chỉ.
+
+**Giá phải trả, nói rõ khi chốt:** trang dài thêm ~112px với entity 5 ô (~13% một màn 390×844), và một khối `@media` trong `FactStrip.astro` phải sửa lại sau khi PR #1 gộp.
 
 **Không đổi gì khác.** Không field nào của `01-CONTENT_MODEL` đổi. §3.1 vẫn bốn cột; Organization và Person vẫn không có hàng (DR-046). Luật 1–4 giữ nguyên.
 
