@@ -873,3 +873,56 @@ phạm vi Task 8 — chờ §3.1 được sửa để gán id riêng cho từng 
 Xem comment đầu `scripts/validators/luat1-post.ts` cho chi tiết kỹ thuật;
 entry này là bản ghi chính thức để giới hạn không rơi mất khi có người sau
 này đọc tầng B và tưởng nó bắt hết mọi kiểu sai vùng.
+
+---
+
+## DR-048 — Bốn vùng §3.1 chưa từng gắn `data-region`, để lọt C1 và I1 qua tám vòng review
+
+**Trạng thái:** chấp nhận (giới hạn đã biết, sibling của DR-047 — cùng chủ đề
+"tầng B không bắt hết mọi kiểu sai vùng", khác nguyên nhân kỹ thuật).
+
+Review toàn nhánh (2026-08-23) phát hiện: bên cạnh giới hạn bucket `'section'`
+đã ghi ở DR-047, `luat1-post.ts` còn một giới hạn thứ hai mà comment đầu file
+CHƯA từng khai. ALIAS trong file đó đọc được TÁM id vùng ngắn từ §3.1
+(`hero-badge`, `hero`, `breadcrumb`, `fact-strip`, `sticky-bar`,
+`action-block`, `map-card`, `footer-meta`). Đối chiếu với
+`grep -rhoE 'data-region="[a-z-]+"' src/components/*.astro` chạy thật trên
+kho hôm nay: chỉ NĂM id có mặt trong HTML — `action-block`, `fact-strip`,
+`sticky-bar`, `map-card` (thẻ bản đồ; vá xong trong cùng đợt sửa ghi entry
+này, xem C1 bên dưới), và bucket `'section'`. BỐN id còn lại — `hero`,
+`hero-badge`, `breadcrumb`, `footer-meta` — KHÔNG component nào từng gắn.
+
+Hệ quả: bốn hàng §3.1 sau nằm HOÀN TOÀN ngoài thẩm quyền của cả tầng A lẫn
+tầng B, dù field có cột hợp lệ trong ma trận:
+
+| Hàng §3.1 | Vùng khai (id chưa gắn) |
+|---|---|
+| `attractionType` · `placeType` · `experienceType` · `tourFormat` (nhãn loại entity) | `hero-badge` |
+| `summary` | `hero` |
+| `containedInPlace` · `venue` (mắt cha) | `breadcrumb` |
+| `_updatedAt` · `updatedAt` | `footer-meta` |
+
+Không có thẻ `data-region` nào bọc các vùng này trong HTML, nên `docTrang()`
+trong `luat1-post.ts` không có gì để gán cho field render ở đó — field đó
+biến mất khỏi cả bộ đếm tầng A lẫn phép so sánh tầng B, dù render thật trên
+trang. Đây chính là lỗ đã để lọt hai phát hiện thật của cùng đợt review này:
+
+- **C1** — `hasMap` bị bỏ rơi hoàn toàn (không render ở đâu, kể cả thẻ bản đồ)
+  trên 37 trang suốt tám vòng review task. Đã vá trong đợt sửa này (chuyển
+  `hasMap` vào thẻ bản đồ, gắn `data-region="map-card" data-field="hasMap"`),
+  nên `map-card` nay chuyển sang cột "có gắn thẻ" ở trên.
+- **I1** — `duration` lặp sang huy hiệu hero (`hero-badge`) trên 19 trang
+  Trải nghiệm/Tour, cạnh bản Thông tin nhanh đã đúng vùng. Huy hiệu hero
+  không mang `data-region`/`data-field` nên tầng A/B đều không thấy cặp lặp.
+  Đã vá trong đợt sửa này (bỏ `duration` khỏi `heroBadges`).
+
+Cả hai field đứng cạnh một vùng CHƯA GẮN THẺ (`hero-badge`) — không phải
+trùng hợp: đây chính xác là loại lỗi mà giới hạn này dự đoán trước sẽ lọt.
+
+Không vá trong đợt này: gắn `data-region`/`data-field` cho bốn vùng còn lại
+(`Hero.astro`, `Breadcrumb.astro`, và dòng "Cập nhật" cuối nội dung trong
+`DetailLayout.astro`) là việc khác phạm vi — mỗi vùng cần xác nhận cách field
+đang render ở đó trước khi gắn thẻ (rủi ro tương tự các phát hiện của Task 1
+khi gắn thẻ cho vùng cũ), không phải việc cơ học một dòng. Ghi giới hạn trung
+thực ở đây và trong comment đầu `scripts/validators/luat1-post.ts` — không tự
+vá, không tự nhận tầng B "bắt hết".

@@ -35,6 +35,31 @@
  *   đang chờ chủ dự án duyệt bản sửa spec, chưa có ở đây). Tầng B vẫn có giá
  *   trị thật trong biên đã nêu; chỉ đừng đọc nó rộng hơn biên đó.
  *
+ * GIỚI HẠN THỨ HAI CỦA TẦNG B — bốn id vùng ALIAS đọc được từ §3.1 nhưng
+ * KHÔNG component nào từng phát ra (review toàn nhánh, 2026-08-23). ALIAS ở
+ * dưới đọc được TÁM id ngắn từ §3.1 (`hero-badge`, `hero`, `breadcrumb`,
+ * `fact-strip`, `sticky-bar`, `action-block`, `map-card`, `footer-meta`) cộng
+ * bucket `'section'` ở trên. Nhưng chỉ NĂM trong số đó có mặt thật trong HTML
+ * (`grep -rhoE 'data-region="[a-z-]+"' src/components/*.astro` — tự chạy lại
+ * lệnh này để xác nhận, đừng tin danh sách chép tay ở đây):
+ * `action-block`, `fact-strip`, `sticky-bar`, `map-card` (thẻ bản đồ, C1 vá
+ * xong cùng đợt sửa này), và bucket `'section'`. BỐN id còn lại — `hero`,
+ * `hero-badge`, `breadcrumb`, `footer-meta` — không component nào gắn, nên
+ * BỐN hàng §3.1 tương ứng nằm HOÀN TOÀN ngoài thẩm quyền của cả hai tầng, dù
+ * field có cột hợp lệ: hàng nhãn loại entity (`attractionType` ·
+ * `placeType` · `experienceType` · `tourFormat` → `hero-badge`), hàng
+ * `summary` (→ `hero`), hàng `containedInPlace` · `venue` (→ `breadcrumb`),
+ * và hàng `_updatedAt` · `updatedAt` (→ `footer-meta`). Field nào chỉ render
+ * ở một trong bốn vùng CHƯA GẮN THẺ này thì cả tầng A lẫn tầng B đều mù —
+ * không đỏ dù đúng dù sai, vì HTML không mang manh mối nào để đối chiếu.
+ * Đây chính là lỗ đã để lọt C1 (`hasMap` bị bỏ rơi không render ở đâu) và I1
+ * (`duration` lặp sang `hero-badge`) qua tám vòng review việc — cả hai field
+ * đó đứng cạnh một vùng KHÔNG GẮN THẺ (`hero-badge`), nên phần lặp/mất không
+ * hề lên báo cáo dù render thật trên trang. Gắn `data-region`/`data-field`
+ * cho bốn vùng còn lại (Hero.astro, Breadcrumb.astro, DetailLayout.astro
+ * phần "Cập nhật") là việc NGOÀI PHẠM VI đợt sửa này — chỉ khai giới hạn
+ * trung thực ở đây, không tự vá. Xem DR-047 (bản mở rộng) cho log đầy đủ.
+ *
  *   SỬA ENTITY-SCOPE (Task 8, cùng ngày, sau khi phát hiện thật ở trên).
  *   Lần bật đầu tiên, docMaTran() gộp vùng theo TÊN FIELD, không theo
  *   entity/cột — nên khi `OrganizationDetail.astro`/`PersonDetail.astro`
