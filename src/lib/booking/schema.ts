@@ -57,8 +57,25 @@ export type ValidationResult =
   | { ok: false; fields: Record<string, string>; message: string }
 
 const SLUG_RE = /^[a-z0-9-]{1,120}$/
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+// `<>` nằm trong lớp bị cấm (vòng review toàn nhánh 2026-08-23): một địa chỉ kiểu `a<b@c.dd`
+// lọt qua biểu thức cũ rồi đi thẳng vào `ReplyToAddresses` của SES → SES trả 400 và MẤT LUÔN
+// thư báo của đơn đó. Vẫn là "biểu thức email đơn giản" theo SPEC §4.4, chỉ bịt đúng hai ký tự.
+const EMAIL_RE = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]{2,}$/
 
+// Ký tự điều khiển (C0 + DEL) → khoảng trắng, rồi mới `trim()`. Áp cho MỌI trường văn bản tự
+// do (`tourTitle`, `name`, `pickup`, `note`) trong `parseBookingPayload`.
+// Vì sao cần (vòng review toàn nhánh 2026-08-23): schema này kiểm độ dài và biểu thức nhưng
+// không lọc `\r`/`\n`. Hai hệ quả thật:
+//  - `note`/`name` có xuống dòng GIẢ MẠO được một dòng trong thân thư văn bản thuần và trong
+//    tin Zalo: một `note` chứa xuống dòng rồi "SĐT: 0999999999" trông y hệt một trường thật với
+//    nhân viên đang đọc (`notify/format.ts` nối mảng dòng bằng `\n`).
+//  - `tourTitle` đi thẳng vào tiêu đề thư SES (`notify/format.ts:17`); ký tự điều khiển ở header
+//    dễ làm SES trả 400 và MẤT LUÔN thư báo của đơn đó.
+// Thay bằng khoảng trắng (không xoá hẳn) để hai chữ dính nhau không bị dán liền.
+const CONTROL_RE = /[\u0000-\u001F\u007F]/g
+function clean(s: string): string {
+  return s.replace(CONTROL_RE, ' ').trim()
+}
 function str(v: unknown): string {
   if (v === null || v === undefined) return ''
   return String(v)
@@ -85,16 +102,19 @@ export function parseBookingPayload(raw: unknown): BookingInput {
   }
   return {
     tourSlug: str(r.tourSlug).trim(),
-    tourTitle: str(r.tourTitle).trim(),
+    tourTitle: clean(str(r.tourTitle)),
     bookingRef: str(r.bookingRef).trim(),
     departDate: str(r.departDate).trim(),
     pax,
-    quoted: { perPax, total: int(pick(r, 'quoted.total')), quotedAt: str(pick(r, 'quoted.quotedAt')) },
-    name: str(r.name).trim(),
+    // `quotedAt` là trường DUY NHẤT trong toàn payload trước đây không có chặn trên: chỉ qua
+    // `str()`, không kiểm định dạng, không giới hạn độ dài — một chuỗi ~15 KB ghi thẳng vào cột
+    // `quoted_json`. Cắt 40 ký tự (dư cho một dấu thời gian ISO 8601 đầy đủ).
+    quoted: { perPax, total: int(pick(r, 'quoted.total')), quotedAt: str(pick(r, 'quoted.quotedAt')).slice(0, 40) },
+    name: clean(str(r.name)),
     phone: str(r.phone).trim(),
     email: str(r.email).trim(),
-    pickup: str(r.pickup).trim(),
-    note: str(r.note).trim(),
+    pickup: clean(str(r.pickup)),
+    note: clean(str(r.note)),
     turnstileToken: str(r.turnstileToken ?? r['cf-turnstile-response']).trim(),
     website: str(r.website).trim(),
   }

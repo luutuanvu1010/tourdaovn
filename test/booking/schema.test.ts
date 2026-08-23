@@ -113,3 +113,50 @@ describe('parseBookingPayload', () => {
     expect((p as any).extra).toBeUndefined()
   })
 })
+
+// Vòng review toàn nhánh 2026-08-23 — mục 6 và 7.
+describe('lọc ký tự điều khiển, chặn trên cho quotedAt, email có <>', () => {
+  it('CR/LF/TAB và ký tự điều khiển trong tourTitle/name/pickup/note → thành khoảng trắng', () => {
+    // Vì sao quan trọng: `note`/`name` có xuống dòng GIẢ MẠO được dòng trong thân thư văn bản
+    // thuần và tin Zalo — một `note` chứa xuống dòng rồi "SĐT: 0999999999" trông y hệt một
+    // trường thật với nhân viên đang đọc. `tourTitle` thì đi thẳng vào tiêu đề thư SES
+    // (`notify/format.ts:17`), ký tự điều khiển ở đó dễ làm SES trả 400 và MẤT LUÔN thư báo.
+    const p = parseBookingPayload({
+      tourTitle: 'Tour\r\n3 đảo',
+      name: 'Nguyễn Văn A\nSĐT: 0999999999',
+      pickup: 'KS\tMường Thanh',
+      note: 'ghi chú\u0000cuối',
+    })
+    expect(p.tourTitle).toBe('Tour  3 đảo')
+    expect(p.name).toBe('Nguyễn Văn A SĐT: 0999999999')
+    expect(p.pickup).toBe('KS Mường Thanh')
+    expect(p.note).toBe('ghi chú cuối')
+    for (const v of [p.tourTitle, p.name, p.pickup, p.note]) expect(v).not.toMatch(/[\u0000-\u001F\u007F]/)
+  })
+
+  it('ký tự điều khiển ở hai rìa không để lại khoảng trắng thừa (thay rồi mới trim)', () => {
+    const p = parseBookingPayload({ tourTitle: '\r\n Tour 3 đảo \n', name: 'A B', pickup: '\n', note: '\r\n' })
+    expect(p.tourTitle).toBe('Tour 3 đảo')
+    expect(p.name).toBe('A B')
+    expect(p.pickup).toBe('')
+    expect(p.note).toBe('')
+  })
+
+  it('quotedAt cắt còn 40 ký tự — trường duy nhất trước đây không có chặn trên', () => {
+    const p = parseBookingPayload({ quoted: { quotedAt: 'x'.repeat(15_000) } })
+    expect(p.quoted.quotedAt.length).toBe(40)
+    const ok = parseBookingPayload({ quoted: { quotedAt: '2026-08-21T02:00:00Z' } })
+    expect(ok.quoted.quotedAt).toBe('2026-08-21T02:00:00Z')
+  })
+
+  it('email chứa < hoặc > → lỗi email (lọt xuống ReplyToAddresses thì SES trả 400, mất thư báo)', () => {
+    const r1 = validateBooking(good({ email: 'a<b@c.dd' }), TODAY)
+    expect(r1.ok).toBe(false)
+    expect((r1 as { fields: Record<string, string> }).fields.email).toBe(MSG.emailInvalid)
+    const r2 = validateBooking(good({ email: 'a@b.cc>' }), TODAY)
+    expect(r2.ok).toBe(false)
+    expect((r2 as { fields: Record<string, string> }).fields.email).toBe(MSG.emailInvalid)
+    // Email thường vẫn qua — không siết nhầm sang chối bỏ địa chỉ hợp lệ.
+    expect(validateBooking(good({ email: 'khach.hang+dat@gmail.com' }), TODAY).ok).toBe(true)
+  })
+})
