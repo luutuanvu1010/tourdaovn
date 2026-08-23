@@ -168,3 +168,35 @@ Object.keys(groups).sort().forEach(k => {
 ---
 
 **Report verified:** All numbers derived from `scripts/reports/luat1-post.json` (validator output, reproducible via command above).
+
+---
+
+## Fix Round 2 (2026-08-23 — Restoration)
+
+### Issue identified
+
+Previous commit deleted the actual deliverable file `docs/evidence/2026-08-22-trung-vung-truoc-4B/hop-dong-fact-strip.md` and folded its content into this process report. That file is the contract Tasks 5–7 are specified to read (task-4-brief.md, Interfaces section: "Produces: bảng hợp đồng từ Task 4").
+
+### Correction applied
+
+Restored `docs/evidence/2026-08-22-trung-vung-truoc-4B/hop-dong-fact-strip.md` carrying:
+- **Field→region matrix** (all 8 rows, corrected per Fix Round 1)
+- **Three constraints** (max 6 cells, no price, ≤2 no spread)
+- **Seven-field warning table** (8 rows, 15 field names, protecting against common misfilings)
+- **Corrected per-entity counts:**
+  - Điểm tham quan: 26 pages, 57 violations
+  - Tour: 11 pages, 22 violations
+  - Địa danh: 7 pages, 19 violations
+  - Trải nghiệm: 8 pages, 16 violations
+  - Khách sạn: 6 pages, 18 violations (out of scope)
+  - **Total:** 52 in-scope pages / 114 in-scope violations + 6 out-of-scope pages / 18 out-of-scope violations = 58 pages / 132 violations
+- **Annotations:** `isAccessibleForFree` spec annotation, `officialSource` quoted vs. inferred distinction
+- **Fixed garbled line:** "BỂN CHÍNH ĐÚNG NỀN" → "Spec khớp hoàn toàn với brief"
+
+**Both files now coexist:**
+- `docs/evidence/2026-08-22-trung-vung-truoc-4B/hop-dong-fact-strip.md` — durable contract, Tasks 5–7 read this
+- `.superpowers/sdd/2026-08-22-dong-luat-1/task-4-report.md` — ephemeral process report
+
+---
+
+**Final status:** DONE. Deliverable restored, all corrections applied, ready for Task 5–7 handoff.
