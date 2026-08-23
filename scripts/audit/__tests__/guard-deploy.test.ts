@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { runHook, bashInput, repoGia } from './hook-harness'
+import { runHook, bashInput, repoGia, thuMucKhongPhaiGit } from './hook-harness'
 
 const HOOK = 'guard-deploy.sh'
 
@@ -23,6 +23,20 @@ test('D-A: có commit chưa push thì chặn mọi lệnh deploy', () => {
 test('D-A: đã push hết thì cho qua', () => {
   const dir = repoGia({ ahead: 0, distFresh: true })
   assert.equal(runHook(HOOK, bashInput('npm run deploy'), dir).denied, false)
+})
+
+test('D-A fail-closed: repo git nhưng không có ref origin/main thì chặn', () => {
+  const dir = repoGia({ ahead: 0, distFresh: true, coOriginMain: false })
+  const r = runHook(HOOK, bashInput('npm run deploy'), dir)
+  assert.equal(r.denied, true)
+  assert.match(r.reason, /không xác định được origin\/main/)
+})
+
+test('D-A fail-closed: CLAUDE_PROJECT_DIR không phải repo git thì chặn', () => {
+  const dir = thuMucKhongPhaiGit()
+  const r = runHook(HOOK, bashInput('npx wrangler deploy'), dir)
+  assert.equal(r.denied, true)
+  assert.match(r.reason, /không xác định được origin\/main/)
 })
 
 test('D-B: wrangler deploy trần với dist cũ hơn src thì chặn', () => {

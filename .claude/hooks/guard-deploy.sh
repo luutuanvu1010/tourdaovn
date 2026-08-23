@@ -34,6 +34,15 @@ PROJECT_DIR="${CLAUDE_PROJECT_DIR:-}"
 cd "$PROJECT_DIR"
 
 # --- D-A: commit chưa push ---
+# Fail-closed: không xác định được ref origin/main (repo chưa fetch, remote
+# khác tên, hoặc PROJECT_DIR không phải repo git) thì CHẶN, không cho qua im
+# lặng. D-B ở dưới vốn đã fail-closed (thiếu dist/index.html thì chặn); nhánh
+# D-A trước đây fail-open là lệch triết lý và lệch đúng kiểu DR-041: "không có
+# tín hiệu hỏng nào".
+if ! git rev-parse --verify -q origin/main >/dev/null 2>&1; then
+  deny "Chặn deploy: không xác định được origin/main. Không tìm thấy ref này trong repo tại $PROJECT_DIR — có thể do chưa fetch, remote khác tên, hoặc đây không phải repo git — nên không biết bản dựng phía Cloudflare sẽ lấy mã từ đâu để đối chiếu. Chạy git fetch origin main rồi thử lại. Nếu repo này thật sự không có remote nào, đó chính là thứ cần xử lý trước khi deploy — bản deploy sẽ không đối chiếu được với bất cứ nguồn nào."
+fi
+
 AHEAD=$(git rev-list --count origin/main..HEAD 2>/dev/null || echo "")
 if [ -n "$AHEAD" ] && [ "$AHEAD" -gt 0 ] 2>/dev/null; then
   deny "Chặn deploy: còn $AHEAD commit chưa push lên origin/main. Cloudflare dựng site từ origin/main, nên bản deploy tay này sẽ bị đè ngay lần Sanity Publish kế tiếp — đúng cơ chế DR-041 đã làm mất trắng đợt 4A. Chạy: git fetch origin main, rồi git push, rồi deploy lại. Nếu đã push rồi mà vẫn bị chặn thì ref origin/main ở local đang cũ, fetch lại."
