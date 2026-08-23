@@ -19,6 +19,12 @@ interface Env {
   // của nhà cung cấp email cũ thành ba biến AWS ở trên — AWS_SES_REGION không bí mật nhưng vẫn
   // phải đi đường này vì wrangler.toml không có [vars], BK4).
   IP_HASH_SALT?: string
+  // Cửa thoát TƯỜNG MINH cho dev khi chưa có TURNSTILE_SECRET_KEY: đặt `'1'` trong `.dev.vars`
+  // thì endpoint vẫn nhận đơn (Turnstile bỏ qua, có console.warn). Thiếu secret mà KHÔNG có cờ
+  // này → endpoint trả 503, không nhận đơn (SPEC §4.7 "hỏng ồn ào, không hỏng câm" + §4.4
+  // "bỏ qua kiểm (chỉ dev)"). KHÔNG bao giờ đặt trên production, KHÔNG khai trong
+  // `wrangler.toml` — file đó không có `[vars]` (BK4).
+  BOOKING_ALLOW_NO_TURNSTILE?: string
 }
 
 type Runtime = import('@astrojs/cloudflare').Runtime<Env>;

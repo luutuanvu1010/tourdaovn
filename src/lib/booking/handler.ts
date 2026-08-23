@@ -1,6 +1,7 @@
 // handler.ts — toàn luồng POST /api/dat-tour (SPEC §4.4), KHÔNG phụ thuộc Astro để test được.
-// Thứ tự: phương thức → Origin → đọc body → honeypot → kiểm đầu vào → Turnstile → tần suất
-// → trùng → sinh mã + INSERT (thử lại khi trùng mã) → trả lời → báo tin trong waitUntil.
+// Thứ tự: phương thức → Origin → cổng cấu hình (Turnstile) → đọc body → honeypot → kiểm đầu
+// vào → Turnstile → tần suất → trùng → sinh mã + INSERT (thử lại khi trùng mã) → trả lời →
+// báo tin trong waitUntil.
 // BK1: không import prices.ts / sanity.ts / resolver.ts. BK2: chỉ ghi D1. BK3: không log PII.
 import type { D1Database } from '@cloudflare/workers-types'
 import { brand, site } from '../../site.config'
@@ -27,6 +28,10 @@ export type BookingEnv = {
   /** Muối băm IP cho tần suất (F4, review Task 8) — vòng đời RIÊNG với TURNSTILE_SECRET_KEY:
    *  xoay khoá Turnstile không được kéo theo việc mọi ip_hash đã lưu bỗng vô nghĩa. */
   IP_HASH_SALT?: string
+  /** Cửa thoát TƯỜNG MINH cho dev khi chưa có TURNSTILE_SECRET_KEY (xem cổng cấu hình trong
+   *  handleBooking). Đặt `'1'` ở `.dev.vars`; KHÔNG bao giờ đặt trên production, và KHÔNG khai
+   *  trong `wrangler.toml` — file đó không có `[vars]` (BK4). */
+  BOOKING_ALLOW_NO_TURNSTILE?: string
 }
 export type WaitUntilCtx = { waitUntil(p: Promise<unknown>): void }
 export type HandlerDeps = {
@@ -41,6 +46,11 @@ export const RATE_WINDOW_MS = 10 * 60 * 1000
 export const RATE_MAX = 5
 export const DUP_WINDOW_MS = 24 * 60 * 60 * 1000
 const CODE_RETRIES = 5
+
+// Cảnh báo một lần cho mỗi isolate, không phải mỗi đơn một dòng. Nội dung chỉ nêu TÊN biến môi
+// trường — không kèm tên/SĐT/email/điểm đón/ghi chú của khách (BK3).
+let warnedNoTurnstile = false
+let warnedNoSalt = false
 
 type Reply = { status: number; body: Record<string, unknown>; heading: string; lines: string[]; ok: boolean }
 
@@ -132,6 +142,29 @@ export async function handleBooking(request: Request, env: BookingEnv, ctx: Wait
       }
     }
 
+    // ─── Cổng cấu hình: thiếu TURNSTILE_SECRET_KEY thì HỎNG ỒN ÀO, không hỏng câm ──────────
+    // SPEC §4.7 (hàng `PUBLIC_TURNSTILE_SITE_KEY`), nguyên văn: "production **phải** có cả site
+    // key lẫn secret, thiếu một trong hai thì mọi đơn bị 400 — hỏng ồn ào, không hỏng câm".
+    // SPEC §4.4 (hàng `turnstileToken`), nguyên văn: "thiếu secret ở môi trường → bỏ qua kiểm
+    // (chỉ dev), ghi `console.warn` một lần".
+    // Hai câu mâu thuẫn về CHỮ nhưng không mâu thuẫn về Ý: §4.4 tự giới hạn phạm vi bỏ qua vào
+    // **dev**, §4.7 nói production không được im lặng mở toang. Cửa thoát TƯỜNG MINH dưới đây
+    // thoả cả hai: dev đặt `BOOKING_ALLOW_NO_TURNSTILE=1` trong `.dev.vars` thì vẫn chạy được;
+    // production không đặt biến đó (và `wrangler.toml` không có `[vars]` — BK4) nên thiếu secret
+    // là TỪ CHỐI nhận đơn, chứ không phải nhận đơn mà không kiểm gì.
+    // Vì sao phải chặn: bỏ qua Turnstile thì lớp còn lại chỉ là honeypot (lách bằng cách để
+    // trống ô `website`) và chống trùng (lách bằng đổi một chữ số SĐT) — không lớp nào là lớp
+    // chặn. Chặn theo lượt yêu cầu nằm ở luật WAF, ngoài Worker (SPEC §4.10 lớp 3).
+    // Đây là THI HÀNH hai mục SPEC trên (phán xét controller, vòng review toàn nhánh
+    // 2026-08-23), KHÔNG phải một quyết định kiến trúc tự đặt ra ở tầng code.
+    if (!env.TURNSTILE_SECRET_KEY && env.BOOKING_ALLOW_NO_TURNSTILE !== '1') {
+      if (!warnedNoTurnstile) {
+        warnedNoTurnstile = true
+        console.error('[dat-tour] TURNSTILE_SECRET_KEY chưa đặt và không có BOOKING_ALLOW_NO_TURNSTILE=1 — TỪ CHỐI nhận đơn')
+      }
+      return reply(request, errorReply(503, MSG.serverError), '')
+    }
+
     const body = await readBody(request)
     if ('error' in body) return reply(request, body.error, '')
     const input = parseBookingPayload(body.data)
@@ -159,6 +192,12 @@ export async function handleBooking(request: Request, env: BookingEnv, ctx: Wait
     // mật khác nhau). Thiếu muối (dev) → ipHash = null, KHÔNG tụt về hằng số đoán được: một
     // hằng cố định làm "băm có muối" chỉ còn danh nghĩa (IPv4 dò ngược được trong vài giây).
     const ipHash = ip && env.IP_HASH_SALT ? await sha256Hex(`${ip}|${env.IP_HASH_SALT}`) : null
+    if (!env.IP_HASH_SALT && !warnedNoSalt) {
+      warnedNoSalt = true
+      // Thiếu muối → cả khối đếm tần suất bên dưới bị nhảy qua. Trước đây việc đó diễn ra
+      // hoàn toàn im lặng; nay ít nhất có một dòng trong log (BK3: chỉ tên biến).
+      console.warn('[dat-tour] IP_HASH_SALT chưa đặt — BỎ QUA đếm tần suất theo IP')
+    }
     // F3 (review Task 8, quyết định controller — KHÔNG đổi kiến trúc): bộ đếm dưới đây đếm số
     // ĐƠN ĐÃ TẠO (đã qua Turnstile, đã INSERT) trong RATE_WINDOW_MS, đúng nghĩa "số đơn/10 phút"
     // của SPEC §4.4 — KHÔNG phải giới hạn số LƯỢT YÊU CẦU. Chặn theo lượt yêu cầu (10 yêu

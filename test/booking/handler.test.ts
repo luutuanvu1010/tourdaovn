@@ -158,13 +158,41 @@ describe('handleBooking', () => {
     expect(row?.notify_zalo).toMatch(/^failed:/)
   })
 
-  it('thiếu secret/khoá (dev) → Turnstile bỏ qua, notifier skipped', async () => {
+  it('thiếu secret/khoá (dev, CÓ cờ BOOKING_ALLOW_NO_TURNSTILE) → Turnstile bỏ qua, notifier skipped', async () => {
     const { f } = fakeFetch(); const { ctx, flush } = mkCtx()
-    const res = await handleBooking(req(payload({ turnstileToken: '' })), { BOOKING_DB: env.BOOKING_DB }, ctx, { fetchImpl: f, now: () => NOW })
+    const res = await handleBooking(req(payload({ turnstileToken: '' })), { BOOKING_DB: env.BOOKING_DB, BOOKING_ALLOW_NO_TURNSTILE: '1' }, ctx, { fetchImpl: f, now: () => NOW })
     expect(res.status).toBe(201)
     await flush()
     const row = await getBookingByCode(env.BOOKING_DB, ((await res.clone().json()) as any).code)
     expect(row?.notify_email).toBe('skipped'); expect(row?.notify_zalo).toBe('skipped')
+  })
+
+  // Cổng cấu hình (vòng review toàn nhánh 2026-08-23): thiếu TURNSTILE_SECRET_KEY thì endpoint
+  // TỪ CHỐI nhận đơn thay vì lặng lẽ tụt xuống chế độ không có lớp chặn nào (SPEC §4.7 "hỏng ồn
+  // ào, không hỏng câm"); cửa thoát cho dev là biến BOOKING_ALLOW_NO_TURNSTILE='1' (SPEC §4.4
+  // "bỏ qua kiểm (chỉ dev)").
+  it('thiếu TURNSTILE_SECRET_KEY và KHÔNG có cờ dev → 503, không lưu, không gọi mạng', async () => {
+    const { f } = fakeFetch(); const { ctx } = mkCtx()
+    const res = await handleBooking(req(payload()), { BOOKING_DB: env.BOOKING_DB }, ctx, { fetchImpl: f, now: () => NOW })
+    expect(res.status).toBe(503)
+    expect(((await res.json()) as any).message).toBe(MSG.serverError)
+    expect(f).not.toHaveBeenCalled()
+    const n = await env.BOOKING_DB.prepare('SELECT COUNT(*) AS n FROM booking').first<{ n: number }>()
+    expect(Number(n?.n)).toBe(0)
+  })
+
+  it('thiếu TURNSTILE_SECRET_KEY nhưng cờ dev = "1" → đi tiếp như cũ (201)', async () => {
+    const { f } = fakeFetch(); const { ctx, flush } = mkCtx()
+    const res = await handleBooking(req(payload()), mkEnv({ TURNSTILE_SECRET_KEY: undefined, BOOKING_ALLOW_NO_TURNSTILE: '1' }), ctx, { fetchImpl: f, now: () => NOW })
+    expect(res.status).toBe(201)
+    expect(((await res.clone().json()) as any).code).toMatch(/^TD-260901-[A-Z2-9]{4}$/)
+    await flush()
+  })
+
+  it('cờ dev khác "1" không mở cổng — vẫn 503', async () => {
+    const { f } = fakeFetch(); const { ctx } = mkCtx()
+    const res = await handleBooking(req(payload()), { BOOKING_DB: env.BOOKING_DB, BOOKING_ALLOW_NO_TURNSTILE: 'true' }, ctx, { fetchImpl: f, now: () => NOW })
+    expect(res.status).toBe(503)
   })
 
   it('form-urlencoded + Accept text/html → trang HTML có mã đơn', async () => {
