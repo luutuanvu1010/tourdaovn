@@ -24,6 +24,7 @@
     "audit:gate": "node --import ./node_modules/tsx/dist/esm/index.mjs audit/gate-audit.ts",
     "audit:deploy": "node --import ./node_modules/tsx/dist/esm/index.mjs audit/deploy-verify.ts",
     "audit:doc": "node --import ./node_modules/tsx/dist/esm/index.mjs audit/doc-reality.ts",
+    "audit:seo": "node --import ./node_modules/tsx/dist/esm/index.mjs audit/html-audit.ts",
     "check:theme": "node ../scripts/check-theme-contrast.mjs"
   },
   "dependencies": {
