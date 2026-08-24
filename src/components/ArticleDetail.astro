@@ -49,10 +49,10 @@ const jumpLinks = [
 ].filter(x => x.on).map(x => ({ href: `#${x.id}`, label: x.label }))
 
 const sidebarRows = [
-  { icon: '👤', label: t('author'), value: data.author?.title || '', visible: !!data.author?.title },
-  { icon: '📂', label: t('category'), value: typeLabel, visible: true },
-  { icon: '📅', label: t('published'), value: formatDate(data.publishedAt, lang), visible: !!data.publishedAt },
-  { icon: '🔄', label: t('articleUpdated'), value: formatDate(data.updatedAt, lang), visible: !!data.updatedAt },
+  { field: 'author', icon: '👤', label: t('author'), value: data.author?.title || '', visible: !!data.author?.title },
+  { field: 'articleType', icon: '📂', label: t('category'), value: typeLabel, visible: true },
+  { field: 'publishedAt', icon: '📅', label: t('published'), value: formatDate(data.publishedAt, lang), visible: !!data.publishedAt },
+  { field: 'updatedAt', icon: '🔄', label: t('articleUpdated'), value: formatDate(data.updatedAt, lang), visible: !!data.updatedAt },
 ]
 ---
 

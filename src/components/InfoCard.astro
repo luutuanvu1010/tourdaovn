@@ -3,6 +3,8 @@ import type { Lang } from '../lib/types'
 import { uiCopy } from '../lib/uiCopy'
 
 export interface InfoRow {
+  /** Xem ghi chú cùng tên ở InfoBar.astro. */
+  field: string
   icon: string
   label: string
   value: string
@@ -26,9 +28,9 @@ function displayValue(row: InfoRow): string {
 ---
 
 {visible.length > 0 && (
-  <dl class="info-card">
+  <dl class="info-card" data-region="info-card">
     {rows.filter(r => r.visible).map((row) => (
-      <div class="info-row">
+      <div class="info-row" data-field={row.field}>
         <dt class="info-row-label">
           <span class="info-row-icon" aria-hidden="true">{row.icon}</span>
           {row.label}

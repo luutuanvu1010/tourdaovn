@@ -1,0 +1,142 @@
+---
+/**
+ * Vùng "Thông tin nhanh" (06-BINDING_MAP §3, v2.1) — thay cặp InfoBar + InfoCard.
+ *
+ * Vì sao gộp: hai vùng cùng ăn một bộ field là gốc của DR-032 và của 44/58 trang
+ * lặp vùng đo ngày 2026-08-22. Một field một vùng thì phải có đúng MỘT component.
+ *
+ * Hợp đồng từ 06: tối đa 6 ô cho bốn entity có hàng ở §3.1; KHÔNG chứa giá
+ * (giá chỉ ở thanh dính + khối hành động); ≤ 2 ô thì không trải dải mà gộp
+ * vào sidebar — chỗ gọi quyết định điều đó qua prop `inline`, component chỉ
+ * dựng.
+ *
+ * Task 7 fix round (2026-08-23, chủ dự án chỉ đạo, gỡ hạn chế "không sửa file
+ * này" CHỈ cho hai thay đổi dưới): trần 6 từng cắt LẶNG (`.slice(0, 6)`, không
+ * log, không cảnh báo) — với entity không có hàng ở §3.1 (vd khách sạn),
+ * không có gì đối chiếu để biết cắt là đúng hay là mất nội dung. Sửa hai chỗ:
+ *   1. `max` — trần tuỳ chỉnh, mặc định 6 (đúng hợp đồng cho bốn entity §3.1).
+ *      Entity không có hàng ở §3.1 không bị ràng buộc trần đó (chỉ Luật 1: một
+ *      field một vùng), nên chỗ gọi có thể truyền `max` cao hơn.
+ *   2. Cắt phải ồn: vượt `max` thì `console.warn` lúc build, nêu rõ dư bao
+ *      nhiêu và field nào bị cắt — không còn cắt câm.
+ */
+export interface Fact {
+  /** Tên field trong 01-CONTENT_MODEL. Bộ kiểm Luật 1 đếm theo đây. */
+  field: string
+  icon: string
+  label: string
+  value: string
+  href?: string
+  visible: boolean
+}
+
+export interface Props {
+  facts: Fact[]
+  /** true = dựng dạng danh sách dọc để nhét vào sidebar (≤ 2 ô). */
+  inline?: boolean
+  /** Trần số ô hiển thị. Mặc định 6 — hợp đồng 06 §3.1. Entity không có hàng
+   *  ở §3.1 (chỉ ràng buộc bởi Luật 1, không ràng buộc bởi trần 6) có thể
+   *  truyền cao hơn để không bị cắt oan. */
+  max?: number
+}
+
+const { facts, inline = false, max = 6 } = Astro.props
+const allVisible = facts.filter(f => f.visible)
+// Quá `max` thì cắt CÓ TIẾNG — cắt câm là đúng thất bại "vùng biến mất, cổng
+// vẫn xanh" mà việc đóng Luật 1 tồn tại để loại bỏ.
+if (allVisible.length > max) {
+  const dropped = allVisible.slice(max).map(f => f.field).join(', ')
+  console.warn(`[FactStrip] ${allVisible.length} ô hiển thị vượt trần ${max} — cắt bớt: ${dropped}`)
+}
+const visible = allVisible.slice(0, max)
+const cols = Math.min(visible.length, 3)
+---
+
+{visible.length > 0 && (
+  <section class:list={['fact-strip', inline && 'fact-strip--inline']}>
+    <div class:list={[!inline && 'container']}>
+      <dl class="fact-grid" style={`--fact-cols:${cols}`} data-region="fact-strip">
+        {visible.map((f) => (
+          <div class="fact" data-field={f.field}>
+            <dt class="fact-label">
+              <span class="fact-icon" aria-hidden="true">{f.icon}</span>
+              {f.label}
+            </dt>
+            <dd class="fact-value">
+              {f.href ? (
+                <a href={f.href} {...(f.href.startsWith('http') ? { target: '_blank', rel: 'noopener' } : {})}>{f.value}</a>
+              ) : f.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+)}
+
+<style>
+  .fact-strip { padding: 0 0 var(--s4); }
+
+  /* I4 fix (2026-08-23): khối gộp (≤2 ô) nay là con TRỰC TIẾP của `.two-col`
+     (DetailLayout.astro), tự nhận vùng grid-area 'facts' — không còn nằm
+     trong `.sidebar-card` (Sidebar.astro) nên không còn ăn ké nền/viền/đệm
+     của thẻ đó. `.fact-grid` bên dưới giữ nguyên nền/viền/đệm riêng (bỏ nhánh
+     từng gỡ chúng khi còn lồng trong .sidebar-card) để tự trông như một thẻ
+     độc lập, khớp các thẻ sidebar khác. */
+  .fact-strip--inline {
+    padding: 0;
+    grid-area: facts;
+  }
+
+  .fact-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--fact-cols, 3), 1fr);
+    gap: var(--s3);
+    margin: 0;
+    background: var(--c-surface-alt);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    padding: var(--s4);
+  }
+
+  /* 06 §3 hàng "Thông tin nhanh": "di động giữ lưới 2 cột" — cột đơn (danh sách
+     dọc kiểu InfoCard cũ) CHỈ áp cho desktop, nơi khối gộp nằm trong sidebar
+     340px hẹp. Trước đây rule này không có media query nên đè cả di động
+     (đặc hiệu hơn rule 2-cột bên dưới bất kể thứ tự khai) — I4, review toàn
+     nhánh: hồi quy vị trí+bố cục trên 15 trang ≤2 ô. */
+  @media (min-width: 1024px) {
+    .fact-strip--inline .fact-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .fact { min-width: 0; }
+
+  .fact-label {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    font-family: var(--font-ui);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-500);
+    color: var(--c-text-muted);
+  }
+
+  .fact-icon { font-size: 1.25rem; line-height: 1; flex: none; }
+
+  .fact-value {
+    margin: 2px 0 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-base);
+    font-weight: var(--fw-700);
+    color: var(--c-text);
+    overflow-wrap: anywhere;
+  }
+
+  /* Luật 5 (cột→hàng ở di động) CHƯA được duyệt — vòng 5 đang chờ chủ dự án.
+     Hôm nay giữ hành vi của InfoBar: hạ xuống 2 cột. Nếu Luật 5 được duyệt,
+     chỗ phải sửa là đúng khối này. */
+  @media (max-width: 1023px) {
+    .fact-grid { grid-template-columns: repeat(min(var(--fact-cols, 3), 2), 1fr); }
+  }
+</style>
