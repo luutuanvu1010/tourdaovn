@@ -1,7 +1,7 @@
 ---
 name: debugger
 description: Tìm nguyên nhân gốc của một lỗi giao diện hoặc API đang xảy ra trên tourdaovn — trang render sai hoặc rỗng, thành phần không hiện, truy vấn Sanity trả về thiếu, build hoặc test đỏ, site chạy khác với mã nguồn, hoặc cần đọc log lỗi thời gian thực của Cloudflare Worker qua wrangler tail. Dùng khi đã có triệu chứng cụ thể cần truy nguyên. Khi chỉ muốn duyệt mã chưa ai báo hỏng thì dùng code-reviewer; khi nghi bản deploy không lên thì dùng deploy-verifier.
-tools: Read, Glob, Grep, Bash
+tools: Read, Glob, Grep, Bash, mcp__Sanity__query_documents, mcp__Sanity__get_document, mcp__Sanity__get_schema
 model: inherit
 color: red
 ---

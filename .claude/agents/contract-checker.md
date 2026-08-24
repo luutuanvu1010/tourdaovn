@@ -1,6 +1,6 @@
 ---
 name: contract-checker
-description: Kiểm hợp đồng dữ liệu giữa schema Sanity, content model, binding map, truy vấn GROQ và template Astro — chạy các cổng g1/g3/g4 đã có và diễn giải kết quả, cộng thêm quét as any che field không tồn tại trên toàn bộ src/. Dùng sau khi sửa schema trong cms/, sau khi đổi truy vấn GROQ, khi thêm loại trang mới, hoặc khi một trang render ra rỗng mà không rõ vì sao. Khác gate-auditor — gate-auditor kiểm xem chính bộ kiểm (g1/g3/g4...) có thật sự chạy và không nói dối; agent này chạy bộ kiểm đó và kết luận về nội dung hợp đồng dữ liệu. Không dùng để kiểm giao diện hay hiệu năng.
+description: Kiểm hợp đồng dữ liệu giữa schema Sanity, content model, binding map, truy vấn GROQ và template Astro — chạy các cổng g1/g3/g4 đã có và diễn giải kết quả, cộng thêm quét as any che field không tồn tại trên toàn bộ src/. Dùng sau khi sửa schema trong cms/, sau khi đổi truy vấn GROQ, khi thêm loại trang mới, hoặc khi nghi cụ thể một field template đọc không có trong schema hay binding map khai sai loại trang. Không dùng cho triệu chứng chung chung như trang rỗng hay render sai khi chưa rõ tầng lỗi — đó là debugger, nó truy nguyên qua nhiều tầng rồi mới khoanh vùng về hợp đồng dữ liệu. Khác gate-auditor — gate-auditor kiểm xem chính bộ kiểm (g1/g3/g4...) có thật sự chạy và không nói dối; agent này chạy bộ kiểm đó và kết luận về nội dung hợp đồng dữ liệu. Không dùng để kiểm giao diện hay hiệu năng.
 tools: Read, Glob, Grep, Bash
 model: inherit
 color: cyan

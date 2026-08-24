@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: Duyệt mã nguồn giao diện và trải nghiệm người dùng của tourdaovn trước khi commit hoặc merge — đối chiếu diff với 06-BINDING_MAP, 07-DESIGN_TOKENS, và các lỗi thị giác đã ghi trong sổ drift của chính dự án này. Dùng khi vừa viết xong một tính năng giao diện, trước khi mở QA2, và trước khi merge nhánh. Khi cần tìm nguyên nhân một thứ đang hỏng thì dùng debugger chứ không dùng agent này. Khác astro-auditor — astro-auditor chạy cổng và đối chiếu token cơ giới trên từng component vừa sửa; agent này đọc toàn bộ diff, đối chiếu với lịch sử drift, và ra kết luận CHẶN/SỬA/HỎI/GHI trước khi merge.
+description: Duyệt một diff đã gộp — nhiều file, sắp commit hoặc merge — cho giao diện và trải nghiệm người dùng của tourdaovn, đối chiếu với 06-BINDING_MAP, 07-DESIGN_TOKENS, và các lỗi thị giác đã ghi trong sổ drift của chính dự án này, rồi ra kết luận CHẶN/SỬA/HỎI/GHI. Dùng trước khi mở QA2 và trước khi merge nhánh, khi cần một phán quyết có đủ điều kiện merge hay không cho toàn bộ thay đổi. Khi cần tìm nguyên nhân một thứ đang hỏng thì dùng debugger chứ không dùng agent này. Một component đơn lẻ vừa viết, chưa gộp thành diff để merge, thì dùng astro-auditor — nó chạy cổng và đối chiếu token cơ giới trên từng file, không ra phán quyết merge.
 tools: Read, Glob, Grep, Bash
 model: inherit
 color: green
