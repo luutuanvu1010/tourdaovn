@@ -38,6 +38,8 @@ Mười agent, chia ba nhóm theo thứ bạn muốn biết.
 
 Hook chỉ nạp lúc phiên bắt đầu. Sửa `.claude/settings.json` giữa phiên thì phải khởi động lại mới có tác dụng.
 
+**Phép thử 5 giây sau khi khởi động lại:** chạy `git add -A` trong repo này. Lệnh phải **bị chặn**, kèm thông điệp về việc dùng chung thư mục làm việc. Không bị chặn nghĩa là hook chưa nạp — và mọi hàng rào còn lại (guard-deploy, guard-data-mutation, post-edit-lint) cũng chưa có tác dụng, đừng tin chúng cho tới khi phép thử này qua.
+
 ## Ranh giới giữa các agent hay bị chọn nhầm
 
 **`deploy-verifier` so với `debugger`.** `deploy-verifier` trả lời một câu hỏi nhị phân — bit đang chạy có đúng là bit vừa dựng không. `debugger` trả lời một câu hỏi nguyên nhân — vì sao thứ này hỏng — và có thể tự gọi `deploy-verifier` như bước 1 của quy trình truy nguyên. Nghi bản deploy chưa lên thì gọi thẳng `deploy-verifier`; có triệu chứng cần tìm gốc rễ thì gọi `debugger`.
