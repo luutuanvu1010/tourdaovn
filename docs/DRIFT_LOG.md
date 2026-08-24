@@ -945,3 +945,115 @@ vá, không tự nhận tầng B "bắt hết".
 `ALIAS` của `luat1-post` **đã** biết `'dải đoạn mở' → 'summary-band'` (thêm 2026-08-24) nên cổng không đỏ vì tên vùng lạ. Nhưng đó là một id **đã khai, chưa nối** — cùng nhóm với `hero`, `hero-badge`, `breadcrumb`, `footer-meta` ở DR-048.
 
 **Đóng khi nào:** Design chặng 2 giao bề mặt cho dải đoạn mở → QA1 → Code dựng dải, gắn `data-region="summary-band"` và `data-field="summary"`, gỡ `summary` khỏi hero overlay. Lúc đó tầng B của cổng mới canh được vùng này.
+
+---
+
+## DR-050 — `07` §2 mô tả ngược bộ chữ đang chạy: tiêu đề là Be Vietnam Pro, không phải Nunito
+
+**Trạng thái:** mở. Phiếu V1 của `SPEC-2026-08-22-be-mat-vong-5` §2.2, viết 2026-08-24.
+
+`07-DESIGN_TOKENS` §2 khai **hai** dòng family giống hệt nhau, Nunito đứng trước:
+
+```
+font.family.heading = "Nunito", "Be Vietnam Pro", system-ui, sans-serif
+font.family.body    = "Nunito", "Be Vietnam Pro", system-ui, sans-serif
+```
+
+`src/styles/tokens.css:71-72` chạy:
+
+```css
+--font-display: "Be Vietnam Pro", "Nunito", system-ui, sans-serif;
+--font-ui:      "Nunito", "Be Vietnam Pro", system-ui, sans-serif;
+```
+
+Dòng `body` khớp. **Dòng `heading` ngược.** Hệ quả thật hôm nay: **tiêu đề dựng bằng Be Vietnam Pro**, thân bài bằng Nunito.
+
+**Mã không sai — đặc tả chưa theo.** `SPEC-2026-08-14-be-mat-vong-3` §3.1 đảo thứ tự **có chủ ý và đúng** (vòng 3 chọn hướng đóng khung: dùng font đã có sẵn trong repo thay vì thêm bộ thứ ba). `07` chưa được cập nhật theo. Đây là **nguồn token duy nhất của dự án đang mô tả sai thứ đang chạy** — vi phạm chính câu mở đầu của `07`.
+
+**Lệch không dừng ở một ô bảng; nó làm hỏng cả mạch văn của §2.** Ba câu dưới đây trong `07` §2 nay đều sai hoặc gây hiểu nhầm:
+
+| Câu trong `07` §2 | Vì sao nay sai |
+|---|---|
+| *"Một chữ cho cả trang: Nunito"* (tiêu đề tiểu mục) | Không còn đúng: hai vai dùng hai chữ khác nhau |
+| Mục 3: *"Be Vietnam Pro là lớp dự phòng duy nhất. Không được xoá — Nunito hỏng thì chữ rơi về…"* | Be Vietnam Pro nay là chữ **chính** của tiêu đề, không phải lớp dự phòng. Câu này khiến người đọc tưởng có thể thay nó mà chỉ mất fallback |
+| Mục 2: *"Lấy lại được cấp đậm 800. Nunito biến thiên 400–800"* | Đúng cho thân bài, nhưng tiêu đề nay chạy Be Vietnam Pro — trong `public/fonts/` bộ này **chỉ có file 700 và 800**, không biến thiên. Đã đối chiếu `tokens.css:77-79`: chú thích ở đó đã biết điều này (*"--font-display đều khai độ đậm, và đều là 700 hoặc 800"*), nên **mã nhất quán**; chỉ `07` là chưa |
+
+**Phiếu này làm một dòng của DR-002 hết đúng.** DR-002 mục "Khớp đúng" liệt kê *"hai font family"* nằm trong nhóm khớp. Câu đó đúng lúc DR-002 viết (2026-08-05) và sai từ 2026-08-14. Không sửa DR-002 — nó là bản ghi của thời điểm nó; ghi chéo ở đây là đủ vết.
+
+**Hai nợ cùng sống trong `07` §2, đã xử ở tầng số nhưng chưa xử ở tầng chữ** (`QĐ-2026-08-24-02`):
+
+- *"Thư mục font từ ~220 KB xuống ~104 KB"* — đo lại 2026-08-24: **6 file, 89.196 byte payload = 87,1 KB**. Con số ~104 KB giữ làm bản ghi lịch sử.
+- *"Nợ có chủ ý: chưa đo LCP sau **hai** lần đổi chữ"* — thực tế **ba** lần: Be Vietnam Pro → Lora → Nunito (cả hai trong ngày 2026-08-06) → đảo vai 2026-08-14.
+
+**Vì sao không sửa `07` ngay bây giờ.** Vòng 5 chặng 1 đang cho Design đề xuất **bộ chữ mới**, và chủ dự án chốt bằng mắt trên bản dựng thật. Viết lại `07` §2 hôm nay là viết cho một bộ chữ có thể bị thay trong vài ngày tới. `SPEC-2026-08-22-be-mat-vong-5` §4 đã xếp việc này thành **V5** (`07-DESIGN_TOKENS` v2, sau khi chủ dự án chốt), tách khỏi **V1** (phiếu này — chỉ *ghi* rằng có lệch).
+
+**Đóng khi nào:** V5 viết lại `07` §2 theo bộ chữ chủ dự án chốt ở cuối chặng 1 — kể cả khi kết quả là **giữ nguyên bộ đang chạy**, vì lúc đó vẫn phải sửa hai dòng family, ba câu văn ở bảng trên, và hai nợ số ở trên.
+
+---
+
+## DR-051 — `07` §2 khai thang cỡ 8 bậc, `tokens.css` chạy 14 giá trị phân biệt
+
+**Trạng thái:** mở. Phiếu V1 của `SPEC-2026-08-22-be-mat-vong-5` §2.3, viết 2026-08-24.
+
+`07-DESIGN_TOKENS` §2 khai `font.size.scale` = *"bậc thang runtime: 17 / 22 / 26 / 32 / 40 / 42 / 46 / 60"* — **tám** bậc.
+
+`src/styles/tokens.css:80-104` định nghĩa **15 token cỡ chữ**, mang **14 giá trị phân biệt** (`--fs-section` và `--fs-h3` cùng bằng 32px):
+
+`11 · 12 · 14 · 15 · 17 · 18 · 20 · 21 · 26 · 32 · 40 · 42 · 46 · 60`
+
+**Ba kiểu lệch, không phải một:**
+
+1. **Thiếu hẳn đầu nhỏ.** Dòng `scale` của `07` bắt đầu từ 17px, bỏ trọn bốn bậc 11 · 12 · 14 · 15. Ba trong bốn bậc đó *có* dòng riêng ở chỗ khác trong `07` (`font.size.sm` 15, `font.size.label` 14, `font.size.badge`), nên **chính `07` tự mâu thuẫn với `07`**: dòng `scale` nói thang có 8 bậc, các dòng khác trong cùng bảng khai thêm bậc mà `scale` không có. Bậc **11px** thì không có dòng nào cả.
+2. **Bậc 22px không tồn tại trong mã.** `--fs-h5` = 20px, chú thích ngay tại `tokens.css:90` tự ghi *"được đẩy lên từ 22px"*.
+3. **`font.size.badge` khai 12px, token tên `badge` chạy 11px.** `--fs-badge: 0.6875rem` = 11px; 12px là `--fs-xs`. Đang dùng ở ít nhất 7 chỗ (`Card.astro`, `HomeHero.astro` ×4, `NearbySection.astro`, `Footer.astro`) — tức 11px là cỡ chữ nhỏ nhất trên site, chạy trên tiếng Việt có dấu, mà đặc tả không biết.
+
+**Hai trong ba kiểu trên DR-002 đã ghi rồi — phiếu này không nhận công phát hiện lại.** DR-002 (2026-08-05) đã có đúng hai dòng: `font.size.badge` 12px vs 11px, và `font.size.scale` bậc 22 vs 20px; và liệt kê `--fs-xs`, `--fs-card-title`, `--fs-nav`, `--fs-section`, `--fs-hero` trong nhóm *"token có trong code, không có dòng nào trong spec"*.
+
+**Cái mới của phiếu này là phép cộng, không phải từng ô.** DR-002 ghi các mảnh rời và xếp chúng vào ba nhóm hình thức (lệch giá trị / thừa trong code / thiếu trong code). Chưa ai cộng lại và hỏi *thang này có bao nhiêu bậc, và mắt có phân biệt được không*. Cộng xong ra con số đáng kể:
+
+**Năm bậc chen trong 6px: 15 · 17 · 18 · 20 · 21.**
+
+Đây là **căn cứ đo được** cho than phiền của chủ dự án *"cỡ chữ lộn xộn, phân cấp mờ"* — và nó nặng hơn vẻ ngoài, vì vòng 3 đã cố giãn đúng chỗ này một lần rồi. Chú thích tại `tokens.css:83-85` ghi nguyên văn chẩn đoán của vòng 3: *"Thang cũ dồn cục ở khoảng giữa: nội dung 17, tiêu đề thẻ 18, chữ menu 18, tiêu đề nhỏ 20 — bốn bậc trong 3px nên mắt không phân biệt được cấp. Đây là gốc của 'chữ đều đều, không phân cấp'."* Vòng 3 đẩy tiêu đề thẻ 18 → 21. **Giãn xong vẫn còn năm bậc trong 6px** — tức hướng đóng khung của vòng 3 đã chạy hết mà chưa giải được vấn đề. Đó là lý lẽ trung tâm của vòng 5.
+
+**Một lỗi số đếm trong spec, sửa để khỏi lan.** `SPEC-2026-08-22-be-mat-vong-5` §2.3 viết *"Bốn bậc nằm sát nhau trong khoảng 15–21px"* rồi liệt kê **năm** giá trị và hai câu sau lại nói *"vẫn còn năm bậc trong 6px"*. Số đúng là **năm**. Prompt vòng 5 đã ghi "năm"; phiếu này ghi "năm".
+
+**Vì sao không sửa `07` ngay bây giờ.** Giống DR-050: chọn tám bậc nào là **quyết định thẩm mỹ thuộc bước 7**, không phải việc dọn dẹp của Cowork — `07` §0 ghi *"Design đề xuất, chủ dự án duyệt"*. Chặng 1 artboard 2 tồn tại đúng để trả lời câu đó, và nó bắt Design nêu rõ bậc nào trong thang mới thay bậc nào trong 14 bậc hiện có, bậc nào bỏ. V1 chỉ *ghi* rằng con số chạy thật lệch con số khai.
+
+**Đóng khi nào:** V5 viết lại `font.size.*` của `07` §2 theo thang chủ dự án chốt ở cuối chặng 1 — tối đa 8 bậc, mỗi bậc gắn đúng một vai (spec §6, R-list chặng 1). Lúc đóng phải xử luôn cả ba kiểu lệch ở trên, kể cả bậc 11px chưa từng được khai.
+
+---
+
+## DR-052 — Hai file Be Vietnam Pro 800 ship lên nhưng chưa từng được khai `@font-face`
+
+**Trạng thái:** mở. Phát hiện 2026-08-24 khi quét kho lập `docs/design-context/DESIGN_SURFACE_MAP.md`. Không thuộc phiếu V1 nào; đây là lệch **mã ↔ mã**, không phải mã ↔ đặc tả.
+
+`public/fonts/` chứa **6** file `.woff2`. `src/layouts/BaseLayout.astro` khai **4** `@font-face` (dòng 121–152) — và grep toàn `src/` cho **0** kết quả với hai tên file còn lại:
+
+| File | Byte | Có `@font-face`? |
+|---|---|---|
+| `nunito-latin-viet-var.woff2` | 39.152 | ✅ `font-weight: 400 800` |
+| `nunito-vietnamese-var.woff2` | 13.040 | ✅ `font-weight: 400 800` |
+| `be-vietnam-pro-latin-viet-700.woff2` | 13.348 | ✅ `font-weight: 700` |
+| `be-vietnam-pro-vietnamese-700.woff2` | 5.132 | ✅ `font-weight: 700` |
+| **`be-vietnam-pro-latin-viet-800.woff2`** | **13.380** | ❌ **không** |
+| **`be-vietnam-pro-vietnamese-800.woff2`** | **5.144** | ❌ **không** |
+
+**Hai hệ quả, cả hai đều thật.**
+
+**1. 18.524 byte chết — 21% ngân sách font.** Hai file lên `public/` và lên `dist/fonts/`, tốn băng thông triển khai, và **không trình duyệt nào tải chúng** vì không có luật CSS nào trỏ tới. Đây là con số đáng kể so với trần R4 của vòng 5 (140 KB payload): gỡ hai file là lấy lại 21% mà không mất gì đang hiển thị.
+
+**2. Cấp đậm 800 của tiêu đề là bôi đậm giả.** Sau `SPEC-2026-08-14-be-mat-vong-3` §3.1, `--font-display` là **Be Vietnam Pro** (xem `DR-050`). Ít nhất **12 component** xin `--fw-800` hoặc `--fw-900` — `Card`, `HomeHero`, `HomeTourGrid`, `HomeHubGrid`, `EntityIndex`, `HomeAreaGrid`, `DetailLayout`, `Footer`, `HomeGroupQuote`, `HomeGuideGrid`, `HomeStatsBand`, `Section`. Mặt chữ 800 **có trên đĩa nhưng không được khai**, nên trình duyệt chỉ thấy một mặt 700 và phải **tổng hợp giả** cấp đậm hơn. Bôi đậm giả làm dày nét không đều, và trên dấu tiếng Việt ở cỡ nhỏ thì dấu bị bết — đúng vùng than phiền *"chữ không hợp ngành du lịch"* mà vòng 5 đang xử.
+
+**Khác `DR-031`, đừng gộp.** `DR-031` là thời Lora: font **chỉ có** 400–700, mã xin 800/900 nên trình duyệt kẹp xuống — thiếu **mặt chữ**. Đây là thiếu **lời khai** cho mặt chữ đã có sẵn trên đĩa. Cách xử ngược nhau: `DR-031` phải hạ mã hoặc đổi font; phiếu này chỉ cần thêm hai khối `@font-face`.
+
+**Ba câu chú thích trong `BaseLayout.astro:115-120` nay cũng sai**, cùng loại với ba câu ở `07` §2 mà `DR-050` ghi:
+
+> *"Nunito — MỘT chữ cho cả trang"* · *"Be Vietnam Pro ở lại làm **lớp dự phòng duy nhất**"* · *"Font biến thiên 400–800: một file phủ mọi cấp đậm, nên chỉ 2 file"*
+
+Be Vietnam Pro nay là chữ **chính** của tiêu đề, không phải lớp dự phòng; và "chỉ 2 file" mô tả Nunito, trong khi thư mục có 6.
+
+**Một nợ hiệu năng đi kèm, thuộc R5 vòng 5.** `BaseLayout.astro:111-113` preload đúng **một** file — `nunito-latin-viet-var.woff2` — kèm chú thích *"Một font cho cả trang nên chỉ còn một dòng preload. Cả tiêu đề lẫn thân bài đều chờ đúng file này."* Câu đó sai từ 2026-08-14: **tiêu đề chờ Be Vietnam Pro, và file đó không được preload**. H1 trong hero nhiều khả năng là phần tử LCP, nên đây là ứng viên trực tiếp cho nợ LCP đang treo ở `07` §2. Chưa đo, nên ghi là **việc phải kiểm**, không phải kết luận.
+
+**Vì sao không sửa ngay.** Ba lối xử — (a) thêm hai `@font-face` 800, (b) gỡ hai file 800 và hạ mã xuống 700, (c) đổi bộ chữ luôn — thì lối (c) đang được cân ở **Design vòng 5 chặng 1**, và chủ dự án chốt bằng mắt. Sửa (a) hay (b) hôm nay có thể thành công bỏ đi trong vài ngày. Đây là **quyết định đánh đổi giữa byte và độ đậm**, thuộc tầng token — không phải việc dọn dẹp.
+
+**Đóng khi nào:** cùng lượt **V5** với `DR-050`/`DR-051`. Sau khi chủ dự án chốt bộ chữ ở cuối chặng 1, chọn một trong ba lối trên, sửa `BaseLayout.astro` (khối `@font-face` + dòng preload + ba câu chú thích), rồi **đo LCP** để đóng luôn nợ R5. Nếu kết quả chặng 1 là **giữ nguyên bộ đang chạy** thì phiếu này vẫn phải xử — nó không tự tiêu.
