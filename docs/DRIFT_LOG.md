@@ -630,3 +630,36 @@ Kiểm thực tế cùng ngày: `curl -sI https://tourdao.vn/` trả `200`, khô
 Đây là loại lệch nguy hiểm hơn vẻ ngoài: file này là thứ người vận hành mở ra khi deploy, và nó đang mô tả **hành vi production sai**. Ai đọc để trả lời "trang chủ tourdao.vn có chuyển hướng không" sẽ trả lời sai.
 
 **Gốc rễ đi kèm:** `QĐ-2026-08-06-04` **bước 6** đòi "ghi mục mới trong sổ để đóng `QĐ-2026-08-06-02`". Bước đó **chưa từng được thi hành** — không có mục nào trong `DECISIONS.md` đóng `QĐ-2026-08-06-02`. Code đổi, sổ không đổi, nên `BUILD-NOTES` không có tín hiệu nào để phải cập nhật theo. Đóng ở `QĐ-2026-08-22-04`.
+
+---
+
+## DR-044 — `control-registry.yaml` khai bộ kiểm pre-build "chưa từng chạy được", trong khi nó chạy và 11 validator đang đỏ
+
+**Trạng thái:** **đã xử phần văn xuôi 2026-08-24** (commit `2a62297`, nhánh `feat-bo-kiem-tu-dong`). Phần khai `live`/`gap` của 27 control **còn mở** — chờ chủ dự án quyết, xem `ND-009`.
+
+Phần đầu `docs/governance/control-registry.yaml` (soạn 2026-08-05) khai bốn điều. Kiểm ngày 2026-08-24 thì **cả bốn đều sai với hiện tại**:
+
+| Sổ nói | Thực tế 2026-08-24 |
+|---|---|
+| `scripts/validators/i1-i19.ts:10` nhập `../../shared/gates/index.js`, "thư mục `shared/` không tồn tại trong repo này" | `shared/gates/index.ts` và `types.ts` tồn tại, vào git ở commit `b73326c` ngày **2026-08-06** — một ngày sau khi sổ được soạn |
+| "bộ kiểm ràng buộc pre-build của dự án chưa từng chạy được ở tourdaovn" | `npm --prefix scripts run validate` chạy được |
+| "chỉ 4 trên 31 control chạy được", 27 khai `gap` | 31 validator chạy |
+| Evidence của 27 control: "chưa có — sẽ là `scripts/reports/validator-status.json` ... khi ND-005 trả xong" | File đó tồn tại và được ghi mỗi lần chạy |
+
+Kết quả chạy thật:
+
+```
+Validator: 31 (0 stub, 3 defer)
+Pass: 15    FAIL: 11    WARN: 2
+[report] Ghi scripts/reports/validator-status.json (overall=fail)
+```
+
+**Hệ quả thật, không phải chuyện chữ nghĩa: 11 ràng buộc dữ liệu đang bị vi phạm mà không ai nhìn** — vì sổ nói bộ kiểm không chạy được, nên không ai chạy nó. Danh sách: `I1`, `I2`, `I3`, `I4`, `I5`, `I12`, `I13`, `I14`, `I19`, `R2`, `S25-FIVE-LANGUAGE-COVERAGE`. Vài ví dụ cụ thể — hotel publish thiếu `slug` (`I12`), Tour thiếu `itinerary` ≥1 chặng (`I14`), Article thiếu `author` (`I4`), Category "Ẩm thực" có 0 experience publish trỏ tới (`R2`).
+
+Đây là lỗi dữ liệu, không phải lỗi mã. `DR-024` đã dự báo đúng: *"Chưa nổ vì chuỗi pre-build đang chết theo ND-005; sẽ nổ hàng loạt ngay khi ND-005 trả xong."* ND-005 trả xong lúc nào không ai ghi lại, nên tiếng nổ diễn ra trong im lặng.
+
+**Vì sao không cổng nào bắt được.** `control-registry-gate` kiểm control khai `live` có trỏ tới bộ thực thi có thật không. Nó **không kiểm chiều ngược**: control khai `gap` mà thực ra đang chạy. Cùng loại điểm mù với `DR-021`, chỉ khác chiều — `DR-021` là "khai đã kiểm mà chưa kiểm", cái này là "khai chưa kiểm mà đã kiểm và đang đỏ".
+
+Đã thêm `GA6` trong `scripts/audit/gate-audit.ts` để bắt đúng chiều này: control khai `gap` mà file bằng chứng của nó tồn tại và có mục mang đúng `id` thì trượt. Chạy thử: `audit:gate` đi từ 34 đạt/1 trượt lên **34 đạt/28 trượt**, bắt đủ cả 27 control. **Cảnh báo:** bản `GA6` hiện tại có lỗi Critical chưa vá — xem `ND-009`.
+
+**Gốc rễ đi kèm, cùng họ với `DR-043`.** Sổ ghi lúc **phát hiện**, không phải lúc **đóng**. Trong phiên 2026-08-24 tôi trích ba tiền đề từ `DRIFT_LOG` và cả ba đều đã lỗi thời: `DR-015` (thư mục `shared/`), `DR-043` (gốc rễ đã đóng ở `QĐ-2026-08-22-04`), và một con số trang. Không mục nào sai lúc viết; chúng chỉ không được cập nhật lúc thực tế đổi.

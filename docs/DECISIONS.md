@@ -1012,3 +1012,55 @@ Kiểm hết bốn nơi dùng field này trong mã nguồn (bỏ bundle `cms/dis
 **Lỗ hổng cổng lộ ra, chưa vá.** `build:ci` = `npm run build` = `astro check && astro build`, **không gọi** `npm --prefix scripts run validate:post` — mà cổng R3 (so sitemap production với sitemap bản dựng) nằm ở đó. Nên Workers Builds **không bao giờ bắt được** URL biến mất; lần này người bắt là một tác nhân, không phải máy. Chưa quyết vá thế nào; ghi ra để khỏi rơi.
 
 **Cảnh báo vận hành kèm theo.** `npm run build` của repo này gãy được vì mạng: 2026-08-22 một build chết giữa chừng do `Socket timed out` khi gọi Sanity API, `dist/` tụt từ 105 trang xuống 2 mà lệnh vẫn kết thúc không báo đỏ. Sau mỗi lần phát hành phải **đếm số trang thật** trên production, không tin dấu tích xanh của Workers Builds. Mốc trước lần push này: **100 URL** trong `sitemap-vi.xml`.
+
+---
+
+## ND-009 — Nhánh `feat-bo-kiem-tu-dong`: một lỗi Critical và năm Important chưa vá, chưa được gộp
+
+**Mở:** 2026-08-24 · **Trạng thái:** mở · **Chặn:** không gộp nhánh `feat-bo-kiem-tu-dong` trước khi xử `C1`.
+
+Nhánh dựng bộ kiểm tự động — 10 subagent, 4 hook, 4 script audit, 168 test xanh. 28 commit từ `ed27125`, HEAD `e7f10c6`. Thi hành `docs/plans/2026-08-23-bo-kiem-tu-dong.md`; diễn biến ghi ở `docs/NHAT-KY-2026-08-24-bo-kiem-tu-dong.md`.
+
+Vòng duyệt toàn nhánh phán quyết **gộp được sau khi sửa `C1`**. Phiên dừng trước khi đợt sửa chạy xong, nên toàn bộ danh sách dưới đây **chưa làm**.
+
+### C1 — Critical, chặn gộp
+
+`scripts/audit/gate-audit.ts:194`, hàm `dangChayThatTrongBaoCao`. File bằng chứng **không tồn tại** → mảng rỗng → verdict `pass`.
+
+Đo thật: đổi tên `scripts/reports/validator-status.json` rồi chạy `audit:gate`.
+
+```
+trước:  34 đạt, 28 trượt
+sau:    61 đạt,  1 trượt
+```
+
+**Xoá một file làm 27 mục trượt thật thành 27 mục đạt.** Nghịch đảo trực tiếp `CLAUDE.md` §6 — không có bằng chứng thì mặc định thành *đạt*. Nguy hiểm gấp đôi vì `scripts/reports/` sinh ra bởi build: một `git clean`, một máy CI mới, hay một lần validator hỏng là đủ.
+
+Sửa: phân biệt ba trạng thái — file **không có** → `skip`; file có, **không có mục** id đó → `pass`; file có, **có mục** → `fail`. Kèm test cho cả ba, đặc biệt trạng thái thứ nhất.
+
+### Important
+
+| Mã | Chỗ | Nội dung |
+|---|---|---|
+| `I1` | `gate-audit.ts:257` | `GA4` phát 0 check, 0 skip khi thư mục validator vắng. Báo cáo đi từ 62 xuống 47 mục mà không dòng nào nói `GA4` đã không chạy |
+| `I2` | `gate-audit.ts:235` | `GA3` biến mất im lặng khi thiếu `postbuild-status.json` |
+| `I3` | `deploy-verify.ts:47` | `soDauHieu` trả `pass` khi dấu hiệu vắng ở **cả hai** bên → gõ sai một tham số làm phép kiểm chống `DR-041` thành lời khai rỗng. **`deploy-verify.test.ts:26` đang khoá hành vi sai này bằng test** |
+| `I4` | `doc-reality.ts:215` | `trichLuatChuyenHuong` chỉ nhận dạng `<đường dẫn> <mũi tên> <URL>`, không nhận cú pháp `_redirects` mà dự án thật sự dùng. `DOC3` `skip` vĩnh viễn — phép kiểm chống `DR-043` chưa từng đối chiếu một luật thật nào |
+| `I5` | `guard-data-mutation.sh:79` | Mẫu khớp chuỗi lệnh thô nên chặn nhầm thao tác chỉ-đọc: `cat`, `wc`, `grep`, `git diff`, `git add` trên `seed/` và `migrate/` đều bị chặn. Người dùng sẽ học cách tạo cờ mở khoá để **đọc** — và cờ đó mở luôn đường **ghi**. Sửa: neo mẫu vào động từ thực thi (`node`, `npx`, `tsx`, `npm run`) |
+| `I6` | `code-reviewer.md`, `astro-auditor.md` | Luật mặc định "từ ba file trở lên" đẩy **mọi** diff sang `code-reviewer`, nhưng agent đó tự định nghĩa là reviewer **giao diện**. Diff thuần backend rơi vào sai lăng kính. Sửa hẹp: luật chỉ áp cho diff giao diện; diff khác dùng skill `/code-review` chung |
+
+Brief sửa đầy đủ cho cả sáu mục nằm trong `.superpowers/sdd/2026-08-23-bo-kiem-tu-dong/progress.md`, phần "KẾT QUẢ VÒNG DUYỆT TOÀN NHÁNH".
+
+### Đã phân loại là để lại được
+
+Vòng duyệt cuối kiểm và kết luận không chặn gộp: test `evidenceDir` trùng ngày (nay đã tự phân biệt được, nợ tự đóng); `demUrlSitemap` chỉ khớp `<loc>` trần; `DV3` bị bỏ khi `DV0` hết giờ; `kiemTrang` không loại chú thích HTML; `agents.test.ts` bỏ qua tên công cụ tiền tố `mcp__`; `exitCodeFor` cho `skip` thoát 0; năm commit có `doc-reality.ts` ở dạng nhị phân trong lịch sử.
+
+### Ba việc chờ chủ dự án chốt
+
+1. **27 control `status: gap` trong `control-registry.yaml`** (xem `DR-044`) — lật thành `live` toàn bộ, chỉ lật 15 cái đang xanh, hay để nguyên tới khi dữ liệu sạch? Hiện 11 validator đỏ vì **vi phạm dữ liệu thật**, không phải lỗi mã. Lật là cổng chuyển đỏ.
+2. **Ngưỡng "ba file"** trong luật định tuyến `astro-auditor` ↔ `code-reviewer` — con số do tác nhân chọn, chưa duyệt. Nên chốt cùng `I6` vì cùng một vấn đề.
+3. **Bốn hook chưa từng chạy thật.** Chúng chỉ nạp lúc phiên Claude Code khởi động. Phép thử sau khi khởi động lại: gõ `git add -A` trong repo này — **phải bị chặn**. Không bị chặn nghĩa là hook chưa nạp và mọi hàng rào còn lại cũng chưa có tác dụng.
+
+### Ghi chú vệ sinh
+
+`scripts/reports/validator-status.json` đang ở trạng thái đã sửa trong cây làm việc — do tác nhân chạy `validate` để kiểm chứng `DR-044`, chưa commit. Không phải dấu vết của phiên khác.
