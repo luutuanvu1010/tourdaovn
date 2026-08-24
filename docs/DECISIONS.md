@@ -1066,3 +1066,30 @@ Nên Luật 5 nay **chọn kiểu theo độ dài giá trị**: vừa một dòn
 Đó là bộ kiểm **chạy đúng thiết kế**: vùng lạ làm nó đỏ to thay vì bị bỏ qua im lặng. Nhưng nghĩa là chốt phiếu này kéo theo **hai dòng mã**: thêm `'dải đoạn mở': 'summary-band'` vào `ALIAS`, và gắn `data-region="summary-band"` lên dải đoạn mở khi Code dựng nó.
 
 Ghi ra đây để không ai chốt phiếu rồi ngạc nhiên vì cổng đỏ.
+
+---
+
+## QĐ-2026-08-24-01 — "Miễn phí" không phải một mức giá: Điểm tham quan miễn phí bỏ vùng giá
+
+**Trạng thái:** chốt 2026-08-24. `06-BINDING_MAP` lên **v2.3.1** (§3.1). Nhánh `docs/06-v2-3` (PR #2), chưa gộp.
+
+**Bối cảnh.** Chủ dự án nêu từ đầu: trang Chùa Long Sơn *"hiện nhiều mức giá miễn phí"*. Đợt Code đóng Luật 1 (PR #1) đưa con số từ **4 lần xuống 3**, và xoá được lỗi nặng hơn là **hai nhãn khác nhau cho cùng một sự thật** ("Giá vé" ở InfoBar, "Phí vào cửa" ở InfoCard). Nhưng 3 vẫn không phải 1, và `QĐ-2026-08-23-02` đã ghi rõ phần còn lại **không sửa được ở tầng Code** — nó là dư thừa trong chính §3.1.
+
+**Đo được.** 13 trang hiện nhãn miễn phí: **11 Điểm tham quan, 2 Địa danh**, không có Trải nghiệm nào. Trên một trang điểm tham quan miễn phí, "Miễn phí" hiện **3 lần**: `gia` ở thanh dính, `gia` ở khối hành động, `isAccessibleForFree` ở Thông tin nhanh.
+
+**Gốc.** `resolvePrice()` coi `isAccessibleForFree` **là một mức giá** nên bơm nhãn "Miễn phí" vào kênh giá; §3.1 đồng thời cấp cho field đó một ô Thông tin nhanh riêng. Hai kênh, một sự thật.
+
+**Chốt.** Với Điểm tham quan có `isAccessibleForFree` = true: nhãn "Miễn phí" hiện **đúng một lần, ở Thông tin nhanh**; **vùng giá không render** — không thanh dính, không khối hành động. 3 lần → **1 lần**.
+
+**Lý lẽ, và vì sao đây không phải ngoại lệ tuỳ tiện.** Ngoại lệ hai vùng của giá được §6 Luật 1 biện minh bằng đúng một câu: *"vì đó là quyết định mua"*. Một điểm tham quan miễn phí **không có quyết định mua nào** — không vé để bán, không giá để so. Biện minh không với tới nó, nên Luật 1 trở lại mức mặc định.
+
+Đây cũng **không phải lối đi mới**: §4.4 đã chọn nó cho Trải nghiệm từ trước (*"hiện nhãn miễn phí **thay** vùng giá"*), §4.2 cho Địa danh (*"Place không có vùng giá"*). Điểm tham quan là entity **duy nhất** đi kiểu khác; v2.3.1 đưa nó về cùng lối. Nói cách khác, đây là **xoá một ngoại lệ**, không phải thêm một ngoại lệ.
+
+**Một việc chưa quyết, ghi để không rơi.** Hôm nay khối hành động của trang miễn phí render nút **"Đặt vé"** trỏ Zalo — một nút "đặt vé" trên một ngôi chùa miễn phí. Gỡ vùng giá **không** tự gỡ nút đó. Nút liên hệ Zalo vẫn có giá trị trên trang điểm tham quan, nhưng **nhãn phải đổi** (liên hệ / hỏi đường, không phải "đặt vé"). Đó là câu hỏi nhãn và luồng, thuộc bước 7; chưa quyết ở đây.
+
+**Việc mã kéo theo**, gộp cùng ba việc của `QĐ-2026-08-23-02`, làm sau khi PR #1 gộp:
+
+- `AttractionDetail.astro`: khi `isAccessibleForFree` = true thì không truyền `priceLabel` cho thanh dính và không bật slot khối hành động **vì giá**.
+- Bộ kiểm `luat1-post` **tự động theo** — nó đọc §3.1 lúc chạy, nên ô `giá` của Điểm tham quan nay mang thêm điều kiện sẽ được phản ánh mà không phải sửa validator. Nhưng **phải kiểm lại**: nếu template vẫn render `gia` khi miễn phí thì tầng B đỏ, đó là bộ kiểm làm đúng việc.
+
+**Không đổi gì khác.** Không field nào của `01-CONTENT_MODEL` đổi. Trải nghiệm, Địa danh, Tour giữ nguyên. Luật 1–5 giữ nguyên câu chữ.

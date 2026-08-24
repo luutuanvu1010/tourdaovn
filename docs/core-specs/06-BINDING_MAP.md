@@ -14,7 +14,7 @@ Phần KHÔNG nhãn (triết lý binding, chính sách vùng rỗng, khung chung
 >
 > 🔧 **SITE-SPECIFIC:** các bảng delta theo entity cụ thể là của nhatrangtravel. Giữ *triết lý binding + khung chung + container policy*; thay *bảng delta* theo entity của site.
 
-- **Phiên bản:** v2.3.0   **Trạng thái:** v2.0.0 là bản mở cổng bước 7 ngày 2026-08-06 (QĐ-2026-08-06-06); v2.1.0 (đợt 4B) duyệt 2026-08-22, QĐ-2026-08-22-02; **v2.2.0 duyệt 2026-08-22, QĐ-2026-08-22-05** — đổi ở §3, §3.1, §6, §4.8, §4.10, §7 và §7.1 (sửa theo N18: bản đầu của dòng này khai thiếu bốn mục sau); **v2.3.0 duyệt 2026-08-24, QĐ-2026-08-23-02** — đoạn mở rời hero (§3, §3.1) và Luật 5 cột→hàng ở di động (§6)
+- **Phiên bản:** v2.3.1   **Trạng thái:** v2.0.0 là bản mở cổng bước 7 ngày 2026-08-06 (QĐ-2026-08-06-06); v2.1.0 (đợt 4B) duyệt 2026-08-22, QĐ-2026-08-22-02; **v2.2.0 duyệt 2026-08-22, QĐ-2026-08-22-05** — đổi ở §3, §3.1, §6, §4.8, §4.10, §7 và §7.1 (sửa theo N18: bản đầu của dòng này khai thiếu bốn mục sau); **v2.3.0 duyệt 2026-08-24, QĐ-2026-08-23-02** — đoạn mở rời hero (§3, §3.1) và Luật 5 cột→hàng ở di động (§6); **v2.3.1 duyệt 2026-08-24, QĐ-2026-08-24-01** — Điểm tham quan miễn phí không còn vùng giá, nhãn "Miễn phí" chỉ ở Thông tin nhanh (§3.1)
 - **Ngày:** v1 soạn và phê chuẩn 2026-06-12; v2 soạn 2026-08-05; v2.1 và v2.2 soạn 2026-08-22   **Người soạn:** Cowork   **Người phê chuẩn:** Lưu Tuấn Vũ
 - **Liên quan:** `01-CONTENT_MODEL.md` v1.0.19 (nguồn sự thật field), `05-URL_MAP-and-DB_SCHEMA.md` (cây trang), `02-SAD.md` 3.1 (prices.yaml), `04-CONSTRAINTS.md` (I6, I16, PY, R), `src/site.config.ts` (phạm vi site, ADR-0021), ADR-0003, ADR-0004, ADR-0007, ADR-0023 (điều hướng).
 
@@ -118,8 +118,18 @@ Mỗi ô ghi **vùng duy nhất** field được hiện trên trang chi tiết. 
 | `faq` | mục | mục | mục | mục |
 | `geo` · `hasMap` | thẻ bản đồ | thẻ bản đồ | thẻ bản đồ (chỉ `geo`) | — |
 | `sameAs` | dòng "Nguồn tham khảo" cạnh Cập nhật | dòng "Nguồn tham khảo" | — | — |
-| giá (`bookingRef`) | thanh dính + khối hành động | — | thanh dính + khối hành động | thanh dính + `BookingForm` |
+| giá (`bookingRef`) | thanh dính + khối hành động — **v2.3.1: KHÔNG render khi `isAccessibleForFree` = true** | — | thanh dính + khối hành động | thanh dính + `BookingForm` |
 | `_updatedAt` · `updatedAt` | cuối nội dung | cuối nội dung | cuối nội dung | cuối nội dung |
+
+**Miễn phí không phải một mức giá (v2.3.1).** Với Điểm tham quan có `isAccessibleForFree` = true, nhãn "Miễn phí" hiện **đúng một lần, ở Thông tin nhanh**, và **vùng giá không render** — không thanh dính, không khối hành động.
+
+Lý do: ngoại lệ hai vùng của giá được biện minh bằng *"đó là quyết định mua"* (§6 Luật 1). Một điểm tham quan miễn phí **không có quyết định mua nào** — không vé để bán, không giá để so. Nên biện minh ấy không với tới nó, và Luật 1 trở lại mức mặc định: một thông tin, một vùng, một lần.
+
+Đây cũng là lối §4.4 đã chọn cho Trải nghiệm từ trước (*"`isAccessibleForFree` = true hiện nhãn miễn phí **thay** vùng giá"*) và §4.2 cho Địa danh (*"Place không có vùng giá"*). v2.3.1 chỉ đưa Điểm tham quan về cùng một lối, thay vì để nó là entity duy nhất đi kiểu khác.
+
+Đo trước khi sửa (2026-08-24, 11 trang điểm tham quan miễn phí): "Miễn phí" hiện **3 lần** trên một trang — `gia` ở thanh dính, `gia` ở khối hành động, `isAccessibleForFree` ở Thông tin nhanh. Sau: **1 lần**.
+
+**Hệ quả lên CTA, phải quyết riêng.** Hôm nay khối hành động của trang miễn phí render nút **"Đặt vé"** trỏ Zalo — một nút "đặt vé" trên một ngôi chùa miễn phí. Gỡ vùng giá không tự gỡ nút đó. Nút liên hệ Zalo vẫn có giá trị, nhưng **nhãn phải đổi** (liên hệ / hỏi đường, không phải "đặt vé"). Đây là câu hỏi nhãn và luồng, chưa quyết ở đây — ghi để không rơi.
 
 Thứ tự mục nội dung thống nhất: Điểm nổi bật → (Tour: Lịch trình → Bao gồm) → Tổng quan/Chi tiết → Cách tới nơi → (Trải nghiệm tại đây) → Mùa nào nên đi → Câu hỏi thường gặp → Cập nhật · Nguồn → **Dải liên quan** (v2.2). Thứ tự khối di động (**sửa v2.3**): hero → thanh đáy → **đoạn mở** → Thông tin nhanh → nội dung theo thứ tự trên, bản đồ ngay sau Cách tới nơi → Gần đây; thanh đáy giá + CTA luôn thấy.
 
