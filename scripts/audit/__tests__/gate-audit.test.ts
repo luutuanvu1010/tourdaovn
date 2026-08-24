@@ -3,7 +3,14 @@ import assert from 'node:assert/strict'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { chdir, cwd as layThuMucLamViecHienHanh } from 'node:process'
-import { duongDanTuEvidence, trichImportTuongDoi, kiemBangChung, kiemImport } from '../gate-audit'
+import {
+  duongDanTuEvidence,
+  duongDanBaoCaoTuLoiHua,
+  trichImportTuongDoi,
+  kiemBangChung,
+  kiemImport,
+  kiemGapConChayThat,
+} from '../gate-audit'
 import type { Control } from '../gate-audit'
 import { REPO_ROOT } from '../lib/evidence'
 
@@ -50,6 +57,59 @@ test('GA1 trượt khi control live không dẫn được đường dẫn nào',
 test('GA1 bỏ qua control gap — chúng không khai là đang chạy', () => {
   const controls: Control[] = [{ id: 'I1', status: 'gap', evidence: 'chưa có' }]
   assert.deepEqual(kiemBangChung(controls, () => false), [])
+})
+
+// --- GA6: chiều ngược của GA1 — control khai gap mà thực ra đang chạy ---
+
+test('duongDanBaoCaoTuLoiHua rút được đường dẫn file báo cáo trong câu lời hứa', () => {
+  assert.equal(
+    duongDanBaoCaoTuLoiHua('chưa có — sẽ là scripts/reports/validator-status.json mục I1 khi ND-005 trả xong'),
+    'scripts/reports/validator-status.json',
+  )
+})
+
+test('duongDanBaoCaoTuLoiHua trả null khi câu không nhắc file báo cáo nào', () => {
+  assert.equal(duongDanBaoCaoTuLoiHua('đã kiểm bằng mắt, chưa có file nào'), null)
+})
+
+test('GA6 trượt khi control khai gap nhưng file evidence đã có mục mang đúng id — sổ chưa cập nhật', () => {
+  const controls: Control[] = [
+    {
+      id: 'I1',
+      status: 'gap',
+      evidence: 'chưa có — sẽ là scripts/reports/validator-status.json mục I1 khi ND-005 trả xong',
+    },
+  ]
+  // vị từ giả: file tồn tại VÀ có mục I1 — tức control này thực ra đang chạy.
+  const c = kiemGapConChayThat(controls, () => true)[0]
+  assert.equal(c.verdict, 'fail')
+  assert.equal(c.id, 'GA6/I1')
+  assert.match(c.detail, /I1/)
+  assert.match(c.detail, /gap/)
+})
+
+test('GA6 đạt khi control khai gap và file evidence chưa có mục nào mang id đó — khớp lời khai', () => {
+  const controls: Control[] = [
+    {
+      id: 'I2',
+      status: 'gap',
+      evidence: 'chưa có — sẽ là scripts/reports/validator-status.json mục I2 khi ND-005 trả xong',
+    },
+  ]
+  const c = kiemGapConChayThat(controls, () => false)[0]
+  assert.equal(c.verdict, 'pass')
+  assert.equal(c.id, 'GA6/I2')
+})
+
+test('GA6 skip khi evidence không nhắc file báo cáo nào để đối chiếu', () => {
+  const controls: Control[] = [{ id: 'I3', status: 'gap', evidence: 'đã kiểm bằng mắt' }]
+  const c = kiemGapConChayThat(controls, () => true)[0]
+  assert.equal(c.verdict, 'skip')
+})
+
+test('GA6 bỏ qua control live — chúng không khai là gap', () => {
+  const controls: Control[] = [{ id: 'I6', status: 'live', evidence: 'scripts/reports/postbuild-status.json mục I6' }]
+  assert.deepEqual(kiemGapConChayThat(controls, () => true), [])
 })
 
 test('trichImportTuongDoi bắt import tương đối, bỏ qua import gói', () => {

@@ -69,6 +69,59 @@ export function kiemBangChung(controls: Control[], tonTai: (p: string) => boolea
     })
 }
 
+/**
+ * Rút đường dẫn file báo cáo được NHẮC TỚI trong evidence dạng lời hứa
+ * ("chưa có — sẽ là scripts/reports/validator-status.json mục I1 khi ND-005 trả
+ * xong"). Khác `duongDanTuEvidence`: hàm đó chỉ đọc TOKEN ĐẦU câu nên trả null
+ * cho đúng dạng câu này (không sửa `duongDanTuEvidence` — GA1 dựa vào hành vi
+ * hiện tại của nó). Hàm này quét CẢ CÂU tìm một token dạng đường dẫn kết thúc
+ * bằng .json, dùng riêng cho GA6.
+ */
+export function duongDanBaoCaoTuLoiHua(evidence: string): string | null {
+  const m = evidence.match(/[\w./-]+\.json/)
+  return m ? m[0] : null
+}
+
+/**
+ * GA6 — chiều ngược của GA1: GA1 kiểm control khai `live` có bằng chứng thật
+ * hay không; GA6 kiểm control khai `gap` mà file báo cáo evidence dẫn tới THỰC
+ * RA đã có mục mang đúng id của nó — tức control này đang chạy mà sổ chưa cập
+ * nhật. `dangChayThat(duongDan, id)` là vị từ: true nghĩa là file `duongDan`
+ * tồn tại VÀ có mục `id` bên trong — do main() cấp, để hàm này thuần và test
+ * được mà không đụng đĩa (giống `tonTai` trong kiemBangChung).
+ */
+export function kiemGapConChayThat(
+  controls: Control[],
+  dangChayThat: (duongDan: string, id: string) => boolean,
+): Check[] {
+  return controls
+    .filter((c) => c.status === 'gap')
+    .map((c) => {
+      const duongDan = duongDanBaoCaoTuLoiHua(c.evidence ?? '')
+      if (duongDan === null) {
+        return {
+          id: `GA6/${c.id}`,
+          verdict: 'skip' as const,
+          detail: `control ${c.id} khai gap, evidence không nhắc file báo cáo nào để đối chiếu: "${c.evidence ?? ''}"`,
+          drift: ['DR-022'],
+        }
+      }
+      return dangChayThat(duongDan, c.id)
+        ? {
+            id: `GA6/${c.id}`,
+            verdict: 'fail' as const,
+            detail: `control ${c.id} khai gap nhưng ${duongDan} đã có mục ${c.id} — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật`,
+            drift: ['DR-022'],
+          }
+        : {
+            id: `GA6/${c.id}`,
+            verdict: 'pass' as const,
+            detail: `control ${c.id} khai gap, ${duongDan} chưa có mục ${c.id} — khớp với lời khai`,
+            drift: ['DR-022'],
+          }
+    })
+}
+
 /** Bắt import tương đối trong mã nguồn. Bỏ qua import gói (node:fs, yaml...). */
 export function trichImportTuongDoi(source: string): string[] {
   const ket: string[] = []
@@ -131,6 +184,26 @@ function main(): void {
   }
 
   if (registry?.controls) checks.push(...kiemBangChung(registry.controls, tonTai))
+
+  // --- GA6: control khai gap mà báo cáo evidence dẫn tới thực ra đã có mục ---
+  const capNhatItemCache = new Map<string, Array<{ id: string }>>()
+  const dangChayThatTrongBaoCao = (duongDan: string, id: string): boolean => {
+    if (!capNhatItemCache.has(duongDan)) {
+      const p = resolve(REPO_ROOT, duongDan)
+      if (!existsSync(p)) {
+        capNhatItemCache.set(duongDan, [])
+      } else {
+        try {
+          const data = JSON.parse(readFileSync(p, 'utf8')) as { items?: Array<{ id: string }> }
+          capNhatItemCache.set(duongDan, data.items ?? [])
+        } catch {
+          capNhatItemCache.set(duongDan, [])
+        }
+      }
+    }
+    return (capNhatItemCache.get(duongDan) ?? []).some((i) => i.id === id)
+  }
+  if (registry?.controls) checks.push(...kiemGapConChayThat(registry.controls, dangChayThatTrongBaoCao))
 
   // --- GA2: báo cáo không cũ hơn bản dựng ---
   const baoCao = join(REPO_ROOT, 'scripts', 'reports', 'postbuild-status.json')
