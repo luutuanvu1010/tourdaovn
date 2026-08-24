@@ -1,5 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import {
   timChuoiCam,
   trichLuatChuyenHuong,
@@ -7,7 +9,10 @@ import {
   kiemQuyetDinhDaDong,
   kiemTanDuMa,
   kiemTanDuTaiLieu,
+  kiemTanDuTaiLieuVoiDanhSachNen,
+  DANH_SACH_NEN_DOC2_DOCS,
 } from '../doc-reality'
+import { REPO_ROOT } from '../lib/evidence'
 
 test('timChuoiCam bắt được chuỗi và nói rõ file nào dòng nào', () => {
   const files = [{ path: 'README.md', content: 'dòng 1\nDeploy qua Cloudflare Pages\ndòng 3' }]
@@ -106,4 +111,68 @@ test('kiemTanDuTaiLieu (DOC2-docs) trượt nhưng nói rõ là tường thuật
   assert.equal(c.id, 'DOC2-docs/nhatrangtravel')
   assert.match(c.detail, /tường thuật/)
   assert.match(c.detail, /DOC2-code/)
+})
+
+// --- kiemTanDuTaiLieuVoiDanhSachNen: danh sách nền cho DOC2-docs ---
+// Khoá theo (file, nội dung dòng đã trim) — KHÔNG theo số dòng, vì thêm một
+// dòng ở đầu file sẽ đẩy lệch mọi số dòng bên dưới dù không đổi gì thật.
+
+test('kiemTanDuTaiLieuVoiDanhSachNen đạt khi mọi chỗ khớp đều nằm trong danh sách nền', () => {
+  const nen = [
+    { file: 'README.md', dong: 'Trích từ nhatrangtravel, giữ phần cốt lõi.', lyDo: 'ghi nguồn gốc' },
+  ]
+  const files = [{ path: 'README.md', content: 'dòng đầu\nTrích từ nhatrangtravel, giữ phần cốt lõi.\ndòng cuối' }]
+  const c = kiemTanDuTaiLieuVoiDanhSachNen(files, 'nhatrangtravel', nen)
+  assert.equal(c.verdict, 'pass')
+  assert.equal(c.id, 'DOC2-docs/nhatrangtravel')
+})
+
+test('kiemTanDuTaiLieuVoiDanhSachNen KHÔNG neo vào số dòng — thêm dòng ở đầu file không làm trượt', () => {
+  const nen = [
+    { file: 'README.md', dong: 'Trích từ nhatrangtravel, giữ phần cốt lõi.', lyDo: 'ghi nguồn gốc' },
+  ]
+  // Cùng nội dung như test trên, nhưng chèn thêm 3 dòng ở đầu — số dòng khớp lệch hẳn.
+  const files = [
+    { path: 'README.md', content: 'mới 1\nmới 2\nmới 3\nTrích từ nhatrangtravel, giữ phần cốt lõi.' },
+  ]
+  const c = kiemTanDuTaiLieuVoiDanhSachNen(files, 'nhatrangtravel', nen)
+  assert.equal(c.verdict, 'pass')
+})
+
+test('kiemTanDuTaiLieuVoiDanhSachNen trượt khi xuất hiện chỗ khớp MỚI ngoài danh sách nền', () => {
+  const nen = [
+    { file: 'README.md', dong: 'Trích từ nhatrangtravel, giữ phần cốt lõi.', lyDo: 'ghi nguồn gốc' },
+  ]
+  const files = [
+    {
+      path: 'README.md',
+      content: 'Trích từ nhatrangtravel, giữ phần cốt lõi.\nMột dòng MỚI nhắc nhatrangtravel chưa từng khai.',
+    },
+  ]
+  const c = kiemTanDuTaiLieuVoiDanhSachNen(files, 'nhatrangtravel', nen)
+  assert.equal(c.verdict, 'fail')
+  assert.match(c.detail, /MỚI/)
+  assert.match(c.detail, /README\.md:2/)
+})
+
+test('kiemTanDuTaiLieuVoiDanhSachNen trượt khi một vị trí trong danh sách nền đã biến mất (cần dọn)', () => {
+  const nen = [
+    { file: 'README.md', dong: 'Trích từ nhatrangtravel, giữ phần cốt lõi.', lyDo: 'ghi nguồn gốc' },
+  ]
+  // Dòng đã đổi/xoá — không còn khớp nội dung nền đã khai nữa.
+  const files = [{ path: 'README.md', content: 'Đã viết lại, không còn nhắc site cũ.' }]
+  const c = kiemTanDuTaiLieuVoiDanhSachNen(files, 'nhatrangtravel', nen)
+  assert.equal(c.verdict, 'fail')
+  assert.match(c.detail, /biến mất|không còn khớp|dọn/)
+  assert.match(c.detail, /README\.md/)
+})
+
+test('DANH_SACH_NEN_DOC2_DOCS khớp đúng thực tế README.md và SETUP-NEW-SITE.md hôm nay (6 vị trí)', () => {
+  const files = [
+    { path: 'README.md', content: readFileSync(join(REPO_ROOT, 'README.md'), 'utf8') },
+    { path: 'SETUP-NEW-SITE.md', content: readFileSync(join(REPO_ROOT, 'SETUP-NEW-SITE.md'), 'utf8') },
+  ]
+  assert.equal(DANH_SACH_NEN_DOC2_DOCS.length, 6)
+  const c = kiemTanDuTaiLieuVoiDanhSachNen(files, 'nhatrangtravel', DANH_SACH_NEN_DOC2_DOCS)
+  assert.equal(c.verdict, 'pass')
 })
