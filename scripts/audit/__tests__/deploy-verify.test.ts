@@ -8,6 +8,14 @@ test('trichTieuDe lấy nội dung thẻ title', () => {
   assert.equal(trichTieuDe('<html><body>không có title</body></html>'), null)
 })
 
+test('trichTieuDe với <title></title> rỗng trả chuỗi rỗng, khác null (không có thẻ)', () => {
+  // Hành vi mong muốn: thẻ title CÓ tồn tại nhưng rỗng thì trả '' (đã tìm thấy
+  // thẻ, chỉ là nội dung rỗng) — khác với không có thẻ nào thì trả null.
+  // Khoá lại bằng test để người sau sửa vào không đổi âm thầm.
+  assert.equal(trichTieuDe('<html><head><title></title></head></html>'), '')
+  assert.notEqual(trichTieuDe('<html><head><title></title></head></html>'), null)
+})
+
 test('demUrlSitemap đếm thẻ loc', () => {
   const xml = '<urlset><url><loc>https://a/</loc></url><url><loc>https://b/</loc></url></urlset>'
   assert.equal(demUrlSitemap(xml), 2)

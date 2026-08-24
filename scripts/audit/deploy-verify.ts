@@ -14,6 +14,12 @@ import type { Check } from './lib/evidence'
 
 const SITE = 'https://tourdao.vn'
 
+// Thời gian chờ tối đa cho một lượt tải. Mạng từ chối ngay thì fetch tự ném
+// lỗi và rơi vào nhánh skip có sẵn — không cần thời gian chờ để bắt ca đó.
+// Ca cần bắt là mạng TREO IM LẶNG: không có thời gian chờ thì lệnh chờ vô hạn,
+// và người vừa deploy xong đang chờ câu trả lời sẽ bỏ qua bước kiểm luôn.
+const THOI_GIAN_CHO_MS = 10_000
+
 // Tên file sitemap thật trong dist/ (kiểm bằng tay 2026-08-24): Astro sinh
 // sitemap.xml làm sitemapindex trỏ tới sitemap-vi.xml — nơi thật sự chứa các
 // thẻ <url><loc>. "sitemap-0.xml" trong ghi chú brief không tồn tại ở repo
@@ -57,10 +63,27 @@ export function soDauHieu(live: string, dist: string, dauHieu: string[]): Check[
   })
 }
 
-/** Tải kèm tham số phá cache. Không phá cache là đo lại chính bản cũ. */
+/**
+ * Tải kèm tham số phá cache. Không phá cache là đo lại chính bản cũ.
+ * Có thời gian chờ THOI_GIAN_CHO_MS — mạng treo im lặng thì ném lỗi rõ ràng
+ * "hết thời gian chờ" thay vì đứng im vô hạn. Lỗi ném ra ở đây luôn được nơi
+ * gọi bắt lại và chuyển thành một mục skip, không bao giờ thoát ra ngoài main().
+ */
 async function tai(duongDan: string, moc: string): Promise<string> {
   const url = `${SITE}${duongDan}?cache-bust=${encodeURIComponent(moc)}`
-  const res = await fetch(url, { cache: 'no-store', redirect: 'follow' })
+  let res: Response
+  try {
+    res = await fetch(url, {
+      cache: 'no-store',
+      redirect: 'follow',
+      signal: AbortSignal.timeout(THOI_GIAN_CHO_MS),
+    })
+  } catch (e) {
+    if (e instanceof Error && e.name === 'TimeoutError') {
+      throw new Error(`hết thời gian chờ ${THOI_GIAN_CHO_MS}ms khi tải ${url}`)
+    }
+    throw e
+  }
   if (!res.ok) throw new Error(`${url} trả ${res.status}`)
   return res.text()
 }
