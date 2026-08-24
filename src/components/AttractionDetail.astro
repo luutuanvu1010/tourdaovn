@@ -40,6 +40,14 @@ function hasPtContent(blocks: unknown[] | undefined | null): boolean {
 
 const prices = loadPrices('data/prices.yaml')
 const priceView = resolvePrice(data.bookingRef?.key, 'attraction', data.isAccessibleForFree, prices, lang)
+
+// 06 §3.1 v2.3.1 (QĐ-2026-08-24-01): điểm tham quan miễn phí KHÔNG có vùng giá.
+// Ngoại lệ hai vùng của giá được §6 Luật 1 biện minh bằng "đó là quyết định
+// mua"; miễn phí thì không có quyết định mua nào, nên nhãn "Miễn phí" chỉ sống
+// ở Thông tin nhanh. resolvePrice() trả "Miễn phí" khi isAccessibleForFree —
+// đó là chỗ nhãn rò sang kênh giá, chặn ngay tại đây.
+const priceLabel = data.isAccessibleForFree ? null : (priceView?.label ?? null)
+const coVungGia = !data.isAccessibleForFree && !!priceView?.label
 const siteBase = siteBaseUrl(Astro.site)
 const entityJsonLd = applyPriceToJsonLd(
   attractionToJsonLd(data, siteBase, lang),
@@ -84,12 +92,12 @@ const facts = [
   badges={heroBadges}
   summary={data.summary}
   jumpLinks={jumpLinks}
-  priceLabel={priceView?.label ?? null}
+  priceLabel={priceLabel}
   ctaHref={bookingHref || null}
   ctaLabel={bookingHref ? t('contactZalo') : null}
   facts={facts}
   sidebarSlots={[
-    { name: 'booking', component: 'BookingCTA', visible: !!priceView?.label, props: { priceText: priceView?.label || '', ctaLabel: t('bookTicket'), ctaUrl: bookingHref || undefined } },
+    { name: 'booking', component: 'BookingCTA', visible: coVungGia, props: { priceText: priceView?.label || '', ctaLabel: t('bookTicket'), ctaUrl: bookingHref || undefined } },
     // 06 §3 hàng "Bản đồ (sidebar)": "chỉ có hasMap thì hiện một link" — thẻ bản
     // đồ phải hiện khi có geo VẼ ĐƯỢC hoặc chỉ có hasMap (không geo). Trước đây
     // chỉ xét geo nên trang chỉ có hasMap (không geo hợp lệ) không có chỗ hiện

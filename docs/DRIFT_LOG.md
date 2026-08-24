@@ -929,3 +929,19 @@ Không vá trong đợt này: gắn `data-region`/`data-field` cho bốn vùng c
 khi gắn thẻ cho vùng cũ), không phải việc cơ học một dòng. Ghi giới hạn trung
 thực ở đây và trong comment đầu `scripts/validators/luat1-post.ts` — không tự
 vá, không tự nhận tầng B "bắt hết".
+
+---
+
+## DR-049 — `06` v2.3 chuyển `summary` khỏi hero, nhưng mã vẫn render nó trong hero
+
+**Trạng thái:** mở, **cố ý chờ Design chặng 2**. Không phải sót.
+
+`06` §3 hàng "Đoạn mở" và §3.1 (v2.3.0, `QĐ-2026-08-23-02`) khai `summary` nằm ở **dải sáng dưới hero, sau thanh dính**. `src/components/DetailLayout.astro` vẫn render nó vào `slot="overlay"` của `Hero` — tức vẫn đè lên ảnh.
+
+**Vì sao không sửa luôn trong đợt này.** Vùng `dải đoạn mở` **chưa tồn tại trong mã**. Dựng nó bây giờ buộc Code phải tự bịa bề mặt cho một dải mà **Design chặng 2 sinh ra để quyết** — và chặng 1 (chữ, thang cỡ, màu) còn chưa chạy. Thang cỡ và bảng màu sắp đổi ở vòng 5, nên dải dựng hôm nay là **công chắc chắn phải làm lại**. Đó là Code đi trước Design, ngược chiều `PLAYBOOK`.
+
+**Vì sao cổng không bắt được nó.** `summary` chưa bao giờ được gắn `data-field`, nên `luat1-post` không thấy. Đây là một trong bốn vùng chưa gắn thẻ đã khai ở **DR-048** — và là ví dụ cụ thể cho thấy DR-048 không phải chuyện hình thức: một drift thật đang sống trong đúng khoảng mù đó.
+
+`ALIAS` của `luat1-post` **đã** biết `'dải đoạn mở' → 'summary-band'` (thêm 2026-08-24) nên cổng không đỏ vì tên vùng lạ. Nhưng đó là một id **đã khai, chưa nối** — cùng nhóm với `hero`, `hero-badge`, `breadcrumb`, `footer-meta` ở DR-048.
+
+**Đóng khi nào:** Design chặng 2 giao bề mặt cho dải đoạn mở → QA1 → Code dựng dải, gắn `data-region="summary-band"` và `data-field="summary"`, gỡ `summary` khỏi hero overlay. Lúc đó tầng B của cổng mới canh được vùng này.

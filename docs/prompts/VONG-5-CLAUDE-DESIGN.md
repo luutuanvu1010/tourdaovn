@@ -3,8 +3,8 @@
 > **Cách dùng:** mở một phiên Claude mới tại thư mục `tourdaovn`, dán toàn bộ nội dung từ
 > dòng `---BẮT ĐẦU PROMPT---` trở xuống.
 >
-> **Soạn:** Cowork, 2026-08-23. **Cập nhật 2026-08-24** sau khi `06` lên v2.3.0
-> (`QĐ-2026-08-23-02`) — **cả hai chặng nay đều mở**.
+> **Soạn:** Cowork, 2026-08-23. **Cập nhật 2026-08-24** sau khi `06` lên **v2.3.1**
+> (`QĐ-2026-08-23-02` + `QĐ-2026-08-24-01`) — **cả hai chặng nay đều mở**.
 >
 > **Nơi đặt trong kho:** `docs/prompts/VONG-5-CLAUDE-DESIGN.md`
 
@@ -30,7 +30,7 @@ màu** — rồi mới sang chặng 2. Lý do ở cuối prompt, và nó là lý
 2. `docs/core-specs/07-DESIGN_TOKENS.md` — bộ token hiện hành, gồm **§1b: ba bộ giao diện
    chọn được**. Lưu ý §2 đang **lệch** so với mã đang chạy — xem "Ba drift" bên dưới.
 3. `src/styles/tokens.css` — token chạy thật. Đây mới là sự thật; `07` là bản mô tả.
-4. `docs/core-specs/06-BINDING_MAP.md` **v2.3.0** — §3, §3.1 và §6. Cần cho chặng 2.
+4. `docs/core-specs/06-BINDING_MAP.md` **v2.3.1** — §3, §3.1 và §6. Cần cho **cả hai** chặng: v2.3.1 đổi thứ có mặt trên chính màn hình tham chiếu của chặng 1.
 5. `docs/core-specs/00-PROJECT_BRIEF.md` mục 6 — ngưỡng Lighthouse, LCP, WCAG.
 6. `docs/design/vong4/` — canvas vòng 4, sáu artboard đã qua QA1. Chặng 2 dựng lại từ đây.
 
@@ -113,9 +113,12 @@ Ba artboard. **Không** đụng tới sáu trang chi tiết.
 
 Dựng **cùng một màn hình** ba lần, ba bộ chữ khác nhau.
 
-- Màn hình: **Chùa Long Sơn** (`/diem-tham-quan/chua-long-son/`). Chọn trang này vì nó có đủ
-  mọi vùng: breadcrumb, hero, đoạn mở, Thông tin nhanh, thanh dính, thân bài, khối hành động,
-  bản đồ.
+- Màn hình: **Chùa Long Sơn** (`/diem-tham-quan/chua-long-son/`). Chọn trang này vì chủ dự án
+  đã nêu đích danh nó, và vì nó có nhiều vùng: breadcrumb, hero, đoạn mở, Thông tin nhanh,
+  thanh dính, thân bài, bản đồ.
+- **Nhưng nó KHÔNG có vùng giá, và đó là có chủ ý.** `06` v2.3.1 (`QĐ-2026-08-24-01`) chốt:
+  điểm tham quan miễn phí thì nhãn "Miễn phí" hiện **đúng một lần ở Thông tin nhanh**, không
+  thanh dính giá, không khối hành động giá. Đừng vẽ vùng giá lên màn hình này.
 - **Ảnh thật lấy từ Sanity của chính trang đó.** Không ô kẻ chéo.
 - **Chữ thật của chính bài đó.** Không chữ giả, không Lorem. Tên riêng và dấu tiếng Việt là
   thứ đang được đánh giá — chữ giả sẽ giấu mất chỗ hỏng.
@@ -132,6 +135,21 @@ Kèm **bảng chi phí**: từng ứng viên, số byte woff2 từng file, tổn
 ### Artboard 3 — Ba bộ màu
 
 - Sắc độ đề xuất cho cả ba bộ: `bien-sau` (mặc định), `cat-bien`, `ngoc-lam`.
+
+**Một sự thật anh phải biết trước khi làm artboard này, nếu không nó sẽ thiếu mất nửa vấn đề.**
+
+`07` §1 định nghĩa `--c-accent` là màu **chỉ xuất hiện ở vùng hành động và nhãn giá**. Nhưng
+đo trên bản dựng thật ngày 2026-08-24: `data/prices.yaml` **toàn chú thích, không có một giá
+thật nào**, nên **không trang nào trên site render một con số giá**. Mọi nhãn giá đang hiện
+đều là chữ "Miễn phí" — và sau v2.3.1 thì cả những trang đó cũng thôi có vùng giá.
+
+Nghĩa là **màu accent hiện không đánh giá được từ dữ liệu thật**, dù nó là màu mang tính
+quyết định nhất của bộ (nó là màu ấm duy nhất trên nền lạnh, theo `07` §0 mục 1).
+
+Nên artboard này phải có thêm **một khối giá + CTA dựng bằng giá MẪU**, đánh dấu rõ là mẫu
+theo đúng quy ước canvas vòng 4 (`data-placeholder`, và ghi chú nói rõ con số là tham khảo).
+Không có nó thì anh đang chọn màu mà không nhìn thấy chỗ màu đó sống.
+
 - Kèm **bảng WCAG AA bốn cặp × ba bộ**: chữ chính trên nền, chữ mờ trên nền, chữ trắng trên
   `primary`, chữ trắng trên `accent`. Tất cả phải ≥ 4.5.
 
@@ -153,7 +171,7 @@ Kèm **bảng chi phí**: từng ứng viên, số byte woff2 từng file, tổn
 Hai bản di động cuối là mới hoàn toàn. Yêu cầu của chủ dự án là **ưu tiên di động**, mà hai
 entity đó chưa từng được vẽ ở 390px — nên đừng coi chúng là phụ.
 
-## Hai thay đổi đặc tả mới ở `06` v2.3 mà chặng 2 phải theo
+## Ba thay đổi đặc tả mới ở `06` v2.3.x mà chặng 2 phải theo
 
 Đây là điều `06` v2.2 chưa nói và v2.3 vừa chốt (`QĐ-2026-08-23-02`, duyệt 2026-08-24). Đọc
 thẳng §3 và §6 của `06`; dưới đây là bản tóm.
@@ -167,7 +185,20 @@ biến mất, và anh không phải thiết kế lớp phủ cho từng bức �
 
 Thứ tự khối di động ở §3.1 nay là: **hero → thanh đáy → đoạn mở → Thông tin nhanh → nội dung**.
 
-**2. Luật 5 — ô cạnh nhau trên desktop, mỗi ô một hàng trên di động.**
+**2. Miễn phí không phải một mức giá (v2.3.1).** Điểm tham quan có `isAccessibleForFree` =
+true thì nhãn "Miễn phí" hiện **đúng một lần ở Thông tin nhanh**; **vùng giá không render**.
+
+Lý do ghi trong §3.1: ngoại lệ hai vùng của giá được §6 Luật 1 biện minh bằng *"vì đó là
+quyết định mua"* — một điểm tham quan miễn phí không có quyết định mua nào. Đây là **xoá một
+ngoại lệ**, không phải thêm: §4.4 đã chọn lối đó cho Trải nghiệm và §4.2 cho Địa danh từ
+trước; Điểm tham quan là entity duy nhất đi kiểu khác.
+
+**Một việc chưa quyết, thuộc bước 7 — tức thuộc anh.** Trang miễn phí hiện vẫn render nút
+**"Đặt vé"** trỏ Zalo: một nút đặt vé trên một ngôi chùa miễn phí. Gỡ vùng giá không tự gỡ
+nút đó. Nút liên hệ Zalo vẫn có giá trị, nhưng **nhãn phải đổi** — liên hệ, hỏi đường, hay
+gì đó đúng hơn. Đề xuất chữ và vị trí cho nó; chủ dự án chốt.
+
+**3. Luật 5 — ô cạnh nhau trên desktop, mỗi ô một hàng trên di động.**
 
 > Mọi vùng trình bày nhiều ô ngang hàng ở desktop — Thông tin nhanh, khối hành động, dòng
 > meta, thẻ thông tin — ở `≤ 640px` chuyển thành **mỗi ô một hàng chiếm hết bề rộng**. Cấm

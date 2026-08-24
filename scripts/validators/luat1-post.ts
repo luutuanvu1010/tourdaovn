@@ -168,6 +168,7 @@ const ALIAS: Record<string, string> = {
   'huy hiệu hero': 'hero-badge',
   'hero': 'hero',
   'breadcrumb': 'breadcrumb',
+  'dải đoạn mở': 'summary-band',
   'thông tin nhanh': 'fact-strip',
   'thanh dính': 'sticky-bar',
   'khối hành động': 'action-block',
