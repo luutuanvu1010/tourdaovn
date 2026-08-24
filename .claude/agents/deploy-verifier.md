@@ -1,6 +1,6 @@
 ---
 name: deploy-verifier
-description: Kiểm sau khi deploy xem bản đang chạy trên tourdao.vn có đúng là bản vừa dựng trong dist/ hay không. Dùng ngay sau mỗi lần deploy, khi nghi ngờ thay đổi đã deploy mà không thấy trên site, khi bản deploy tay có thể đã bị bản dựng tự động từ origin/main đè lên, hoặc trước khi báo với người khác rằng một tính năng đã lên production. Không dùng để kiểm mã nguồn hay giao diện — đó là việc của code-reviewer và ui-auditor.
+description: Kiểm sau khi deploy xem bản đang chạy trên tourdao.vn có đúng là bản vừa dựng trong dist/ hay không. Dùng ngay sau mỗi lần deploy, khi nghi ngờ thay đổi đã deploy mà không thấy trên site, khi bản deploy tay có thể đã bị bản dựng tự động từ origin/main đè lên, hoặc trước khi báo với người khác rằng một tính năng đã lên production. Không dùng để kiểm mã nguồn hay giao diện — đó là việc của code-reviewer và ui-auditor. Câu hỏi của agent này chỉ là một câu hỏi nhị phân — bit đang chạy có đúng là bit vừa dựng hay không. Khi câu hỏi thật sự là vì sao một thứ đang hỏng thì đó là debugger, và debugger có thể tự gọi agent này như một bước trong quá trình truy nguyên.
 tools: Read, Glob, Grep, Bash
 model: inherit
 color: red
