@@ -13,6 +13,7 @@ const AGENTS_DIR = join(REPO_ROOT, '.claude', 'agents')
 const MONG_DOI = [
   'gate-auditor', 'deploy-verifier', 'doc-reality-auditor', 'seo-auditor',
   'contract-checker', 'astro-auditor', 'ui-auditor',
+  'code-reviewer', 'debugger',
 ]
 
 /** Công cụ được phép khai trong `tools:`. Sai tên là agent im lặng mất công cụ. */
