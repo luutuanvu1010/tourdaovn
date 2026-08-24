@@ -1093,3 +1093,69 @@ Ghi ra đây để không ai chốt phiếu rồi ngạc nhiên vì cổng đỏ
 - Bộ kiểm `luat1-post` **tự động theo** — nó đọc §3.1 lúc chạy, nên ô `giá` của Điểm tham quan nay mang thêm điều kiện sẽ được phản ánh mà không phải sửa validator. Nhưng **phải kiểm lại**: nếu template vẫn render `gia` khi miễn phí thì tầng B đỏ, đó là bộ kiểm làm đúng việc.
 
 **Không đổi gì khác.** Không field nào của `01-CONTENT_MODEL` đổi. Trải nghiệm, Địa danh, Tour giữ nguyên. Luật 1–5 giữ nguyên câu chữ.
+
+---
+
+## QĐ-2026-08-24-02 — Ràng buộc "dữ liệu mỏng" thu hẹp thay vì bỏ; và nhãn nút trên trang miễn phí vào phạm vi Design vòng 5
+
+**Trạng thái:** chốt 2026-08-24. Sửa `SPEC-2026-08-22-be-mat-vong-5` §6 và §7 (R4, R8, R9). Không đụng `06`, `07`, `01-CONTENT_MODEL`.
+
+**Bối cảnh.** Prompt bàn giao Design vòng 5 (`docs/prompts/VONG-5-CLAUDE-DESIGN.md`, `f37b404` → `9a9d06f`) tự tuyên bố ràng buộc R8 của spec — *"dữ liệu mỏng: mọi khối phải tử tế với 1 mục"* — **đã hết hiệu lực**, rồi thay chỗ R8 bằng một ràng buộc khác. Prompt không có thẩm quyền huỷ ràng buộc cứng của spec: `CLAUDE.md` §1 xếp spec trên prompt. Hệ quả thực tế là tồn tại **hai bảng R1–R8 khác nhau cho cùng một cổng QA1**, đúng loại nguồn sự thật thứ hai mà `CLAUDE.md` §5 bắt dừng. QĐ này xử ở tầng đúng: sửa spec, rồi prompt chép lại.
+
+**Đo được (bản dựng `dist/` 2026-08-24 09:37, sau `d31eef3`).** Đếm trang chi tiết entity, tách trang term bằng dấu hiệu JSON-LD `"@type":"DefinedTerm"`:
+
+| Loại | Trang chi tiết |
+|---|---|
+| Điểm tham quan | **36** |
+| Tour | **23** |
+| Cẩm nang | 15 |
+| Trải nghiệm | **9** |
+| Địa danh | 7 |
+| Khách sạn | 6 |
+| Tác giả | 3 |
+| Công ty | 3 |
+| **Tổng trang chi tiết** | **102** |
+
+Cộng **11 trang term** (9 dưới `/tour/`, 2 dưới `/trai-nghiem/`) và các trang index nhánh, hub, tĩnh → **128** `index.html` trong `dist/`.
+
+**Ba con số của prompt không khớp bản dựng và phải sửa:** prompt ghi Tour **30** (thực **23**, dôi 30%), Trải nghiệm **10** (thực **9**), Điểm tham quan **34** (thực **36**); và dòng "Tổng **123**" không bằng tổng các dòng của chính nó (102) — `grep` toàn `docs/` cho thấy số 123 không xuất hiện ở bất kỳ nguồn nào khác, tức không truy được phép đo.
+
+**Chốt 1 — R8 thu hẹp, không bỏ.** Tiền đề của prompt đúng ở phần lớn: hồi soạn prompt Pha F kho có 1 tour, nay có 23; lưới ba thẻ trên trang Tour và Điểm tham quan không còn nguy cơ để một thẻ lẻ loi. Nhưng "kho đã dày" **không đúng đều**, và bằng chứng ngược nằm trong cùng bản dựng đó:
+
+- `/resort/` là index nhánh có **0** entity — một dải rỗng hoàn toàn vẫn đang được dựng.
+- Khách sạn 6, Địa danh 7, Trải nghiệm 9 — dưới một lưới ba cột hai hàng.
+- Các dải sinh từ truy vấn liên quan (**Gần đây**, **Trải nghiệm tại đây**, **Dải liên quan** §3 v2.2) có số mục phụ thuộc dữ liệu từng trang, không phụ thuộc tổng kho: một Địa danh vẫn có thể chỉ có 1 mục lân cận.
+
+Nên R8 **không bị bỏ**, mà thu hẹp từ "mọi khối" xuống đúng chỗ còn rủi ro. Câu mới ở §7:
+
+> **R8** — **Khối có số mục phụ thuộc dữ liệu phải tử tế với 1 mục.** Áp cho: mọi dải/lưới sinh từ truy vấn liên quan (Gần đây, Trải nghiệm tại đây, Dải liên quan), và mọi listing của nhánh dưới 12 entity (Khách sạn 6, Địa danh 7, Trải nghiệm 9, Resort 0). **Không** còn áp cho lưới thẻ của Tour và Điểm tham quan — hai nhánh này đã đủ dày (23 và 36) để bố cục lấy 3 thẻ một hàng làm mặc định. Đi cùng R7: ít mục thì thu khối lại cho tử tế, **không** độn placeholder cho đầy hàng.
+
+**Chốt 2 — ràng buộc mới của prompt vào spec làm R9, không chiếm chỗ R8.** Nội dung prompt đặt nhầm vào ô R8 là một ràng buộc thật và đáng giữ, chỉ là không được đá chỗ R8:
+
+> **R9** — Không đổi một field nào của `01-CONTENT_MODEL`; không sửa `06-BINDING_MAP`, không sửa `07-DESIGN_TOKENS`. Design **đề xuất**; Cowork ghi vào đặc tả sau khi chủ dự án duyệt.
+
+**Chốt 3 — nhãn nút trên trang miễn phí là hạng mục giao nộp của Design vòng 5.** `QĐ-2026-08-24-01` để treo câu hỏi này với chữ *"thuộc bước 7; chưa quyết ở đây"*. Nay đóng: nó vào **§6 chặng 2** như hạng mục giao nộp thứ mười hai — Design đề xuất **chữ và vị trí** cho nút Zalo trên trang điểm tham quan miễn phí, chủ dự án chốt. Ràng buộc của đề xuất, phải ghi thẳng vào prompt vì thiếu nó thì Design không biết biên:
+
+- `06` §6 **Luật 3** cấm "nút thay thế trỏ về chính site" khi không có giá. Nút Zalo trỏ **ra ngoài** site nên **không** vướng Luật 3 — nhưng một nút trỏ về trang khác của tourdao.vn thì vướng.
+- **R7** cấm CTA giả. Nút phải dẫn tới một hành động có thật (mở Zalo), không phải một nút trang trí cho cân bố cục.
+- Nhãn "Đặt vé" **bị loại** trên trang miễn phí: không có vé để đặt.
+
+**Chốt 4 — mốc thư mục font sửa theo số đo, và ghi rõ đơn vị.** Bốn tài liệu (`07` §2, `DECISIONS` QĐ-2026-08-06-11, nhật ký 06/08, spec §2/§6/§7 R4) ghi **~104 KB**; prompt ghi **108 KB** ở hai chỗ mà không nói mình đo lại. Đo hôm nay, `public/fonts/` có đúng **6 file** `.woff2`:
+
+| File | Byte |
+|---|---|
+| `nunito-latin-viet-var.woff2` | 39.152 |
+| `nunito-vietnamese-var.woff2` | 13.040 |
+| `be-vietnam-pro-latin-viet-800.woff2` | 13.380 |
+| `be-vietnam-pro-latin-viet-700.woff2` | 13.348 |
+| `be-vietnam-pro-vietnamese-800.woff2` | 5.144 |
+| `be-vietnam-pro-vietnamese-700.woff2` | 5.132 |
+| **Tổng payload** | **89.196 byte = 87,1 KB** |
+
+`du -sh public/fonts` trả **108K** — đó là dung lượng đĩa sau khi làm tròn theo block, không phải payload. Prompt lấy đúng số này làm mốc, trong khi R4 lại bắt Design *"ghi số byte woff2 từng file"*: cộng payload rồi so với mốc đĩa là lệch ~21 KB, và R4 không chấm được.
+
+**Chốt:** mốc và trần của R4 đều tính bằng **tổng byte payload của các file `.woff2`**, nêu rõ đơn vị. Mốc hiện tại **89.196 byte (87,1 KB)**. Trần giữ nguyên **140 KB payload** — mốc trước đợt đổi chữ, nay còn dư 53 KB. Con số ~104 KB trong các tài liệu cũ giữ nguyên làm **bản ghi lịch sử** của thời điểm đó, không sửa ngược.
+
+**Không đổi gì khác.** `06` v2.3.1 giữ nguyên câu chữ. `07` giữ nguyên, vẫn chờ lượt V5. Luật 1–5 giữ nguyên. Hai phiếu drift của V1 (font-stack ngược, thang 14 bậc) **vẫn chưa viết** — xem mục "Nợ" dưới.
+
+**Nợ ghi để không rơi.** Spec §4 khai V3 (prompt) **chặn bởi V1 + V2**. V2 xong. **V1 chưa xong**: `DRIFT_LOG.md` chưa có phiếu nào cho font-stack ngược (§2.2) hay thang cỡ 14 bậc vs 8 bậc khai (§2.3) — phiếu mới nhất là DR-049. Hai dữ kiện đó hiện chỉ sống trong prompt, mà prompt là artifact lịch sử chứ không phải sổ drift. QĐ này **không** đóng nợ V1; nó chỉ ghi rằng V3 đã chạy trước V1 và V1 vẫn phải viết.
