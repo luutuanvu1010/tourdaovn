@@ -133,10 +133,36 @@ const cols = Math.min(visible.length, 3)
     overflow-wrap: anywhere;
   }
 
-  /* Luật 5 (cột→hàng ở di động) CHƯA được duyệt — vòng 5 đang chờ chủ dự án.
-     Hôm nay giữ hành vi của InfoBar: hạ xuống 2 cột. Nếu Luật 5 được duyệt,
-     chỗ phải sửa là đúng khối này. */
+  /* Giữa 641px và 1023px: hạ xuống 2 cột như InfoBar cũ. */
   @media (max-width: 1023px) {
     .fact-grid { grid-template-columns: repeat(min(var(--fact-cols, 3), 2), 1fr); }
+  }
+
+  /* Luật 5 (06 §6, v2.3) — ở ≤ 640px mỗi ô một hàng chiếm hết bề rộng.
+     Luật nói: giá trị vừa một dòng thì nhãn trái / giá trị phải; dài hơn một
+     dòng thì nhãn trên / giá trị full-width. CSS không đo được độ dài chữ, nên
+     `flex-wrap` làm đúng việc đó một cách tự nhiên: còn chỗ thì giá trị nằm
+     cùng hàng với nhãn; không còn chỗ thì nó tự xuống dòng và chiếm trọn.
+     `flex-basis` là ngưỡng quyết định — dưới ngưỡng thì xuống dòng.
+
+     KHÔNG dùng `text-align: right` cho giá trị: khi nó xuống dòng riêng, chữ
+     căn phải làm một địa chỉ 78 ký tự khó đọc hẳn — đúng thứ Luật 5 sinh ra để
+     gỡ. "Giá trị bên phải" đạt được bằng `space-between` khi hai thứ cùng hàng.
+     Điểm này cần Design chặng 2 xác nhận. */
+  @media (max-width: 640px) {
+    .fact-grid { grid-template-columns: 1fr; }
+
+    .fact {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--s2);
+    }
+
+    .fact-value {
+      margin: 0;
+      flex: 1 1 14ch;
+    }
   }
 </style>
