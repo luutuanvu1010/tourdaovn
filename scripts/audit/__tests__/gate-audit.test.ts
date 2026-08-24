@@ -1,7 +1,11 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { existsSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { chdir, cwd as layThuMucLamViecHienHanh } from 'node:process'
 import { duongDanTuEvidence, trichImportTuongDoi, kiemBangChung, kiemImport } from '../gate-audit'
 import type { Control } from '../gate-audit'
+import { REPO_ROOT } from '../lib/evidence'
 
 test('duongDanTuEvidence lấy đường dẫn ở đầu chuỗi', () => {
   assert.equal(
@@ -72,4 +76,40 @@ test('GA4 trượt khi import tương đối không giải được (DR-015)', (
 test('GA4 đạt khi mọi import giải được', () => {
   const files = [{ path: 'scripts/validators/x.ts', source: "import { g } from './y'" }]
   assert.equal(kiemImport(files, () => true)[0].verdict, 'pass')
+})
+
+// Từ đây trở xuống dùng vị từ tồn-tại THẬT (đọc đĩa, neo vào REPO_ROOT), không
+// phải hằng số () => true / () => false. Hai ca trước không chạm vào phép tính
+// đường dẫn thật của kiemImport nên không thể bắt được lỗi: kiemImport từng
+// dùng resolve(dirname(f.path), spec), mà f.path là đường dẫn TƯƠNG ĐỐI so với
+// gốc repo — resolve() với hai đối số tương đối neo ngầm vào thư mục làm việc
+// hiện hành, nên kết quả lệch một cấp khi bị gọi qua `npm --prefix scripts`
+// (đổi thư mục làm việc sang scripts/). Hai test dưới đây chạm đúng chỗ đó.
+const tonTaiThat = (p: string) => existsSync(resolve(REPO_ROOT, p))
+
+test('GA4 dùng vị từ tồn-tại thật: i1-i19.ts nhập shared/gates/index.js — file có thật, phải đạt', () => {
+  const files = [
+    { path: 'scripts/validators/i1-i19.ts', source: "import { g } from '../../shared/gates/index.js'" },
+  ]
+  assert.equal(kiemImport(files, tonTaiThat)[0].verdict, 'pass')
+})
+
+test('GA4 cho kết quả giống hệt nhau bất kể chạy từ thư mục làm việc nào (bẫy tái diễn DR-021 ngay trong gate-auditor)', () => {
+  const files = [
+    { path: 'scripts/validators/i1-i19.ts', source: "import { g } from '../../shared/gates/index.js'" },
+  ]
+
+  const truoc = layThuMucLamViecHienHanh()
+  try {
+    chdir(REPO_ROOT)
+    const tuGocRepo = kiemImport(files, tonTaiThat)
+
+    chdir(resolve(REPO_ROOT, 'scripts'))
+    const tuThuMucScripts = kiemImport(files, tonTaiThat)
+
+    assert.deepEqual(tuThuMucScripts, tuGocRepo)
+    assert.equal(tuGocRepo[0].verdict, 'pass')
+  } finally {
+    chdir(truoc)
+  }
 })

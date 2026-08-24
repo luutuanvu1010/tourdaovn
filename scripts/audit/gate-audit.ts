@@ -2,17 +2,19 @@
 //
 // Nhóm lỗi lớn nhất của dự án là cổng in [pass] cho phép kiểm nó không hề chạy:
 // DR-021 (vòng đối chiếu chạy 0 lần vì file nguồn không tồn tại), DR-022 (control
-// khai live, dẫn bằng chứng là file chưa từng được ghi), DR-015 (cả bộ kiểm
-// pre-build chết ngay lúc nhập module vì shared/ không có trong repo).
+// khai live, dẫn bằng chứng là file chưa từng được ghi). DR-015 từng là một ca
+// thuộc lớp lỗi này — cả bộ kiểm pre-build chết ngay lúc nhập module vì thư mục
+// shared/ chưa có trong repo — nhưng đã được xử theo ND-005 (commit b73326c,
+// 2026-08-06); shared/gates/ tồn tại thật ngày hôm nay. Vẫn giữ DR-015 làm ví dụ
+// lịch sử về đúng lớp lỗi mà GA4 đi tìm, đừng đọc như thể nó đang còn xảy ra.
 //
 // Thiết kế: phần quyết định là hàm thuần nhận dữ liệu và một vị từ tồn-tại, nên
 // test không cần đụng đĩa. Phần đọc đĩa nằm gọn trong main().
 
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
-import { pathToFileURL } from 'node:url'
 import { parse } from 'yaml'
-import { buildReport, exitCodeFor, writeReport, REPO_ROOT } from './lib/evidence'
+import { buildReport, duocGoiTrucTiep, exitCodeFor, writeReport, REPO_ROOT } from './lib/evidence'
 import type { Check } from './lib/evidence'
 
 export interface Control {
@@ -20,7 +22,6 @@ export interface Control {
   status: string
   evidence?: string
   executor?: string
-  pipeline?: string
 }
 
 interface Registry {
@@ -84,7 +85,12 @@ export function kiemImport(
 ): Check[] {
   return files.map((f) => {
     const hong = trichImportTuongDoi(f.source).filter((spec) => {
-      const goc = resolve(dirname(f.path), spec)
+      // join + normalize, KHÔNG resolve(): f.path là đường dẫn tương đối so với
+      // gốc repo, không phải đường dẫn tuyệt đối. resolve() với hai đối số
+      // tương đối sẽ neo ngầm vào thư mục tiến trình đang đứng — sai lệch một
+      // cấp khi bị gọi qua `npm --prefix scripts` (cwd đổi sang scripts/). join()
+      // chỉ nối chuỗi và normalize, không đọc thư mục hiện hành.
+      const goc = join(dirname(f.path), spec)
       // moduleResolution "bundler": thử extensionless, .ts, .js->.ts, và /index.ts
       const ungVien = [goc, `${goc}.ts`, goc.replace(/\.js$/, '.ts'), join(goc, 'index.ts')]
       return !ungVien.some(tonTai)
@@ -210,6 +216,4 @@ function main(): void {
 // Test import các hàm thuần ở trên bằng `import ... from '../gate-audit'` —
 // nếu main() chạy vô điều kiện ở đây, mỗi lần test nạp module sẽ tự ghi báo
 // cáo ra đĩa và gọi process.exit() giữa chừng, giết luôn tiến trình test.
-const duocGoiTrucTiep =
-  process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href
-if (duocGoiTrucTiep) main()
+if (duocGoiTrucTiep(import.meta.url)) main()

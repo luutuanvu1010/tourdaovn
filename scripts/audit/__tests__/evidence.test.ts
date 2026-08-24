@@ -2,7 +2,8 @@
 // đó là bài học DR-021 — cổng in [pass] cho phép kiểm nó không chạy được.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { buildReport, renderMarkdown, evidenceDir, exitCodeFor } from '../lib/evidence'
+import { pathToFileURL } from 'node:url'
+import { buildReport, renderMarkdown, evidenceDir, exitCodeFor, duocGoiTrucTiep } from '../lib/evidence'
 import type { Check } from '../lib/evidence'
 
 const RAN_AT = '2026-08-23T04:05:06.000Z'
@@ -47,4 +48,24 @@ test('exitCodeFor: skip không làm đỏ, fail làm đỏ', () => {
   const chi_skip: Check[] = [{ id: 'A3', verdict: 'skip', detail: 'x', drift: [] }]
   assert.equal(exitCodeFor(buildReport('x', RAN_AT, chi_skip)), 0)
   assert.equal(exitCodeFor(buildReport('x', RAN_AT, BA_HANG)), 1)
+})
+
+test('duocGoiTrucTiep: true khi url khớp file đang được thực thi trực tiếp', () => {
+  const truoc = process.argv[1]
+  process.argv[1] = '/gia/lap/gate-audit.ts'
+  try {
+    assert.equal(duocGoiTrucTiep(pathToFileURL('/gia/lap/gate-audit.ts').href), true)
+  } finally {
+    process.argv[1] = truoc
+  }
+})
+
+test('duocGoiTrucTiep: false khi url là của một module khác bị import', () => {
+  const truoc = process.argv[1]
+  process.argv[1] = '/gia/lap/nguoi-chay-test.ts'
+  try {
+    assert.equal(duocGoiTrucTiep(pathToFileURL('/gia/lap/gate-audit.ts').href), false)
+  } finally {
+    process.argv[1] = truoc
+  }
 })

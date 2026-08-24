@@ -14,7 +14,7 @@
 
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const LIB_DIR = dirname(fileURLToPath(import.meta.url))
 
@@ -96,4 +96,18 @@ export function writeReport(report: Report): string {
 /** Mã thoát cho script gọi. Skip KHÔNG làm đỏ — nó làm hẹp phạm vi lời khai. */
 export function exitCodeFor(report: Report): number {
   return report.summary.fail > 0 ? 1 : 0
+}
+
+/**
+ * True khi file đang chạy chính là file được thực thi trực tiếp (node script.ts),
+ * false khi nó chỉ bị import (ví dụ từ test). Mỗi script trong scripts/audit gọi
+ * hàm main() của mình ở top-level; nếu gọi vô điều kiện, test import các hàm
+ * thuần từ file đó sẽ vô tình chạy luôn main() — ghi báo cáo ra đĩa và gọi
+ * process.exit() giữa chừng, giết tiến trình test. Dùng chung một helper ở đây
+ * để Task 7-9 không phải chép tay ba lần và có nguy cơ chép lệch.
+ *
+ * Gọi bằng: `if (duocGoiTrucTiep(import.meta.url)) main()`.
+ */
+export function duocGoiTrucTiep(url: string): boolean {
+  return process.argv[1] !== undefined && url === pathToFileURL(process.argv[1]).href
 }

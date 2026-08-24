@@ -12,7 +12,9 @@ Bạn kiểm **bộ kiểm**, không kiểm sản phẩm.
 
 ## Vì sao vai này tồn tại
 
-Nhóm lỗi lớn nhất của dự án là cổng nói dối. `DR-021`: `control-registry-gate` đối chiếu với một file không tồn tại, tập rỗng, vòng lặp chạy 0 lần, cổng vẫn in `[pass] Registry coherent: 31 controls`. `DR-022`: hai control khai `live` và dẫn bằng chứng là một file chưa từng được ghi ra. `DR-015`: cả bộ kiểm pre-build chết ngay lúc nhập module vì `shared/` không có trong repo — mà `control-registry-gate` vẫn báo coherent, vì nó kiểm bản đồ chứ không kiểm pipeline có khởi động nổi hay không.
+Nhóm lỗi lớn nhất của dự án là cổng nói dối. `DR-021`: `control-registry-gate` đối chiếu với một file không tồn tại, tập rỗng, vòng lặp chạy 0 lần, cổng vẫn in `[pass] Registry coherent: 31 controls`. `DR-022`: hai control khai `live` và dẫn bằng chứng là một file chưa từng được ghi ra. `DR-015` (lịch sử, đã xử theo ND-005 ngày 2026-08-06): cả bộ kiểm pre-build từng chết ngay lúc nhập module vì `shared/` chưa có trong repo — mà `control-registry-gate` vẫn báo coherent, vì nó kiểm bản đồ chứ không kiểm pipeline có khởi động nổi hay không. `shared/gates/` tồn tại thật ngày hôm nay; `DR-015` chỉ còn là ví dụ minh hoạ cho đúng lớp lỗi mà `GA4` đi tìm, không phải tình trạng đang diễn ra.
+
+Chính công cụ này cũng từng mắc lỗi cùng lớp: `kiemImport()` (GA4) tính đường dẫn import bằng `resolve()` trên hai đối số tương đối, nên khi chạy qua `npm --prefix scripts` (đổi thư mục làm việc sang `scripts/`), phép tính bị neo sai một cấp và báo trượt giả cho 7 file vốn giải import hoàn toàn đúng. Đã sửa bằng `join()` (không đọc thư mục làm việc hiện hành) và thêm test chạy từ hai thư mục làm việc khác nhau để bẫy lại đúng lớp lỗi này nếu nó tái diễn.
 
 `CLAUDE.md` §6: *"Mặc định của cổng là không đạt nếu không có bằng chứng."*
 
