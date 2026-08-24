@@ -1,20 +1,9 @@
-# Prompt bàn giao — Vòng 5: Claude Design
+<!-- FILE SINH TỰ ĐỘNG — ĐỪNG SỬA Ở ĐÂY.
+     Nguồn duy nhất: docs/prompts/VONG-5-CLAUDE-DESIGN.md (phần giữa hai mốc).
+     Sinh lại: sed -n '18,368p' docs/prompts/VONG-5-CLAUDE-DESIGN.md
+     Sửa thẳng file này = tạo nguồn sự thật thứ hai (CLAUDE.md muc 5).
+     Sinh lúc: 2026-08-24, nguồn tại d31eef3 + sửa chưa commit. -->
 
-> **Cách dùng:** mở một phiên Claude mới tại thư mục `tourdaovn`, dán toàn bộ nội dung từ
-> dòng `---BẮT ĐẦU PROMPT---` trở xuống.
->
-> **Soạn:** Cowork, 2026-08-23. **Cập nhật 2026-08-24** sau khi `06` lên **v2.3.1**
-> (`QĐ-2026-08-23-02` + `QĐ-2026-08-24-01`) — **cả hai chặng nay đều mở**.
->
-> **Sửa lần 2, 2026-08-24 (`QĐ-2026-08-24-02`), sau tự kiểm P1–P6:** bản trước tự tuyên bố
-> ràng buộc R8 của spec "đã hết hiệu lực" rồi chiếm chỗ R8 — prompt không có thẩm quyền huỷ
-> ràng buộc cứng của spec. Đã sửa ở tầng đúng: R8 **thu hẹp** trong spec, nội dung cũ thành
-> **R9**. Cùng lượt: sửa bảng kho nội dung (ba dòng sai, tổng không khớp), sửa mốc thư mục
-> font (sai đơn vị), thêm cổng ra chặng 2, thêm câu chặn mơ hồ, và **thêm khối P1–P6 ở cuối**.
->
-> **Nơi đặt trong kho:** `docs/prompts/VONG-5-CLAUDE-DESIGN.md`
-
----BẮT ĐẦU PROMPT---
 
 # Vai của anh: Design (bước 7)
 
@@ -366,60 +355,3 @@ thay vì dựng 8 × 3 bản rồi vứt đi phần lớn.
 Nếu anh thấy mình đang đề xuất một con số mà chưa dựng ra để nhìn — đó là lúc dừng lại và
 dựng.
 
----KẾT THÚC PROMPT---
-
----
-
-# Khối QA prompt — P1–P6
-
-> Đặt **sau** `---KẾT THÚC PROMPT---` có chủ ý: đây là bằng chứng **về** prompt, không phải
-> thứ Design phải đọc. Vẫn nằm trong cùng file theo `PROMPT_FACTORY` §7 (*"khối QA là một phần
-> của prompt — không phải file riêng"*), chỉ không nằm trong phần được dán đi.
->
-> **Người chạy:** Cowork · **Ngày:** 2026-08-24 · **Bản được chấm:** sau sửa lần 2
-> (`QĐ-2026-08-24-02`) · **Cổng:** spec §4, V3
-
-| Tiêu chí | Kết quả | Bằng chứng |
-|---|---|---|
-| **P1 — Đầu vào đủ** | ✅ *(lượt 1 chấm nhầm ✅ khi đang thiếu — xem ghi chú dưới bảng)* | **Tám** đầu vào có thứ tự, mỗi cái trỏ **section cụ thể** (spec §1/§3/§6/§7; `07` §1b/§2; `06` §3/§3.1/§6; `00` mục 6), không có câu "đọc những gì liên quan". Đã kiểm cả sáu đường dẫn tồn tại. **Ba dữ kiện sai của bản trước đã sửa:** bảng kho nội dung (3 dòng sai + tổng 123 không khớp tổng dòng và không truy được nguồn) nay đo lại trên `dist/` 2026-08-24 09:37 kèm phương pháp tách trang term; mốc thư mục font (108 KB — số `du`, sai đơn vị so với chính R4) nay là **89.196 byte payload** kèm bảng 6 file |
-| **P2 — Ràng buộc cứng** | ✅ | R1–R9 khớp 1:1 với spec §7 sau `QĐ-2026-08-24-02`. Mỗi R truy được: R1→`07` mở đầu + `CLAUDE.md` §5; R2→`07` §1b; R3→`07` §1 + `04-CONSTRAINTS` §3; R4→`07` §2 + QĐ mới; R5→`00` §6; R6→`06` §6 Luật 1; R7→`06` quyết định nền 2–3; R8→`00` + QĐ mới; R9→`CLAUDE.md` §3 |
-| **P3 — Phạm vi rõ** | ✅ | "Ranh giới phạm vi" tách token (toàn site) khỏi bố cục (chỉ trang chi tiết entity); mục "Điều anh KHÔNG được làm" liệt kê 6 điều cấm cụ thể; hai chặng có bảng hạng mục đếm được (3 + 8 + 1). Không có câu "làm thêm nếu thấy cần". Hạng mục thứ 12 (nhãn nút trang miễn phí) trước đây là phạm vi nở ra ngoài spec §6 — nay đã vào spec §6 theo QĐ mới, kèm ba biên (Luật 3, R7, loại nhãn "Đặt vé") |
-| **P4 — Cấm tự quyết** | ✅ | Câu chặn chung *"Cấm tự quyết định kiến trúc. Gặp mơ hồ → DỪNG, hỏi"* mở đầu mục "Điều anh KHÔNG được làm", ghi rõ áp cho mọi chỗ. Bản trước chỉ có bản hẹp một ca (field chưa khai vùng) — ca đó vẫn giữ làm ví dụ cụ thể |
-| **P5 — Cổng ra** | ✅ | Mục "Hai cổng" khai đủ hai cổng, ai mở, Design làm gì. Cổng giữa: chủ dự án chốt chữ/thang/màu, Design **chờ**. QA1 vòng 5: **tác nhân độc lập** chạy (spec §4, V4) — bản trước không nhắc ai chạy. Kèm hai câu của `GOVERNANCE` 5.1: không nhận lời tự khai, im lặng là trượt |
-| **P6 — Không tạo luật** | ✅ | Prompt không còn tạo, đổi, hay huỷ ràng buộc nào. **Đây là mục trượt của bản trước:** nó tuyên bố R8 của spec "đã hết hiệu lực" rồi thay bằng nội dung khác, tạo hai bảng R1–R8 khác nhau cho cùng cổng QA1 (`CLAUDE.md` §5, nguồn sự thật thứ hai). Đã xử ở tầng đúng: sửa spec §7 qua `QĐ-2026-08-24-02`, prompt chép lại. Trích dẫn Luật 5 đã đối chiếu nguyên văn `06` §6 dòng 383–387 — khớp, kể cả mục loại trừ lưới thẻ và số đo 272 ô |
-
-**Ghi chú P1 — lượt kiểm thứ nhất chấm sai, ghi lại thay vì sửa lặng.** Lượt 1 (2026-08-24)
-chấm P1 ✅ với sáu đầu vào. Sai: prompt **thiếu `docs/design-context/COMPONENT_INVENTORY.md`**,
-mà chú thích trong `scripts/gen-component-inventory.mjs` khai đúng chữ rằng file đó *"là đầu
-vào **bắt buộc** của prompt giao cho Claude Design"*. Người kiểm đối chiếu danh sách đọc với
-spec §6 — nơi không liệt kê đầu vào — nên không thấy thiếu. **Bài học cho lượt sau: P1 phải
-đối chiếu với những gì tồn tại trong `docs/design-context/`, không chỉ với những gì spec nhắc.**
-
-Phát hiện khi quét kho trả lời một câu hỏi khác của chủ dự án. Đã sửa: thêm mục 7 và 8 vào
-danh sách đọc, và **sinh lại `COMPONENT_INVENTORY.md`** — bản trong kho đã lệch 179 dòng thêm /
-34 dòng xoá so với code, vì `FactStrip` đổi ngày 23/08 mà chưa ai chạy lại script.
-
-**Kết luận P1–P6: ĐẠT 6/6** (sau khi vá P1).
-
-## Hai blocker của spec §4 — cả hai đã xong
-
-Spec §4 khai V3 (prompt này) **chặn bởi V1 + V2**. Chấm riêng:
-
-| Blocker | Trạng thái | Bằng chứng |
-|---|---|---|
-| **V2** — `06-BINDING_MAP` v2.3 | ✅ xong | `06` v2.3.1, `QĐ-2026-08-23-02` + `QĐ-2026-08-24-01` |
-| **V1** — hai phiếu drift (font-stack ngược §2.2, thang 14 bậc vs 8 bậc khai §2.3) ghi vào `DRIFT_LOG.md` | ✅ xong 2026-08-24 | **DR-050** (bộ chữ) và **DR-051** (thang cỡ) |
-
-Trước 2026-08-24 mục này trượt: hai dữ kiện drift chỉ sống trong mục "Ba drift" của chính
-prompt này, mà prompt là **artifact lịch sử** (`PROMPT_FACTORY` §6), không phải sổ drift —
-`CLAUDE.md` §8 bắt ghi drift lại chứ không âm thầm chọn một bên. Nay đã có vết riêng, và cả
-hai phiếu đều khai **"đóng khi nào"** trỏ về V5, nên vòng 5 đổi chữ xong thì `07` §2 có đường
-để đóng thay vì trôi.
-
-Hai phiếu ghi rõ chúng **không** phát hiện lại thứ `DR-002` đã ghi (badge 11 vs 12px, bậc 22
-không tồn tại); cái mới là **phép cộng** — 14 giá trị phân biệt trên 15 token, và **năm bậc
-chen trong 6px** sau khi vòng 3 đã giãn một lần. DR-050 còn ghi chéo rằng nó làm một dòng
-"Khớp đúng" của DR-002 (*"hai font family"*) hết đúng kể từ 2026-08-14.
-
-**Kết luận cổng V3: ĐỦ ĐIỀU KIỆN MỞ.** P1–P6 đạt 6/6, V1 và V2 đều xong. Phần còn lại là
-việc của chủ dự án: bàn giao prompt cho Design.

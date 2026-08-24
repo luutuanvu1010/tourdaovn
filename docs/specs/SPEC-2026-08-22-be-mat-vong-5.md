@@ -1,6 +1,7 @@
 # SPEC — Bề mặt vòng 5: chữ, thang cỡ, màu, và bố cục di động của trang chi tiết
 
 - **Trạng thái:** nháp, **chờ chủ dự án duyệt**. Hướng đã chốt qua năm câu hỏi trong phiên brainstorm 2026-08-22; giá trị cụ thể chưa chốt và cố ý chưa điền.
+- **Sửa đổi 2026-08-24 (`QĐ-2026-08-24-02`):** §6 thêm hạng mục giao nộp thứ mười hai (nhãn nút trên trang miễn phí) và sửa mốc font; §7 **R8 thu hẹp** (không bỏ), thêm **R9**, R4 đổi sang đơn vị byte payload; §2.6 sửa số đo thư mục font.
 - **Ngày soạn:** 2026-08-22   **Người soạn:** Cowork   **Người duyệt:** Lưu Tuấn Vũ
 - **Loại quyết định:** cửa hai chiều ở phần token (chữ, cỡ, màu — revert bằng một commit). **Cửa một chiều ở `06-BINDING_MAP` v2.3**: đổi vùng của `summary` và thêm Luật 5 kéo theo mockup và code phải dựng lại. **Cửa một chiều ở V0b**: thêm một cổng vào `gate:all` và buộc component gắn `data-field`/`data-region` — gỡ ra sau này là gỡ một hàng rào.
 - **Repo lúc soạn:** khởi thảo tại `ab24aa5`; **soát lại tại `6e2d57e`** sau khi một phiên song song phát hành `06` v2.2.0 (`44393e7`) và chốt cổng QA1 đợt 4B (`1c20f17`) — xem §0.
@@ -145,7 +146,7 @@ Canvas vòng 4 có sáu artboard trang chi tiết: `Main` + `DiDong` (Điểm th
 
 ### 2.6 Nợ LCP đang treo
 
-`07` §2 mục "Nợ có chủ ý" ghi: *"chưa đo LCP sau hai lần đổi chữ."* Bộ chữ đã đổi hai lần trong ngày 2026-08-06 (`QĐ-2026-08-06-10` chốt Lora, `QĐ-2026-08-06-11` thay bằng Nunito ngay trong ngày), rồi đổi vai lần nữa ở vòng 3 ngày 14/08. Thư mục font hiện ~104 KB, giảm từ ~220 KB. Ngưỡng của `00-PROJECT_BRIEF` §6: LCP ≤ 2500 ms, Lighthouse mobile ≥ 90.
+`07` §2 mục "Nợ có chủ ý" ghi: *"chưa đo LCP sau hai lần đổi chữ."* Bộ chữ đã đổi hai lần trong ngày 2026-08-06 (`QĐ-2026-08-06-10` chốt Lora, `QĐ-2026-08-06-11` thay bằng Nunito ngay trong ngày), rồi đổi vai lần nữa ở vòng 3 ngày 14/08. Thư mục font **đo lại 2026-08-24: 6 file, 89.196 byte payload = 87,1 KB** (`QĐ-2026-08-24-02`), giảm từ ~220 KB; con số ~104 KB ghi ở `07` §2 và `QĐ-2026-08-06-11` là bản ghi của thời điểm đó, giữ nguyên. Ngưỡng của `00-PROJECT_BRIEF` §6: LCP ≤ 2500 ms, Lighthouse mobile ≥ 90.
 
 Đề xuất bộ chữ thứ tư mà không đóng nợ này là mở nợ chồng nợ.
 
@@ -173,7 +174,7 @@ Nên phương án "Code sửa `AttractionDetail.astro` và `DetailLayout`" chữ
 
 ## 3. Quyết định đã chốt trong phiên brainstorm 2026-08-22
 
-Năm câu hỏi, năm câu trả lời của chủ dự án. Ghi lại để bước sau không phải đoán lại.
+**Sáu** quyết định của chủ dự án (3.1–3.6). Ghi lại để bước sau không phải đoán lại. *(Sửa 2026-08-24: dòng này trước ghi "năm câu hỏi, năm câu trả lời" — số đếm cũ, sót lại từ trước khi 3.6 được thêm. §4 và prompt vòng 5 đều đã ghi "sáu"; nay thống nhất.)*
 
 **3.1 — Tách theo vai.** Bốn ý thuộc ba vai; không gộp vào một prompt Design. Ý (1) và (3) đi Design; ý (2) đi đường sửa `06`; ý (4) đi Code.
 
@@ -193,9 +194,9 @@ Năm câu hỏi, năm câu trả lời của chủ dự án. Ghi lại để bư
 |---|---|---|---|---|
 | **V0a** | Phiếu Code đợt 4B, gồm ý (4): thay cặp `InfoBar` + `InfoCard` bằng vùng **Thông tin nhanh** theo `06` §3.1, đóng cả **chín** kiểu lặp ở §2.1 — không chỉ ca giá của Chùa Long Sơn | Code | QA2 | ~~chốt cổng QA1 4B, chốt N3/N15~~ — **đã chốt 2026-08-22** (`QĐ-2026-08-22-05`, `1c20f17`). Không còn bị chặn |
 | **V0b** | **Bộ kiểm Luật 1** (§5.4): validator hậu dựng đếm số vùng mỗi field, đỏ khi > 1 ngoài ngoại lệ đã khai. Kèm việc gắn `data-field` / `data-region` vào component vùng | Code | QA2 · vào `gate:all` | V0a **hoặc** chạy cùng V0a |
-| **V1** | Hai phiếu drift: font-stack ngược (§2.2), thang 14 bậc vs 8 bậc khai (§2.3) | Cowork | ghi vào `DRIFT_LOG.md` | — |
+| **V1** | Hai phiếu drift: font-stack ngược (§2.2), thang 14 bậc vs 8 bậc khai (§2.3) | Cowork | ~~ghi vào `DRIFT_LOG.md`~~ — **xong 2026-08-24: `DR-050` + `DR-051`** | — |
 | **V2** | `06-BINDING_MAP` **v2.3** (§5) | Cowork | chủ dự án chốt + QĐ mới | — |
-| **V3** | Prompt bàn giao Design vòng 5 (§6) | Cowork | tự kiểm P1–P6 | V1 + V2 |
+| **V3** | Prompt bàn giao Design vòng 5 (§6) | Cowork | ~~tự kiểm P1–P6~~ — **xong 2026-08-24: đạt 6/6**, khối QA ở cuối `docs/prompts/VONG-5-CLAUDE-DESIGN.md` | ~~V1 + V2~~ — cả hai đã xong |
 | **V4** | Mockup vòng 5 (§6) | Design | QA1 do tác nhân độc lập chạy | V3 |
 | **V5** | `07-DESIGN_TOKENS` **v2** — điền giá trị chủ dự án đã chọn | Cowork | chủ dự án chốt + QĐ | V4 |
 | **V6** | Code vòng 5 | Code | QA2 | V5 |
@@ -291,7 +292,7 @@ Design chưa đụng vào sáu trang. Giao ba thứ để chủ dự án chốt 
 | **Thang cỡ mới** | ≤ 8 bậc, mỗi bậc gắn đúng một vai | Dựng song song ở 390px và 1280px. Phải nêu bậc nào thay bậc nào trong 14 bậc hiện có |
 | **Ba bộ màu** | Sắc độ đề xuất cho `bien-sau`, `cat-bien`, `ngoc-lam` | Bảng AA bốn cặp × ba bộ. Sửa bộ nào thì sửa cả ba, không bỏ bộ nào |
 
-Kèm **bảng chi phí font**: từng ứng viên, số byte woff2 từng file, tổng thư mục, chênh so với 104 KB hiện tại.
+Kèm **bảng chi phí font**: từng ứng viên, số byte woff2 từng file, tổng payload, chênh so với **89.196 byte (87,1 KB)** hiện tại — mốc đo lại 2026-08-24, tính bằng byte payload chứ không phải `du` (`QĐ-2026-08-24-02`).
 
 **Cổng: chủ dự án chốt chữ, thang, màu.** Rồi mới sang chặng 2.
 
@@ -308,6 +309,12 @@ Bốn entity × desktop 1280 + di động 390, theo bộ đã chốt và theo `0
 
 Mỗi artboard chặng 2 kèm **bảng đối chiếu vùng ↔ dòng nào trong `06` v2.3**. Vùng không đối chiếu được là vùng phải bỏ.
 
+**Hạng mục thứ mười hai — nhãn nút trên trang điểm tham quan miễn phí** (thêm 2026-08-24, `QĐ-2026-08-24-02`). `QĐ-2026-08-24-01` gỡ vùng giá khỏi trang miễn phí nhưng **không** gỡ nút "Đặt vé" trỏ Zalo còn lại — một nút đặt vé trên một ngôi chùa miễn phí. Đó là câu hỏi nhãn và luồng, thuộc bước 7. Design đề xuất **chữ và vị trí**; chủ dự án chốt. Biên của đề xuất:
+
+- Nhãn **"Đặt vé" bị loại** trên trang miễn phí — không có vé để đặt.
+- `06` §6 **Luật 3** cấm "nút thay thế trỏ về chính site" khi không có giá. Nút Zalo trỏ **ra ngoài** site nên không vướng; một nút trỏ về trang khác của tourdao.vn thì vướng.
+- **R7** cấm CTA giả: nút phải dẫn tới hành động có thật (mở Zalo), không phải nút trang trí cho cân bố cục.
+
 **Vì sao tách hai chặng.** Gộp lại thì Design phải dựng 8 artboard × 3 ứng viên chữ = 24 bản, phần lớn vứt đi. Tách ra thì chủ dự án chốt chữ trên một màn hình rồi mới trả giá cho tám bản.
 
 ### Ranh giới phạm vi trong prompt
@@ -321,11 +328,14 @@ Mỗi artboard chặng 2 kèm **bảng đối chiếu vùng ↔ dòng nào trong
 | **R1** | Không tạo nguồn token thứ hai. Giá trị mới là **đề xuất trong bảng**, không viết thẳng vào `tokens.css`, không hardcode màu vào mockup | `07` mở đầu; `CLAUDE.md` §5 |
 | **R2** | Cả ba bộ giao diện phải cùng dùng được. Sửa sắc độ thì sửa cho cả ba | `07` §1b |
 | **R3** | WCAG AA ≥ 4,5 ở bốn cặp × ba bộ. `--c-sand` cấm làm nền cho chữ trắng (chỉ đạt 3,28). Kiểm bằng `npm --prefix scripts run check:theme` | `07` §1; `04-CONSTRAINTS` §3 |
-| **R4** | Font mới phải self-host được, đủ subset `vietnamese` + `latin`, ghi số byte woff2 từng file. **Trần: tổng thư mục font ≤ 140 KB** — mốc trước đợt đổi chữ; nay đang 104 KB | `07` §2 |
+| **R4** | Font mới phải self-host được, đủ subset `vietnamese` + `latin`, ghi số byte woff2 từng file. **Trần: tổng payload `.woff2` ≤ 140 KB** — mốc trước đợt đổi chữ; nay đang **89.196 byte = 87,1 KB** trên 6 file (`QĐ-2026-08-24-02`). Mốc và trần đều tính bằng **byte payload**, không phải `du` | `07` §2; `QĐ-2026-08-24-02` |
 | **R5** | Kèm điều kiện **đo LCP trước khi lên live** (LCP ≤ 2500 ms, Lighthouse mobile ≥ 90). Đây là cách đóng nợ đang treo ở `07` §2 | `00-PROJECT_BRIEF` §6 |
 | **R6** | Luật 1: một thông tin, một vùng, một lần. Mockup lặp field ra hai vùng là trượt — trừ giá | `06` §6 |
 | **R7** | Vùng rỗng ẩn hẳn. Không placeholder, không khung trống, không CTA giả | `06` quyết định nền 2 và 3 |
-| **R8** | Dữ liệu mỏng: mọi khối phải tử tế với **1 mục**, không chỉ với 6–8 mục | `00-PROJECT_BRIEF`; prompt Pha F |
+| **R8** | **Khối có số mục phụ thuộc dữ liệu phải tử tế với 1 mục.** Áp cho mọi dải/lưới sinh từ truy vấn liên quan (Gần đây, Trải nghiệm tại đây, Dải liên quan) và mọi listing của nhánh dưới 12 entity (Khách sạn 6, Địa danh 7, Trải nghiệm 9, Resort 0). **Không** còn áp cho lưới thẻ Tour và Điểm tham quan — hai nhánh đã đủ dày (23 và 36). Ít mục thì **thu khối lại**, không độn placeholder cho đầy hàng | `00-PROJECT_BRIEF`; **thu hẹp theo `QĐ-2026-08-24-02`** (bản gốc: "mọi khối tử tế với 1 mục", prompt Pha F) |
+| **R9** | Không đổi một field nào của `01-CONTENT_MODEL`; không sửa `06-BINDING_MAP`, không sửa `07-DESIGN_TOKENS`. Design **đề xuất**; Cowork ghi vào đặc tả sau khi chủ dự án duyệt | `CLAUDE.md` §3 (ranh vai Design); `QĐ-2026-08-24-02` |
+
+**Ghi chú sửa đổi (2026-08-24, `QĐ-2026-08-24-02`).** R8 **thu hẹp chứ không bỏ**. Prompt vòng 5 bản `9a9d06f` tuyên bố ràng buộc này "đã hết hiệu lực" rồi chiếm chỗ R8 bằng nội dung nay là R9 — prompt không có thẩm quyền huỷ ràng buộc cứng của spec (`CLAUDE.md` §1). Căn cứ đo và lý lẽ đầy đủ ở `QĐ-2026-08-24-02`; tóm tắt: kho đã dày ở Tour (23) và Điểm tham quan (36), nhưng `/resort/` vẫn có **0** entity và các dải liên quan vẫn có thể chỉ 1 mục.
 
 ## 8. Phương án đã loại
 
