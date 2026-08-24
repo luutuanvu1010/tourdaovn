@@ -19,10 +19,10 @@ const { data, lang, nearby = [] } = Astro.props
 const t = uiCopy(lang)
 
 const sidebarRows = [
-  { icon: '💼', label: t('role'), value: data.jobTitle || '', visible: !!data.jobTitle },
-  { icon: '📚', label: t('knowsAbout'), value: data.knowsAbout?.join(', ') || '', visible: !!(data.knowsAbout && data.knowsAbout.length > 0) },
-  { icon: '🌐', label: t('website'), value: hostLabel(data.url), href: data.url || undefined, visible: !!data.url },
-  { icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
+  { field: 'jobTitle', icon: '💼', label: t('role'), value: data.jobTitle || '', visible: !!data.jobTitle },
+  { field: 'knowsAbout', icon: '📚', label: t('knowsAbout'), value: data.knowsAbout?.join(', ') || '', visible: !!(data.knowsAbout && data.knowsAbout.length > 0) },
+  { field: 'url', icon: '🌐', label: t('website'), value: hostLabel(data.url), href: data.url || undefined, visible: !!data.url },
+  { field: 'sameAs', icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
 ]
 
 const siteBase = siteBaseUrl(Astro.site)

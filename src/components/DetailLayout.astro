@@ -2,10 +2,11 @@
 import type { Lang, EntityRef, ImageAsset, NearbyEntity } from '../lib/types'
 import { uiCopy } from '../lib/uiCopy'
 import { formatDate } from '../lib/dates'
+import { hostLabel } from '../lib/siteUrl'
 import Breadcrumb from './Breadcrumb.astro'
 import Hero from './Hero.astro'
-import InfoBar from './InfoBar.astro'
-import type { InfoBarItem } from './InfoBar.astro'
+import FactStrip from './FactStrip.astro'
+import type { Fact } from './FactStrip.astro'
 import Sidebar from './Sidebar.astro'
 import type { Slot } from './Sidebar.astro'
 import NearbySection from './NearbySection.astro'
@@ -17,7 +18,25 @@ export interface Props {
   image?: string | ImageAsset
   gallery?: ImageAsset[] | null
   containedInPlace?: EntityRef
-  infoBarItems?: InfoBarItem[]
+  /** Dòng "Nguồn tham khảo" cạnh Cập nhật — 06 §3.1: `sameAs` chỉ render Ở ĐÂY,
+   *  KHÔNG vào Thông tin nhanh, KHÔNG vào sidebar. Chỉ mục đầu mảng; rỗng thì
+   *  ẩn cả dòng. */
+  sameAs?: string[] | null
+  /** Vùng "Thông tin nhanh" — 06 §3.1. Nơi DUY NHẤT của các field ngắn. */
+  facts?: Fact[]
+  /** Trần số ô hiển thị ở `FactStrip`. Không truyền = mặc định 6 (hợp đồng 06
+   *  §3.1 cho bốn entity có hàng trong ma trận). Entity không có hàng ở §3.1
+   *  (vd khách sạn — chỉ ràng buộc bởi Luật 1, không ràng buộc trần 6) truyền
+   *  cao hơn qua đây. Task 7 fix round, 2026-08-23. */
+  factsMax?: number
+  /** @deprecated Không còn render gì — `InfoBar` đã gỡ (Task 7 fix round,
+   *  2026-08-23, LodgingDetail là template cuối chuyển sang `facts`). Giữ
+   *  prop này (kiểu lỏng, không còn phụ thuộc `InfoBar.astro`) chỉ để
+   *  `ArticleDetail`/`OrganizationDetail`/`PersonDetail` — ba template ngoài
+   *  phạm vi việc đóng Luật 1, vẫn dùng `InfoCard` trực tiếp qua slot `info`,
+   *  xem DRIFT_LOG DR-046 — khỏi vỡ kiểu vì vẫn truyền `infoBarItems={[]}`.
+   *  Xoá hẳn khi ba template đó cũng dọn theo. */
+  infoBarItems?: unknown[]
   sidebarSlots: Slot[]
   nearbyTitle: string
   nearby: NearbyEntity[]
@@ -39,7 +58,7 @@ export interface Props {
 }
 
 const {
-  title, lang, entityType, image, gallery, containedInPlace, infoBarItems,
+  title, lang, entityType, image, gallery, containedInPlace, sameAs, facts, factsMax,
   sidebarSlots, nearbyTitle, nearby, updatedAt,
   badges, summary, speakable = false, jumpLinks, priceLabel, ctaHref, ctaLabel,
 } = Astro.props
@@ -49,6 +68,28 @@ const jumps = jumpLinks ?? []
 // Thanh dính chỉ có nghĩa khi có ít nhất một thứ để hiện. Không có thì không
 // render — vùng rỗng ẩn hẳn, 06-BINDING_MAP quyết định nền 2.
 const showStickyBar = jumps.length > 0 || !!priceLabel || !!(ctaHref && ctaLabel)
+
+// Hợp đồng 06: "≤ 2 ô thì không trải dải" — gộp vào sidebar cạnh bản đồ.
+const factsVisible = (facts ?? []).filter(f => f.visible)
+const factsInline = factsVisible.length > 0 && factsVisible.length <= 2
+
+// I4 (review toàn nhánh, 2026-08-23): trước đây bản gộp (≤2 ô) được TRUYỀN VÀO
+// `<Sidebar>` qua một slot 'info' giả lập (effectiveSlots chèn tay), nên trong
+// HTML tĩnh nó luôn nằm SAU `.content-main` — đúng vị trí desktop (cạnh bản đồ)
+// nhưng SAI vị trí di động (06 §3 đòi "ngay dưới tiêu đề"; đo bằng thứ tự byte
+// thật trong dist/, không phải thứ tự nhìn thấy sau khi CSS `order` xào lại —
+// `order` không đổi thứ tự DOM/cây accessibility, chỉ đổi thứ tự vẽ). Sửa: bản
+// gộp nay là con TRỰC TIẾP của `.two-col`, đứng TRƯỚC `.content-main` trong mã
+// nguồn (đúng thứ tự tài liệu cho di động), và tự nhận vùng `facts` của
+// grid-template-areas bên dưới để desktop vẫn xếp nó vào cột sidebar — không
+// còn đi qua slot 'info' của Sidebar (slot đó nay chỉ còn InfoCard hợp lệ của
+// Article/Organization/Person, DR-046).
+
+// "Nguồn tham khảo" — 06 §3.1: hàng riêng cạnh Cập nhật ở cuối nội dung, KHÔNG
+// vào Thông tin nhanh (đã tách khỏi `facts` ở AttractionDetail/PlaceDetail),
+// KHÔNG vào sidebar. Giá trị là nhãn theo host, y hệt InfoCard cũ đã làm.
+const sameAsHref = sameAs && sameAs.length > 0 ? sameAs[0] : null
+const sameAsLabel = sameAsHref ? hostLabel(sameAsHref) : ''
 
 const t = uiCopy(lang)
 ---
@@ -71,7 +112,7 @@ const t = uiCopy(lang)
         {jumps.map(j => <a href={j.href}>{j.label}</a>)}
       </nav>
       <div class="sticky-bar__action">
-        {priceLabel && <span class="sticky-bar__price">{priceLabel}</span>}
+        {priceLabel && <span class="sticky-bar__price" data-region="sticky-bar" data-field="gia">{priceLabel}</span>}
         {ctaHref && ctaLabel && (
           <a class="sticky-bar__cta" href={ctaHref} target="_blank" rel="noopener">{ctaLabel}</a>
         )}
@@ -80,16 +121,26 @@ const t = uiCopy(lang)
   </div>
 )}
 
-{infoBarItems && infoBarItems.length > 0 && <InfoBar items={infoBarItems} />}
+{!factsInline && factsVisible.length > 0 && <FactStrip facts={facts!} max={factsMax} />}
 
 <div class="container two-col">
+  {factsInline && <FactStrip facts={facts!} inline max={factsMax} />}
+
   <div class="content-main">
     <slot name="content" />
 
     <div class="updated-section">
-      <div class="updated">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        {t('updated')} {formatDate(updatedAt, lang)}
+      <div class="updated-row">
+        <div class="updated">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          {t('updated')} {formatDate(updatedAt, lang)}
+        </div>
+        {sameAsHref && (
+          <div class="reference-source" data-region="section" data-field="sameAs">
+            <span aria-hidden="true">🔗</span>
+            {t('referenceSource')}: <a href={sameAsHref} target="_blank" rel="noopener">{sameAsLabel}</a>
+          </div>
+        )}
       </div>
     </div>
   </div>
@@ -97,6 +148,13 @@ const t = uiCopy(lang)
   {/* stickyBar: Sidebar cộng chiều cao thanh dính vào chỗ dính của nó (DR-033). */}
   <Sidebar slots={sidebarSlots} stickyBar={showStickyBar}>
     <slot name="booking" slot="booking" />
+    {/* Forward cho InfoCard — VẪN CẦN, không phải hàng chết. Ba template
+       ngoài phạm vi việc đóng Luật 1 (ArticleDetail, OrganizationDetail,
+       PersonDetail — không có hàng ở 06 §3.1, không dùng FactStrip) vẫn
+       truyền <InfoCard slot="info"> qua đây. Mọi template có hàng ở §3.1 đã
+       chuyển sang `facts` không truyền gì vào slot này nên nhánh trống, không
+       render thừa. Xem DRIFT_LOG DR-046 — không xoá tới khi ba template đó
+       cũng chuyển hoặc có quyết định khác. */}
     <slot name="info" slot="info" />
     <slot name="map" slot="map" />
     <slot name="about" slot="about" />
@@ -230,21 +288,49 @@ const t = uiCopy(lang)
   .two-col {
     display: grid;
     grid-template-columns: 1fr 340px;
+    /* I4 fix: ba vùng đặt tên — 'facts' (bản gộp Thông tin nhanh ≤2 ô, rỗng khi
+       không có), 'main' (content-main), 'sidebar' (Sidebar.astro, tự khai
+       grid-area:sidebar). 'facts' đứng ở CỘT SIDEBAR, hàng riêng phía trên
+       'sidebar' — không đụng hàng của 'main' nên 'main' không trải dài qua
+       nhiều hàng chia sẻ track với các thẻ sidebar nhỏ (tránh track bị "kéo
+       giãn" theo main — bug CSS Grid có thật khi một item trải hàng cao hơn
+       nhiều so với các track nó chia sẻ). 'sidebar' vẫn cùng hàng với 'main'
+       như trước — position:sticky của Sidebar không đổi hành vi. Ô 'facts' của
+       cột 'main' để trống (".", không field nào chiếm) — track rỗng co về 0,
+       không tốn chỗ khi factsInline=false (đa số trang). */
+    grid-template-areas:
+      '.    facts'
+      'main sidebar';
     gap: var(--s7);
     align-items: start;
     padding-top: var(--s6);
     padding-bottom: var(--s7);
   }
 
+  .content-main {
+    grid-area: main;
+  }
+
   .updated-section {
     padding-top: var(--s4);
   }
 
-  .updated {
-    font-size: var(--fs-sm);
-    color: var(--c-text-muted);
+  /* Một hàng chung border-top cho cả "Cập nhật" và "Nguồn tham khảo" — 06 §3.1
+     đặt hai dòng này cạnh nhau ở cuối nội dung. */
+  .updated-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s4);
     padding: var(--s4) 0;
     border-top: 1px solid var(--c-border);
+  }
+
+  .updated,
+  .reference-source {
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
     display: flex;
     align-items: center;
     gap: var(--s2);
@@ -254,9 +340,29 @@ const t = uiCopy(lang)
     color: var(--c-primary);
   }
 
+  .reference-source a {
+    color: var(--c-primary);
+    text-decoration: none;
+    font-weight: var(--fw-600);
+  }
+
+  .reference-source a:hover {
+    text-decoration: underline;
+  }
+
   @media (max-width: 1023px) {
     .two-col {
       grid-template-columns: 1fr;
+      /* I4 fix (06 §3 hàng "Thông tin nhanh": di động "ngay dưới tiêu đề"):
+         'facts' đứng hàng ĐẦU TIÊN — khớp đúng thứ tự nó đã đứng trong mã
+         nguồn (ngay trước .content-main ở markup phía trên), không cần
+         `order` để xào lại — `order` chỉ đổi thứ tự VẼ, không đổi thứ tự
+         DOM/accessibility tree mà bộ kiểm tài liệu tĩnh (và trình đọc màn
+         hình) thấy. */
+      grid-template-areas:
+        'facts'
+        'main'
+        'sidebar';
     }
   }
 </style>

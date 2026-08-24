@@ -630,3 +630,302 @@ Kiểm thực tế cùng ngày: `curl -sI https://tourdao.vn/` trả `200`, khô
 Đây là loại lệch nguy hiểm hơn vẻ ngoài: file này là thứ người vận hành mở ra khi deploy, và nó đang mô tả **hành vi production sai**. Ai đọc để trả lời "trang chủ tourdao.vn có chuyển hướng không" sẽ trả lời sai.
 
 **Gốc rễ đi kèm:** `QĐ-2026-08-06-04` **bước 6** đòi "ghi mục mới trong sổ để đóng `QĐ-2026-08-06-02`". Bước đó **chưa từng được thi hành** — không có mục nào trong `DECISIONS.md` đóng `QĐ-2026-08-06-02`. Code đổi, sổ không đổi, nên `BUILD-NOTES` không có tín hiệu nào để phải cập nhật theo. Đóng ở `QĐ-2026-08-22-04`.
+
+---
+
+## DR-044 — `06` §3.1 chưa khai vùng cho bốn entity còn lại
+
+**Trạng thái:** mở (phần "bổ sung vào §3.1" vẫn chờ Cowork/chủ dự án — xem
+cập nhật 2026-08-23 bên dưới cho phần đã dồn vùng xong). Phát hiện 2026-08-23,
+Task 7 (đóng Luật 1).
+
+**Cập nhật 2026-08-23 (cùng ngày, sau ruling của chủ dự án ở DR-045):**
+`LodgingDetail` cũng đã dồn về `FactStrip` — không còn là trường hợp "chưa
+dồn" như ghi ban đầu bên dưới. Chi tiết cách xử lý (đo trên build thay vì
+trên nguồn, trần `max` tuỳ biến) ở DR-045.
+
+Ma trận §3.1 (v2.2, đọc thẳng bằng `luat1-post.ts`) chỉ khai bốn entity: Điểm
+tham quan, Địa danh, Trải nghiệm, Tour. `restaurant`, `specialty`, `event`,
+`hotel`/`resort` không có hàng nào, nên tầng B (sai vùng, bật ở Task 8) sẽ
+không đối chiếu được cho chúng — chỉ tầng A (lặp vùng) áp được, và tầng A chỉ
+đếm được số vùng, không biết vùng nào "đúng".
+
+Đã dồn về một vùng `FactStrip` khi đóng Luật 1 (2026-08-23) cho ba trong bốn
+entity — `RestaurantDetail`, `SpecialtyDetail`, `EventDetail` — để không lặp
+vùng, dù cả ba không render trang nào trong `dist/` hiện tại (không có route
+`/nha-hang/`, `/dac-san/`, `/su-kien/`) nên đây là việc dọn nhất quán mã
+nguồn, không phải sửa lỗi hiển thị cho người dùng. `LodgingDetail`
+(khách sạn — 6 trang, có render) **chưa** dồn được; xem DR-045 vì sao.
+
+"Vùng nào cho field nào" ở bốn entity này vẫn là quyết định nằm trong từng
+template chứ chưa phải của bản ánh xạ `06`. Cần bổ sung vào §3.1 ở một lượt
+sửa `06` sau, do Cowork đề xuất và qua cổng duyệt — không phải việc của vai
+Code.
+
+---
+
+## DR-045 — `LodgingDetail` không dồn được vào `FactStrip`: hơn 6 field, component có trần cứng
+
+**Trạng thái:** **đã xử 2026-08-23**, cùng ngày phát hiện — chủ dự án ra ba
+ruling, xem "Cập nhật — ruling và cách xử" ở cuối mục này. Nguyên văn phần mở
+đầu bên dưới giữ làm bản ghi (đây là lý do Task 7 dừng lại và báo cáo, không
+phải mô tả sai).
+
+Phát hiện 2026-08-23, Task 7.
+
+`FactStrip.astro` (đã chốt, Task 7 không được sửa) tự cắt còn tối đa 6 ô hiển
+thị (`facts.filter(f => f.visible).slice(0, 6)`), đúng theo hợp đồng "tối đa
+6 ô" của `06` §3 — hợp đồng đó viết cho bốn entity có hàng ở §3.1, nơi số
+field tối đa đã được thiết kế vừa 6 (Điểm tham quan: 5).
+
+`LodgingDetail` không có hàng ở §3.1 (xem DR-044), và bộ field nó đang render
+qua cặp `InfoBar` + `InfoCard` cũ rộng hơn nhiều: tối thiểu 9 field duy nhất
+cho khách sạn (`starRating`, `beachAccess`, `checkinTime`, `address`,
+`checkoutTime`, `numberOfRooms`, `petsAllowed`, `geo` (khoảng cách sân bay),
+`officialSource` — chưa tính `sameAs` đã có vùng riêng, và chưa tính
+`beachfront`/`landArea`/`onSiteActivities` chỉ resort mới có, có thể lên tới
+12). Gộp thẳng vào `facts` rồi để `FactStrip` tự cắt sẽ **âm thầm xoá** 3+
+field khỏi 6 trang khách sạn thật — đúng loại lỗi "vùng biến mất, cổng vẫn
+xanh" mà cả việc đóng Luật 1 này được lập ra để chặn (xem cảnh báo trong
+`task-7-brief.md` và bằng chứng `hop-dong-fact-strip.md`).
+
+Task 7 **không tự chọn** một trong các hướng xử lý (nhận 6 và mất 3+ field;
+dựng thêm một khối `data-region="fact-strip"` thứ hai ngoài component để
+không bị cắt; giảm bớt field trước khi vào `facts`; sửa `FactStrip.astro` để
+nó tự cuộn/xem thêm) — mỗi hướng đổi hành vi hiển thị hoặc đổi hợp đồng của
+một component đã chốt, vượt phạm vi quyết định của vai Code. `LodgingDetail`
+**giữ nguyên** cặp `InfoBar` + `InfoCard` cũ (18 vi phạm lặp vùng không đổi,
+không tệ thêm so với trước Task 7), và do đó `InfoBar.astro`/`InfoCard.astro`
+**chưa xoá được** — cả hai vẫn là primitive thật đang dùng, không chỉ tồn tại
+vì quên dọn. `entity-layout-post.ts` giữ nguyên, chưa đổi 'InfoBar' thành
+'FactStrip', vì lý do tương tự: đổi tên trong khi Lodging còn dùng thật sẽ mô
+tả sai hiện trạng.
+
+Cần quyết định ở tầng Cowork/chủ dự án: chấp nhận hướng nào trong bốn hướng
+trên (hoặc hướng khác), rồi Task 8 (hoặc một task riêng) thực thi.
+
+---
+
+### Cập nhật — ruling và cách xử (2026-08-23)
+
+Chủ dự án ra ba ruling sau khi đọc mục trên:
+
+1. **Số liệu ban đầu đo sai chỗ.** Ước tính "9–12 field" đếm số khai báo
+   `field:` trong mã nguồn (`infoBarItems` + `sidebarRows`), không đếm số ô
+   THẬT SỰ render. Đo lại trên `dist/khach-san/*/index.html` (6 trang, kiểm
+   độc lập bằng `grep -o 'data-field="[a-zA-Z]*"'` trước khi tin, không chỉ
+   nhận số của chủ dự án) — union `data-field` trên cả 6 trang là đúng **6**:
+   `beachAccess, checkinTime, checkoutTime, numberOfRooms, petsAllowed,
+   starRating`. Không trang nào vượt 6. `address`, `geo` (khoảng cách sân
+   bay), `officialSource` khai trong mã nhưng cả 6 khách sạn thật hiện có đều
+   không có dữ liệu nên `visible:false`, không render — không phải field bị
+   cắt, là field vốn không có gì để hiện. Không có resort nào render (3
+   document resort trong Sanity đều thiếu field, không lên trang) nên
+   `beachfront`/`landArea`/`onSiteActivities` chưa từng xuất hiện trên build.
+2. **Nhưng nằm đúng ở trần 6 mà cắt câm là lỗi thật của `FactStrip.astro`** —
+   một field nữa xuất hiện sau này (resort có dữ liệu, hoặc khách sạn thêm
+   `address`) sẽ biến mất không dấu vết. Chủ dự án gỡ hạn chế "không sửa
+   `FactStrip.astro`" **chỉ cho hai thay đổi**: (a) prop `max` tuỳ biến, mặc
+   định vẫn 6; (b) `console.warn` lúc build khi số ô hiển thị vượt `max`, nêu
+   rõ field nào bị cắt. Đã làm — xem diff `src/components/FactStrip.astro`.
+3. **Chỉ `InfoBar.astro` bị xoá, không phải cả hai.** `InfoCard.astro` còn
+   sống — `ArticleDetail`, `OrganizationDetail`, `PersonDetail` (ngoài phạm
+   vi việc đóng Luật 1, không có hàng ở §3.1) vẫn import và render nó qua
+   slot `info` của `DetailLayout`. Xoá `InfoCard.astro` sẽ vỡ ba trang đó.
+   Ghi riêng ở DR-046.
+
+**Cách xử:** `LodgingDetail.astro` gộp `infoBarItems` + `sidebarRows` cũ
+thành một mảng `facts` duy nhất (9 field cho hotel, tới 12 cho resort đủ ba
+field riêng — giữ nguyên TOÀN BỘ field từng khai trong mã, không chỉ 6 field
+đang thật sự render, để không cắt oan khi dữ liệu tương lai đủ hơn), loại
+`gia` (giá không bao giờ vào `facts`) và `sameAs` (chuyển sang prop
+`DetailLayout`, dùng lại đường đã xây ở Task 6). Truyền
+`factsMax={facts.length}` xuống `DetailLayout` → `FactStrip`, tức trần bằng
+đúng số field khai báo — không ô nào bị cắt bởi component, kể cả khi tương
+lai có đủ dữ liệu resort. Cảnh báo `console.warn` mới của `FactStrip` vẫn là
+lưới an toàn nếu sau này ai thêm field vào mảng mà quên nâng `factsMax`.
+
+`InfoBar.astro` đã xoá (`git rm`) sau khi xác minh lại — không phải tin theo
+chủ dự án — mọi tham chiếu còn lại trong `src/` chỉ là comment, không phải
+import/render (`grep -rn "InfoBar" src/` trước khi xoá). `InfoCard.astro`
+giữ nguyên. `entity-layout-post.ts` cập nhật: đổi `'InfoBar'` → `'FactStrip'`
+trong danh sách primitive tầng 1 và hợp đồng tầng 3 (đổi tên biến
+`ENTITIES_WITH_INFOBAR`/`ENTITIES_WITHOUT_INFOBAR` thành
+`ENTITIES_WITH_FACTSTRIP`/`ENTITIES_WITHOUT_FACTSTRIP` cho nhất quán), giữ
+nguyên dòng `'src/components/InfoCard.astro'` trong danh sách primitive vì
+file đó còn thật.
+
+Kết quả đo trên `dist/` sau khi convert: xem `task-7-report.md` mục "Fix
+round — Lodging convert theo ruling".
+
+---
+
+## DR-046 — `InfoCard.astro` còn sống cho ba template ngoài phạm vi đóng Luật 1
+
+**Trạng thái:** mở (có chủ đích — không phải quên dọn).
+
+Kế hoạch đóng Luật 1 (Task 5–7) chỉ bao trùm sáu entity có/không có hàng ở
+`06` §3.1 dùng cặp `InfoBar`/`InfoCard`: Điểm tham quan, Địa danh, Trải
+nghiệm, Tour, Nhà hàng, Đặc sản, Sự kiện, Khách sạn — tất cả nay đã chuyển
+sang `FactStrip` (`InfoBar.astro` xoá ở Task 7 fix round, 2026-08-23). Ba
+template KHÔNG nằm trong phạm vi này — `ArticleDetail.astro`,
+`OrganizationDetail.astro`, `PersonDetail.astro` — vẫn `import InfoCard from
+'./InfoCard.astro'` và render `<InfoCard slot="info" rows={sidebarRows}
+lang={lang} />` bên trong `DetailLayout`. Xác nhận bằng
+`grep -rn "import InfoCard\|<InfoCard" src/` (2026-08-23): đúng ba file này,
+không file nào khác.
+
+Xoá `InfoCard.astro` bây giờ sẽ vỡ ba template đó (mất hẳn vùng info hiện
+đang render tác giả/tổ chức/liên hệ). `DetailLayout.astro` giữ nguyên
+`<slot name="info" slot="info" />` (đường forward cho `InfoCard`) và prop
+`infoBarItems?: unknown[]` (kiểu lỏng, không còn phụ thuộc `InfoBar.astro`)
+chỉ để ba template này khỏi vỡ kiểu khi còn truyền `infoBarItems={[]}` — xem
+comment tại chỗ trong `DetailLayout.astro`.
+
+Ba entity này (Bài viết, Tổ chức, Người) không có hàng ở `06` §3.1 (đúng như
+`restaurant`/`specialty`/`event`/`hotel` trước khi Task 7 xử — xem DR-044),
+và Luật 1 tầng A (lặp vùng) không bắt lỗi gì ở chúng vì `InfoCard` là vùng
+DUY NHẤT chúng dùng (không có `InfoBar` đi kèm để lặp). Nên việc này không
+phải một vi phạm Luật 1 đang mở — chỉ là một loose end: `InfoCard.astro`
+không còn là một nửa của cặp trùng lặp nữa, nhưng vẫn là một component "cũ"
+sống sót ngoài kế hoạch dọn dẹp hiện tại. Cần một quyết định riêng (có thể là
+Task 8 mở rộng, hoặc một task khác) nếu muốn ba template này cũng chuyển
+sang `facts`/`FactStrip`, hoặc chấp nhận `InfoCard.astro` là primitive lâu
+dài cho nhóm entity phi-địa-lý (Article/Organization/Person) — quyết định đó
+chưa có, ghi lại ở đây để không rơi mất.
+
+**Cập nhật Task 8 (2026-08-23) — tầng B của `luat1-post.ts` làm lộ đúng gap
+này bằng máy, không phải drift mới.** Bật tầng B (SAI VÙNG — field render ở
+vùng khác vùng §3.1 khai) cho ra 15 vi phạm thật trên 5 trang, toàn bộ đều là
+Organization/Person: `cong-ty/cong-ty-co-phan-hon-tam-bien-nha-trang` (5:
+`address`, `telephone`, `officialSource`, `licenseInfo`, `sameAs`),
+`cong-ty/cong-ty-co-phan-vinpearl` (4: thiếu `officialSource`),
+`cong-ty/cong-ty-tnhh-tour-dao` (4: thiếu `sameAs`), `tac-gia/ho-dac-duy` (1:
+`sameAs`), `tac-gia/nguyen-phu-hai` (1: `sameAs`) — tất cả đọc ra `SAI VUNG:
+info-card`. Lý do kỹ thuật: `docMaTran()` trong `luat1-post.ts` gộp vùng theo
+TÊN field, không theo entity/cột — nên khi `OrganizationDetail.astro`/
+`PersonDetail.astro` dùng lại đúng tên field mà §3.1 đã khai vùng cho Điểm
+tham quan/Địa danh/Tour (`address`, `telephone`, `officialSource`,
+`licenseInfo`, `sameAs`), tầng B đọc nhầm thành "field này có vùng đã khai"
+và đỏ khi thấy chúng ở `info-card` — dù `info-card` là vùng hợp lệ (duy nhất)
+cho hai entity chưa nằm trong phạm vi đóng Luật 1. Đây KHÔNG phải một vi
+phạm Luật 1 mới (Luật 1 vẫn giữ đúng: mỗi field một vùng, không lặp) — nó là
+tầng B đang thiếu trục entity để phân biệt "field X ở entity đã khai" với
+"field trùng tên ở entity chưa có hàng trong §3.1". Thêm trục đó là mở rộng
+parser, ngoài phạm vi Task 8 (xem comment đầu `luat1-post.ts`). Task 8 KHÔNG
+sửa `src/components/**` và KHÔNG entity-hoá validator để ép xanh — giữ
+`luat1-post.ts` đỏ thật trên 5 trang này, ghi vào bằng chứng nghiệm thu
+(`docs/evidence/2026-08-22-trung-vung-truoc-4B/luat1-sau-khi-sua-xanh.txt`).
+Quyết định vẫn treo y như đoạn trên: nếu chủ dự án chốt Organization/Person
+chuyển sang `FactStrip`/`facts`, gap này tự đóng cùng lúc; nếu chốt giữ
+`InfoCard` làm primitive lâu dài, tầng B cần trục entity để hết báo nhầm.
+
+**Cập nhật thứ hai, cùng ngày — controller chốt: 15 vi phạm ở trên là ĐỎ
+GIẢ do defect của validator, không phải một phát hiện Luật 1 thật, và đã
+vá.** `docMaTran()` gộp vùng cho phép theo TÊN field trên toàn bộ ma trận
+§3.1, không tách theo cột entity — đây là defect có sẵn từ bản review Task 2
+(deferred minor: "the allowed region count is a union across entity columns
+rather than the per-entity cell"), tầng A chịu được vì chỉ ĐẾM số vùng, tầng
+B thì không vì nó SO SÁNH đúng-sai vùng cụ thể. Đã vá trong `luat1-post.ts`:
+`docMaTran()` nay trả thêm `theoEntity` (Field → entity key → đúng vùng của
+CỘT đó) và `entityCoCot` (tập entity có cột thật trong §3.1); hàm mới
+`entityCuaTrang()` suy entity của một trang từ segment URL đầu, tra qua
+`ROUTE_MAP` (`src/lib/routes.ts` — theo đúng tiền lệ import từ `src/` mà
+`scripts/meta-validators/g3-binding-map-vs-template.ts` đã đặt, không tự
+liệt tiền tố URL bằng tay). Tầng B nay chỉ phán một trang khi entity của
+trang đó CÓ cột trong §3.1 — Organization và Person (không có cột) nằm
+ngoài thẩm quyền tầng B, nên 15 vi phạm ở trên KHÔNG còn xuất hiện. Xác
+minh tầng B vẫn sống (không phải "hết đỏ vì thôi không kiểm nữa"): tạm đổi
+`data-region="fact-strip"` thành `"breadcrumb"` trên
+`dist/diem-tham-quan/chua-long-son/index.html` (entity `attraction`, CÓ cột
+trong §3.1) — tầng B bắt đúng 5 vi phạm `SAI VUNG: breadcrumb`
+(`openingHours`, `address`, `telephone`, `isAccessibleForFree`,
+`officialSource`); phục hồi file gốc, xác nhận giống hệt bằng `diff`, chạy
+lại về `[pass]`. Câu hỏi chính sách ở đoạn trên (Organization/Person có nên
+chuyển sang `FactStrip` không) vẫn treo — DR-046 vẫn ở trạng thái mở — chỉ
+riêng phần "tầng B báo nhầm" đã đóng.
+
+---
+
+## DR-047 — Tầng B của `luat1-post.ts` không tách được các mục nội dung, chỉ tách được id vùng
+
+**Trạng thái:** chấp nhận (giới hạn đã biết, ghi lại để không ai đọc tầng B
+rộng hơn biên thật của nó).
+
+Task 8 (2026-08-23) bật tầng B (SAI VÙNG) của `luat1-post.ts`: field render ở
+vùng khác vùng §3.1 khai thì đỏ, kể cả khi không lặp. Nhưng `idTuTenVung()`
+trong file đó gom TẤT CẢ các ô §3.1 mở đầu bằng "mục" hoặc "dòng" — tức
+`highlights`, `body`, `accessInfo`, `faq`, `seasonNote`, `includes`,
+`excludes`, `itinerary`, `sameAs`, và rollup `experiences` — về một id ngắn
+DUY NHẤT là `'section'`. HTML cũng không tách data-region riêng cho từng mục
+nội dung (chỉ có `data-region="section"` chung, xem `DetailLayout.astro:138`
+cho `sameAs`). Hệ quả: tầng B phân biệt được field render ở `fact-strip` khi
+§3.1 khai `hero-badge` (id khác nhau), nhưng KHÔNG phân biệt được field
+render ở mục "Câu hỏi thường gặp" khi §3.1 khai mục "Nguồn tham khảo" — cả
+hai đều chỉ là `'section'`. Một field cho sai mục nội dung này sang mục nội
+dung khác (trong số 9 field kể trên) sẽ lọt qua tầng B mà không hiện đỏ.
+
+Đây không phải một lỗi tầng B viết sai — nó là biên thật của những gì tầng B
+đo được với id vùng hiện có. Không vá trong đợt này: mở rộng `idTuTenVung()`
+(và data-region trong HTML) để tách id cho từng mục nội dung là việc khác
+phạm vi Task 8 — chờ §3.1 được sửa để gán id riêng cho từng mục (đề xuất đó
+đang chờ chủ dự án duyệt bản sửa spec, chưa có ở thời điểm ghi entry này).
+Xem comment đầu `scripts/validators/luat1-post.ts` cho chi tiết kỹ thuật;
+entry này là bản ghi chính thức để giới hạn không rơi mất khi có người sau
+này đọc tầng B và tưởng nó bắt hết mọi kiểu sai vùng.
+
+---
+
+## DR-048 — Bốn vùng §3.1 chưa từng gắn `data-region`, để lọt C1 và I1 qua tám vòng review
+
+**Trạng thái:** chấp nhận (giới hạn đã biết, sibling của DR-047 — cùng chủ đề
+"tầng B không bắt hết mọi kiểu sai vùng", khác nguyên nhân kỹ thuật).
+
+Review toàn nhánh (2026-08-23) phát hiện: bên cạnh giới hạn bucket `'section'`
+đã ghi ở DR-047, `luat1-post.ts` còn một giới hạn thứ hai mà comment đầu file
+CHƯA từng khai. ALIAS trong file đó đọc được TÁM id vùng ngắn từ §3.1
+(`hero-badge`, `hero`, `breadcrumb`, `fact-strip`, `sticky-bar`,
+`action-block`, `map-card`, `footer-meta`). Đối chiếu với
+`grep -rhoE 'data-region="[a-z-]+"' src/components/*.astro` chạy thật trên
+kho hôm nay: chỉ NĂM id có mặt trong HTML — `action-block`, `fact-strip`,
+`sticky-bar`, `map-card` (thẻ bản đồ; vá xong trong cùng đợt sửa ghi entry
+này, xem C1 bên dưới), và bucket `'section'`. BỐN id còn lại — `hero`,
+`hero-badge`, `breadcrumb`, `footer-meta` — KHÔNG component nào từng gắn.
+(Lệnh grep trên thật ra trả về SÁU id, không phải năm: `info-card` cũng có
+mặt, nhưng đó là id cũ của `InfoCard.astro` — Article/Organization/Person,
+ngoài từ vựng ALIAS/§3.1 hoàn toàn, không tính vào con số ở đây.)
+
+Hệ quả: bốn hàng §3.1 sau nằm HOÀN TOÀN ngoài thẩm quyền của cả tầng A lẫn
+tầng B, dù field có cột hợp lệ trong ma trận:
+
+| Hàng §3.1 | Vùng khai (id chưa gắn) |
+|---|---|
+| `attractionType` · `placeType` · `experienceType` · `tourFormat` (nhãn loại entity) | `hero-badge` |
+| `summary` | `hero` |
+| `containedInPlace` · `venue` (mắt cha) | `breadcrumb` |
+| `_updatedAt` · `updatedAt` | `footer-meta` |
+
+Không có thẻ `data-region` nào bọc các vùng này trong HTML, nên `docTrang()`
+trong `luat1-post.ts` không có gì để gán cho field render ở đó — field đó
+biến mất khỏi cả bộ đếm tầng A lẫn phép so sánh tầng B, dù render thật trên
+trang. Đây chính là lỗ đã để lọt hai phát hiện thật của cùng đợt review này:
+
+- **C1** — `hasMap` bị bỏ rơi hoàn toàn (không render ở đâu, kể cả thẻ bản đồ)
+  trên 37 trang suốt tám vòng review task. Đã vá trong đợt sửa này (chuyển
+  `hasMap` vào thẻ bản đồ, gắn `data-region="map-card" data-field="hasMap"`),
+  nên `map-card` nay chuyển sang cột "có gắn thẻ" ở trên.
+- **I1** — `duration` lặp sang huy hiệu hero (`hero-badge`) trên 19 trang
+  Trải nghiệm/Tour, cạnh bản Thông tin nhanh đã đúng vùng. Huy hiệu hero
+  không mang `data-region`/`data-field` nên tầng A/B đều không thấy cặp lặp.
+  Đã vá trong đợt sửa này (bỏ `duration` khỏi `heroBadges`).
+
+Cả hai field đứng cạnh một vùng CHƯA GẮN THẺ (`hero-badge`) — không phải
+trùng hợp: đây chính xác là loại lỗi mà giới hạn này dự đoán trước sẽ lọt.
+
+Không vá trong đợt này: gắn `data-region`/`data-field` cho bốn vùng còn lại
+(`Hero.astro`, `Breadcrumb.astro`, và dòng "Cập nhật" cuối nội dung trong
+`DetailLayout.astro`) là việc khác phạm vi — mỗi vùng cần xác nhận cách field
+đang render ở đó trước khi gắn thẻ (rủi ro tương tự các phát hiện của Task 1
+khi gắn thẻ cho vùng cũ), không phải việc cơ học một dòng. Ghi giới hạn trung
+thực ở đây và trong comment đầu `scripts/validators/luat1-post.ts` — không tự
+vá, không tự nhận tầng B "bắt hết".

@@ -2,17 +2,17 @@
  * Entity detail layout contract.
  *
  * Tầng 1 — Component selection: detail phải dùng DetailLayout (wrapper chung) hoặc
- *          Hero/Section/Gallery/InfoBar/NearbySection/Sidebar (primitive chung).
+ *          Hero/Section/Gallery/FactStrip/NearbySection/Sidebar (primitive chung).
  * Tầng 2 — Container containment: mọi visible element trong detail phải nằm trong container.
- * Tầng 3 — InfoBar contract: 9 entity có InfoBar, 3 không có.
+ * Tầng 3 — FactStrip contract: 9 entity có FactStrip, 3 không có.
  *
  * Nguyên tắc container policy (chốt 2026-06-30):
  *   Mỗi component visible trong detail phải tự bọc <div class="container">,
- *   hoặc được bọc bởi một primitive đã có container (Hero, Section, FAQ, Gallery, InfoBar).
+ *   hoặc được bọc bởi một primitive đã có container (Hero, Section, FAQ, Gallery, FactStrip).
  *   Không có element nào được render trần ra ngoài container.
- *   Ngoại lệ: InfoBar (full-width bar có chủ ý), Hero (full-width).
+ *   Ngoại lệ: FactStrip (full-width bar có chủ ý), Hero (full-width).
  *
- * B8.13 (2026-06-30): DetailLayout.astro là proxy hợp lệ cho Hero/Sidebar/NearbySection/InfoBar.
+ * B8.13 (2026-06-30): DetailLayout.astro là proxy hợp lệ cho Hero/Sidebar/NearbySection/FactStrip.
  *   Template dùng DetailLayout không cần import trực tiếp các primitive đó.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
@@ -33,7 +33,7 @@ const SHARED_PRIMITIVES = [
   'src/components/Hero.astro',
   'src/components/Section.astro',
   'src/components/Gallery.astro',
-  'src/components/InfoBar.astro',
+  'src/components/FactStrip.astro',
   'src/components/NearbySection.astro',
   'src/components/Sidebar.astro',
   'src/components/BookingCTA.astro',
@@ -42,38 +42,38 @@ const SHARED_PRIMITIVES = [
   'src/styles/tokens.css',
 ]
 
-// B8.13: DetailLayout là proxy hợp lệ cho Hero + Sidebar + NearbySection + InfoBar.
+// B8.13: DetailLayout là proxy hợp lệ cho Hero + Sidebar + NearbySection + FactStrip.
 // Mỗi rule yêu cầu EITHER import trực tiếp các primitive cũ HOẶC import DetailLayout.
 const DETAIL_RULES: DetailRule[] = [
   {
     file: 'src/components/PlaceDetail.astro',
     requiresAny: ["import DetailLayout from './DetailLayout.astro'", "import Hero from './Hero.astro'"],
-    note: 'Place detail must use shared DetailLayout or Hero/Section/InfoBar/Sidebar backbone',
+    note: 'Place detail must use shared DetailLayout or Hero/Section/FactStrip/Sidebar backbone',
   },
   {
     file: 'src/components/AttractionDetail.astro',
     requiresAny: ["import DetailLayout from './DetailLayout.astro'", "import Hero from './Hero.astro'"],
-    note: 'Attraction detail must use shared DetailLayout or Hero/Section/InfoBar/Sidebar backbone',
+    note: 'Attraction detail must use shared DetailLayout or Hero/Section/FactStrip/Sidebar backbone',
   },
   {
     file: 'src/components/RestaurantDetail.astro',
     requiresAny: ["import DetailLayout from './DetailLayout.astro'", "import Hero from './Hero.astro'"],
-    note: 'Restaurant detail must use shared DetailLayout or Hero/Section/InfoBar/Sidebar backbone',
+    note: 'Restaurant detail must use shared DetailLayout or Hero/Section/FactStrip/Sidebar backbone',
   },
   {
     file: 'src/components/SpecialtyDetail.astro',
     requiresAny: ["import DetailLayout from './DetailLayout.astro'", "import Hero from './Hero.astro'"],
-    note: 'Specialty detail must use shared DetailLayout or Hero/Section/InfoBar/Sidebar backbone',
+    note: 'Specialty detail must use shared DetailLayout or Hero/Section/FactStrip/Sidebar backbone',
   },
   {
     file: 'src/components/ExperienceDetail.astro',
     requiresAny: ["import DetailLayout from './DetailLayout.astro'", "import Hero from './Hero.astro'"],
-    note: 'Experience detail must use shared DetailLayout or Hero/Section/InfoBar/Sidebar backbone',
+    note: 'Experience detail must use shared DetailLayout or Hero/Section/FactStrip/Sidebar backbone',
   },
   {
     file: 'src/components/LodgingDetail.astro',
     requiresAny: ["import DetailLayout from './DetailLayout.astro'", "import Hero from './Hero.astro'"],
-    note: 'Hotel/Resort shared lodging detail must use shared DetailLayout or Hero/Section/InfoBar/Sidebar backbone',
+    note: 'Hotel/Resort shared lodging detail must use shared DetailLayout or Hero/Section/FactStrip/Sidebar backbone',
   },
   {
     file: 'src/components/HotelDetail.astro',
@@ -88,27 +88,27 @@ const DETAIL_RULES: DetailRule[] = [
   {
     file: 'src/components/TourDetail.astro',
     requiresAny: ["import DetailLayout from './DetailLayout.astro'", "import Hero from './Hero.astro'"],
-    note: 'Tour detail must use shared DetailLayout or Hero/Section/InfoBar/Sidebar backbone',
+    note: 'Tour detail must use shared DetailLayout or Hero/Section/FactStrip/Sidebar backbone',
   },
   {
     file: 'src/components/EventDetail.astro',
     requiresAny: ["import DetailLayout from './DetailLayout.astro'", "import Hero from './Hero.astro'"],
-    note: 'Event detail must use shared DetailLayout or Hero/Section/InfoBar/Sidebar backbone',
+    note: 'Event detail must use shared DetailLayout or Hero/Section/FactStrip/Sidebar backbone',
   },
   {
     file: 'src/components/ArticleDetail.astro',
     requiresAny: ["import DetailLayout from './DetailLayout.astro'", "import Hero from './Hero.astro'"],
-    note: 'Article detail must use shared DetailLayout or Hero/Section/Sidebar backbone (no InfoBar)',
+    note: 'Article detail must use shared DetailLayout or Hero/Section/Sidebar backbone (no FactStrip)',
   },
   {
     file: 'src/components/OrganizationDetail.astro',
     requiresAny: ["import DetailLayout from './DetailLayout.astro'", "import Hero from './Hero.astro'"],
-    note: 'Organization detail must use shared DetailLayout or Hero/Section/Sidebar backbone (no InfoBar)',
+    note: 'Organization detail must use shared DetailLayout or Hero/Section/Sidebar backbone (no FactStrip)',
   },
   {
     file: 'src/components/PersonDetail.astro',
     requiresAny: ["import DetailLayout from './DetailLayout.astro'", "import Hero from './Hero.astro'"],
-    note: 'Person detail must use shared DetailLayout or Hero/Section/Sidebar backbone (no InfoBar)',
+    note: 'Person detail must use shared DetailLayout or Hero/Section/Sidebar backbone (no FactStrip)',
   },
 ]
 
@@ -228,9 +228,13 @@ function main() {
     }
   }
 
-  // ── Tầng 3: InfoBar contract ──
-  // B8.13: DetailLayout handles InfoBar — accept infoBarItems prop as valid signal
-  const ENTITIES_WITH_INFOBAR = [
+  // ── Tầng 3: FactStrip contract ──
+  // B8.13: DetailLayout handles FactStrip rendering — a template using
+  // DetailLayout satisfies the requirement without importing FactStrip
+  // directly. Task 7 fix round (2026-08-23): InfoBar.astro deleted, all 9
+  // entities below now render their quick facts through DetailLayout's
+  // `facts` prop rather than a direct FactStrip/InfoBar import.
+  const ENTITIES_WITH_FACTSTRIP = [
     'src/components/PlaceDetail.astro',
     'src/components/AttractionDetail.astro',
     'src/components/ExperienceDetail.astro',
@@ -240,31 +244,31 @@ function main() {
     'src/components/TourDetail.astro',
     'src/components/EventDetail.astro',
   ]
-  const ENTITIES_WITHOUT_INFOBAR = [
+  const ENTITIES_WITHOUT_FACTSTRIP = [
     'src/components/ArticleDetail.astro',
     'src/components/PersonDetail.astro',
     'src/components/OrganizationDetail.astro',
   ]
 
-  for (const file of ENTITIES_WITH_INFOBAR) {
+  for (const file of ENTITIES_WITH_FACTSTRIP) {
     if (!existsSync(resolve(REPO_ROOT, file))) continue
     const content = readRel(file)
-    const hasDirectImport = content.includes("import InfoBar from './InfoBar.astro'")
+    const hasDirectImport = content.includes("import FactStrip from './FactStrip.astro'")
     const usesDetailLayout = content.includes("import DetailLayout from './DetailLayout.astro'")
     if (!hasDirectImport && !usesDetailLayout) {
-      errors.push(`${file}: entity yêu cầu InfoBar nhưng thiếu import hoặc DetailLayout`)
+      errors.push(`${file}: entity yêu cầu FactStrip nhưng thiếu import hoặc DetailLayout`)
     }
   }
 
-  for (const file of ENTITIES_WITHOUT_INFOBAR) {
+  for (const file of ENTITIES_WITHOUT_FACTSTRIP) {
     if (!existsSync(resolve(REPO_ROOT, file))) continue
-    if (readRel(file).includes("import InfoBar from './InfoBar.astro'")) {
-      errors.push(`${file}: entity KHÔNG có InfoBar nhưng lại import InfoBar`)
+    if (readRel(file).includes("import FactStrip from './FactStrip.astro'")) {
+      errors.push(`${file}: entity KHÔNG có FactStrip nhưng lại import FactStrip`)
     }
   }
 
   // Sidebar contract — B8.13: DetailLayout wraps Sidebar, templates only need DetailLayout
-  for (const file of [...ENTITIES_WITH_INFOBAR, ...ENTITIES_WITHOUT_INFOBAR]) {
+  for (const file of [...ENTITIES_WITH_FACTSTRIP, ...ENTITIES_WITHOUT_FACTSTRIP]) {
     if (!existsSync(resolve(REPO_ROOT, file))) continue
     const content = readRel(file)
     const hasSidebarImport = content.includes("import Sidebar from './Sidebar.astro'")
@@ -275,7 +279,7 @@ function main() {
   }
 
   // NearbySection contract — B8.13: DetailLayout wraps NearbySection
-  for (const file of [...ENTITIES_WITH_INFOBAR, ...ENTITIES_WITHOUT_INFOBAR]) {
+  for (const file of [...ENTITIES_WITH_FACTSTRIP, ...ENTITIES_WITHOUT_FACTSTRIP]) {
     if (!existsSync(resolve(REPO_ROOT, file))) continue
     const content = readRel(file)
     const hasNearbyImport = content.includes("import NearbySection from './NearbySection.astro'")
@@ -346,7 +350,7 @@ function main() {
   }
 
   console.log(`[pass] ${DETAIL_RULES.length} detail rules, ${LEGACY_EXCEPTIONS.length} legacy exceptions declared`)
-  console.log(`[pass] InfoBar contract: ${ENTITIES_WITH_INFOBAR.length} with, ${ENTITIES_WITHOUT_INFOBAR.length} without`)
+  console.log(`[pass] FactStrip contract: ${ENTITIES_WITH_FACTSTRIP.length} with, ${ENTITIES_WITHOUT_FACTSTRIP.length} without`)
 }
 
 main()

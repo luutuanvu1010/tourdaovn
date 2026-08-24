@@ -12,7 +12,7 @@ const { priceText, ctaUrl, ctaLabel, asOf } = Astro.props
 
 <div class="booking-cta">
   {priceText && (
-    <div class="booking-price">
+    <div class="booking-price" data-region="action-block" data-field="gia">
       <span class="booking-price-value">{priceText}</span>
       {asOf && <span class="booking-asof">{asOf}</span>}
     </div>

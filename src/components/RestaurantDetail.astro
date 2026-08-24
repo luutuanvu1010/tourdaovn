@@ -6,7 +6,6 @@ import { entityPageGraphToLd, restaurantToJsonLd, jsonLdScriptContent } from '..
 import DetailLayout from './DetailLayout.astro'
 import Section from './Section.astro'
 import FAQ from './FAQ.astro'
-import InfoCard from './InfoCard.astro'
 import Body from './Body.astro'
 import MapView from './MapView.astro'
 import { ROUTE_MAP } from '../lib/routes'
@@ -26,22 +25,26 @@ function hasPtContent(blocks: unknown[] | undefined | null): boolean {
   return blocks.some((b: any) => b._type === 'block' && b.children?.some((c: any) => (c.text || '').trim()))
 }
 
-const infoBarItems = [
-  { icon: '🍽️', label: t('cuisine'), value: data.servesCuisine?.[0] || '', visible: !!(data.servesCuisine && data.servesCuisine.length > 0) },
-  { icon: '🕐', label: t('hours'), value: data.openingHours ? `${data.openingHours.open || ''} - ${data.openingHours.close || ''}` : '', visible: !!data.openingHours },
-  { icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
-  { icon: '📍', label: t('distance'), value: '', visible: false },
-]
-
-const sidebarRows = [
-  { icon: '📍', label: t('address'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
-  { icon: '🍽️', label: t('cuisine'), value: data.servesCuisine?.join(', ') || '', visible: !!(data.servesCuisine && data.servesCuisine.length > 0) },
-  { icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : '', visible: !!data.openingHours },
-  { icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
-  { icon: '📅', label: t('reservations'), value: data.acceptsReservations ? t('acceptsReservations') : t('no'), visible: data.acceptsReservations !== undefined },
-  { icon: '📋', label: t('menu'), value: t('view'), href: data.hasMenu, visible: !!data.hasMenu },
-  { icon: '🔗', label: t('officialWebsite'), value: hostLabel(data.officialSource), href: data.officialSource || undefined, visible: !!data.officialSource },
-  { icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
+// `restaurant` không có hàng ở 06 §3.1 — xem DRIFT_LOG DR-044. Quy tắc: giữ
+// nguyên bộ field đang có (union của `infoBarItems` cũ và `sidebarRows` cũ),
+// dồn về một vùng FactStrip, loại `sameAs` (luôn có vùng riêng — dòng "Nguồn
+// tham khảo" cạnh Cập nhật — bất kể entity nào).
+//
+// task-7-brief.md liệt kê 4 field (servesCuisine, openingHours, address,
+// telephone) cho vùng này, nhưng file thật (từ bản fork ban đầu, không phải
+// thêm sau) còn 3 field nữa trong `sidebarRows` cũ: acceptsReservations,
+// hasMenu, officialSource — không field nào trong 7 field "dễ xếp nhầm" của
+// hợp đồng. "Giữ nguyên bộ field đang có" áp dụng nghĩa đen: cả 7 field vào
+// đây. Ghi lại chênh lệch với bảng brief trong task-7-report.md, không tự ý
+// bỏ 3 field — bỏ là đúng lỗi "vùng biến mất" mà việc này phải tránh.
+const facts = [
+  { field: 'servesCuisine', icon: '🍽️', label: t('cuisine'), value: data.servesCuisine?.join(', ') || '', visible: !!(data.servesCuisine && data.servesCuisine.length > 0) },
+  { field: 'openingHours', icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : '', visible: !!data.openingHours },
+  { field: 'address', icon: '📍', label: t('address'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
+  { field: 'telephone', icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
+  { field: 'acceptsReservations', icon: '📅', label: t('reservations'), value: data.acceptsReservations ? t('acceptsReservations') : t('no'), visible: data.acceptsReservations !== undefined },
+  { field: 'hasMenu', icon: '📋', label: t('menu'), value: t('view'), href: data.hasMenu, visible: !!data.hasMenu },
+  { field: 'officialSource', icon: '🔗', label: t('officialWebsite'), value: hostLabel(data.officialSource), href: data.officialSource || undefined, visible: !!data.officialSource },
 ]
 
 const siteBase = siteBaseUrl(Astro.site)
@@ -55,9 +58,9 @@ const jsonLd = entityPageGraphToLd(restaurantToJsonLd(data, siteBase, lang), dat
   image={data.mainImage}
   gallery={data.gallery}
   containedInPlace={data.containedInPlace}
-  infoBarItems={infoBarItems}
+  sameAs={data.sameAs}
+  facts={facts}
   sidebarSlots={[
-    { name: 'info', component: 'InfoCard', visible: sidebarRows.some(r => r.visible), props: { rows: sidebarRows } },
     { name: 'map', component: 'Map', visible: !!(data.geo), props: {} },
   ]}
   nearbyTitle={t('nearby')}
@@ -97,7 +100,6 @@ const jsonLd = entityPageGraphToLd(restaurantToJsonLd(data, siteBase, lang), dat
     {data.faq && data.faq.length > 0 && <FAQ faq={data.faq} lang={lang} contained={false} />}
   </Fragment>
 
-  {sidebarRows.some(r => r.visible) && <InfoCard slot="info" rows={sidebarRows} lang={lang} />}
   {data.geo && <MapView slot="map" geo={data.geo} title={data.title} height={240} />}
 </DetailLayout>
 
