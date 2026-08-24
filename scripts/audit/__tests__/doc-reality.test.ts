@@ -5,6 +5,8 @@ import {
   trichLuatChuyenHuong,
   kiemChuyenHuong,
   kiemQuyetDinhDaDong,
+  kiemTanDuMa,
+  kiemTanDuTaiLieu,
 } from '../doc-reality'
 
 test('timChuoiCam bắt được chuỗi và nói rõ file nào dòng nào', () => {
@@ -22,8 +24,18 @@ test('timChuoiCam đạt khi không có chuỗi cấm', () => {
   assert.equal(timChuoiCam(files, luat)[0].verdict, 'pass')
 })
 
-test('trichLuatChuyenHuong bắt cặp nguồn → đích', () => {
+test('trichLuatChuyenHuong bắt cặp nguồn → đích (glyph Unicode)', () => {
   const t = 'Luật `/ → https://tourdaonhatrang.com/ 302` đang bật.'
+  assert.deepEqual(trichLuatChuyenHuong(t), [{ tu: '/', den: 'https://tourdaonhatrang.com/' }])
+})
+
+test('trichLuatChuyenHuong bắt cặp nguồn -> đích (ASCII)', () => {
+  const t = 'Luật `/ -> https://tourdaonhatrang.com/ 302` đang bật.'
+  assert.deepEqual(trichLuatChuyenHuong(t), [{ tu: '/', den: 'https://tourdaonhatrang.com/' }])
+})
+
+test('trichLuatChuyenHuong bắt cặp nguồn ⇒ đích (glyph khác)', () => {
+  const t = 'Luật `/ ⇒ https://tourdaonhatrang.com/ 302` đang bật.'
   assert.deepEqual(trichLuatChuyenHuong(t), [{ tu: '/', den: 'https://tourdaonhatrang.com/' }])
 })
 
@@ -40,8 +52,11 @@ test('DOC3 đạt khi _redirects có luật đó', () => {
   assert.equal(c.verdict, 'pass')
 })
 
-test('DOC3 đạt (rỗng) khi BUILD-NOTES không mô tả luật nào', () => {
-  assert.deepEqual(kiemChuyenHuong('không nhắc chuyển hướng', ''), [])
+test('DOC3 báo skip (không phải mảng rỗng im lặng — DR-021) khi BUILD-NOTES không mô tả luật nào', () => {
+  const c = kiemChuyenHuong('không nhắc chuyển hướng', '')[0]
+  assert.equal(c.verdict, 'skip')
+  assert.equal(c.id, 'DOC3')
+  assert.match(c.detail, /không mô tả luật chuyển hướng nào/)
 })
 
 test('DOC4 trượt khi DRIFT_LOG trích quyết định mà DECISIONS không có', () => {
@@ -53,4 +68,42 @@ test('DOC4 trượt khi DRIFT_LOG trích quyết định mà DECISIONS không c�
 test('DOC4 đạt khi mọi quyết định được trích đều có trong sổ', () => {
   const c = kiemQuyetDinhDaDong('xem `QĐ-2026-08-22-04`.', '## QĐ-2026-08-22-04 — nội dung\n')[0]
   assert.equal(c.verdict, 'pass')
+})
+
+test('DOC4 báo skip (không phải pass rỗng — DR-021) khi DRIFT_LOG không trích quyết định nào', () => {
+  const c = kiemQuyetDinhDaDong('không nhắc quyết định nào ở đây', '# Sổ quyết định\n')[0]
+  assert.equal(c.verdict, 'skip')
+  assert.equal(c.id, 'DOC4')
+  assert.match(c.detail, /không trích mã quyết định nào/)
+})
+
+test('DOC4 không nhận mã-là-tiền-tố-của-mã-khác làm khớp (ranh giới từ)', () => {
+  const c = kiemQuyetDinhDaDong('đóng ở `QĐ-2026-08-22-04`.', '## QĐ-2026-08-22-04X — nội dung khác\n')[0]
+  assert.equal(c.verdict, 'fail')
+  assert.match(c.detail, /QĐ-2026-08-22-04/)
+})
+
+test('kiemTanDuMa (DOC2-code) đạt khi mã/cấu hình sạch', () => {
+  const files = [{ path: 'src/site.config.ts', content: 'export const fallback = "https://tourdao.vn"' }]
+  const c = kiemTanDuMa(files, 'nhatrangtravel')[0]
+  assert.equal(c.verdict, 'pass')
+  assert.equal(c.id, 'DOC2-code/nhatrangtravel')
+})
+
+test('kiemTanDuMa (DOC2-code) trượt khi mã/cấu hình đang chạy còn tàn dư — ca nghiêm trọng DR-006', () => {
+  const files = [{ path: 'src/site.config.ts', content: "fallback = 'https://nhatrangtravel.net'" }]
+  const c = kiemTanDuMa(files, 'nhatrangtravel')[0]
+  assert.equal(c.verdict, 'fail')
+  assert.equal(c.id, 'DOC2-code/nhatrangtravel')
+  assert.match(c.detail, /src\/site\.config\.ts/)
+  assert.deepEqual(c.drift, ['DR-006'])
+})
+
+test('kiemTanDuTaiLieu (DOC2-docs) trượt nhưng nói rõ là tường thuật, trỏ sang DOC2-code', () => {
+  const files = [{ path: 'README.md', content: 'Trích từ nhatrangtravel, giữ phần cốt lõi.' }]
+  const c = kiemTanDuTaiLieu(files, 'nhatrangtravel')[0]
+  assert.equal(c.verdict, 'fail')
+  assert.equal(c.id, 'DOC2-docs/nhatrangtravel')
+  assert.match(c.detail, /tường thuật/)
+  assert.match(c.detail, /DOC2-code/)
 })
