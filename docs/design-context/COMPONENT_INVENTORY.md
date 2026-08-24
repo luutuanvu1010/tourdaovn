@@ -6,7 +6,7 @@
 Hợp đồng API của thư viện component đang chạy production. Mỗi mục là interface
 `Props` nguyên văn trong code, không diễn giải lại.
 
-## Primitive dùng chung (27)
+## Primitive dùng chung (28)
 
 ### AuthorityMeta
 
@@ -33,7 +33,7 @@ export interface Props {
 
 ```ts
 export interface Props {
-  blocks: any[] | undefined
+  blocks: any[] | undefined | null
   class?: string
 }
 ```
@@ -117,28 +117,69 @@ export interface Props {
   lang: Lang
   entityType: string
   image?: string | ImageAsset
-  gallery?: ImageAsset[]
+  gallery?: ImageAsset[] | null
   containedInPlace?: EntityRef
-  infoBarItems?: InfoBarItem[]
+  /** Dòng "Nguồn tham khảo" cạnh Cập nhật — 06 §3.1: `sameAs` chỉ render Ở ĐÂY,
+   *  KHÔNG vào Thông tin nhanh, KHÔNG vào sidebar. Chỉ mục đầu mảng; rỗng thì
+   *  ẩn cả dòng. */
+  sameAs?: string[] | null
+  /** Vùng "Thông tin nhanh" — 06 §3.1. Nơi DUY NHẤT của các field ngắn. */
+  facts?: Fact[]
+  /** Trần số ô hiển thị ở `FactStrip`. Không truyền = mặc định 6 (hợp đồng 06
+   *  §3.1 cho bốn entity có hàng trong ma trận). Entity không có hàng ở §3.1
+   *  (vd khách sạn — chỉ ràng buộc bởi Luật 1, không ràng buộc trần 6) truyền
+   *  cao hơn qua đây. Task 7 fix round, 2026-08-23. */
+  factsMax?: number
+  /** @deprecated Không còn render gì — `InfoBar` đã gỡ (Task 7 fix round,
+   *  2026-08-23, LodgingDetail là template cuối chuyển sang `facts`). Giữ
+   *  prop này (kiểu lỏng, không còn phụ thuộc `InfoBar.astro`) chỉ để
+   *  `ArticleDetail`/`OrganizationDetail`/`PersonDetail` — ba template ngoài
+   *  phạm vi việc đóng Luật 1, vẫn dùng `InfoCard` trực tiếp qua slot `info`,
+   *  xem DRIFT_LOG DR-046 — khỏi vỡ kiểu vì vẫn truyền `infoBarItems={[]}`.
+   *  Xoá hẳn khi ba template đó cũng dọn theo. */
+  infoBarItems?: unknown[]
   sidebarSlots: Slot[]
   nearbyTitle: string
   nearby: NearbyEntity[]
   updatedAt: string
+  /** Phù hiệu ngắn cạnh tiêu đề trong hero — 06-BINDING_MAP §3 "Nhãn loại entity". */
+  badges?: string[] | null
+  /** Đoạn mở trong hero — §3 "Đoạn mở", `summary`. */
+  summary?: string | null
+  /** Gắn `data-speakable` lên đoạn mở. Chỉ trang cẩm nang bật, vì chỉ Article
+   *  khai `speakable` với cssSelector `[data-speakable]` trong JSON-LD. */
+  speakable?: boolean
+  /** Mục neo cho thanh dính. Rỗng thì không render thanh. */
+  jumpLinks?: { href: string; label: string }[] | null
+  /** Nhãn giá đã render sẵn (I16) — null thì thanh dính không hiện vùng giá. */
+  priceLabel?: string | null
+  /** CTA chính trên thanh dính, thường là Zalo. Thiếu thì không render nút. */
+  ctaHref?: string | null
+  ctaLabel?: string | null
 }
 ```
 
 Type phụ trợ:
 
 ```ts
-export interface InfoBarItem {
+export interface Fact {
+  /** Tên field trong 01-CONTENT_MODEL. Bộ kiểm Luật 1 đếm theo đây. */
+  field: string
   icon: string
   label: string
   value: string
+  href?: string
   visible: boolean
-} // khai ở InfoBar.astro
+} // khai ở FactStrip.astro
 export interface Slot {
   name: string
-  component: 'BookingCTA' | 'InfoCard' | 'Map' | 'Article' | 'custom'
+  // I4 fix round (2026-08-23): 'custom' từng khai cho ô FactStrip inline chèn
+  // qua slot 'info' — nay FactStrip inline là con trực tiếp của `.two-col`
+  // (DetailLayout.astro), không còn đi qua Sidebar nữa, nên không component
+  // nào tạo giá trị 'custom' cho field này. Bỏ khỏi union thay vì để mã chết
+  // (tiền lệ Ruling 2 của ledger đợt này: hằng khai mà không dùng là nợ
+  // reviewer sẽ bắt).
+  component: 'BookingCTA' | 'InfoCard' | 'Map' | 'Article'
   visible: boolean
   props: Record<string, any>
 } // khai ở Sidebar.astro
@@ -163,9 +204,41 @@ export interface Props {
 ```ts
 export interface Props {
   faq: FAQItem[]
+  /** Neo cho thanh dính ở DetailLayout. */
+  id?: string
   heading?: string
   lang?: Lang
   contained?: boolean
+}
+```
+
+### FactStrip
+
+`src/components/FactStrip.astro`
+
+```ts
+export interface Props {
+  facts: Fact[]
+  /** true = dựng dạng danh sách dọc để nhét vào sidebar (≤ 2 ô). */
+  inline?: boolean
+  /** Trần số ô hiển thị. Mặc định 6 — hợp đồng 06 §3.1. Entity không có hàng
+   *  ở §3.1 (chỉ ràng buộc bởi Luật 1, không ràng buộc bởi trần 6) có thể
+   *  truyền cao hơn để không bị cắt oan. */
+  max?: number
+}
+```
+
+Type phụ trợ:
+
+```ts
+export interface Fact {
+  /** Tên field trong 01-CONTENT_MODEL. Bộ kiểm Luật 1 đếm theo đây. */
+  field: string
+  icon: string
+  label: string
+  value: string
+  href?: string
+  visible: boolean
 }
 ```
 
@@ -176,6 +249,16 @@ export interface Props {
 ```ts
 export interface Props {
   lang?: string
+}
+```
+
+### FooterBadges
+
+`src/components/FooterBadges.astro`
+
+```ts
+export interface Props {
+  badges?: SiteFooterBadge[] | null
 }
 ```
 
@@ -213,29 +296,14 @@ export interface Props {
 ```ts
 export interface Props {
   image?: string | ImageAsset
-  gallery?: ImageAsset[]
+  gallery?: ImageAsset[] | null
   imageAlt?: string
-}
-```
-
-### InfoBar
-
-`src/components/InfoBar.astro`
-
-```ts
-export interface Props {
-  items: InfoBarItem[]
-}
-```
-
-Type phụ trợ:
-
-```ts
-export interface InfoBarItem {
-  icon: string
-  label: string
-  value: string
-  visible: boolean
+  /**
+   * Hero tràn hết chiều ngang thay vì nằm trong container.
+   * Container policy (06-BINDING_MAP §3) cho Hero là ngoại lệ full-width có chủ
+   * ý; phần chữ bên trong vẫn tự bọc container nên không có element trần.
+   */
+  fullBleed?: boolean
 }
 ```
 
@@ -254,6 +322,8 @@ Type phụ trợ:
 
 ```ts
 export interface InfoRow {
+  /** Xem ghi chú cùng tên ở InfoBar.astro. */
+  field: string
   icon: string
   label: string
   value: string
@@ -344,6 +414,8 @@ export interface Props {
 ```ts
 export interface Props {
   slots: Slot[]
+  /** Trang có thanh dính dưới header (DetailLayout) → chỗ dính cộng thêm --sticky-bar-h. */
+  stickyBar?: boolean
 }
 ```
 
@@ -352,7 +424,13 @@ Type phụ trợ:
 ```ts
 export interface Slot {
   name: string
-  component: 'BookingCTA' | 'InfoCard' | 'Map' | 'Article' | 'custom'
+  // I4 fix round (2026-08-23): 'custom' từng khai cho ô FactStrip inline chèn
+  // qua slot 'info' — nay FactStrip inline là con trực tiếp của `.two-col`
+  // (DetailLayout.astro), không còn đi qua Sidebar nữa, nên không component
+  // nào tạo giá trị 'custom' cho field này. Bỏ khỏi union thay vì để mã chết
+  // (tiền lệ Ruling 2 của ledger đợt này: hằng khai mà không dùng là nợ
+  // reviewer sẽ bắt).
+  component: 'BookingCTA' | 'InfoCard' | 'Map' | 'Article'
   visible: boolean
   props: Record<string, any>
 }
@@ -368,6 +446,10 @@ export interface Props {
   lang: Lang
   destinationHref: string
   config: SiteSettingsResult | null
+  /** Tour cho khối "Tour nổi bật" ngay dưới hero. Rỗng thì khối tự ẩn. */
+  homeTours?: any[]
+  /** Tổng số tour thật, cho nhãn "Xem tất cả N tour". */
+  homeTourTotal?: number
 }
 ```
 
@@ -425,6 +507,7 @@ export interface Props {
   data: AttractionResult
   lang: Lang
   nearby?: import('../lib/types').NearbyEntity[]
+  contact?: SiteContact | null
 }
 ```
 
@@ -744,7 +827,7 @@ interface TourEntity {
 }
 ```
 
-## Trang chủ (9)
+## Trang chủ (14)
 
 ### HomeAreaGrid
 
@@ -778,6 +861,18 @@ export interface Props {
 ```ts
 export interface Props {
   facts?: KeyFact[]
+}
+```
+
+### HomeGroupQuote
+
+`src/components/HomeGroupQuote.astro`
+
+```ts
+export interface Props {
+  groupQuote?: SiteGroupQuote | null
+  zaloUrl?: string | null
+  fallbackCtaLabel: string
 }
 ```
 
@@ -837,6 +932,18 @@ export interface Props {
 }
 ```
 
+### HomePartners
+
+`src/components/HomePartners.astro`
+
+```ts
+export interface Props {
+  partners?: SitePartner[] | null
+  heading: string
+  sub?: string
+}
+```
+
 ### HomeRollupSection
 
 `src/components/HomeRollupSection.astro`
@@ -858,6 +965,43 @@ Type phụ trợ:
 type HomeCard = EntityRef | HomepagePlaceCard | HomepageArticleCard
 ```
 
+### HomeStatsBand
+
+`src/components/HomeStatsBand.astro`
+
+```ts
+export interface Props {
+  stats?: SiteStat[] | null
+}
+```
+
+### HomeTestimonials
+
+`src/components/HomeTestimonials.astro`
+
+```ts
+export interface Props {
+  testimonials?: SiteTestimonial[] | null
+  heading: string
+  disclosure?: string
+}
+```
+
+### HomeTourGrid
+
+`src/components/HomeTourGrid.astro`
+
+```ts
+export interface Props {
+  tours: any[]
+  lang: Lang
+  /** Đường dẫn trang danh sách tour, ví dụ `/tour/`. */
+  indexHref: string
+  /** Tổng số tour đang có — dùng cho nhãn "Xem tất cả N tour". */
+  total: number
+}
+```
+
 ### HomeTrustBar
 
 `src/components/HomeTrustBar.astro`
@@ -865,6 +1009,7 @@ type HomeCard = EntityRef | HomepagePlaceCard | HomepageArticleCard
 ```ts
 export interface Props {
   items: Array<{ icon: string; title: string; description: string }>
+  heading?: string
 }
 ```
 
@@ -879,8 +1024,8 @@ cùng inventory, nếu không thì hợp đồng API còn type treo.
 
 | Nhóm | Số component |
 |---|---|
-| Primitive dùng chung | 27 |
+| Primitive dùng chung | 28 |
 | Template entity detail | 13 |
 | Trang danh sách | 5 |
-| Trang chủ | 9 |
-| **Tổng** | **54** |
+| Trang chủ | 14 |
+| **Tổng** | **60** |
