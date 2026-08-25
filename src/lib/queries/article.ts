@@ -31,7 +31,12 @@ export function articleBySlugQuery(): string {
       ${mainImageFragment()},
       sameAs,
       url,
-      jobTitle,
+      // QĐ-2026-08-25-03: jobTitle la object i18n. Thieu chieu ngon ngu thi
+      // component render ra chuoi "[object Object]" — da len trang song o 2
+      // trang cam nang. queries/person.ts:29 von da chieu dung; hang nay sot.
+      // (Chu thich khong dau va khong backtick: khoi nay nam TRONG template
+      //  literal cua GROQ, backtick se dong chuoi.)
+      "jobTitle": jobTitle.vi,
       imageProvenance
     },
     body,

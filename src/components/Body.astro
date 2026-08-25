@@ -4,23 +4,89 @@ import { imageUrl } from '../lib/sanity-image'
 export interface Props {
   blocks: any[] | undefined | null
   class?: string
+  /**
+   * Hạ cấp tiêu đề thân bài — `06` §3 hàng "Thân bài" (N15b, v2.2).
+   *
+   * Trong trang chi tiết entity, tiêu đề mục của `Section` là `<h2>`. Biên tập
+   * vẫn gõ h2 trong Sanity, nhưng render thẳng ra `<h2>` thì thân bài ngang cấp
+   * với tiêu đề mục và dàn bài tài liệu gãy. `headingOffset={1}` đẩy h2→h3,
+   * h3→h4, h4→h5.
+   *
+   * `06` khai prop này từ v2.2 nhưng mã CHƯA BAO GIỜ có nó (QĐ-2026-08-25-03).
+   * Đo được: một trang điểm tham quan phát 7 thẻ `<h2>` trong thân bài, ngang
+   * hàng 3 `<h2>` tiêu đề mục.
+   *
+   * Trang Article KHÔNG hạ cấp (`06` §4.10): ở đó thân bài là nội dung chính,
+   * không nằm dưới một tiêu đề mục nào. Nên mặc định là 0, caller nào cần thì
+   * bật — không đảo ngược mặc định để khỏi đổi hành vi Article.
+   */
+  headingOffset?: 0 | 1
 }
 
-const { blocks, class: className } = Astro.props
+const { blocks, class: className, headingOffset = 0 } = Astro.props
 
-function renderInline(children: any[]): string {
+const esc = (t: string) =>
+  t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
+/**
+ * Link trong Portable Text là ANNOTATION, không phải mark đơn giản: `marks` của
+ * một span chứa `_key` trỏ vào `block.markDefs[]`.
+ *
+ * Bản cũ chỉ so chuỗi với 'strong' và 'em', nên mọi `_key` rơi vào nhánh
+ * không-khớp và **link biến thành chữ thường** — 11 trang đã phát hành mất link
+ * mà không cổng nào thấy, vì HTML vẫn hợp lệ, chỉ thiếu một thẻ `<a>`.
+ *
+ * Bản cũ cũng nhả thẳng `c.text` vào `set:html` mà không escape. Nay escape
+ * trước rồi mới bọc thẻ.
+ *
+ * (Docblock của `goRac` ngay dưới đây; hàm đó chạy TRƯỚC escape.)
+ */
+
+/**
+ * Gỡ rác `<cite index="…">` do công cụ sinh nội dung để lại trong `body`.
+ *
+ * Trước khi có escape, trình duyệt lặng lẽ nuốt chúng như thẻ không biết. Sau
+ * khi escape, chúng thành CHỮ HIỆN RA — đo được **25 thẻ trên 2 trang**
+ * (`dia-danh/noi-thanh-nha-trang` 24, `dia-danh/cang-cap-treo-vinpearl` 1).
+ * Tức bản vá escape đúng về bảo mật nhưng làm lộ một nợ dữ liệu có sẵn.
+ *
+ * Gỡ ở tầng render là chữa triệu chứng: nguồn vẫn bẩn. Nợ dọn hai tài liệu đó
+ * trong Sanity ghi ở QĐ-2026-08-25-03. Làm ở đây vì không có nó thì đợt phát
+ * hành này đẩy rác lên trang sống.
+ */
+const goRac = (t: string) => t.replace(/<\/?cite\b[^>]*>/gi, '')
+
+function renderInline(children: any[], markDefs: any[] = []): string {
   return children.map((c: any) => {
     if (!c || typeof c !== 'object') return ''
-    const text = c.text || ''
+    const text = goRac(c.text || '')
     if (!text) return ''
-    if (!c.marks || c.marks.length === 0) return text
-    let out = text
+    if (!c.marks || c.marks.length === 0) return esc(text)
+    let out = esc(text)
     for (const mark of c.marks) {
       if (mark === 'strong') out = `<strong>${out}</strong>`
       else if (mark === 'em') out = `<em>${out}</em>`
+      else if (mark === 'underline') out = `<u>${out}</u>`
+      else {
+        const def = markDefs.find((d: any) => d && d._key === mark)
+        if (def && def._type === 'link' && def.href) {
+          const href = String(def.href)
+          // Link ra ngoài site mở tab mới kèm rel bảo vệ; link nội bộ thì không.
+          const raNgoai = /^https?:\/\//i.test(href) && !href.includes('tourdao.vn')
+          const them = raNgoai ? ' target="_blank" rel="noopener nofollow"' : ''
+          out = `<a href="${esc(href)}"${them}>${out}</a>`
+        }
+      }
     }
     return out
   }).join('')
+}
+
+// h2 → h3 → h4 → h5 khi headingOffset = 1. Kẹp ở h5: không hạ sâu hơn.
+const capTieuDe = (style: string): string => {
+  const n = Number(style.slice(1))
+  if (!Number.isFinite(n)) return 'p'
+  return 'h' + Math.min(n + headingOffset, 5)
 }
 ---
 
@@ -35,19 +101,21 @@ function renderInline(children: any[]): string {
         return (
           <figure>
             <img src={src} alt={block.alt || ''} loading="lazy" />
+            {block.caption && <figcaption>{block.caption}</figcaption>}
           </figure>
         )
       }
 
       if (block._type === 'block' && block.children) {
-        const html = renderInline(block.children)
-        const text = block.children.map((c: any) => c.text || '').join('')
+        const html = renderInline(block.children, block.markDefs)
+        const text = goRac(block.children.map((c: any) => c.text || '').join(''))
         if (!text.trim()) return null
 
         const style = block.style || 'normal'
-        if (style === 'h2') return <h2 set:html={html} />
-        if (style === 'h3') return <h3 set:html={html} />
-        if (style === 'h4') return <h4 set:html={html} />
+        if (/^h[2-4]$/.test(style)) {
+          const The = capTieuDe(style)
+          return <The set:html={html} />
+        }
         return <p set:html={html} />
       }
 
@@ -69,13 +137,60 @@ function renderInline(children: any[]): string {
 
   .body-block h2,
   .body-block h3,
-  .body-block h4 {
+  .body-block h4,
+  .body-block h5 {
     margin-top: var(--s6);
     margin-bottom: var(--s3);
     font-family: var(--font-display);
     font-weight: var(--fw-700);
     line-height: var(--lh-heading);
   }
+
+  /* QĐ-2026-08-25-03: bốn cấp này trước đây KHÔNG khai font-size nào, nên rơi
+     về mặc định trình duyệt — đo được 25,5px (1.5em) và 19,9px (1.17em). Hai
+     giá trị đó không có trong thang chữ của `07` §2 và vi phạm câu mở đầu
+     `tokens.css`: "0 hardcoded value bên ngoài file này".
+
+     Thang 26 / 21 / 17, buộc theo THẺ chứ không theo ý định biên tập — CSS chỉ
+     thấy thẻ. Hệ quả phải nói rõ, vì nó khác nhau ở hai loại trang:
+
+     • Trang CẨM NANG (headingOffset=0): editor h2 → <h2> 26px, trước 25,5px;
+       editor h3 → <h3> 21px, trước 19,9px. Gần như không đổi.
+     • Trang ENTITY (headingOffset=1): editor h2 → <h3> 21px, trước 25,5px;
+       editor h3 → <h4> 17px, trước 19,9px. NHỎ ĐI MỘT BẬC — và đó đúng là điều
+       headingOffset sinh ra để làm: thân bài nằm DƯỚI tiêu đề mục nên phải nhỏ
+       hơn nó.
+
+     Bản đầu đặt h2 = --fs-section (32px), tức BẰNG tiêu đề mục — đảo ngược đúng
+     thứ vừa sửa, và trên 13 trang cẩm nang thì 72 thẻ h2 thân bài nhảy 25,5→32px.
+     Việc chỉnh thang cỡ tiêu đề vẫn là câu hỏi mở của chủ dự án, chưa chốt. */
+  .body-block h2 { font-size: var(--fs-h4); }
+  .body-block h3 { font-size: var(--fs-card-title); }
+  .body-block h4 { font-size: var(--fs-base); }
+  .body-block h5 { font-size: var(--fs-base); }
+
+  /* Link trong thân bài — trước đây chưa từng có luật nào, vì chưa từng có link
+     nào render ra. Gạch chân để phân biệt được với chữ thường, không chỉ bằng
+     màu (WCAG 1.4.1: không dùng riêng màu để truyền thông tin).
+
+     PHẢI dùng :global(). Astro gắn `data-astro-cid-*` vào selector VÀ vào phần
+     tử, nhưng thẻ <a> ở đây sinh trong `set:html` nên không mang thuộc tính đó
+     — luật scoped không bao giờ khớp. Bản đầu của khối này viết `.body-block a`
+     và **không ăn một dòng nào**: `tokens.css` có `a { color: inherit;
+     text-decoration: none }` toàn cục, nên 41 link trên 15 trang render y hệt
+     chữ thường. Chú thích WCAG ở trên khi đó mô tả một thứ không xảy ra. */
+  .body-block :global(a) {
+    color: var(--c-primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .body-block :global(a:hover) {
+    color: var(--c-primary-strong);
+  }
+
+  .body-block :global(strong) { font-weight: var(--fw-700); }
+  .body-block :global(em) { font-style: italic; }
 
   .body-block figure {
     margin: var(--s5) 0;
@@ -84,5 +199,11 @@ function renderInline(children: any[]): string {
   .body-block figure img {
     max-width: 100%;
     border-radius: var(--radius-md);
+  }
+
+  .body-block figcaption {
+    margin-top: var(--s2);
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
   }
 </style>

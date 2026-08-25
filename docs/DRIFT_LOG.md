@@ -934,7 +934,15 @@ vá, không tự nhận tầng B "bắt hết".
 
 ## DR-049 — `06` v2.3 chuyển `summary` khỏi hero, nhưng mã vẫn render nó trong hero
 
-**Trạng thái:** mở, **cố ý chờ Design chặng 2**. Không phải sót.
+**Trạng thái:** **ĐÓNG 2026-08-24** — `QĐ-2026-08-24-05`. (Trước đó: mở, cố ý chờ Design chặng 2. Không phải sót.)
+
+> **Đóng thế nào.** Design chặng 2 giao mockup (project `fca38485`) → QA1 bắt hai chỗ lệch với `06` v2.3 → chủ dự án chốt phương án A → Code dựng. `DetailLayout.astro` nay có `.summary-band` **sau thanh dính**, gắn `data-region="summary-band"` và `data-field="summary"`; `summary` đã gỡ khỏi `slot="overlay"` của `Hero`. Kèm theo, `title` cũng rời lớp phủ xuống `.title-band` — `06` lên **v2.4.0**.
+>
+> **Kiểm:** thứ tự vùng trong `<body>` là hero → title-band → sticky-bar → summary-band → fact-strip; `slot="overlay"` còn **0** phần tử chữ; `luat1-post` **pass — 137 trang, 0 field lặp vùng, 0 field sai vùng**; `BM-ORPHAN-REGION` và `BM-EMPTY-REGION` pass; `astro check` 0 lỗi.
+>
+> **Điều phiếu này dự đoán đúng.** Phiếu viết *"`summary` chưa bao giờ được gắn `data-field`, nên `luat1-post` không thấy"* và xếp nó vào khoảng mù của `DR-048`. Nay vùng đã gắn thẻ, nên đây là **lần đầu tiên tầng B của cổng canh được đoạn mở**. Ba vùng còn lại của `DR-048` — `hero`, `hero-badge`, `breadcrumb`, `footer-meta` — vẫn chưa nối; `DR-048` giữ nguyên trạng thái mở.
+>
+> **Một mục mới mở ra từ đây:** `.title-band` **chưa** gắn `data-region` và `title` chưa vào ma trận §3.1, nên cổng chưa canh dải tiêu đề. Lý do và điều kiện gắn: xem `QĐ-2026-08-24-05` mục "Còn mở".
 
 `06` §3 hàng "Đoạn mở" và §3.1 (v2.3.0, `QĐ-2026-08-23-02`) khai `summary` nằm ở **dải sáng dưới hero, sau thanh dính**. `src/components/DetailLayout.astro` vẫn render nó vào `slot="overlay"` của `Hero` — tức vẫn đè lên ảnh.
 
@@ -1025,7 +1033,13 @@ Dòng `body` khớp. **Dòng `heading` ngược.** Hệ quả thật hôm nay: *
 
 ## DR-052 — Hai file Be Vietnam Pro 800 ship lên nhưng chưa từng được khai `@font-face`
 
-**Trạng thái:** mở. Phát hiện 2026-08-24 khi quét kho lập `docs/design-context/DESIGN_SURFACE_MAP.md`. Không thuộc phiếu V1 nào; đây là lệch **mã ↔ mã**, không phải mã ↔ đặc tả.
+**Trạng thái:** **đóng một phần 2026-08-24** — còn mở hai mục. Phát hiện 2026-08-24 khi quét kho lập `docs/design-context/DESIGN_SURFACE_MAP.md`. Không thuộc phiếu V1 nào; đây là lệch **mã ↔ mã**, không phải mã ↔ đặc tả.
+
+> **Đã sửa (2026-08-24, `BaseLayout.astro`).** Thêm **hai khối `@font-face` cấp 800** cho Be Vietnam Pro (latin-viet và vietnamese) — bốn khối thành sáu. Bôi đậm giả trên ≥12 component chấm dứt. **Đính chính 2026-08-25:** bản đầu của dòng này ghi "không tải thêm một byte nào" — **sai, và sai ngược với phép đo ở chính phiếu này**: thân phiếu khai rõ hai file "không trình duyệt nào tải chúng vì không có luật CSS nào trỏ tới". Khai `@font-face` xong thì chúng **bắt đầu** được tải: **+18.524 byte**, đưa một trang tiếng Việt dùng cả hai cấp từ 70.672 lên 89.196 byte. Vẫn dưới trần R4 140 KB. Ba câu chú thích khai ngược ở đầu khối `<style is:global>` đã viết lại. Kiểm: `grep` bản dev server phát ra cho **2** khai `font-weight: 800` và cả hai tên file 800 trên cả trang chủ lẫn trang chi tiết; `astro check` 0 lỗi 0 cảnh báo.
+>
+> **Còn mở, không sửa trong lượt này:**
+> 1. **Preload.** `BaseLayout.astro` vẫn preload đúng một file — Nunito latin-viet, tức chữ thân bài; chữ tiêu đề vẫn không được preload. Phiếu này tự ghi *"chưa đo, nên là việc phải kiểm, không phải kết luận"*, nên chưa đụng. Đóng cùng lượt **R5** sau khi đo LCP thật. Chú thích ở dòng preload đã sửa cho khỏi khai sai.
+> 2. **`--fw-900`.** Vẫn còn trong `tokens.css` và `.hubs-title` vẫn dùng. Không mặt chữ nào có cấp đó; trình duyệt kẹp về 800 — nay là 800 **thật** chứ không còn là 800 tổng hợp giả, nên tác hại đã giảm. Gỡ token là đụng `07`, thuộc lượt V5.
 
 `public/fonts/` chứa **6** file `.woff2`. `src/layouts/BaseLayout.astro` khai **4** `@font-face` (dòng 121–152) — và grep toàn `src/` cho **0** kết quả với hai tên file còn lại:
 
@@ -1057,3 +1071,119 @@ Be Vietnam Pro nay là chữ **chính** của tiêu đề, không phải lớp d
 **Vì sao không sửa ngay.** Ba lối xử — (a) thêm hai `@font-face` 800, (b) gỡ hai file 800 và hạ mã xuống 700, (c) đổi bộ chữ luôn — thì lối (c) đang được cân ở **Design vòng 5 chặng 1**, và chủ dự án chốt bằng mắt. Sửa (a) hay (b) hôm nay có thể thành công bỏ đi trong vài ngày. Đây là **quyết định đánh đổi giữa byte và độ đậm**, thuộc tầng token — không phải việc dọn dẹp.
 
 **Đóng khi nào:** cùng lượt **V5** với `DR-050`/`DR-051`. Sau khi chủ dự án chốt bộ chữ ở cuối chặng 1, chọn một trong ba lối trên, sửa `BaseLayout.astro` (khối `@font-face` + dòng preload + ba câu chú thích), rồi **đo LCP** để đóng luôn nợ R5. Nếu kết quả chặng 1 là **giữ nguyên bộ đang chạy** thì phiếu này vẫn phải xử — nó không tự tiêu.
+
+---
+
+## DR-053 — `07` §0 cho phép motif đất liền, `07` §1 cấm; hai câu trong cùng một file
+
+**Trạng thái:** mở. Phát hiện 2026-08-24 khi đo kho ảnh cho `QĐ-2026-08-24-03`. Đây là lệch **đặc tả ↔ đặc tả**, trong **cùng một tài liệu** — khác họ với `DR-050`/`DR-051` (đặc tả ↔ mã).
+
+`07-DESIGN_TOKENS` nói hai câu ngược nhau về cùng một chuyện — hoạ tiết và ảnh được gợi tới cảnh quan nào:
+
+| Chỗ | Ngày | Nguyên văn |
+|---|---|---|
+| **§0 mục 1** | bổ sung **2026-06-30** | *"bản sắc Khánh Hoà không chỉ là biển; thiết kế phải cho phép **ảnh và motif gợi thêm đồng lúa, đầm phá, chân núi và rừng**, nhưng không mở thêm palette brand mới khi chưa rebrand"* |
+| **§1** | chốt **2026-08-06** | *"**Cấm token và hoạ tiết đất liền.** Không thêm màu hay hoạ tiết gợi ruộng lúa, đồng bằng, núi rừng, đường bình độ."* |
+
+**Câu ở §1 tự khai mình là bản thay thế** — nó mở đầu bằng *"Quy tắc cảnh quan biển đảo (chủ dự án chốt hướng thị giác 2026-08-06, **thay quy tắc cảnh quan cũ**)"*. Nhưng quy tắc cũ **không bị gỡ khỏi §0**; nó vẫn nằm đó, vẫn đọc như luật đang hiệu lực, và §0 là mục **"Quyết định nền (founder chốt)"** — tức là mục có thẩm quyền cao nhất trong tài liệu.
+
+**Chồng lấn thật nằm ở chữ "motif".** §1 cấm *token và hoạ tiết*; §0 cho phép *ảnh và motif*. "Hoạ tiết" và "motif" là cùng một thứ, nên hai câu trực tiếp mâu thuẫn ở đó. Còn về **ảnh**, §1 không nói gì cả — nên hiện tại **không có luật nào** trả lời được câu hỏi "ảnh của site được phép chụp cảnh gì".
+
+**Vì sao phiếu này không phải chuyện chữ nghĩa.** `QĐ-2026-08-24-03` vừa đưa **chuẩn chất ảnh (13b)** thành hạng mục giao nộp của Design vòng 5 chặng 1. Design sẽ phải dựa vào `07` để biết biên — và `07` đang đưa ra hai biên khác nhau. Thêm nữa, dự án Claude Design đã **tự viết một chuẩn ảnh thứ ba** trong `readme.md` của nó (*"ảnh biển đảo thật, nắng trưa…"*), không truy về được câu nào trong hai câu trên. Ba nguồn cho một câu hỏi.
+
+**Vì sao không sửa ngay.** Sửa nghĩa là chọn một trong hai, mà đó là **quyết định định vị thương hiệu**, không phải dọn dẹp: Tour Đảo bán tour biển đảo (`00-PROJECT_BRIEF` §3), nhưng kho ảnh đang lên sóng có `attraction/thac-ta-gu` (thác), `attraction/khu-du-lich-yang-bay` (rừng), `attraction/khu-du-lich-ba-ho` (suối) — tức **nội dung đất liền đã có thật trên site**. Cấm ảnh đất liền là bỏ những trang đó khỏi bản sắc thị giác; cho phép là mở lại hướng mà `DR-002` đã gỡ. Chủ dự án chốt, không phải Cowork chốt.
+
+**Đóng khi nào:** cùng lượt **V5**, ở cổng cuối chặng 1, cùng lúc chủ dự án chốt hạng mục **13b**. Câu chốt được ghi vào `07` §1 thành một câu duy nhất về **cả ảnh lẫn hoạ tiết**, và câu ở §0 mục 1 được sửa hoặc đánh dấu là bản ghi lịch sử. Đóng luôn nguồn thứ ba: hoặc chép câu đã chốt vào `readme.md` của dự án Design, hoặc gỡ đoạn đó khỏi đấy.
+
+---
+
+## DR-054 — `07` §0 khai chữ nội dung là Plus Jakarta Sans, mã chạy Nunito
+
+**Trạng thái:** mở. Phát hiện 2026-08-24, cùng lượt rà với `DR-053`. **Không trùng `DR-050`** — xem mục cuối.
+
+`07-DESIGN_TOKENS` §0 mục 2, nguyên văn:
+
+> *"Hệ chữ phase 1.1 (cập nhật 2026-06-29): giữ hai font self-host hiện có… Be Vietnam Pro dùng cho heading/display; **Plus Jakarta Sans dùng cho body/UI**."*
+
+Mã đang chạy: `src/styles/tokens.css:72` khai `--font-ui: "Nunito", "Be Vietnam Pro", system-ui, sans-serif`. Bộ chữ này bị thay ngày **2026-08-06** (`QĐ-2026-08-06-11`, thay Lora bằng Nunito) — tức câu ở §0 đã sai **18 ngày**.
+
+**Mã còn tự ghi rằng nó đã gỡ bộ chữ đó.** Grep `src/` cho đúng **một** kết quả với "Jakarta", và đó là một câu chú thích ở `BaseLayout.astro:120`:
+
+> *"Lora và Plus Jakarta Sans đã gỡ: không còn chỗ nào gọi tới chúng."*
+
+Nghĩa là hai tài liệu nói ngược nhau **một cách tường minh**: mã khai đã gỡ, `07` §0 khai đang dùng. Đây không phải chuyện tài liệu chậm cập nhật một cách mơ hồ — có người đã ghi lại việc gỡ, chỉ là ghi ở mã chứ không ghi ở đặc tả.
+
+**Vì sao đây là phiếu riêng chứ không phải phần của `DR-050`.** `DR-050` ghi *"`07` **§2** mô tả ngược bộ chữ đang chạy"* — nó bắt đúng §2, mục *"Chữ"*. §0 là mục khác: **"Quyết định nền (founder chốt qua trắc nghiệm 2026-06-12)"**, và trong thứ tự đọc của tài liệu nó đứng **trước** §2. Người đọc `07` từ đầu gặp câu sai ở §0 trước khi gặp câu sai ở §2, và hai câu sai theo hai kiểu khác nhau:
+
+| Phiếu | Mục | Sai thế nào |
+|---|---|---|
+| `DR-050` | §2 | Khai **Nunito cho tiêu đề**; thật ra tiêu đề là Be Vietnam Pro — đảo vai giữa hai bộ đang có |
+| **`DR-054`** | **§0 mục 2** | Khai **Plus Jakarta Sans cho nội dung**; đó là **một bộ chữ thứ ba không tồn tại trong repo** |
+
+Khác nhau về hệ quả: sửa `DR-050` là đảo lại hai tên đã có; sửa phiếu này là **xoá tên một bộ chữ chưa từng được ship**. Gộp hai phiếu thì lúc đóng sẽ sót một trong hai chỗ — đúng kiểu sót đã xảy ra: `DR-050` viết ngày 2026-08-24 và **không ai để ý §0 cũng sai**.
+
+**Vì sao không sửa ngay.** Cùng lý do với `DR-050`/`DR-051`/`DR-052`: **Design vòng 5 chặng 1 đang cân ba ứng viên chữ**, và chủ dự án chốt bằng mắt trên bản dựng thật. Sửa `07` hôm nay để khai đúng Nunito, rồi vài ngày nữa chốt bộ khác, là sửa hai lần. Nhưng phiếu **không tự tiêu** kể cả khi chặng 1 chốt giữ nguyên bộ đang chạy — câu ở §0 vẫn phải viết lại, vì "Plus Jakarta Sans" sai ở mọi kết cục.
+
+**Đóng khi nào:** cùng lượt **V5** với `DR-050`, `DR-051`, `DR-052`. Khi Cowork ghi bộ chữ đã chốt vào `07`, phải sửa **cả §0 mục 2 lẫn §2** trong cùng một lần, và đối chiếu lại `BaseLayout.astro` — ba chỗ, một nguồn.
+
+---
+
+## DR-055 — Ảnh trong thân bài không có chỗ khai `alt`: 561 khối, 0 khối có alt
+
+**Trạng thái:** mở. Phát hiện 2026-08-25 khi review `QĐ-2026-08-25-03`. Đây là lệch **schema ↔ đặc tả**: `06` đòi một thứ mà schema Sanity không có chỗ chứa.
+
+`06` §3 hàng "Hero" khai *"alt bắt buộc khi có ảnh (2.0)"*, và I12 chặn publish khi `logo` đối tác thiếu alt. Nhưng ảnh **trong thân bài** thì không có field `alt` để mà thiếu:
+
+| Đo trên `production`, tài liệu đã duyệt | Số |
+|---|---|
+| Tài liệu có ảnh trong `body` | **66** |
+| **Tổng khối ảnh trong `body`** | **561** |
+| Khối ảnh có `alt` | **0** |
+| Khối ảnh có `caption` | **0** |
+
+Nguyên nhân ở schema: `body` khai ảnh bằng `{ type: 'image' }` trần, không có khối `fields`. So sánh `mainImage` và `gallery` — hai chỗ đó khai `alt` tử tế, nên `mainImageFragment()` chiếu được và I12 chấm được.
+
+**Vì sao phiếu này sinh ra HÔM NAY chứ không sớm hơn.** Trước `QĐ-2026-08-25-03`, ảnh trong thân bài **không render ra** (truy vấn không deref `asset->`, xem phiếu đó). Không có `<img>` nào thì không có `alt` nào để thiếu. Bản vá làm ảnh hiện lên — và cùng lúc đưa **561 ảnh không nhãn** lên trang. Đây là **nợ có sẵn bị bản vá làm lộ ra**, không phải nợ do bản vá tạo ra; nhưng hệ quả với người dùng trình đọc màn hình thì là mới.
+
+**Không sửa được ở tầng mã.** `Body.astro` đã đọc `block.alt` (`alt={block.alt || ''}`) — nó sẽ dùng ngay khi field tồn tại. Biên tập viên **không có ô để nhập**. Sửa là thêm `fields: [{ name: 'alt', … }]` vào khối image của `body` trong schema, rồi nhập liệu cho 561 khối.
+
+**Kèm theo: `<figcaption>` là mã chết có chủ ý.** `Body.astro` render `<figcaption>` khi khối ảnh có `caption`; không khối nào có, nên `dist/` có **0** thẻ. Giữ lại vì nó sẽ chạy đúng ngay khi schema thêm field, và vì gỡ rồi thêm lại là hai lần sửa. Ghi ra đây để lần sau không ai tưởng nó đang hoạt động.
+
+**Quan hệ với các nợ ảnh đang có.** `SPEC-2026-08-22-be-mat-vong-5` §9 khai ba việc ảnh **V-A** (thay ảnh dưới mốc), **V-B** (rà ảnh dùng lại), **V-C** (bù `alt` — 26 ảnh, `mainImage` và `gallery`). Phiếu này **KHÔNG** thuộc V-C: V-C là nhập liệu vào field đã có, còn đây là **thêm field**. Nên nó đứng cạnh V-A/V-B/V-C, không nằm trong.
+
+**Đóng khi nào:** thêm field `alt` (và cân nhắc `caption`) vào khối image của `body` trong `cms/schemas/`, deploy schema, rồi nhập liệu. Cần phiếu quyết định vì đụng `01-CONTENT_MODEL` và schema — `06` §6 khai rõ: *"Mọi field xuất hiện ở đây phải tồn tại trong `01-CONTENT_MODEL.md`. Cần field mới: quay lại sửa content model trước, không bịa tại đây."*
+
+---
+
+## DR-056 — Cổng sớm `pre-push` chưa từng chạy: hook thiếu bit thực thi, git bỏ qua trong im lặng
+
+**Trạng thái:** **đã sửa 2026-08-25** trong cùng đợt phát hiện. Ghi lại vì cách nó ẩn mình đáng biết.
+
+`.githooks/pre-push` tồn tại từ ADR-0010 Quyết định 4 và chạy `npm run gate`, fail thì chặn push. `scripts/install-hooks.sh` đặt `core.hooksPath=.githooks` và in *"✓ Git hooks trong .githooks/ sẽ chạy từ clone này"*.
+
+Câu đó **sai**. Đo được:
+
+```
+$ git ls-files -s .githooks/pre-push
+100644 86d6489c...        ← mode 644, KHÔNG executable
+$ grep -c chmod scripts/install-hooks.sh
+0
+```
+
+**Git bỏ qua hook không executable và vẫn để `git push` thành công**, chỉ in một dòng `hint:` lẫn giữa output:
+
+> `hint: The '.githooks/pre-push' hook was ignored because it's not set as executable.`
+
+Không mã lỗi, không cảnh báo, `push` trả về 0. Ai không đọc kỹ dòng `hint` sẽ tin rằng cổng đã chạy và đã xanh.
+
+**Phạm vi: mọi clone.** Bit thực thi được **git lưu trong index**, nên `100644` là trạng thái của repo chứ không phải của một máy. Bất kỳ ai từng chạy `install-hooks.sh` đều nhận một hàng rào không hoạt động. Cổng sớm ở máy vì thế **chưa từng chặn một lần push nào** kể từ khi được dựng.
+
+**Cách phát hiện.** 2026-08-25, đẩy nhánh `feat/be-mat-vong-5-va-ra-bo-cuc` với **năm cổng đang đỏ** (R3, R4, S24-AUTHORITY, control-registry, deferred). Push **thành công**. Kỳ vọng là bị chặn — chính khoảng cách giữa kỳ vọng và kết quả làm lộ dòng `hint`. Nếu hôm đó cổng xanh thì lỗi này còn ẩn tiếp.
+
+**Đã sửa.**
+1. `git update-index --chmod=+x .githooks/pre-push` → mode `100755` vào index, có hiệu lực cho mọi clone sau.
+2. `scripts/install-hooks.sh` thêm `chmod +x .githooks/*` và sửa câu thông báo, để clone cũ chạy lại script là được vá.
+
+**Bài học ghi lại, vì nó lặp với `DR-048`.** Cả hai là **cổng tồn tại nhưng không nhìn thấy gì**: `DR-048` là bốn vùng chưa gắn `data-region` nên `luat1-post` mù; đây là hook chưa executable nên git mù. Trong cả hai ca, bảng điều khiển báo xanh vì **không có ai kiểm**, chứ không phải vì đã kiểm và đạt. `CLAUDE.md` §6 viết *"mặc định của cổng là không đạt nếu không có bằng chứng"* — hai phiếu này là hai kiểu bằng chứng giả khác nhau.
+
+**Hệ quả còn mở, không sửa ở đây.** Hook nay chạy thật, nên **lần push tới sẽ bị chặn** bởi năm cổng đỏ đang có. Chúng là nợ dữ liệu đã xếp đợt 4D (`SPEC-2026-08-22-be-mat-vong-5` §9), không phải nợ của đợt này — nhưng từ nay chúng chặn đường phát hành thật sự, chứ không còn chỉ nằm trong báo cáo.

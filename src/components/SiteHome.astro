@@ -204,16 +204,35 @@ const activeSections = rawSections.filter((s) => !s.hidden)
         const hasHighlights = Boolean(td.highlights?.length)
         const hasFacts = Boolean(td.keyFacts?.length)
         if (!hasBody && !hasHighlights && !hasFacts) return null
+        /* Hai cột — QĐ-2026-08-25-01. Trước đây bốn khối xếp dọc: thân bài bị
+           kẹp `max-width: var(--measure, 70ch)` (~620px) — luật đặt ở
+           `Body.astro:61`, KHÔNG phải ở `.home-body` của file này (`.home-body`
+           là CSS chết, không markup nào dùng) — nên trong khung 1200px thừa
+           ~580px trắng bên phải, còn dải Fact chạy hết bề ngang phía dưới.
+           Nay Fact về cột phụ 340px cạnh chữ — đúng bề rộng cột phụ mà trang
+           chi tiết đã dùng (`two-col`), không phải con số mới. Dưới 1024px xếp
+           chồng lại như cũ. `70ch` giữ nguyên: đó là luật measure của 07 §2.
+           Lưu ý phần này CHỈ giải quyết một nửa: `.editorial-main` rộng ~764px
+           còn `.body-block` vẫn kẹp ~620px, nên ~144px trắng còn lại trong cột
+           trái. Thu hẹp nốt là đụng luật measure — cần phiếu riêng. */
         return (
           <section class="container editorial-section">
             <h2 class="editorial-section-heading">{copy.sections.overview}</h2>
-            {hasBody && td.body && <Body blocks={td.body} />}
-            {hasHighlights && td.highlights && (
-              <ul class="home-highlights">
-                {td.highlights.map((h) => <li>{h}</li>)}
-              </ul>
-            )}
-            {hasFacts && td.keyFacts && <HomeFacts facts={td.keyFacts} />}
+            <div class="editorial-grid">
+              <div class="editorial-main">
+                {hasBody && td.body && <Body blocks={td.body} />}
+                {hasHighlights && td.highlights && (
+                  <ul class="home-highlights">
+                    {td.highlights.map((h) => <li>{h}</li>)}
+                  </ul>
+                )}
+              </div>
+              {hasFacts && td.keyFacts && (
+                <aside class="editorial-aside">
+                  <HomeFacts facts={td.keyFacts} aside />
+                </aside>
+              )}
+            </div>
           </section>
         )
       }
@@ -390,6 +409,27 @@ const activeSections = rawSections.filter((s) => !s.hidden)
     font-size: var(--fs-h3);
     font-weight: var(--fw-800);
     margin-bottom: var(--s5);
+  }
+
+  /* 340px là bề rộng cột phụ dùng chung với trang chi tiết (DetailLayout
+     .two-col), không phải giá trị mới. align-items:start để cột Fact không bị
+     kéo dài theo chiều cao thân bài. */
+  .editorial-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: var(--s7);
+    align-items: start;
+  }
+
+  .editorial-main {
+    min-width: 0;
+  }
+
+  @media (max-width: 1024px) {
+    .editorial-grid {
+      grid-template-columns: 1fr;
+      gap: var(--s6);
+    }
   }
 
   .home-body {

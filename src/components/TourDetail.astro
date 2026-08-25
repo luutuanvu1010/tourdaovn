@@ -170,7 +170,7 @@ const hasActionMeta = !!(data.operator?.title || data.operator?.licenseInfo || d
 
     {hasPtContent(data.body) && (
       <Section heading={t('details')} contained={false} id="details">
-        <Body blocks={data.body} />
+        <Body blocks={data.body} headingOffset={1} />
       </Section>
     )}
 

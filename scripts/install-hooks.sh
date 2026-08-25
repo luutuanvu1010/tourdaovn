@@ -12,4 +12,11 @@ if ! git rev-parse --git-dir > /dev/null 2>&1; then
 fi
 
 git config core.hooksPath .githooks
-echo "✓ Đã set core.hooksPath=.githooks. Git hooks trong .githooks/ sẽ chạy từ clone này."
+
+# Bit thực thi là ĐIỀU KIỆN, không phải chi tiết: git BỎ QUA hook không
+# executable và chỉ in một dòng `hint:` mà `git push` vẫn thành công. Script này
+# thiếu chmod từ đầu, nên `.githooks/pre-push` nằm mode 100644 trong index và
+# cổng sớm CHƯA TỪNG chạy cho bất kỳ clone nào — phát hiện 2026-08-25, DR-056.
+chmod +x .githooks/*
+
+echo "✓ Đã set core.hooksPath=.githooks và bật bit thực thi. Git hooks trong .githooks/ sẽ chạy từ clone này."

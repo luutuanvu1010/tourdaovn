@@ -1,12 +1,12 @@
 ---
 export interface Slot {
   name: string
-  // I4 fix round (2026-08-23): 'custom' từng khai cho ô FactStrip inline chèn
-  // qua slot 'info' — nay FactStrip inline là con trực tiếp của `.two-col`
-  // (DetailLayout.astro), không còn đi qua Sidebar nữa, nên không component
-  // nào tạo giá trị 'custom' cho field này. Bỏ khỏi union thay vì để mã chết
-  // (tiền lệ Ruling 2 của ledger đợt này: hằng khai mà không dùng là nợ
-  // reviewer sẽ bắt).
+  // I4 fix round (2026-08-23): 'custom' từng khai cho ô FactStrip chèn qua slot
+  // 'info'. Bỏ khỏi union thay vì để mã chết (tiền lệ Ruling 2: hằng khai mà
+  // không dùng là nợ reviewer sẽ bắt).
+  // Cập nhật QĐ-2026-08-25-02: không còn "FactStrip inline" nào cả — Thông tin
+  // nhanh nay luôn là dải riêng phía trên `.two-col`, không đi qua Sidebar dưới
+  // bất kỳ hình thức nào.
   component: 'BookingCTA' | 'InfoCard' | 'Map' | 'Article'
   visible: boolean
   props: Record<string, any>

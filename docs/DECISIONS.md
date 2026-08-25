@@ -1159,3 +1159,444 @@ Nên R8 **không bị bỏ**, mà thu hẹp từ "mọi khối" xuống đúng c
 **Không đổi gì khác.** `06` v2.3.1 giữ nguyên câu chữ. `07` giữ nguyên, vẫn chờ lượt V5. Luật 1–5 giữ nguyên. Hai phiếu drift của V1 (font-stack ngược, thang 14 bậc) **vẫn chưa viết** — xem mục "Nợ" dưới.
 
 **Nợ ghi để không rơi.** Spec §4 khai V3 (prompt) **chặn bởi V1 + V2**. V2 xong. **V1 chưa xong**: `DRIFT_LOG.md` chưa có phiếu nào cho font-stack ngược (§2.2) hay thang cỡ 14 bậc vs 8 bậc khai (§2.3) — phiếu mới nhất là DR-049. Hai dữ kiện đó hiện chỉ sống trong prompt, mà prompt là artifact lịch sử chứ không phải sổ drift. QĐ này **không** đóng nợ V1; nó chỉ ghi rằng V3 đã chạy trước V1 và V1 vẫn phải viết.
+
+---
+
+## QĐ-2026-08-24-03 — Ảnh vào phạm vi Design vòng 5 (hạng mục 13, R10); nợ kho ảnh tách ra ngoài
+
+**Trạng thái:** chốt 2026-08-24. Sửa `SPEC-2026-08-22-be-mat-vong-5` §2 (thêm 2.8), §6 (chặng 1), §7 (thêm R10), §9 (thêm V-A/V-B/V-C). Không đụng `06`, `07`, `01-CONTENT_MODEL`, không đụng `src/`.
+
+**Bối cảnh.** Chủ dự án mở phiên 2026-08-24 với yêu cầu *"refactor lại trang chủ và các trang thành phần (các entity) cho trang doanh nghiệp du lịch địa phương"*, rồi khoanh lại: tầng cần đổi là **diện mạo** — chữ, thang cỡ, màu, ảnh, khoảng cách.
+
+Đối chiếu với đặc tả đang có cho ra ba kết luận, và cả ba đổi hướng của phiên:
+
+1. **Ba phần tư yêu cầu đã có spec rồi.** `SPEC-2026-08-22-be-mat-vong-5` §3.3 chép đúng ba triệu chứng đó — *"chữ không hợp ngành du lịch, cỡ chữ lộn xộn phân cấp mờ, màu chưa ra chất du lịch"* — và §6 đã chia thành ba artboard chặng 1. Viết một spec "vòng 6" cho cùng ba thứ là dựng **hai đặc tả cùng chi phối bộ chữ và bộ màu**, đúng loại nguồn sự thật thứ hai mà `CLAUDE.md` §5 bắt dừng. Nên phiên này **sửa đổi spec vòng 5**, không tạo spec mới.
+
+2. **Trang chủ không cần đặc tả riêng cho phần diện mạo.** Ranh giới của vòng 5 đã ghi *"Token áp toàn site; bố cục chỉ đụng trang chi tiết entity"*. Đo lại để chắc rằng câu đó đúng trên mã chứ không chỉ đúng trên giấy — đếm mã màu viết cứng trong toàn bộ `src/components/` và `src/layouts/`: **6 mã, ở 4 file** (`TourDetail` 2, `RouteMap` 2, `ExperienceDetail` 1, `BaseLayout` 1), và **0 mã** trong 15 file `Home*` cộng `SiteHome`; `font-size` không đi qua token: **2**. Kỷ luật token đủ chặt để **đổi token là trang chủ đổi thật**. *Bố cục* trang chủ vẫn ngoài phạm vi, đúng như §9 — việc "bày lại trọn trang chủ theo mạch bán hàng" mà vòng 3 §4 để dành vẫn còn để dành.
+
+3. **Còn đúng một lỗ hổng thật: ảnh.** Vòng 5 phủ chữ, thang cỡ, màu. Không phủ ảnh. `07-DESIGN_TOKENS` **không có mục nào về ảnh** — chỉ vài câu rải rác nói *vai trò* của ảnh; `tokens.css` **không có token tỷ lệ nào**; và **5 tỷ lệ khung đang rải ở 8 component** mà không đặc tả nào khai cái nào cho vai nào.
+
+**Đo được (2026-08-24, đọc Sanity, bộ lọc "lên sóng" chép đúng `src/lib/sanity.ts:162`).** Script và kết quả đầy đủ: `docs/evidence/2026-08-24-kho-anh/`.
+
+| Dữ kiện | Số |
+|---|---|
+| Trang chi tiết lên sóng, 6 loại entity có ảnh | **89** |
+| Ảnh chính hẹp hơn **1200px** mà `Hero.astro:20` xin | **40/88 = 45 %** |
+| Hẹp hơn cả **640px** của thẻ lưới | 7/88 = 8 % |
+| Hẹp nhất — `attraction/thac-ta-gu`, ảnh **dọc** trong khung ngang | **399×501** |
+| Một tấm ảnh dùng ở nhiều chỗ | **27 tấm** (một tấm 3 lần) |
+| Thiếu `alt` | 10/88 ảnh chính + 16/309 ảnh gallery |
+| Trang lên sóng không có ảnh chính | 1 (`tour/tour-du-thuyen-vega-yacht-nha-trang-day-tour`) |
+
+**Số này khác `QĐ-2026-08-24-02`, và cả hai đều đúng.** Phiếu trước đếm bản dựng `dist/` lúc **09:37** cùng ngày (Tour 23, Khách sạn 6); phiếu này đọc Sanity **sau giờ đó** (Tour 27, Khách sạn 10). Chênh lệch là **10 tài liệu được duyệt sau giờ dựng** — 6 tour du thuyền, 4 khách sạn; `ket-qua-doi-chieu.txt` chỉ đích danh từng cái. **Bài học ghi lại: con số về kho luôn phải kèm mốc đo**, vì kho đang thay đổi hằng ngày.
+
+**Một phép đo đảo ngược giả thiết ban đầu, và làm ca này nặng hơn.** Bản nháp phiếu này viết rằng Sanity CDN *không* phóng ảnh lên. Sai — đã đo bằng cách tải thật và đọc kích thước pixel từ header file:
+
+| Ca | Gốc | Mã xin | CDN trả về | Đang tải | Nếu xin đúng cỡ gốc | Phí |
+|---|---|---|---|---|---|---|
+| `attraction/thac-ta-gu` | 399×501 | `w=1200` | **1200×1507** | 283.013 B | 59.279 B | **+223.734 B (+377 %)** |
+| Hero **trang chủ** | 1280×720 | `w=1800` | **1800×1013** | 232.531 B | 164.493 B | **+68.038 B (+41 %)** |
+
+Ảnh dưới mốc bị trả giá **hai lần**: vừa mềm vì không có thêm chi tiết nào để hiện, vừa **nặng hơn cả ảnh gốc** vì CDN nội suy lên rồi nén lại. Riêng hero trang chủ phí **68.038 byte** — bằng **76 % toàn bộ ngân sách font của site** (89.196 byte, `QĐ-2026-08-24-02`) — cho không một chi tiết nào thêm. Đặt cạnh nợ LCP ở spec §2.6: đang cân từng KB bộ chữ để cứu LCP, trong khi phần tử LCP nhiều khả năng chính là tấm ảnh bị phóng 1,4× đó.
+
+**Chốt 1 — ảnh thành hạng mục giao nộp thứ mười ba, ở chặng 1 chứ không phải chặng 2.** Hai phần: **13a** bảng tỷ lệ khung theo vai (tối đa 3 tỷ lệ, mỗi tỷ lệ gắn ít nhất một vai, kết quả vào `07` thành token chứ không viết cứng trong component); **13b** chuẩn chất ảnh. Đặt ở chặng 1 vì **ảnh và màu phải được nhìn cùng nhau** — chốt bộ màu trên một tấm ảnh rồi mới đổi chuẩn ảnh là phải chốt màu lại; và vì chặng 1 vốn đã bắt dựng bằng **ảnh thật lấy từ Sanity**.
+
+**13b có một lý do riêng để không hoãn: chuẩn chất ảnh đang tồn tại mà không có chủ.** `readme.md` của dự án Claude Design tự viết *"ảnh biển đảo thật, nắng trưa, xanh lam–ngọc, tương phản cao. Không ảnh đơn sắc, không filter lạnh, không grain"*. Câu đó không truy về được đặc tả nào — Design tự đặt ra. Hoặc nó vào `07` thành luật, hoặc nó bị gỡ; để nguyên là một nguồn sự thật thứ hai đang lớn dần.
+
+**Chốt 2 — thêm R10 vào §7: mốc phân giải tối thiểu theo vai, và cấm phóng ảnh lên.** Mỗi vai trong bảng 13a kèm một mốc bề rộng tối thiểu. Ảnh dưới mốc **không được xin cỡ lớn hơn ảnh gốc**. Design đề xuất **cách rơi** (hạ khung, đổi bố cục, hay hero thuần chữ); chủ dự án chốt. Cấm cách rơi nào tạo ô trống hay ảnh placeholder — **R7 vẫn áp**.
+
+Đây là ràng buộc cứng chứ không phải khuyến nghị, vì nó có bằng chứng byte đứng sau và vì nó chạm R5: một mốc phân giải ghi trong bảng mà không có luật cấm phóng thì mã vẫn cứ xin `w=1800` cho ảnh 1280px như hôm nay.
+
+**Chốt 3 — nợ kho ảnh tách ra ngoài vòng 5, thành V-A/V-B/V-C ở §9.** Vòng 5 sửa **luật** về ảnh; nó không sửa được **kho** ảnh — đó là việc nhập liệu trong Sanity, không token nào chạm tới.
+
+| Mã | Việc | Khối lượng |
+|---|---|---|
+| **V-A** | Thay ảnh dưới mốc phân giải | 40 trang (7 trong đó hẹp hơn cả 640px) |
+| **V-B** | Rà 27 tấm ảnh dùng ở nhiều chỗ — dùng lại **không mặc nhiên sai**, phải rà từng ca | 27 tấm |
+| **V-C** | Bù `alt` còn thiếu | 26 ảnh |
+
+Tách để hai việc không kẹt nhau: Design chạy được chặng 1 khi kho ảnh chưa xong, và ngược lại. Nhưng **ba việc này chỉ mở sau khi chốt 13a và R10** — thay ảnh trước khi biết tỷ lệ khung và mốc phân giải là thay hai lần.
+
+**Chốt 4 — khoảng cách KHÔNG vào phạm vi.** Chủ dự án có nêu khoảng cách cùng với ảnh. Loại ra vì **không có bằng chứng hỏng**: thang 9 bậc (4·8·12·16·24·32·48·64·96) đang được tôn trọng, `DESIGN_SURFACE_MAP` không ghi vấn đề nào, và `07` §3 đã khai nhịp dọc chuẩn của một mục. Mở một hạng mục không có triệu chứng đo được là mời Design đi sửa thứ đang chạy đúng. Nếu sau chặng 1 nhìn bản dựng thật mà thấy nhịp sai thì mở lại — bằng một phiếu có số đo, như phiếu này.
+
+**Không đổi gì khác.** `06` v2.3.1 giữ nguyên. `07` giữ nguyên, vẫn chờ lượt V5 — hạng mục 13 và R10 là **đề xuất** của Design, Cowork mới ghi vào `07` sau khi chủ dự án chốt (**R9**). Luật 1–5 giữ nguyên. R1–R9 giữ nguyên câu chữ. Phạm vi bố cục không đổi: trang chủ, header, footer vẫn ngoài phạm vi vẽ lại.
+
+**Nợ ghi để không rơi.** Trong lúc đo, phát hiện **hai chỗ lệch trong chính `07`** chưa ai ghi phiếu; đã viết thành `DR-053` và `DR-054`. Cả hai đều chạm đúng thứ chặng 1 sắp chốt, nên phải đóng cùng lượt V5, không để trôi:
+
+- **`DR-053`** — `07` §0 mục 1 (bổ sung 2026-06-30) vẫn cho phép *"ảnh và motif gợi thêm đồng lúa, đầm phá, chân núi và rừng"*, trong khi §1 (chốt 2026-08-06, tự khai *"thay quy tắc cảnh quan cũ"*) **cấm hoạ tiết đất liền**. Hai câu trong cùng một file đánh nhau — và đây đúng là câu mà 13b phải dựa vào.
+- **`DR-054`** — `07` §0 mục 2 khai chữ nội dung là **Plus Jakarta Sans**; mã chạy **Nunito**. `DR-050` bắt §2, chưa bắt §0. Chặng 1 chốt bộ chữ mà `07` còn hai chỗ mô tả sai ở hai mục khác nhau thì Cowork không biết ghi đè lên đâu.
+
+---
+
+## QĐ-2026-08-24-04 — Giữ hai bộ chữ đang chạy; đóng xung đột giữa hai đề xuất Design
+
+**Trạng thái:** chốt 2026-08-24. Không sửa `tokens.css` ở phiếu này. Đóng xung đột, không mở việc mới.
+
+**Bối cảnh — hai đề xuất cùng chi phối `--font-display` và `--font-ui`.** Trong cùng ngày 2026-08-24 có hai sản phẩm Design nói ngược nhau về bộ chữ:
+
+| | Canvas `dc5e2c02` (chặng 1, phiên này) | Project Design `fca38485` (chặng 2) |
+|---|---|---|
+| Bộ chữ | **Bỏ Nunito**, Be Vietnam Pro cả hai vai — 73.056 B, giảm 16.140 B | **Giữ cả hai vai** như đang chạy — 89.196 B, không đổi |
+| Thang cỡ | Gộp **14 bậc → 8** | Giữ số bậc; sửa 4 giá trị, thêm 2 token cho di động |
+
+Để nguyên là đúng loại nguồn sự thật thứ hai mà `CLAUDE.md` §5 bắt dừng: hai đặc tả cùng quyết một token.
+
+**Chốt — giữ cả hai bộ.** Chủ dự án chốt 2026-08-24. `--font-display` giữ Be Vietnam Pro, `--font-ui` giữ Nunito. **Đề xuất "bộ B" của canvas chặng 1 rút lại**, không thi hành, không giữ làm phương án dự phòng. Ngân sách font đứng nguyên **89.196 byte** — R4 không bị đụng, và trần 140 KB còn dư nguyên.
+
+Hệ quả kèm theo: hướng thang cỡ đi theo project `fca38485` — **giữ số bậc, sửa giá trị, thêm token cho di động** — chứ không gộp 14 xuống 8. Hai token cỡ di động vẫn **chưa được duyệt**; chính artboard của Design ghi *"cần một phiếu quyết định trước khi vào `tokens.css`"*, và phiếu đó chưa có.
+
+**Đã thi hành ngay trong phiên, phần không cần ai quyết:** hai khối `@font-face` cấp **800** cho Be Vietnam Pro vào `src/layouts/BaseLayout.astro` — đóng phần chính của `DR-052`. Bốn khối thành sáu. **Chi phí thật: +18.524 byte trình duyệt phải tải** — bản đầu của phiếu này ghi "0 byte tải thêm", **sai**, và sai ngược với chính phép đo của `DR-052`: hai file nằm trong `dist/` nhưng không luật CSS nào trỏ tới nên **không trình duyệt nào tải chúng**. Khai xong thì chúng mới được tải. Một trang tiếng Việt dùng cả hai cấp nay tải **89.196** byte thay vì 70.672 — vẫn dưới trần R4 140 KB. Đây là đổi byte lấy độ đậm thật. Kiểm trên bản dev server phát ra: 2 khai `font-weight: 800`, cả hai tên file có mặt ở trang chủ lẫn trang chi tiết; `astro check` 0 lỗi 0 cảnh báo. Bôi đậm giả trên ≥12 component chấm dứt.
+
+**Không đổi gì khác.** `07` giữ nguyên, vẫn còn `DR-050`/`DR-051`/`DR-054` mô tả sai bộ chữ và thang — phiếu này **không** đóng chúng, chỉ khiến chúng dễ đóng hơn vì hướng đã rõ: đặc tả phải viết lại theo mã, không phải ngược lại. `--fw-900` và dòng preload vẫn mở, ghi trong `DR-052`.
+
+---
+
+## QĐ-2026-08-24-05 — `06` v2.4: `title` rời lớp phủ hero; dựng dải tiêu đề và dải đoạn mở, đóng DR-049
+
+**Trạng thái:** chốt 2026-08-24. Sửa `06-BINDING_MAP` §3 (hàng Hero, thêm hàng Dải tiêu đề) lên **v2.4.0**; sửa `src/components/DetailLayout.astro`. Không đụng `01-CONTENT_MODEL`, không đụng `07`, không đụng `tokens.css`.
+
+**Bối cảnh.** Design chặng 2 giao bảy mockup mobile-first (project `fca38485`). `DR-049` khai điều kiện đóng đúng bằng câu này: *"Design chặng 2 giao bề mặt cho dải đoạn mở → QA1 → Code dựng dải"*. Điều kiện đã đủ. Nhưng khi đối chiếu mockup với `06` v2.3, QA1 bắt **hai chỗ lệch**, và một trong hai chạm ràng buộc cứng.
+
+**Lệch 1 — `h1` rời hero.** `06` v2.3 khai hero còn *"huy hiệu loại + h1"*; mockup đưa cả `h1` xuống dưới ảnh. Đây là **cải tiến thật**, không phải lỗi: chữ trên ảnh buộc phải canh tương phản theo từng tấm ảnh, và QA1 đợt 4B đã đo được **6,6:1** ở bộ `ngoc-lam` — sát ngưỡng AA. Trên nền sáng, cặp `--c-text`/`--c-surface` đo **17,85:1** (`bien-sau`) và **16,80:1** (`cat-bien`).
+
+**Lệch 2 — vị trí đoạn mở, và đây là chỗ phải bác.** Mockup đặt cả `h1` lẫn đoạn mở **trước** thanh dính. Spec vòng 5 §3.6 đã bác đúng cách bày đó ngày 2026-08-23 với lý do ghi sẵn: *"đẩy giá xuống sâu thêm ~110px trên desktop, phải mở lại Luật 3"*. Cộng lại chiều cao từ chính markup của mockup, khổ desktop:
+
+| Cách bày | Vị trí thanh giá |
+|---|---|
+| `06` v2.3 (h1 trong hero) | 68 + 51 + 380 + 24 = **~523px** |
+| Mockup (h1 + đoạn mở cùng ra trước thanh dính) | 68 + 51 + 380 + **152** + 24 = **~675px** |
+
+Chênh **~152px** — tệ hơn con số ~110px §3.6 dự đoán. Vùng nhìn thấy thật của laptop 1366×768 khoảng 625–660px, nên thanh giá **rơi khỏi màn đầu**. Đó là vi phạm **Luật 3** — *"màn đầu của entity thương mại phải có giá hoặc nhãn miễn phí"*. Trên di động thì không vướng, vì mockup có thanh dính đáy màn mang giá.
+
+**Chốt — phương án A: lấy cái hay của mockup, giữ ràng buộc của `06`.**
+
+- `title` **rời** lớp phủ hero xuống **dải tiêu đề**, dải sáng riêng ngay dưới ảnh và **trước** thanh dính.
+- `summary` giữ **đúng chỗ `06` v2.3 đã chốt**: dải sáng **sau** thanh dính, trên Thông tin nhanh.
+- Hero sau đó **chỉ còn huy hiệu loại và ảnh** — không còn chữ nào đè lên ảnh.
+- Thanh giá đứng ở **~582px**, vẫn trên màn đầu. Luật 3 không phải mở lại; §3.6 không phải bác.
+- Một thứ tự DOM cho cả hai khổ, không dựng hai lần.
+
+Hai phương án đã loại: **B** — theo mockup nguyên văn rồi rút hero desktop 380→260px để bù; loại vì phải bác lại lý lẽ §3.6 và cần Design xác nhận hero 260px còn đủ ảnh. **C** — giữ `06` v2.3 nguyên văn; loại vì vứt mất cải tiến "chữ ra khỏi ảnh" trên di động, đúng thứ chủ dự án nêu là ưu tiên.
+
+**Đã thi hành.** `DetailLayout.astro`: gỡ `h1` và `summary` khỏi `slot="overlay"`; dựng `.title-band` giữa hero và thanh dính; dựng `.summary-band` sau thanh dính, gắn `data-region="summary-band"` và `data-field="summary"`; `.detail-title` đổi màu chữ từ `--c-text-inverse` sang `--c-text`.
+
+**Đối chiếu — đo trên bản dựng, không phải trên phép sửa:**
+
+| Kiểm | Kết quả |
+|---|---|
+| Thứ tự vùng trong `<body>` | hero → title-band → sticky-bar → summary-band → fact-strip → two-col ✅ |
+| `slot="overlay"` còn chứa chữ | **0** (chỉ còn breadcrumb + huy hiệu) |
+| `astro check` | 0 lỗi, 0 cảnh báo (136 file) |
+| **Luật 1 (`luat1-post`)** | **pass — 137 trang, 0 field lặp vùng, 0 field sai vùng** |
+| `BM-ORPHAN-REGION`, `BM-EMPTY-REGION` | pass |
+| Cổng đỏ còn lại | R3, R4, S24-AUTHORITY, control-registry, deferred — **đều là nợ dữ liệu URL/hreflang/metadata tác giả trên trang cẩm nang**, khớp đúng danh sách spec §9 khai, không cổng nào đỏ thêm |
+
+Đây là **lần đầu tiên `luat1-post` canh được vùng đoạn mở**: trước đó `summary` chưa bao giờ được gắn `data-field` nên cổng mù với nó — một trong bốn vùng của `DR-048`.
+
+**Còn mở, ghi để không rơi.** `title` **chưa** được gắn `data-region` và **chưa** vào ma trận §3.1, nên `luat1-post` chưa canh dải tiêu đề. Gắn nó cần phiếu riêng: `title` còn xuất hiện ở **mắt cuối breadcrumb**, nên đưa vào §3.1 mà không khai ngoại lệ cho breadcrumb sẽ làm Luật 1 báo lặp vùng. Breadcrumb sinh từ cây URL chứ không từ field entity nên ngoại lệ là hợp lý — nhưng phải viết thành chữ trước khi bật cổng.
+
+**Chưa thi hành, thuộc lượt sau.** Bốn thay đổi còn lại của mockup — hero di động 240px, lịch trình gấp lại, khối đặt chỗ lên trên, thanh dính đáy màn — cùng hai token cỡ di động. Tất cả đều chờ spec vòng 5 qua cổng duyệt.
+
+---
+
+## QĐ-2026-08-25-01 — Bốn chỉnh sửa bề mặt: breadcrumb + tiêu đề lên trên hero, neo cuộn, hai cột Tổng quan; và một đính chính về footer
+
+**Trạng thái:** chốt 2026-08-25. Sửa `06-BINDING_MAP` lên **v2.5.0** (§3: hàng Hero, hàng Dải tiêu đề, ghi chú hàng Breadcrumb). Sửa `DetailLayout.astro`, `Hero.astro`, `HomeFacts.astro`, `SiteHome.astro`, `tokens.css`. Không đụng `01-CONTENT_MODEL`, không đụng `07`, không đụng schema Sanity.
+
+**Bối cảnh.** Chủ dự án xem bản dựng local sau `QĐ-2026-08-24-05` và nêu bốn chỉnh sửa. Ba việc thi hành được; việc thứ tư hoá ra **không phải việc code**.
+
+---
+
+### Chốt 1 — Breadcrumb và dải tiêu đề lên TRÊN hero
+
+Chủ dự án yêu cầu đẩy cả hai lên trên ảnh. Hai hệ quả, một tốt một phải trả giá.
+
+**Hệ quả tốt: đóng một drift chưa ai ghi.** `06` §3 khai từ **v2.2 (N3)** rằng breadcrumb *"nằm trên dải sáng phía trên hero, không đè lên ảnh"*. Mã lại đặt nó trong `slot="overlay"` của Hero suốt từ đó, kèm `inverse` để chữ trắng đọc được trên ảnh. Không cổng nào bắt được vì breadcrumb chưa gắn `data-region` — cùng khoảng mù `DR-048`. Nay `.crumb-band` là dải riêng, `inverse` bỏ đi, mã khớp đặc tả.
+
+**Giá phải trả: Luật 3.** Đưa hai dải chữ lên trên đẩy thanh dính xuống sâu hơn. Cộng theo chiều cao thật của mã (không phải của mockup):
+
+| Cách bày | Vị trí thanh giá, khung 1280px |
+|---|---|
+| Trước 2026-08-24 (cả ba thứ nằm trong lớp phủ) | 68 + 430 = **~498px** |
+| `06` v2.4 (tiêu đề xuống dưới hero) | 68 + 430 + 104 = **~602px** |
+| v2.5 nếu **giữ** hero 430px | 68 + 47 + 104 + 430 = **~649px** |
+| **v2.5 với hero 380px** | 68 + 47 + 104 + 380 = **~599px** |
+
+**⚠ Đính chính 2026-08-25, sau review.** Bảng trên **sai ở hai chỗ** và không được dùng làm căn cứ chốt:
+
+1. **Bỏ sót `line-height` của breadcrumb.** Dải breadcrumb không phải 47px mà **~69px** (12 + đệm 32 + hộp dòng 15×1,68 = 25,2). Dải tiêu đề là ~100px, không phải 104.
+2. **Giả định h1 luôn một dòng.** **14 trên 28** trang tour có tiêu đề trên 45 ký tự; ở 46px trong cột 1152px, quá nửa số đó xuống dòng, cộng thêm ~56px.
+
+Cộng lại đúng: **~617px** với h1 một dòng, **~673px** với h1 hai dòng.
+
+**ĐÃ ĐO 2026-08-25** (Chrome headless qua CDP, trên bản dựng thật — extension trình duyệt không dùng được ở phiên này, xem "Cách đo" dưới). Phép cộng lại của review **khớp gần như tuyệt đối**:
+
+| Trang | h1 | viewport 1366×657 | Trên màn đầu? |
+|---|---|---|---|
+| `tour/ve-vin-harbour` (14 ký tự) | 46px, **1,14 dòng** | thanh dính **618 → 675px** | mép trên lọt, **mép dưới bị cắt** |
+| `tour/hon-tam-tron-goi…` (65 ký tự) | 46px, **2,14 dòng** | thanh dính **674 → 731px** | **KHÔNG — nằm hẳn ngoài** |
+
+657px là chiều cao viewport thật của trình duyệt trên màn 768 sau khi trừ chrome. Ở 1366×768 (không trừ chrome) thì cả hai đều lọt — nên con số phụ thuộc hoàn toàn vào việc lấy chiều cao màn hay chiều cao viewport, và **phải lấy viewport**.
+
+**Kết luận: với tiêu đề dài, thanh dính không còn trên màn đầu ở laptop phổ biến.** 14/28 trang tour có tiêu đề trên 45 ký tự, nên đây là **nửa số trang**, không phải ca hiếm. Hôm nay **chưa thành vi phạm Luật 3** vì `sticky-bar__price` render trên **0 trang** — thanh chỉ mang CTA "Chat Zalo". Ngày `bookingRef.key` phân giải được giá thì nó thành vi phạm thật. **Đây là nợ mở, chưa đóng bằng quyết định này.**
+
+**Đo cả khổ di động 390×844** (ca §3.6 lo): **không có tràn ngang** (`scrollWidth` = 390). Nhưng dải breadcrumb cao **128px** (breadcrumb xuống 3 dòng vì mắt cuối là tiêu đề dài) cộng dải tiêu đề **200px** (h1 32px, **4,2 dòng**) — tức **328px chữ trước khi thấy ảnh**, ảnh hero bắt đầu ở **397px**, tức **47% màn đầu là chữ**. §3.6 lo "ảnh bị đẩy xuống ~160px"; thực tế là **hơn gấp đôi**. Thanh dính ở 725→782px, vẫn trong 844. **Lo ngại của §3.6 được xác nhận bằng số, và nặng hơn dự đoán của chính nó.**
+
+**Cách đo, để chạy lại được:** `docs/evidence/2026-08-25-do-bo-cuc/do-layout.mjs` — mở Chrome headless với `--remote-debugging-port`, đặt viewport bằng `Emulation.setDeviceMetricsOverride`, đọc `getBoundingClientRect()`. Ảnh chụp bằng `--window-size` **không** dùng được: nó không đặt layout viewport như thiết bị thật và tôi đã một lần báo động nhầm "tràn ngang trên di động" vì tin vào ảnh đó.
+
+**Và một dữ kiện làm cả phép so này thành lý thuyết:** `sticky-bar__price` hiện **render trên 0 trang** trong bản dựng — `priceLabel` phân giải từ `data/prices.yaml` qua `bookingRef.key` và hiện không khớp gì. Giá chỉ tồn tại dưới dạng chữ trong thân bài. Theo `06` §6 Luật 3 thì **không có giá thì ẩn vùng giá**, nên đây không phải vi phạm — nhưng nghĩa là 617-so-với-667 là cuộc tranh luận về một phần tử chưa xuất hiện ở đâu. Nợ dữ liệu này phải đóng trước khi Luật 3 có ý nghĩa đo được. Nên hero rút **430 → 380px** desktop và **280 → 240px** di động, đưa thanh giá về ~599px, tức **bằng mức của v2.4**.
+
+Hai con số 380 và 240 **không do Cowork hay Code đặt ra**: đó đúng là chiều cao hero desktop và di động trong mockup Design chặng 2 (project `fca38485`). Design đã tự kết luận hero cũ quá cao.
+
+**Một lỗi thật lộ ra trong lúc thi hành, cổng bắt được.** Dọn hết chữ khỏi lớp phủ khiến biến thể **không-ảnh** của Hero còn lại đúng một khối gradient trống. Trên hai trang **tác giả** — Person không có `mainImage` và không có huy hiệu loại (`06` §4.11) — nó thành `<section>` rỗng, vi phạm **R7** *"vùng rỗng ẩn hẳn, không khung trống"*. `BM-EMPTY-REGION` chuyển đỏ và chỉ đích danh hai trang.
+
+Lần sửa đầu vẫn sai: guard viết `Boolean(image)`, trong khi GROQ trả `{_type:'image', alt:''}` **không có `asset`** cho entity chưa gắn ảnh — object đó **truthy** còn `imageUrl()` trả `undefined`. Guard đúng là `image?.asset?.url`. Ghi lại vì đây là cái bẫy sẽ lặp: **object ảnh rỗng của Sanity là truthy.**
+
+`06` §3 hàng Hero vì vậy đổi trạng thái rỗng: **không ảnh VÀ không huy hiệu → ẩn hẳn hero.** Câu cũ "thiếu mainImage thì hero thuần chữ" nay vô nghĩa, vì không còn chữ nào trong hero để mà thuần.
+
+### Chốt 2 — Neo cuộn, không phải cuộn mượt
+
+Yêu cầu là "hiệu ứng kéo trang rất nhẹ". Đo ra: **`scroll-behavior: smooth` đã có sẵn** ở `tokens.css:203`. Không thêm gì mới; thiếu hai thứ làm nó hỏng:
+
+- **`scroll-padding-top`** — chưa từng khai. Header dính cao `--header-h` và thanh dính cao `--sticky-bar-h`, nên mọi link nhảy mục ở chính thanh dính đó đưa tiêu đề **chui vào gầm hai thanh vừa bấm**. Trang cuộn mượt nhưng dừng sai chỗ. Nay `calc(--header-h + --sticky-bar-h + --s3)`.
+- **`prefers-reduced-motion` không tắt được nó.** Khối reduced-motion hiện có chỉ ép `animation-duration` và `transition-duration` về 0; `scroll-behavior` không thuộc hai thứ đó nên lọt lưới. `07` §5 khai reduced-motion tắt **mọi** chuyển động — nên phải tắt riêng bằng `html { scroll-behavior: auto }`. Với người bật reduced-motion vì say chuyển động, trang tự trượt là đúng thứ họ muốn tắt.
+
+**Không** thêm hiệu ứng hiện-dần-khi-cuộn: `07` §5 cấm animation tự chạy, và mở loại đó cần phiếu riêng.
+
+### Chốt 3 — "Tổng quan" trên trang chủ về hai cột
+
+Chẩn đoán khớp lời chủ dự án: `.home-body` bị kẹp `max-width: 70ch` (~620px) bên trong khung 1200px, nên thừa ~580px trắng bên phải, trong khi dải `HomeFacts` chạy hết bề ngang ở **dưới**. Nay `.editorial-grid` là `minmax(0, 1fr)` + **340px**, Fact về cột phải.
+
+- **340px không phải số mới** — đó là bề rộng cột phụ mà `DetailLayout .two-col` đã dùng.
+- **`70ch` giữ nguyên**: đó là luật measure của `07` §2, không được phá để lấp chỗ trống.
+- `HomeFacts` thêm prop **`aside`** — bỏ nền dải, bỏ container, lưới về một cột, chữ căn trái. Cùng nếp với prop `inline` của `FactStrip`, **không phải API mới**.
+- Dưới 1024px xếp chồng lại như cũ.
+
+**Phạm vi:** đây là bố cục **một khối** của trang chủ, không phải bày lại trang chủ. Việc "bày lại trọn trang chủ theo mạch bán hàng" mà vòng 3 §4 để dành **vẫn còn để dành**, và `06` §5.7 vẫn gom 9 khối vào một dòng.
+
+### Chốt 4 — Footer: **không thêm field, vì field đã có**
+
+Yêu cầu là "phần giới thiệu doanh nghiệp và dòng miễn trừ trong Footer không được hardcode, nên bổ sung field trong Site Setting". Đo lại thì tiền đề không đúng:
+
+| Tầng | Trạng thái |
+|---|---|
+| Schema Sanity `cms/schemas/siteSettings.ts` | `footer.tagline` ("Câu giới thiệu dưới logo") và `footer.disclaimer` ("Dòng miễn trừ trách nhiệm") — **đã có sẵn** |
+| Mã `Footer.astro:55-56` | `viOnly(footerConfig?.tagline) \|\| t('footerTagline')` — **đã đọc Sanity trước** |
+| Dữ liệu | Truy vấn `siteSettings`: cả hai **`null`** |
+
+Nên hai câu đang hiện trên trang không phải hardcode — chúng là **lớp rơi về** khi Sanity trống. Việc còn lại là **nhập liệu trong Studio**, không phải sửa mã hay sửa schema. Không mở việc code nào ở đây.
+
+*(Ghi thêm cho khỏi lặp lại: `uiCopy.footerTagline` trỏ về `brand.tagline` trong `site.config.ts`, còn tên pháp nhân ở dòng cuối footer **cố ý** ở lại `site.config.ts` vì nó cũng là `Organization.legalName` trong JSON-LD — `QĐ-2026-08-14-01`.)*
+
+---
+
+**Đối chiếu — đo trên bản dựng:**
+
+| Kiểm | Kết quả |
+|---|---|
+| Thứ tự vùng trang chi tiết | crumb-band → title-band → hero → sticky-bar → summary-band → fact-strip ✅ |
+| Breadcrumb còn `inverse` | không |
+| Trang chủ | `.editorial-grid` + `.editorial-main` + `.editorial-aside` + `facts-section--aside` ✅ |
+| `astro check` | 0 lỗi, 0 cảnh báo (136 file) |
+| **Luật 1** | **pass — 138 trang, 0 field lặp vùng, 0 field sai vùng** |
+| `BM-EMPTY-REGION` | đỏ khi hero rỗng → **pass** sau khi sửa guard |
+| `BM-ORPHAN-REGION` | pass |
+| Cổng đỏ còn lại | R3 (1), R4 (45), S24-AUTHORITY (6), control-registry (2), deferred (1) — **45/45 lỗi R4 đều ở `/cam-nang/`**, không lỗi nào chạm template đã sửa. Khớp danh sách nợ spec §9 |
+
+**Nợ ghi để không rơi.**
+
+1. **`.title-band` vẫn chưa gắn `data-region`**, `title` vẫn chưa vào ma trận §3.1 — nguyên văn lý do ở `QĐ-2026-08-24-05`, không đổi: vướng mắt cuối breadcrumb.
+2. **Cảnh báo CSS có sẵn:** bản dựng báo `Unexpected "}"` trong CSS xuất ra của `HomeRollupSection.astro`. File đó cân bằng ngoặc (17/17) và không nằm trong phạm vi phiếu này. Chưa rõ nguyên nhân — cần xem riêng.
+3. **Hai ô footer trống trong Sanity** — xem Chốt 4. Việc nhập liệu, chưa ai làm.
+
+---
+
+## QĐ-2026-08-25-02 — `author` về đúng một vùng; bỏ luật "≤ 2 ô thì không trải dải"; và 13 ca Luật 2 trong thân bài
+
+**Trạng thái:** chốt 2026-08-25. Sửa `06-BINDING_MAP` lên **v2.6.0** (§3: hàng Thông tin nhanh, hàng Hộp tác giả). Sửa `ArticleDetail.astro`, `DetailLayout.astro`. Không đụng `01-CONTENT_MODEL`, `07`, schema Sanity.
+
+**Bối cảnh.** Chủ dự án rà bố cục ngày 2026-08-25 và chỉ ra ba ca cụ thể. Đo lại thì hai ca đúng, một ca sai số đếm nhưng đúng bản chất, và cả ba đều truy về **hai gốc chung**.
+
+---
+
+### Chốt 1 — `author` chỉ còn Hộp tác giả
+
+Chủ dự án báo tên tác giả hiện **hai lần** trên trang cẩm nang. Đo lại (bỏ hết `<script>` để chỉ còn giao diện): **ba lần**.
+
+| Vùng | Nguồn |
+|---|---|
+| Huy hiệu hero "Bởi {tên}" | `ArticleDetail.astro:40` |
+| Hộp tác giả | `ArticleDetail.astro:78` |
+| Hàng InfoCard ở sidebar | `ArticleDetail.astro:52` |
+
+`06` §3 khai **đúng một vùng**: *"Hộp tác giả"*. Hai chỗ còn lại không được khai ở đâu — **vi phạm Luật 1 trên mọi trang cẩm nang**.
+
+*(Hai link `tac-gia/…` nằm trong JSON-LD là bình thường, không tính.)*
+
+**Vì sao cổng mù.** `data-field="author"` chỉ có **1** trong HTML; hai render kia không gắn thẻ. Đúng khoảng mù `DR-048`, y hệt ca `summary` đóng hôm qua ở `QĐ-2026-08-24-05`. **Đây là lần thứ hai trong hai ngày một vi phạm Luật 1 sống được vì thiếu thẻ** — đủ để coi việc gắn thẻ nốt bốn vùng còn lại của `DR-048` là việc phải làm, không phải việc nên làm.
+
+**Gỡ hai chỗ thừa.** Lý lẽ cũ ghi trong mã — *"tác giả là tín hiệu E-E-A-T, phải đọc được ngay trên màn đầu"* — đúng về ý định nhưng không cho phép mở thêm vùng: Luật 1 chỉ nhượng bộ cho **giá**. Muốn tác giả lên màn đầu thì đổi **vị trí** Hộp tác giả, không nhân nó ra ba bản.
+
+**Gắn thẻ, và giới hạn phải nói thẳng.** Hộp tác giả nay mang `data-region="author-box"` + `data-field="author"`. Nhưng **thẻ này chưa làm cổng canh được**: header của `luat1-post` khai tầng B *"xét theo cột entity của §3.1 (bốn cột)"* và Article *"nằm hoàn toàn ngoài từ vựng ALIAS/§3.1"*. Muốn cổng thật sự bắt thì phải thêm cột Cẩm nang vào ma trận §3.1 — **việc riêng, cần phiếu**. Ghi ra đây để không ai tưởng lỗ đã bịt.
+
+### Chốt 2 — bỏ luật "≤ 2 ô thì không trải dải"
+
+Chủ dự án báo Thời lượng / Phù hợp ở trang Trải nghiệm *"hiển thị sai vị trí"*. Đo ra: **không sai thứ tự, sai cột**.
+
+| Trang | Số ô | Nằm ở đâu |
+|---|---|---|
+| `trai-nghiem/cano-keo-du-bay` | **2** | **cột phụ** |
+| `trai-nghiem/phao-chuoi` | **2** | **cột phụ** |
+| `diem-tham-quan/chua-long-son` | 5 | trải dải |
+| `tour/ve-vin-harbour` | 3 | trải dải |
+
+Gốc là hợp đồng `06` *"≤ 2 ô thì không trải dải ngang — desktop gộp vào cạnh bản đồ ở sidebar"*. Luật đó cắt theo **số lượng dữ liệu**, không theo loại trang — nên **cùng một loại entity ra hai wireframe khác nhau tuỳ trang có mấy ô**. Đó đúng là thứ chủ dự án gọi tên ở lượt rà trước: *"wireframe phải giống nhau, phần hiển thị thì thích ứng theo từng loại entity"*. Luật này làm ngược: wireframe đổi theo dữ liệu, không theo loại.
+
+**Chốt: Thông tin nhanh luôn trải dải, mọi trang, mọi số ô.** `factsInline` gỡ khỏi `DetailLayout`; prop `inline` của `FactStrip` không còn ai gọi. Hàng lưới `facts` trong `grid-template-areas` cũng gỡ — nó sinh ra ở I4 fix (2026-08-23) chỉ để đỡ bản gộp, nay không ai chiếm.
+
+**Đối chiếu sau khi sửa:** cả bốn trang trên đều `trong_two_col = false`.
+
+### Chốt 3 — 13 ca Luật 2 trong thân bài, là nợ biên tập
+
+Chủ dự án báo "Giờ mở cửa hiển thị sai vị trí" nhưng không kèm URL, và trang cẩm nang được gửi **không có** field đó (0 lần). Quét toàn bộ `dist/` thì ra một họ vấn đề khác: **field cấu trúc bị biên tập mở lại thành mục trong thân bài** — vi phạm **Luật 2** *"cấu trúc giữ khung, bài viết giữ chiều sâu; `body` không mở mục cùng vai"*.
+
+**12 ca trên 11 trang** *(sửa sau review 2026-08-25 — bản đầu ghi 13/12)*: `Phù hợp` 5 · `Địa chỉ` 2 · `Thời lượng` 2 · `Giờ mở cửa` 3.
+
+Đây là **nợ dữ liệu, không phải lỗi mã** — không sửa trong phiếu này. Script và toàn bộ cảnh báo về độ tin: `docs/evidence/2026-08-25-luat2-body/`.
+
+**Bốn lần đếm mới ra 12, và mỗi lần sai một kiểu khác:** **4** (làm phẳng HTML rồi gộp khoảng trắng nên ranh giới thẻ biến mất — mọi nhãn mở đầu `h2`/`h3` đều lọt) → **12** (chèn `¶` ở ranh giới thẻ) → **13** (thêm nhánh cụm ghép `Giá vé & Giờ mở cửa:`, +1 ca thật) → **12** (cắt thân bài bằng **cửa sổ 60.000 ký tự** nên nuốt cả FAQ → 1 ca giả; cắt đúng phần tử bằng đếm độ sâu `<div>`).
+
+Lần sai cuối là **đúng lỗi mà `QĐ-2026-08-25-03` ghi ở một chỗ khác** — *"cửa sổ ký tự không phải phạm vi phần tử"* — lặp lại trong chính script viết ra để kiểm thứ khác.
+
+**Và 12 KHÔNG phải "12 ca Luật 2".** Script chỉ soi nhãn lấy từ `fact-strip`, nên bốn vai mà `06` §6 gọi tên trực tiếp — `itinerary`, `includes`, `excludes`, `accessInfo` — **không bao giờ bị phát hiện**; nó cũng bỏ qua toàn bộ trang cẩm nang (không có `fact-strip`). Phép đo rộng hơn cho **khoảng 33 trang / 54 va chạm**, chưa xác nhận từng ca. Trích 12 là trích *"nhãn Thông tin nhanh bị mở lại có dấu hai chấm"*, không phải toàn bộ Luật 2.
+
+---
+
+**Đối chiếu — đo trên bản dựng:**
+
+| Kiểm | Kết quả |
+|---|---|
+| Tên tác giả thấy được trên trang cẩm nang | **1** (lần thứ hai là `authority-meta`, có `hidden`) |
+| `data-field="author"` · `data-region="author-box"` | 1 · 1 |
+| `fact-strip` nằm trong `two-col` | **0/4 trang** |
+| `astro check` | 0 lỗi, 0 cảnh báo |
+| **Luật 1** | **pass — 137 trang, 0 field lặp vùng, 0 field sai vùng** |
+| `BM-ORPHAN-REGION` · `BM-EMPTY-REGION` | pass · pass |
+
+**Cổng đỏ còn lại và vì sao không phải do phiếu này:** R3 **1 → 2 lỗi**, R4 **45 → 42**. Cả hai đổi vì **nội dung Sanity đổi giữa hai lần dựng** (138 → 137 trang); URL mới mất là `/cam-nang/mua-ve-hon-tam-nha-trang-o-dau/`, không dính gì tới định tuyến hay mã đã sửa. S24-AUTHORITY (6), control-registry (2), deferred (1) giữ nguyên.
+
+**Nợ ghi để không rơi.**
+
+1. **Thêm cột Cẩm nang vào §3.1** để `luat1-post` canh được Article — xem Chốt 1.
+2. **Gắn `data-region` cho bốn vùng còn lại của `DR-048`** (`hero`, `hero-badge`, `breadcrumb`, `footer-meta`) và cho `.title-band`. Hai vi phạm Luật 1 trong hai ngày đều sống nhờ khoảng mù này.
+3. **13 ca Luật 2** — nợ biên tập, chưa ai nhận.
+4. **"Giờ mở cửa hiển thị sai vị trí"** — chưa đóng, thiếu URL của chủ dự án.
+
+---
+
+## QĐ-2026-08-25-03 — Thân bài: trả lại link và ảnh, hạ cấp tiêu đề theo `06`, đưa cỡ chữ về token
+
+**Trạng thái:** chốt 2026-08-25. Sửa `src/components/Body.astro`, `src/lib/queries/fragments.ts`, và tám template entity. Không đụng `06`, `07`, `01-CONTENT_MODEL`, schema Sanity.
+
+**Bối cảnh.** Lượt rà bố cục 2026-08-25 mở đầu bằng *"link và ảnh trong phần body của Entity không hiển thị"*. Đo lại thì đó là **ba lỗi độc lập cùng nằm trong một component**, và cả ba đều thuộc loại **hỏng im lặng**: HTML hợp lệ, cổng xanh, chỉ thiếu thứ đáng lẽ phải có.
+
+### Lỗi 1 — link biến thành chữ thường
+
+Link trong Portable Text là **annotation**: `marks` của một span chứa `_key` trỏ vào `block.markDefs[]`. `renderInline` cũ chỉ so chuỗi với `'strong'` và `'em'`; mọi `_key` rơi vào nhánh không-khớp và bị bỏ. `grep markDefs src/` ra **0**.
+
+**Đo được: 11 tài liệu đã duyệt có link trong thân bài.** Trên `trai-nghiem/phao-chuoi`, `hontamnhatrang.com` xuất hiện **0** lần trong HTML dựng ra.
+
+**Sửa:** đọc `markDefs`, dựng `<a>`. Link ra ngoài site mang `target="_blank" rel="noopener nofollow"`; link nội bộ thì không. Kèm theo: bản cũ nhả thẳng `c.text` vào `set:html` **không escape** — nay escape trước rồi mới bọc thẻ.
+
+### Lỗi 2 — ảnh trong thân bài biến mất
+
+`bodyFragment` trả portable text **thô**: `"body": coalesce(body.vi, …)`. Khối ảnh vì vậy chỉ có `asset: { _ref, _type: 'reference' }`, không có `url`. `Body.astro` gọi `imageUrl()`, hàm đó đòi `asset.url` (`sanity-image.ts:46`), trả `undefined`, component `return null`.
+
+**Đo được: 66 tài liệu đã duyệt có ảnh trong thân bài.** Trên `diem-tham-quan/rung-thong-khanh-son`, `.body-block` chứa **0** `<figure>` và **0** `<img>`.
+
+**Sửa:** deref `asset->` trong `bodyFragment`, hình dạng chép đúng `mainImageFragment` để `imageUrl()` và `isSvg()` dùng chung một hợp đồng. Thêm `<figcaption>` khi khối ảnh có `caption`.
+
+### Lỗi 3 — `headingOffset` được `06` khai nhưng chưa từng tồn tại
+
+`06` §3 hàng "Thân bài" (N15b, v2.2) khai: *"trong trang chi tiết entity, `Body` hạ một cấp khi render — tiêu đề lưu h2 hiện thành `<h3>` … prop `headingOffset` của `Body`"*. `grep headingOffset src/` ra **0**.
+
+Hệ quả đo được: `rung-thong-khanh-son` phát **7 thẻ `<h2>` trong thân bài**, ngang cấp với 3 `<h2>` tiêu đề mục — dàn bài tài liệu gãy.
+
+**Sửa:** thêm prop, bật `headingOffset={1}` ở tám template entity. **Không bật** cho `ArticleDetail` (`06` §4.10: ở trang cẩm nang thân bài là nội dung chính, không nằm dưới tiêu đề mục nào), cũng không cho `PersonDetail` (dùng `bio`, không dưới `Section`), `SiteHome`, `TouristDestinationHub` (không phải trang chi tiết entity).
+
+### Kèm theo — cỡ chữ tiêu đề thân bài về token
+
+`.body-block h2/h3/h4` **không khai `font-size` nào**, nên rơi về mặc định trình duyệt: đo được **25,5px** (`1.5em`) và **19,9px** (`1.17em`). Hai giá trị đó không có trong thang của `07` §2 và vi phạm câu mở đầu `tokens.css` — *"0 hardcoded value bên ngoài file này"*.
+
+Nay gán token sát giá trị đang render (`--fs-h4` 26px, `--fs-h5` 20px), nên **diện mạo gần như không đổi**. Đây là **đưa về thang, không phải đổi thang**: câu hỏi chỉnh thang cỡ tiêu đề của chủ dự án vẫn mở, chưa chốt.
+
+Thêm luật cho link thân bài — trước nay chưa có, vì chưa từng có link nào render ra: gạch chân cộng màu primary. Không dùng riêng màu (WCAG 1.4.1).
+
+---
+
+**Đối chiếu — đo bên trong đúng phần tử `.body-block`, cắt bằng cách đếm độ sâu `<div>`:**
+
+| Trang | `<a>` | `<figure>` | Tiêu đề |
+|---|---|---|---|
+| `trai-nghiem/phao-chuoi` | **1** (`hontamnhatrang.com`) | 1 | h2=**0**, h3=3 — đã hạ cấp |
+| `diem-tham-quan/rung-thong-khanh-son` | 0 | **12** (trước **0**) | h2=**0**, h3=7, h4=4 |
+| `cam-nang/thien-duong-bien-dao…` | **7** | 0 | h2=**3**, h3=8 — **không** hạ cấp, đúng §4.10 |
+
+`astro check` 0 lỗi 0 cảnh báo · **Luật 1 pass — 138 trang, 0 field lặp vùng, 0 field sai vùng** · `BM-ORPHAN-REGION` và `BM-EMPTY-REGION` pass.
+
+**Một phép đo sai của chính tôi, ghi lại.** Lần kiểm đầu tôi cắt "thân bài" bằng cửa sổ 40.000 ký tự từ `class="body-block"`. Cửa sổ đó tràn ra ngoài phần tử và đếm cả tiêu đề mục lẫn link chân trang — ra `<a>=28`, `h2=3`, kết luận sai rằng offset chưa chạy. Cắt đúng phần tử bằng cách đếm độ sâu `<div>` thì `<a>=1`, `h2=0`. **Cửa sổ ký tự không phải phạm vi phần tử**; đo DOM thì phải cắt theo cây.
+
+**Nợ ghi để không rơi.**
+
+1. **Không cổng nào bắt được ba lỗi này**, và cả ba đều sống nhiều tháng. Chúng không phải lỗi "vùng sai" hay "lặp vùng" nên `luat1-post` không đụng tới; `BM-EMPTY-REGION` cũng không, vì vùng có chữ, chỉ thiếu ảnh và link. Một cổng kiểu *"số `<img>` trong `.body-block` phải khớp số khối ảnh trong dữ liệu"* sẽ bắt được — chưa có, chưa ai đề xuất.
+2. **Thang cỡ tiêu đề** vẫn là câu hỏi mở của chủ dự án (lượt rà 2026-08-25 mục 3). Phiếu này chỉ đưa hai cấp lạc thang về token, không chốt thang.
+
+---
+
+## QĐ-2026-08-25-04 — Chốt bộ giao diện `cat-bien`; ba nền phụ khai riêng cho từng bộ
+
+**Trạng thái:** chốt 2026-08-25. Sửa `src/styles/tokens.css` và `07-DESIGN_TOKENS` §1 + §1b. **Chưa** đổi `siteSettings.theme` trong Sanity — xem "Trình tự bắt buộc" ở cuối.
+
+**Bối cảnh.** Chủ dự án chọn **`cat-bien` (nền kem)** làm bộ giao diện. Nhưng bật nó nguyên trạng thì **làm bệnh nặng thêm**, không nhẹ đi — và đây là lý do phiếu này tồn tại.
+
+### Vì sao `cat-bien` là bộ tệ nhất trước khi sửa
+
+`07` §1b khai *"mỗi bộ chỉ đổi bốn token màu gốc"*, và `tokens.css` làm đúng vậy: khối `[data-theme='cat-bien']` đè 7 token, **không có** `--c-surface-alt`, `--c-primary-soft`, `--c-border`. Ba token đó vì thế **thừa hưởng từ `:root`**, tức từ bộ `bien-sau`.
+
+Hệ quả: nền kem **ấm** `#FDFAF5` đứng cạnh nền phụ xám **lạnh** `#F8FAFC`. Hai thứ đó lệch nhau **1,005** — nói cách khác **khối xen kẽ ở bộ này gần như không tồn tại về mặt thị giác**, tệ hơn cả hai bộ kia (1,046). Và chúng còn lệch nhau về nhiệt độ màu.
+
+Đây đúng là căn bệnh `07` §1 tự đặt tên: *"`--c-surface` #FFFFFF và `--c-surface-alt` #F8FAFC chỉ lệch ~4% độ sáng, nên nếu cả trang chỉ dùng hai nền này thì đọc thành một mảng trắng liền."* Với `cat-bien` thì không phải 4% mà gần như 0%.
+
+### Chốt — ba nền phụ khai riêng cho từng bộ
+
+| Bộ | `surface.alt` | `primary.soft` | `border` | Tách nền chính↔phụ |
+|---|---|---|---|---|
+| `bien-sau` | #EAF2F8 | #DCEBF6 | #D3E1EC | 1,046 → **1,132** |
+| **`cat-bien`** | **#F5EDE0** | **#E4EEF1** | **#E7DCC9** | **1,005 → 1,116** |
+| `ngoc-lam` | #E8F4F2 | #D6EBE8 | #CFE3E0 | 1,046 → **1,126** |
+
+**Không thêm một mã brand nào.** `primary`, `accent` san hô, `sand`, và mọi màu chữ giữ nguyên. Đây là chữa **diện tích màu**, không phải mở bảng màu — đúng cách `07` §1 chỉ định và đúng hướng vòng 3 §3.3 đã chọn.
+
+**R2 được tôn trọng:** *"sửa bộ nào thì sửa cả ba"*. Không bộ nào bị bỏ, kể cả hai bộ không được chọn.
+
+### Đối chiếu
+
+`npm --prefix scripts run check:theme` — **pass, 3 bộ, tất cả cặp đạt AA**, thấp nhất 5,02 (`cat-bien`, trắng/accent) đúng như trước khi sửa: bốn cặp của cổng không đụng tới ba token này.
+
+Hai cặp **ngoài** phạm vi cổng, đo riêng vì đề xuất đụng đúng nền đó — chữ chính và chữ mờ trên nền phụ:
+
+| Bộ | chữ/nền phụ | chữ mờ/nền phụ | chữ/nền mềm |
+|---|---|---|---|
+| `bien-sau` | 15,77 | 6,70 | 14,67 |
+| `cat-bien` | 15,05 | 6,57 | 14,82 |
+| `ngoc-lam` | 15,86 | 6,73 | 14,37 |
+
+Tất cả dư AA. `npm --prefix scripts run check:token-parity` — **XANH, không lệch mới**; hai mục vàng còn lại là `DR-050` và `DR-051` có sẵn.
+
+### Trình tự bắt buộc — vì sao CHƯA đổi `siteSettings.theme`
+
+`siteTheme.ts` đọc `siteSettings.theme` **lúc dựng** (cache module-level), nên đổi trong Sanity chỉ có hiệu lực ở lần deploy sau. Nghe thì an toàn, nhưng nó tạo một cửa sập:
+
+**`origin/main` hiện CHƯA có bản vá ba nền phụ này** — nó nằm ở PR #6, chưa merge. Nếu đổi `theme` sang `cat-bien` ngay bây giờ rồi có ai deploy từ `main`, production nhận **`cat-bien` KHÔNG kèm bản vá** — tức đúng tổ hợp tệ nhất: nền kem cộng nền phụ xám lạnh, tách nền 1,005.
+
+**Nên thứ tự là: merge PR #6 → deploy → rồi mới đổi `theme` sang `cat-bien`.** Đảo thứ tự là tự bắn vào chân.

@@ -6,9 +6,11 @@
  * lặp vùng đo ngày 2026-08-22. Một field một vùng thì phải có đúng MỘT component.
  *
  * Hợp đồng từ 06: tối đa 6 ô cho bốn entity có hàng ở §3.1; KHÔNG chứa giá
- * (giá chỉ ở thanh dính + khối hành động); ≤ 2 ô thì không trải dải mà gộp
- * vào sidebar — chỗ gọi quyết định điều đó qua prop `inline`, component chỉ
- * dựng.
+ * (giá chỉ ở thanh dính + khối hành động).
+ *
+ * QĐ-2026-08-25-02 BỎ luật "≤ 2 ô thì không trải dải" — vùng này nay LUÔN trải
+ * dải. Prop `inline` và biến thể `.fact-strip--inline` vì thế mất chỗ gọi cuối
+ * cùng và đã gỡ, thay vì để mã chết.
  *
  * Task 7 fix round (2026-08-23, chủ dự án chỉ đạo, gỡ hạn chế "không sửa file
  * này" CHỈ cho hai thay đổi dưới): trần 6 từng cắt LẶNG (`.slice(0, 6)`, không
@@ -33,14 +35,13 @@ export interface Fact {
 export interface Props {
   facts: Fact[]
   /** true = dựng dạng danh sách dọc để nhét vào sidebar (≤ 2 ô). */
-  inline?: boolean
   /** Trần số ô hiển thị. Mặc định 6 — hợp đồng 06 §3.1. Entity không có hàng
    *  ở §3.1 (chỉ ràng buộc bởi Luật 1, không ràng buộc bởi trần 6) có thể
    *  truyền cao hơn để không bị cắt oan. */
   max?: number
 }
 
-const { facts, inline = false, max = 6 } = Astro.props
+const { facts, max = 6 } = Astro.props
 const allVisible = facts.filter(f => f.visible)
 // Quá `max` thì cắt CÓ TIẾNG — cắt câm là đúng thất bại "vùng biến mất, cổng
 // vẫn xanh" mà việc đóng Luật 1 tồn tại để loại bỏ.
@@ -53,8 +54,8 @@ const cols = Math.min(visible.length, 3)
 ---
 
 {visible.length > 0 && (
-  <section class:list={['fact-strip', inline && 'fact-strip--inline']}>
-    <div class:list={[!inline && 'container']}>
+  <section class="fact-strip">
+    <div class="container">
       <dl class="fact-grid" style={`--fact-cols:${cols}`} data-region="fact-strip">
         {visible.map((f) => (
           <div class="fact" data-field={f.field}>
@@ -77,16 +78,9 @@ const cols = Math.min(visible.length, 3)
 <style>
   .fact-strip { padding: 0 0 var(--s4); }
 
-  /* I4 fix (2026-08-23): khối gộp (≤2 ô) nay là con TRỰC TIẾP của `.two-col`
-     (DetailLayout.astro), tự nhận vùng grid-area 'facts' — không còn nằm
-     trong `.sidebar-card` (Sidebar.astro) nên không còn ăn ké nền/viền/đệm
-     của thẻ đó. `.fact-grid` bên dưới giữ nguyên nền/viền/đệm riêng (bỏ nhánh
-     từng gỡ chúng khi còn lồng trong .sidebar-card) để tự trông như một thẻ
-     độc lập, khớp các thẻ sidebar khác. */
-  .fact-strip--inline {
-    padding: 0;
-    grid-area: facts;
-  }
+  /* Lịch sử: I4 fix (2026-08-23) đưa khối gộp ≤2 ô ra khỏi `.sidebar-card` để
+     nó thôi ăn ké nền/viền/đệm của thẻ sidebar. QĐ-2026-08-25-02 bỏ hẳn khối
+     gộp, nên `.fact-grid` nay chỉ có một hình dạng và giữ nền/viền/đệm riêng. */
 
   .fact-grid {
     display: grid;
@@ -104,11 +98,6 @@ const cols = Math.min(visible.length, 3)
      340px hẹp. Trước đây rule này không có media query nên đè cả di động
      (đặc hiệu hơn rule 2-cột bên dưới bất kể thứ tự khai) — I4, review toàn
      nhánh: hồi quy vị trí+bố cục trên 15 trang ≤2 ô. */
-  @media (min-width: 1024px) {
-    .fact-strip--inline .fact-grid {
-      grid-template-columns: 1fr;
-    }
-  }
 
   .fact { min-width: 0; }
 
