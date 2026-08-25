@@ -1187,3 +1187,31 @@ Không mã lỗi, không cảnh báo, `push` trả về 0. Ai không đọc kỹ
 **Bài học ghi lại, vì nó lặp với `DR-048`.** Cả hai là **cổng tồn tại nhưng không nhìn thấy gì**: `DR-048` là bốn vùng chưa gắn `data-region` nên `luat1-post` mù; đây là hook chưa executable nên git mù. Trong cả hai ca, bảng điều khiển báo xanh vì **không có ai kiểm**, chứ không phải vì đã kiểm và đạt. `CLAUDE.md` §6 viết *"mặc định của cổng là không đạt nếu không có bằng chứng"* — hai phiếu này là hai kiểu bằng chứng giả khác nhau.
 
 **Hệ quả còn mở, không sửa ở đây.** Hook nay chạy thật, nên **lần push tới sẽ bị chặn** bởi năm cổng đỏ đang có. Chúng là nợ dữ liệu đã xếp đợt 4D (`SPEC-2026-08-22-be-mat-vong-5` §9), không phải nợ của đợt này — nhưng từ nay chúng chặn đường phát hành thật sự, chứ không còn chỉ nằm trong báo cáo.
+
+---
+
+## DR-057 — R4 hreflang không phải nợ dữ liệu: một vị từ GROQ so `null` bị bốn phiếu quyết định và spec §9 dán nhãn sai suốt nhiều tuần
+
+**Trạng thái:** **đã sửa 2026-08-25** (`fetchArticleAlternateSlugs`, `src/lib/sanity.ts:266-305`). Ghi lại vì cách phân loại sai kéo dài nhiều đợt là điều đáng biết, không chỉ bản thân lỗi.
+
+`fetchArticleAlternateSlugs` dựng vị từ `translationGroup._ref == *[_id == $id][0].translationGroup._ref` để tìm bản dịch cùng nhóm. Không có bài nào trong `production` đã gắn field `translationGroup`, nên vế trái luôn `null`. Vế phải cũng `null` vì cùng lý do. GROQ so `null == null` là **đúng**, nên vị từ khớp mọi bài đã duyệt, không chỉ bài cùng nhóm. Vòng lặp bên dưới gán `alternates[language]` theo thứ tự kết quả trả về, cái cuối thắng — nên mỗi bài (trừ bài "thắng" cuối cùng) nhận một `vi`/`x-default` alternate trỏ sang **một bài khác**, gây vừa thiếu hreflang self vừa hreflang không đối xứng.
+
+**Số đo, 2026-08-25.**
+
+| Đo | Kết quả |
+|---|---|
+| Bài đã duyệt có `translationGroup` (`production`) | **0** |
+| Bài đã duyệt đủ điều kiện đối chiếu (`slug` + `language`) | **18** |
+| Dòng lỗi `R4` trước sửa (`gate:all`) | **51**, trên **18** trang `/cam-nang/` |
+| Dòng lỗi `R4` sau sửa | **0** |
+
+**Vì sao cổng bắt đúng triệu chứng mà không ai sửa root cause suốt nhiều tuần.** `R4` (`r3-r4-post.ts`) đã đỏ đúng cách kể từ khi có nội dung `/cam-nang/` — đây không phải cổng mù kiểu `DR-048`/`DR-056`, nó báo lỗi thật, đúng trang, đúng ngôn ngữ. Nhưng **bốn phiếu quyết định** và **spec §9** đọc "R4 còn đỏ" rồi xếp chung nó vào nhóm "nợ dữ liệu đợt 4D" mà không mở lại truy vấn để hỏi vì sao:
+
+1. `QĐ-2026-08-22-02` — *"lỗi dữ liệu cổng lộ ra (... R4 hreflang cẩm nang, S24 người duyệt)"*.
+2. `QĐ-2026-08-22-05` — *"Nợ dữ liệu đợt 4D cũng còn nguyên: ... hreflang R4, người duyệt S24"*.
+3. `QĐ-2026-08-24-05` — *"Cổng đỏ còn lại | R3, R4, ... đều là nợ dữ liệu URL/hreflang/metadata tác giả trên trang cẩm nang, khớp đúng danh sách spec §9 khai"*.
+4. `QĐ-2026-08-25-01` — *"45/45 lỗi R4 đều ở `/cam-nang/`, không lỗi nào chạm template đã sửa. Khớp danh sách nợ spec §9"*.
+
+Và `SPEC-2026-08-22-be-mat-vong-5` §9: *"Năm cổng đang đỏ ở `gate:all`... Đều là nợ dữ liệu hoặc nợ cũ, đã xếp vào đợt 4D."* Số lỗi R4 còn được theo dõi qua từng đợt (45 → 42 ở `QĐ-2026-08-25-02`, quy cho nội dung Sanity đổi giữa hai lần dựng) — nhưng luôn ở mức "đếm và ghi nhận", chưa lần nào ở mức "đọc thông điệp lỗi và hỏi vị từ nào tạo ra nó". Nếu R4 thật sự là nợ dữ liệu (thiếu bản dịch), việc gắn `translationGroup` cho 18 bài mới là việc phải làm — không ai làm việc đó, vì nhãn "nợ dữ liệu" ngụ ý "chờ biên tập viên nhập liệu", trong khi lỗi thật nằm trong bốn dòng GROQ.
+
+**Bài học.** Một cổng đỏ lâu ngày, có bằng chứng, có số đo, có tên hạng mục "nợ dữ liệu" đi kèm — vẫn có thể là lỗi logic đội lốt nợ dữ liệu. Nhãn tồn tại càng lâu và càng được nhiều phiếu quyết định lặp lại, nó càng có vẻ đáng tin mà không ai còn kiểm lại. `CLAUDE.md` §6: *"mặc định của cổng là không đạt nếu không có bằng chứng"* — áp cho cả việc phân loại một cổng đỏ: dán nhãn "nợ dữ liệu" cũng cần bằng chứng (đo tận vị từ/truy vấn tạo ra lỗi), không phải suy ra từ việc cổng đỏ nhiều đợt liên tiếp.
