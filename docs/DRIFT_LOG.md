@@ -20,7 +20,30 @@ Xử theo QĐ-2026-08-05-02 (g1, g3) và QĐ-2026-08-05-03 (g2, tắt, phiếu n
 
 ## DR-002 — Token trong code lệch `07-DESIGN_TOKENS.md`
 
-**Trạng thái:** mở, sẽ tự tiêu khi viết lại bộ token cho tourdaovn.
+**Trạng thái:** mở — rà lại 2026-08-25, thu hẹp từ 8 xuống **6** mục lệch giá trị. (Trước đó: "mở, sẽ tự tiêu khi viết lại bộ token cho tourdaovn." Bộ token đã được viết lại qua nhiều đợt; phiếu không tự tiêu theo.)
+
+**Đo lại 2026-08-25.** Bảng "Lệch giá trị" tám dòng dưới đây nay còn **sáu** dòng sống:
+
+| Token | `07-DESIGN_TOKENS` | `tokens.css` | 2026-08-25 |
+|---|---|---|---|
+| `color.surface` | `#FFFFFF` (07:39) | `#FFFFFF` (css:23) | ✅ khớp — `QĐ-2026-08-06-04` |
+| `color.surface.alt` | `#EAF2F8` (07:40) | `#EAF2F8` (css:24) | ✅ khớp — `QĐ-2026-08-25-04` đổi cả hai bên |
+| `font.size.badge` | 12px | `--fs-badge: 0.6875rem` = 11px (css:80) | ❌ còn — `check:token-parity` in VÀNG |
+| `font.size.scale` bậc 22 | 22px | `--fs-h5: 1.25rem` = 20px (css:90) | ❌ còn — nay nằm trong phạm vi `DR-051` |
+| `shadow.raised` | `0 4px 12px rgba(15, 23, 42, 0.10)` (07:149) | `0 6px 24px -8px rgba(0,91,150,.15), 0 2px 6px rgba(26,32,44,.05)` (css:134) | ❌ còn |
+| `motion.fast` | 150ms (07:169) | `--m-fast: 180ms` (css:148) | ❌ còn |
+| `motion.base` | 250ms (07:170) | `--m-base: 300ms` (css:149) | ❌ còn |
+| `motion.easing` | `cubic-bezier(0.2, 0, 0, 1)` (07:171) | `--m-ease: ease` (css:150) | ❌ còn |
+
+**Bốn dòng cuối bảng không có cổng nào canh.** `npm --prefix scripts run check:token-parity` **không so** `shadow.*` và `motion.*` — nó bỏ qua chúng trong im lặng rồi vẫn in `XANH`. Đó là `DR-059`, mở cùng ngày. Nghĩa là bốn mục đó chỉ sống trong phiếu này, không bộ kiểm nào đỏ vì chúng.
+
+**Mục "Token có trong code, không có dòng nào trong spec" — nhóm cảnh quan đất liền đã gỡ.** `QĐ-2026-08-06-04` (`docs/DECISIONS.md:522`) gỡ `--c-land-rice`, `--c-land-forest`, `--c-land-mist`, `--c-sand-paper`, `--pattern-rice-lines`, `--pattern-contour-lines`, `--landscape-page-bg`, và tự ghi *"Đóng phần lớn DR-002"*. Kiểm 2026-08-25: `grep -rn -- "--c-land-\|--pattern-rice\|--pattern-contour\|--landscape-page-bg\|--c-sand-paper" src/` → **0 kết quả**. Các nhóm còn lại (nền thẻ, footer, hero fallback, bậc chữ thêm, token component) **chưa đo lại ở lượt này** — đếm cho đúng cần một phép quét hai chiều mà `check:token-parity` chưa làm được (xem `DR-059`).
+
+**Mục "Token có trong spec, không thành biến trong code" — hai trong ba đã hết là lệch.** `measure` và `letter-spacing` nay được khai **cố ý** ở `KHONG_CO_BIEN` (`scripts/check-token-parity.mjs:54-59`), kèm lý do từng mục. Mục thứ ba, `space.section`, không nằm trong danh sách đó — nó rơi vào đúng khoảng mù của `DR-059`.
+
+**Không gộp vào `DR-051` ở đây.** Hai dòng `font.size.badge` và `font.size.scale` bậc 22 trùng phạm vi với `DR-051`. Gộp phiếu là một quyết định, và `DR-051` đang là phiếu V1 chờ vòng 5 viết lại `07`. Ghi chéo để không ai sửa hai nơi rồi tưởng là hai việc.
+
+**Nguyên văn phần dưới giữ làm bản ghi** — các con số trong đó là của lượt đo 2026-08-05, đọc kèm bảng trên.
 
 `07-DESIGN_TOKENS.md` phê chuẩn 2026-06-12 khai khoảng 30 dòng token. `src/styles/tokens.css` có khoảng 90 biến. Ba loại lệch.
 
@@ -62,7 +85,26 @@ Khoảng 40 biến. Nhóm chính:
 
 ## DR-003 — Hai đặc tả đã duyệt mâu thuẫn nhau về màu nền
 
-**Trạng thái:** mở, cần chủ dự án hoà giải.
+**Trạng thái:** mở phần "Kèm theo" — **đóng một nửa 2026-08-25**: phần xung đột màu nền **ĐÓNG** từ 2026-08-06; phần §B của `08` chấm bài bằng đáp án nhatrangtravel **CÒN MỞ**, và nay lệch nặng hơn lúc viết phiếu. (Trước đó: "mở, cần chủ dự án hoà giải" — thực tế đã hoà giải từ 2026-08-06, chỉ sổ này chưa cập nhật.)
+
+**Phần đã đóng — xung đột nền.** `QĐ-2026-08-06-04` (`docs/DECISIONS.md:505-509`): chủ dự án chốt **nền trắng thuần**; `07-DESIGN_TOKENS` thắng, `08-QA_CHECKLIST` B4 sửa theo. Cả hai file đã phản ánh:
+
+- `07-DESIGN_TOKENS.md:39` — `color.surface | #FFFFFF | nền trang mặc định — **chủ dự án chốt 2026-08-06, giải DR-003**`.
+- `08-QA_CHECKLIST.md:71-72` — nay đòi `#FFFFFF` và `#F8FAFC`; dòng 74 ghi nguyên văn *"**DR-003 đã giải 2026-08-06.** … Chủ dự án chốt **nền trắng**; `07-DESIGN_TOKENS` thắng, mục này sửa theo."*
+
+**Phần còn mở — §B vẫn là đáp án của một dự án khác.** Chính `QĐ-2026-08-06-04` đã hoãn phần này chứ không đóng: `docs/DECISIONS.md:528` — *"`08-QA_CHECKLIST` §B còn giá trị hardcode ở mục liệt kê, cần rà lại khi Design xuất mockup."* Đo 2026-08-25:
+
+| `08-QA_CHECKLIST` | Đòi | Đang chạy | Lệch |
+|---|---|---|---|
+| dòng 52 (§B1) | accent cam `#C2410C` | `--c-accent: #C0392B` (css:18); và **đổi theo bộ giao diện**: `#B45309` ở `cat-bien` (css:172), `#BE123C` ở `ngoc-lam` (css:191) | ❌ sai hai đời — đổi giá trị (`QĐ-2026-08-06-04`) rồi thành ba giá trị theo bộ (`QĐ-2026-08-06-05`). Một hex cứng không còn mô tả nổi thứ đang chạy |
+| dòng 58 (§B2) | sand `#F5A623` | `--c-sand: #F5A623` (css:21) | ✅ còn đúng |
+| dòng 64 (§B3) | coral `#E8654E` | `--c-coral: #E8654E` (css:30) | ✅ còn đúng |
+| dòng 79 (§B5) | body, label, badge dùng `--font-ui` (**Plus Jakarta Sans**) | `--font-ui: "Nunito", "Be Vietnam Pro", system-ui` (css:72). Plus Jakarta Sans **đã gỡ hẳn** khỏi kho — `07`:126 *"Gỡ hẳn Lora và Plus Jakarta Sans vì không còn chỗ nào gọi tới"*; `public/fonts/` chỉ còn Nunito + Be Vietnam Pro | ❌ cổng đang chấm bài bằng một font không còn tồn tại trong repo |
+| dòng 78 (§B5) | heading dùng `--font-display` (**Be Vietnam Pro**), weight 700-900 | `--font-display: "Be Vietnam Pro", "Nunito", …` (css:71) | ◐ khớp **mã**, nhưng ngược `07`:101 (khai Nunito đứng trước) — đó là `DR-050`, không phải phiếu này. Vế "weight 700-900" thì `07`:103 đã khai 900 vô tác dụng (`DR-031`) |
+
+Nói cách khác: trong bốn giá trị nhatrangtravel phiếu này nêu, **hai vẫn trùng giá trị đang chạy** (sand, coral), **một đã hết hiệu lực** (`#FBF8F3`, đóng cùng phần trên), và **một sai nặng hơn trước** (`#C2410C`). Bộ chữ thì `08` §B5 đang khai một font đã bị gỡ khỏi kho.
+
+**Không sửa ở đây.** `08-QA_CHECKLIST` là core spec đã phê chuẩn; sửa §B đụng R9 và cần chủ dự án duyệt (`CLAUDE.md` §1). Lượt rà này chỉ ghi nhận. **Điều kiện đóng nốt:** một quyết định viết lại §B1 theo cơ chế bộ giao diện (không hex cứng) và §B5 theo bộ chữ thật.
 
 - `07-DESIGN_TOKENS.md` §1: `color.surface = #FFFFFF`, "nền trang mặc định".
 - `08-QA_CHECKLIST.md` dòng 71: "`body` background = `--c-surface` (#FBF8F3)"; dòng 73: "Không có vùng nào dùng nền trắng thuần cho body".
@@ -75,7 +117,20 @@ Kèm theo: `08-QA_CHECKLIST` §B hardcode màu và font của nhatrangtravel (`#
 
 ## DR-004 — `05-URL_MAP` mô tả một site khác
 
-**Trạng thái:** mở, xử ở pha C.
+**Trạng thái:** mở — rà lại 2026-08-25: **y nguyên, không mục nào tự tiêu.** (Trước đó: "mở, xử ở pha C." Pha C đã qua; phiếu thì không.)
+
+**Đo 2026-08-25** trên `docs/core-specs/05-URL_MAP-and-DB_SCHEMA.md` (140 dòng, chưa từng có bản v2):
+
+| Mục của phiếu | Kiểm | Kết quả |
+|---|---|---|
+| Canonical host | dòng 37 | vẫn `https://nhatrangtravel.net` |
+| Prefix `am-thuc`, `nha-hang`, `dac-san`, `su-kien` | dòng 47, 52, 53, 57 (bảng §1.2) | vẫn còn cả bốn |
+| Thiếu `tat-ca` | `grep -c "tat-ca"` toàn file | **0** — hub thứ tư đang chạy vẫn không có dòng nào |
+| Năm cột ngôn ngữ | dòng 8, 26, 41 | vẫn năm, trong khi `src/site.config.ts:130` khai `langs = ['vi']` |
+
+**Vì sao không tự tiêu, dù `06` đã lên v2.** `06-BINDING_MAP` được viết lại và tự khai đóng `DR-005` (`06`:21), nhưng `05` chưa có bản tương ứng: nó vẫn mang khối `CORE SPEC · Nguồn: nhatrangtravel/project/05-URL_MAP-and-DB_SCHEMA.md` ở dòng 4 và nhãn `🔧 SITE-SPECIFIC` ở dòng 15 — tức bản gốc chưa qua khâu thay phần riêng. Sửa `06` không làm `05` đúng theo.
+
+**Cần gì để quyết.** Một quyết định phê chuẩn `05` v2 cho tourdaovn: canonical host `tourdao.vn`, bảng §1.2 rút về một cột `vi`, bỏ bốn nhánh đang tắt, thêm `tat-ca`. Đây là core spec đã phê chuẩn nên không tác nhân nào sửa được bằng một lượt rà sổ (`CLAUDE.md` §1, R9).
 
 - Canonical host khai `https://nhatrangtravel.net`. Site chạy `tourdao.vn`.
 - Bảng prefix §1.2 còn `am-thuc`, `nha-hang`, `dac-san`, `su-kien`. Bốn nhánh này đã tắt trong `src/site.config.ts`.
@@ -88,7 +143,22 @@ Kèm theo: `08-QA_CHECKLIST` §B hardcode màu và font của nhatrangtravel (`#
 
 ## DR-005 — `06-BINDING_MAP` khai loại trang không tồn tại và thiếu loại trang đang chạy
 
-**Trạng thái:** mở, xử ở pha E.
+**Trạng thái:** **ĐÓNG 2026-08-25** — đã giải ở `06-BINDING_MAP` v2 (soạn 2026-08-05, v2.0.0 duyệt 2026-08-06 theo `QĐ-2026-08-06-06`); sổ này chưa cập nhật suốt từ đó. Bằng chứng trực tiếp: `docs/core-specs/06-BINDING_MAP.md:21` — *"**Đổi gì ở v2.** Đóng DR-005 (khai loại trang không tồn tại, thiếu loại trang đang chạy)…"*. (Trước đó: "mở, xử ở pha E.")
+
+**Kiểm từng gạch đầu dòng của phiếu, 2026-08-25 — không nhận lời tự khai của `06` làm bằng chứng duy nhất:**
+
+| Mục của phiếu | Kiểm trên `06-BINDING_MAP.md` | Kết quả |
+|---|---|---|
+| §5.3 tên "Bốn hub" nhưng liệt `/am-thuc/` | dòng 298 | `### 5.3 Bốn hub (/kham-pha/, /luu-tru/, /di-lai/, /tat-ca/)`. `grep -c "am-thuc"` toàn file = **0** |
+| §4.5 Restaurant, §4.6 Specialty, §4.9 Event mô tả entity đang tắt | §4 không còn ba mục này; chuyển xuống §8.1 (dòng 423), §8.2 (438), §8.3 (450) dưới đề "Phụ lục — entity đang tắt" (417) | ✅ |
+| §5.5 index sự kiện | dòng 320 | *"Đã chuyển xuống phụ lục §8 — entity `event` đang tắt trong `src/site.config.ts`."* |
+| Không có bảng riêng cho trang chủ `/` | dòng 326 | `### 5.7 Trang chủ / (SiteHome)` |
+| `/lo-trinh-don-khach/` không có bảng ánh xạ | dòng 362 | `### 5.9 Trang lộ trình đón khách /lo-trinh-don-khach/` |
+| §7 tuyên bố sai "16 mẫu URL" | dòng 393 | Câu đó đã bị rút, và bản mới **nêu đích danh phiếu này**: *"Bản v1 tuyên bố '16 mẫu URL đều có bảng ánh xạ' — câu đó khi ấy vừa thừa vừa thiếu (DR-005), nên v2 viết lại thành danh sách kiểm được thay vì một lời khẳng định."* |
+
+**Không kéo theo `DR-004`.** `05-URL_MAP` vẫn mô tả một site khác; hai phiếu tách bạch, đóng phiếu này không đóng phiếu kia.
+
+**Một cảnh báo hiệu lực giữ nguyên, không thuộc phiếu này.** `06`:29 vẫn ghi bộ kiểm máy `g3` không đọc thẳng file này (`DR-027`), nên `g3` xanh không phải bằng chứng cho `06` đúng. Kết luận đóng ở trên dựa trên đọc file, không dựa trên `g3`.
 
 - §5.3 tên là "Bốn hub" và liệt `/am-thuc/`. Hub thứ tư thật là `/tat-ca/`, không có dòng nào trong file.
 - §4.5 Restaurant, §4.6 Specialty, §4.9 Event, §5.5 index sự kiện: mô tả bốn loại trang thuộc entity đang tắt.
@@ -100,7 +170,22 @@ Kèm theo: `08-QA_CHECKLIST` §B hardcode màu và font của nhatrangtravel (`#
 
 ## DR-006 — `00-PROJECT_BRIEF` là của nhatrangtravel, và sai đã rò xuống code
 
-**Trạng thái:** mở, xử ở pha A.
+**Trạng thái:** mở một chuỗi ở `src/lib/homepage.ts` — **đóng một nửa 2026-08-25**: phần đặc tả **ĐÓNG**, hai trong ba chỗ mã **ĐÓNG**; chỗ thứ ba còn sống, nhưng tính chất của nó đã đổi. (Trước đó: "mở, xử ở pha A.")
+
+**Phần đã đóng — đặc tả.** `docs/core-specs/00-PROJECT_BRIEF.md:16` ghi thẳng: *"**Đóng:** DR-006 phần đặc tả."* Bản v2.0.0 viết lại toàn bộ nội dung cho tourdaovn 2026-08-06 (`00`:13-14), và khối đầu file khai rõ *"Bản v1 (nhatrangtravel) xem lịch sử git — không giữ song song để khỏi hai nguồn sự thật"* (`00`:6) — tức không để lại nguồn thứ hai.
+
+**Phần đã đóng — hai trong ba chỗ mã.**
+
+| Chỗ phiếu nêu | Kiểm 2026-08-25 |
+|---|---|
+| `src/components/SiteHome.astro:36` — "Cổng thông tin du lịch Nha Trang…" | `grep -rn "Cổng thông tin du lịch Nha Trang" src/` → **0 kết quả** |
+| `src/pages/index.astro:37` — cùng chuỗi trong meta description | dòng 47 nay là `const metaDescription = brand.description` |
+
+Nguồn duy nhất nay là `src/site.config.ts:94-96`, và chú thích ngay trên nó (`site.config.ts:85-88`) ghi đúng lý do: *"ĐÂY LÀ NƠI DUY NHẤT: trước đây câu này bị chép ở 3 file khác nhau và lệch nhau (DR-006)."* Nội dung lấy theo `00-PROJECT_BRIEF` §1 và §3 — đúng chiều thẩm quyền.
+
+**Phần còn mở — một chuỗi, nhưng không còn là cùng một lỗi.** `src/lib/homepage.ts:57` vẫn là `overview: 'Tổng quan về Nha Trang'` (phiếu ghi dòng 59; mã đã dịch chuyển). Cái sai mà phiếu này cảnh báo — *"site đang tự giới thiệu sai bản chất doanh nghiệp"* — thì **không còn**: đây là tiêu đề mục tổng quan điểm đến, và điểm đến chính đúng là Nha Trang. Cái còn lại là **tên điểm đến viết cứng trong copy** trong khi điểm đến vốn là cấu hình. Nợ đó đã có chỗ đứng riêng từ trước: `docs/GOI-2-KET-QUA.md:68` xếp nó vào mục #9 bảng "còn nợ" của `ADR-0021` (*"~120 dòng mô tả 'ở Nha Trang', 'của Khánh Hòa' trong `uiCopy.ts` … nhiều công, ít rủi ro, làm cuối"*).
+
+**Cần gì để đóng nốt.** Một trong hai, và cần người quyết: (a) dọn mục #9 của `ADR-0021` rồi đóng phiếu này; hoặc (b) chốt rằng phần copy đó thuộc hẳn nợ `ADR-0021` và đóng `DR-006` ngay bây giờ. Lượt rà này **không** tự chọn — để mở một dòng rẻ hơn đóng nhầm.
 
 Brief tự khai "gần như toàn bộ nội dung là của nhatrangtravel, cần viết lại khi dựng site khác". Nhưng sai này không dừng ở tài liệu, nó đang hiển thị cho người dùng:
 
@@ -114,7 +199,27 @@ Trong khi `src/site.config.ts` khai `brand.legalName = 'Công ty TNHH Tour Đả
 
 ## DR-007 — Menu điều hướng hardcode, lệch hợp đồng đã duyệt
 
-**Trạng thái:** mở, xử ở pha E và G.
+**Trạng thái:** **ĐÓNG 2026-08-25** — đã giải bởi `ADR-0023` (điều hướng theo dòng dịch vụ) và `06-BINDING_MAP` v2; sổ này chưa cập nhật. (Trước đó: "mở, xử ở pha E và G.")
+
+**Bằng chứng ở tầng quyết định.**
+
+- `docs/adr/ADR-0023-dieu-huong-theo-dong-dich-vu.md:102` — *"**Tích cực.** Điều hướng có một nguồn sự thật duy nhất, đóng DR-007 và phiếu nợ đã ghi ở…"*
+- `docs/DECISIONS.md:243` — *"**Ba việc trả kèm.** DR-007 (điều hướng hardcode ba chỗ)…"*
+- `docs/core-specs/06-BINDING_MAP.md:21` — *"Đóng … DR-007 phần đặc tả."*
+
+**Bằng chứng ở tầng mã — cả ba chỗ phiếu nêu, đo 2026-08-25.**
+
+| Chỗ phiếu nêu | Kiểm |
+|---|---|
+| `Header.astro:24` — `['hub-kham-pha','hub-luu-tru','hub-di-lai']` | dòng 24 nay là chú thích *"Menu đọc từ `nav` trong site.config.ts — nguồn duy nhất (ADR-0023, DR-007)"*; mảng cứng không còn |
+| `Footer.astro:32-33` — `['attraction','experience','tour']` và `['hotel','resort']` | dòng 29 *"Chân trang đọc cùng một `nav` với menu chính (ADR-0023, DR-007)"*; dòng 32 `const navItems = resolveNav(uiLang, contact?.zaloUrl, 'footer')`. Hai mảng cứng không còn |
+| `src/lib/homepage.ts` — `quickLinks` lặp năm lần | `grep -rn "quickLinks" src/` → **0 kết quả** |
+
+`nav` sống ở `src/site.config.ts:288` và được phân giải qua `resolveNav` / `autoRouteLinks` trong `src/lib/routes.ts:211-235`, đọc `ROUTE_MAP` — không nơi nào chép lại danh sách. Bản đối chứng mà phiếu nêu (`HomeHubGrid.astro` đọc config) nay là cách làm chung: `HomeHubGrid.astro:14-15` — *"Hub nào hiện ở đây do src/site.config.ts quyết định, không khai lại tại chỗ"* → `const hubEntities = navHubs`.
+
+Dòng mà phiếu trích ở `01-CONTENT_MODEL.md` nay là **ghi chú giải quyết**, không còn là phiếu nợ: dòng 568 — *"Điều hướng có nguồn riêng là `ROUTE_MAP` (ADR-0023, DR-007)."*
+
+**Còn lại quanh hub, nhưng KHÔNG thuộc phiếu này** — ghi ra để không ai đọc phiếu đóng rồi tưởng đã dọn sạch: `HomeHubGrid.astro:17-20` viết cứng ba khoá hub để chọn màu nền icon, và `HOME_COPY` giữ `hubDescriptions` cho năm ngôn ngữ trong khi `langs = ['vi']`. Cả hai là **trình bày và copy**, không phải hợp đồng điều hướng — `06` §2 chỉ khai "Header điều hướng | config (build)", và hợp đồng đó nay đã được giữ.
 
 `06-BINDING_MAP` §2 khai "Header điều hướng | config (build)". Code hardcode ở ba chỗ:
 
@@ -130,7 +235,25 @@ Bản đối chứng cách làm đúng đã có trong repo: `src/components/Home
 
 ## DR-008 — `DESIGN.md` được hai file luật trích dẫn nhưng không tồn tại
 
-**Trạng thái:** mở, xử ở pha F.
+**Trạng thái:** mở — phép kiểm mà kế hoạch khai **đã chạy 2026-08-25 và KHÔNG sạch**. `docs/plans/2026-08-25-dong-no-ky-thuat.md:539` hẹn *"kiểm bằng `grep -rn "DESIGN.md" docs/ src/`. Nếu 0 kết quả thì đóng"* — kết quả là **11 trích dẫn còn sống trên 7 file**, trong đó có **đúng hai dòng luật** đã sinh ra phiếu này. Không đóng. (Trước đó: "mở, xử ở pha F." Pha F đã qua; phiếu thì không.)
+
+**Đo 2026-08-25** — `grep -rnE "(^|[^A-Za-z0-9-])DESIGN\.md" docs/ src/ playbook/`, đã loại tên file `*-CLAUDE-DESIGN.md` / `*-BAN-GIAO-DESIGN.md` và các câu tự nói về phiếu này:
+
+| File | Dòng | Loại |
+|---|---|---|
+| `playbook/GOVERNANCE.md` | 98 | **luật** — điều kiện vào QA1 vẫn đòi *"Mockup đã xuất; BINDING_MAP và DESIGN.md đã duyệt"* |
+| `playbook/GOVERNANCE.md` | 109 | **luật** — điều kiện ra QA2 mục (5) vẫn là *"không hardcode token ngoài DESIGN.md"* |
+| `playbook/ai/PROMPT_FACTORY.md` | 158 | luật — P1 liệt `DESIGN.md` trong "4 file" |
+| `docs/core-specs/08-QA_CHECKLIST.md` | 110, 118, 225 | core spec — bắt đối chiếu "DESIGN.md §5" và "§5.10" |
+| `docs/core-specs/DESIGN_PATTERNS.md` | 10, 20, 49 | core spec — vẫn dẫn `project/DESIGN.md` |
+| `src/styles/tokens.css` | 91 | **mã** — *"Shared component tokens (trích từ DESIGN.md §5)"* |
+| `src/components/MapView.astro` | 5 | **mã** — *"DESIGN.md §5.9: height 320px, radius md"* |
+
+**Trong bốn "tham chiếu chết" phiếu này nêu, mới vá được một — và vá chưa trọn file.** `tokens.css` dòng 2 đã sửa: dòng 10 nay ghi *"Tham chiếu cũ 'DESIGN.md' đã gỡ — file đó chưa bao giờ tồn tại (DR-008)"*. Nhưng **chính file đó còn dòng 91**, nên câu "đã gỡ" ở dòng 10 hiện không đúng cho cả file — một câu nói dối nhỏ nằm ngay trong bản vá. `DESIGN_PATTERNS.md` 10/20/49 chưa động tới. Phép quét lần này còn lộ thêm hai chỗ phiếu chưa từng đếm: `08-QA_CHECKLIST.md` (3 dòng) và `MapView.astro`.
+
+**Lệch tên ở tầng luật vẫn nguyên:** `playbook/PLAYBOOK.md:24` gọi artifact bước 7 là `DESIGN_TOKENS + mockup`; `playbook/GOVERNANCE.md:98` gọi là `DESIGN.md`. Hai tên cho một thứ, đúng như phiếu ghi từ đầu.
+
+**Cần gì để quyết.** Một quyết định ở tầng `GOVERNANCE` / `PLAYBOOK` chốt **một** tên cho artifact bước 7 — thứ thực tế đang tồn tại là `07-DESIGN_TOKENS.md` cộng mockup — rồi sửa 11 chỗ trên theo. Đây là sửa luật gốc: `CLAUDE.md` §5 bắt dừng và xin quyết định ở đúng tầng, lượt rà sổ này không có thẩm quyền đó.
 
 `GOVERNANCE` 4.3 (điều kiện vào QA1) và 4.4 (điều kiện ra QA2 mục 5) đều đòi `DESIGN.md`. File không tồn tại trong repo. `docs/core-specs/README.md` giải thích vì sao: "để lại, quá riêng, bản sắc Nha Trang".
 
@@ -1242,3 +1365,49 @@ Bài `0ab6d35f-30c6-4d50-8a60-814333d354b8` (cẩm nang bến tàu du lịch Nha
 Đoạn chú thích cũ ở Phần 1 ghi *"Hiện chưa có dòng R3 nào"* — câu đó đã sai kể từ khi thêm dòng trên, nên được sửa lại cho khớp thực tế cùng lúc, không để lại một câu nói dối trong file.
 
 **Bài học.** Đổi slug của nội dung **đã phát hành** là một quyết định **cửa một chiều** đối với URL công khai — không đối xứng với việc đổi slug bản nháp, vốn không ai tham chiếu từ ngoài. Một khi trang đã lên sitemap và có thể đã được index, việc đổi slug ở Sanity Studio (một hệ soạn nội dung, không đi qua cùng review với thay đổi mã) không tự động kèm theo redirect — biên tập viên không có bước nào nhắc họ điều đó. `R3` là hàng rào đúng chỗ vì nó chạy sau build, so sánh với sitemap production thật, nên bắt được đúng khoảng trống này bất kể nó phát sinh từ mã hay từ nội dung. Nhưng hàng rào bắt được sau khi việc đã xảy ra — nó không ngăn ai đổi slug mà không nghĩ tới URL cũ. Nợ này lặp lại được: bất kỳ lần đổi slug nào sau phát hành cũng cần một dòng redirect đi kèm, và hiện không có cơ chế nào ở tầng Sanity Studio nhắc việc đó tại thời điểm đổi.
+
+---
+
+## DR-059 — `check:token-parity` in "XANH" trong khi bỏ qua 16 trên 45 token nó vừa đọc, và 4 trong số đó đang lệch thật
+
+**Trạng thái:** mở. Phát hiện 2026-08-25 khi rà lại `DR-002`. Đây là lệch **cổng ↔ thứ cổng khai là đã kiểm** — cùng họ với `DR-048` và `DR-056`, không phải lệch mã ↔ đặc tả.
+
+`scripts/check-token-parity.mjs` (soạn 2026-08-24) tự khai ở đầu file là bộ đối sánh `07-DESIGN_TOKENS` ↔ `tokens.css`, và kết bằng `XANH — không có lệch mới ngoài những mục đã có phiếu.` (dòng 161). Câu đó đọc như "đã so hết những gì vừa đọc". Nó chưa so hết.
+
+**Cơ chế.** Vòng lặp chính suy tên biến CSS theo đúng hai đường: tra bảng `ANH_XA` (10 mục), hoặc suy cơ học cho token bắt đầu bằng `color.` (dòng 123). Token nào không thuộc hai đường đó nhận `bienCss = null`, và dòng ngay dưới là `if (!bienCss) continue` (dòng 124) — **bỏ qua trong im lặng**. Nó không vào `doDo` (đỏ), không vào `vang`, và không cả vào `thieuBien` — bucket "07 khai mà không thấy biến" ở dòng 127 chỉ chạy khi `bienCss` đã có giá trị. Cả ba bucket in ra được đều nằm **sau** cái `continue`.
+
+Đối lập với `KHONG_CO_BIEN` (dòng 54-59): đó cũng là loại trừ, nhưng **có khai tên, có ghi lý do từng mục**. Khoảng mù ở đây thì không ai khai gì cả.
+
+**Số đo 2026-08-25.** Chạy lại đúng logic của bộ kiểm trên hai file thật:
+
+| Đo | Kết quả |
+|---|---|
+| Dòng bộ kiểm đọc được từ bảng `07` | **46** (chính nó in ra) — trong đó **1** là hàng tiêu đề `Token`, nên **45** token thật |
+| Bị `KHONG_CO_BIEN` loại, **có khai lý do** | 5 |
+| Bị `continue` loại, **trong im lặng** | **16** |
+| Thật sự được đối chiếu | **24** |
+| Trong 16 mục bị bỏ qua, số mục đang **lệch thật** | **4** |
+
+Mười sáu mục bị bỏ qua: `space.scale`, `space.section`, `container.max`, `radius.sm`, `radius.md`, `radius.pill`, `shadow.card`, `shadow.raised`, `shadow.overlay`, `bp.sm`, `bp.md`, `bp.lg`, `bp.xl`, `motion.fast`, `motion.base`, `motion.easing`.
+
+Bốn mục đang lệch thật — cả bốn đã có tên trong `DR-002` từ 2026-08-05 và chưa mục nào được sửa:
+
+| Token | `07-DESIGN_TOKENS` | `tokens.css` |
+|---|---|---|
+| `shadow.raised` | `0 4px 12px rgba(15, 23, 42, 0.10)` (07:149) | `0 6px 24px -8px rgba(0,91,150,.15), 0 2px 6px rgba(26,32,44,.05)` (css:134) |
+| `motion.fast` | `150ms` (07:169) | `--m-fast: 180ms` (css:148) |
+| `motion.base` | `250ms` (07:170) | `--m-base: 300ms` (css:149) |
+| `motion.easing` | `cubic-bezier(0.2, 0, 0, 1)` (07:171) | `--m-ease: ease` (css:150) |
+
+Mười hai mục còn lại **chưa đo** ở lượt này — cố ý không đóng khung chúng là "chắc khớp", vì chính đó là lỗi mà phiếu này mô tả.
+
+**Vì sao ghi riêng thay vì nhét vào `DR-002`.** `DR-002` là lệch **token**; phiếu này là lệch **bằng chứng**. Bộ kiểm được dựng đúng vì `DR-050`/`DR-051` *"lọt qua nhiều vòng review vì không cổng nào đỏ"* (chú thích đầu `check-token-parity.mjs`) — rồi chính nó để lọt bốn mục cùng loại. `CLAUDE.md` §6: *"mặc định của cổng là không đạt nếu không có bằng chứng"*. Ở đây cổng in một chữ XANH cho 16 mục chưa hề được kiểm; ai đọc dòng đó sẽ tin `07` và `tokens.css` chỉ còn hai chỗ lệch.
+
+**Nhẹ hơn `DR-056` một bậc, và nói ra chỗ nhẹ đó.** Bộ kiểm này **không** nằm trong `gate:all` — chú thích của chính nó ghi rõ thêm một cổng vào gate là cửa một chiều, phải chủ dự án chốt. Nên nó chưa từng cho một lần merge nào qua oan. Nhưng nó là thứ người ta chạy tay để trả lời câu "07 còn lệch mã ở đâu", và với câu hỏi đó nó đang trả lời thiếu.
+
+**Không sửa ở đây.** Sửa gồm hai phần, cả hai vượt phạm vi một lượt rà sổ:
+
+1. Khai thêm ánh xạ cho `shadow.*`, `motion.*`, `radius.*`, `space.*`, `container.*`, `bp.*`. Tên không cơ học (`motion.fast` → `--m-fast`, `container.max` → `--container`) nên phải khai tay — đúng chỗ mà chú thích của file đã cảnh báo là *"nơi DR-050 nấp suốt mười ngày"*.
+2. Đổi nhánh `continue` ở dòng 124 thành một bucket in ra được, để mục chưa khai ánh xạ **hiện lên** thay vì biến mất.
+
+Việc (2) quan trọng hơn (1): không có nó thì lần thêm token tiếp theo lại tạo một khoảng mù mới, và bộ kiểm lại in XANH.
