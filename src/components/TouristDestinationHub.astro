@@ -998,7 +998,12 @@ const hasReference = Boolean(td?.faq?.length || td?.safetyNote || td?.sameAs?.le
     margin-top: var(--s5);
   }
 
-  @media (max-width: var(--bp-lg)) {
+  /* Giá trị px thật, KHÔNG phải var(--bp-lg). Custom property không dùng được
+     trong điều kiện media query — trình duyệt coi cả at-rule là không hợp lệ và
+     bỏ nguyên khối, âm thầm, không báo lỗi. Ba khối dưới đây từng viết bằng
+     var() nên chết suốt; /nha-trang/ giữ nguyên số cột máy tính trên điện thoại.
+     Xem DR-059. Giữ khớp --bp-lg/md/sm trong tokens.css: 1024 / 768 / 640. */
+  @media (max-width: 1024px) {
     .hubs-grid,
     .rollup-grid {
       grid-template-columns: repeat(2, 1fr);
@@ -1019,7 +1024,7 @@ const hasReference = Boolean(td?.faq?.length || td?.safetyNote || td?.sameAs?.le
     }
   }
 
-  @media (max-width: var(--bp-md)) {
+  @media (max-width: 768px) {
     .trust-grid,
     .facts-grid,
     .specialty-grid,
@@ -1041,7 +1046,7 @@ const hasReference = Boolean(td?.faq?.length || td?.safetyNote || td?.sameAs?.le
     }
   }
 
-  @media (max-width: var(--bp-sm)) {
+  @media (max-width: 640px) {
     .hub-section--editorial {
       padding: var(--s7) 0;
     }

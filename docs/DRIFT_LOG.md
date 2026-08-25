@@ -87,16 +87,19 @@ Khoảng 40 biến. Nhóm chính:
 
 **Trạng thái:** mở phần "Kèm theo" — **đóng một nửa 2026-08-25**: phần xung đột màu nền **ĐÓNG** từ 2026-08-06; phần §B của `08` chấm bài bằng đáp án nhatrangtravel **CÒN MỞ**, và nay lệch nặng hơn lúc viết phiếu. (Trước đó: "mở, cần chủ dự án hoà giải" — thực tế đã hoà giải từ 2026-08-06, chỉ sổ này chưa cập nhật.)
 
-**Phần đã đóng — xung đột nền.** `QĐ-2026-08-06-04` (`docs/DECISIONS.md:505-509`): chủ dự án chốt **nền trắng thuần**; `07-DESIGN_TOKENS` thắng, `08-QA_CHECKLIST` B4 sửa theo. Cả hai file đã phản ánh:
+**Phần đã đóng — xung đột nền.** `QĐ-2026-08-06-04` (`docs/DECISIONS.md:505-509`): chủ dự án chốt **nền trắng thuần**; `07-DESIGN_TOKENS` thắng, `08-QA_CHECKLIST` B4 sửa theo. Hai file đã phản ánh:
 
 - `07-DESIGN_TOKENS.md:39` — `color.surface | #FFFFFF | nền trang mặc định — **chủ dự án chốt 2026-08-06, giải DR-003**`.
-- `08-QA_CHECKLIST.md:71-72` — nay đòi `#FFFFFF` và `#F8FAFC`; dòng 74 ghi nguyên văn *"**DR-003 đã giải 2026-08-06.** … Chủ dự án chốt **nền trắng**; `07-DESIGN_TOKENS` thắng, mục này sửa theo."*
+- `08-QA_CHECKLIST.md:71` — nay đòi `#FFFFFF`; dòng 74 ghi nguyên văn *"**DR-003 đã giải 2026-08-06.** … Chủ dự án chốt **nền trắng**; `07-DESIGN_TOKENS` thắng, mục này sửa theo."*
 
-**Phần còn mở — §B vẫn là đáp án của một dự án khác.** Chính `QĐ-2026-08-06-04` đã hoãn phần này chứ không đóng: `docs/DECISIONS.md:528` — *"`08-QA_CHECKLIST` §B còn giá trị hardcode ở mục liệt kê, cần rà lại khi Design xuất mockup."* Đo 2026-08-25:
+Chỉ **nền chính** đã phản ánh. Dòng 72 ngay bên dưới thì chưa — xem bảng phần còn mở.
+
+**Phần còn mở — §B vẫn là đáp án của một dự án khác.** Chính `QĐ-2026-08-06-04` đã hoãn phần này chứ không đóng: `docs/DECISIONS.md:526` — *"`08-QA_CHECKLIST` §B còn giá trị hardcode ở mục liệt kê, cần rà lại khi Design xuất mockup."* Đo 2026-08-25:
 
 | `08-QA_CHECKLIST` | Đòi | Đang chạy | Lệch |
 |---|---|---|---|
 | dòng 52 (§B1) | accent cam `#C2410C` | `--c-accent: #C0392B` (css:18); và **đổi theo bộ giao diện**: `#B45309` ở `cat-bien` (css:172), `#BE123C` ở `ngoc-lam` (css:191) | ❌ sai hai đời — đổi giá trị (`QĐ-2026-08-06-04`) rồi thành ba giá trị theo bộ (`QĐ-2026-08-06-05`). Một hex cứng không còn mô tả nổi thứ đang chạy |
+| **dòng 72 (§B4)** | khối xen kẽ `--c-surface-alt` = **`#F8FAFC`** | `--c-surface-alt: #EAF2F8` (css:24), theo `07`:40 — **`QĐ-2026-08-25-04`** đổi từ `#F8FAFC` vì giá trị cũ chỉ cách nền trắng **1,046** nên khối xen kẽ đọc thành một mảng trắng liền; nay **1,132** | ❌ **thêm 2026-08-25 (vòng sửa 1).** Trong core-specs đây là **nơi duy nhất** còn khẳng định giá trị cũ, và trước lượt rà này **không phiếu nào ghi**. Hai gói prompt bàn giao (`PHA-F-…:602/881`, `PHA-F2-…:602/881`) cũng còn `#F8FAFC` nhưng là bản chụp lưu trữ, không phải luật đang hiệu lực |
 | dòng 58 (§B2) | sand `#F5A623` | `--c-sand: #F5A623` (css:21) | ✅ còn đúng |
 | dòng 64 (§B3) | coral `#E8654E` | `--c-coral: #E8654E` (css:30) | ✅ còn đúng |
 | dòng 79 (§B5) | body, label, badge dùng `--font-ui` (**Plus Jakarta Sans**) | `--font-ui: "Nunito", "Be Vietnam Pro", system-ui` (css:72). Plus Jakarta Sans **đã gỡ hẳn** khỏi kho — `07`:126 *"Gỡ hẳn Lora và Plus Jakarta Sans vì không còn chỗ nào gọi tới"*; `public/fonts/` chỉ còn Nunito + Be Vietnam Pro | ❌ cổng đang chấm bài bằng một font không còn tồn tại trong repo |
@@ -104,7 +107,9 @@ Khoảng 40 biến. Nhóm chính:
 
 Nói cách khác: trong bốn giá trị nhatrangtravel phiếu này nêu, **hai vẫn trùng giá trị đang chạy** (sand, coral), **một đã hết hiệu lực** (`#FBF8F3`, đóng cùng phần trên), và **một sai nặng hơn trước** (`#C2410C`). Bộ chữ thì `08` §B5 đang khai một font đã bị gỡ khỏi kho.
 
-**Không sửa ở đây.** `08-QA_CHECKLIST` là core spec đã phê chuẩn; sửa §B đụng R9 và cần chủ dự án duyệt (`CLAUDE.md` §1). Lượt rà này chỉ ghi nhận. **Điều kiện đóng nốt:** một quyết định viết lại §B1 theo cơ chế bộ giao diện (không hex cứng) và §B5 theo bộ chữ thật.
+**Dòng 72 là loại khác, và đáng lo hơn.** Bốn mục trên là di sản chép từ nhatrangtravel — biết trước là lệch. Dòng 72 thì **từng đúng**: nó khớp `07` cho tới `QĐ-2026-08-25-04` hôm nay. Nghĩa là `08` không được cập nhật cùng lượt với `07` và `tokens.css`, và không cổng nào bắt — `check:token-parity` chỉ so `07` với CSS, chưa bao giờ đọc `08`. Đây đúng cơ chế mà chính phiếu này cảnh báo ở phần "Kèm theo", nay tự tái diễn bằng một quyết định mới.
+
+**Không sửa ở đây.** `08-QA_CHECKLIST` là core spec đã phê chuẩn; sửa §B đụng R9 và cần chủ dự án duyệt (`CLAUDE.md` §1). Lượt rà này chỉ ghi nhận. **Điều kiện đóng nốt:** một quyết định viết lại §B1 theo cơ chế bộ giao diện (không hex cứng), §B4 dòng 72 theo giá trị `07` hiện hành, và §B5 theo bộ chữ thật.
 
 - `07-DESIGN_TOKENS.md` §1: `color.surface = #FFFFFF`, "nền trang mặc định".
 - `08-QA_CHECKLIST.md` dòng 71: "`body` background = `--c-surface` (#FBF8F3)"; dòng 73: "Không có vùng nào dùng nền trắng thuần cho body".
@@ -235,7 +240,20 @@ Bản đối chứng cách làm đúng đã có trong repo: `src/components/Home
 
 ## DR-008 — `DESIGN.md` được hai file luật trích dẫn nhưng không tồn tại
 
-**Trạng thái:** mở — phép kiểm mà kế hoạch khai **đã chạy 2026-08-25 và KHÔNG sạch**. `docs/plans/2026-08-25-dong-no-ky-thuat.md:539` hẹn *"kiểm bằng `grep -rn "DESIGN.md" docs/ src/`. Nếu 0 kết quả thì đóng"* — kết quả là **11 trích dẫn còn sống trên 7 file**, trong đó có **đúng hai dòng luật** đã sinh ra phiếu này. Không đóng. (Trước đó: "mở, xử ở pha F." Pha F đã qua; phiếu thì không.)
+**Trạng thái:** mở — phép kiểm mà kế hoạch khai **đã chạy 2026-08-25 và KHÔNG sạch**. `docs/plans/2026-08-25-dong-no-ky-thuat.md:539` hẹn *"kiểm bằng `grep -rn "DESIGN.md" docs/ src/`. Nếu 0 kết quả thì đóng"* — kết quả là **12 trích dẫn còn sống trên 6 file**, trong đó có **đúng hai dòng luật** đã sinh ra phiếu này. Không đóng.
+
+**Lệnh trong kế hoạch quét thiếu, nên số đếm phải nêu rõ phạm vi.** `grep -rn "DESIGN.md" docs/ src/` **không chạm `playbook/`** — mà `GOVERNANCE.md` nằm ở đó. Chạy đúng lệnh ấy sẽ bỏ sót chính hai dòng luật là lý do phiếu tồn tại. Phạm vi thật đã quét: `playbook/ src/ docs/core-specs/`; quy tắc đếm: **bỏ những dòng chỉ kể lại chuyện DR-008** (bản thân sổ này, `docs/plans/`, và các dòng ghi "đã gỡ"). Số ra:
+
+| File | Dòng | Số |
+|---|---|---|
+| `playbook/GOVERNANCE.md` | 98, 109 | 2 — **hai dòng luật** |
+| `docs/core-specs/DESIGN_PATTERNS.md` | 10, 20, 49 | 3 |
+| `docs/core-specs/08-QA_CHECKLIST.md` | 110, 118, 225 | 3 |
+| `playbook/ai/PROMPT_FACTORY.md` | 158 | 1 |
+| `src/styles/tokens.css` | 91 | 1 |
+| `src/components/MapView.astro` | 5 | 1 |
+
+Không tính `docs/core-specs/README.md:48` — dòng đó **mô tả việc cố ý bỏ** `DESIGN.md` ra ngoài bộ core-specs, không trỏ tới nó như một nguồn. (Lượt rà đầu ghi "11 trên 7 file"; đếm lại ở vòng sửa 1 theo quy tắc trên ra **12 trên 6**.) (Trước đó: "mở, xử ở pha F." Pha F đã qua; phiếu thì không.)
 
 **Đo 2026-08-25** — `grep -rnE "(^|[^A-Za-z0-9-])DESIGN\.md" docs/ src/ playbook/`, đã loại tên file `*-CLAUDE-DESIGN.md` / `*-BAN-GIAO-DESIGN.md` và các câu tự nói về phiếu này:
 
@@ -1399,7 +1417,20 @@ Bốn mục đang lệch thật — cả bốn đã có tên trong `DR-002` từ
 | `motion.base` | `250ms` (07:170) | `--m-base: 300ms` (css:149) |
 | `motion.easing` | `cubic-bezier(0.2, 0, 0, 1)` (07:171) | `--m-ease: ease` (css:150) |
 
-Mười hai mục còn lại **chưa đo** ở lượt này — cố ý không đóng khung chúng là "chắc khớp", vì chính đó là lỗi mà phiếu này mô tả.
+**Mười hai mục còn lại: đã đo nốt ở vòng sửa 1 (2026-08-25).** Lượt đầu để ngỏ vì không muốn đóng khung chúng là "chắc khớp" — đúng thứ lỗi phiếu này mô tả. Nay đo tay từng mục, đối chiếu `07` với `tokens.css`:
+
+| Mục | `07` | `tokens.css` | |
+|---|---|---|---|
+| `radius.sm` / `md` / `pill` | 8px · 12px · 999px (142-144) | 8px · 12px · 999px (127, 128, 130) | ✅ |
+| `shadow.card` | `0 1px 3px rgba(15, 23, 42, 0.08)` (148) | `0 1px 3px rgba(15,23,42,0.08)` (133) | ✅ |
+| `shadow.overlay` | `0 12px 32px rgba(15, 23, 42, 0.16)` (150) | `0 12px 32px rgba(15,23,42,0.16)` (136) | ✅ |
+| `container.max` | 1200px (138) | 1200px (139) | ✅ |
+| `bp.sm` / `md` / `lg` / `xl` | 640 · 768 · 1024 · 1280 (158-161) | 640 · 768 · 1024 · 1280 (142-145) | ✅ |
+| `space.scale`, `space.section` | mô tả thang, không phải một giá trị | — | **không so được** |
+
+Vậy **"4 lệch trong 16" là con số đủ**, không phải mức sàn. Mười mục so được đều khớp; hai mục còn lại không có dạng so trực tiếp.
+
+**Một chi tiết cho ai sửa bộ kiểm:** hai dòng shadow khớp về **giá trị** nhưng khác về **khoảng trắng** trong `rgba(...)`. So chuỗi trần sẽ báo đỏ oan cả hai. Bộ kiểm phải chuẩn hoá khoảng trắng trước khi so, nếu không việc vá dòng 124 sẽ đổi một lỗi im lặng lấy hai lỗi giả.
 
 **Vì sao ghi riêng thay vì nhét vào `DR-002`.** `DR-002` là lệch **token**; phiếu này là lệch **bằng chứng**. Bộ kiểm được dựng đúng vì `DR-050`/`DR-051` *"lọt qua nhiều vòng review vì không cổng nào đỏ"* (chú thích đầu `check-token-parity.mjs`) — rồi chính nó để lọt bốn mục cùng loại. `CLAUDE.md` §6: *"mặc định của cổng là không đạt nếu không có bằng chứng"*. Ở đây cổng in một chữ XANH cho 16 mục chưa hề được kiểm; ai đọc dòng đó sẽ tin `07` và `tokens.css` chỉ còn hai chỗ lệch.
 
@@ -1411,3 +1442,48 @@ Mười hai mục còn lại **chưa đo** ở lượt này — cố ý không �
 2. Đổi nhánh `continue` ở dòng 124 thành một bucket in ra được, để mục chưa khai ánh xạ **hiện lên** thay vì biến mất.
 
 Việc (2) quan trọng hơn (1): không có nó thì lần thêm token tiếp theo lại tạo một khoảng mù mới, và bộ kiểm lại in XANH.
+
+---
+
+## DR-060 — Ba media query của `/nha-trang/` viết bằng `var()` nên chết im lặng; trang giữ nguyên số cột máy tính trên điện thoại
+
+**Trạng thái:** **đã xử 2026-08-25** (`src/components/TouristDestinationHub.astro`). Phát hiện khi chủ dự án yêu cầu refactor `/nha-trang/` cho ưu tiên di động.
+
+**Lỗi.** Ba trong bốn media query của `TouristDestinationHub.astro` viết điều kiện bằng custom property:
+
+```css
+@media (max-width: var(--bp-lg)) { … }   /* dòng 1001 */
+@media (max-width: var(--bp-md)) { … }   /* dòng 1022 */
+@media (max-width: var(--bp-sm)) { … }   /* dòng 1044 */
+```
+
+**`var()` không dùng được trong điều kiện media query.** Custom property được giải ở tầng tính giá trị của phần tử, còn điều kiện media query được đánh giá trước đó và không gắn với phần tử nào. Trình duyệt coi cả at-rule là không hợp lệ và **bỏ nguyên khối** — không cảnh báo, không lỗi build, không cổng nào đỏ. Ba khối ấy chết từ lúc viết.
+
+**Chỉ khối thứ tư (`max-width: 480px`, dòng 1037) là hợp lệ**, và nó chỉ xử `.trust-grid` với `.facts-grid`. Mọi lưới khác giữ nguyên số cột máy tính xuống tới màn hình nhỏ nhất.
+
+**Đo trên trang thật `https://tourdao.vn/nha-trang/`, khung 390×844 (CDP, `Emulation.setDeviceMetricsOverride`):**
+
+| Lưới | Cột | Bề rộng mỗi ô |
+|---|---|---|
+| `.hubs-grid` | **4** | 106 · 110 · 96 · **0px** — một trong bốn lối vào hub bị bóp mất hẳn |
+| `.rollup-grid` | **4** | 77,5px |
+| `.feature-grid--attractions` | **3** | ~102px |
+| `.feature-grid--experiences` | **3** | 141 · 77 · 91px (thang `2fr 1fr 1fr` giữ nguyên) |
+| `.article-grid` | 2 | 171px |
+| `.trust-grid`, `.facts-grid` | 1 | 358px ✅ (nhờ khối 480px hợp lệ) |
+
+Không tràn ngang (`scrollWidth` = 390) — các lưới **bị bóp** chứ không tràn, nên lỗi không lộ ra bằng thanh cuộn ngang. Đó là lý do nó sống sót qua các lượt kiểm trước.
+
+**Vi phạm Luật 5** (`06` §6: lưới nhiều cột trên máy tính phải thành hàng trải hết bề ngang ở ≤640px). Không cổng nào canh Luật 5 trên trang điểm đến.
+
+**Đã sửa.** Thay bằng giá trị px thật, đúng bằng `--bp-lg/md/sm` trong `tokens.css:142-144`: `1024px` · `768px` · `640px`. Kèm chú thích tại chỗ nói rõ vì sao không được dùng `var()`, để lần sau không ai viết lại như cũ. **Không đổi một giá trị bố cục nào** — thang mà tác giả viết ra vốn đã đầy đủ ba tầng (≤1024 bốn cột về hai; ≤768 lưới thẻ về một; ≤640 lưới hub và feature về một), chỉ là cả ba đều chết.
+
+**Đo lại sau khi sửa, cùng khung 390×844, cùng script:** `hubs-grid`, `rollup-grid`, `article-grid`, `feature-grid--attractions`, `feature-grid--experiences` — **tất cả 1 cột, 358px**. Ô 0px biến mất. Trang cao 8596px → 12015px, đúng như phải thế khi thẻ thôi bị bóp cạnh nhau mà xếp chồng. `gate:all` không đỏ thêm cổng nào.
+
+**Phạm vi.** `grep -rn "@media[^{]*var(" src/` → chỉ file này, không lan sang component nào khác.
+
+**Bài học.** CSS không hợp lệ **hỏng im lặng**. Không như TypeScript hay GROQ, không có gì báo cho ta biết — bản dựng vẫn thành công, cổng vẫn xanh, trang vẫn hiện. Muốn bắt loại lỗi này thì phải **đo thứ đã dựng ra**, không phải đọc thứ đã viết vào. Ở đây bằng chứng quyết định là `grep "@media[^{]*var(" dist/_astro/*.css` cho **3 kết quả** — CSS đã phát hành còn nguyên `var()`, tức trình duyệt thật đang vứt chúng.
+
+**Còn nợ, không thuộc phiếu này.** Khối `640px` đặt `.feature-grid--stays` về **2 cột** chứ không phải 1 (~171px mỗi thẻ ở 390px). Đó là ý tác giả viết rõ, không phải lỗi `var()`, và lưới đó không render trên `/nha-trang/` nên chưa lộ. Trang điểm đến nào có mục lưu trú sẽ dính. Xử cùng lúc đồng bộ bố cục.
+
+**Nợ lớn hơn mà phiếu này chạm vào.** `06` §4.1 khai trang điểm đến *"khung chung áp dụng"*, và §5.7 khai khối nội dung trang chủ là *"như §4.1"* — tức một bộ khối cho cả hai. Mã thì có **hai bản**: trang chủ dùng `SiteHome.astro` (532 dòng, ghép 12 component `Home*`), `/nha-trang/` dùng `TouristDestinationHub.astro` (1086 dòng, tự vẽ lại toàn bộ, không dùng `DetailLayout`/`Breadcrumb`/`Hero`/`FactStrip`/`Section` nào). `/nha-trang/` không có `crumb-band`, `title-band`, `summary-band`, `fact-strip` — trang chi tiết có đủ cả bốn. Chính vì tự vẽ lại mà nó có riêng ba media query hỏng này. Đồng bộ về bộ `Home*` là **thi hành đặc tả đang có**, không phải quyết định kiến trúc mới — nhưng là một diff lớn, chủ dự án đã chốt làm ở vòng riêng có bản xem trước.
