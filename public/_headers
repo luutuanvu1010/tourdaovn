@@ -1,0 +1,23 @@
+# Header cho Workers Static Assets. Cloudflare đọc file này; nó KHÔNG được phục
+# vụ như một asset. Cùng cú pháp với public/_redirects.
+#
+# Vì sao có file này: GEO Dashboard là một tool trong Sanity Studio
+# (cms/components/GeoDashboard.tsx) chạy ở origin https://tourdaovn.sanity.studio
+# và fetch bốn endpoint /ai/*.json trên tourdao.vn. Không có CORS thì trình duyệt
+# chặn phản hồi và dashboard trông như "chưa kết nối" — dù cả bốn endpoint đều
+# trả 200 với dữ liệu mới.
+#
+# Chỉ mở cho dữ liệu công khai dành cho máy đọc. KHÔNG mở cho trang HTML.
+
+/ai/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=300
+
+/llms.txt
+  Access-Control-Allow-Origin: *
+
+/sitemap.xml
+  Access-Control-Allow-Origin: *
+
+/sitemap-vi.xml
+  Access-Control-Allow-Origin: *

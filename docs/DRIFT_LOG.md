@@ -1215,3 +1215,30 @@ Không mã lỗi, không cảnh báo, `push` trả về 0. Ai không đọc kỹ
 Và `SPEC-2026-08-22-be-mat-vong-5` §9: *"Năm cổng đang đỏ ở `gate:all`... Đều là nợ dữ liệu hoặc nợ cũ, đã xếp vào đợt 4D."* Số lỗi R4 còn được theo dõi qua từng đợt (45 → 42 ở `QĐ-2026-08-25-02`, quy cho nội dung Sanity đổi giữa hai lần dựng) — nhưng luôn ở mức "đếm và ghi nhận", chưa lần nào ở mức "đọc thông điệp lỗi và hỏi vị từ nào tạo ra nó". Nếu R4 thật sự là nợ dữ liệu (thiếu bản dịch), việc gắn `translationGroup` cho 18 bài mới là việc phải làm — không ai làm việc đó, vì nhãn "nợ dữ liệu" ngụ ý "chờ biên tập viên nhập liệu", trong khi lỗi thật nằm trong bốn dòng GROQ.
 
 **Bài học.** Một cổng đỏ lâu ngày, có bằng chứng, có số đo, có tên hạng mục "nợ dữ liệu" đi kèm — vẫn có thể là lỗi logic đội lốt nợ dữ liệu. Nhãn tồn tại càng lâu và càng được nhiều phiếu quyết định lặp lại, nó càng có vẻ đáng tin mà không ai còn kiểm lại. `CLAUDE.md` §6: *"mặc định của cổng là không đạt nếu không có bằng chứng"* — áp cho cả việc phân loại một cổng đỏ: dán nhãn "nợ dữ liệu" cũng cần bằng chứng (đo tận vị từ/truy vấn tạo ra lỗi), không phải suy ra từ việc cổng đỏ nhiều đợt liên tiếp.
+
+---
+
+## DR-058 — Đổi slug bài đã phát hành không kèm redirect: URL cũ mất câm, `R3` bắt được
+
+**Trạng thái:** đã sửa 2026-08-25 (một dòng 301 trong `public/_redirects`).
+
+Bài `0ab6d35f-30c6-4d50-8a60-814333d354b8` (cẩm nang bến tàu du lịch Nha Trang) bị đổi slug ngay trong Sanity Studio lúc `2026-08-25T04:45:45Z` — **sau** bản deploy production `03:43:51Z` — bỏ đuôi `-cap-nhat-2026`. Trang mới dựng đúng trong `dist/` với slug mới, nhưng URL cũ vẫn còn trong sitemap production (vì sitemap production được sinh ra trước lần đổi slug) và không ai để lại dòng chuyển hướng. Nếu deploy tiếp mà không vá, URL cũ sẽ trả **404** với bất kỳ ai còn giữ liên kết cũ (kết quả tìm kiếm đã lập chỉ mục, liên kết đã chia sẻ...).
+
+Đây đúng là việc `R3` (`04-CONSTRAINTS §1c`, thực thi ở `scripts/validators/r3-r4-post.ts:184`) sinh ra để chặn: *"một URL đã từng tồn tại KHÔNG được biến mất câm."* Cổng đã hoạt động đúng thiết kế — đỏ đúng lúc, đúng URL, không phải cổng mù kiểu `DR-048`/`DR-056`.
+
+**Số đo, 2026-08-25 — `node scripts/validators/r3-r4-post.ts` (chạy từ `scripts/`).**
+
+| Đo | Trước | Sau |
+|---|---|---|
+| `R3` | **FAIL — 1 lỗi**: `URL "https://tourdao.vn/cam-nang/tron-bo-cam-nang-ben-tau-du-lich-nha-trang-gia-ve-lich-trinh-and-dich-vu-cap-nhat-2026/" trong sitemap production cũ biến mất, không có redirect trong public/_redirects` | **pass** |
+| `R4` | pass | pass (không đụng) |
+
+**Đã vá:** thêm một dòng 301 vào `public/_redirects`, Phần 1 (khu vực dành riêng cho dòng R3):
+
+```
+/cam-nang/tron-bo-cam-nang-ben-tau-du-lich-nha-trang-gia-ve-lich-trinh-and-dich-vu-cap-nhat-2026/    /cam-nang/tron-bo-cam-nang-ben-tau-du-lich-nha-trang-gia-ve-lich-trinh-and-dich-vu/    301
+```
+
+Đoạn chú thích cũ ở Phần 1 ghi *"Hiện chưa có dòng R3 nào"* — câu đó đã sai kể từ khi thêm dòng trên, nên được sửa lại cho khớp thực tế cùng lúc, không để lại một câu nói dối trong file.
+
+**Bài học.** Đổi slug của nội dung **đã phát hành** là một quyết định **cửa một chiều** đối với URL công khai — không đối xứng với việc đổi slug bản nháp, vốn không ai tham chiếu từ ngoài. Một khi trang đã lên sitemap và có thể đã được index, việc đổi slug ở Sanity Studio (một hệ soạn nội dung, không đi qua cùng review với thay đổi mã) không tự động kèm theo redirect — biên tập viên không có bước nào nhắc họ điều đó. `R3` là hàng rào đúng chỗ vì nó chạy sau build, so sánh với sitemap production thật, nên bắt được đúng khoảng trống này bất kể nó phát sinh từ mã hay từ nội dung. Nhưng hàng rào bắt được sau khi việc đã xảy ra — nó không ngăn ai đổi slug mà không nghĩ tới URL cũ. Nợ này lặp lại được: bất kỳ lần đổi slug nào sau phát hành cũng cần một dòng redirect đi kèm, và hiện không có cơ chế nào ở tầng Sanity Studio nhắc việc đó tại thời điểm đổi.
