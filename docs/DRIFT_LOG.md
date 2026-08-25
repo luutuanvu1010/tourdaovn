@@ -1152,3 +1152,38 @@ Nguyên nhân ở schema: `body` khai ảnh bằng `{ type: 'image' }` trần, k
 **Quan hệ với các nợ ảnh đang có.** `SPEC-2026-08-22-be-mat-vong-5` §9 khai ba việc ảnh **V-A** (thay ảnh dưới mốc), **V-B** (rà ảnh dùng lại), **V-C** (bù `alt` — 26 ảnh, `mainImage` và `gallery`). Phiếu này **KHÔNG** thuộc V-C: V-C là nhập liệu vào field đã có, còn đây là **thêm field**. Nên nó đứng cạnh V-A/V-B/V-C, không nằm trong.
 
 **Đóng khi nào:** thêm field `alt` (và cân nhắc `caption`) vào khối image của `body` trong `cms/schemas/`, deploy schema, rồi nhập liệu. Cần phiếu quyết định vì đụng `01-CONTENT_MODEL` và schema — `06` §6 khai rõ: *"Mọi field xuất hiện ở đây phải tồn tại trong `01-CONTENT_MODEL.md`. Cần field mới: quay lại sửa content model trước, không bịa tại đây."*
+
+---
+
+## DR-056 — Cổng sớm `pre-push` chưa từng chạy: hook thiếu bit thực thi, git bỏ qua trong im lặng
+
+**Trạng thái:** **đã sửa 2026-08-25** trong cùng đợt phát hiện. Ghi lại vì cách nó ẩn mình đáng biết.
+
+`.githooks/pre-push` tồn tại từ ADR-0010 Quyết định 4 và chạy `npm run gate`, fail thì chặn push. `scripts/install-hooks.sh` đặt `core.hooksPath=.githooks` và in *"✓ Git hooks trong .githooks/ sẽ chạy từ clone này"*.
+
+Câu đó **sai**. Đo được:
+
+```
+$ git ls-files -s .githooks/pre-push
+100644 86d6489c...        ← mode 644, KHÔNG executable
+$ grep -c chmod scripts/install-hooks.sh
+0
+```
+
+**Git bỏ qua hook không executable và vẫn để `git push` thành công**, chỉ in một dòng `hint:` lẫn giữa output:
+
+> `hint: The '.githooks/pre-push' hook was ignored because it's not set as executable.`
+
+Không mã lỗi, không cảnh báo, `push` trả về 0. Ai không đọc kỹ dòng `hint` sẽ tin rằng cổng đã chạy và đã xanh.
+
+**Phạm vi: mọi clone.** Bit thực thi được **git lưu trong index**, nên `100644` là trạng thái của repo chứ không phải của một máy. Bất kỳ ai từng chạy `install-hooks.sh` đều nhận một hàng rào không hoạt động. Cổng sớm ở máy vì thế **chưa từng chặn một lần push nào** kể từ khi được dựng.
+
+**Cách phát hiện.** 2026-08-25, đẩy nhánh `feat/be-mat-vong-5-va-ra-bo-cuc` với **năm cổng đang đỏ** (R3, R4, S24-AUTHORITY, control-registry, deferred). Push **thành công**. Kỳ vọng là bị chặn — chính khoảng cách giữa kỳ vọng và kết quả làm lộ dòng `hint`. Nếu hôm đó cổng xanh thì lỗi này còn ẩn tiếp.
+
+**Đã sửa.**
+1. `git update-index --chmod=+x .githooks/pre-push` → mode `100755` vào index, có hiệu lực cho mọi clone sau.
+2. `scripts/install-hooks.sh` thêm `chmod +x .githooks/*` và sửa câu thông báo, để clone cũ chạy lại script là được vá.
+
+**Bài học ghi lại, vì nó lặp với `DR-048`.** Cả hai là **cổng tồn tại nhưng không nhìn thấy gì**: `DR-048` là bốn vùng chưa gắn `data-region` nên `luat1-post` mù; đây là hook chưa executable nên git mù. Trong cả hai ca, bảng điều khiển báo xanh vì **không có ai kiểm**, chứ không phải vì đã kiểm và đạt. `CLAUDE.md` §6 viết *"mặc định của cổng là không đạt nếu không có bằng chứng"* — hai phiếu này là hai kiểu bằng chứng giả khác nhau.
+
+**Hệ quả còn mở, không sửa ở đây.** Hook nay chạy thật, nên **lần push tới sẽ bị chặn** bởi năm cổng đỏ đang có. Chúng là nợ dữ liệu đã xếp đợt 4D (`SPEC-2026-08-22-be-mat-vong-5` §9), không phải nợ của đợt này — nhưng từ nay chúng chặn đường phát hành thật sự, chứ không còn chỉ nằm trong báo cáo.
