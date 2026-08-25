@@ -12,11 +12,20 @@ export interface Props {
    * ý; phần chữ bên trong vẫn tự bọc container nên không có element trần.
    */
   fullBleed?: boolean
+  /**
+   * Slot `overlay` có nội dung hay không.
+   * Lớp phủ tối `.hero-gradient-overlay` sinh ra CHỈ để chữ đè trên ảnh đọc
+   * được. Từ 06 v2.5, breadcrumb / h1 / đoạn mở đều đã ra ngoài hero, nên trang
+   * không có huy hiệu loại thì lớp phủ đó làm tối 55% dưới của một tấm ảnh
+   * chẳng còn gì trên nó — khung trang trí rỗng, đúng thứ R7 cấm. Cờ này tắt cả
+   * lớp phủ lẫn `.hero-overlay` cho những trang đó.
+   */
+  hasOverlay?: boolean
 }
 
 // Không dùng default `= []` ở đây: nó chỉ kích hoạt với `undefined`, mà caller
 // đưa `null` (GROQ). Chặn bằng `?? []` ở điểm dùng bên dưới.
-const { image, gallery, imageAlt, fullBleed = false } = Astro.props
+const { image, gallery, imageAlt, fullBleed = false, hasOverlay = true } = Astro.props
 const src = typeof image === 'string' ? image : imageUrl(image, { width: 1200 })
 const alt = imageAlt || (typeof image === 'object' ? image?.alt : undefined) || ''
 const mainImageKey = typeof image === 'object' ? (image?.asset?._id || image?.asset?.url) : src
@@ -43,10 +52,14 @@ const hasGallery = galleryItems.length === 4
           <figure class="hero-main-figure">
             <img src={src} alt={alt} loading="eager" fetchpriority="high" />
           </figure>
-          <div class="hero-gradient-overlay" aria-hidden="true"></div>
-          <div class="hero-overlay"><div class:list={[{ container: fullBleed }]}>
-            <slot name="overlay" />
-          </div></div>
+          {hasOverlay && (
+            <>
+              <div class="hero-gradient-overlay" aria-hidden="true"></div>
+              <div class="hero-overlay"><div class:list={[{ container: fullBleed }]}>
+                <slot name="overlay" />
+              </div></div>
+            </>
+          )}
         </div>
         {hasGallery && (
           <div class="hero-gallery-grid">
@@ -87,14 +100,28 @@ const hasGallery = galleryItems.length === 4
   .hero-block--mosaic .hero-media-grid {
     grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
     gap: var(--s1);
-    height: clamp(320px, 34vw, 430px);
+    /* 06 v2.5 (QĐ-2026-08-25-01): rút từ clamp(320px, 34vw, 430px).
+       Breadcrumb và h1 nay đứng TRÊN hero, cộng thêm ~151px trước thanh dính.
+       ĐÃ ĐO (Chrome headless, CDP, 2026-08-25), viewport 1366x657: thanh dính ở
+       618-675px khi h1 một dòng, 674-731px khi h1 hai dòng — trường hợp hai dòng
+       nằm HẲN ngoài màn đầu. 14/28 trang tour có tiêu đề >45 ký tự nên đây là
+       nửa số trang, không phải ca hiếm. Chưa thành vi phạm Luật 3 vì
+       sticky-bar__price render trên 0 trang; xem 06 §3 hàng Hero.
+       380 là chiều cao hero desktop trong mockup Design chặng 2. */
+    height: clamp(280px, 30vw, 380px);
     background: var(--c-card);
   }
 
   /* ── Main image ── */
   .hero-main {
     position: relative;
-    height: 400px;
+    /* 06 v2.5: 400px → CÙNG clamp với biến thể mosaic ở trên. Đây là biến thể
+       ảnh đơn (không đủ 4 ảnh gallery). Bản sửa đầu đặt phẳng 380px kèm chú
+       thích "phải cùng chiều cao với mosaic" — câu đó tự sai: mosaic là clamp,
+       nên trong khoảng 1024–1266px mosaic thấp hơn (330px ở 1100px) và hai loại
+       trang có thanh giá ở hai độ sâu khác nhau, đúng thứ chú thích bảo là
+       không thể xảy ra. Dùng chung một biểu thức thì nó đúng thật. */
+    height: clamp(280px, 30vw, 380px);
     overflow: hidden;
   }
 
@@ -213,12 +240,14 @@ const hasGallery = galleryItems.length === 4
       height: auto;
     }
 
+    /* 06 v2.5: 280 → 240px, theo mockup Design chặng 2. Trên 390px, hero 280px
+       chiếm 33% màn nên nội dung đầu tiên chưa vào tầm mắt ở lần cuộn thứ nhất. */
     .hero-main {
-      height: 280px;
+      height: 240px;
     }
 
     .hero-block--mosaic .hero-main {
-      height: 280px;
+      height: 240px;
     }
 
     .hero-gallery-grid {

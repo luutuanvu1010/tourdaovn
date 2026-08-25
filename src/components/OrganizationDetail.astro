@@ -65,7 +65,7 @@ const jsonLd = entityPageGraphToLd(organizationToJsonLd(data, siteBase, lang), d
 
     {hasPtContent(data.body) && (
       <Section contained={false}>
-        <Body blocks={data.body} />
+        <Body blocks={data.body} headingOffset={1} />
       </Section>
     )}
   </Fragment>

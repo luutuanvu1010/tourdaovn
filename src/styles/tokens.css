@@ -201,6 +201,10 @@
 html {
   font-size: 100%;
   scroll-behavior: smooth;
+  /* Neo cuộn phải dừng DƯỚI header dính và thanh dính, không chui vào gầm chúng.
+     Thiếu dòng này thì mọi link nhảy mục ở thanh dính đưa tiêu đề khuất sau
+     đúng hai thanh vừa bấm — cuộn mượt nhưng dừng sai chỗ. Cộng --s3 cho thoáng. */
+  scroll-padding-top: calc(var(--header-h) + var(--sticky-bar-h) + var(--s3));
 }
 
 body {
@@ -254,5 +258,13 @@ p {
   *, *::before, *::after {
     animation-duration: 0ms !important;
     transition-duration: 0ms !important;
+  }
+
+  /* Cuộn mượt cũng là chuyển động. 07 §5 khai reduced-motion tắt MỌI transition
+     và animation, nhưng scroll-behavior không nằm trong hai thứ đó nên khối
+     trên không chạm tới — phải tắt riêng. Với người đặt reduced-motion vì say
+     chuyển động, trang tự trượt là đúng thứ họ tắt. */
+  html {
+    scroll-behavior: auto;
   }
 }

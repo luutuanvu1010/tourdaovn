@@ -59,7 +59,7 @@ const jsonLd = entityPageGraphToLd(specialtyToJsonLd(data, siteBase, lang), data
 
     {hasPtContent(data.body) && (
       <Section heading={t('details')} contained={false}>
-        <Body blocks={data.body} />
+        <Body blocks={data.body} headingOffset={1} />
       </Section>
     )}
 

@@ -1,0 +1,67 @@
+Trang chi tiết ĐANG LÊN SÓNG, 6 loại entity: 89
+  attraction   36/36  có ảnh chính
+  tour         26/27  có ảnh chính
+  hotel        10/10  có ảnh chính
+  experience    9/9   có ảnh chính
+  place         7/7   có ảnh chính
+
+Không có ảnh chính:            1/89 = 1%
+Có ảnh chính nhưng thiếu alt:  10/88 = 11%
+Ảnh gallery thiếu alt:         16/309 = 5%
+
+--- Độ phân giải ảnh chính (n=88) ---
+Hẹp hơn 1200px — Hero trang chi tiết xin: 40/88 = 45%
+Hẹp hơn 1800px — hero trang chủ xin:    81/88 = 92%
+Hẹp hơn 640px — thẻ lưới xin:            7/88 = 8%
+Bề rộng nhỏ nhất 399px · lớn nhất 2903px
+
+--- Hướng khung ---
+Ảnh dọc (ar<1), cắt nặng ở khung ngang: 5/88 = 6%
+Gần vuông (1<=ar<1.2):                  1/88 = 1%
+Định dạng: {"jpg":67,"webp":19,"avif":1,"png":1}
+
+--- Dùng lại cùng một tấm ảnh (ảnh chính + gallery) ---
+  3x image-e572e93fdd20700008325a4b6fdf4472dc446f3b-1500x1000-jpg
+  2x image-d32a92b30b75eac2552a731c6f976a768c7e8782-1500x1000-jpg
+  2x image-ca09a033679eca3231bc52b9a04c4cdbc38e32aa-1500x1000-jpg
+  2x image-cca7a8ef3ac0b33fe29d23468990add7513499d7-1500x1000-jpg
+  2x image-5d8aff297b70d33012e3705504d0dee5f7e9995a-1500x1000-jpg
+  2x image-d7fc943aa2f88ed2f80225c56226cebd2113b9ac-1500x1000-jpg
+  2x image-99a5d4d0a1304001bdc6fe2e5b183450148e4f3c-1500x1000-jpg
+  2x image-53050459beaddc73d4dd97aeee35a600a8b66827-1500x1000-jpg
+  2x image-2c34fc03256a27b1ad71ec0ccf1f33a1ea5083c2-1500x1000-jpg
+  2x image-793f835e0ec3182b4fce951f2d6983a7b2966607-1500x1000-jpg
+  2x image-daee3847c0ecd1d75aa91af9ce4605a9494faf6d-700x525-webp
+  2x image-88361f526c4178efac113148ea91d7afdc0368ae-1500x1000-jpg
+  2x image-452ef5911e456ac00df665057574a2cfe2854cfc-1500x1000-jpg
+  2x image-7f7fb87927b558a9f0d3569bf6aae907e44ca5d5-1500x1000-jpg
+  2x image-2e892007f8bb123d683d052cd83ec4670fbaa7a0-1500x1000-jpg
+  2x image-acb82138bc21214c594bfc74498a4548253d359c-1500x1000-jpg
+  2x image-5a84e330cc2ce2907167e4de73299736c27dd4d1-1500x1000-jpg
+  2x image-4c35692dc73f6abd70b65f1f2a39ff23481dbf0d-1500x1000-jpg
+  2x image-a7fad9acc3df78363e91a77f44102d523e45608e-841x919-jpg
+  2x image-2f15cabedf5112ea7afacada2380eae657db97a3-1500x1000-jpg
+  2x image-1c427c7d05517bde9cb79d935757be4c56c73692-1324x859-jpg
+  2x image-1661d2171090271c309ee2efba0d97a8a2e4ca97-2000x1333-jpg
+  2x image-7822929fe5943d6541ee1ab49363adee5d6d2dab-1200x675-jpg
+  2x image-7d2ccbacec9a6f9ba0061e2d3ff2343ed25e521f-720x480-jpg
+  2x image-69d6d7c4a813c2bd6f6aca0fbc0f261194498921-1000x800-jpg
+  2x image-6f712f4a0198a5571a747773913b63c8ce9a66c8-1087x809-jpg
+  2x image-a3ace3a92ee401cac014c18538679da0591a9677-1500x1000-jpg
+
+--- Trang lên sóng KHÔNG có ảnh chính (1) ---
+  tour/tour-du-thuyen-vega-yacht-nha-trang-day-tour — Tour du thuyền Vega Yacht Nha Trang (Day Tour)
+
+--- 12 ảnh chính hẹp nhất ---
+   399x501   ar=0.80  attraction/thac-ta-gu
+   512x768   ar=0.67  hotel/imperial-nha-trang
+   516x387   ar=1.33  attraction/hon-chong
+   542x566   ar=0.96  attraction/vin-harbour
+   549x364   ar=1.51  experience/phao-chuoi
+   600x400   ar=1.50  attraction/khu-du-lich-vinh-san-ho
+   600x400   ar=1.50  tour/tour-3-dao-nha-trang-deluxe-bai-tranh-lang-chai-vinh-san-ho
+   640x479   ar=1.34  attraction/khu-du-lich-yang-bay
+   677x453   ar=1.49  attraction/thap-ba-ponaga
+   700x372   ar=1.88  attraction/nha-tho-nui
+   700x525   ar=1.33  attraction/khu-du-lich-ba-ho
+   700x466   ar=1.50  attraction/khu-du-lich-suoi-tien

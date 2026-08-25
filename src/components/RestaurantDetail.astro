@@ -80,7 +80,7 @@ const jsonLd = entityPageGraphToLd(restaurantToJsonLd(data, siteBase, lang), dat
 
     {hasPtContent(data.body) && (
       <Section heading={t('aboutRestaurant')} contained={false}>
-        <Body blocks={data.body} />
+        <Body blocks={data.body} headingOffset={1} />
       </Section>
     )}
 

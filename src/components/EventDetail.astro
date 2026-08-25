@@ -87,7 +87,7 @@ const facts: { field: string; icon: string; label: string; value: string; visibl
 
     {hasPtContent(data.body) && (
       <Section heading={t('details')} contained={false}>
-        <Body blocks={data.body} />
+        <Body blocks={data.body} headingOffset={1} />
       </Section>
     )}
 
