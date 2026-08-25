@@ -1064,3 +1064,23 @@ Vòng duyệt cuối kiểm và kết luận không chặn gộp: test `evidence
 ### Ghi chú vệ sinh
 
 `scripts/reports/validator-status.json` đang ở trạng thái đã sửa trong cây làm việc — do tác nhân chạy `validate` để kiểm chứng `DR-044`, chưa commit. Không phải dấu vết của phiên khác.
+
+---
+
+## QĐ-2026-08-25-01 — Để Growth Trial hết hạn, dự án Sanity rơi về Free
+
+**Bối cảnh.** Ngày 2026-08-25 Sanity gửi cảnh báo *"TourDaoVN has used 100% of API Requests"*. Kiểm ra: dự án `pgedy374` đang ở gói `growth-trial-2023-10-19`, đã dùng 247.5k/250.000 API request của tháng 8, `overageAllowed: false`, và trial hết hạn 2026-08-26T00:57Z — tức sáng hôm sau. Hai đường đi: nâng lên Growth (15 USD mỗi seat mỗi tháng, mở phí vượt 1 USD mỗi 25k request) hoặc không làm gì và tự rơi về Free.
+
+**Câu hỏi.** Có nâng gói không?
+
+**Chốt.** **Không.** Để trial hết hạn, dự án tự rơi về Free. Không thêm thẻ, không nâng cấp. Sanity không trừ tiền gì.
+
+**Ai chốt.** Chủ dự án, trong phiên 2026-08-25.
+
+**Hệ quả đã lường và chấp nhận.**
+- Hạn mức API **không đổi**: Free và Growth Trial đều 250.000 request mỗi tháng, reset 00:00 UTC ngày 1.
+- Bốn thành viên vai `editor` **thành `viewer` — mất quyền Publish trong Studio**. Free chỉ có hai vai `administrator` và `viewer`, không có nấc giữa. Tài khoản admin giữ nguyên toàn quyền. Ai cần publish thì hoặc nâng lên administrator (kèm quyền chạm mọi thiết lập dự án), hoặc nâng gói lại.
+- Mất Comments, Scheduled publishing, AI Assist. Đã kiểm trước khi chốt: **0 release / lịch publish hẹn giờ đang chờ**, nên không mất nội dung nào đã xếp lịch.
+- Dataset `production` vốn đã `public` nên không có gì đổi ở đó.
+
+**Ghi chú.** Phần định lượng — thao tác nào tốn hạn mức, thao tác nào không — tách thành sổ tay riêng ở `docs/SO-TAY-HAN-MUC-SANITY.md`. Nguyên nhân đốt hết hạn mức tháng 8 không phải khách truy cập mà là số lần dựng lại site: 157 commit push lên `main`, mỗi lần Workers Builds tự dựng và đọc lại toàn bộ nội dung, cộng một `astro dev` chạy nền 21 tiếng.
