@@ -128,7 +128,23 @@ export function getClient(): SanityClient {
     dataset,
     apiVersion: '2026-06-01',
     token,
-    useCdn: false,
+    /* Đọc qua `apicdn.sanity.io` thay vì `api.sanity.io`. Hai endpoint có HẠN
+       MỨC RIÊNG, và bản dựng là hộ tiêu thụ lớn nhất: mỗi lần dựng đọc lại toàn
+       bộ dữ liệu cho ~140 trang cộng các endpoint máy đọc.
+
+       2026-08-25 hạn mức của `api` cạn — build của Cloudflare chết ở bước
+       prerender với `plan_limit_reached`, và mọi bản dựng ở máy cũng hỏng. Cùng
+       lúc đó `apicdn` vẫn trả 200. Xem `QĐ-2026-08-25-06`.
+
+       Đánh đổi: CDN có thể trả nội dung trễ tới ~60 giây. Ở dự án này việc đó
+       không thành vấn đề vì publish và deploy vốn đã tách rời — webhook Sanity
+       đang tắt theo `QĐ-2026-08-22-03`, nên nội dung chỉ lên trang khi có người
+       đẩy mã. Đo lúc chuyển: bản dựng qua CDN cho 141 URL so với 140 đang chạy,
+       thêm một bài mới, **không mất trang nào**.
+
+       Vẫn gửi kèm token: đã kiểm, `apicdn` nhận token và trả 200 bình thường
+       với `perspective: 'published'`. */
+    useCdn: true,
     perspective: 'published',
   })
 

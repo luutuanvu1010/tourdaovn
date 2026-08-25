@@ -1641,3 +1641,46 @@ Bốn mục cam kết và "Điểm nổi bật" chuyển từ `h2` xuống `h3`.
 2. `06` §4.1 nên có hàng khai rõ ba dải quanh hero cho trang điểm đến thay vì thừa hưởng ngầm qua *"khung chung áp dụng"*. Sửa `06` đụng R9, cần phiếu riêng.
 3. `keyFacts` hiện nằm trong cột phụ mục Tổng quan (nếp trang chủ). Khung chung `06` §6 đặt "Thông tin nhanh" ngay sau đoạn mở. Chưa đổi, chưa quyết.
 4. `.feature-grid--stays` trong `DR-060` đã hết ý nghĩa — khối đó nay do `HomeRollupSection` dựng.
+
+---
+
+## QĐ-2026-08-25-06 — Đọc Sanity qua `apicdn` lúc dựng, sau khi hạn mức `api` cạn
+
+**Ngày:** 2026-08-25 · **Người quyết:** chủ dự án · **Loại:** cửa hai chiều (đổi `useCdn` về `false` là hoàn nguyên)
+
+**Chuyện đã xảy ra.** PR #8 merge lúc `09:05:44Z`. Workers Builds chạy, qua hết `astro check` (**0 lỗi**), dựng xong server và client, rồi chết ở lần gọi Sanity **đầu tiên** trong bước prerender:
+
+```
+[ERROR] [build] Failed to call getStaticPaths for src/pages/[...path].astro
+plan_limit_reached - API Requests quota limit reached. Go to sanity.io/manage to upgrade your plan.
+Failed: error occurred while running build command
+```
+
+**Không phải lỗi mã.** Kiểm lại bằng tay cùng token:
+
+| Endpoint | Kết quả |
+|---|---|
+| `pgedy374.api.sanity.io` | **HTTP 402** `plan_limit_reached` |
+| `pgedy374.apicdn.sanity.io` | **HTTP 200**, `count(*)` = 1262 |
+
+`src/lib/sanity.ts:131` đặt `useCdn: false`, nên mọi bản dựng nện vào đúng endpoint đã cạn.
+
+**Hậu quả thực tế — không có gì gãy.** Build hỏng thì không sinh ra bản deploy nào để đè lên bản đang chạy. Production vẫn phục vụ bản `2026-08-25T07:25:31Z` của PR #7; kiểm 5 điểm (`/`, `/nha-trang/`, một trang tour, `/ai/index.json`, `/sitemap-vi.xml`) đều **200**. PR #8 đã vào `main` nhưng chưa lên trang.
+
+**Vì sao hạn mức cạn.** Bản dựng là hộ tiêu thụ lớn nhất: mỗi lần dựng đọc lại toàn bộ dữ liệu cho ~140 trang cộng bốn endpoint `/ai/*`, `llms.txt` và sitemap. Ngày 2026-08-25 có số lần dựng bất thường — tác nhân dựng lại sau gần như mỗi thay đổi trong lúc làm hai đợt `feat/dong-no-ky-thuat` và `feat/dong-bo-trang-diem-den`, cộng bốn subagent mỗi con dựng ít nhất một lần, cộng hai lần Workers Builds. **Đây là lỗi vận hành của tác nhân, ghi lại để không lặp:** đo một lần rồi dùng lại `dist/`, đừng dựng lại sau mỗi sửa nhỏ.
+
+**Chốt — `useCdn: true`.**
+
+**Đánh đổi:** CDN có thể trả nội dung trễ tới ~60 giây. Ở dự án này không thành vấn đề vì publish và deploy **vốn đã tách rời**: webhook Sanity đang tắt theo `QĐ-2026-08-22-03`, nên nội dung chỉ lên trang khi có người đẩy mã — độ trễ 60 giây nằm gọn trong khoảng đó.
+
+**Đo lúc chuyển, không phải suy đoán.** Dựng lại với `useCdn: true` thành công. So sitemap với production:
+
+- **141 URL** so với **140** đang chạy
+- Thêm: `cam-nang/ngam-hoang-hon-nha-trang-o-dau-dep-top-dia-diem-khong-the-bo-lo/` — bài publish sau bản dựng 07:25
+- **Mất: 0 trang** — `R3` an toàn
+
+Nói cách khác CDN ở đây **không cũ hơn** mà còn mới hơn bản đang chạy.
+
+**Không bật lại webhook Sanity lúc này.** Chủ dự án đã đồng ý bật lại (`QĐ-2026-08-22-03` sẽ bị đảo), nhưng tác nhân không có token quản trị nên chưa thi hành. **Giữ nguyên trạng thái tắt** cho tới khi hạn mức rõ ràng đã hồi: mỗi lần webhook bắn là một lần dựng toàn site, và log của chính webhook đó cho thấy ngày 2026-08-22 nó bắn **25 lần trong khoảng một tiếng**.
+
+**Còn phải làm.** Chủ dự án vào `sanity.io/manage` xem chu kỳ hạn mức và mức tiêu thụ thật. Nếu lượng dựng cần vượt hạn mức gói hiện tại thì đây là quyết định nâng gói, không phải quyết định kỹ thuật.
