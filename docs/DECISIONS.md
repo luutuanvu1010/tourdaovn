@@ -1600,3 +1600,44 @@ Tất cả dư AA. `npm --prefix scripts run check:token-parity` — **XANH, kh�
 **`origin/main` hiện CHƯA có bản vá ba nền phụ này** — nó nằm ở PR #6, chưa merge. Nếu đổi `theme` sang `cat-bien` ngay bây giờ rồi có ai deploy từ `main`, production nhận **`cat-bien` KHÔNG kèm bản vá** — tức đúng tổ hợp tệ nhất: nền kem cộng nền phụ xám lạnh, tách nền 1,005.
 
 **Nên thứ tự là: merge PR #6 → deploy → rồi mới đổi `theme` sang `cat-bien`.** Đảo thứ tự là tự bắn vào chân.
+
+---
+
+## QĐ-2026-08-25-05 — Đưa trang điểm đến vào phạm vi bề mặt; đồng bộ nó về bộ khối dùng chung
+
+**Ngày:** 2026-08-25 · **Người quyết:** chủ dự án · **Loại:** cửa hai chiều (hoàn nguyên bằng `git revert`)
+
+**Bối cảnh.** Chủ dự án yêu cầu refactor `https://tourdao.vn/nha-trang/` cho (1) đồng bộ bố cục chung và (2) ưu tiên hiển thị di động, rồi nêu nghi vấn *"dường như trước đó có sai lầm khi cấu trúc wireframe đã được viết tay mà không theo khung của hệ thống"*.
+
+Điều tra cho thấy nghi vấn **đúng về hiện tượng, khác về nguyên nhân** — chi tiết ở `DR-061`. Tóm tắt: lệch thừa kế từ commit fork `d7bac08`, rồi bị nới rộng vì ba vòng bề mặt liên tiếp đều để trang này ngoài phạm vi.
+
+**Chốt 1 — đảo ranh giới phạm vi của vòng 5.** `SPEC-2026-08-22-be-mat-vong-5` §9 và dòng 379 ghi *"Design **không** được vẽ lại bố cục trang chủ, header, hay footer trong vòng này"*. Ranh giới đó **hết hiệu lực đối với trang điểm đến**. Lý do vạch nó hồi 22/8 là bốn điều chủ dự án nêu khi ấy đều về trang chi tiết; nay chủ dự án nêu trực tiếp về trang điểm đến.
+
+Vòng 5 **không** bị mở lại: spec đó đã đóng và đã phát hành. Đây là một đợt riêng, phạm vi đúng một trang.
+
+**Chốt 2 — hero chỉ chứa ảnh.** Chủ dự án nêu: *"toàn bộ Hero không chứa mô tả, chỉ có thể chứa Tiêu đề - Heading"*. Áp đúng luật `06` v2.5 §3 vốn đã có: *"trên ảnh chỉ còn huy hiệu loại; `title` và `summary` đều đã ra ngoài — không còn chữ nào đè lên ảnh"*, cộng §3.1 *"Nhãn loại entity … không áp dụng: … touristDestination"*. Hai câu đó cộng lại cho kết quả: **hero trang này còn đúng một tấm ảnh.**
+
+Thứ tự khối nay theo `06` §6 v2.5: breadcrumb → tiêu đề → hero → đoạn mở → nội dung. Trang điểm đến không có thanh dính (thiết bị của trang chi tiết) nên đoạn mở nối thẳng sau hero.
+
+Bỏ theo cùng luật: **lớp phủ tối** (sinh ra chỉ để chữ trên ảnh đọc được; hết chữ thì nó chỉ làm tối 55% dưới của ảnh) và **con dấu trang trí**. Ghi công ảnh **giữ lại** nhưng chuyển xuống dưới ảnh — `Hero` dùng chung không có chỗ cho nó vì trang chi tiết không hiện ghi công.
+
+**Chốt 3 — bốn thay đổi bố cục phần thân, đã duyệt.**
+
+| Khối | Trước | Sau |
+|---|---|---|
+| Tổng quan | xếp dọc, dải Thông tin nhanh chạy hết bề ngang | hai cột: chữ trái, Thông tin nhanh cột phụ 340px — cùng bố cục trang chủ (`QĐ-2026-08-25-01`) |
+| Dải tin cậy | bó trong khung đọc 752px | rộng hết khung 1152px |
+| Điểm tham quan | **cắt cứng còn 3** dù dữ liệu có 4 | hiện đủ 4 — component chung không cắt |
+| Cẩm nang bản địa | 2 thẻ ngang, dạng riêng | 4 thẻ dọc, cùng dạng các mục khác |
+
+Bốn mục cam kết và "Điểm nổi bật" chuyển từ `h2` xuống `h3`. Không mất chữ nào, và đúng hơn về ngữ nghĩa vì chúng vốn nằm trong mục khác.
+
+**Chốt 4 — vá `HomeRollupSection` dù nó ngoài phạm vi một-trang.** Xem `DR-062`. Vá này **cũng đổi trang chủ**: khối rollup 3 mục ở đó đang hiện 3 cột, mỗi ô 119px trên khung 390px, và sẽ về 1 cột. Chấp nhận vì (a) đó là vi phạm Luật 5 đang sống trên production, (b) không vá thì chính `/nha-trang/` vẫn còn một khối 3 cột sau khi đồng bộ, tức mục tiêu (2) không đạt.
+
+**Bằng chứng.** `astro check` 0 lỗi. `gate:all` 9/11 — hai cổng đỏ còn lại là `S24-AUTHORITY-HTML` (6) và `Deferred`/`I16` (1), cả hai chờ dữ liệu chủ dự án, không liên quan. `BM-ORPHAN-REGION`, `BM-EMPTY-REGION`, `Luật 1` (140 trang) đều xanh sau khi gắn `data-region="summary-band"` lên trang này. Đo CDP 390×844: mọi lưới về 1 cột, không tràn ngang. Component 1091 → 390 dòng.
+
+**Còn nợ, ghi để khỏi rơi.**
+1. `HomeHero.astro` nay không còn ai gọi. Xoá là quyết định riêng.
+2. `06` §4.1 nên có hàng khai rõ ba dải quanh hero cho trang điểm đến thay vì thừa hưởng ngầm qua *"khung chung áp dụng"*. Sửa `06` đụng R9, cần phiếu riêng.
+3. `keyFacts` hiện nằm trong cột phụ mục Tổng quan (nếp trang chủ). Khung chung `06` §6 đặt "Thông tin nhanh" ngay sau đoạn mở. Chưa đổi, chưa quyết.
+4. `.feature-grid--stays` trong `DR-060` đã hết ý nghĩa — khối đó nay do `HomeRollupSection` dựng.

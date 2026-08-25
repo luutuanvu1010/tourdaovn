@@ -1486,4 +1486,112 @@ Không tràn ngang (`scrollWidth` = 390) — các lưới **bị bóp** chứ kh
 
 **Còn nợ, không thuộc phiếu này.** Khối `640px` đặt `.feature-grid--stays` về **2 cột** chứ không phải 1 (~171px mỗi thẻ ở 390px). Đó là ý tác giả viết rõ, không phải lỗi `var()`, và lưới đó không render trên `/nha-trang/` nên chưa lộ. Trang điểm đến nào có mục lưu trú sẽ dính. Xử cùng lúc đồng bộ bố cục.
 
-**Nợ lớn hơn mà phiếu này chạm vào.** `06` §4.1 khai trang điểm đến *"khung chung áp dụng"*, và §5.7 khai khối nội dung trang chủ là *"như §4.1"* — tức một bộ khối cho cả hai. Mã thì có **hai bản**: trang chủ dùng `SiteHome.astro` (532 dòng, ghép 12 component `Home*`), `/nha-trang/` dùng `TouristDestinationHub.astro` (1086 dòng, tự vẽ lại toàn bộ, không dùng `DetailLayout`/`Breadcrumb`/`Hero`/`FactStrip`/`Section` nào). `/nha-trang/` không có `crumb-band`, `title-band`, `summary-band`, `fact-strip` — trang chi tiết có đủ cả bốn. Chính vì tự vẽ lại mà nó có riêng ba media query hỏng này. Đồng bộ về bộ `Home*` là **thi hành đặc tả đang có**, không phải quyết định kiến trúc mới — nhưng là một diff lớn, chủ dự án đã chốt làm ở vòng riêng có bản xem trước.
+**Nợ lớn hơn mà phiếu này chạm vào.** `06` §4.1 khai trang điểm đến *"khung chung áp dụng"*, và §5.7 khai khối nội dung trang chủ là *"như §4.1"* — tức một bộ khối cho cả hai. Mã thì có **hai bản**: trang chủ dùng `SiteHome.astro` (532 dòng, ghép 12 component `Home*`), `/nha-trang/` dùng `TouristDestinationHub.astro` (1091 dòng, tự vẽ lại toàn bộ, không dùng `DetailLayout`/`Breadcrumb`/`Hero`/`FactStrip`/`Section` nào). `/nha-trang/` không có `crumb-band`, `title-band`, `summary-band`, `fact-strip` — trang chi tiết có đủ cả bốn. Chính vì tự vẽ lại mà nó có riêng ba media query hỏng này. Đồng bộ về bộ `Home*` là **thi hành đặc tả đang có**, không phải quyết định kiến trúc mới — nhưng là một diff lớn, chủ dự án đã chốt làm ở vòng riêng có bản xem trước.
+
+---
+
+## DR-061 — Trang điểm đến và trang chủ dựng cùng một bộ khối bằng hai bản mã khác nhau, lệch từ ngày fork
+
+**Trạng thái:** **đã xử 2026-08-25** (`src/components/TouristDestinationHub.astro`, 1091 → 390 dòng). Chủ dự án duyệt cùng ngày, xem `QĐ-2026-08-25-05`.
+
+**Đặc tả nói gì.** `06` §4.1 khai trang điểm đến: *"**Khung chung áp dụng**, cộng:"* rồi liệt kê các khối riêng. §5.7 dòng 346 khai khối nội dung trang chủ là *"**như §4.1**"*. Tức một bộ khối cho cả hai trang.
+
+**Mã làm gì.** Hai bản:
+
+| | `SiteHome.astro` | `TouristDestinationHub.astro` |
+|---|---|---|
+| Dòng | 532 | **1091** |
+| Cách dựng | ghép 12 component `Home*` | tự vẽ toàn bộ markup + CSS |
+| Vùng cấu trúc chung | — | **không có** `crumb-band`, `title-band`, `summary-band` |
+
+Cả hai render **cùng bộ khoá** `copy.sections.*` từ `src/lib/homepage.ts` — cùng vốn từ nội dung, khác cách vẽ. Chín trên mười hai khối ánh xạ một-đối-một vào component đã có sẵn; riêng năm lưới `attractions`/`experiences`/`stays`/`specialties`/`tours` đều là cùng một `HomeRollupSection`.
+
+**Không ai viết tay sai khung ở đây — lệch có từ ngày fork.** `git log --diff-filter=A` cho cả hai file trả về **cùng một commit** `d7bac08` (2026-07-22, *"fork engine Core"*). Bộ `Home*` đã tồn tại từ giây phút đầu và hub ngay từ đầu đã không dùng. Lệch này **thừa kế theo bản fork**, không phải quyết định ở dự án này.
+
+**Cái sai thật: khoảng cách bị nới ra qua từng vòng bề mặt.**
+
+| | `SiteHome` | `TouristDestinationHub` |
+|---|---|---|
+| Tổng commit sau fork | 13 | 8 |
+| Vòng bề mặt đã nhận | vòng 2, vòng 3, Site Settings, **vòng 5** | chỉ vòng 3 (`59cab03`) |
+
+Vòng 5 — đúng vòng làm mobile-first — đụng **17 file nguồn** và **không có file này**. Đó không phải sơ suất: `SPEC-2026-08-22-be-mat-vong-5` §9 và dòng 379 ghi thẳng *"Design **không** được vẽ lại bố cục trang chủ, header, hay footer trong vòng này"*, vì bốn điều chủ dự án nêu hồi đó là về trang chi tiết. **Một ranh giới phạm vi vạch có chủ đích, rồi không ai quay lại gỡ.**
+
+**Hệ quả đo được.** Vì tự vẽ lại nên hub có riêng ba media query hỏng của `DR-060` — chúng cũng sinh ra ở `d7bac08` và **chết suốt 34 ngày**. Đồng bộ về bộ `Home*` xoá luôn cả lớp lỗi đó chứ không chỉ vá một lần.
+
+**Đã sửa.** Hub nay ghép từ chính các component trang chủ dùng: `HomeTrustBar`, `HomeHubGrid`, `HomeBannerGrid`, `HomeRollupSection` ×5, `HomeAreaGrid`, `HomeGuideGrid`, `HomeFacts`, cộng `Breadcrumb` + `Hero` + `Section` + `FAQ` + `HomeMetaBar`. Chỉ còn CSS cho ba thứ không có component chung: lưới hai cột mục Tổng quan, khối Điểm đến liên quan, cụm tham chiếu cuối trang.
+
+**Bốn thay đổi bố cục thấy được, chủ dự án đã duyệt** — chi tiết ở `QĐ-2026-08-25-05`.
+
+**Còn nợ, cố ý không làm trong đợt này.** `HomeHero.astro` nay **không còn ai gọi** (hub là consumer duy nhất; `SiteHome` có hero riêng và chỉ nhắc tên nó trong một chú thích ở dòng 363). Xoá một component là quyết định riêng, chưa làm. `06` §4.1 nên có thêm hàng khai rõ ba dải quanh hero cho trang điểm đến thay vì để chúng thừa hưởng ngầm qua câu *"khung chung áp dụng"* — sửa `06` đụng R9, cần phiếu riêng.
+
+**Bài học.** Fork mang theo cả nợ của dự án gốc, và nợ đó **không thuộc về ai** cho tới khi có người nhận. Ba vòng bề mặt đi qua file này mà không ai mở nó ra, vì mỗi vòng đều có một câu "ngoài phạm vi" hợp lý. Ranh giới phạm vi cần một ngày hết hạn, không thì nó thành nơi nợ đọng lại.
+
+---
+
+## DR-062 — `:has()` đè media query trong `HomeRollupSection`: khối 2 hoặc 3 mục không bao giờ đổ về một cột
+
+**Trạng thái:** **đã xử 2026-08-25** (`src/components/HomeRollupSection.astro`). Lỗi **có sẵn từ trước**, không do đợt refactor tạo ra; refactor chỉ làm nó lộ ra.
+
+**Lỗi.** Component chọn số cột theo số thẻ bằng `:has()`, rồi thu hẹp theo bề ngang bằng media query nhắm bộ chọn trần:
+
+```css
+.home-card-grid:has(> :last-child:nth-child(3)) { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 640px) { .home-card-grid { grid-template-columns: 1fr; } }
+```
+
+**Độ đặc hiệu, không phải thứ tự.** `:has()` lấy độ đặc hiệu của đối số bên trong, nên bộ chọn trên là **(0,3,0)**; `.home-card-grid` trần chỉ **(0,1,0)**. Đặc hiệu cao thắng bất kể đứng trước hay sau và bất kể nằm trong media query hay không. Ba khối thu hẹp **không bao giờ áp được** cho khối có đúng 2 hoặc 3 mục.
+
+**Vì sao sống lâu.** Khối **4 mục trở lên** không khớp luật `:has()` nào (chỉ có nhánh cho 1, 2, 3) nên rơi đúng xuống media query và thu bình thường. Hai lưới cạnh nhau cho hai kết quả khác hẳn — người xem dễ kết luận "lưới này thu được, chắc lưới kia cũng thế".
+
+**Đo trên production, khung 390×844, CDP:**
+
+| Trang | Khối | Trước | Sau |
+|---|---|---|---|
+| `/` (trang chủ) | rollup 3 mục | **3 cột · ô 119px** | 1 cột · 358px |
+| `/nha-trang/` | Trải nghiệm nổi bật (3 mục) | *(xem ghi chú)* | 1 cột · 358px |
+
+**Ghi chú về hàng thứ hai — sửa sau review 2026-08-25.** Bản đầu của phiếu này ghi `/nha-trang/`
+"trước: 3 cột · ô 119px". **Sai, và sai theo cách dễ tin.** Hub cũ chưa từng import
+`HomeRollupSection`, không có `.home-card-grid` nào, nên lỗi `:has()` không với tới nó; `DR-060`
+ngay trên cùng sổ này còn ghi lưới đó đo được **1 cột, 358px** sau bản vá `ab03f1b` đã ở `main`.
+Con số 119px là thật, nhưng nó đo ở **trạng thái giữa chừng** của nhánh refactor — sau khi hub
+chuyển sang `HomeRollupSection`, trước khi vá độ đặc hiệu. Trạng thái đó **chưa bao giờ lên
+production**. Giữ hàng lại vì nó là bằng chứng cơ chế; sửa cột "trước" để không đọc thành một
+lỗi từng chạy thật.
+
+Chỉ **trang chủ** mới dính lỗi này trên production, và **từ trước đợt refactor** — không phải hồi
+quy. Vi phạm **Luật 5** (`06` §6).
+
+**Đã sửa.** Ba khối media query nay nhắc lại các bộ chọn `:has()` để đạt đủ độ đặc hiệu. Số cột thật = nhỏ hơn giữa *(số mục)* và *(mức bề ngang cho phép)*: ≤1024px trần 3 cột, ≤768px trần 2 (phải hạ khối 3 mục), ≤640px trần 1 (phải hạ cả khối 2 và 3 mục).
+
+**Bài học.** `:has()` mang độ đặc hiệu của thứ nằm trong nó, nên nó **âm thầm vô hiệu hoá** mọi luật sau viết bằng bộ chọn đơn giản hơn — kể cả luật trong media query. Cùng họ với `DR-060`: CSS không hợp lệ hoặc bị đè thì **hỏng im lặng**, bản dựng vẫn xanh. Bắt được chỉ bằng cách **đo thứ đã dựng ra**, không phải đọc thứ đã viết vào.
+
+---
+
+## DR-063 — `FAQPage.speakable` trỏ vào bộ chọn cũng khớp đoạn mở, trên MỌI trang có FAQ
+
+**Trạng thái:** mở, phát hiện 2026-08-25 khi review nhánh `feat/dong-bo-trang-diem-den`. **Không sửa trong nhánh đó** — đây là lệch toàn hệ thống, sửa lệch trên đúng một trang sẽ tạo ra bất đối xứng mới.
+
+**Đường đi.** JSON-LD của trang chi tiết và trang điểm đến đều gắn `speakable` vào `subjectOf` → **`FAQPage`**, với `cssSelector: ["[data-speakable]"]`. Kiểm bằng cách đi cây JSON-LD trong `dist/`:
+
+| Trang | Nơi `speakable` treo |
+|---|---|
+| `dia-danh/dao-hon-mun/` | `subjectOf` → `FAQPage` |
+| `trai-nghiem/cano-keo-du-bay/` | `subjectOf` → `FAQPage` |
+| `nha-trang/` | `subjectOf` → `FAQPage` |
+
+Cả ba trang đều có **5** phần tử mang `data-speakable`: bốn `.faq-answer` và **một `.detail-summary`**.
+
+**Vì sao đáng ngờ.** Bộ chọn của `FAQPage` khớp trúng cả đoạn mở, mà đoạn mở **không phải câu trả lời nào** của FAQ đó. Trợ lý giọng nói đọc theo khai báo này sẽ đọc một đoạn không thuộc cặp hỏi–đáp nào.
+
+**Vì sao KHÔNG phải lỗi của nhánh refactor.** Reviewer nêu mục này như một lỗi mới do nhánh tạo ra ("bản cũ không hề phát thẻ này"). Vế đó đúng với **hub cũ**, nhưng sai về hệ thống: `DetailLayout.astro:180` đã gắn `data-speakable` lên đoạn mở từ trước, và `06` §4.1 khai thẳng *"speakable | build từ `summary` và `faq`"*. Nhánh refactor **khớp đúng nếp trang chi tiết**; nó không tạo lệch mới mà chỉ làm lệch sẵn có phủ thêm một trang.
+
+**Ba lối đi, chưa chọn.**
+1. Tách bộ chọn: `FAQPage.speakable` chỉ nhận `.faq-answer`, còn đoạn mở treo dưới `WebPage`/`mainEntityOfPage`.
+2. Bỏ `data-speakable` khỏi đoạn mở trên mọi trang, chấp nhận `06` §4.1 chỉ còn nuôi speakable bằng `faq`.
+3. Kết luận rằng cách khai hiện tại chấp nhận được và ghi nó thành chữ trong `06`.
+
+Lối (1) hợp `06` §4.1 nhất vì nó giữ được cả `summary` lẫn `faq` làm nguồn. Cần một phiếu quyết định và một lượt sửa `src/lib/serialize/`, ngoài phạm vi đợt này.
+
+**Bài học.** Reviewer bắt đúng **hiện tượng** nhưng quy sai **phạm vi** — cùng loại nhầm mà `DR-061` mô tả ở chiều ngược lại. Trước khi ghi một lệch là "do nhánh này gây ra", phải kiểm xem các trang KHÔNG thuộc nhánh có lệch y hệt không. Ở đây một lệnh đếm trên hai trang chi tiết là đủ.
