@@ -1684,3 +1684,51 @@ Nói cách khác CDN ở đây **không cũ hơn** mà còn mới hơn bản đa
 **Không bật lại webhook Sanity lúc này.** Chủ dự án đã đồng ý bật lại (`QĐ-2026-08-22-03` sẽ bị đảo), nhưng tác nhân không có token quản trị nên chưa thi hành. **Giữ nguyên trạng thái tắt** cho tới khi hạn mức rõ ràng đã hồi: mỗi lần webhook bắn là một lần dựng toàn site, và log của chính webhook đó cho thấy ngày 2026-08-22 nó bắn **25 lần trong khoảng một tiếng**.
 
 **Còn phải làm.** Chủ dự án vào `sanity.io/manage` xem chu kỳ hạn mức và mức tiêu thụ thật. Nếu lượng dựng cần vượt hạn mức gói hiện tại thì đây là quyết định nâng gói, không phải quyết định kỹ thuật.
+
+---
+
+## Bổ sung cho `QĐ-2026-08-25-06` — đã đo chi phí một lần dựng, và kết quả sau phát hành
+
+**Ngày:** 2026-08-25, sau khi PR #9 merge. Phần này viết sau phiếu gốc vì lúc chốt chưa ai có con số.
+
+### Một lần dựng tốn hơn 400 lượt gọi Sanity
+
+Đo bằng cách gắn tạm bộ đếm vào `client.fetch` trong `src/lib/sanity.ts` — đúng chỗ duy nhất `createClient` được gọi, nên mọi đường đọc đều bị phủ — rồi chạy `npm run build` một lần. Bộ đếm in mỗi 25 lượt; lần in cuối là **400**, nên tổng thật nằm khoảng **400–420**. Bộ đếm đã gỡ ngay sau khi đo, không commit.
+
+Vì sao nhiều đến vậy: site sinh HTML từ nội dung Sanity, nên mỗi lần dựng phải hỏi *"có những trang nào"* (`getStaticPaths` → `fetchAllSlugs`) rồi *"nội dung từng trang là gì"* cho ~140 trang, cộng bốn endpoint `/ai/*`, `llms.txt` và sitemap.
+
+**Hệ quả — đây mới là phần đáng nhớ:**
+
+| Tình huống | Lượt gọi |
+|---|---|
+| Một lần dựng | **~400** |
+| Một PR chỉ sửa CSS, hoặc chỉ sửa tài liệu | **~400** — vẫn dựng lại toàn bộ |
+| 10 lần dựng/ngày | ~4.000/ngày ≈ **~120.000/tháng** |
+| Webhook Sanity bắn 25 lần trong một giờ (đo thật 2026-08-22) | **~10.000 trong một giờ** |
+
+Hàng cuối là bằng chứng số cho `QĐ-2026-08-22-03`. Lúc ấy phiếu đó chỉ nói "25 lần bắn"; nay biết mỗi lần bắn là ~400 lượt gọi. **Không bật lại webhook cho tới khi hạn mức rõ ràng đã hồi và có cơ chế chặn dội.**
+
+### Ba điều rút ra cho vận hành
+
+1. **Đo một lần rồi dùng lại `dist/`.** Đừng dựng lại sau mỗi sửa nhỏ. Ngày 2026-08-25 tác nhân dựng lại sau gần như mỗi thay đổi qua hai đợt refactor, cộng bốn subagent — cỡ 7.000–8.000 lượt trong một ngày. Đó là nguyên nhân trực tiếp làm hạn mức cạn.
+2. **Merge một PR chỉ-tài-liệu cũng tốn ~400 lượt gọi**, vì Workers Builds dựng lại toàn site bất kể diff đụng gì. Nên gộp thay đổi tài liệu vào cùng PR với thay đổi mã khi có thể.
+3. **`npm run deploy` bỏ qua `gate:all`.** Nó chỉ chạy `astro check && astro build`, không gọi validator nào — `R3`, `R4`, `Luật 1`, `BM-*` đều không được kiểm. Deploy tay thì chạy `npm run gate` trước.
+
+### Kết quả sau phát hành
+
+PR #9 merge `09:55:34Z`, bản dựng lên `09:58:41Z` — **3 phút 7 giây**. Bản này mang cả PR #8 (giao diện trang điểm đến) lẫn PR #9 (đổi endpoint) lên cùng lúc.
+
+| Phép kiểm trên production | Kết quả |
+|---|---|
+| Ba dải quanh hero (`crumb-band`, `title-band`, `summary-band`) | có đủ |
+| Chữ đè lên ảnh hero | **hết cả 5 lớp** (`hero-title`, `hero-summary`, `hero-eyebrow`, `hero-stamp`, `hero-gradient`) |
+| Rãnh lưới thẻ | có |
+| Mọi lưới ở khung 390×844 | **1 cột, 358px**; tràn ngang **0px** |
+| Sitemap | 142 URL — **mất 0**, thêm 2 bài mới publish |
+| CORS `/ai/*` và chuyển hướng 301 của PR #7 | còn nguyên |
+
+Việc "mất 0 trang" là điều kiện `R3`, và là phép kiểm quan trọng nhất với một thay đổi nguồn đọc.
+
+### Còn phải làm
+
+Chủ dự án vào `sanity.io/manage` đối chiếu **~400 lượt/lần dựng** với hạn mức và nhịp dựng thật. Vá `useCdn` chuyển tải sang endpoint có hạn mức riêng, nhưng nó **không làm giảm số lượt gọi** — chỉ đổi chỗ tính. Muốn giảm thật thì phải giảm số lần dựng, hoặc dựng tăng dần thay vì dựng lại toàn bộ.
