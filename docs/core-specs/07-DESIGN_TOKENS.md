@@ -32,18 +32,18 @@ Mọi cặp màu chữ trên nền dưới đây đã kiểm WCAG AA (≥ 4,5:1 
 |---|---|---|
 | color.primary | #0C4A6E | heading, link, nhãn nhánh ở header, viền focus; chữ trắng trên nền này đạt AA |
 | color.primary.strong | #082F49 | hover và active của link, nền footer, nền header đậm nếu mockup chọn |
-| color.primary.soft | #F0F7FC | nền khối nhấn nhẹ (hỏi đáp, số liệu nhanh, lưu ý an toàn) với chữ text |
+| color.primary.soft | **#DCEBF6** | nền khối nhấn nhẹ (hỏi đáp, số liệu nhanh, lưu ý an toàn) với chữ text. **v2026-08-25 (`QĐ-2026-08-25-04`): đẩy ra xa trắng, từ #F0F7FC** |
 | color.accent | #C0392B | san hô — nút CTA đặt, CTA gọi điện; chữ trắng đạt 5.44 (AA) |
 | color.accent.strong | #96271A | hover của CTA; chữ nhãn giá trên nền accent.soft |
 | color.accent.soft | #FEF2F0 | nền nhãn giá trên card và vùng giá ("từ X, cập nhật [ngày]") |
 | color.surface | #FFFFFF | nền trang mặc định — **chủ dự án chốt 2026-08-06, giải DR-003**; `08-QA_CHECKLIST` B4 phải sửa theo |
-| color.surface.alt | #F8FAFC | nền xen kẽ khối, nền card trên nền trắng |
+| color.surface.alt | **#EAF2F8** | nền xen kẽ khối, nền card trên nền trắng. **v2026-08-25 (`QĐ-2026-08-25-04`): từ #F8FAFC.** Giá trị cũ chỉ cách nền trắng **1,046** nên khối xen kẽ đọc thành một mảng trắng liền — đúng bệnh "thiếu diện tích màu" mà §1 mô tả. Nay **1,132** |
 | color.sea | #0E7490 | ngọc lam vịnh nông — nhãn tự nhiên, tiện ích, trạng thái thành công; chữ trắng đạt 5.36 (AA) |
 | color.sand | #F5A623 | cát biển — nhãn ấm, gạch chân trang trí. **Không dùng làm nền CTA**: tương phản với chữ trắng không đạt AA |
 | color.text | #0F172A | chữ chính trên surface và surface.alt |
 | color.text.muted | #475569 | mô tả ngắn trên card, ngày cập nhật, nhãn phụ, breadcrumb |
 | color.text.inverse | #F8FAFC | chữ trên primary, primary.strong, accent |
-| color.border | #E2E8F0 | viền card, viền bảng, kẻ phân vùng |
+| color.border | **#D3E1EC** | viền card, viền bảng, kẻ phân vùng. **v2026-08-25 (`QĐ-2026-08-25-04`): từ #E2E8F0**, nhuốm cùng sắc với nền phụ mới |
 
 Quy tắc dùng accent: accent chỉ xuất hiện ở vùng hành động và nhãn giá (binding map 5.1, các vùng giá cộng CTA ở mục 4). Vùng nội dung không dùng accent. Đây là cách giữ luật "không CTA giả" của 06 ở tầng thị giác: thấy màu ấm là có hành động thật.
 
@@ -62,13 +62,25 @@ Quy tắc dùng accent: accent chỉ xuất hiện ở vùng hành động và n
 
 Chủ dự án chọn bộ đang bật trong Sanity Studio (`siteSettings.theme`). **Studio chỉ chọn, không nhập giá trị màu** — nên đây vẫn là một nguồn sự thật: bảng dưới đây.
 
-Mỗi bộ chỉ đổi bốn token màu gốc; toàn bộ chữ, khoảng cách, bo góc, bóng giữ nguyên. Đổi bộ là đổi tông, không phải đổi hệ thống.
+Mỗi bộ đổi bốn token màu gốc **cộng ba nền phụ** (`QĐ-2026-08-25-04`); toàn bộ chữ, khoảng cách, bo góc, bóng giữ nguyên. Đổi bộ là đổi tông, không phải đổi hệ thống.
 
 | Bộ | `surface` | `primary` | `accent` | `text` | Cảm giác |
 |---|---|---|---|---|---|
 | `bien-sau` **(mặc định)** | #FFFFFF | #0C4A6E | #C0392B | #0F172A | biển sâu, trắng sạch |
 | `cat-bien` | #FDFAF5 | #155E75 | #B45309 | #1C1917 | cát ấm, nắng chiều |
 | `ngoc-lam` | #FFFFFF | #0F766E | #BE123C | #0F172A | nước nông, trong |
+
+**Ba nền phụ, thêm 2026-08-25 (`QĐ-2026-08-25-04`).** Trước đó chỉ `:root` khai chúng, nên `cat-bien` và `ngoc-lam` **thừa hưởng nền phụ của `bien-sau`** — và với `cat-bien` thì đó là một nền xám **lạnh** đứng cạnh nền kem **ấm**, chỉ cách nhau **1,005**. Khối xen kẽ ở bộ đó gần như không tồn tại về mặt thị giác. Nay mỗi bộ tự khai, nhuốm đúng sắc của chính nó:
+
+| Bộ | `surface.alt` | `primary.soft` | `border` | Tách nền chính↔phụ |
+|---|---|---|---|---|
+| `bien-sau` | #EAF2F8 | #DCEBF6 | #D3E1EC | 1,046 → **1,132** |
+| `cat-bien` | #F5EDE0 | #E4EEF1 | #E7DCC9 | **1,005 → 1,116** |
+| `ngoc-lam` | #E8F4F2 | #D6EBE8 | #CFE3E0 | 1,046 → **1,126** |
+
+Không thêm một mã brand nào: `primary`, `accent`, `sand`, chữ đều giữ nguyên. Đây là chữa **diện tích màu** (§1 "Bệnh đã chữa và đừng tái phát"), không phải mở bảng màu.
+
+Chữ trên nền phụ mới, đo lại — hai cặp này **nằm ngoài** bốn cặp mà `check-theme-contrast.mjs` chấm, thêm ở đây vì đề xuất đụng đúng nền đó: `bien-sau` 15,77 / 6,70 · `cat-bien` 15,05 / 6,57 · `ngoc-lam` 15,86 / 6,73. Tất cả dư AA.
 
 **Ngưỡng bắt buộc.** Mọi bộ phải đạt WCAG AA ở bốn cặp: chữ chính trên nền, chữ mờ trên nền, chữ trắng trên `primary`, chữ trắng trên `accent` — tất cả ≥ 4.5.
 

@@ -1550,3 +1550,53 @@ Thêm luật cho link thân bài — trước nay chưa có, vì chưa từng c�
 
 1. **Không cổng nào bắt được ba lỗi này**, và cả ba đều sống nhiều tháng. Chúng không phải lỗi "vùng sai" hay "lặp vùng" nên `luat1-post` không đụng tới; `BM-EMPTY-REGION` cũng không, vì vùng có chữ, chỉ thiếu ảnh và link. Một cổng kiểu *"số `<img>` trong `.body-block` phải khớp số khối ảnh trong dữ liệu"* sẽ bắt được — chưa có, chưa ai đề xuất.
 2. **Thang cỡ tiêu đề** vẫn là câu hỏi mở của chủ dự án (lượt rà 2026-08-25 mục 3). Phiếu này chỉ đưa hai cấp lạc thang về token, không chốt thang.
+
+---
+
+## QĐ-2026-08-25-04 — Chốt bộ giao diện `cat-bien`; ba nền phụ khai riêng cho từng bộ
+
+**Trạng thái:** chốt 2026-08-25. Sửa `src/styles/tokens.css` và `07-DESIGN_TOKENS` §1 + §1b. **Chưa** đổi `siteSettings.theme` trong Sanity — xem "Trình tự bắt buộc" ở cuối.
+
+**Bối cảnh.** Chủ dự án chọn **`cat-bien` (nền kem)** làm bộ giao diện. Nhưng bật nó nguyên trạng thì **làm bệnh nặng thêm**, không nhẹ đi — và đây là lý do phiếu này tồn tại.
+
+### Vì sao `cat-bien` là bộ tệ nhất trước khi sửa
+
+`07` §1b khai *"mỗi bộ chỉ đổi bốn token màu gốc"*, và `tokens.css` làm đúng vậy: khối `[data-theme='cat-bien']` đè 7 token, **không có** `--c-surface-alt`, `--c-primary-soft`, `--c-border`. Ba token đó vì thế **thừa hưởng từ `:root`**, tức từ bộ `bien-sau`.
+
+Hệ quả: nền kem **ấm** `#FDFAF5` đứng cạnh nền phụ xám **lạnh** `#F8FAFC`. Hai thứ đó lệch nhau **1,005** — nói cách khác **khối xen kẽ ở bộ này gần như không tồn tại về mặt thị giác**, tệ hơn cả hai bộ kia (1,046). Và chúng còn lệch nhau về nhiệt độ màu.
+
+Đây đúng là căn bệnh `07` §1 tự đặt tên: *"`--c-surface` #FFFFFF và `--c-surface-alt` #F8FAFC chỉ lệch ~4% độ sáng, nên nếu cả trang chỉ dùng hai nền này thì đọc thành một mảng trắng liền."* Với `cat-bien` thì không phải 4% mà gần như 0%.
+
+### Chốt — ba nền phụ khai riêng cho từng bộ
+
+| Bộ | `surface.alt` | `primary.soft` | `border` | Tách nền chính↔phụ |
+|---|---|---|---|---|
+| `bien-sau` | #EAF2F8 | #DCEBF6 | #D3E1EC | 1,046 → **1,132** |
+| **`cat-bien`** | **#F5EDE0** | **#E4EEF1** | **#E7DCC9** | **1,005 → 1,116** |
+| `ngoc-lam` | #E8F4F2 | #D6EBE8 | #CFE3E0 | 1,046 → **1,126** |
+
+**Không thêm một mã brand nào.** `primary`, `accent` san hô, `sand`, và mọi màu chữ giữ nguyên. Đây là chữa **diện tích màu**, không phải mở bảng màu — đúng cách `07` §1 chỉ định và đúng hướng vòng 3 §3.3 đã chọn.
+
+**R2 được tôn trọng:** *"sửa bộ nào thì sửa cả ba"*. Không bộ nào bị bỏ, kể cả hai bộ không được chọn.
+
+### Đối chiếu
+
+`npm --prefix scripts run check:theme` — **pass, 3 bộ, tất cả cặp đạt AA**, thấp nhất 5,02 (`cat-bien`, trắng/accent) đúng như trước khi sửa: bốn cặp của cổng không đụng tới ba token này.
+
+Hai cặp **ngoài** phạm vi cổng, đo riêng vì đề xuất đụng đúng nền đó — chữ chính và chữ mờ trên nền phụ:
+
+| Bộ | chữ/nền phụ | chữ mờ/nền phụ | chữ/nền mềm |
+|---|---|---|---|
+| `bien-sau` | 15,77 | 6,70 | 14,67 |
+| `cat-bien` | 15,05 | 6,57 | 14,82 |
+| `ngoc-lam` | 15,86 | 6,73 | 14,37 |
+
+Tất cả dư AA. `npm --prefix scripts run check:token-parity` — **XANH, không lệch mới**; hai mục vàng còn lại là `DR-050` và `DR-051` có sẵn.
+
+### Trình tự bắt buộc — vì sao CHƯA đổi `siteSettings.theme`
+
+`siteTheme.ts` đọc `siteSettings.theme` **lúc dựng** (cache module-level), nên đổi trong Sanity chỉ có hiệu lực ở lần deploy sau. Nghe thì an toàn, nhưng nó tạo một cửa sập:
+
+**`origin/main` hiện CHƯA có bản vá ba nền phụ này** — nó nằm ở PR #6, chưa merge. Nếu đổi `theme` sang `cat-bien` ngay bây giờ rồi có ai deploy từ `main`, production nhận **`cat-bien` KHÔNG kèm bản vá** — tức đúng tổ hợp tệ nhất: nền kem cộng nền phụ xám lạnh, tách nền 1,005.
+
+**Nên thứ tự là: merge PR #6 → deploy → rồi mới đổi `theme` sang `cat-bien`.** Đảo thứ tự là tự bắn vào chân.

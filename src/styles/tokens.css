@@ -14,19 +14,19 @@
   /* §1 Color — bảng màu biển đảo */
   --c-primary:        #0C4A6E;
   --c-primary-strong: #082F49;
-  --c-primary-soft:   #F0F7FC;
+  --c-primary-soft:   #DCEBF6;
   --c-accent:         #C0392B;   /* san hô — CTA, nhãn giá */
   --c-accent-strong:  #96271A;
   --c-accent-soft:    #FEF2F0;
   --c-sand:           #F5A623;
   --c-sand-soft:      #FBE3B3;
   --c-surface:        #FFFFFF;   /* nền trang — trắng thuần */
-  --c-surface-alt:    #F8FAFC;   /* khối xen kẽ */
+  --c-surface-alt:    #EAF2F8;   /* khối xen kẽ */
   --c-card:           #FFFFFF;
   --c-text:           #0F172A;
   --c-text-muted:     #475569;
   --c-text-inverse:   #F8FAFC;
-  --c-border:         #E2E8F0;
+  --c-border:         #D3E1EC;
   --c-coral:          #E8654E;
   --c-sea:            #0E7490;   /* ngọc lam vịnh nông */
   --c-green:          #0E7490;   /* bí danh cũ, giữ để không gãy component */
@@ -174,6 +174,15 @@
   --c-text-muted:     #57534E;
   --c-primary-strong: #0E4A5C;
   --c-accent-strong:  #92400E;
+  /* QĐ-2026-08-25-04: ba nền phụ PHẢI khai riêng ở đây.
+     Trước đó bộ này chỉ đè 7 token gốc, nên --c-surface-alt thừa hưởng #F8FAFC
+     của :root — một nền xám LẠNH đứng cạnh nền kem ẤM #FDFAF5, và hai thứ đó
+     chỉ cách nhau 1,005 về độ tương phản. Tức khối xen kẽ ở bộ này gần như
+     KHÔNG TỒN TẠI về mặt thị giác, tệ hơn cả hai bộ kia (1,046).
+     Ba giá trị dưới đây nhuốm sắc cát cho khớp nền kem, đưa tách nền lên 1,116. */
+  --c-surface-alt:    #F5EDE0;
+  --c-primary-soft:   #E4EEF1;
+  --c-border:         #E7DCC9;
 }
 
 :root[data-theme='ngoc-lam'] {
@@ -184,6 +193,11 @@
   --c-text-muted:     #475569;
   --c-primary-strong: #0B5A54;
   --c-accent-strong:  #9F1239;
+  /* Cùng lý do như cat-bien, nhuốm sắc ngọc. R2 của spec vòng 5: sửa bộ nào
+     thì sửa cả ba — không bộ nào được bỏ. */
+  --c-surface-alt:    #E8F4F2;
+  --c-primary-soft:   #D6EBE8;
+  --c-border:         #CFE3E0;
 }
 
 /* ── Reset ── */
