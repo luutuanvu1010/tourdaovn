@@ -265,6 +265,12 @@ export async function fetchAlternateSlugs(id: string): Promise<AlternateSlugs | 
 
 export async function fetchArticleAlternateSlugs(id: string): Promise<AlternateSlugs | null> {
   const c = getClient()
+  // `defined(translationGroup)` là ĐIỀU KIỆN, không phải phòng thủ thừa.
+  // Không có nó, bài chưa gắn nhóm dịch làm vế phải thành `null`, và
+  // `translationGroup._ref == null` khớp MỌI bài cũng chưa gắn — tức toàn bộ.
+  // Vòng lặp bên dưới gán alternates[lang] theo thứ tự, cái cuối thắng, nên mỗi
+  // bài nhận `vi` alternate trỏ sang một bài KHÁC. Đo 2026-08-25: 0/18 bài có
+  // translationGroup, mà vị từ khớp cả 18 → 51 lỗi R4 trên 18 trang. Xem DR-057.
   const query = `{
     "current": *[_id == $id][0]{ _type, language, reviewStatus, translationGroup },
     "translations": *[
@@ -272,6 +278,7 @@ export async function fetchArticleAlternateSlugs(id: string): Promise<AlternateS
       reviewStatus == "approved" &&
       defined(slug.current) &&
       defined(language) &&
+      defined(translationGroup) &&
       translationGroup._ref == *[_id == $id][0].translationGroup._ref
     ]{
       language,
