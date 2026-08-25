@@ -59,6 +59,12 @@ const cards = items
   .home-card-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
+    /* Lưới này chạy KHÔNG CÓ RÃNH cho tới 2026-08-25. Dòng `gap` duy nhất của
+       file nằm TRẦN trong `@media (max-width: 767px)` — không thuộc bộ chọn nào
+       — nên trình duyệt vứt nguyên khai báo. Kiểm trên CSS đã dựng: 11 luật của
+       `.home-card-grid`, không luật nào có `gap`. Thẻ có viền 1px và đổ bóng nên
+       chúng dán sát vào nhau thành một mảng liền. Xem DR-062. */
+    gap: var(--s5);
   }
 
   /* ── Lưới thích ứng theo SỐ MỤC THẬT (bàn giao bước 7) ──
@@ -98,7 +104,12 @@ const cards = items
     .home-card-grid:has(> :last-child:nth-child(1)) :global(.card-img-wrap) {
       min-height: 0;
     }
-    gap: var(--s4);
+
+    /* Rãnh hẹp lại ở khổ nhỏ. Trước đây khai báo này đứng TRẦN ngay đây, ngoài
+       mọi bộ chọn, nên bị vứt — đó là lý do lưới chạy không rãnh suốt. */
+    .home-card-grid {
+      gap: var(--s4);
+    }
   }
 
   .home-view-all {

@@ -256,9 +256,9 @@ const hasReference = Boolean(td?.faq?.length || td?.safetyNote || td?.sameAs?.le
     font-weight: var(--fw-800);
     color: var(--c-text);
     line-height: var(--lh-display);
-    letter-spacing: -0.02em;
-    margin: 0;
     text-wrap: balance;
+    padding-bottom: var(--s2);
+    margin: 0;
   }
 
   .hero-credit-band {
@@ -290,6 +290,14 @@ const hasReference = Boolean(td?.faq?.length || td?.safetyNote || td?.sameAs?.le
     grid-template-columns: minmax(0, 1fr) 340px;
     gap: var(--s7);
     align-items: start;
+  }
+
+  /* Bắt buộc, không phải trang trí. Ở ≤1024px rãnh thành `1fr`, mà `1fr` là
+     `minmax(auto, 1fr)` — nội dung không ngắt được (URL dài, bảng rộng) sẽ đẩy
+     rãnh vượt container và làm cả trang cuộn ngang. `SiteHome.astro:424` khai
+     đúng dòng này cho cùng lưới. */
+  .editorial-main {
+    min-width: 0;
   }
 
   .highlights-heading {

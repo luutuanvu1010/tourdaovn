@@ -1634,7 +1634,7 @@ Bốn mục cam kết và "Điểm nổi bật" chuyển từ `h2` xuống `h3`.
 
 **Chốt 4 — vá `HomeRollupSection` dù nó ngoài phạm vi một-trang.** Xem `DR-062`. Vá này **cũng đổi trang chủ**: khối rollup 3 mục ở đó đang hiện 3 cột, mỗi ô 119px trên khung 390px, và sẽ về 1 cột. Chấp nhận vì (a) đó là vi phạm Luật 5 đang sống trên production, (b) không vá thì chính `/nha-trang/` vẫn còn một khối 3 cột sau khi đồng bộ, tức mục tiêu (2) không đạt.
 
-**Bằng chứng.** `astro check` 0 lỗi. `gate:all` 9/11 — hai cổng đỏ còn lại là `S24-AUTHORITY-HTML` (6) và `Deferred`/`I16` (1), cả hai chờ dữ liệu chủ dự án, không liên quan. `BM-ORPHAN-REGION`, `BM-EMPTY-REGION`, `Luật 1` (140 trang) đều xanh sau khi gắn `data-region="summary-band"` lên trang này. Đo CDP 390×844: mọi lưới về 1 cột, không tràn ngang. Component 1086 → 390 dòng.
+**Bằng chứng.** `astro check` 0 lỗi. `gate:all` 9/11 — hai cổng đỏ còn lại là `S24-AUTHORITY-HTML` (6) và `Deferred`/`I16` (1), cả hai chờ dữ liệu chủ dự án, không liên quan. `BM-ORPHAN-REGION`, `BM-EMPTY-REGION`, `Luật 1` (140 trang) đều xanh sau khi gắn `data-region="summary-band"` lên trang này. Đo CDP 390×844: mọi lưới về 1 cột, không tràn ngang. Component 1091 → 390 dòng.
 
 **Còn nợ, ghi để khỏi rơi.**
 1. `HomeHero.astro` nay không còn ai gọi. Xoá là quyết định riêng.
