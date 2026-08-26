@@ -1,14 +1,15 @@
 # SPEC — Nhiều điểm đến trên một site
 
-- **Trạng thái:** thiết kế duyệt trong phiên 2026-08-26 (hướng A). Toàn văn spec và `ADR-0028`
-  **chưa** phê chuẩn — chờ chủ dự án đọc.
+- **Trạng thái:** thiết kế duyệt trong phiên 2026-08-26 (hướng A); toàn văn spec và `ADR-0028`
+  chủ dự án phê chuẩn cùng ngày (`QĐ-2026-08-26-01`). Kế hoạch thi hành:
+  `docs/plans/2026-08-26-da-diem-den.md`.
 - **Ngày soạn:** 2026-08-26   **Người soạn:** Cowork   **Người duyệt:** Lưu Tuấn Vũ
 - **Loại quyết định:** cửa **một chiều** ở đúng một chỗ — cardinality của `TouristDestination`
   trong `01-CONTENT_MODEL` §2 đổi từ **1** sang **N**, kéo theo một quan hệ mới
   (`* → touristDestination`) trong mô hình dữ liệu. Ghi ở `ADR-0028`. Mọi phần còn lại
   (khối trang chủ, loại đích menu, chữ nghĩa) là cửa hai chiều.
-- **Bản ghi:** `docs/adr/ADR-0028-da-diem-den.md` (nháp); `QĐ-2026-08-26-01` sẽ ghi vào
-  `docs/DECISIONS.md` khi phê chuẩn.
+- **Bản ghi:** `docs/adr/ADR-0028-da-diem-den.md` (accepted); `QĐ-2026-08-26-01` trong
+  `docs/DECISIONS.md`.
 - **Đầu vào đã đọc:** `CLAUDE.md`, `01-CONTENT_MODEL` §2 §2.1 §5 §6, `ADR-0020`, `ADR-0021`,
   `ADR-0023`, `QĐ-2026-08-25-01`, `docs/SO-TAY-HAN-MUC-SANITY.md`,
   `cms/schemas/{touristDestination,baseFields,lodgingBase,place,attraction,tour,article,index}.ts`,

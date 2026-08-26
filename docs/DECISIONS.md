@@ -1084,3 +1084,32 @@ Vòng duyệt cuối kiểm và kết luận không chặn gộp: test `evidence
 - Dataset `production` vốn đã `public` nên không có gì đổi ở đó.
 
 **Ghi chú.** Phần định lượng — thao tác nào tốn hạn mức, thao tác nào không — tách thành sổ tay riêng ở `docs/SO-TAY-HAN-MUC-SANITY.md`. Nguyên nhân đốt hết hạn mức tháng 8 không phải khách truy cập mà là số lần dựng lại site: 157 commit push lên `main`, mỗi lần Workers Builds tự dựng và đọc lại toàn bộ nội dung, cộng một `astro dev` chạy nền 21 tiếng.
+
+---
+
+## QĐ-2026-08-26-01 — Nhiều điểm đến trên một site: TouristDestination là N
+
+**Bối cảnh.** Chủ dự án yêu cầu thêm được điểm đến ngoài Nha Trang vào CMS, và các điểm đến đó thừa hưởng toàn bộ cấu trúc trang chi tiết giống Nha Trang. Rà soát cho thấy khuôn trang đã đa điểm đến sẵn — `src/pages/[...path].astro:73-80` lặp qua mọi `touristDestination` đã duyệt, `src/lib/sitemap.ts:86` đưa hết vào sitemap, `RouteDispatch` render bằng `TouristDestinationHub` — nhưng **dữ liệu** thì không: hai khối tự động của trang điểm đến ("Các khu vực nên biết", "Cẩm nang bản địa") quét toàn bộ dataset, và không entity con nào khai mình thuộc điểm đến nào. `01-CONTENT_MODEL.md:42` khai cardinality TouristDestination là **1**.
+
+**Câu hỏi.** Site đóng vai gì sau khi thêm điểm đến; gắn nội dung vào điểm đến bằng cách nào; khách tìm thấy điểm đến mới bằng đường nào.
+
+**Chốt.** Sáu điểm, chủ dự án quyết trong phiên 2026-08-26:
+
+1. **Trang chủ `/` vẫn là Nha Trang.** Điểm đến khác là trang anh em `/‹slug›/` cùng khuôn. Các trang danh mục (`/tour/`, `/khach-san/`…) **vẫn gom chung toàn site**, chưa tách theo điểm đến.
+2. **Cardinality TouristDestination 1 → N**, và thêm một field `destination` (reference) vào **mười** entity: place, attraction, experience, hotel, resort, tour, article, restaurant, specialty, event. Chạy script nạp bù dữ liệu cũ về Nha Trang.
+3. **Lối vào là khối "Điểm đến khác" trên trang chủ cộng một mục menu** (loại đích `kind` thứ tám).
+4. **Không đặt `initialValue` mặc định** cho field mới. Mặc định im lặng sẽ gán nhãn Nha Trang cho nội dung điểm đến khác mà không có tín hiệu nào báo. Thiếu ô là **warn** (bất biến I20 mới), không **fail**; trỏ sai type vẫn là **fail** qua `references` trong `gate.config.ts`.
+5. **Hoãn sửa ~30 dòng meta description trong `src/lib/uiCopy.ts`** ("Khách sạn tại Nha Trang"…) — đó là mô tả của các trang danh mục toàn site đang xếp hạng trên Google, sửa là quyết định SEO riêng. Ghi nợ trong `DRIFT_LOG.md`, không im lặng bỏ qua.
+6. **Bản nháp ADR-0028 do Cowork soạn**, chủ dự án phê chuẩn cùng ngày.
+
+**Ai chốt.** Chủ dự án, trong phiên 2026-08-26. `ADR-0028` chuyển sang `accepted` cùng ngày.
+
+**Hệ quả đã lường và chấp nhận.**
+- Có **hai** đường mô tả vị trí trên cùng một document (`containedInPlace` có thứ bậc, `destination` phẳng), và **không có kiểm máy nào bắt hai đường mâu thuẫn**. Cố ý: chúng phục vụ hai vai khác nhau và không suy ra nhau.
+- Khoảng 57 document (số theo bản sao lưu 2026-08-14) bị script ghi vào. **Không lùi được bằng `git revert`** — phải sao lưu trước khi chạy.
+- Enum `siteSettings.sections` mở 19 → 20 khoá; `NavKind` 7 → 8 loại đích. Cả hai là enum đóng có kiểm, phải sửa đồng thời ở schema, đặc tả và mã.
+- Hai meta-validator `g1` và `g4` chép tay danh sách field nên **phải sửa cùng lúc**, nếu không cổng vẫn xanh nhưng nói sai về thực tế.
+
+**Ràng buộc thi hành.** Quota API Sanity đã chạm trần (xác minh 2026-08-26 bằng lỗi `plan_limit_reached`), reset **2026-09-01** theo `QĐ-2026-08-25-01`. Nạp bù dữ liệu và `npm run build` chưa chạy được tới lúc đó. **Thứ tự cứng:** nạp bù xong mới được dựng mã đổi truy vấn — ngược lại là trang chủ Nha Trang rỗng hai khối.
+
+**Tài liệu.** `docs/specs/SPEC-2026-08-26-da-diem-den.md`, `docs/adr/ADR-0028-da-diem-den.md`, kế hoạch thi công `docs/plans/2026-08-26-da-diem-den.md` (8 task).

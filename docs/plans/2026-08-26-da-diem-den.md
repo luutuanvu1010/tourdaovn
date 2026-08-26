@@ -1251,11 +1251,12 @@ thành:
 | `/{destinationSlug}/` | trang điểm đến | TouristDestination | **một trang cho MỖI** TouristDestination đã duyệt (ADR-0028), ví dụ `/nha-trang/`, `/phu-quoc/`; bản ngôn ngữ ở `/en/nha-trang/`, `/zh/nha-trang/`... Slug trùng với một segment trong ROUTE_MAP thì bị bỏ qua kèm cảnh báo `[B11]` (`src/pages/[...path].astro:75-78`) |
 ```
 
-- [ ] **Bước 6: Sửa dòng đếm `kind` đã lỗi thời trong `docs/adr/README.md`**
+- [x] **Bước 6: Sửa dòng đếm `kind` đã lỗi thời trong `docs/adr/README.md`** — ĐÃ LÀM 2026-08-26
 
-Mục ADR-0023 đang ghi "Cơ chế `nav` khai trong `site.config` (sáu `kind`, kiểm lúc build)".
-Con số đó đã sai từ trước (thực tế là bảy), và bước 1 vừa nâng lên tám. Đổi `sáu \`kind\``
-thành `tám \`kind\``.
+Mục ADR-0023 ghi "Cơ chế `nav` khai trong `site.config` (sáu `kind`, kiểm lúc build)". Con số
+đó đã sai từ trước (thực tế là bảy), và bước 1 nâng lên tám. Đã đổi thành `tám \`kind\`` trong
+commit chốt ADR. **Không làm lại** — chỉ kiểm bằng
+`grep -n "kind\`, kiểm lúc build" docs/adr/README.md`, phải thấy chữ "tám".
 
 - [ ] **Bước 7: Ghi năm phiếu nợ vào `DRIFT_LOG.md`**
 
@@ -1307,8 +1308,9 @@ git commit -m "feat(nav): loại đích menu 'destination' + tiêu đề overvie
 **Điều kiện tiên quyết — kiểm đủ ba thứ trước khi bắt đầu:**
 
 1. Đã qua 00:00 UTC ngày 2026-09-01 (quota reset).
-2. Có `SANITY_WRITE_TOKEN`. File `.env` hiện **không có** biến này — token đọc không patch
-   được. Chủ dự án lấy token ghi ở https://www.sanity.io/manage/project/pgedy374/api.
+2. ~~Có `SANITY_WRITE_TOKEN`~~ — **đã xong 2026-08-26**, biến đã có trong `.env` (180 ký tự).
+   `.env` bị `.gitignore:7` chặn và không nằm trong git, nên token không rò ra repo. Kiểm lại
+   trước khi chạy bằng `grep -q '^SANITY_WRITE_TOKEN=.' .env && echo CÓ` — **đừng in giá trị**.
 3. Task 1 đã merge (field `destination` đã có trong schema đã deploy lên Studio).
 
 **Files:** không sửa file nào. Task này đổi **dữ liệu**, và dữ liệu không revert được bằng git.
@@ -1348,8 +1350,12 @@ Không có bản sao lưu mới thì **không chạy bước 4**.
 
 ```bash
 touch .claude/.cho-phep-ghi-du-lieu
-SANITY_WRITE_TOKEN=<token> npm --prefix scripts run backfill:destination -- --live
+npm --prefix scripts run backfill:destination -- --live
 ```
+
+Không cần truyền token trên dòng lệnh: script gọi `dotenv` trỏ vào `.env` ở gốc repo, mà
+`SANITY_WRITE_TOKEN` đã nằm sẵn ở đó từ 2026-08-26. Dán bí mật vào dòng lệnh là để nó lọt vào
+lịch sử shell — đừng làm khi không cần.
 
 Kỳ vọng: in một dòng `✓` mỗi document, rồi dòng cuối `Còn thiếu: 0 (phải là 0)`. Script tự
 `exit(1)` nếu còn sót.
@@ -1387,9 +1393,12 @@ rm -f .claude/.cho-phep-ghi-du-lieu
 **Điều kiện tiên quyết:** Task 7 xong, đã xác minh còn thiếu = 0.
 
 **Files:**
-- Sửa: `docs/adr/ADR-0028-da-diem-den.md` (proposed → accepted, sau khi chủ dự án phê chuẩn)
-- Sửa: `docs/DECISIONS.md` (thêm `QĐ-2026-08-26-01`)
 - Tạo: `docs/evidence/2026-09-01-da-diem-den/`
+
+> **Phần chốt quyết định đã xong trước 2026-09-01.** Chủ dự án phê chuẩn ADR-0028 ngay trong
+> phiên 2026-08-26: `ADR-0028` đã ở trạng thái `accepted`, `QĐ-2026-08-26-01` đã có trong
+> `docs/DECISIONS.md`, và mục ADR-0028 đã có trong `docs/adr/README.md`. Bước 9 dưới đây giờ
+> chỉ còn là **bước kiểm**, không phải bước viết.
 
 - [ ] **Bước 1: Bộ bất biến trên dữ liệu thật**
 
@@ -1474,26 +1483,25 @@ Tạo `docs/evidence/2026-09-01-da-diem-den/` chứa output các bước 1, 2, 3
 
 - [ ] **Bước 9: Chốt quyết định**
 
-Sau khi chủ dự án phê chuẩn:
-- `docs/adr/ADR-0028-da-diem-den.md`: `proposed` → `accepted`, điền ngày và người phê chuẩn.
-- `docs/adr/README.md`: thêm một mục vào phần "ADR riêng của tourdaovn", sau ADR-0027:
-
-```markdown
-- [ADR-0028](ADR-0028-da-diem-den.md) — **TouristDestination là N**, và mọi entity khai mình
-  thuộc điểm đến nào. Khuôn tái dùng: cardinality của entity trụ là tham số chứ không phải
-  hằng; quan hệ `* → touristDestination` là cạnh phẳng, độc lập với chuỗi `containedInPlace`.
-  Việc site này giữ Nha Trang ở `/` là cấu hình, không phải luật engine.
-```
-
-- `docs/DECISIONS.md`: thêm `QĐ-2026-08-26-01` theo khuôn các mục có sẵn — bối cảnh, câu hỏi,
-  chốt, ai chốt, hệ quả đã lường.
-
-- [ ] **Bước 10: Commit**
+Đã viết xong từ 2026-08-26. Chỉ kiểm ba dòng, **không viết lại**:
 
 ```bash
-git add docs/adr/ADR-0028-da-diem-den.md docs/adr/README.md docs/DECISIONS.md \
-  docs/evidence/2026-09-01-da-diem-den/
-git commit -m "docs: ADR-0028 accepted + QĐ-2026-08-26-01 + bằng chứng nghiệm thu"
+grep -n "Trạng thái:" docs/adr/ADR-0028-da-diem-den.md | head -1
+grep -c "QĐ-2026-08-26-01" docs/DECISIONS.md
+grep -c "ADR-0028-da-diem-den.md" docs/adr/README.md
+```
+
+Kỳ vọng: dòng đầu chứa `**accepted**`; hai lệnh sau đều ra số **≥ 1**.
+
+Nếu quá trình thi hành Task 1-8 làm lộ ra điều gì mâu thuẫn với hệ quả đã ghi trong
+`QĐ-2026-08-26-01`, **ghi bổ sung một mục đính chính** vào `DECISIONS.md` theo khuôn "Đính
+chính" của `ADR-0027` — không sửa đè lên bản ghi cũ.
+
+- [ ] **Bước 10: Commit bằng chứng**
+
+```bash
+git add docs/evidence/2026-09-01-da-diem-den/
+git commit -m "docs(evidence): nghiệm thu nhiều điểm đến — cổng, build, trang thật"
 ```
 
 ---

@@ -10,9 +10,9 @@ tách rời, nối bằng `primaryDestinationSlug`. Việc site này giữ Nha T
 không phải luật engine.
 ═══════════════════════════════════════════════════ -->
 
-- **Trạng thái:** **proposed** — nháp soạn 2026-08-26 theo yêu cầu chủ dự án trong cùng phiên.
-  **Chưa phê chuẩn.**
-- **Ngày:** soạn 2026-08-26   **Người phê chuẩn:** _(chờ)_ Lưu Tuấn Vũ (chủ dự án)
+- **Trạng thái:** **accepted** — nháp soạn 2026-08-26 theo yêu cầu chủ dự án; toàn văn phê
+  chuẩn cùng ngày (xem `QĐ-2026-08-26-01`).
+- **Ngày:** soạn và phê chuẩn 2026-08-26   **Người phê chuẩn:** Lưu Tuấn Vũ (chủ dự án)
 - **Loại quyết định:** cửa **một chiều** ở hai điểm — (1) cardinality `TouristDestination`
   trong `01-CONTENT_MODEL` §2 đổi từ **1** sang **N**; (2) thêm một quan hệ mới
   `* → touristDestination` vào mô hình dữ liệu, tức thêm một field vào mười entity và nạp bù
