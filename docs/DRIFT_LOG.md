@@ -739,3 +739,19 @@ Chiều over-blocking **cố ý giữ nguyên**: phân biệt "chạy một tệ
 **Kiểm.** Bơm 12 lệnh mẫu qua chính hook: bảy lệnh ghi — gồm một lệnh nạp bù *chưa từng tồn tại* — đều CHẶN; năm lệnh chỉ đọc (`test`, `audit:gate`, `npm run build`, `git status`, triển khai Studio) đều lọt. Chạy với cờ đã xoá.
 
 **Nợ còn lại.** Mẫu vẫn là danh sách chép tay cho các họ lệnh khác (`patch:n5`, `publish:drafts`, `translate`). Cách chữa tận gốc là sinh mẫu từ chính `scripts/package.json` lúc chạy, thay vì chép. Chưa làm — cần quyết định riêng, vì nó cho hook đọc file trong repo và đổi hành vi theo nội dung file đó.
+
+## DR-052 — Đặc tả khai TouristDestination là N, điều hướng Studio vẫn khai là 1
+
+**Trạng thái:** **đã xử 2026-08-26**, nhánh `feat-da-diem-den`. Phát hiện khi chủ dự án thử làm Task 8 bước 5 và không tìm thấy nút tạo điểm đến mới.
+
+`cms/lib/structure.ts` khai mục menu "Điểm đến" bằng `S.document().documentId('seed.nha-trang')` — ghim cứng đúng một document. Bấm vào là mở thẳng form Nha Trang: **không danh sách, không nút tạo mới**. Chín entity còn lại đều dùng `S.documentTypeListItem(...)` và vì thế đều tạo mới được.
+
+ADR-0028 đã đổi cardinality **1 → N** ở `01-CONTENT_MODEL` §2, schema đã có field `destination` trên mười entity, hạ tầng định tuyến vốn đã lặp qua mọi điểm đến đã duyệt (`src/pages/[...path].astro`), và 211 document đã nạp bù xong. Nhưng khâu cuối — **lối vào để người nhập liệu tạo điểm đến thứ hai** — thì không ai đụng tới.
+
+Hệ quả: mục tiêu đã duyệt của ADR-0028 (*"Chủ dự án nhập một document Điểm đến thứ hai trong Sanity Studio và được ngay một trang `/‹slug›/`"*) **không thực hiện được**, dù mọi tầng phía dưới đã sẵn sàng. Kế hoạch thi công `docs/plans/2026-08-26-da-diem-den.md` không liệt kê `cms/lib/structure.ts` trong bản đồ file, nên Task 8 bước 5 yêu cầu một việc mà Studio không cho làm.
+
+Đây cũng là lý do document `touristDestination` thứ hai đã có trong dataset — "Tỉnh Khánh Hòa" (`d5b267a3-a771-4cb2-8a50-8733da6372b5`, đã `approved`) — **không với tới được qua menu**, và vì thế thiếu cả `slug.vi` lẫn `summary.vi` mà không ai thấy.
+
+**Đã sửa.** Thay khối singleton bằng `S.documentTypeListItem('touristDestination')`, đúng khuôn chín entity kia. Không đặc cách, không ghim cứng `_id` nào: điểm đến trụ là **cấu hình** (`primaryDestinationSlug` trong `src/site.config.ts`), không phải một vị trí đặc biệt trong menu — đúng tinh thần ADR-0028. Chỉ còn `siteSettings` giữ `documentId` ghim cứng, và đó là singleton thật.
+
+**Bài học chung.** Đổi cardinality của một entity không chỉ là đổi con số trong đặc tả và thêm field. Nó chạm ít nhất bốn tầng: content model, schema, truy vấn/định tuyến, **và lối vào nhập liệu**. Ba tầng đầu có cổng máy kiểm (g1, g3, g4, astro check); tầng thứ tư không có cổng nào, nên nó im lặng cho tới khi có người thật ngồi xuống nhập liệu.
