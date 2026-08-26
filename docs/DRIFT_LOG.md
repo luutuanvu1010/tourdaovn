@@ -1733,3 +1733,26 @@ Hệ quả: mục tiêu đã duyệt của ADR-0028 (*"Chủ dự án nhập m�
 **Đã sửa.** Thay khối singleton bằng `S.documentTypeListItem('touristDestination')`, đúng khuôn chín entity kia. Không đặc cách, không ghim cứng `_id` nào: điểm đến trụ là **cấu hình** (`primaryDestinationSlug` trong `src/site.config.ts`), không phải một vị trí đặc biệt trong menu — đúng tinh thần ADR-0028. Chỉ còn `siteSettings` giữ `documentId` ghim cứng, và đó là singleton thật.
 
 **Bài học chung.** Đổi cardinality của một entity không chỉ là đổi con số trong đặc tả và thêm field. Nó chạm ít nhất bốn tầng: content model, schema, truy vấn/định tuyến, **và lối vào nhập liệu**. Ba tầng đầu có cổng máy kiểm (g1, g3, g4, astro check); tầng thứ tư không có cổng nào, nên nó im lặng cho tới khi có người thật ngồi xuống nhập liệu.
+
+## DR-073 — Hook `pre-push` chặn mọi push vì hai cổng đỏ mà chính `main` cũng mắc
+
+**Trạng thái:** mở. Phát hiện 2026-08-27 khi push nhánh `feat-da-diem-den` sau lần gộp `origin/main`.
+
+`.githooks/pre-push` (dựng ở `DR-056`, vốn chưa từng chạy vì thiếu bit thực thi) nay chạy thật: nó gọi `npm run gate` và **huỷ push nếu bất kỳ cổng nào đỏ**. Ý định đúng — cổng sớm ở máy tốt hơn phát hiện muộn.
+
+Nhưng repo hiện có **hai cổng đỏ thường trực** mà không nhánh nào đóng được bằng mã:
+
+| Cổng | Lỗi | Bản chất |
+|---|---|---|
+| `governance-post` | `S24-AUTHORITY-HTML`, 6 lỗi trên 4 trang: thiếu `approvedBy`, thiếu nguồn xác minh hoặc tác giả, thiếu `contentProvenance` hợp lệ | **dữ liệu** — phải sửa trong Studio, không sửa được bằng commit |
+| `deferred-gate` | `I16: deferred nhưng registry không khai live post-build executor` | **quản trị** — `I16` khai `gap`/`pre-build` trong `control-registry.yaml`, mà validator xếp nó `deferred`. Đóng nó là trả lời câu hỏi "27 dòng `gap`" mà chính file registry đang treo chờ chủ dự án |
+
+Đã xác minh **cả hai có sẵn trên `main`**, không phải do nhánh này gây ra: mục `I16` trong `control-registry.yaml` của `main` giống hệt bản đã gộp, và `git diff origin/main..HEAD` trên file đó **không có dòng nào nhắc I16**; sáu lỗi S24 nằm trên bốn trang cũ, không trang nào thuộc nội dung mới.
+
+Nghĩa là **`main` cũng không tự push được qua chính hook của nó**. Hook nghiêm hơn hiện trạng thật của repo.
+
+**Hệ quả đã thấy.** Push nhánh này phải dùng `--no-verify`. Đó là một hàng rào an toàn bị vô hiệu bằng tay — và một khi đã quen tay, nó vô hiệu cho mọi lần push sau, kể cả lần đáng ra phải chặn.
+
+**Đáng ghi thêm:** lần gộp này làm cổng **tốt lên**, không xấu đi — từ 4 đỏ xuống 2. `r3-r4-post` (R4 hreflang) chuyển xanh nhờ bản sửa của `main` (`DR-057`), `control-registry-gate` cũng xanh.
+
+**Hướng xử, cần chủ dự án quyết:** (a) điền dữ liệu còn thiếu cho 4 document để đóng S24; (b) trả lời câu hỏi "27 dòng `gap`" để đóng `deferred-gate`; hoặc (c) cho hook phân biệt "nợ có sẵn" với "lỗi mới do lần push này gây ra" — chỉ chặn loại thứ hai. Cách (c) khó làm đúng và dễ nới nhầm, nên (a)+(b) là đường sạch hơn.
