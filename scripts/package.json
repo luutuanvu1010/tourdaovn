@@ -15,6 +15,7 @@
     "patch:n5:live-vi": "node --import ./node_modules/tsx/dist/esm/index.mjs patch-n5-live-vi.ts",
     "patch:n5:s25": "node --import ./node_modules/tsx/dist/esm/index.mjs patch-n5-s25.ts",
     "backfill:seo-meta": "node --import ./node_modules/tsx/dist/esm/index.mjs backfill-seo-meta.ts",
+    "backfill:destination": "node --import ./node_modules/tsx/dist/esm/index.mjs migrate/backfill-destination.ts",
     "publish:drafts": "node --import ./node_modules/tsx/dist/esm/index.mjs publish-drafts.ts",
     "translate": "node --import ./node_modules/tsx/dist/esm/index.mjs translate/index.ts",
     "snapshot:slugs": "node --import ./node_modules/tsx/dist/esm/index.mjs tools/snapshot-slugs.ts",
