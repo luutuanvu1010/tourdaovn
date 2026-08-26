@@ -1,9 +1,9 @@
 {
-  "ranAt": "2026-08-26T21:33:14.398Z",
+  "ranAt": "2026-08-26T23:02:58.858Z",
   "summary": {
-    "total": 24,
+    "total": 26,
     "fail": 0,
-    "warn": 24
+    "warn": 26
   },
   "drifts": [
     {
@@ -70,13 +70,6 @@
       "detail": "Zone tùy chọn \"Dải liên quan (cuối trang)\" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
     },
     {
-      "entityType": "hotel",
-      "zone": "—",
-      "diff": "template_field_not_in_map",
-      "severity": "warn",
-      "detail": "Template truy cập data.isAccessibleForFree nhưng field này không có trong BINDING_MAP cho hotel — dữ liệu không được đặc tả"
-    },
-    {
       "entityType": "resort",
       "zone": "Phân loại",
       "diff": "optional_zone_no_source_in_template",
@@ -89,13 +82,6 @@
       "diff": "optional_zone_no_source_in_template",
       "severity": "warn",
       "detail": "Zone tùy chọn \"Dải liên quan (cuối trang)\" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
-    },
-    {
-      "entityType": "resort",
-      "zone": "—",
-      "diff": "template_field_not_in_map",
-      "severity": "warn",
-      "detail": "Template truy cập data.isAccessibleForFree nhưng field này không có trong BINDING_MAP cho resort — dữ liệu không được đặc tả"
     },
     {
       "entityType": "tour",
@@ -112,6 +98,13 @@
       "detail": "Zone tùy chọn \"Dải liên quan (cuối trang)\" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
     },
     {
+      "entityType": "tour",
+      "zone": "giá (`bookingRef`)",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"giá (`bookingRef`)\" (source=[isAccessibleForFree]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
       "entityType": "article",
       "zone": "Phân loại",
       "diff": "optional_zone_no_source_in_template",
@@ -126,6 +119,13 @@
       "detail": "Zone tùy chọn \"Dải liên quan (cuối trang)\" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
     },
     {
+      "entityType": "article",
+      "zone": "giá (`bookingRef`)",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"giá (`bookingRef`)\" (source=[isAccessibleForFree]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
       "entityType": "person",
       "zone": "Phân loại",
       "diff": "optional_zone_no_source_in_template",
@@ -138,6 +138,13 @@
       "diff": "optional_zone_no_source_in_template",
       "severity": "warn",
       "detail": "Zone tùy chọn \"Dải liên quan (cuối trang)\" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
+      "entityType": "person",
+      "zone": "giá (`bookingRef`)",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"giá (`bookingRef`)\" (source=[isAccessibleForFree]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
     },
     {
       "entityType": "person",
@@ -159,6 +166,13 @@
       "diff": "optional_zone_no_source_in_template",
       "severity": "warn",
       "detail": "Zone tùy chọn \"Dải liên quan (cuối trang)\" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
+    },
+    {
+      "entityType": "organization",
+      "zone": "giá (`bookingRef`)",
+      "diff": "optional_zone_no_source_in_template",
+      "severity": "warn",
+      "detail": "Zone tùy chọn \"giá (`bookingRef`)\" (source=[isAccessibleForFree]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác."
     },
     {
       "entityType": "organization",
