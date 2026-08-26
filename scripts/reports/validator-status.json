@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-08-26T08:57:30.530Z",
+  "ranAt": "2026-08-26T21:32:49.002Z",
   "overall": "fail",
   "totals": {
     "total": 32,
@@ -233,19 +233,18 @@
       "id": "I10",
       "status": "warn",
       "level": "warn",
-      "errorCount": 14,
+      "errorCount": 13,
       "errors": [
         "5cae3f5d-3adf-426a-87f3-083349a51e92: summary.vi quá ngắn (16 ký tự, cần ≥50) (I10)",
         "689621b3-dd86-48b4-9a93-d0a057282766: summary.vi quá ngắn (12 ký tự, cần ≥50) (I10)",
         "7e1c5db0-e3aa-4266-9caf-2e66346a2f7e: thiếu summary (I10)",
         "8977ee94-df2c-485f-952f-56af57ab0a80: summary.vi quá ngắn (15 ký tự, cần ≥50) (I10)",
+        "897ba990-a16b-4452-8333-ac8b88e00a3f: summary.vi quá ngắn (48 ký tự, cần ≥50) (I10)",
         "9190e7a1-e877-4603-9dcd-8e961366d574: thiếu summary (I10)",
         "91e9aff6-54df-40e9-80d4-16ea8ddddf89: summary.vi quá ngắn (19 ký tự, cần ≥50) (I10)",
         "94c807c2-2697-4753-bbf0-89b9b263de3d: summary.vi quá ngắn (25 ký tự, cần ≥50) (I10)",
         "cad2be12-74e8-4626-b56a-e8e7906b98ba: summary.vi quá ngắn (32 ký tự, cần ≥50) (I10)",
         "d5540b1e-1503-4fd3-8cf7-e3d9030be28b: thiếu summary (I10)",
-        "d5b267a3-a771-4cb2-8a50-8733da6372b5: thiếu summary (I10)",
-        "d67f230e-1d45-490a-ba5f-8dd906671d06: thiếu summary (I10)",
         "daba25ca-b0c9-4494-9fae-b0db6b4b6f59: summary.vi quá ngắn (18 ký tự, cần ≥50) (I10)",
         "e6ef4b4a-3b08-45cd-9558-b1f34785cf7c: summary.vi quá ngắn (22 ký tự, cần ≥50) (I10)",
         "ecbf0678-b4c3-4a37-a315-1b720ae6e121: summary.vi quá ngắn (5 ký tự, cần ≥50) (I10)"
@@ -259,15 +258,16 @@
       "id": "I12",
       "status": "fail",
       "level": "fail",
-      "errorCount": 7,
+      "errorCount": 8,
       "errors": [
         "689621b3-dd86-48b4-9a93-d0a057282766: resort publish thiếu field bắt buộc \"slug\" (I12)",
         "7e1c5db0-e3aa-4266-9caf-2e66346a2f7e: place publish thiếu field bắt buộc \"slug\" (I12)",
         "7e1c5db0-e3aa-4266-9caf-2e66346a2f7e: body quá ngắn (0<400) (I12-body)",
         "8977ee94-df2c-485f-952f-56af57ab0a80: resort publish thiếu field bắt buộc \"slug\" (I12)",
+        "897ba990-a16b-4452-8333-ac8b88e00a3f: body quá ngắn (11<400) (I12-body)",
         "d5540b1e-1503-4fd3-8cf7-e3d9030be28b: resort publish thiếu field bắt buộc \"slug\" (I12)",
         "d67f230e-1d45-490a-ba5f-8dd906671d06: attraction publish thiếu field bắt buộc \"slug\" (I12)",
-        "d67f230e-1d45-490a-ba5f-8dd906671d06: body quá ngắn (0<400) (I12-body)"
+        "e2db7438-cabb-46da-95f6-4d5230a22060: body quá ngắn (31<400) (I12-body)"
       ]
     },
     {
@@ -326,7 +326,7 @@
       "id": "I19",
       "status": "fail",
       "level": "fail",
-      "errorCount": 11,
+      "errorCount": 9,
       "errors": [
         "31296182-2a50-43fe-bea9-cf471b4c6c01: thiếu approvedBy (I19)",
         "5b82bbad-a2c5-48bc-a3e0-4b3b5f987d22: thiếu approvedBy (I19)",
@@ -335,8 +335,6 @@
         "8977ee94-df2c-485f-952f-56af57ab0a80: thiếu approvedBy (I19)",
         "8a236bb6-3abd-46b3-84c7-e51319d9a16f: thiếu approvedBy (I19)",
         "d5540b1e-1503-4fd3-8cf7-e3d9030be28b: thiếu approvedBy (I19)",
-        "d5b267a3-a771-4cb2-8a50-8733da6372b5: thiếu approvedBy (I19)",
-        "d67f230e-1d45-490a-ba5f-8dd906671d06: thiếu approvedBy (I19)",
         "daba25ca-b0c9-4494-9fae-b0db6b4b6f59: thiếu approvedBy (I19)",
         "ecbf0678-b4c3-4a37-a315-1b720ae6e121: thiếu contentProvenance (I19)"
       ]
@@ -345,10 +343,11 @@
       "id": "I2",
       "status": "fail",
       "level": "fail",
-      "errorCount": 2,
+      "errorCount": 3,
       "errors": [
         "5b82bbad-a2c5-48bc-a3e0-4b3b5f987d22: Place thiếu sameAs (I2)",
-        "7e1c5db0-e3aa-4266-9caf-2e66346a2f7e: Place thiếu sameAs (I2)"
+        "7e1c5db0-e3aa-4266-9caf-2e66346a2f7e: Place thiếu sameAs (I2)",
+        "897ba990-a16b-4452-8333-ac8b88e00a3f: Place thiếu sameAs (I2)"
       ]
     },
     {
@@ -465,7 +464,7 @@
       "id": "PY5",
       "status": "warn",
       "level": "warn",
-      "errorCount": 84,
+      "errorCount": 83,
       "errors": [
         "04bf8610-c915-48ff-96c9-3ab317f550ec: experience thiếu cả bookingRef lẫn isAccessibleForFree — có thể quên gắn giá (PY5)",
         "0740af9c-2683-4246-aa18-da833d8db223: tour thiếu cả bookingRef lẫn isAccessibleForFree — có thể quên gắn giá (PY5)",
@@ -531,7 +530,6 @@
         "d0a0a705-6c33-41b7-b1ac-68c486689dd7: attraction thiếu cả bookingRef lẫn isAccessibleForFree — có thể quên gắn giá (PY5)",
         "d0c3af33-e19f-4909-8a98-965156e0ac1d: attraction thiếu cả bookingRef lẫn isAccessibleForFree — có thể quên gắn giá (PY5)",
         "d5540b1e-1503-4fd3-8cf7-e3d9030be28b: resort thiếu cả bookingRef lẫn isAccessibleForFree — có thể quên gắn giá (PY5)",
-        "d67f230e-1d45-490a-ba5f-8dd906671d06: attraction thiếu cả bookingRef lẫn isAccessibleForFree — có thể quên gắn giá (PY5)",
         "d98d74ee-051d-425d-b8c8-ff1f09aa8c03: tour thiếu cả bookingRef lẫn isAccessibleForFree — có thể quên gắn giá (PY5)",
         "daba25ca-b0c9-4494-9fae-b0db6b4b6f59: event thiếu cả bookingRef lẫn isAccessibleForFree/ticketUrl — có thể quên gắn giá (PY5)",
         "dc51aa8d-9119-4976-99a9-0b04f5b5723a: experience thiếu cả bookingRef lẫn isAccessibleForFree — có thể quên gắn giá (PY5)",
@@ -585,7 +583,7 @@
       "id": "S25-FIVE-LANGUAGE-COVERAGE",
       "status": "fail",
       "level": "fail",
-      "errorCount": 31,
+      "errorCount": 29,
       "errors": [
         "689621b3-dd86-48b4-9a93-d0a057282766: thiếu slug.vi.current cho strict 5-language coverage (S2.5)",
         "7e1c5db0-e3aa-4266-9caf-2e66346a2f7e: thiếu slug.vi.current cho strict 5-language coverage (S2.5)",
@@ -594,10 +592,7 @@
         "9190e7a1-e877-4603-9dcd-8e961366d574: thiếu summary.vi cho strict 5-language coverage (S2.5)",
         "d5540b1e-1503-4fd3-8cf7-e3d9030be28b: thiếu slug.vi.current cho strict 5-language coverage (S2.5)",
         "d5540b1e-1503-4fd3-8cf7-e3d9030be28b: thiếu summary.vi cho strict 5-language coverage (S2.5)",
-        "d5b267a3-a771-4cb2-8a50-8733da6372b5: thiếu slug.vi.current cho strict 5-language coverage (S2.5)",
-        "d5b267a3-a771-4cb2-8a50-8733da6372b5: thiếu summary.vi cho strict 5-language coverage (S2.5)",
         "d67f230e-1d45-490a-ba5f-8dd906671d06: thiếu slug.vi.current cho strict 5-language coverage (S2.5)",
-        "d67f230e-1d45-490a-ba5f-8dd906671d06: thiếu summary.vi cho strict 5-language coverage (S2.5)",
         "daba25ca-b0c9-4494-9fae-b0db6b4b6f59: thiếu slug.vi.current cho strict 5-language coverage (S2.5)",
         "0ab6d35f-30c6-4d50-8a60-814333d354b8: Article thiếu translationGroup/language cho strict 5-language coverage (S2.5)",
         "0d6133cb-2fa0-415e-bf96-fa26cc3ee1f7: Article thiếu translationGroup/language cho strict 5-language coverage (S2.5)",
@@ -615,6 +610,7 @@
         "9de85e07-b5a8-42e8-af8f-77590535bdff: Article thiếu translationGroup/language cho strict 5-language coverage (S2.5)",
         "cf784a8a-0f6b-466f-9df3-017948ea4ba0: Article thiếu translationGroup/language cho strict 5-language coverage (S2.5)",
         "d8987581-596a-49fe-905b-5bcf2efa76c8: Article thiếu translationGroup/language cho strict 5-language coverage (S2.5)",
+        "e2db7438-cabb-46da-95f6-4d5230a22060: Article thiếu translationGroup/language cho strict 5-language coverage (S2.5)",
         "eb8ea858-e746-4ebc-a0fc-7efc013166f2: Article thiếu translationGroup/language cho strict 5-language coverage (S2.5)",
         "f82e13ae-d8e0-42b6-86a5-a9a56edf9122: Article thiếu translationGroup/language cho strict 5-language coverage (S2.5)",
         "fcdc03de-2161-4d2d-af99-820d0ae5c347: Article thiếu translationGroup/language cho strict 5-language coverage (S2.5)"

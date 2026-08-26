@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-08-26T09:08:16.311Z",
+  "generatedAt": "2026-08-26T21:33:10.130Z",
   "status": "pass",
   "summary": {
     "files": {
@@ -11,41 +11,41 @@
       "/ai/graph.json": "present",
       "/ai/reading-guide.json": "present"
     },
-    "totalEntities": 119,
+    "totalEntities": 122,
     "entityTypes": {
-      "article": 19,
+      "article": 20,
       "attraction": 39,
       "experience": 9,
       "hotel": 10,
       "organization": 3,
       "person": 3,
-      "place": 7,
+      "place": 8,
       "tour": 28,
-      "touristDestination": 1
+      "touristDestination": 2
     },
     "urlsByLanguage": {
-      "vi": 119
+      "vi": 122
     },
     "aiCoverageRatio": 1,
     "sitemapCoverageRatio": 1,
     "graph": {
-      "nodes": 119,
-      "edges": 172,
+      "nodes": 122,
+      "edges": 174,
       "danglingEdges": 0,
       "orphanNodes": 25,
       "relations": {
-        "author": 18,
+        "author": 19,
         "about": 14,
         "mentions": 16,
-        "containedInPlace": 33,
+        "containedInPlace": 34,
         "venue": 8,
         "itineraryStop": 60,
         "operator": 23
       }
     },
     "readiness": {
-      "missingSource": 75,
-      "missingSameAs": 75,
+      "missingSource": 78,
+      "missingSameAs": 78,
       "commercialMissingBookingOrFreeFlag": 66,
       "missingLanguages": 0,
       "staleFiles": []
@@ -156,6 +156,22 @@
       "hasSameAs": false,
       "hasBookingOrFreeFlag": true,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/article;1a90060e-2908-4523-a336-079347783c9f"
+    },
+    {
+      "id": "e2db7438-cabb-46da-95f6-4d5230a22060",
+      "type": "article",
+      "title": "Kinh nghiệm du lịch Vĩnh Hy",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/kinh-nghiem-du-lich-vinh-hy/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;e2db7438-cabb-46da-95f6-4d5230a22060"
     },
     {
       "id": "78267fc0-825f-454c-96ea-2838482ac36c",
@@ -1486,6 +1502,22 @@
       "studioUrl": "https://tourdaovn.sanity.studio/desk/place;e4d873ef-47c8-4230-84f3-e982f943c1a1"
     },
     {
+      "id": "897ba990-a16b-4452-8333-ac8b88e00a3f",
+      "type": "place",
+      "title": "Đèo Vĩnh Hy",
+      "canonicalUrl": "https://tourdao.vn/dia-danh/deo-vinh-hy/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/place;897ba990-a16b-4452-8333-ac8b88e00a3f"
+    },
+    {
       "id": "91e9aff6-54df-40e9-80d4-16ea8ddddf89",
       "type": "place",
       "title": "Nội thành Nha Trang",
@@ -1964,6 +1996,22 @@
       "hasSameAs": false,
       "hasBookingOrFreeFlag": true,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/touristDestination;seed.nha-trang"
+    },
+    {
+      "id": "83a38820-1a6d-4c93-ac0f-e2865b4a2933",
+      "type": "touristDestination",
+      "title": "Ninh Thuận",
+      "canonicalUrl": "https://tourdao.vn/ninh-thuan/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/touristDestination;83a38820-1a6d-4c93-ac0f-e2865b4a2933"
     }
   ]
 }

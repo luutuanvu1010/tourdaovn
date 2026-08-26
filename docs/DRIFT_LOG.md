@@ -692,11 +692,26 @@ Site có nhiều điểm đến thì ba chuỗi này mô tả thiếu. Sửa là
 
 ## DR-048 — Breadcrumb của trang điểm đến thứ hai chưa từng được kiểm bằng trang thật
 
-**Trạng thái:** mở, chờ dữ liệu. Phát hiện 2026-08-26.
+**Trạng thái:** **đã đóng 2026-08-27** — kiểm xong trên trang thật sau khi có điểm đến thứ hai (Ninh Thuận). Kết quả **khác dự đoán, theo hướng tốt**; xem "Kết quả kiểm" ở cuối mục. Phát hiện 2026-08-26.
 
 `src/components/Breadcrumb.astro:43` đã có nhánh riêng cho `touristDestination` (`if (entityType !== 'touristDestination')`), viết từ trước đợt này. Nhưng dataset mới chỉ có **một** TouristDestination có slug (`seed.nha-trang`), nên nhánh đó chưa bao giờ chạy trên một trang điểm đến **không phải trang chủ**.
 
 Lần đầu kiểm được là Task 8 bước 6 của `docs/plans/2026-08-26-da-diem-den.md`, sau khi chủ dự án nhập điểm đến thứ hai trong Studio.
+
+**Kết quả kiểm (2026-08-27, điểm đến thứ hai là Ninh Thuận).** Tiền đề của mục này sai một nửa: trang điểm đến **không hề render breadcrumb**, vì `TouristDestinationHub.astro` không dùng component đó. Hợp lý — trang điểm đến nằm ngay dưới trang chủ, chuỗi "Trang chủ › Ninh Thuận" không thêm thông tin gì.
+
+Nhánh `entityType !== 'touristDestination'` ở `Breadcrumb.astro:43` thực ra được kích hoạt ở **trang chi tiết**, qua chuỗi `containedInPlace`. Kiểm trên `dist/dia-danh/deo-vinh-hy/index.html`:
+
+```
+1. Trang chủ    https://tourdao.vn/
+2. Địa danh     https://tourdao.vn/dia-danh/
+3. Ninh Thuận   https://tourdao.vn/ninh-thuan/     ← trỏ đúng điểm đến mới
+4. Đèo Vĩnh Hy  (mục hiện tại, không link)
+```
+
+Đúng cả trong JSON-LD `BreadcrumbList` lẫn HTML hiển thị. Không phải sửa gì.
+
+Bằng chứng: `docs/evidence/2026-08-26-da-diem-den/buoc-6-nghiem-thu-trang-that.txt`.
 
 ## DR-049 — Chữ trong `HOME_COPY` bản en/zh/ko/ru còn tên riêng "Nha Trang"
 

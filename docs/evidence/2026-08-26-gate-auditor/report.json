@@ -1,6 +1,6 @@
 {
   "agent": "gate-auditor",
-  "ranAt": "2026-08-26T09:08:48.102Z",
+  "ranAt": "2026-08-26T21:32:49.170Z",
   "checks": [
     {
       "id": "GA1/I6",
@@ -260,8 +260,8 @@
     },
     {
       "id": "GA2",
-      "verdict": "pass",
-      "detail": "postbuild-status.json mới hơn hoặc bằng dist/",
+      "verdict": "fail",
+      "detail": "postbuild-status.json CŨ HƠN dist/index.html — báo cáo đang nói về một bản dựng khác với bản đang nằm trên đĩa. Chạy lại npm run gate.",
       "drift": [
         "DR-001"
       ]
@@ -516,8 +516,8 @@
     }
   ],
   "summary": {
-    "pass": 37,
-    "fail": 27,
+    "pass": 36,
+    "fail": 28,
     "skip": 0
   }
 }

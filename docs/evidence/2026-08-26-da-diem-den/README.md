@@ -4,20 +4,22 @@
 **Việc:** ADR-0028 / `docs/plans/2026-08-26-da-diem-den.md` Task 8.
 **Nhánh:** `feat-da-diem-den`.
 
-## Trạng thái: 8/10 bước xong. Bước 5 và 6 CHỜ NGƯỜI.
+## Trạng thái: 10/10 bước XONG (bước 1–4, 7–10 chạy 2026-08-26; bước 5–6 ngày 2026-08-27).
 
 | Bước | Việc | Kết quả |
 |---|---|---|
 | 1 | `validate` — bất biến trên dữ liệu thật | **đạt** — 0 fail mới, I20 pass |
 | 2 | `npm run gate` — bộ cổng đầy đủ | **đạt có điều kiện** — 4 cổng đỏ, tất cả có sẵn từ trước |
-| 3 | `audit:gate` — cổng kiểm chính bộ kiểm | **đạt** — `GA3/I20` đã đóng; ít hơn mốc một fail |
+| 3 | `audit:gate` — cổng kiểm chính bộ kiểm | **đạt** — `GA3/I20` đã đóng |
 | 4 | `npm run build` + trang chủ không đổi | **đạt** — 4/4/0 giữ nguyên |
-| 5 | Chủ dự án tạo Điểm đến thứ hai trong Studio | **CHỜ NGƯỜI** |
-| 6 | Dựng lại + nghiệm thu trên trang thật | **chặn bởi bước 5** |
+| 5 | Chủ dự án tạo Điểm đến thứ hai trong Studio | **đạt** — Ninh Thuận, 1 Place + 1 Article |
+| 6 | Dựng lại + nghiệm thu trên trang thật | **đạt** — xem `buoc-6-nghiem-thu-trang-that.txt` |
 | 7 | Thử hàng rào menu | **đạt** — build dừng đúng chỗ |
 | 8 | Ghi bằng chứng | thư mục này |
 | 9 | Chốt quyết định | **đã xong từ trước**, xem dưới |
 | 10 | Commit | commit chứa thư mục này |
+
+**Bước 5 chỉ làm được sau khi vá `DR-052`** — điều hướng Studio khai `touristDestination` là singleton ghim cứng `seed.nha-trang`, không có nút tạo mới. Kế hoạch không liệt kê `cms/lib/structure.ts`, nên khâu cuối để *nhập được* điểm đến thứ hai bị bỏ sót dù mọi tầng dưới đã sẵn sàng.
 
 ## Đọc nhanh từng bước
 
@@ -33,19 +35,22 @@
 
 **Bước 9 — đã xong từ trước**, ở commit `cc7a2bd`: `ADR-0028` trạng thái `accepted` kèm ngày và người phê chuẩn; `QĐ-2026-08-26-01` trong `docs/DECISIONS.md`; mục ADR-0028 trong `docs/adr/README.md`.
 
-## ⚠ Còn thiếu để nghiệm thu trọn vẹn
+## Tám tiêu chí nghiệm thu của spec §7
 
-**Bước 5 là việc của người, không phải của tác nhân.** Chủ dự án tạo Điểm đến thứ hai trong Studio, tối thiểu: `title.vi`, `slug.vi`, `summary.vi`, `mainImage`, `reviewStatus = approved`. Rồi gán `destination` cho ít nhất một Place và một Article thuộc điểm đến đó.
-
-Chừng nào chưa có, **ba tiêu chí nghiệm thu của spec §7 chưa kiểm được**:
-
-| # | Tiêu chí | Vì sao chưa kiểm được |
+| # | Tiêu chí | Kết quả |
 |---|---|---|
-| 5 | Điểm đến thứ hai có trang trong `dist/` và trong sitemap | chưa có điểm đến thứ hai đủ slug |
-| 6 | Khối "Điểm đến khác" **hiện** khi có hai | mới chứng minh được nửa "ẩn khi một" |
-| — | Breadcrumb trang điểm đến thứ hai (`DR-048`) | nhánh `Breadcrumb.astro:43` chưa từng chạy trên trang thật |
+| 1 | Studio hiện ô "Điểm đến" trên đủ mười type; `touristDestination` không có | **đạt** — bundle Studio có 1 khai báo + 10 lần dùng `destinationField` |
+| 2 | `count(… && !defined(destination)) == 0` | **đạt** — Task 7, 211/211 |
+| 3 | `npm run gate` 0 fail; g1 warn ≤ 14 | **một phần** — g1 warn 14 đạt; 4 cổng đỏ đều có sẵn từ trước đợt |
+| 4 | `npm run build` xanh; `/` giữ nguyên nội dung | **đạt** — 4/4/3 giữ nguyên |
+| 5 | Điểm đến thứ hai có trang trong `dist/` và trong sitemap | **đạt** — `/ninh-thuan/` + `sitemap-vi.xml` |
+| 6 | Khối "Điểm đến khác" ẩn khi một, hiện khi hai | **đạt** — `dest-card` 0 → 1 |
+| 7 | Menu trỏ slug không tồn tại → build dừng | **đạt** — exit 1, nêu đúng đường dẫn |
+| 8 | `01-CONTENT_MODEL` không còn khai cardinality là 1 | **đạt** — Task 1, đổi thành `N (ADR-0028)` |
 
-Dataset hiện có **hai** `touristDestination`, nhưng cái thứ hai — "Tỉnh Khánh Hòa" (`d5b267a3-a771-4cb2-8a50-8733da6372b5`, đã `approved`) — **thiếu cả `slug.vi` lẫn `summary.vi`** (chính nó cũng là một trong các lỗi `S25` của bước 1). Nó không sinh trang và không lọt `otherDestinationsQuery`. Điền slug cho nó là một cách thoả bước 5, nếu đó đúng là điểm đến muốn mở.
+Cộng thêm `DR-048` (breadcrumb) đã kiểm xong và đóng.
+
+**Tiêu chí 3 là cái duy nhất không đạt nguyên văn.** Bốn cổng đỏ — `r3-r4-post` (R4 hreflang bài viết), `governance-post` (S24 thiếu người duyệt), `control-registry-gate` (hệ quả của R4), `deferred-gate` (về I16) — **đều đã đỏ trước đợt này** và không cái nào liên quan tới `destination`. Kế hoạch ước lượng thấp nợ cổng có sẵn.
 
 ## Sai lệch so với kế hoạch
 

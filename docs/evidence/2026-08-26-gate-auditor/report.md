@@ -1,6 +1,6 @@
 # Bằng chứng — gate-auditor
 
-Chạy lúc: 2026-08-26T09:08:48.102Z
+Chạy lúc: 2026-08-26T21:32:49.170Z
 
 | Mã | Kết quả | Chi tiết | Truy về |
 |---|---|---|---|
@@ -36,7 +36,7 @@ Chạy lúc: 2026-08-26T09:08:48.102Z
 | GA6/PY7 | **TRƯỢT** | control PY7 khai gap nhưng scripts/reports/validator-status.json đã có mục PY7 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật | DR-022 |
 | GA6/R1 | **TRƯỢT** | control R1 khai gap nhưng scripts/reports/validator-status.json đã có mục R1 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật | DR-022 |
 | GA6/R2 | **TRƯỢT** | control R2 khai gap nhưng scripts/reports/validator-status.json đã có mục R2 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật | DR-022 |
-| GA2 | đạt | postbuild-status.json mới hơn hoặc bằng dist/ | DR-001 |
+| GA2 | **TRƯỢT** | postbuild-status.json CŨ HƠN dist/index.html — báo cáo đang nói về một bản dựng khác với bản đang nằm trên đĩa. Chạy lại npm run gate. | DR-001 |
 | GA3/I6 | đạt | I6 có mục trong scripts/reports/postbuild-status.json | DR-022 |
 | GA3/I20 | đạt | I20 có mục trong scripts/reports/validator-status.json | DR-022 |
 | GA3/PY8 | đạt | PY8 có mục trong scripts/reports/postbuild-status.json | DR-022 |
@@ -69,4 +69,4 @@ Chạy lúc: 2026-08-26T09:08:48.102Z
 | GA5/scripts/validators/control-registry-gate.ts | đạt | pipeline postbuild-validate khai scripts/validators/control-registry-gate.ts, file tồn tại | DR-026 |
 | GA5/scripts/validators/deferred-gate.ts | đạt | pipeline postbuild-validate khai scripts/validators/deferred-gate.ts, file tồn tại | DR-026 |
 
-Kết luận: 37 đạt, 27 trượt.
+Kết luận: 36 đạt, 28 trượt.
