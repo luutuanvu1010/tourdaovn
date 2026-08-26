@@ -721,3 +721,21 @@ Vì sao tới giờ chưa ai thấy: bốn control `live` trước đó (`I6`, `
 **Đã sửa.** Tách `GA3` thành hàm thuần `kiemLiveCoTrongBaoCao`, tra báo cáo theo `stage` qua bảng `BAO_CAO_THEO_STAGE`; `stage` lạ hoặc thiếu thì `skip` kèm lý do chứ không đoán. Dùng lại đúng vị từ `dangChayThatTrongBaoCao` mà `GA6` đang dùng — cùng câu hỏi "file này có mục mang id này không", chỉ khác chiều kết luận. Sáu test hồi quy trong `scripts/audit/__tests__/gate-audit.test.ts`, gồm một ca chốt: control pre-build **không** được tính là đạt chỉ vì id của nó tình cờ có mặt trong `postbuild-status.json`.
 
 Cùng họ với `DR-021` và `DR-044`: cổng nói một câu nghe như sự thật, mà phép kiểm đằng sau không làm được điều nó tự nhận.
+
+## DR-051 — Hàng rào chặn ghi dữ liệu chép tay tên lệnh, nên lệnh mới mặc định LỌT
+
+**Trạng thái:** **đã xử 2026-08-26**, nhánh `feat-da-diem-den`. Phát hiện ngay sau khi Task 7 (ADR-0028) ghi thật 211 document.
+
+`guard-data-mutation.sh` giữ một biểu thức `MAU_GHI` chép tay từ `scripts/package.json`. Với họ lệnh nạp bù, nó chép **tên cụ thể** của đúng một lệnh đang có lúc soạn. Lệnh nạp bù thêm sau đó — sinh ra trong chính đợt này — **không khớp mẫu nào**, nên chạy thẳng với `--live` và ghi 211 document mà hook không hé một tiếng.
+
+Cờ `.claude/.cho-phep-ghi-du-lieu` có được tạo trước khi chạy, theo đúng kế hoạch. Nhưng **cờ ấy không phải thứ đã cho phép lệnh chạy** — lệnh vốn không bị chặn. Đây mới là điểm đáng sợ: quy trình *trông như* đã qua một cổng kiểm soát, trong khi cổng ấy không hề đóng. Cùng họ với `DR-021`, `DR-044`, `DR-050`.
+
+**Hàng rào còn lộn ngược ở chiều kia.** Mẫu khớp trên **chuỗi lệnh**, nên lệnh chỉ *nhắc tới* một đường dẫn mà không chạy nó cũng bị chặn: trong phiên này `git add` một tệp và `sed -n` đọc một tệp đều bị chặn, và đến lượt chính lệnh vá hook cũng bị chặn vì phần chú thích của nó có nhắc đường dẫn. Vậy là hàng rào chặn thứ vô hại và để lọt thứ nguy hiểm.
+
+**Đã sửa — chỉ một chiều, có chủ ý.** Đổi từ khớp tên cụ thể sang khớp **tiền tố**, để lệnh nạp bù mới mặc định **bị chặn** thay vì mặc định lọt. Cùng triết lý đảo chiều mà vòng sửa 1 đã áp cho nhánh MCP Sanity (danh sách cho phép thay cho danh sách chặn).
+
+Chiều over-blocking **cố ý giữ nguyên**: phân biệt "chạy một tệp" với "nhắc tới một tệp" bằng regex trên chuỗi lệnh là việc dễ làm sai, và làm sai theo hướng nới một hàng rào an toàn. Phiền tay không phải lý do đủ mạnh.
+
+**Kiểm.** Bơm 12 lệnh mẫu qua chính hook: bảy lệnh ghi — gồm một lệnh nạp bù *chưa từng tồn tại* — đều CHẶN; năm lệnh chỉ đọc (`test`, `audit:gate`, `npm run build`, `git status`, triển khai Studio) đều lọt. Chạy với cờ đã xoá.
+
+**Nợ còn lại.** Mẫu vẫn là danh sách chép tay cho các họ lệnh khác (`patch:n5`, `publish:drafts`, `translate`). Cách chữa tận gốc là sinh mẫu từ chính `scripts/package.json` lúc chạy, thay vì chép. Chưa làm — cần quyết định riêng, vì nó cho hook đọc file trong repo và đổi hành vi theo nội dung file đó.

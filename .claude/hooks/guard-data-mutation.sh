@@ -71,12 +71,25 @@ esac
 CMD=$(printf '%s' "$INPUT" | jq -r '.tool_input.command // ""')
 
 # Danh sách lấy từ scripts/package.json — đúng những script đụng dữ liệu thật.
+#
+# Vòng sửa 2 (2026-08-26, DR-051): trước đây lệnh backfill được chép TÊN CỤ THỂ
+# (chỉ có seo-meta), nên lệnh backfill thêm sau đó lọt lưới và ghi thật 211
+# document mà hook không hé một tiếng. Đổi sang khớp TIỀN TỐ, để lệnh backfill
+# mới mặc định BỊ CHẶN thay vì mặc định lọt — cùng triết lý đảo chiều đã áp cho
+# nhánh MCP Sanity ở vòng sửa 1.
+#
+# Giới hạn đã biết, CỐ Ý giữ: mẫu khớp trên chuỗi lệnh, nên lệnh chỉ NHẮC TỚI
+# một đường dẫn mà không chạy nó (git add, sed, cat trên cùng tệp đó) cũng bị
+# chặn. Phiền, nhưng lệch về phía fail-closed. Nới ra để phân biệt "chạy" với
+# "nhắc tới" là nới một hàng rào an toàn — không đổi khi chưa có lý do mạnh hơn
+# sự tiện tay.
+#
 # Vòng sửa 1: thêm translate (ghi Sanity thật qua scripts/translate/batch.ts,
 # chặn không điều kiện bất kể --live hay --dry-run, cờ mở khoá vẫn là đường
 # thoát duy nhất); cho phép @<phiên bản> ghim ngay sau `sanity` (npx
 # sanity@latest ...); migrate/ và seed/ khớp MỌI đuôi file, có hoặc không tiền
 # tố scripts/ (seed/ ghi dữ liệu thật qua client.createOrReplace()).
-MAU_GHI='(publish:drafts|publish-drafts\.ts|patch:n5|patch-n5-[a-z0-9-]+\.ts|backfill:seo-meta|backfill-seo-meta\.ts|(^|[[:space:]])translate([[:space:]/]|$)|(^|[[:space:]])(scripts/)?(migrate|seed)/[A-Za-z0-9_.-]+|sanity(@[^[:space:]]+)?[[:space:]]+documents[[:space:]]+(create|delete|replace)|sanity(@[^[:space:]]+)?[[:space:]]+dataset[[:space:]]+delete)'
+MAU_GHI='(publish:drafts|publish-drafts\.ts|patch:n5|patch-n5-[a-z0-9-]+\.ts|backfill:[A-Za-z0-9:_-]+|backfill-[A-Za-z0-9_-]+\.ts|(^|[[:space:]])translate([[:space:]/]|$)|(^|[[:space:]])(scripts/)?(migrate|seed)/[A-Za-z0-9_.-]+|sanity(@[^[:space:]]+)?[[:space:]]+documents[[:space:]]+(create|delete|replace)|sanity(@[^[:space:]]+)?[[:space:]]+dataset[[:space:]]+delete)'
 
 if printf '%s' "$CMD" | grep -Eq "$MAU_GHI"; then
   co_the_ghi || deny "$LY_DO"
