@@ -1756,3 +1756,21 @@ Nghĩa là **`main` cũng không tự push được qua chính hook của nó**.
 **Đáng ghi thêm:** lần gộp này làm cổng **tốt lên**, không xấu đi — từ 4 đỏ xuống 2. `r3-r4-post` (R4 hreflang) chuyển xanh nhờ bản sửa của `main` (`DR-057`), `control-registry-gate` cũng xanh.
 
 **Hướng xử, cần chủ dự án quyết:** (a) điền dữ liệu còn thiếu cho 4 document để đóng S24; (b) trả lời câu hỏi "27 dòng `gap`" để đóng `deferred-gate`; hoặc (c) cho hook phân biệt "nợ có sẵn" với "lỗi mới do lần push này gây ra" — chỉ chặn loại thứ hai. Cách (c) khó làm đúng và dễ nới nhầm, nên (a)+(b) là đường sạch hơn.
+
+## DR-074 — "Xem trang live" không bao giờ hiện trên Article, và trỏ vào 404 cho ba entity khác
+
+**Trạng thái:** **đã xử 2026-08-27**, nhánh `feat-da-diem-den`. Phát hiện khi chủ dự án yêu cầu rà lại nút "Xem trang live" trong Studio.
+
+`cms/sanity.config.ts` gắn `ViewLiveAction` cho **mọi** schemaType trừ `category`, nên nhìn từ cấu hình thì nút đã phủ hết. Khoảng trống nằm trong `cms/lib/resolveProductionUrl.ts`: hàm này trả `null` thì nút **im lặng biến mất**, không báo gì.
+
+**Lỗi 1 — Article không bao giờ có nút.** Hàm đọc `doc.slug?.vi?.current` cho **mọi** type. Nhưng Article dùng i18n **cấp document** (ADR-0004) và lưu slug ở `slug.current`, không phải `slug.vi.current`. Đo trên dữ liệu thật: một Article có `slug.current = "snorkeling-lan-dau-can-biet-gi"` và `slug.vi.current = null`. Nên hàm trả `null` cho **toàn bộ** Article, và nút chưa từng xuất hiện trên loại nội dung được sản xuất nhiều nhất.
+
+**Lỗi 2 — ba entity trỏ vào trang không tồn tại.** Hàm giữ một bảng `SEGMENT_MAP` **chép tay**, khai `restaurant → /nha-hang/`, `specialty → /dac-san/`, `event → /su-kien/`. Đối chiếu với `ROUTE_MAP`: cả ba **không có route nào**, và `dist/` không có thư mục nào tên như vậy. Bấm nút trên một Event đã duyệt là mở thẳng vào 404. Hiện có 1 Event, 0 Restaurant, 0 Specialty — nên mới chỉ một document dính.
+
+**Gốc rễ chung: nguồn sự thật thứ hai.** `ROUTE_MAP` trong `src/lib/routes.ts` là nguồn duy nhất cho địa chỉ URL, và nó **đã lọc sẵn theo route đang bật**. `SEGMENT_MAP` là bản chép tay của nó, và như mọi bản chép tay, nó trôi. Cùng loại bệnh với `g1`/`g4` (chép tay bảng field) và với `MAU_GHI` của hook (`DR-071`).
+
+**Đã sửa.** Bỏ hẳn `SEGMENT_MAP`; suy segment từ `ROUTE_MAP`, nên type không có route tự trả `null` thay vì dựng URL ma. Chọn chỗ đọc slug theo `getDocI18nTypes()` — cùng danh sách mà Studio đang dùng để cấu hình i18n, không khai thêm một danh sách nữa.
+
+**Kiểm.** Chạy chính hàm đó trên mẫu thật của 11 type: `article`, `place`, `person`, `touristDestination`, `tour`, `hotel`, `organization` đều ra URL; `event`, `restaurant`, `specialty`, `category` trả `null` (nút không hiện) thay vì trỏ 404. Hai URL của document **đã duyệt** đối chiếu ngược vào `dist/`: `/cam-nang/tron-bo-cam-nang-ben-tau-…/` và `/dia-danh/ben-cang-da-chong/` đều tồn tại thật. Bundle Studio dựng lại không còn chuỗi `nha-hang`.
+
+**Nợ để lại.** `event` là entity có nội dung thật (1 document đã duyệt) nhưng **không có trang chi tiết nào** trong `ROUTE_MAP`. Nút không hiện là đúng với hiện trạng, nhưng câu hỏi thật — *Sự kiện có nên có trang riêng không* — chưa ai trả lời. Ghi ở đây để không rơi.
