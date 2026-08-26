@@ -12,9 +12,13 @@ export interface Props {
   destinations?: DestinationCard[]
   lang: Lang
   heading: string
+  /** Nhãn và đích cho link "Xem tất cả". Khối cắt còn 4 card, nên phải có lối tới
+   *  danh sách đầy đủ — nếu không, điểm đến thứ năm trở đi vô hình trên trang chủ. */
+  viewAllLabel?: string
+  viewAllHref?: string
 }
 
-const { destinations = [], lang, heading } = Astro.props
+const { destinations = [], lang, heading, viewAllLabel, viewAllHref } = Astro.props
 
 const cards = destinations
   .map(d => ({
@@ -34,6 +38,7 @@ const cards = destinations
           <h2 class="section-title">{heading}</h2>
           <span class="section-underline" aria-hidden="true"></span>
         </div>
+        {viewAllHref && <a href={viewAllHref} class="see-all">{viewAllLabel} ›</a>}
       </div>
       <div class="dest-grid">
         {cards.map(card => (
@@ -83,6 +88,18 @@ const cards = destinations
     background: var(--c-sand);
     border-radius: 2px;
   }
+
+  .see-all {
+    font-weight: var(--fw-600);
+    font-size: var(--fs-label);
+    color: var(--c-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--s1);
+    transition: opacity var(--m-fast) var(--m-ease);
+  }
+
+  .see-all:hover { opacity: 0.7; }
 
   .dest-grid {
     display: grid;

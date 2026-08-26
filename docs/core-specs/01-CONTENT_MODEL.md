@@ -788,6 +788,7 @@ Mỗi bất biến kèm cách kiểm bằng máy (bằng chứng E1). Bản thi 
 | I18 | Organization chỉ publish khi có ít nhất một quan hệ vào: Tour.operator, Event.organizer hoặc Article.about trỏ tới nó, kể cả từ draft (tránh vòng kẹt với I14) | Validator CI reverse reference quét cả draft | DECISIONS 2026-06-11 G4 |
 | I19 | Mọi entity chỉ publish khi reviewStatus = approved kèm approvedBy và contentProvenance; Category miễn (từ vựng đóng founder tuyển, việc tuyển chính là duyệt) | Validator CI required-field cộng kiểm giá trị enum đóng | DECISIONS 2026-06-11 G5 |
 | I20 | Entity đã publish nên khai destination | required-field mức warn | ADR-0028 |
+| I21 | Mục nổi bật của điểm đến phải thuộc chính điểm đến đó | ref integrity hai phía trên năm ô featured* | ADR-0028 |
 
 ### Nới bắt buộc v1.0.12 (chủ dự án chốt 2026-08-04)
 

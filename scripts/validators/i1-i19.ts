@@ -466,6 +466,55 @@ export function validateI20(docs: any[]): ValidatorResult {
   return { passed: errors.length === 0, errors }
 }
 
+// ── I21: Mục nổi bật của một điểm đến phải THUỘC chính điểm đến đó (ADR-0028) ──
+//
+// Năm ô `featured*` trên touristDestination là tuyển chọn TAY, khác hẳn hai khối
+// "Các khu vực nên biết" / "Cẩm nang bản địa" vốn lọc tự động theo `destination`.
+// Trước bất biến này KHÔNG có gì ngăn bấm một Điểm tham quan của Nha Trang vào ô
+// nổi bật của Ninh Thuận: trang sẽ hiện nội dung sai điểm đến và mọi cổng đều xanh.
+//
+// Mức `fail`, khác I20 vốn là `warn`. Hai loại sai khác nhau: I20 bắt việc THIẾU —
+// document vẫn đúng, chỉ không xuất hiện ở đâu. I21 bắt việc SAI — trang đang nói
+// với khách rằng Hòn Mun thuộc Ninh Thuận. Sai sự thật nặng hơn thiếu sót.
+// Đặt `fail` được vì dữ liệu hiện tại SẠCH (kiểm 2026-08-27: cả 7 mục nổi bật của
+// Nha Trang đều thuộc Nha Trang) — cổng này sinh ra đã xanh, nó giữ chứ không đòi.
+
+const I21_FEATURED_FIELDS = [
+  'featuredAttractions', 'featuredStays', 'featuredExperiences',
+  'featuredSpecialties', 'featuredTours',
+]
+
+export function validateI21(docs: any[]): ValidatorResult {
+  const errors: string[] = []
+  const byId = new Map<string, any>()
+  for (const d of docs) if (d?._id) byId.set(d._id, d)
+
+  for (const dest of docs) {
+    if (dest._type !== 'touristDestination') continue
+    for (const field of I21_FEATURED_FIELDS) {
+      const picks = dest[field]
+      if (!Array.isArray(picks)) continue
+      for (const pick of picks) {
+        const targetId = refId(pick)
+        if (!targetId) continue
+        const target = byId.get(targetId)
+        // Trỏ tới _id không tồn tại là việc của V2 trong validate-min.ts, không phải
+        // của bất biến này. Bắt ở hai chỗ thì một lỗi ra hai dòng, khó đọc.
+        if (!target) continue
+        const belongsTo = refId(target.destination)
+        if (belongsTo !== dest._id) {
+          errors.push(
+            `${dest._id}: ${field} chứa ${target._type}/${targetId} nhưng document đó ` +
+            `${belongsTo ? `thuộc điểm đến ${belongsTo}` : 'chưa khai destination'} — ` +
+            `trang điểm đến sẽ hiện nội dung của điểm đến khác (I21)`
+          )
+        }
+      }
+    }
+  }
+  return { passed: errors.length === 0, errors }
+}
+
 // ── Dispatch map ──
 
 export const VALIDATORS: Record<string, (docs: any[], prices?: Map<string, PriceEntry>) => ValidatorResult> = {
@@ -489,6 +538,7 @@ export const VALIDATORS: Record<string, (docs: any[], prices?: Map<string, Price
   I18: (docs) => validateI18(docs),
   I19: (docs) => validateI19(docs),
   I20: (docs) => validateI20(docs),
+  I21: (docs) => validateI21(docs),
   'I-FAQ-TYPE': (docs) => validateI_FAQ_TYPE(docs)
 }
 
@@ -496,6 +546,6 @@ export const VALIDATOR_LEVELS: Record<string, 'fail' | 'warn'> = {
   I1: 'fail', I2: 'fail', I3: 'fail', I4: 'fail', I5: 'fail',
   I6: 'fail', I7: 'fail', I8: 'fail', I9: 'fail', I10: 'warn',
   I11: 'fail', I12: 'fail', I13: 'fail', I14: 'fail', I15: 'fail',
-  I16: 'fail', I17: 'fail', I18: 'fail', I19: 'fail', I20: 'warn',
+  I16: 'fail', I17: 'fail', I18: 'fail', I19: 'fail', I20: 'warn', I21: 'fail',
   'I-FAQ-TYPE': 'fail'
 }

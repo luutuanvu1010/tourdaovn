@@ -284,6 +284,18 @@ controls:
     status: live
     evidence: scripts/reports/validator-status.json
 
+  # I21 (ADR-0028) — như I20, sinh ra đã chạy thật nên khai `live` ngay. Mức `fail`
+  # chứ không `warn`: I20 bắt việc THIẾU, I21 bắt việc SAI. Đặt `fail` được vì dữ
+  # liệu hiện tại sạch — cổng này giữ trạng thái sạch chứ không đòi ai dọn.
+  - id: I21
+    source: docs/core-specs/04-CONSTRAINTS.md#I21
+    level: fail
+    stage: pre-build
+    executor: scripts/validators/i1-i19.ts
+    pipeline: prebuild-validate
+    status: live
+    evidence: scripts/reports/validator-status.json
+
   # ── Toàn vẹn nguồn giá PY1–PY8 ─────────────────────────────────────────────
   # Nguồn: 04-CONSTRAINTS bảng PY, dòng 64–71. Thi hành: py1-py8.ts.
 
