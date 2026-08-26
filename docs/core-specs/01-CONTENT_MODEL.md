@@ -552,7 +552,7 @@ Cấu hình toàn site. Toàn bộ dataset chỉ có đúng 1 document. Không d
 |---|---|---|---|---|---|
 | title | string | tùy | không | mặc định "Trang chủ", hiển thị trên document header | hệ thống |
 | branding | object | tùy | không | ảnh nhận diện thương hiệu; 4 field con, ô nào trống thì lớp dự phòng trong code gánh (guard rỗng). **CHỮ** thương hiệu KHÔNG vào đây — tên site, tên pháp nhân, mô tả vẫn ở `src/site.config.ts` (ADR-0021 QĐ8, QĐ-2026-08-14-01) | founder |
-| sections | array object | tùy | không | thứ tự render là thứ tự trong mảng; `key` là enum đóng 19 giá trị; `hidden` mặc định false. Thiếu field `sections` hoặc mảng rỗng → homepage dùng DEFAULT_SECTIONS. | founder |
+| sections | array object | tùy | không | thứ tự render là thứ tự trong mảng; `key` là enum đóng 20 giá trị; `hidden` mặc định false. Thiếu field `sections` hoặc mảng rỗng → homepage dùng DEFAULT_SECTIONS. | founder |
 | hero | object | tùy | không (tiếng Việt) | chữ và ảnh Hero trang chủ; 7 ô con, ô nào trống thì lớp dự phòng trong code gánh. `summary` chỉ đè phần NGƯỜI ĐỌC thấy — `<meta description>` vẫn là `brand.description` cố định lúc build (QĐ-2026-08-14-03) | founder |
 | footer | object | tùy | không (tiếng Việt) | chữ và ảnh chân trang; 4 ô con. Tiêu đề cột và danh sách liên kết KHÔNG ở đây — sinh từ `ROUTE_MAP` (ADR-0023) | founder |
 | contact | object | tùy | không | 4 field con, dữ liệu trung lập ngôn ngữ; field con nào trống thì kênh đó không render (guard rỗng, không nút chết) | founder |
@@ -595,7 +595,10 @@ Field `footer` (thêm v1.0.18 — chữ và ảnh chân trang, QĐ-2026-08-14-03
 **Hai đường đọc:** `hero` đi trong `siteSettingsQuery()` (chỉ trang chủ có Hero). `footer` đọc qua `src/lib/siteFooter.ts`, cùng lý do với `branding` — `Footer.astro` render ở **mọi** trang còn truy vấn đầy đủ chỉ chạy ở trang chủ (N7).
 
 Field `sections[]`:
-- `key`: string enum đóng 19 giá trị — hero | stats | trustBar | partners | testimonials | editorialBody | banners | hubGrid | areas | attractions | experiences | guides | stays | specialties | tours | faq | safety | groupQuote | meta
+- `key`: string enum đóng 20 giá trị — hero | stats | trustBar | partners | testimonials | editorialBody | banners | hubGrid | destinations | areas | attractions | experiences | guides | stays | specialties | tours | faq | safety | groupQuote | meta
+
+  Khoá `destinations` thêm ở ADR-0028 — khối liệt kê các TouristDestination **khác** đang
+  publish. Empty guard áp dụng như mọi section: một điểm đến thì khối không render.
   - Bốn khoá `stats`, `partners`, `testimonials`, `groupQuote` thêm v1.0.16 cùng bốn field cùng tên. `trustBar` giữ nguyên khoá nhưng đổi vai thành khối "Vì sao chọn" (bốn điểm khác biệt, nguồn `config (build)`).
 - `hidden`: boolean, mặc định false
 

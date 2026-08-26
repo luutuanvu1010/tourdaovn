@@ -19,6 +19,8 @@ export const HOME_COPY: Record<Lang, {
     specialties: string
     tours: string
     relatedDestinations: string
+    /** Nhãn khối "Điểm đến khác" trên trang chủ (ADR-0028). */
+    destinations: string
     faq: string
     /** Bốn khối thêm cho trang chủ hướng A (SPEC-2026-08-06). */
     whyUs: string
@@ -65,6 +67,7 @@ export const HOME_COPY: Record<Lang, {
       specialties: 'Đặc sản và ẩm thực nổi bật',
       tours: 'Tour nổi bật',
       relatedDestinations: 'Điểm đến liên quan',
+      destinations: 'Điểm đến khác',
       faq: 'Câu hỏi thường gặp',
       whyUs: 'Vì sao chọn',
       partners: 'Chúng tôi làm việc cùng',
@@ -106,6 +109,7 @@ export const HOME_COPY: Record<Lang, {
       specialties: 'Food and specialties',
       tours: 'Featured tours',
       relatedDestinations: 'Related destinations',
+      destinations: 'Other destinations',
       faq: 'Frequently asked questions',
       whyUs: 'Why choose us',
       partners: 'We work with',
@@ -147,6 +151,7 @@ export const HOME_COPY: Record<Lang, {
       specialties: '美食和特产',
       tours: '精选旅行团',
       relatedDestinations: '相关目的地',
+      destinations: '其他目的地',
       faq: '常见问题',
       whyUs: '为什么选择我们',
       partners: '合作伙伴',
@@ -188,6 +193,7 @@ export const HOME_COPY: Record<Lang, {
       specialties: '음식과 특산품',
       tours: '추천 투어',
       relatedDestinations: '관련 목적지',
+      destinations: '다른 여행지',
       faq: '자주 묻는 질문',
       whyUs: '왜 저희를 선택하나요',
       partners: '함께하는 파트너',
@@ -229,6 +235,7 @@ export const HOME_COPY: Record<Lang, {
       specialties: 'Еда и деликатесы',
       tours: 'Избранные туры',
       relatedDestinations: 'Похожие направления',
+      destinations: 'Другие направления',
       faq: 'Частые вопросы',
       whyUs: 'Почему мы',
       partners: 'Мы работаем с',
