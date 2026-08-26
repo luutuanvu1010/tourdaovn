@@ -144,6 +144,10 @@ export const defaultLang: Lang = 'vi'
 
 export const entities = {
   // ── Điểm đến & trải nghiệm ────────────────────────────────────────────
+  // Công tắc này chỉ bật/tắt trang DANH SÁCH `/diem-den/`. Trang chi tiết của từng
+  // điểm đến sống ở gốc site (`/nha-trang/`) và do `[...path].astro` sinh riêng, KHÔNG
+  // phụ thuộc công tắc này — tắt ở đây là mất trang danh sách, không mất trang điểm đến.
+  touristDestination: true, // Điểm đến (danh sách) → /diem-den/
   place:        true,   // Địa danh          → /dia-danh/
   attraction:   true,   // Điểm tham quan    → /diem-tham-quan/
   experience:   true,   // Trải nghiệm       → /trai-nghiem/
@@ -360,9 +364,19 @@ export const enabledRoutes: string[] = [...enabledEntities, ...enabledHubs]
  */
 const DOC_LEVEL_ENTITIES: string[] = ['article']
 
+/**
+ * Danh mục có trang DANH SÁCH nhưng trang CHI TIẾT không nằm dưới segment danh sách.
+ * Chỉ `touristDestination`: danh sách ở `/diem-den/`, chi tiết ở gốc `/{slug}/` (ADR-0028).
+ * Phải loại khỏi `fieldLevelEntities` vì danh sách đó nuôi `fetchAllSlugs`, tức nuôi việc
+ * SINH TRANG CHI TIẾT — để nó vào là dựng thêm `/diem-den/{slug}/` trùng nội dung với
+ * trang gốc, hai URL cùng một nội dung.
+ */
+const ROOT_DETAIL_ENTITIES: string[] = ['touristDestination']
+
 /** Danh mục bật, kiểu field-level — dùng cho truy vấn Sanity lúc build */
 export const fieldLevelEntities: string[] = enabledEntities
   .filter((e) => !DOC_LEVEL_ENTITIES.includes(e))
+  .filter((e) => !ROOT_DETAIL_ENTITIES.includes(e))
 
 /** Hỏi nhanh: danh mục này có đang bật không? */
 export function isEntityEnabled(entity: string): boolean {

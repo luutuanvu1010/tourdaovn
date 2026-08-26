@@ -343,7 +343,7 @@ Lý do: doanh thu công ty đến từ offline/đại lý/OTA, site là kênh m�
 | Đánh giá khách | `siteSettings.testimonials[]`: `quote`, `authorName`, `authorNote`, `sourceName`, `sourceUrl` | tùy | ẩn khối | **KHÔNG serialize ra JSON-LD** — Google cấm rich snippet tự phục vụ, xem QĐ-2026-08-06-09 |
 | Báo giá đoàn | `siteSettings.groupQuote`: `heading`, `text`, `ctaLabel` | tùy | ẩn khối | nút đọc `contact.zaloUrl`, không khai số thứ hai |
 | Vì sao chọn | config (build) | tùy | ẩn khối | bốn điểm khác biệt; xem việc 12 của kế hoạch 2026-08-06 |
-| Điểm đến khác | rollup (build): TouristDestination approved khác điểm đến trụ | tùy | ẩn khối | tối đa 4 card; URL là `/{slug}/`, không qua ROUTE_MAP; chỉ có một điểm đến thì khối không render (ADR-0028) |
+| Điểm đến khác | rollup (build): TouristDestination approved khác điểm đến trụ | tùy | ẩn khối | tối đa 4 card; URL là `/{slug}/` — trang chi tiết điểm đến ở gốc site, không nằm dưới `/diem-den/`; chỉ có một điểm đến thì khối không render (ADR-0028) |
 | Các khối nội dung | như §4.1 (trust bar, banner, hub grid, areas, guides, featured, faq, safety) | tùy | khối rỗng tự ẩn dù `hidden = false` | empty guard là cổng cứng, xem §4.1 |
 | JSON-LD | `WebSite` cộng `Organization`; `telephone`/`email` từ `siteSettings.contact`, `logo` từ `siteSettings.branding.logo` | có | field liên hệ trống thì không phát thuộc tính đó; chưa tải logo thì không phát `logo` | guard rỗng §5.1; `logo` thêm v1.0.17 — Google dùng cho nhận diện thương hiệu |
 

@@ -135,6 +135,26 @@ export function otherDestinationsQuery(lang: string): string {
   }`
 }
 
+/**
+ * MỌI điểm đến đang publish — nuôi trang danh sách `/diem-den/` (ADR-0028).
+ *
+ * Khác `otherDestinationsQuery`: truy vấn kia loại điểm đến đang render và cắt còn 4 card
+ * cho một khối trên trang chủ; truy vấn này liệt kê đủ, không loại cái nào, không cắt.
+ */
+export function allDestinationsQuery(lang: string): string {
+  return `*[
+    _type == "touristDestination" &&
+    reviewStatus == "approved" &&
+    defined(slug.${lang}.current)
+  ] | order(title.${lang} asc) {
+    _id, _type,
+    "title": coalesce(title.${lang}, title.vi),
+    "slug": coalesce(slug.${lang}.current, slug.vi.current),
+    "summary": coalesce(summary.${lang}, summary.vi),
+    ${mainImageFragment()}
+  }`
+}
+
 export function allDestinationSlugsQuery(): string {
   return `*[_type == "touristDestination" && reviewStatus == "approved"]{
     "slug": slug.vi.current

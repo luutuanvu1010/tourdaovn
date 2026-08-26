@@ -893,6 +893,7 @@ export interface PageCopy { title: string; desc: string }
 export const INDEX_COPY: Record<Lang, Record<string, PageCopy>> = {
   vi: {
     place:        { title: 'Địa danh', desc: 'Các địa danh tại Nha Trang và Khánh Hòa.' },
+    touristDestination: { title: 'Điểm đến', desc: 'Các điểm đến du lịch có trên site.' },
     attraction:   { title: 'Điểm tham quan', desc: 'Điểm tham quan nổi bật ở Nha Trang.' },
     experience:   { title: 'Trải nghiệm', desc: 'Hoạt động và trải nghiệm tại Nha Trang.' },
     restaurant:   { title: 'Nhà hàng', desc: 'Nhà hàng và quán ăn ở Nha Trang.' },
@@ -907,6 +908,7 @@ export const INDEX_COPY: Record<Lang, Record<string, PageCopy>> = {
   },
   en: {
     place:        { title: 'Places', desc: 'Places across Nha Trang and Khanh Hoa.' },
+    touristDestination: { title: 'Destinations', desc: 'Travel destinations covered on this site.' },
     attraction:   { title: 'Attractions', desc: 'Notable attractions in Nha Trang.' },
     experience:   { title: 'Experiences', desc: 'Activities and experiences in Nha Trang.' },
     restaurant:   { title: 'Restaurants', desc: 'Restaurants and eateries in Nha Trang.' },
@@ -921,6 +923,7 @@ export const INDEX_COPY: Record<Lang, Record<string, PageCopy>> = {
   },
   zh: {
     place:        { title: '地点', desc: '芽庄与庆和的各处地点。' },
+    touristDestination: { title: '目的地', desc: '本站收录的旅游目的地。' },
     attraction:   { title: '景点', desc: '芽庄的著名景点。' },
     experience:   { title: '体验', desc: '芽庄的活动与体验。' },
     restaurant:   { title: '餐厅', desc: '芽庄的餐厅与小吃店。' },
@@ -935,6 +938,7 @@ export const INDEX_COPY: Record<Lang, Record<string, PageCopy>> = {
   },
   ko: {
     place:        { title: '장소', desc: '나트랑과 카인호아의 장소들.' },
+    touristDestination: { title: '여행지', desc: '이 사이트에서 다루는 여행지.' },
     attraction:   { title: '명소', desc: '나트랑의 주요 명소.' },
     experience:   { title: '체험', desc: '나트랑의 액티비티와 체험.' },
     restaurant:   { title: '맛집', desc: '나트랑의 레스토랑과 식당.' },
@@ -949,6 +953,7 @@ export const INDEX_COPY: Record<Lang, Record<string, PageCopy>> = {
   },
   ru: {
     place:        { title: 'Места', desc: 'Места Нячанга и Кханьхоа.' },
+    touristDestination: { title: 'Направления', desc: 'Туристические направления на этом сайте.' },
     attraction:   { title: 'Достопримечательности', desc: 'Известные достопримечательности Нячанга.' },
     experience:   { title: 'Впечатления', desc: 'Активности и впечатления в Нячанге.' },
     restaurant:   { title: 'Рестораны', desc: 'Рестораны и закусочные Нячанга.' },

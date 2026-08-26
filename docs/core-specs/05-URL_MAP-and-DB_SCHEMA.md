@@ -69,6 +69,7 @@ Cột mẫu dùng cây vi làm ví dụ; ngôn ngữ khác thay prefix ngôn ng�
 |---|---|---|---|
 | `/` | trang chủ site | WebSite / cấu hình build | bản ngôn ngữ ở `/en/`, `/zh/`...; x-default = `/`; không phải trang entity |
 | `/{destinationSlug}/` | trang điểm đến | TouristDestination | **một trang cho MỖI** TouristDestination đã duyệt (ADR-0028), ví dụ `/nha-trang/`, `/phu-quoc/`; bản ngôn ngữ ở `/en/nha-trang/`, `/zh/nha-trang/`... Slug trùng với một segment trong ROUTE_MAP thì bị bỏ qua kèm cảnh báo `[B11]` (`src/pages/[...path].astro:71-74`) |
+| `/diem-den/` | trang danh sách điểm đến | TouristDestination approved | CollectionPage. Liệt kê MỌI điểm đến đã duyệt có `slug.vi`; card trỏ về **trang gốc** `/{destinationSlug}/`, **không** phải `/diem-den/{slug}/`. Đây là entry DUY NHẤT trong `ROUTE_MAP` có danh sách và chi tiết ở hai nhánh URL khác nhau — giữ chi tiết ở gốc vì `/nha-trang/` đang xếp hạng, dời nó là quyết định SEO riêng. Thi hành: `touristDestination` bị loại khỏi `fieldLevelEntities` (`src/site.config.ts`) nên `fetchAllSlugs` không sinh trang dưới segment này |
 | `/kham-pha/` | hub rollup chơi gì | Attraction cộng Experience (suy ở build) | CollectionPage |
 | `/luu-tru/` | hub rollup ở đâu | Hotel cộng Resort | CollectionPage |
 | `/am-thuc/` | hub rollup ăn gì | Restaurant cộng Specialty | CollectionPage |
