@@ -1831,3 +1831,36 @@ Vòng duyệt cuối kiểm và kết luận không chặn gộp: test `evidence
 **Ràng buộc thi hành.** Quota API Sanity đã chạm trần (xác minh 2026-08-26 bằng lỗi `plan_limit_reached`), reset **2026-09-01** theo `QĐ-2026-08-25-07`. Nạp bù dữ liệu và `npm run build` chưa chạy được tới lúc đó. **Thứ tự cứng:** nạp bù xong mới được dựng mã đổi truy vấn — ngược lại là trang chủ Nha Trang rỗng hai khối.
 
 **Tài liệu.** `docs/specs/SPEC-2026-08-26-da-diem-den.md`, `docs/adr/ADR-0028-da-diem-den.md`, kế hoạch thi công `docs/plans/2026-08-26-da-diem-den.md` (8 task).
+
+---
+
+## QĐ-2026-08-27-01 — Bật lại deploy tự động sau khi Publish, kèm sửa ba chỗ lệch của webhook
+
+**Ngày:** 2026-08-27 · **Người quyết:** chủ dự án · **Loại:** cửa hai chiều (đặt `isDisabledByUser: true` là hoàn nguyên)
+
+**Bối cảnh.** Webhook `Cloudflare rebuild` (`UCT8eZl6s8SXBtKP`) bị tắt từ 2026-08-22 theo `QĐ-2026-08-22-03`, vì mỗi lần bắn là một lần dựng lại đọc toàn bộ nội dung qua Sanity Content API, và tháng 8 đã đốt sạch hạn mức 250k theo cách đó. `DR-042` ghi ba chỗ lệch `ADR-0009` và đặt điều kiện: **xử xong mới được bật lại**.
+
+**Điều kiện đã thay đổi từ lúc tắt.** Hai việc do đợt khác làm đã tháo phần lớn rủi ro:
+
+1. **`QĐ-2026-08-25-06` chuyển bản dựng sang đọc qua CDN** (`src/lib/sanity.ts` nay `useCdn: true`). Bản dựng không còn ăn vào xô `api` 250k mà vào xô **`apicdn` 1.000.000/tháng, hiện gần như chưa dùng**. Đây là thứ đổi bản chất bài toán chi phí, không phải một tối ưu nhỏ.
+2. **Gói đã lên Growth trả phí** (xác minh 2026-08-26). Vượt hạn mức không còn là HTTP 402 dừng hẳn mà là hoá đơn — nhưng vượt CDN rẻ hơn vượt `api` **bốn lần** ($1/250k so với $1/25k), và xô CDN lớn gấp bốn.
+
+**Chốt.** Bật lại webhook, đồng thời sửa đúng hai trong ba chỗ lệch của `DR-042`:
+
+| | Trước | Nay | `ADR-0009` |
+|---|---|---|---|
+| Sự kiện | `create` | `create`, `update`, `delete` | mục 3 |
+| Dataset | `*` | `production` | mục 3 |
+| Lọc type | không có | 15 type có render trang | mục 3 |
+| Lọc draft | có | giữ nguyên | — |
+| Debounce | không | **vẫn không** | mục 4 cho phép MVP bỏ qua |
+
+**Vì sao chỉ nghe `create` là lỗi nặng nhất.** Sửa một trang **đã publish** rồi bấm Publish lại là sự kiện `update`. Theo cấu hình cũ, thao tác thường gặp nhất của biên tập viên **không kích build**. Nghĩa là hook vừa bắn thừa cho việc không cần, vừa im lặng đúng lúc cần nhất.
+
+**Vì sao bộ lọc type đáng giá hơn tưởng.** Dataset có 18 `_type`, trong đó **5 là của hệ thống**: `sanity.imageAsset` (sinh mỗi lần tải một tấm ảnh), `system.schema` (sinh mỗi lần `sanity deploy` — riêng ngày 2026-08-27 đã ba lần), `system.group`, `system.retention`, `sanity.canvas.link`. Với `dataset: "*"` không lọc type, **mỗi document hệ thống đó kích một lần dựng toàn site**. Đây nhiều khả năng là phần lớn tiếng ồn mà `DR-042` đo được (25 lần bắn/ngày, 4 lần trong 6 giây) — không phải biên tập viên bấm Publish 25 lần.
+
+**Nợ còn mở, cố ý.** Debounce (`ADR-0009` mục 4: Worker gom sự kiện, bắn sau khoảng lặng 120 giây) **chưa làm**. Chính ADR ghi "MVP có thể bỏ qua Worker và bắn thẳng, chấp nhận build xếp hàng". Với xô CDN 1M và bộ lọc type vừa thêm, chấp nhận được. Phải xem lại nếu mức dùng CDN vượt ~50%.
+
+**Hệ quả phải biết.** Bản dựng tự động lấy mã từ **`origin/main`**, không phải từ nhánh đang làm. PR #11 chưa gộp, nên tới khi gộp, bấm Publish sẽ phát hành **hành vi của `main`**: có trang `/ninh-thuan/` (định tuyến đa điểm đến vốn đã có trên `main`), nhưng **chưa có** `/diem-den/` và hai khối trang chủ **chưa lọc** theo điểm đến.
+
+**Đã kiểm.** Đọc lại cấu hình từ server sau khi ghi, không tin phản hồi của chính lệnh ghi: `dataset: production`, `on: [create, update, delete]`, `isDisabledByUser: false`, `isDisabled: false`, `includeDrafts: false`, filter đúng như khai. **Chưa kiểm đầu Cloudflare** — deploy hook đó chạy được trước khi bị tắt, nhưng lần bắn thật đầu tiên mới xác nhận trọn chuỗi.

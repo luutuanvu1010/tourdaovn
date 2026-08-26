@@ -743,7 +743,9 @@ Cạm bẫy nằm ở chỗ **không có tín hiệu hỏng nào**: `wrangler de
 
 ## DR-042 — Webhook Sanity lệch `ADR-0009` mục 3 và 4
 
-**Trạng thái:** mở. Phát hiện 2026-08-22. Hook đang tắt (`QĐ-2026-08-22-03`) nên chưa gây hại; phải xử **trước** khi bật lại.
+**Trạng thái:** **xử 2/3 và đã bật lại hook 2026-08-27** (`QĐ-2026-08-27-01`). Lệch 1 (chỉ nghe `create`) và lệch 2 (`dataset: "*"`, không lọc type) đã sửa: nay `on: [create, update, delete]`, `dataset: production`, và bộ lọc nêu đúng 15 type có render trang — loại 5 type hệ thống (`sanity.imageAsset`, `system.schema`, `system.group`, `system.retention`, `sanity.canvas.link`) vốn mỗi cái đều đang kích một lần dựng toàn site. **Lệch 3 (debounce) còn mở, cố ý** — `ADR-0009` mục 4 cho phép MVP bỏ qua, và rủi ro chi phí đã giảm mạnh nhờ `QĐ-2026-08-25-06` chuyển bản dựng sang xô CDN 1M. Xem lại nếu CDN vượt ~50%.
+
+Phát hiện 2026-08-22, khi hook đang tắt (`QĐ-2026-08-22-03`).
 
 Cấu hình thật của hook `Cloudflare rebuild` (id `UCT8eZl6s8SXBtKP`, tạo 2026-07-27), đọc bằng management API `v2021-10-04`:
 
