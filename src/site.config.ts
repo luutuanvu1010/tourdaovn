@@ -245,7 +245,7 @@ export const primaryDestinationSlug = 'nha-trang'
 //   dòng sai. Đây là cố ý: thà đỏ trên máy còn hơn khách bấm vào trang trắng.
 //
 //  ─────────────────────────────────────────────────────────────────────────
-//  BẢY LOẠI ĐÍCH  (`kind`)
+//  TÁM LOẠI ĐÍCH  (`kind`)
 //  ─────────────────────────────────────────────────────────────────────────
 //
 //   kind        target là gì                         Ví dụ
@@ -256,6 +256,7 @@ export const primaryDestinationSlug = 'nha-trang'
 //   'term'      '<danh mục>/<đường dẫn danh mục con>' 'experience/lan-bien'
 //   'detail'    '<danh mục>/<đường dẫn document>'    'tour/tour-hon-tam'
 //   'static'    tên trang tĩnh                       'lien-he'
+//   'destination' đường dẫn của một Điểm đến        'phu-quoc'
 //   'zalo'      KHÔNG có target — tự lấy "Liên kết Zalo" trong Sanity Studio
 //
 //   Mục có `children` trở thành menu thả xuống.
@@ -263,7 +264,7 @@ export const primaryDestinationSlug = 'nha-trang'
 //   Riêng 'zalo': chưa điền Liên kết Zalo trong Studio thì mục này tự ẩn.
 //   Không có nút chết.
 
-export type NavKind = 'home' | 'index' | 'hub' | 'term' | 'detail' | 'static' | 'zalo'
+export type NavKind = 'home' | 'index' | 'hub' | 'term' | 'detail' | 'static' | 'zalo' | 'destination'
 
 export interface NavItem {
   /** Chữ hiện trên menu */

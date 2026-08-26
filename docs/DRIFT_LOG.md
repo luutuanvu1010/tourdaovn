@@ -663,3 +663,45 @@ Pass: 15    FAIL: 11    WARN: 2
 Đã thêm `GA6` trong `scripts/audit/gate-audit.ts` để bắt đúng chiều này: control khai `gap` mà file bằng chứng của nó tồn tại và có mục mang đúng `id` thì trượt. Chạy thử: `audit:gate` đi từ 34 đạt/1 trượt lên **34 đạt/28 trượt**, bắt đủ cả 27 control. **Cảnh báo:** bản `GA6` hiện tại có lỗi Critical chưa vá — xem `ND-009`.
 
 **Gốc rễ đi kèm, cùng họ với `DR-043`.** Sổ ghi lúc **phát hiện**, không phải lúc **đóng**. Trong phiên 2026-08-24 tôi trích ba tiền đề từ `DRIFT_LOG` và cả ba đều đã lỗi thời: `DR-015` (thư mục `shared/`), `DR-043` (gốc rễ đã đóng ở `QĐ-2026-08-22-04`), và một con số trang. Không mục nào sai lúc viết; chúng chỉ không được cập nhật lúc thực tế đổi.
+
+---
+
+## DR-045 — Mô tả trang danh mục còn gắn cứng "Nha Trang"
+
+**Trạng thái:** mở, **hoãn có chủ ý**. Phát hiện 2026-08-26 khi soạn `SPEC-2026-08-26-da-diem-den` §8. Hoãn theo quyết định chủ dự án cùng phiên (`QĐ-2026-08-26-01` chốt 5).
+
+`src/lib/uiCopy.ts:893-1108` — `INDEX_COPY` (893), `HUB_COPY` (966), `HUB_PART_COPY` (1000) và `fallbackDescription` (1099) mô tả các trang danh mục **toàn site** bằng cụm "tại Nha Trang"; 37 dòng trong file chứa tên riêng đó. Sau ADR-0028 các trang danh mục vẫn gom chung mọi điểm đến, nên ngay khi điểm đến thứ hai có nội dung, những mô tả này **thành sai sự thật**: `/khach-san/` sẽ liệt kê khách sạn Phú Quốc dưới thẻ meta "Khách sạn tại Nha Trang".
+
+Không sửa trong đợt này vì đây là `<meta description>` của những trang **đang xếp hạng trên Google**. Đổi hàng loạt là một quyết định SEO riêng, không phải hệ quả kỹ thuật của ADR-0028.
+
+## DR-046 — Trang danh mục chưa lọc được theo điểm đến
+
+**Trạng thái:** mở, **cố ý không làm**. Phát hiện 2026-08-26. Nguồn: `QĐ-2026-08-26-01` chốt 1.
+
+ADR-0028 chọn hướng A: điểm đến thứ hai có trang trụ riêng, còn các trang danh mục (`/tour/`, `/khach-san/`…) **vẫn gom chung toàn site**. Chưa có đường nào để khách xem "chỉ tour Phú Quốc" — không `/tour/?diem-den=…`, không `/‹diem-den›/tour/`.
+
+Field `destination` thêm ở ADR-0028 đã đặt sẵn dữ liệu cho việc đó. Mở ra là một đợt riêng, đụng `ROUTE_MAP` trong `src/site.config.ts` và bảng địa chỉ ở `05-URL_MAP-and-DB_SCHEMA.md`.
+
+## DR-047 — `brand.description` / `headline` / `tagline` nói riêng về Nha Trang
+
+**Trạng thái:** mở, **hoãn có chủ ý**. Phát hiện 2026-08-26. Cùng loại quyết định với `DR-045`.
+
+`src/site.config.ts:94-106` — `description` (94), `headline` (103), `tagline` (106) đều mang tên riêng "Nha Trang". `description` là `<meta description>` mặc định của **mọi** trang trong site (`QĐ-2026-08-14-03` khoá nó thành hằng lúc build, `hero.summary` trong Studio không đè được).
+
+Site có nhiều điểm đến thì ba chuỗi này mô tả thiếu. Sửa là quyết định thương hiệu cộng SEO, không phải hệ quả kỹ thuật.
+
+## DR-048 — Breadcrumb của trang điểm đến thứ hai chưa từng được kiểm bằng trang thật
+
+**Trạng thái:** mở, chờ dữ liệu. Phát hiện 2026-08-26.
+
+`src/components/Breadcrumb.astro:43` đã có nhánh riêng cho `touristDestination` (`if (entityType !== 'touristDestination')`), viết từ trước đợt này. Nhưng dataset mới chỉ có **một** TouristDestination có slug (`seed.nha-trang`), nên nhánh đó chưa bao giờ chạy trên một trang điểm đến **không phải trang chủ**.
+
+Lần đầu kiểm được là Task 8 bước 6 của `docs/plans/2026-08-26-da-diem-den.md`, sau khi chủ dự án nhập điểm đến thứ hai trong Studio.
+
+## DR-049 — Chữ trong `HOME_COPY` bản en/zh/ko/ru còn tên riêng "Nha Trang"
+
+**Trạng thái:** mở, **chưa gây hại**. Phát hiện 2026-08-26.
+
+`src/lib/homepage.ts` giữ `HOME_COPY` cho năm ngôn ngữ. Task 6 của đợt này đã đổi `sections.overview` thành hàm nhận tên điểm đến, nên tiêu đề tổng quan hết gắn cứng. Nhưng các chuỗi **khác** trong bốn bản en/zh/ko/ru vẫn còn tên riêng "Nha Trang" / "芽庄" / "나트랑" / "Нячанг".
+
+Chưa render vì `src/site.config.ts:130` khai `langs = ['vi']` — bốn bản kia không có trang nào. Phải soát lại **trước** khi mở thêm ngôn ngữ, nếu không mỗi ngôn ngữ mở ra là một lần rò tên riêng lên trang thật.

@@ -210,7 +210,7 @@ const activeSections = rawSections.filter((s) => !s.hidden)
         if (!hasBody && !hasHighlights && !hasFacts) return null
         return (
           <section class="container editorial-section">
-            <h2 class="editorial-section-heading">{copy.sections.overview}</h2>
+            <h2 class="editorial-section-heading">{copy.sections.overview(td.title)}</h2>
             {hasBody && td.body && <Body blocks={td.body} />}
             {hasHighlights && td.highlights && (
               <ul class="home-highlights">

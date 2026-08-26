@@ -180,7 +180,7 @@ const hasReference = Boolean(td?.faq?.length || td?.safetyNote || td?.sameAs?.le
       <div class="overview-stack">
         {td?.body && td.body.length > 0 && (
           <div class="overview-block">
-            <h2 class="section-title">{copy.sections.overview}</h2>
+            <h2 class="section-title">{copy.sections.overview(title)}</h2>
             <span class="section-underline" aria-hidden="true"></span>
             <div class="body-text">
               <Body blocks={td.body} />

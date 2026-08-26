@@ -8,7 +8,8 @@ export const HOME_COPY: Record<Lang, {
   hubDescriptions: Record<string, string>
   trustItems: Array<{ icon: string; title: string; description: string }>
   sections: {
-    overview: string
+    /** Nhận tên điểm đến đang render — trang Phú Quốc không được mang tiêu đề Nha Trang. */
+    overview: (name: string) => string
     highlights: string
     facts: string
     areas: string
@@ -56,7 +57,7 @@ export const HOME_COPY: Record<Lang, {
       { icon: '💬', title: 'Thanh toán linh hoạt', description: 'Chốt qua Zalo với người thật, thống nhất cách thanh toán trước khi giữ chỗ.' },
     ],
     sections: {
-      overview: 'Tổng quan về Nha Trang',
+      overview: (name) => `Tổng quan về ${name}`,
       highlights: 'Điểm nổi bật',
       facts: 'Thông tin nền tảng',
       areas: 'Các khu vực nên biết',
@@ -98,7 +99,7 @@ export const HOME_COPY: Record<Lang, {
       { icon: '🧭', title: 'Practical first', description: 'No ads, no sponsored content, facts only' },
     ],
     sections: {
-      overview: 'About Nha Trang',
+      overview: (name) => `About ${name}`,
       highlights: 'Highlights',
       facts: 'Useful basics',
       areas: 'Areas to know',
@@ -140,7 +141,7 @@ export const HOME_COPY: Record<Lang, {
       { icon: '🧭', title: '实用优先', description: '无广告，无赞助内容，仅提供事实' },
     ],
     sections: {
-      overview: '关于芽庄',
+      overview: (name) => `关于${name}`,
       highlights: '亮点',
       facts: '基础信息',
       areas: '值得了解的区域',
@@ -182,7 +183,7 @@ export const HOME_COPY: Record<Lang, {
       { icon: '🧭', title: '실용 정보 우선', description: '광고 없음, 후원 콘텐츠 없음, 사실만' },
     ],
     sections: {
-      overview: '나트랑 소개',
+      overview: (name) => `${name} 소개`,
       highlights: '하이라이트',
       facts: '기본 정보',
       areas: '알아두면 좋은 지역',
@@ -224,7 +225,7 @@ export const HOME_COPY: Record<Lang, {
       { icon: '🧭', title: 'Практичность прежде всего', description: 'Без рекламы, без спонсоров, только факты' },
     ],
     sections: {
-      overview: 'О Нячанге',
+      overview: (name) => `О направлении ${name}`,
       highlights: 'Основные моменты',
       facts: 'Полезная база',
       areas: 'Районы, которые стоит знать',

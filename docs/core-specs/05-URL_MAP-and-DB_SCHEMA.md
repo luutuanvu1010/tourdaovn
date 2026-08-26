@@ -68,7 +68,7 @@ Cột mẫu dùng cây vi làm ví dụ; ngôn ngữ khác thay prefix ngôn ng�
 | Mẫu URL | Loại trang | Entity nguồn | Ghi chú (canonical, redirect) |
 |---|---|---|---|
 | `/` | trang chủ site | WebSite / cấu hình build | bản ngôn ngữ ở `/en/`, `/zh/`...; x-default = `/`; không phải trang entity |
-| `/{destinationSlug}/` | trang điểm đến | TouristDestination | ví dụ `/nha-trang/`; bản ngôn ngữ ở `/en/nha-trang/`, `/zh/nha-trang/`... |
+| `/{destinationSlug}/` | trang điểm đến | TouristDestination | **một trang cho MỖI** TouristDestination đã duyệt (ADR-0028), ví dụ `/nha-trang/`, `/phu-quoc/`; bản ngôn ngữ ở `/en/nha-trang/`, `/zh/nha-trang/`... Slug trùng với một segment trong ROUTE_MAP thì bị bỏ qua kèm cảnh báo `[B11]` (`src/pages/[...path].astro:71-74`) |
 | `/kham-pha/` | hub rollup chơi gì | Attraction cộng Experience (suy ở build) | CollectionPage |
 | `/luu-tru/` | hub rollup ở đâu | Hotel cộng Resort | CollectionPage |
 | `/am-thuc/` | hub rollup ăn gì | Restaurant cộng Specialty | CollectionPage |

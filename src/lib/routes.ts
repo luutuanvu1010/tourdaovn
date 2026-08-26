@@ -152,7 +152,7 @@ function resolveInternalPath(item: NavItem, lang: Lang): string | null {
     throw new Error(`\n\n[site.config] Mục menu "${item.label}": ${msg}\n`)
   }
 
-  if (!item.kind) bad('thiếu `kind`. Xem bảng sáu loại đích ở site.config.ts mục 7.')
+  if (!item.kind) bad('thiếu `kind`. Xem bảng tám loại đích ở site.config.ts mục 7.')
   if (!item.target) bad(`\`kind: '${item.kind}'\` cần có \`target\`.`)
   const target = item.target as string
 
@@ -160,6 +160,13 @@ function resolveInternalPath(item: NavItem, lang: Lang): string | null {
     if (!(staticPages as readonly string[]).includes(target)) {
       bad(`trang tĩnh "${target}" chưa khai trong \`staticPages\` ở site.config.ts.`)
     }
+    return `${prefix}/${target}/`
+  }
+
+  if (item.kind === 'destination') {
+    // Không tự kiểm slug có thật hay không tại đây: assertNavTargetsExist đối chiếu mọi
+    // mục menu với danh sách trang mà LẦN BUILD NÀY thực sự sinh ra, nên khai trỏ tới điểm
+    // đến chưa nhập nội dung là build dừng ngay trên máy, kèm đúng đường dẫn sai.
     return `${prefix}/${target}/`
   }
 
