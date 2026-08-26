@@ -71,10 +71,27 @@ export const GATE: GateConfig = {
   },
   references: {
     // experienceType trỏ đúng một type đích (category) → kiểm được trọn vẹn.
-    experience: [{ field: 'experienceType', to: 'category' }],
+    experience: [
+      { field: 'experienceType', to: 'category' },
+      { field: 'destination', to: 'touristDestination' },
+    ],
     // operator trỏ đúng một type đích (organization) → kiểm được trọn vẹn.
-    tour: [{ field: 'operator', to: 'organization' }],
+    tour: [
+      { field: 'operator', to: 'organization' },
+      { field: 'destination', to: 'touristDestination' },
+    ],
     // author trỏ đúng một type đích (person) → kiểm được trọn vẹn.
-    article: [{ field: 'author', to: 'person' }],
+    article: [
+      { field: 'author', to: 'person' },
+      { field: 'destination', to: 'touristDestination' },
+    ],
+    // destination trỏ đúng một type đích → kiểm được trọn vẹn, không vướng vấn đề
+    // "một trong N type" mà containedInPlace mắc phải (xem chú thích đầu file).
+    // Luật này KHÔNG kiểm ô trống: validate-min.ts bỏ qua reference null. Thiếu ô là
+    // việc của I20 mức warn.
+    place:      [{ field: 'destination', to: 'touristDestination' }],
+    attraction: [{ field: 'destination', to: 'touristDestination' }],
+    hotel:      [{ field: 'destination', to: 'touristDestination' }],
+    resort:     [{ field: 'destination', to: 'touristDestination' }],
   },
 }

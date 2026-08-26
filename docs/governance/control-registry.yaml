@@ -273,6 +273,17 @@ controls:
     gap_id: ND-005
     evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục I19 khi ND-005 trả xong"
 
+  # I20 là control MỚI (ADR-0028), sinh ra đã chạy thật nên khai `live` ngay — khác 27 dòng
+  # `gap` phía trên vốn là nợ lịch sử. Khai `gap` cho một control đang chạy sẽ bị GA6 bắt.
+  - id: I20
+    source: docs/core-specs/04-CONSTRAINTS.md#I20
+    level: warn
+    stage: pre-build
+    executor: scripts/validators/i1-i19.ts
+    pipeline: prebuild-validate
+    status: live
+    evidence: scripts/reports/validator-status.json
+
   # ── Toàn vẹn nguồn giá PY1–PY8 ─────────────────────────────────────────────
   # Nguồn: 04-CONSTRAINTS bảng PY, dòng 64–71. Thi hành: py1-py8.ts.
 
