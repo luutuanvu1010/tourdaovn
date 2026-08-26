@@ -1,0 +1,22 @@
+Bước 7 — thử hàng rào menu (assertNavTargetsExist)
+
+Thêm tạm vào `nav` trong src/site.config.ts:
+  { label: 'Thử', kind: 'destination', target: 'diem-den-khong-ton-tai' },
+
+npm run build  →  exit=1, build DỪNG:
+
+    [site.config] Menu đang trỏ tới trang KHÔNG TỒN TẠI:
+      • /diem-den-khong-ton-tai/
+
+    Nguyên nhân thường gặp: khai mục menu trước khi nhập nội dung trong
+    Sanity Studio, hoặc đường dẫn (slug) trong `nav` không khớp document thật.
+
+    Sửa: nhập nội dung trước, hoặc tạm ghi chú dòng đó lại trong
+    src/site.config.ts mục 7, rồi build lại.
+
+Đúng kỳ vọng: loại đích `destination` mới (Task 6) KHÔNG tự kiểm slug tại
+resolveInternalPath, nhưng assertNavTargetsExist đối chiếu với danh sách trang
+mà LẦN BUILD NÀY thực sự sinh ra, nên vẫn bắt được, kèm đúng đường dẫn sai.
+
+Đã gỡ dòng thử. Dựng lại: exit=0, 144 trang, area-card 4 / guide-card 4 /
+dest-card 0. `git diff src/site.config.ts` rỗng — file khớp bản đã commit.
