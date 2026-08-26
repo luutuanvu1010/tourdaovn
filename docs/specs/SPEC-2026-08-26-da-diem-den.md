@@ -11,7 +11,7 @@
 - **Bản ghi:** `docs/adr/ADR-0028-da-diem-den.md` (accepted); `QĐ-2026-08-26-01` trong
   `docs/DECISIONS.md`.
 - **Đầu vào đã đọc:** `CLAUDE.md`, `01-CONTENT_MODEL` §2 §2.1 §5 §6, `ADR-0020`, `ADR-0021`,
-  `ADR-0023`, `QĐ-2026-08-25-01`, `docs/SO-TAY-HAN-MUC-SANITY.md`,
+  `ADR-0023`, `QĐ-2026-08-25-07`, `docs/SO-TAY-HAN-MUC-SANITY.md`,
   `cms/schemas/{touristDestination,baseFields,lodgingBase,place,attraction,tour,article,index}.ts`,
   `src/site.config.ts`, `src/lib/{routes,sitemap,homepage,uiCopy,sanity}.ts`,
   `src/lib/queries/touristDestination.ts`, `src/pages/[...path].astro`, `src/pages/index.astro`,
@@ -364,7 +364,7 @@ Kiểm hồi quy bắt buộc cho trang chủ: sau khi nạp bù, `/` phải gi�
 ## 6. Vận hành — rào cản phải vượt trước khi thi hành
 
 **Quota API Sanity đã cạn.** Truy vấn thử lúc soạn spec này trả `plan_limit_reached`. Theo
-`QĐ-2026-08-25-01`, hạn mức là 250.000 request/tháng, **reset 00:00 UTC ngày 1** — tức
+`QĐ-2026-08-25-07`, hạn mức là 250.000 request/tháng, **reset 00:00 UTC ngày 1** — tức
 **2026-09-01**, và rơi về Free không làm đổi hạn mức đó.
 
 Hệ quả cụ thể:
@@ -378,7 +378,7 @@ phần g1/g3/g4 (ba validator này đọc file trong repo, không gọi Sanity).
 
 **Auto-deploy đang bật.** Theo bản ghi vận hành, đẩy lên `main` là Workers Builds tự dựng và
 đè bản deploy tay. Đợt này làm trên nhánh riêng, không đẩy thẳng `main`. Thêm một lý do nữa:
-mỗi lần dựng lại đốt hạn mức Sanity, mà `QĐ-2026-08-25-01` đã chỉ ra 157 lần dựng trong tháng
+mỗi lần dựng lại đốt hạn mức Sanity, mà `QĐ-2026-08-25-07` đã chỉ ra 157 lần dựng trong tháng
 8 chính là nguyên nhân cạn quota.
 
 ## 7. Tiêu chí nghiệm thu

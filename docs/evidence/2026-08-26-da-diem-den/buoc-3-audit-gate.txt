@@ -19,7 +19,7 @@ GA3/I20 ĐÃ ĐÓNG. Đường đi của nó trong đợt này:
   1. Thêm control I20 khai `live`, stage `pre-build`  → GA3 trượt.
   2. Truy nguyên: GA3 bản cũ đóng cứng postbuild-status.json, mà bộ kiểm pre-build
      ghi vào validator-status.json → control pre-build khai live KHÔNG BAO GIỜ
-     qua được GA3. Đây là khiếm khuyết của cổng, không phải của I20 (DR-050).
+     qua được GA3. Đây là khiếm khuyết của cổng, không phải của I20 (DR-070).
   3. Vá GA3 tra báo cáo theo `stage` (commit f862d3a) → GA3 vẫn trượt, nhưng giờ
      trượt vì lý do THẬT: validator-status.json chưa có mục I20.
   4. Bước 1 của Task 8 chạy validate → sinh mục I20 → GA3/I20 đạt.

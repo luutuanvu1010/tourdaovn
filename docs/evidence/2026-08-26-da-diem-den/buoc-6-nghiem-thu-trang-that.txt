@@ -76,7 +76,7 @@ Chạy 2026-08-27, sau khi chủ dự án hoàn tất Bước 5.
 
   area-card   4 → 4    guide-card  4 → 4    tour-card  3 → 3
 
-═══ 8. Breadcrumb (DR-048) — kết quả KHÁC dự đoán, theo hướng tốt ═══
+═══ 8. Breadcrumb (DR-068) — kết quả KHÁC dự đoán, theo hướng tốt ═══
 
   Trang /ninh-thuan/ KHÔNG có breadcrumb: `TouristDestinationHub.astro` không dùng
   component Breadcrumb. Hợp lý — trang điểm đến nằm ngay dưới trang chủ, chuỗi
@@ -91,11 +91,11 @@ Chạy 2026-08-27, sau khi chủ dự án hoàn tất Bước 5.
       3. Ninh Thuận   https://tourdao.vn/ninh-thuan/     ← trỏ đúng điểm đến mới
       4. Đèo Vĩnh Hy  (mục hiện tại, không link)
 
-  HTML hiển thị cũng mang href="/ninh-thuan/". DR-048 đã kiểm xong: đúng.
+  HTML hiển thị cũng mang href="/ninh-thuan/". DR-068 đã kiểm xong: đúng.
 
 ═══ 9. Chạy lại bộ kiểm vì dữ liệu đã đổi ═══
 
-  validate:   11 FAIL — vẫn đúng bộ 11 có sẵn của DR-044, 0 fail mới. I20: pass.
+  validate:   11 FAIL — vẫn đúng bộ 11 có sẵn của DR-064, 0 fail mới. I20: pass.
   audit:gate: GA3/I20 đạt. Cả năm dòng GA3 đều đạt.
   npm run gate: vẫn đúng 4 cổng đỏ có sẵn (r3-r4-post, governance-post,
                 control-registry-gate, deferred-gate). g1/g3/g4 xanh.

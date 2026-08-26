@@ -1,10 +1,9 @@
 ---
 import type { PlaceResult, Lang } from '../lib/types'
-import { siteBaseUrl, hostLabel } from '../lib/siteUrl'
+import { siteBaseUrl } from '../lib/siteUrl'
 import { uiCopy, typeLabel as lookupLabel, PLACE_TYPE_LABELS } from '../lib/uiCopy'
 import DetailLayout from './DetailLayout.astro'
 import Section from './Section.astro'
-import InfoCard from './InfoCard.astro'
 import Body from './Body.astro'
 import FAQ from './FAQ.astro'
 import MapView from './MapView.astro'
@@ -35,31 +34,20 @@ const jumpLinks = [
   { id: 'experiences', label: t('experiencesHere'), on: !!data.experiences?.length },
   { id: 'faq', label: t('faqHeading'), on: !!data.faq?.length },
 ].filter(x => x.on).map(x => ({ href: `#${x.id}`, label: x.label }))
-const parentHref = data.containedInPlace?.slug
-  ? entityHref(data.containedInPlace._type, data.containedInPlace.slug, lang)
-  : undefined
 
 function hasPtContent(blocks: unknown[] | undefined | null): boolean {
   if (!blocks || blocks.length === 0) return false
   return blocks.some((b: any) => b._type === 'block' && b.children?.some((c: any) => (c.text || '').trim()))
 }
 
-// Ô nào không có dữ liệu thì không vào lưới — InfoBar co theo số ô thật, nên
-// ở đây bỏ ô "khoảng cách" chết cứng.
-const infoBarItems = [
-  { icon: '🏷️', label: t('type'), value: typeLabel, visible: true },
-  { icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : t('freeAccess'), visible: true },
-  { icon: '🗺️', label: t('partOf'), value: data.containedInPlace?.title || '', visible: !!data.containedInPlace?.title },
-]
-
-const sidebarRows = [
-  { icon: '📍', label: t('address'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
-  { icon: '🗺️', label: t('partOf'), value: data.containedInPlace?.title || '', href: parentHref, visible: !!data.containedInPlace?.title },
-  { icon: '🏷️', label: t('type'), value: typeLabel, visible: true },
-  { icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : '', visible: !!data.openingHours },
-  { icon: '🎫', label: t('admission'), value: data.isAccessibleForFree ? t('free') : '', visible: !!data.isAccessibleForFree },
-  { icon: '🗺️', label: t('map'), value: t('openMap'), href: data.hasMap, visible: !!data.hasMap },
-  { icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
+// Một field một vùng (06 §6 Luật 1). Template khai DỮ LIỆU, không chọn vùng.
+// containedInPlace KHÔNG vào đây: 06 §3 nói cha chỉ hiện ở breadcrumb — trước
+// đây in ở cả InfoBar lẫn InfoCard, vi phạm đang chạy thật. placeType cũng
+// không vào đây: huy hiệu hero, và chỉ ở đó (§3.1) — cũng đang lặp hai vùng.
+const facts = [
+  { field: 'openingHours', icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : '', visible: !!data.openingHours },
+  { field: 'address', icon: '📍', label: t('address'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
+  { field: 'isAccessibleForFree', icon: '🎫', label: t('admission'), value: t('free'), visible: data.isAccessibleForFree === true },
 ]
 
 const siteBase = siteBaseUrl(Astro.site)
@@ -76,10 +64,14 @@ const jsonLd = entityPageGraphToLd(placeToJsonLd(data, siteBase, lang), data, si
   image={data.mainImage}
   gallery={data.gallery}
   containedInPlace={data.containedInPlace}
-  infoBarItems={infoBarItems}
+  sameAs={data.sameAs}
+  facts={facts}
   sidebarSlots={[
-    { name: 'info', component: 'InfoCard', visible: sidebarRows.some(r => r.visible), props: { rows: sidebarRows } },
-    { name: 'map', component: 'Map', visible: !!(data.geo), props: { geo: data.geo, title: data.title } },
+    // 06 §3 hàng "Bản đồ (sidebar)": "chỉ có hasMap thì hiện một link" — thẻ bản
+    // đồ phải hiện khi có geo VẼ ĐƯỢC hoặc chỉ có hasMap (không geo). Trước đây
+    // chỉ xét geo nên trang chỉ có hasMap (không geo hợp lệ) không có chỗ hiện
+    // link — hasMap bị bỏ rơi hoàn toàn, không render ở đâu.
+    { name: 'map', component: 'Map', visible: !!(data.geo) || !!(data.hasMap), props: { geo: data.geo, title: data.title } },
   ]}
   nearbyTitle={t('nearby')}
   nearby={nearby}
@@ -97,7 +89,7 @@ const jsonLd = entityPageGraphToLd(placeToJsonLd(data, siteBase, lang), data, si
 
     {hasPtContent(data.body) && (
       <Section heading={t('details')} contained={false} id="details">
-        <Body blocks={data.body} />
+        <Body blocks={data.body} headingOffset={1} />
       </Section>
     )}
 
@@ -138,8 +130,16 @@ const jsonLd = entityPageGraphToLd(placeToJsonLd(data, siteBase, lang), data, si
     )}
   </Fragment>
 
-  {sidebarRows.some(r => r.visible) && <InfoCard slot="info" rows={sidebarRows} lang={lang} />}
-  {data.geo && <MapView slot="map" geo={data.geo} title={data.title} height={240} />}
+  {(data.geo || data.hasMap) && (
+    <Fragment slot="map">
+      {data.geo && <MapView geo={data.geo} title={data.title} height={240} />}
+      {data.hasMap && (
+        <a class="map-card-link" data-region="map-card" data-field="hasMap" href={data.hasMap} target="_blank" rel="noopener">
+          <span aria-hidden="true">🗺️</span> {t('openMap')}
+        </a>
+      )}
+    </Fragment>
+  )}
 </DetailLayout>
 
 <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>

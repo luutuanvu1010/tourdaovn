@@ -8,9 +8,24 @@
 #
 # Dạng dòng:   <đường dẫn cũ>   <đường dẫn mới>   301
 #
-# Hiện chưa có dòng R3 nào. Đợt điều hướng theo dòng dịch vụ (ADR-0023) không đổi
-# đường dẫn nào: ba hub Khám phá / Lưu trú / Đi lại chỉ rời khỏi menu, URL vẫn
-# sống và vẫn nằm trong sitemap.
+# Dòng đang có: bài cẩm nang bến tàu du lịch Nha Trang bị đổi slug trong Sanity
+# Studio lúc 2026-08-25T04:45:45Z — SAU bản deploy production 03:43:51Z — bỏ đuôi
+# "-cap-nhat-2026". Trang mới đã dựng đúng trong dist/; URL cũ vẫn nằm trong
+# sitemap production nên nếu không có dòng dưới đây, lần deploy tới sẽ 404. Xem
+# DR-058.
+#
+/cam-nang/tron-bo-cam-nang-ben-tau-du-lich-nha-trang-gia-ve-lich-trinh-and-dich-vu-cap-nhat-2026/    /cam-nang/tron-bo-cam-nang-ben-tau-du-lich-nha-trang-gia-ve-lich-trinh-and-dich-vu/    301
+/cam-nang/tron-bo-cam-nang-ben-tau-du-lich-nha-trang-gia-ve-lich-trinh-and-dich-vu-cap-nhat-2026     /cam-nang/tron-bo-cam-nang-ben-tau-du-lich-nha-trang-gia-ve-lich-trinh-and-dich-vu/    301
+#
+# Dòng thứ hai không có gạch chéo cuối. Sitemap production dùng dạng CÓ gạch chéo
+# nên bản đã index được dòng trên che; dòng dưới đỡ liên kết chép tay hoặc chia sẻ
+# thủ công ở dạng không gạch chéo — không có asset nào khớp thì chúng rơi thẳng vào
+# 404.html. Cổng R3 chỉ đòi dòng trên (nó so đúng chuỗi trong sitemap), nên dòng này
+# là vá chủ động chứ không phải để qua cổng.
+#
+# Đợt điều hướng theo dòng dịch vụ (ADR-0023) không đổi đường dẫn nào: ba hub
+# Khám phá / Lưu trú / Đi lại chỉ rời khỏi menu, URL vẫn sống và vẫn nằm trong
+# sitemap — không cần dòng ở đây.
 #
 # ── Phần 2. Điều hướng tạm thời — KHÔNG phải R3 ────────────────────────
 # Dòng dưới đây không phục vụ R3. Nó là điều hướng hạ tầng tạm thời trong lúc

@@ -15,7 +15,7 @@ Trực giác tự nhiên là "đụng vào Sanity mới tốn hạn mức Sanity
 
 ## 2. Trạng thái gói cước
 
-Chốt 2026-08-25 (`QĐ-2026-08-25-01`): để Growth Trial hết hạn 2026-08-26T00:57Z (07:57 giờ VN)
+Chốt 2026-08-25 (`QĐ-2026-08-25-07`): để Growth Trial hết hạn 2026-08-26T00:57Z (07:57 giờ VN)
 và dự án **tự rơi về Free**, không nâng cấp.
 
 | Tài nguyên | Hạn mức | Cho vượt? | Dùng lúc 25/8 |

@@ -22,7 +22,7 @@ không phải luật engine.
 - **Liên quan:** `ADR-0002` (mô hình entity), `ADR-0020` (multi-site registry — **phương án bị
   loại**, xem dưới), `ADR-0021` (site.config là nguồn sự thật), `ADR-0023` (điều hướng khai
   một chỗ), `01-CONTENT_MODEL` §2 §2.1 §5 §6, `05-URL_MAP` §2, `06-BINDING_MAP`,
-  `QĐ-2026-08-25-01` (gói cước Sanity), `docs/specs/SPEC-2026-08-26-da-diem-den.md`
+  `QĐ-2026-08-25-07` (gói cước Sanity), `docs/specs/SPEC-2026-08-26-da-diem-den.md`
 
 ## Bối cảnh
 
@@ -107,7 +107,7 @@ document vẫn publish, vẫn lên trang danh mục, chỉ nằm nhầm trang đ
 Sai lộ ra ồn ào tốt hơn sai lặng lẽ.
 
 **Vì sao `warn` chứ không `fail`.** Bộ cổng của dự án đang có 27 control `status: gap` và 11
-validator đỏ vì dữ liệu thật (`DR-044`). Thêm một điều kiện `fail` mới lúc này là chặn publish
+validator đỏ vì dữ liệu thật (`DR-064`). Thêm một điều kiện `fail` mới lúc này là chặn publish
 mọi nội dung chưa nạp bù — bao gồm cả nội dung đang chờ lên. `warn` cho phép nạp bù dần mà
 không dựng thêm một hàng rào nữa trước mặt biên tập viên.
 
@@ -120,7 +120,7 @@ dung thật, mà hôm nay mới có một.
 **Mỗi điểm đến một site riêng (`ADR-0020`).** Hạ tầng đã có, schema không phải đụng, không có
 cửa một chiều nào. Loại vì nó nhân đôi chi phí vận hành cho một lợi ích chưa cần: thêm một
 dataset Sanity, một tên miền, một đường phát hành, một bộ cổng phải chạy song song — trong khi
-`QĐ-2026-08-25-01` vừa ghi nhận dự án **đã cạn hạn mức API Sanity** của tháng 8 với **một**
+`QĐ-2026-08-25-07` vừa ghi nhận dự án **đã cạn hạn mức API Sanity** của tháng 8 với **một**
 site. Phương án này vẫn để ngỏ nếu sau này một điểm đến lớn tới mức cần thương hiệu riêng.
 
 **Chọn tay trên trang Điểm đến (`featuredPlaces[]`, `featuredArticles[]`).** Ít việc nhất,
@@ -150,7 +150,7 @@ che chỗ hở đang thấy.
 - Enum `sections` trong `siteSettings` mở từ 19 lên 20 khoá; `NavKind` từ 7 lên 8 loại đích.
   Cả hai là enum đóng có kiểm, nên phải sửa đồng thời ở schema, ở đặc tả, và ở mã.
 
-**Bị chặn tới 2026-09-01:** hạn mức API Sanity đã cạn (`QĐ-2026-08-25-01`, reset 00:00 UTC
+**Bị chặn tới 2026-09-01:** hạn mức API Sanity đã cạn (`QĐ-2026-08-25-07`, reset 00:00 UTC
 ngày 1). Script nạp bù và `npm run build` đều gọi Sanity nên chưa chạy được. Phần sửa mã, sửa
 schema, sửa validator và sửa tài liệu làm được ngay.
 

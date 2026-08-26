@@ -85,7 +85,7 @@ Một tranh luận đáng ghi: người thực thi khai ca *"sửa 5 file, xem h
 
 Lúc soi khoản "sổ quản trị nói sai" mà chủ dự án cho sửa, tôi chạy thử `npm --prefix scripts run validate`. **Nó chạy được.**
 
-Chi tiết và hệ quả ghi ở `DR-044`. Tóm tắt: `control-registry.yaml` khai bộ kiểm ràng buộc pre-build *"chưa từng chạy được ở tourdaovn"*, khai 27 trên 31 control là `gap`. Thực tế 31 validator chạy, **11 đang đỏ vì vi phạm dữ liệu thật** — và không ai nhìn, vì sổ nói bộ kiểm không chạy được nên không ai chạy nó.
+Chi tiết và hệ quả ghi ở `DR-064`. Tóm tắt: `control-registry.yaml` khai bộ kiểm ràng buộc pre-build *"chưa từng chạy được ở tourdaovn"*, khai 27 trên 31 control là `gap`. Thực tế 31 validator chạy, **11 đang đỏ vì vi phạm dữ liệu thật** — và không ai nhìn, vì sổ nói bộ kiểm không chạy được nên không ai chạy nó.
 
 Đây đúng là thứ `gate-auditor` phải bắt, nhưng `GA1` chỉ kiểm chiều *control khai `live` có bằng chứng thật không*, không kiểm chiều ngược. Tôi thêm `GA6` để bịt — rồi `GA6` mắc lỗi lần năm ở trên.
 
@@ -109,7 +109,7 @@ Vòng duyệt cuối kiểm lại cả bảy và **không phản biện cái nà
 
 ## Một việc tôi phải khai
 
-Lệnh `validate` tôi chạy để kiểm chứng `DR-044` đã **ghi đè `scripts/reports/validator-status.json`** — file có track git. Nội dung mới phản ánh đúng hiện trạng, nhưng thay đổi đó do tôi gây ra, không phải phiên khác. Chưa commit.
+Lệnh `validate` tôi chạy để kiểm chứng `DR-064` đã **ghi đè `scripts/reports/validator-status.json`** — file có track git. Nội dung mới phản ánh đúng hiện trạng, nhưng thay đổi đó do tôi gây ra, không phải phiên khác. Chưa commit.
 
 ## Phiên dừng ở đâu
 

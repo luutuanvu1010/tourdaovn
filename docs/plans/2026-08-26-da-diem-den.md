@@ -25,7 +25,7 @@ Mọi task đều nằm dưới các luật này. Đọc trước khi bắt đ�
 
 1. **Nhánh.** Làm trên nhánh riêng, **không đẩy thẳng `main`**. Đẩy lên `main` là Workers
    Builds tự dựng, đè bản deploy tay, và đốt hạn mức API Sanity.
-2. **Quota Sanity cạn tới 2026-09-01.** Reset 00:00 UTC ngày 1 (`QĐ-2026-08-25-01`). Mọi lệnh
+2. **Quota Sanity cạn tới 2026-09-01.** Reset 00:00 UTC ngày 1 (`QĐ-2026-08-25-07`). Mọi lệnh
    gọi Sanity — gồm `npm run build` và script nạp bù — **thất bại với `plan_limit_reached`**
    cho tới lúc đó. Task 1-6 làm được ngay; Task 7-8 phải chờ.
 3. **Thứ tự cứng: Task 7 (nạp bù dữ liệu) phải xong trước khi bất kỳ bản dựng nào chạy mã của

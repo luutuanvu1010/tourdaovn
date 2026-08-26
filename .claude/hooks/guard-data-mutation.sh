@@ -72,7 +72,7 @@ CMD=$(printf '%s' "$INPUT" | jq -r '.tool_input.command // ""')
 
 # Danh sách lấy từ scripts/package.json — đúng những script đụng dữ liệu thật.
 #
-# Vòng sửa 2 (2026-08-26, DR-051): trước đây lệnh backfill được chép TÊN CỤ THỂ
+# Vòng sửa 2 (2026-08-26, DR-071): trước đây lệnh backfill được chép TÊN CỤ THỂ
 # (chỉ có seo-meta), nên lệnh backfill thêm sau đó lọt lưới và ghi thật 211
 # document mà hook không hé một tiếng. Đổi sang khớp TIỀN TỐ, để lệnh backfill
 # mới mặc định BỊ CHẶN thay vì mặc định lọt — cùng triết lý đảo chiều đã áp cho

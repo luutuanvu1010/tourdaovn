@@ -19,11 +19,11 @@
 | 9 | Chốt quyết định | **đã xong từ trước**, xem dưới |
 | 10 | Commit | commit chứa thư mục này |
 
-**Bước 5 chỉ làm được sau khi vá `DR-052`** — điều hướng Studio khai `touristDestination` là singleton ghim cứng `seed.nha-trang`, không có nút tạo mới. Kế hoạch không liệt kê `cms/lib/structure.ts`, nên khâu cuối để *nhập được* điểm đến thứ hai bị bỏ sót dù mọi tầng dưới đã sẵn sàng.
+**Bước 5 chỉ làm được sau khi vá `DR-072`** — điều hướng Studio khai `touristDestination` là singleton ghim cứng `seed.nha-trang`, không có nút tạo mới. Kế hoạch không liệt kê `cms/lib/structure.ts`, nên khâu cuối để *nhập được* điểm đến thứ hai bị bỏ sót dù mọi tầng dưới đã sẵn sàng.
 
 ## Đọc nhanh từng bước
 
-**Bước 1.** 11 FAIL — **đúng bộ 11 đã có** trong `DR-044` (`I1 I2 I3 I4 I5 I12 I13 I14 I19 R2 S25`), **0 fail mới**. `I20: pass` với 0 lỗi, vì Task 7 đã nạp bù hết 211 document. Số validator 31 → 32.
+**Bước 1.** 11 FAIL — **đúng bộ 11 đã có** trong `DR-064` (`I1 I2 I3 I4 I5 I12 I13 I14 I19 R2 S25`), **0 fail mới**. `I20: pass` với 0 lỗi, vì Task 7 đã nạp bù hết 211 document. Số validator 31 → 32.
 
 **Bước 2.** Bốn cổng đỏ: `r3-r4-post` (R4), `governance-post` (S24), `control-registry-gate`, `deferred-gate`. Đối chiếu `postbuild-status.json` trước/sau cho thấy **I6 và R3 đã ĐỎ→XANH**; R4 vốn đã đỏ (42 lỗi) nay 54 — 100% lỗi nằm ở hreflang của trang `/cam-nang/`, không lỗi nào chạm trang chủ, trang điểm đến, hay field `destination`. Hai cổng còn lại là hệ quả của R4 và của `I16` — mà diff `cc7a2bd..HEAD` trên `control-registry.yaml` **chỉ thêm khối I20, không nhắc I16 dòng nào**. `g1` fail 0 / warn 14 đúng mốc, `g3`/`g4` fail 0.
 
@@ -48,7 +48,7 @@
 | 7 | Menu trỏ slug không tồn tại → build dừng | **đạt** — exit 1, nêu đúng đường dẫn |
 | 8 | `01-CONTENT_MODEL` không còn khai cardinality là 1 | **đạt** — Task 1, đổi thành `N (ADR-0028)` |
 
-Cộng thêm `DR-048` (breadcrumb) đã kiểm xong và đóng.
+Cộng thêm `DR-068` (breadcrumb) đã kiểm xong và đóng.
 
 **Tiêu chí 3 là cái duy nhất không đạt nguyên văn.** Bốn cổng đỏ — `r3-r4-post` (R4 hreflang bài viết), `governance-post` (S24 thiếu người duyệt), `control-registry-gate` (hệ quả của R4), `deferred-gate` (về I16) — **đều đã đỏ trước đợt này** và không cái nào liên quan tới `destination`. Kế hoạch ước lượng thấp nợ cổng có sẵn.
 
