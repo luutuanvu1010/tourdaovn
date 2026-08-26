@@ -705,3 +705,19 @@ Lần đầu kiểm được là Task 8 bước 6 của `docs/plans/2026-08-26-d
 `src/lib/homepage.ts` giữ `HOME_COPY` cho năm ngôn ngữ. Task 6 của đợt này đã đổi `sections.overview` thành hàm nhận tên điểm đến, nên tiêu đề tổng quan hết gắn cứng. Nhưng các chuỗi **khác** trong bốn bản en/zh/ko/ru vẫn còn tên riêng "Nha Trang" / "芽庄" / "나트랑" / "Нячанг".
 
 Chưa render vì `src/site.config.ts:130` khai `langs = ['vi']` — bốn bản kia không có trang nào. Phải soát lại **trước** khi mở thêm ngôn ngữ, nếu không mỗi ngôn ngữ mở ra là một lần rò tên riêng lên trang thật.
+
+## DR-050 — `GA3` đóng cứng `postbuild-status.json`, nên mọi control `live` chặng pre-build trượt vĩnh viễn
+
+**Trạng thái:** **đã xử 2026-08-26**, nhánh `feat-da-diem-den`. Phát hiện khi thêm control `I20` (ADR-0028).
+
+`GA3` trong `scripts/audit/gate-audit.ts` lặp qua **mọi** control khai `live` và đối chiếu với `scripts/reports/postbuild-status.json` — không nhìn `stage`. Nhưng hai chặng ghi hai file khác nhau: bộ kiểm pre-build (`scripts/validate-constraints.ts:150`) ghi `validator-status.json`, bộ kiểm post-build ghi `postbuild-status.json`. Hai file cùng hình dạng `items: [{id, status}]`.
+
+Hệ quả: **một control `live` ở `stage: pre-build` không bao giờ qua được `GA3`** — bộ kiểm của nó không ghi vào file mà `GA3` đọc, nên chạy bao nhiêu lần cũng vô ích.
+
+Vì sao tới giờ chưa ai thấy: bốn control `live` trước đó (`I6`, `PY8`, `R3`, `R4`) **đều** là post-build. `I20` là control `live` đầu tiên ở chặng pre-build, và nó dẫm ngay vào điểm mù.
+
+Điểm nguy hiểm nằm ở chỗ thông điệp lỗi *nghe như* một việc sửa được: "khai live nhưng không có mục nào trong postbuild-status.json". Người đọc sẽ đi chạy lại bộ kiểm — và không có gì thay đổi. Kế hoạch thi công `docs/plans/2026-08-26-da-diem-den.md` Task 8 Bước 3 đã hứa đúng như vậy: "bước 1 vừa sinh `validator-status.json` có mục `I20`, nên control khai `live` giờ đã có bằng chứng thật". Lời hứa đó **sai** với bản `GA3` cũ.
+
+**Đã sửa.** Tách `GA3` thành hàm thuần `kiemLiveCoTrongBaoCao`, tra báo cáo theo `stage` qua bảng `BAO_CAO_THEO_STAGE`; `stage` lạ hoặc thiếu thì `skip` kèm lý do chứ không đoán. Dùng lại đúng vị từ `dangChayThatTrongBaoCao` mà `GA6` đang dùng — cùng câu hỏi "file này có mục mang id này không", chỉ khác chiều kết luận. Sáu test hồi quy trong `scripts/audit/__tests__/gate-audit.test.ts`, gồm một ca chốt: control pre-build **không** được tính là đạt chỉ vì id của nó tình cờ có mặt trong `postbuild-status.json`.
+
+Cùng họ với `DR-021` và `DR-044`: cổng nói một câu nghe như sự thật, mà phép kiểm đằng sau không làm được điều nó tự nhận.

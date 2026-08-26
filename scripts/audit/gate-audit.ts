@@ -20,6 +20,7 @@ import type { Check } from './lib/evidence'
 export interface Control {
   id: string
   status: string
+  stage?: string
   evidence?: string
   executor?: string
 }
@@ -117,6 +118,58 @@ export function kiemGapConChayThat(
             id: `GA6/${c.id}`,
             verdict: 'pass' as const,
             detail: `control ${c.id} khai gap, ${duongDan} chưa có mục ${c.id} — khớp với lời khai`,
+            drift: ['DR-022'],
+          }
+    })
+}
+
+/**
+ * Mỗi chặng ghi báo cáo riêng: bộ kiểm pre-build ghi `validator-status.json`, bộ kiểm
+ * post-build ghi `postbuild-status.json`. Hai file cùng hình dạng `items: [{id, status}]`.
+ */
+const BAO_CAO_THEO_STAGE: Record<string, string> = {
+  'pre-build': 'scripts/reports/validator-status.json',
+  'post-build': 'scripts/reports/postbuild-status.json',
+}
+
+/**
+ * GA3 — control khai `live` phải có mục mang đúng id của nó trong báo cáo của CHẶNG nó chạy.
+ *
+ * Tìm báo cáo theo `stage`, không đóng cứng vào `postbuild-status.json`. Bản cũ đóng cứng, nên
+ * mọi control `live` ở chặng pre-build đều trượt vĩnh viễn — bộ kiểm pre-build không bao giờ
+ * ghi vào file post-build, và không lần chạy nào đóng được. Bắt đúng như vậy khi thêm I20
+ * (ADR-0028), control `live` đầu tiên ở chặng pre-build.
+ *
+ * `dangChayThat(duongDan, id)` là vị từ do main() cấp, để hàm này thuần và test được mà không
+ * đụng đĩa — cùng khuôn với `tonTai` ở GA1 và GA6.
+ */
+export function kiemLiveCoTrongBaoCao(
+  controls: Control[],
+  dangChayThat: (duongDan: string, id: string) => boolean,
+): Check[] {
+  return controls
+    .filter((c) => c.status === 'live')
+    .map((c) => {
+      const duongDan = BAO_CAO_THEO_STAGE[c.stage ?? '']
+      if (!duongDan) {
+        return {
+          id: `GA3/${c.id}`,
+          verdict: 'skip' as const,
+          detail: `control ${c.id} khai live nhưng \`stage\` là "${c.stage ?? '(thiếu)'}" — không biết đối chiếu với báo cáo nào`,
+          drift: ['DR-022'],
+        }
+      }
+      return dangChayThat(duongDan, c.id)
+        ? {
+            id: `GA3/${c.id}`,
+            verdict: 'pass' as const,
+            detail: `${c.id} có mục trong ${duongDan}`,
+            drift: ['DR-022'],
+          }
+        : {
+            id: `GA3/${c.id}`,
+            verdict: 'fail' as const,
+            detail: `${c.id} khai live (stage ${c.stage}) nhưng không có mục nào trong ${duongDan} — nó đỏ hay xanh cũng không ai biết qua cổng`,
             drift: ['DR-022'],
           }
     })
@@ -231,23 +284,11 @@ function main(): void {
     )
   }
 
-  // --- GA3: control live có mục trong báo cáo ---
-  if (registry?.controls && existsSync(baoCao)) {
-    const items = (JSON.parse(readFileSync(baoCao, 'utf8')).items ?? []) as Array<{ id: string; status: string }>
-    const coTrongBaoCao = new Set(items.map((i) => i.id))
-    for (const c of registry.controls.filter((c) => c.status === 'live')) {
-      checks.push(
-        coTrongBaoCao.has(c.id)
-          ? { id: `GA3/${c.id}`, verdict: 'pass', detail: `${c.id} có mục trong postbuild-status.json`, drift: ['DR-022'] }
-          : {
-              id: `GA3/${c.id}`,
-              verdict: 'fail',
-              detail: `${c.id} khai live nhưng không có mục nào trong postbuild-status.json — nó đỏ hay xanh cũng không ai biết qua cổng`,
-              drift: ['DR-022'],
-            },
-      )
-    }
-  }
+  // --- GA3: control live có mục trong báo cáo của CHẶNG nó chạy ---
+  // Dùng lại đúng vị từ của GA6: cùng câu hỏi "file này có mục mang id này không",
+  // chỉ khác chiều kết luận. Không đóng cứng postbuild-status.json — xem
+  // kiemLiveCoTrongBaoCao và BAO_CAO_THEO_STAGE.
+  if (registry?.controls) checks.push(...kiemLiveCoTrongBaoCao(registry.controls, dangChayThatTrongBaoCao))
 
   // --- GA4: import giải được ---
   const thuMucValidator = [join('scripts', 'validators'), join('scripts', 'meta-validators')]

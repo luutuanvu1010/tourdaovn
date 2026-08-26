@@ -10,6 +10,7 @@ import {
   kiemBangChung,
   kiemImport,
   kiemGapConChayThat,
+  kiemLiveCoTrongBaoCao,
 } from '../gate-audit'
 import type { Control } from '../gate-audit'
 import { REPO_ROOT } from '../lib/evidence'
@@ -172,4 +173,62 @@ test('GA4 cho kết quả giống hệt nhau bất kể chạy từ thư mục l
   } finally {
     chdir(truoc)
   }
+})
+
+// ── GA3: control live phải có mục trong báo cáo của CHẶNG nó chạy ──
+// Hồi quy cho lỗi bắt được khi thêm I20 (ADR-0028): bản cũ đóng cứng
+// postbuild-status.json, nên mọi control live ở chặng pre-build trượt vĩnh viễn.
+
+const VALIDATOR_STATUS = 'scripts/reports/validator-status.json'
+const POSTBUILD_STATUS = 'scripts/reports/postbuild-status.json'
+
+/** Vị từ giả: chỉ file `duongDanCo` mới có mục mang `idCo`. */
+const chiCo = (duongDanCo: string, idCo: string) =>
+  (duongDan: string, id: string) => duongDan === duongDanCo && id === idCo
+
+test('GA3 tìm control pre-build trong validator-status.json, không phải postbuild', () => {
+  const controls: Control[] = [{ id: 'I20', status: 'live', stage: 'pre-build' }]
+  const checks = kiemLiveCoTrongBaoCao(controls, chiCo(VALIDATOR_STATUS, 'I20'))
+  assert.equal(checks.length, 1)
+  assert.equal(checks[0].verdict, 'pass')
+  assert.match(checks[0].detail, /validator-status\.json/)
+})
+
+test('GA3 trượt khi control pre-build chưa có mục trong validator-status.json', () => {
+  const controls: Control[] = [{ id: 'I20', status: 'live', stage: 'pre-build' }]
+  const checks = kiemLiveCoTrongBaoCao(controls, () => false)
+  assert.equal(checks[0].verdict, 'fail')
+  assert.match(checks[0].detail, /I20/)
+  assert.match(checks[0].detail, /validator-status\.json/)
+  assert.deepEqual(checks[0].drift, ['DR-022'])
+})
+
+test('GA3 KHÔNG chấp nhận control pre-build chỉ vì nó có mặt trong postbuild-status.json', () => {
+  const controls: Control[] = [{ id: 'I20', status: 'live', stage: 'pre-build' }]
+  const checks = kiemLiveCoTrongBaoCao(controls, chiCo(POSTBUILD_STATUS, 'I20'))
+  assert.equal(checks[0].verdict, 'fail')
+})
+
+test('GA3 giữ nguyên hành vi cũ cho control post-build', () => {
+  const controls: Control[] = [{ id: 'R3', status: 'live', stage: 'post-build' }]
+  assert.equal(kiemLiveCoTrongBaoCao(controls, chiCo(POSTBUILD_STATUS, 'R3'))[0].verdict, 'pass')
+  assert.equal(kiemLiveCoTrongBaoCao(controls, () => false)[0].verdict, 'fail')
+})
+
+test('GA3 bỏ qua control live khai stage lạ hoặc thiếu stage, không tự phán đoán', () => {
+  const controls: Control[] = [
+    { id: 'X1', status: 'live', stage: 'runtime' },
+    { id: 'X2', status: 'live' },
+  ]
+  const checks = kiemLiveCoTrongBaoCao(controls, () => true)
+  assert.equal(checks.length, 2)
+  assert.equal(checks[0].verdict, 'skip')
+  assert.match(checks[0].detail, /runtime/)
+  assert.equal(checks[1].verdict, 'skip')
+  assert.match(checks[1].detail, /thiếu/)
+})
+
+test('GA3 không đụng tới control khai gap', () => {
+  const controls: Control[] = [{ id: 'I19', status: 'gap', stage: 'pre-build' }]
+  assert.deepEqual(kiemLiveCoTrongBaoCao(controls, () => false), [])
 })
