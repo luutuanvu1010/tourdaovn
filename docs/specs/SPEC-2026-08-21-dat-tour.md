@@ -554,8 +554,31 @@ Kiểm được, đặt ra trước khi thi công. Im lặng là trượt.
   định thì ghi `DRIFT_LOG`.
 - **`control-registry.yaml`** chưa có dòng cho BK1–BK5 (kiểm bằng review/grep, không có
   executor script); thêm khi có kiểm máy.
-- **Lịch khởi hành cố định**, **mã tour hiển thị**, **đa ngôn ngữ cho form** — ngoài phạm vi
-  theo ba quyết định §3; mở lại là quyết định mới.
+- **Lịch khởi hành cố định** và **đa ngôn ngữ cho form** — ngoài phạm vi theo ba quyết định §3;
+  mở lại là quyết định mới.
+
+- **Mã tour chảy xuống tới thư báo đơn.** Chủ dự án chốt 2026-08-26: mã tour (`TD101`…`TD306`,
+  tiền tố `TD`, ≤ 10 ký tự) **dừng ở Google Sheet**, dùng để quản lý danh mục. Không vào
+  `prices.yaml`, không hiện trên trang, không vào đơn.
+
+  *Vì sao có thể muốn mở sau này:* tên tour dài như "Tour 3 đảo Vip Nha Trang: Mini Beach - Làng
+  Chài - Hòn Tằm" dễ đọc nhầm qua điện thoại; một mã 5 ký tự trong thư báo giúp nhân viên đối
+  chiếu nhanh hơn.
+
+  *Phác thảo nếu mở — sáu chỗ, một task:*
+  1. `data/prices.yaml`: thêm field tuỳ chọn `maTour` cho mỗi dòng giá.
+  2. `scripts/validators/py1-py8.ts`: `validatePY2` có **danh sách khoá đóng**
+     (`unit`, `amount`, `tiers`, `paxRates`) — phải mở thêm `maTour`, và thêm một luật kiểm
+     định dạng `^TD[A-Z0-9-]{0,8}$`. **Đây là chỗ khiến việc này thành quyết định chứ không phải
+     một cột:** đổi lược đồ giá là chạm tầng `ADR-0027`.
+  3. `scripts/prices-pull.mjs`: thôi bỏ qua cột `Mã tour`, ghi xuống yaml. Script đã được viết
+     sao cho chỉ phải sửa một chỗ.
+  4. `BookingForm.astro`: nướng vào `data-ma-tour` lúc build (không đọc giá lúc chạy — `BK1`).
+  5. `src/lib/booking/schema.ts` + `store.ts` + migration `0002_*.sql`: nhận `maTour` trong
+     payload (có chặn độ dài, qua `clean()`), thêm cột `ma_tour` vào bảng `booking`.
+  6. `notify/format.ts`: đưa mã vào tiêu đề thư và tin Zalo.
+
+  *Chi phí thật nằm ở bước 2 và 5*, không ở việc thêm một cột.
 - **Nhãn `zh`/`ko`/`ru` của form đang chép nguyên tiếng Anh** (kiểu `Record<UIKey,string>` buộc đủ
   khoá; site chạy `langs = ['vi']`). Dịch khi mở ngôn ngữ mới.
 - **Phối hợp với audit giao diện vòng 4** (`docs/plans/2026-08-21-audit-va-ke-hoach-giao-dien-vong-4.md`,
