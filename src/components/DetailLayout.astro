@@ -2,10 +2,11 @@
 import type { Lang, EntityRef, ImageAsset, NearbyEntity } from '../lib/types'
 import { uiCopy } from '../lib/uiCopy'
 import { formatDate } from '../lib/dates'
+import { hostLabel } from '../lib/siteUrl'
 import Breadcrumb from './Breadcrumb.astro'
 import Hero from './Hero.astro'
-import InfoBar from './InfoBar.astro'
-import type { InfoBarItem } from './InfoBar.astro'
+import FactStrip from './FactStrip.astro'
+import type { Fact } from './FactStrip.astro'
 import Sidebar from './Sidebar.astro'
 import type { Slot } from './Sidebar.astro'
 import NearbySection from './NearbySection.astro'
@@ -17,14 +18,32 @@ export interface Props {
   image?: string | ImageAsset
   gallery?: ImageAsset[] | null
   containedInPlace?: EntityRef
-  infoBarItems?: InfoBarItem[]
+  /** Dòng "Nguồn tham khảo" cạnh Cập nhật — 06 §3.1: `sameAs` chỉ render Ở ĐÂY,
+   *  KHÔNG vào Thông tin nhanh, KHÔNG vào sidebar. Chỉ mục đầu mảng; rỗng thì
+   *  ẩn cả dòng. */
+  sameAs?: string[] | null
+  /** Vùng "Thông tin nhanh" — 06 §3.1. Nơi DUY NHẤT của các field ngắn. */
+  facts?: Fact[]
+  /** Trần số ô hiển thị ở `FactStrip`. Không truyền = mặc định 6 (hợp đồng 06
+   *  §3.1 cho bốn entity có hàng trong ma trận). Entity không có hàng ở §3.1
+   *  (vd khách sạn — chỉ ràng buộc bởi Luật 1, không ràng buộc trần 6) truyền
+   *  cao hơn qua đây. Task 7 fix round, 2026-08-23. */
+  factsMax?: number
+  /** @deprecated Không còn render gì — `InfoBar` đã gỡ (Task 7 fix round,
+   *  2026-08-23, LodgingDetail là template cuối chuyển sang `facts`). Giữ
+   *  prop này (kiểu lỏng, không còn phụ thuộc `InfoBar.astro`) chỉ để
+   *  `ArticleDetail`/`OrganizationDetail`/`PersonDetail` — ba template ngoài
+   *  phạm vi việc đóng Luật 1, vẫn dùng `InfoCard` trực tiếp qua slot `info`,
+   *  xem DRIFT_LOG DR-046 — khỏi vỡ kiểu vì vẫn truyền `infoBarItems={[]}`.
+   *  Xoá hẳn khi ba template đó cũng dọn theo. */
+  infoBarItems?: unknown[]
   sidebarSlots: Slot[]
   nearbyTitle: string
   nearby: NearbyEntity[]
   updatedAt: string
-  /** Phù hiệu ngắn cạnh tiêu đề trong hero — 06-BINDING_MAP §3 "Nhãn loại entity". */
+  /** Huy hiệu loại, nay là thứ DUY NHẤT còn nằm trên ảnh hero (06 v2.5) — §3 "Nhãn loại entity". */
   badges?: string[] | null
-  /** Đoạn mở trong hero — §3 "Đoạn mở", `summary`. */
+  /** Đoạn mở — 06 v2.3 chuyển khỏi hero xuống dải sáng SAU thanh dính (`.summary-band`); §3 "Đoạn mở". */
   summary?: string | null
   /** Gắn `data-speakable` lên đoạn mở. Chỉ trang cẩm nang bật, vì chỉ Article
    *  khai `speakable` với cssSelector `[data-speakable]` trong JSON-LD. */
@@ -39,7 +58,7 @@ export interface Props {
 }
 
 const {
-  title, lang, entityType, image, gallery, containedInPlace, infoBarItems,
+  title, lang, entityType, image, gallery, containedInPlace, sameAs, facts, factsMax,
   sidebarSlots, nearbyTitle, nearby, updatedAt,
   badges, summary, speakable = false, jumpLinks, priceLabel, ctaHref, ctaLabel,
 } = Astro.props
@@ -53,19 +72,85 @@ const showStickyBar = jumps.length > 0 || !!priceLabel || !!(ctaHref && ctaLabel
 // CTA là neo trong trang (#dat-tour) thì không mở tab mới; link ngoài (Zalo) mới mở tab.
 const ctaExternal = !!ctaHref && !ctaHref.startsWith('#')
 
+// QĐ-2026-08-25-02: BỎ luật "≤ 2 ô thì không trải dải".
+//
+// Luật cũ cắt theo SỐ LƯỢNG DỮ LIỆU, không theo loại trang — nên cùng một loại
+// entity, trang 2 ô đẩy Thông tin nhanh vào cột phụ còn trang 3 ô trải dải hết
+// bề ngang. Đo được: `trai-nghiem/cano-keo-du-bay` và `phao-chuoi` đều 2 ô nên
+// vào cột phụ; `diem-tham-quan/chua-long-son` 5 ô và `tour/ve-vin-harbour` 3 ô
+// thì trải dải. Cùng một wireframe mà ra hai hình dạng, tuỳ dữ liệu.
+// Nay Thông tin nhanh LUÔN trải dải, mọi trang, mọi số ô.
+const factsVisible = (facts ?? []).filter(f => f.visible)
+
+// Lịch sử vùng Thông tin nhanh, giữ vì nó giải thích vì sao slot 'info' của
+// Sidebar nay hẹp thế:
+//   • Trước 2026-08-23: bản gộp (≤2 ô) đi qua một slot 'info' giả lập của
+//     Sidebar, nên trong HTML tĩnh nó nằm SAU `.content-main` — sai thứ tự di
+//     động mà 06 §3 đòi ("ngay dưới tiêu đề").
+//   • I4 fix 2026-08-23: đưa bản gộp thành con trực tiếp của `.two-col`, nhận
+//     vùng lưới `facts`.
+//   • QĐ-2026-08-25-02: BỎ hẳn khái niệm "bản gộp". Thông tin nhanh nay LUÔN là
+//     dải riêng phía trên `.two-col`; `factsInline` và vùng lưới `facts` đều đã
+//     gỡ. Ba câu của bản I4 mô tả cơ chế nay không còn — viết lại ở đây thay vì
+//     để chú thích khai một thứ đã xoá.
+// Slot 'info' của Sidebar vì vậy chỉ còn InfoCard hợp lệ của
+// Article/Organization/Person (DR-046).
+
+// "Nguồn tham khảo" — 06 §3.1: hàng riêng cạnh Cập nhật ở cuối nội dung, KHÔNG
+// vào Thông tin nhanh (đã tách khỏi `facts` ở AttractionDetail/PlaceDetail),
+// KHÔNG vào sidebar. Giá trị là nhãn theo host, y hệt InfoCard cũ đã làm.
+const sameAsHref = sameAs && sameAs.length > 0 ? sameAs[0] : null
+const sameAsLabel = sameAsHref ? hostLabel(sameAsHref) : ''
+
 const t = uiCopy(lang)
+
+// Hero có ảnh THẬT hay không. Không kiểm bằng `Boolean(image)`: GROQ trả về
+// object `{_type:'image', alt:''}` KHÔNG có `asset` cho entity chưa gắn ảnh —
+// object đó truthy, trong khi `imageUrl()` trả undefined. Hai trang tác giả đã
+// lộ đúng bẫy này (cổng BM-EMPTY-REGION).
+const hasHeroImage = typeof image === 'string' ? Boolean(image) : Boolean(image?.asset?.url)
 ---
 
-<Hero image={image} gallery={gallery} fullBleed>
-  <Breadcrumb slot="overlay" containedInPlace={containedInPlace} entityType={entityType} lang={lang} currentTitle={title} inverse />
-  {badgeList.length > 0 && (
-    <div slot="overlay" class="detail-badges">
-      {badgeList.map(b => <span class="detail-badge">{b}</span>)}
-    </div>
-  )}
-  <h1 slot="overlay" class="detail-title">{title}</h1>
-  {summary && <p slot="overlay" class="detail-summary" {...(speakable ? { 'data-speakable': true } : {})}>{summary}</p>}
-</Hero>
+{/* Dải breadcrumb và dải tiêu đề — 06 v2.5 (QĐ-2026-08-25-01), cả hai nay đứng
+    TRÊN hero, không còn phần tử chữ nào đè lên ảnh.
+
+    Breadcrumb: đây là về ĐÚNG chỗ 06 §3 đã khai từ v2.2 (N3) — "dải sáng phía
+    trên hero, không đè lên ảnh". Mã trước đó đặt nó trong slot="overlay" nên
+    lệch đặc tả; lệch đó nay đóng. Bỏ prop `inverse` vì nền đã là nền sáng.
+
+    Tiêu đề: v2.4 đặt h1 ở dải dưới hero, v2.5 đưa lên trên. Đổi lại phải rút
+    hero desktop 430→380px để giữ Luật 3 "giá trước, chữ sau". Con số 380 lấy từ
+    mockup Design chặng 2, không phải tự đặt. Chi tiết phép tính và mức độ tin
+    cậy: xem hàng "Hero" ở 06 §3 — con số hiện là ƯỚC LƯỢNG, chưa đo trình duyệt. */}
+{/* KHÔNG bọc thêm `.container` ở đây: Breadcrumb tự bọc container làm gốc của
+    nó (Breadcrumb.astro:78). Bọc hai lần thì `padding-inline: var(--s5)` cộng
+    dồn, đẩy breadcrumb thụt vào 24px so với h1 ngay bên dưới. 06 §3 khai
+    component hoặc tự bọc container, hoặc được primitive bọc — không phải cả hai. */}
+<div class="crumb-band">
+  <Breadcrumb containedInPlace={containedInPlace} entityType={entityType} lang={lang} currentTitle={title} />
+</div>
+
+<div class="title-band">
+  <div class="container">
+    <h1 class="detail-title">{title}</h1>
+  </div>
+</div>
+
+{/* Không ảnh VÀ không huy hiệu thì bỏ hẳn hero, không dựng khung rỗng — R7
+    "vùng rỗng ẩn hẳn". Trước v2.5 điều này không xảy ra vì lớp phủ luôn có
+    breadcrumb, h1 và đoạn mở; ba thứ đó nay đã ra ngoài, nên biến thể "không
+    ảnh" của Hero còn lại đúng một khối gradient trống. Cổng BM-EMPTY-REGION
+    bắt được ca này trên hai trang tác giả — Person không có mainImage và
+    không có huy hiệu loại (06 §4.11). */}
+{(hasHeroImage || badgeList.length > 0) && (
+  <Hero image={image} gallery={gallery} fullBleed hasOverlay={badgeList.length > 0}>
+    {badgeList.length > 0 && (
+      <div slot="overlay" class="detail-badges">
+        {badgeList.map(b => <span class="detail-badge">{b}</span>)}
+      </div>
+    )}
+  </Hero>
+)}
 
 {showStickyBar && (
   <div class="sticky-bar">
@@ -74,7 +159,7 @@ const t = uiCopy(lang)
         {jumps.map(j => <a href={j.href}>{j.label}</a>)}
       </nav>
       <div class="sticky-bar__action">
-        {priceLabel && <span class="sticky-bar__price">{priceLabel}</span>}
+        {priceLabel && <span class="sticky-bar__price" data-region="sticky-bar" data-field="gia">{priceLabel}</span>}
         {ctaHref && ctaLabel && (
           <a class="sticky-bar__cta" href={ctaHref} {...(ctaExternal ? { target: '_blank', rel: 'noopener' } : {})}>{ctaLabel}</a>
         )}
@@ -83,16 +168,41 @@ const t = uiCopy(lang)
   </div>
 )}
 
-{infoBarItems && infoBarItems.length > 0 && <InfoBar items={infoBarItems} />}
+{/* Dải đoạn mở — 06 v2.3 §3 hàng "Đoạn mở" (QĐ-2026-08-23-02), dựng 2026-08-24,
+    đóng DR-049. Vị trí là dải sáng dưới hero, SAU thanh dính, TRÊN Thông tin
+    nhanh — đúng chữ của 06, không phải chỗ khác.
+    Vì sao sau thanh dính chứ không trước: spec vòng 5 §3.6 bác cách chen giữa
+    hero và thanh dính vì nó đẩy thanh giá xuống sâu thêm ~152px trên desktop,
+    tức giá rơi khỏi màn đầu trên laptop 1366×768 — vi phạm Luật 3 "giá trước,
+    chữ sau".
+    data-region/data-field là điều kiện để tầng B của luat1-post canh được vùng
+    này; trước đây summary chưa bao giờ được gắn thẻ nên cổng mù với nó (DR-048). */}
+{summary && (
+  <div class="summary-band" data-region="summary-band">
+    <div class="container">
+      <p class="detail-summary" data-field="summary" {...(speakable ? { 'data-speakable': true } : {})}>{summary}</p>
+    </div>
+  </div>
+)}
+
+{factsVisible.length > 0 && <FactStrip facts={facts!} max={factsMax} />}
 
 <div class="container two-col">
   <div class="content-main">
     <slot name="content" />
 
     <div class="updated-section">
-      <div class="updated">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        {t('updated')} {formatDate(updatedAt, lang)}
+      <div class="updated-row">
+        <div class="updated">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          {t('updated')} {formatDate(updatedAt, lang)}
+        </div>
+        {sameAsHref && (
+          <div class="reference-source" data-region="section" data-field="sameAs">
+            <span aria-hidden="true">🔗</span>
+            {t('referenceSource')}: <a href={sameAsHref} target="_blank" rel="noopener">{sameAsLabel}</a>
+          </div>
+        )}
       </div>
     </div>
   </div>
@@ -100,6 +210,13 @@ const t = uiCopy(lang)
   {/* stickyBar: Sidebar cộng chiều cao thanh dính vào chỗ dính của nó (DR-033). */}
   <Sidebar slots={sidebarSlots} stickyBar={showStickyBar}>
     <slot name="booking" slot="booking" />
+    {/* Forward cho InfoCard — VẪN CẦN, không phải hàng chết. Ba template
+       ngoài phạm vi việc đóng Luật 1 (ArticleDetail, OrganizationDetail,
+       PersonDetail — không có hàng ở 06 §3.1, không dùng FactStrip) vẫn
+       truyền <InfoCard slot="info"> qua đây. Mọi template có hàng ở §3.1 đã
+       chuyển sang `facts` không truyền gì vào slot này nên nhánh trống, không
+       render thừa. Xem DRIFT_LOG DR-046 — không xoá tới khi ba template đó
+       cũng chuyển hoặc có quyết định khác. */}
     <slot name="info" slot="info" />
     <slot name="map" slot="map" />
     <slot name="about" slot="about" />
@@ -125,12 +242,30 @@ const t = uiCopy(lang)
     backdrop-filter: blur(4px);
   }
 
+  /* Ba dải chữ quanh hero — 06 v2.5 (`.crumb-band` và `.title-band` TRÊN hero,
+     `.summary-band` dưới thanh dính). Cả ba đứng trên nền trang, không đè
+     ảnh, nên chữ dùng token màu chữ thường chứ không phải --c-text-inverse. */
+  .crumb-band {
+    background: var(--c-surface);
+    padding: var(--s3) 0 0;
+  }
+
+  .title-band {
+    background: var(--c-surface);
+    padding: var(--s3) 0 var(--s5);
+  }
+
+  .summary-band {
+    background: var(--c-surface);
+    padding: var(--s5) 0 0;
+  }
+
   .detail-summary {
     max-width: 62ch;
-    color: var(--c-text-inverse);
+    color: var(--c-text-muted);
     font-size: var(--fs-base);
     line-height: var(--lh-body);
-    opacity: 0.92;
+    margin: 0;
   }
 
   /* Thanh dính: neo mục + giá + CTA. Bám dưới header nên dùng --header-h. */
@@ -220,7 +355,11 @@ const t = uiCopy(lang)
     font-family: var(--font-display);
     font-size: clamp(var(--fs-h3), 4.2vw, var(--fs-hero));
     font-weight: var(--fw-800);
-    color: var(--c-text-inverse);
+    /* 06 v2.4 đưa h1 xuống nền sáng (v2.5 đưa tiếp lên TRÊN hero) nên đổi từ
+       --c-text-inverse sang --c-text.
+       Cặp --c-text / --c-surface đo 17,85:1 ở bien-sau và 16,80 ở cat-bien —
+       cao hơn hẳn 6,6:1 mà QA1 4B đo được khi chữ còn đè lên ảnh. */
+    color: var(--c-text);
     /* 1.06 là giá trị cứng ngoài token và ở cỡ hero nó làm dấu ngã dòng dưới
        chạm dấu nặng dòng trên — đúng lỗi Design nêu. --lh-display là bậc riêng
        cho chữ hiển thị lớn, duyệt 2026-08-06. */
@@ -233,21 +372,44 @@ const t = uiCopy(lang)
   .two-col {
     display: grid;
     grid-template-columns: 1fr 340px;
+    /* Hai vùng: 'main' (content-main) và 'sidebar' (Sidebar.astro tự khai
+       grid-area:sidebar).
+
+       QĐ-2026-08-25-02 gỡ hàng lưới 'facts'. Hàng đó sinh ra ở I4 fix
+       (2026-08-23) để đỡ bản gộp Thông tin nhanh ≤2 ô trong cột phụ; nay
+       Thông tin nhanh luôn trải dải nên không có gì chiếm nó nữa, và một
+       grid-area không ai dùng là chỗ để hiểu nhầm về sau. */
+    grid-template-areas: 'main sidebar';
     gap: var(--s7);
     align-items: start;
     padding-top: var(--s6);
     padding-bottom: var(--s7);
   }
 
+  .content-main {
+    grid-area: main;
+  }
+
   .updated-section {
     padding-top: var(--s4);
   }
 
-  .updated {
-    font-size: var(--fs-sm);
-    color: var(--c-text-muted);
+  /* Một hàng chung border-top cho cả "Cập nhật" và "Nguồn tham khảo" — 06 §3.1
+     đặt hai dòng này cạnh nhau ở cuối nội dung. */
+  .updated-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s4);
     padding: var(--s4) 0;
     border-top: 1px solid var(--c-border);
+  }
+
+  .updated,
+  .reference-source {
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
     display: flex;
     align-items: center;
     gap: var(--s2);
@@ -257,9 +419,28 @@ const t = uiCopy(lang)
     color: var(--c-primary);
   }
 
+  .reference-source a {
+    color: var(--c-primary);
+    text-decoration: none;
+    font-weight: var(--fw-600);
+  }
+
+  .reference-source a:hover {
+    text-decoration: underline;
+  }
+
   @media (max-width: 1023px) {
     .two-col {
       grid-template-columns: 1fr;
+      /* QĐ-2026-08-25-02 gỡ hàng 'facts' ở đây nữa. Bản sửa đầu chỉ dọn luật
+         desktop và bỏ sót luật này, nên track 'facts' vẫn tồn tại kèm
+         `gap: var(--s7)` — tức MỘT KHOẢNG TRỐNG 48px cố định trên mọi trang
+         chi tiết ở khổ ≤1023px, cho một vùng không gì có thể chiếm.
+         Thông tin nhanh nay là dải riêng phía trên `.two-col`, không còn đi
+         qua lưới này. */
+      grid-template-areas:
+        'main'
+        'sidebar';
     }
   }
 </style>

@@ -1,6 +1,8 @@
 # SPEC — Bề mặt vòng 5: chữ, thang cỡ, màu, và bố cục di động của trang chi tiết
 
 - **Trạng thái:** nháp, **chờ chủ dự án duyệt**. Hướng đã chốt qua năm câu hỏi trong phiên brainstorm 2026-08-22; giá trị cụ thể chưa chốt và cố ý chưa điền.
+- **Sửa đổi 2026-08-24 (`QĐ-2026-08-24-02`):** §6 thêm hạng mục giao nộp thứ mười hai (nhãn nút trên trang miễn phí) và sửa mốc font; §7 **R8 thu hẹp** (không bỏ), thêm **R9**, R4 đổi sang đơn vị byte payload; §2.6 sửa số đo thư mục font.
+- **Sửa đổi 2026-08-24 (`QĐ-2026-08-24-03`):** §2.8 thêm chẩn đoán thứ tám (kho ảnh); §6 chặng 1 thêm **hạng mục thứ mười ba — Ảnh** (13a bảng tỷ lệ khung theo vai, 13b chuẩn chất ảnh); §7 thêm **R10** (mốc phân giải tối thiểu, cấm phóng ảnh lên); §9 tách **V-A/V-B/V-C** là nợ dữ liệu ảnh, ngoài phạm vi vòng 5. Bằng chứng: `docs/evidence/2026-08-24-kho-anh/`.
 - **Ngày soạn:** 2026-08-22   **Người soạn:** Cowork   **Người duyệt:** Lưu Tuấn Vũ
 - **Loại quyết định:** cửa hai chiều ở phần token (chữ, cỡ, màu — revert bằng một commit). **Cửa một chiều ở `06-BINDING_MAP` v2.3**: đổi vùng của `summary` và thêm Luật 5 kéo theo mockup và code phải dựng lại. **Cửa một chiều ở V0b**: thêm một cổng vào `gate:all` và buộc component gắn `data-field`/`data-region` — gỡ ra sau này là gỡ một hàng rào.
 - **Repo lúc soạn:** khởi thảo tại `ab24aa5`; **soát lại tại `6e2d57e`** sau khi một phiên song song phát hành `06` v2.2.0 (`44393e7`) và chốt cổng QA1 đợt 4B (`1c20f17`) — xem §0.
@@ -145,7 +147,7 @@ Canvas vòng 4 có sáu artboard trang chi tiết: `Main` + `DiDong` (Điểm th
 
 ### 2.6 Nợ LCP đang treo
 
-`07` §2 mục "Nợ có chủ ý" ghi: *"chưa đo LCP sau hai lần đổi chữ."* Bộ chữ đã đổi hai lần trong ngày 2026-08-06 (`QĐ-2026-08-06-10` chốt Lora, `QĐ-2026-08-06-11` thay bằng Nunito ngay trong ngày), rồi đổi vai lần nữa ở vòng 3 ngày 14/08. Thư mục font hiện ~104 KB, giảm từ ~220 KB. Ngưỡng của `00-PROJECT_BRIEF` §6: LCP ≤ 2500 ms, Lighthouse mobile ≥ 90.
+`07` §2 mục "Nợ có chủ ý" ghi: *"chưa đo LCP sau hai lần đổi chữ."* Bộ chữ đã đổi hai lần trong ngày 2026-08-06 (`QĐ-2026-08-06-10` chốt Lora, `QĐ-2026-08-06-11` thay bằng Nunito ngay trong ngày), rồi đổi vai lần nữa ở vòng 3 ngày 14/08. Thư mục font **đo lại 2026-08-24: 6 file, 89.196 byte payload = 87,1 KB** (`QĐ-2026-08-24-02`), giảm từ ~220 KB; con số ~104 KB ghi ở `07` §2 và `QĐ-2026-08-06-11` là bản ghi của thời điểm đó, giữ nguyên. Ngưỡng của `00-PROJECT_BRIEF` §6: LCP ≤ 2500 ms, Lighthouse mobile ≥ 90.
 
 Đề xuất bộ chữ thứ tư mà không đóng nợ này là mở nợ chồng nợ.
 
@@ -171,9 +173,43 @@ Không bộ kiểm nào đếm số vùng của một field. Luật 2 và Luật
 
 Nên phương án "Code sửa `AttractionDetail.astro` và `DetailLayout`" chữa được 44 trang hôm nay và **không ngăn được trang thứ 59**. Entity mới, delta mới, hay một lần refactor `DetailLayout` là drift quay lại, im lặng như lần này. Đóng gốc nghĩa là **đưa Luật 1 xuống tầng máy kiểm** — hiện vật V0b ở §4, hợp đồng ở §5.4.
 
+### 2.8 Kho ảnh không đủ phân giải cho chính cái khung mà mã đang xin
+
+*(Thêm 2026-08-24, `QĐ-2026-08-24-03`. Bằng chứng và script chạy lại: `docs/evidence/2026-08-24-kho-anh/`.)*
+
+Ba triệu chứng chủ dự án nêu ở §3.3 đều thuộc tầng token. Chẩn đoán này là thứ **không** nằm ở tầng token, nhưng đứng cùng vùng than phiền *"nhìn không ra công ty du lịch"* — nên phải đo trước khi vòng 5 chốt bất cứ thứ gì, kẻo chốt xong chữ và màu mà mặt trang vẫn mềm.
+
+**Phương pháp.** Đọc Sanity với đúng bộ lọc "lên sóng" của `src/lib/sanity.ts:162` (`reviewStatus == "approved"` + có `slug.vi.current` + có `title.vi`), 6 loại entity có ảnh. Ba mốc phân giải **lấy từ chính mã**, không tự đặt: `SiteHome.astro:121` xin `w=1800`, `Hero.astro:20` xin `w=1200`, `Hero.astro:29`/`Card.astro` xin `w=640`.
+
+**Mốc đo: 2026-08-24, đọc Sanity, 89 trang chi tiết lên sóng.** Con số này khác `QĐ-2026-08-24-02` (đếm bản dựng `dist/` lúc 09:37 cùng ngày: Tour 23, Khách sạn 6) vì **10 tài liệu được duyệt sau giờ dựng** — 6 tour du thuyền và 4 khách sạn; `ket-qua-doi-chieu.txt` chỉ đích danh từng cái. Cả hai con số đúng ở mốc của nó.
+
+| Dữ kiện | Số |
+|---|---|
+| Ảnh chính hẹp hơn **1200px** mà hero trang chi tiết xin | **40/88 = 45 %** |
+| Hẹp hơn cả **640px** của thẻ lưới | 7/88 = 8 % |
+| Hẹp nhất: `attraction/thac-ta-gu` — **399×501**, ảnh **dọc** đặt vào khung ngang | ar 0,80 |
+| Một tấm ảnh dùng ở nhiều chỗ (một tấm dùng 3 lần) | **27 tấm** |
+| Thiếu `alt` — `06` §3 khai *"alt bắt buộc khi có ảnh"* | 10/88 chính + 16/309 gallery |
+| Trang lên sóng không có ảnh chính | 1 (`tour/tour-du-thuyen-vega-yacht-nha-trang-day-tour`) |
+| Nhánh Resort | vẫn **0** trang |
+
+**Điều dễ đoán sai, nên đã đo riêng: Sanity CDN _có_ phóng ảnh lên.** Xin `?w=` vượt cỡ gốc thì CDN nội suy rồi nén lại, trả về ảnh **vừa mềm vừa nặng hơn ảnh gốc**:
+
+| Ca | Gốc | Mã xin | CDN trả về | Đang tải | Nếu xin đúng cỡ gốc | Phí |
+|---|---|---|---|---|---|---|
+| `attraction/thac-ta-gu` | 399×501 | `w=1200` | **1200×1507** | 283.013 B | 59.279 B | **+223.734 B (+377 %)** |
+| Hero **trang chủ** | 1280×720 | `w=1800` | **1800×1013** | 232.531 B | 164.493 B | **+68.038 B (+41 %)** |
+
+Riêng hero trang chủ phí **68.038 byte** — bằng **76 % toàn bộ ngân sách font của site** (89.196 byte, `QĐ-2026-08-24-02`) — cho **không một chi tiết nào thêm**. Và nó gần như chắc chắn là phần tử LCP, tức đụng thẳng **R5** và cùng nợ với §2.6: đổi bộ chữ để cứu LCP trong khi hero tải một tấm ảnh phóng 1,4× là chữa sai chỗ.
+
+**Kết luận.** Ảnh hỏng ở **hai tầng khác nhau**, và phải xử ở hai chỗ khác nhau:
+
+- **Tầng đặc tả** — chưa có luật nào về ảnh. `07` không có mục ảnh; `tokens.css` không có token tỷ lệ nào; 5 tỷ lệ khung đang rải ở 8 component (`4/3`, `12/7`, `3/2`, `16/9`) mà không đặc tả nào khai cái nào cho vai nào. Đây là việc của vòng 5 → hạng mục 13 ở §6, R10 ở §7.
+- **Tầng dữ liệu** — 40 tấm ảnh không đủ phân giải, 27 tấm dùng lại, 26 chỗ thiếu `alt`. Không token nào chữa được; đây là việc nhập liệu → tách ra V-A/V-B/V-C ở §9.
+
 ## 3. Quyết định đã chốt trong phiên brainstorm 2026-08-22
 
-Năm câu hỏi, năm câu trả lời của chủ dự án. Ghi lại để bước sau không phải đoán lại.
+**Sáu** quyết định của chủ dự án (3.1–3.6). Ghi lại để bước sau không phải đoán lại. *(Sửa 2026-08-24: dòng này trước ghi "năm câu hỏi, năm câu trả lời" — số đếm cũ, sót lại từ trước khi 3.6 được thêm. §4 và prompt vòng 5 đều đã ghi "sáu"; nay thống nhất.)*
 
 **3.1 — Tách theo vai.** Bốn ý thuộc ba vai; không gộp vào một prompt Design. Ý (1) và (3) đi Design; ý (2) đi đường sửa `06`; ý (4) đi Code.
 
@@ -187,15 +223,25 @@ Năm câu hỏi, năm câu trả lời của chủ dự án. Ghi lại để bư
 
 **3.6 — Đoạn mở đặt ở dải sáng dưới hero, sau thanh dính.** Không lên trên hero (đẩy ảnh xuống ~160px trên di động), không chen giữa hero và thanh dính (đẩy giá xuống sâu thêm ~110px trên desktop, phải mở lại Luật 3). Hero sau đó còn **huy hiệu loại + h1**.
 
+> **⚠ ĐÃ BỊ OVERRIDE MỘT PHẦN — 2026-08-25, `QĐ-2026-08-25-01`.** Chủ dự án xem bản dựng local rồi yêu cầu đẩy **breadcrumb và `h1`** lên **trên** hero. Mã đã theo. Ghi ở đây vì §3.6 là quyết định của chính chủ dự án ba ngày trước, và để nguyên thì đặc tả nói ngược mã — đúng loại xung đột `CLAUDE.md` §5 bắt dừng.
+>
+> **Phần nào đổi:** câu cuối. Hero nay chỉ còn **huy hiệu loại**, không còn `h1`. Thứ tự thật: breadcrumb → h1 → hero → thanh dính → đoạn mở → Thông tin nhanh.
+>
+> **Phần nào GIỮ NGUYÊN:** vị trí **đoạn mở** vẫn đúng như §3.6 chốt — dải sáng **sau** thanh dính. Lý lẽ Luật 3 của §3.6 không bị bác; nó là căn cứ để từ chối phương án đưa đoạn mở lên cùng.
+>
+> **Cái giá đã trả:** hai dải chữ lên trên đẩy thanh dính xuống, nên hero rút 430→380px (desktop) và 280→240px (di động) để giá không rơi khỏi màn đầu.
+>
+> **Điều §3.6 lo mà CHƯA ai đo lại:** *"trên di động 390px ảnh bị đẩy xuống ~160px; màn đầu toàn chữ, mất cú hích cảm xúc"*. Với tiêu đề dài ba dòng, breadcrumb + dải tiêu đề có thể đẩy ảnh xuống **hơn** 160px — tức lo ngại cũ nặng thêm chứ không nhẹ đi. Chủ dự án chốt bằng mắt trên bản dựng local, nhưng **chưa đo trên máy 390px thật**. Đây là nợ mở, không phải câu hỏi đã đóng.
+
 ## 4. Hiện vật, vai, và cổng
 
 | # | Hiện vật | Vai | Cổng | Chặn bởi |
 |---|---|---|---|---|
 | **V0a** | Phiếu Code đợt 4B, gồm ý (4): thay cặp `InfoBar` + `InfoCard` bằng vùng **Thông tin nhanh** theo `06` §3.1, đóng cả **chín** kiểu lặp ở §2.1 — không chỉ ca giá của Chùa Long Sơn | Code | QA2 | ~~chốt cổng QA1 4B, chốt N3/N15~~ — **đã chốt 2026-08-22** (`QĐ-2026-08-22-05`, `1c20f17`). Không còn bị chặn |
 | **V0b** | **Bộ kiểm Luật 1** (§5.4): validator hậu dựng đếm số vùng mỗi field, đỏ khi > 1 ngoài ngoại lệ đã khai. Kèm việc gắn `data-field` / `data-region` vào component vùng | Code | QA2 · vào `gate:all` | V0a **hoặc** chạy cùng V0a |
-| **V1** | Hai phiếu drift: font-stack ngược (§2.2), thang 14 bậc vs 8 bậc khai (§2.3) | Cowork | ghi vào `DRIFT_LOG.md` | — |
+| **V1** | Hai phiếu drift: font-stack ngược (§2.2), thang 14 bậc vs 8 bậc khai (§2.3) | Cowork | ~~ghi vào `DRIFT_LOG.md`~~ — **xong 2026-08-24: `DR-050` + `DR-051`** | — |
 | **V2** | `06-BINDING_MAP` **v2.3** (§5) | Cowork | chủ dự án chốt + QĐ mới | — |
-| **V3** | Prompt bàn giao Design vòng 5 (§6) | Cowork | tự kiểm P1–P6 | V1 + V2 |
+| **V3** | Prompt bàn giao Design vòng 5 (§6) | Cowork | ~~tự kiểm P1–P6~~ — **xong 2026-08-24: đạt 6/6**, khối QA ở cuối `docs/prompts/VONG-5-CLAUDE-DESIGN.md` | ~~V1 + V2~~ — cả hai đã xong |
 | **V4** | Mockup vòng 5 (§6) | Design | QA1 do tác nhân độc lập chạy | V3 |
 | **V5** | `07-DESIGN_TOKENS` **v2** — điền giá trị chủ dự án đã chọn | Cowork | chủ dự án chốt + QĐ | V4 |
 | **V6** | Code vòng 5 | Code | QA2 | V5 |
@@ -290,10 +336,22 @@ Design chưa đụng vào sáu trang. Giao ba thứ để chủ dự án chốt 
 | **Ba ứng viên chữ** | Cùng một màn hình Chùa Long Sơn dựng ba lần, ba bộ chữ khác nhau | **Ảnh thật lấy từ Sanity** và **chữ thật của chính bài đó** — không chữ giả, không ô kẻ chéo. Ứng viên A bắt buộc là bộ đang chạy (Be Vietnam Pro + Nunito) để làm mốc so |
 | **Thang cỡ mới** | ≤ 8 bậc, mỗi bậc gắn đúng một vai | Dựng song song ở 390px và 1280px. Phải nêu bậc nào thay bậc nào trong 14 bậc hiện có |
 | **Ba bộ màu** | Sắc độ đề xuất cho `bien-sau`, `cat-bien`, `ngoc-lam` | Bảng AA bốn cặp × ba bộ. Sửa bộ nào thì sửa cả ba, không bỏ bộ nào |
+| **Ảnh** *(thêm `QĐ-2026-08-24-03`)* | Bảng tỷ lệ khung theo vai (**13a**) và chuẩn chất ảnh (**13b**) | Tối đa 3 tỷ lệ, mỗi tỷ lệ gắn ít nhất một vai; chuẩn chất ảnh phải bám `00-PROJECT_BRIEF` §3. Chi tiết ngay dưới bảng |
 
-Kèm **bảng chi phí font**: từng ứng viên, số byte woff2 từng file, tổng thư mục, chênh so với 104 KB hiện tại.
+Kèm **bảng chi phí font**: từng ứng viên, số byte woff2 từng file, tổng payload, chênh so với **89.196 byte (87,1 KB)** hiện tại — mốc đo lại 2026-08-24, tính bằng byte payload chứ không phải `du` (`QĐ-2026-08-24-02`).
 
-**Cổng: chủ dự án chốt chữ, thang, màu.** Rồi mới sang chặng 2.
+**Hạng mục thứ mười ba — Ảnh** (thêm 2026-08-24, `QĐ-2026-08-24-03`; chẩn đoán ở §2.8). Đi cùng **chặng 1**, không để sang chặng 2: ảnh và màu phải được nhìn cùng nhau — chốt màu trên một tấm ảnh rồi mới đổi chuẩn ảnh là phải chốt màu lại.
+
+**13a — Bảng tỷ lệ khung theo vai.** Hiện có **5 tỷ lệ rải ở 8 component** (`4/3` ở `Card`, `NearbySection`, `Gallery`, `SkeletonCard`; `12/7` ở `HomeTourGrid`; `3/2` ở `HomeAreaGrid`, `TouristDestinationHub`; `16/9` ở `HomeGuideGrid`) và **không đặc tả nào khai cái nào cho vai nào**. Design giao một bảng *vai → tỷ lệ* phủ hết các vai đang có ảnh: hero desktop, hero di động, ô mosaic gallery, thẻ lưới entity, thẻ cẩm nang, thẻ khu vực, ô ảnh chờ. Biên của đề xuất:
+
+- **Tối đa 3 tỷ lệ.** Đây là một thang, không phải một danh sách — cùng lý lẽ với thang cỡ chữ ở §2.3.
+- **Mỗi tỷ lệ phải gắn ít nhất một vai.** Tỷ lệ không có vai là token chết.
+- Kết quả vào `07` thành **token**, không viết cứng trong component. `tokens.css` hiện **không có token tỷ lệ nào** — đã kiểm.
+- Đổi tỷ lệ của một vai thì phải nói rõ **ảnh đang có bị cắt thêm bao nhiêu**: 6 % ảnh chính là ảnh dọc (§2.8).
+
+**13b — Chuẩn chất ảnh.** Chuẩn này **đang tồn tại nhưng không có chủ**: `readme.md` của dự án Claude Design tự viết *"ảnh biển đảo thật, nắng trưa, xanh lam–ngọc, tương phản cao. Không ảnh đơn sắc, không filter lạnh, không grain"* — câu đó không truy về được đặc tả nào. Nó phải **vào `07` thành luật, hoặc bị gỡ**; để nguyên là nguồn sự thật thứ hai (`CLAUDE.md` §5). Đề xuất phải nêu tối thiểu: ảnh thật hay ảnh kho, có người trong khung hay không, hướng sáng, cấm gì. Bám định vị ở `00-PROJECT_BRIEF` §3 — công ty tự vận hành tour, không phải sàn trung gian.
+
+**Cổng: chủ dự án chốt chữ, thang, màu, và ảnh.** Rồi mới sang chặng 2.
 
 ### Chặng 2 — áp vào trang (8 artboard)
 
@@ -308,6 +366,12 @@ Bốn entity × desktop 1280 + di động 390, theo bộ đã chốt và theo `0
 
 Mỗi artboard chặng 2 kèm **bảng đối chiếu vùng ↔ dòng nào trong `06` v2.3**. Vùng không đối chiếu được là vùng phải bỏ.
 
+**Hạng mục thứ mười hai — nhãn nút trên trang điểm tham quan miễn phí** (thêm 2026-08-24, `QĐ-2026-08-24-02`). `QĐ-2026-08-24-01` gỡ vùng giá khỏi trang miễn phí nhưng **không** gỡ nút "Đặt vé" trỏ Zalo còn lại — một nút đặt vé trên một ngôi chùa miễn phí. Đó là câu hỏi nhãn và luồng, thuộc bước 7. Design đề xuất **chữ và vị trí**; chủ dự án chốt. Biên của đề xuất:
+
+- Nhãn **"Đặt vé" bị loại** trên trang miễn phí — không có vé để đặt.
+- `06` §6 **Luật 3** cấm "nút thay thế trỏ về chính site" khi không có giá. Nút Zalo trỏ **ra ngoài** site nên không vướng; một nút trỏ về trang khác của tourdao.vn thì vướng.
+- **R7** cấm CTA giả: nút phải dẫn tới hành động có thật (mở Zalo), không phải nút trang trí cho cân bố cục.
+
 **Vì sao tách hai chặng.** Gộp lại thì Design phải dựng 8 artboard × 3 ứng viên chữ = 24 bản, phần lớn vứt đi. Tách ra thì chủ dự án chốt chữ trên một màn hình rồi mới trả giá cho tám bản.
 
 ### Ranh giới phạm vi trong prompt
@@ -321,11 +385,15 @@ Mỗi artboard chặng 2 kèm **bảng đối chiếu vùng ↔ dòng nào trong
 | **R1** | Không tạo nguồn token thứ hai. Giá trị mới là **đề xuất trong bảng**, không viết thẳng vào `tokens.css`, không hardcode màu vào mockup | `07` mở đầu; `CLAUDE.md` §5 |
 | **R2** | Cả ba bộ giao diện phải cùng dùng được. Sửa sắc độ thì sửa cho cả ba | `07` §1b |
 | **R3** | WCAG AA ≥ 4,5 ở bốn cặp × ba bộ. `--c-sand` cấm làm nền cho chữ trắng (chỉ đạt 3,28). Kiểm bằng `npm --prefix scripts run check:theme` | `07` §1; `04-CONSTRAINTS` §3 |
-| **R4** | Font mới phải self-host được, đủ subset `vietnamese` + `latin`, ghi số byte woff2 từng file. **Trần: tổng thư mục font ≤ 140 KB** — mốc trước đợt đổi chữ; nay đang 104 KB | `07` §2 |
+| **R4** | Font mới phải self-host được, đủ subset `vietnamese` + `latin`, ghi số byte woff2 từng file. **Trần: tổng payload `.woff2` ≤ 140 KB** — mốc trước đợt đổi chữ; nay đang **89.196 byte = 87,1 KB** trên 6 file (`QĐ-2026-08-24-02`). Mốc và trần đều tính bằng **byte payload**, không phải `du` | `07` §2; `QĐ-2026-08-24-02` |
 | **R5** | Kèm điều kiện **đo LCP trước khi lên live** (LCP ≤ 2500 ms, Lighthouse mobile ≥ 90). Đây là cách đóng nợ đang treo ở `07` §2 | `00-PROJECT_BRIEF` §6 |
 | **R6** | Luật 1: một thông tin, một vùng, một lần. Mockup lặp field ra hai vùng là trượt — trừ giá | `06` §6 |
 | **R7** | Vùng rỗng ẩn hẳn. Không placeholder, không khung trống, không CTA giả | `06` quyết định nền 2 và 3 |
-| **R8** | Dữ liệu mỏng: mọi khối phải tử tế với **1 mục**, không chỉ với 6–8 mục | `00-PROJECT_BRIEF`; prompt Pha F |
+| **R8** | **Khối có số mục phụ thuộc dữ liệu phải tử tế với 1 mục.** Áp cho mọi dải/lưới sinh từ truy vấn liên quan (Gần đây, Trải nghiệm tại đây, Dải liên quan) và mọi listing của nhánh dưới 12 entity (Khách sạn 6, Địa danh 7, Trải nghiệm 9, Resort 0). **Không** còn áp cho lưới thẻ Tour và Điểm tham quan — hai nhánh đã đủ dày (23 và 36). Ít mục thì **thu khối lại**, không độn placeholder cho đầy hàng | `00-PROJECT_BRIEF`; **thu hẹp theo `QĐ-2026-08-24-02`** (bản gốc: "mọi khối tử tế với 1 mục", prompt Pha F) |
+| **R9** | Không đổi một field nào của `01-CONTENT_MODEL`; không sửa `06-BINDING_MAP`, không sửa `07-DESIGN_TOKENS`. Design **đề xuất**; Cowork ghi vào đặc tả sau khi chủ dự án duyệt | `CLAUDE.md` §3 (ranh vai Design); `QĐ-2026-08-24-02` |
+| **R10** | **Mốc phân giải tối thiểu theo vai, và cấm phóng ảnh lên.** Mỗi vai trong bảng 13a phải kèm một mốc bề rộng tối thiểu. Ảnh **dưới mốc thì không được xin cỡ lớn hơn ảnh gốc** — Sanity CDN không từ chối, nó nội suy lên rồi nén lại, trả về ảnh vừa mềm vừa nặng hơn ảnh gốc (đo: `thac-ta-gu` +377 %, hero trang chủ +41 %). Design đề xuất **cách rơi** khi ảnh dưới mốc (hạ khung, đổi bố cục, hay hero thuần chữ); chủ dự án chốt. **Cấm** cách rơi nào tạo ô trống hay ảnh placeholder — R7 vẫn áp | §2.8; `00-PROJECT_BRIEF` §6 (ngưỡng LCP, chung căn cứ với R5); `docs/evidence/2026-08-24-kho-anh/` |
+
+**Ghi chú sửa đổi (2026-08-24, `QĐ-2026-08-24-02`).** R8 **thu hẹp chứ không bỏ**. Prompt vòng 5 bản `9a9d06f` tuyên bố ràng buộc này "đã hết hiệu lực" rồi chiếm chỗ R8 bằng nội dung nay là R9 — prompt không có thẩm quyền huỷ ràng buộc cứng của spec (`CLAUDE.md` §1). Căn cứ đo và lý lẽ đầy đủ ở `QĐ-2026-08-24-02`; tóm tắt: kho đã dày ở Tour (23) và Điểm tham quan (36), nhưng `/resort/` vẫn có **0** entity và các dải liên quan vẫn có thể chỉ 1 mục.
 
 ## 8. Phương án đã loại
 
@@ -337,7 +405,7 @@ Mỗi artboard chặng 2 kèm **bảng đối chiếu vùng ↔ dòng nào trong
 | Hai prompt Design song song (token trước, bố cục sau) | QA1 phải chạy hai lượt, và mockup token sẽ lệch ngay khi bố cục đổi | Chủ dự án, §3.5 |
 | Đóng khung: chỉ dùng hai font đã có | Đúng hướng vòng 3 đã chạy và chưa giải được "chữ không hợp ngành" (§1) | Chủ dự án, §3.4 |
 | Mở: Design tự dựng bộ nhận diện mới | Phải viết lại phần lớn `07`, dựng lại toàn bộ mockup 4B vừa qua QA1, chạy lại QA1 từ đầu | Chủ dự án, §3.4 |
-| Đoạn mở lên trên hero, cùng dải breadcrumb | Trên di động 390px ảnh bị đẩy xuống ~160px; màn đầu toàn chữ, mất cú hích cảm xúc của site du lịch | Chủ dự án, §3.6 |
+| ~~Đoạn mở lên trên hero, cùng dải breadcrumb~~ **— override một phần 2026-08-25** | Lý do loại ban đầu: trên di động 390px ảnh bị đẩy xuống ~160px; màn đầu toàn chữ, mất cú hích cảm xúc của site du lịch. **`QĐ-2026-08-25-01`:** chủ dự án đảo lại phần **breadcrumb + `h1`** — hai thứ đó nay ở trên hero. **Đoạn mở thì KHÔNG** — nó vẫn ở dưới thanh dính đúng như §3.6. Lo ngại về di động vẫn chưa được đo lại | Chủ dự án, §3.6 → `QĐ-2026-08-25-01` |
 | Đoạn mở chen giữa hero và thanh dính | Đẩy giá và CTA trên desktop tụt thêm ~110px, phải mở lại Luật 3 | Chủ dự án, §3.6 |
 | Chỉ sửa `AttractionDetail.astro` cho hết ca Chùa Long Sơn | Chữa 5/58 trang và bỏ sót 39 trang còn lại; và không có bộ kiểm thì trang thứ 59 lặp lại im lặng (§2.7) | Cowork, §2.1 |
 | Sửa cả 44 trang nhưng không làm bộ kiểm V0b | Đóng hiện trạng, không đóng gốc. Luật 1 vẫn là luật duy nhất trong `06` không có máy kiểm; drift quay lại ở lần refactor `DetailLayout` kế tiếp | Cowork, §2.7 |
@@ -350,6 +418,22 @@ Mỗi artboard chặng 2 kèm **bảng đối chiếu vùng ↔ dòng nào trong
 - **Thêm bộ giao diện thứ tư.** Không. Ba bộ hiện có được sửa sắc độ, không thêm bộ.
 - **Dark mode, token semantic success/error, font mono.** Vẫn thiếu có chủ ý theo `07` §0 mục 4.
 - **Năm cổng đang đỏ ở `gate:all`** (`jsonld-post` I6, `r3-r4-post`, `governance-post` S24, `control-registry-gate`, `deferred-gate`). Đều là nợ dữ liệu hoặc nợ cũ, đã xếp vào đợt 4D.
+
+### Nợ dữ liệu ảnh — ba việc tách ra, không nằm trong vòng 5
+
+*(Thêm 2026-08-24, `QĐ-2026-08-24-03`. Chẩn đoán ở §2.8.)*
+
+Vòng 5 sửa **luật** về ảnh (hạng mục 13, R10). Nó **không** sửa được **kho** ảnh: đó là việc nhập liệu trong Sanity, không token nào chạm tới. Tách ra để hai việc không kẹt nhau — Design vẫn chạy được chặng 1 trong khi kho ảnh chưa xong, và ngược lại.
+
+| Mã | Việc | Khối lượng (mốc 2026-08-24) | Vì sao không gộp vào vòng 5 |
+|---|---|---|---|
+| **V-A** | Thay ảnh dưới mốc phân giải | **40** trang có ảnh chính hẹp hơn 1200px; trong đó 7 hẹp hơn cả 640px | Cần **ảnh mới**, không phải cần quyết định. Chờ V-A thì chặng 1 đứng im |
+| **V-B** | Rà **27** tấm ảnh dùng ở nhiều chỗ | 27 tấm, một tấm dùng 3 lần | Dùng lại **không mặc nhiên sai** — cùng một địa điểm ở hai trang là hợp lệ. Phải rà từng ca, là việc biên tập |
+| **V-C** | Bù `alt` còn thiếu | 10 ảnh chính + 16 ảnh gallery = **26** | `06` §3 khai *"alt bắt buộc khi có ảnh"*; đây là nợ dữ liệu chạm gate publish, thuộc cùng họ với các cổng đỏ ở trên |
+
+**Ba việc này chỉ mở được sau khi chốt hạng mục 13a và R10** — thay ảnh trước khi biết tỷ lệ khung và mốc phân giải là thay hai lần. Thứ tự: chốt chặng 1 → V-A → V-B → V-C.
+
+**Một ca lẻ, xử ngay được, không cần chờ:** `tour/tour-du-thuyen-vega-yacht-nha-trang-day-tour` đang lên sóng mà **không có ảnh chính** — trang tour duy nhất trong tình trạng này.
 
 ## 10. Rủi ro và nợ
 

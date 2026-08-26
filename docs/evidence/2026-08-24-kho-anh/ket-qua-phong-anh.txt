@@ -1,0 +1,20 @@
+attraction/thac-ta-gu — ảnh chính hẹp nhất của site
+  mã xin w=1200 — Hero.astro:20 (hero trang chi tiết)
+  CDN trả về 1200x1507 (jpeg) — CÓ PHÓNG LÊN
+    ở w=1200 (đang chạy):    283.013 byte
+    ở w=399 (cỡ gốc):        59.279 byte
+    phí: 223.734 byte (+377%) mà không thêm một chi tiết nào
+
+touristDestination/Nha Trang — ảnh hero TRANG CHỦ
+  mã xin w=1800 — SiteHome.astro:121 (hero trang chủ)
+  CDN trả về 1800x1013 (jpeg) — CÓ PHÓNG LÊN
+    ở w=1800 (đang chạy):    232.531 byte
+    ở w=1280 (cỡ gốc):       164.493 byte
+    phí: 68.038 byte (+41%) mà không thêm một chi tiết nào
+
+Tổng phí của riêng hai ca này: 291.772 byte
+So với toàn bộ ngân sách font của site (89.196 byte): 327%
+
+Kết luận: Sanity CDN KHÔNG từ chối phóng ảnh. Xin `?w=` lớn hơn ảnh gốc thì nó nội suy
+lên rồi nén lại — trả về một tấm ảnh vừa mềm vừa nặng hơn ảnh gốc. Đây là lý do phải
+có mốc phân giải tối thiểu theo vai (R10), chứ không chỉ là chuyện thẩm mỹ.

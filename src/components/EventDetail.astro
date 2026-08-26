@@ -6,13 +6,12 @@ import DetailLayout from './DetailLayout.astro'
 import FAQ from './FAQ.astro'
 import Section from './Section.astro'
 import BookingCTA from './BookingCTA.astro'
-import InfoCard from './InfoCard.astro'
 import Body from './Body.astro'
 import MapView from './MapView.astro'
 import { applyPriceToJsonLd, entityPageGraphToLd, eventToJsonLd, jsonLdScriptContent } from '../lib/serialize'
 import { loadPrices } from '../lib/prices'
 import { resolvePrice } from '../lib/resolver'
-import { formatDate, formatDateShort } from '../lib/dates'
+import { formatDate } from '../lib/dates'
 
 export interface Props {
   data: EventResult
@@ -51,20 +50,20 @@ const jsonLd = entityPageGraphToLd(entityJsonLd, data, siteBase, lang)
 
 const ticketLabel = priceView?.label || (data.ticketUrl ? t('viewTickets') : data.isAccessibleForFree ? t('free') : '')
 
-const infoBarItems: { icon: string; label: string; value: string; visible: boolean }[] = [
-  { icon: '📅', label: t('date'), value: formatDateShort(data.startDate, lang), visible: true },
-  { icon: '🏷️', label: t('status'), value: isPast ? t('past') : (data.eventStatus && data.eventStatus !== 'EventScheduled' ? (statusLabel || '') : ''), visible: isPast || (!!data.eventStatus && data.eventStatus !== 'EventScheduled') },
-  { icon: '🎫', label: t('tickets'), value: ticketLabel || '', visible: !!ticketLabel },
-  { icon: '📍', label: t('locationAt'), value: data.location?.title || '', visible: !!data.location?.title },
-]
-
-const sidebarRows: { icon: string; label: string; value: string; href?: string; visible: boolean }[] = [
-  { icon: '📅', label: t('start'), value: formatDate(data.startDate, lang), visible: true },
-  { icon: '📅', label: t('end'), value: data.endDate ? formatDate(data.endDate, lang) : '', visible: !!data.endDate },
-  { icon: '🏷️', label: t('status'), value: statusLabel || '', visible: !!data.eventStatus },
-  { icon: '📍', label: t('locationAt'), value: data.location?.title || '', visible: !!data.location?.title },
-  { icon: '🏢', label: t('organizer'), value: data.organizer?.title || '', visible: !!data.organizer?.title },
-  { icon: '🏷️', label: t('eventType'), value: eventTypeLabel, visible: true },
+// `event` không có hàng ở 06 §3.1 — xem DRIFT_LOG DR-044. Quy tắc: giữ
+// nguyên bộ field đang có (union `infoBarItems` cũ ∪ `sidebarRows` cũ), dồn
+// về một vùng FactStrip. `gia` KHÔNG vào đây dù `infoBarItems` cũ có nó —
+// ràng buộc chốt của toàn việc này: giá chỉ ở thanh dính + khối hành động
+// (đã render qua BookingCTA ở slot booking, không mất thông tin). Ô
+// `startDate`/`eventStatus` dùng bản đầy đủ hơn từ `sidebarRows` cũ (ngày dài
+// thay vì rút gọn; nhãn trạng thái thật thay vì ghi đè "đã qua").
+const facts: { field: string; icon: string; label: string; value: string; visible: boolean }[] = [
+  { field: 'startDate', icon: '📅', label: t('start'), value: formatDate(data.startDate, lang), visible: true },
+  { field: 'endDate', icon: '📅', label: t('end'), value: data.endDate ? formatDate(data.endDate, lang) : '', visible: !!data.endDate },
+  { field: 'eventStatus', icon: '🏷️', label: t('status'), value: statusLabel || '', visible: !!data.eventStatus },
+  { field: 'location', icon: '📍', label: t('locationAt'), value: data.location?.title || '', visible: !!data.location?.title },
+  { field: 'organizer', icon: '🏢', label: t('organizer'), value: data.organizer?.title || '', visible: !!data.organizer?.title },
+  { field: 'eventType', icon: '🏷️', label: t('eventType'), value: eventTypeLabel, visible: true },
 ]
 ---
 
@@ -74,10 +73,9 @@ const sidebarRows: { icon: string; label: string; value: string; href?: string; 
   entityType="event"
   image={data.mainImage}
   gallery={data.gallery}
-  infoBarItems={infoBarItems}
+  facts={facts}
   sidebarSlots={[
     { name: 'booking', component: 'BookingCTA', visible: !isPast && !!ticketLabel, props: {} },
-    { name: 'info', component: 'InfoCard', visible: sidebarRows.some(r => r.visible), props: { rows: sidebarRows } },
     { name: 'map', component: 'Map', visible: !!((data.location as any)?.geo || (data as any).geo), props: {} },
   ]}
   nearbyTitle={t('otherEvents')}
@@ -89,7 +87,7 @@ const sidebarRows: { icon: string; label: string; value: string; href?: string; 
 
     {hasPtContent(data.body) && (
       <Section heading={t('details')} contained={false}>
-        <Body blocks={data.body} />
+        <Body blocks={data.body} headingOffset={1} />
       </Section>
     )}
 
@@ -99,7 +97,6 @@ const sidebarRows: { icon: string; label: string; value: string; href?: string; 
   {!isPast && priceView?.label && <BookingCTA slot="booking" priceText={priceView.label} ctaLabel={t('bookTicket')} />}
   {!isPast && !priceView?.label && data.ticketUrl && <BookingCTA slot="booking" priceText={data.ticketUrl} ctaLabel={t('viewTickets')} ctaUrl={data.ticketUrl} />}
   {!isPast && data.isAccessibleForFree && <BookingCTA slot="booking" priceText={t('freeAdmission')} ctaLabel={t('info')} />}
-  {sidebarRows.some(r => r.visible) && <InfoCard slot="info" rows={sidebarRows} lang={lang} />}
   {((data.location as any)?.geo || (data as any).geo) && <MapView slot="map" geo={((data.location as any)?.geo || (data as any).geo) as any} title={data.location?.title || data.title} height={240} />}
 </DetailLayout>
 

@@ -7,7 +7,6 @@ import FAQ from './FAQ.astro'
 import Section from './Section.astro'
 import BookingCTA from './BookingCTA.astro'
 import ContactChannels from './ContactChannels.astro'
-import InfoCard from './InfoCard.astro'
 import Body from './Body.astro'
 import MapView from './MapView.astro'
 import { applyPriceToJsonLd, entityPageGraphToLd, experienceToJsonLd, jsonLdScriptContent } from '../lib/serialize'
@@ -40,16 +39,20 @@ const entityJsonLd = applyPriceToJsonLd(
 const jsonLd = entityPageGraphToLd(entityJsonLd, data, siteBase, lang)
 const hasContactChannel = !!(contact?.zaloUrl || contact?.hotline || contact?.whatsapp)
 
-const infoBarItems = [
-  { icon: '⏱️', label: t('duration'), value: data.duration || '', visible: !!data.duration },
-  { icon: '👤', label: t('suitableFor'), value: data.touristType?.join(', ') || '', visible: !!(data.touristType && data.touristType.length > 0) },
-  { icon: '🎫', label: t('price'), value: data.isAccessibleForFree ? t('free') : priceView?.label || '', visible: !!(data.isAccessibleForFree || priceView?.label) },
-  { icon: '📋', label: t('includes'), value: data.includes?.slice(0, 2).join(', ') || '', visible: !!(data.includes && data.includes.length > 0) },
+// Vùng "Thông tin nhanh" — 06 §3.1 Trải nghiệm: đúng 2 ô (`duration`,
+// `touristType`). Giá không vào đây (thanh dính + khối hành động); `includes`
+// đã có mục "Bao gồm" riêng; `experienceType` đã là huy hiệu hero, chỉ ở đó.
+const facts = [
+  { field: 'duration', icon: '⏱️', label: t('duration'), value: data.duration || '', visible: !!data.duration },
+  { field: 'touristType', icon: '👤', label: t('suitableFor'), value: data.touristType?.join(', ') || '', visible: !!(data.touristType && data.touristType.length > 0) },
 ]
 
-// Phù hiệu trong hero: loại trải nghiệm (§4.4 `experienceType`) và thời lượng.
-// Cả hai là gate của §4.4 nhưng trước đây không đọc được trên màn đầu.
-const heroBadges = [data.experienceType?.name, data.duration].filter((x): x is string => !!x)
+// Phù hiệu trong hero: loại trải nghiệm (§4.4 `experienceType`), và CHỈ loại —
+// 06 §3.1 khai `duration` → Thông tin nhanh MỘT MÌNH ("chỉ ở đó" áp cho nhãn
+// loại, không áp cho duration). Trước đây `data.duration` cũng vào đây, nên
+// thời lượng hiện cả huy hiệu hero LẪN fact-strip — hai vùng cho một field,
+// sống sót qua Luật 1 chỉ vì huy hiệu hero không mang data-region/data-field.
+const heroBadges = [data.experienceType?.name].filter((x): x is string => !!x)
 
 // Thanh dính: neo tới đúng những mục THẬT SỰ render. Trước đây ExperienceDetail
 // không truyền jumpLinks/priceLabel/ctaHref nào, nên showStickyBar luôn sai và
@@ -67,13 +70,6 @@ const stickyPriceLabel = data.isAccessibleForFree ? t('free') : (priceView?.labe
 
 // CTA trên thanh dính là Zalo — kênh đặt chỗ duy nhất của site (00 §3).
 const zaloHref = contact?.zaloUrl || ''
-
-const sidebarRows = [
-  { icon: '🏷️', label: t('type'), value: data.experienceType?.name || '', visible: !!data.experienceType?.name },
-  { icon: '📍', label: t('venue'), value: data.venue?.title || '', visible: !!data.venue?.title },
-  { icon: '⏱️', label: t('duration'), value: data.duration || '', visible: !!data.duration },
-  { icon: '👤', label: t('suitableFor'), value: data.touristType?.join(', ') || '', visible: !!(data.touristType && data.touristType.length > 0) },
-]
 ---
 
 <DetailLayout
@@ -89,10 +85,9 @@ const sidebarRows = [
   priceLabel={stickyPriceLabel}
   ctaHref={zaloHref || null}
   ctaLabel={zaloHref ? t('contactZalo') : null}
-  infoBarItems={infoBarItems}
+  facts={facts}
   sidebarSlots={[
     { name: 'booking', component: 'BookingCTA', visible: !!priceView?.label || hasContactChannel, props: {} },
-    { name: 'info', component: 'InfoCard', visible: sidebarRows.some(r => r.visible), props: { rows: sidebarRows } },
     { name: 'map', component: 'Map', visible: !!(data.geo), props: {} },
   ]}
   nearbyTitle={t('similarExperiences')}
@@ -111,7 +106,7 @@ const sidebarRows = [
 
     {hasPtContent(data.body) && (
       <Section heading={t('details')} contained={false} id="details">
-        <Body blocks={data.body} />
+        <Body blocks={data.body} headingOffset={1} />
       </Section>
     )}
 
@@ -128,7 +123,6 @@ const sidebarRows = [
 
   {priceView?.label && <BookingCTA slot="booking" priceText={priceView.label} ctaLabel={t('bookNow')} />}
   {hasContactChannel && <ContactChannels slot="booking" contact={contact} lang={lang} />}
-  {sidebarRows.some(r => r.visible) && <InfoCard slot="info" rows={sidebarRows} lang={lang} />}
   {data.geo && <MapView slot="map" geo={data.geo} title={data.title} height={240} />}
 </DetailLayout>
 

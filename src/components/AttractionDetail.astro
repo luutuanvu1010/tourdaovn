@@ -7,7 +7,6 @@ import Section from './Section.astro'
 
 import FAQ from './FAQ.astro'
 import BookingCTA from './BookingCTA.astro'
-import InfoCard from './InfoCard.astro'
 import Body from './Body.astro'
 import MapView from './MapView.astro'
 import Card from './Card.astro'
@@ -41,6 +40,14 @@ function hasPtContent(blocks: unknown[] | undefined | null): boolean {
 
 const prices = loadPrices('data/prices.yaml')
 const priceView = resolvePrice(data.bookingRef?.key, 'attraction', data.isAccessibleForFree, prices, lang)
+
+// 06 §3.1 v2.3.1 (QĐ-2026-08-24-01): điểm tham quan miễn phí KHÔNG có vùng giá.
+// Ngoại lệ hai vùng của giá được §6 Luật 1 biện minh bằng "đó là quyết định
+// mua"; miễn phí thì không có quyết định mua nào, nên nhãn "Miễn phí" chỉ sống
+// ở Thông tin nhanh. resolvePrice() trả "Miễn phí" khi isAccessibleForFree —
+// đó là chỗ nhãn rò sang kênh giá, chặn ngay tại đây.
+const priceLabel = data.isAccessibleForFree ? null : (priceView?.label ?? null)
+const coVungGia = !data.isAccessibleForFree && !!priceView?.label
 const siteBase = siteBaseUrl(Astro.site)
 const entityJsonLd = applyPriceToJsonLd(
   attractionToJsonLd(data, siteBase, lang),
@@ -62,23 +69,15 @@ const jumpLinks = [
 // đúng là "CTA giả" mà R4 cấm. Không có zaloUrl thì không render nút.
 const bookingHref = contact?.zaloUrl || ''
 
-// Ô nào không có dữ liệu thì không vào lưới — InfoBar co theo số ô thật, nên
-// ở đây bỏ ô "khoảng cách" chết cứng và bỏ luôn giá trị "không có" giả.
-const infoBarItems = [
-  { icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : '', visible: !!data.openingHours },
-  { icon: '🎫', label: t('ticketPrice'), value: priceView?.label || '', visible: !!(priceView?.label) },
-  { icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
-]
-
-const sidebarRows = [
-  { icon: '📍', label: t('address'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
-  { icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : '', visible: !!data.openingHours },
-  { icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
-  { icon: '🔗', label: t('officialWebsite'), value: hostLabel(data.officialSource), href: data.officialSource || undefined, visible: !!data.officialSource },
-  // "Có thu phí" không có giá kèm là thông tin rỗng (kế hoạch vòng 4, F6): chỉ hiện khi miễn phí.
-  { icon: '🎫', label: t('admission'), value: t('free'), visible: data.isAccessibleForFree === true },
-  { icon: '🗺️', label: t('map'), value: t('openMap'), href: data.hasMap, visible: !!data.hasMap },
-  { icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
+// Một field một vùng (06 §6 Luật 1). Template khai DỮ LIỆU, không chọn vùng —
+// trước đây cùng bộ field này đi vào cả InfoBar lẫn InfoCard, đó là DR-032.
+// Giá KHÔNG ở đây: 06 §3.1 khai giá → thanh dính + khối hành động.
+const facts = [
+  { field: 'openingHours', icon: '🕐', label: t('hours'), value: data.openingHours ? [data.openingHours.open, data.openingHours.close].filter(Boolean).join(' - ') : '', visible: !!data.openingHours },
+  { field: 'address', icon: '📍', label: t('address'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
+  { field: 'telephone', icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
+  { field: 'isAccessibleForFree', icon: '🎫', label: t('admission'), value: t('free'), visible: data.isAccessibleForFree === true },
+  { field: 'officialSource', icon: '🔗', label: t('officialWebsite'), value: hostLabel(data.officialSource), href: data.officialSource || undefined, visible: !!data.officialSource },
 ]
 ---
 
@@ -89,17 +88,21 @@ const sidebarRows = [
   image={data.mainImage}
   gallery={data.gallery}
   containedInPlace={data.containedInPlace}
+  sameAs={data.sameAs}
   badges={heroBadges}
   summary={data.summary}
   jumpLinks={jumpLinks}
-  priceLabel={priceView?.label ?? null}
+  priceLabel={priceLabel}
   ctaHref={bookingHref || null}
   ctaLabel={bookingHref ? t('contactZalo') : null}
-  infoBarItems={infoBarItems}
+  facts={facts}
   sidebarSlots={[
-    { name: 'booking', component: 'BookingCTA', visible: !!priceView?.label, props: { priceText: priceView?.label || '', ctaLabel: t('bookTicket'), ctaUrl: bookingHref || undefined } },
-    { name: 'info', component: 'InfoCard', visible: sidebarRows.some(r => r.visible), props: { rows: sidebarRows } },
-    { name: 'map', component: 'Map', visible: !!(data.geo), props: { geo: data.geo, title: data.title } },
+    { name: 'booking', component: 'BookingCTA', visible: coVungGia, props: { priceText: priceView?.label || '', ctaLabel: t('bookTicket'), ctaUrl: bookingHref || undefined } },
+    // 06 §3 hàng "Bản đồ (sidebar)": "chỉ có hasMap thì hiện một link" — thẻ bản
+    // đồ phải hiện khi có geo VẼ ĐƯỢC hoặc chỉ có hasMap (không geo). Trước đây
+    // chỉ xét geo nên trang chỉ có hasMap (không geo hợp lệ) không có chỗ hiện
+    // link — hasMap bị bỏ rơi hoàn toàn, không render ở đâu.
+    { name: 'map', component: 'Map', visible: !!(data.geo) || !!(data.hasMap), props: { geo: data.geo, title: data.title } },
   ]}
   nearbyTitle={t('nearby')}
   nearby={nearby}
@@ -117,7 +120,7 @@ const sidebarRows = [
 
     {hasPtContent(data.body) && (
       <Section heading={t('overview')} contained={false} id="overview">
-        <Body blocks={data.body} />
+        <Body blocks={data.body} headingOffset={1} />
       </Section>
     )}
 
@@ -161,13 +164,38 @@ const sidebarRows = [
   {priceView?.label && (
     <BookingCTA slot="booking" priceText={priceView.label} ctaLabel={t('bookTicket')} ctaUrl={bookingHref || undefined} />
   )}
-  {sidebarRows.some(r => r.visible) && <InfoCard slot="info" rows={sidebarRows} lang={lang} />}
-  {data.geo && <MapView slot="map" geo={data.geo} title={data.title} height={240} />}
+  {(data.geo || data.hasMap) && (
+    <Fragment slot="map">
+      {data.geo && <MapView geo={data.geo} title={data.title} height={240} />}
+      {data.hasMap && (
+        <a class="map-card-link" data-region="map-card" data-field="hasMap" href={data.hasMap} target="_blank" rel="noopener">
+          <span aria-hidden="true">🗺️</span> {t('openMap')}
+        </a>
+      )}
+    </Fragment>
+  )}
 </DetailLayout>
 
 <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
 
 <style>
+  /* Link "Mở bản đồ" trong thẻ bản đồ (sidebar) — 06 §3 hàng "Bản đồ (sidebar)":
+     "hasMap là link 'Mở Google Maps' trong cùng thẻ". Đứng dưới MapView khi có
+     geo vẽ được; là nội dung duy nhất của thẻ khi chỉ có hasMap. */
+  .map-card-link {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    margin-top: var(--s3);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-600);
+    color: var(--c-primary);
+    text-decoration: none;
+  }
+  .map-card-link:hover {
+    text-decoration: underline;
+  }
+
   /* "Cách tới nơi" — với đảo và công viên trên đảo, "đi bằng gì" là câu hỏi
      đầu tiên của khách, nên khối này không được là cỡ chữ nhỏ nhất trang.
      Nền cát giữ nguyên: cát là màu của ghi chú. */

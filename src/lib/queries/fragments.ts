@@ -106,9 +106,26 @@ export function openingHoursFragment(): string {
 
 /**
  * Fragment body portable text — object localized.
+ *
+ * QĐ-2026-08-25-03: deref `asset->` cho khối ảnh trong thân bài.
+ *
+ * Trước đó fragment này trả portable text THÔ, nên khối ảnh chỉ có
+ * `asset: { _ref, _type: 'reference' }` — không có `url`. `Body.astro` gọi
+ * `imageUrl()`, hàm đó đòi `asset.url`, trả `undefined`, và component
+ * `return null`. Kết quả: **ảnh trong thân bài biến mất im lặng trên 66 trang
+ * đã phát hành**, không cổng nào đỏ vì không có gì để đỏ — HTML hợp lệ, chỉ
+ * thiếu một thẻ `<figure>`.
+ *
+ * Hình dạng `asset->` chép đúng `mainImageFragment` để `imageUrl()` và
+ * `isSvg()` dùng chung một hợp đồng, không phải hai.
  */
 export function bodyFragment(lang: string): string {
-  return `"body": coalesce(body.${lang}, body.vi)`
+  return `"body": coalesce(body.${lang}, body.vi)[] {
+    ...,
+    _type == "image" => {
+      asset->{ _id, url, mimeType, metadata { dimensions { width, height } } }
+    }
+  }`
 }
 
 /**

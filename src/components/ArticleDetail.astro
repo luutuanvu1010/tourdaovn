@@ -33,12 +33,19 @@ function hasBlocksContent(blocks: unknown[] | undefined | null): boolean {
   return blocks.some((b: any) => b._type === 'block' && b.children?.some((c: any) => (c.text || '').trim()))
 }
 
-// Phù hiệu hero: chuyên mục bài (§4.10 `articleType`) và tên tác giả — tác giả
-// là tín hiệu E-E-A-T, phải đọc được ngay trên màn đầu chứ không nằm dưới thân bài.
-const heroBadges = [
-  typeLabel,
-  data.author?.title ? `Bởi ${data.author.title}` : null,
-].filter((x): x is string => !!x)
+// Phù hiệu hero: CHỈ chuyên mục bài (§4.10 `articleType`).
+//
+// QĐ-2026-08-25-02: gỡ phù hiệu "Bởi {tác giả}". `06` §3 khai `author` đúng MỘT
+// vùng — "Hộp tác giả" — còn ở đây nó là vùng thứ hai. Cùng với hàng sidebar đã
+// gỡ bên dưới, tên tác giả từng hiện BA lần trên mỗi trang cẩm nang: phù hiệu
+// hero, hộp tác giả, và hàng InfoCard. Đó là vi phạm Luật 1, và cổng không thấy
+// vì hai trong ba chỗ không gắn `data-field` (khoảng mù DR-048).
+//
+// Lý lẽ cũ ở đây — "tác giả là tín hiệu E-E-A-T, phải đọc được ngay trên màn
+// đầu" — vẫn đúng về ý định, nhưng nó không cho phép mở thêm vùng: Luật 1 chỉ
+// nhượng bộ cho giá. Muốn tác giả lên màn đầu thì đổi VỊ TRÍ hộp tác giả, không
+// phải nhân nó ra ba bản.
+const heroBadges = [typeLabel].filter((x): x is string => !!x)
 
 // Neo chỉ trỏ tới mục thật sự render — khối vắng mà vẫn để neo là link chết.
 const jumpLinks = [
@@ -49,10 +56,11 @@ const jumpLinks = [
 ].filter(x => x.on).map(x => ({ href: `#${x.id}`, label: x.label }))
 
 const sidebarRows = [
-  { icon: '👤', label: t('author'), value: data.author?.title || '', visible: !!data.author?.title },
-  { icon: '📂', label: t('category'), value: typeLabel, visible: true },
-  { icon: '📅', label: t('published'), value: formatDate(data.publishedAt, lang), visible: !!data.publishedAt },
-  { icon: '🔄', label: t('articleUpdated'), value: formatDate(data.updatedAt, lang), visible: !!data.updatedAt },
+  // `author` đã gỡ khỏi đây — QĐ-2026-08-25-02. Vùng duy nhất của nó là Hộp tác
+  // giả (`06` §3, dòng "Hộp tác giả"), dựng ở phần thân bên dưới.
+  { field: 'articleType', icon: '📂', label: t('category'), value: typeLabel, visible: true },
+  { field: 'publishedAt', icon: '📅', label: t('published'), value: formatDate(data.publishedAt, lang), visible: !!data.publishedAt },
+  { field: 'updatedAt', icon: '🔄', label: t('articleUpdated'), value: formatDate(data.updatedAt, lang), visible: !!data.updatedAt },
 ]
 ---
 
@@ -75,10 +83,18 @@ const sidebarRows = [
   updatedAt={data._updatedAt}
 >
   <Fragment slot="content">
+    {/* Vùng DUY NHẤT của `author` — `06` §3 hàng "Hộp tác giả". Gắn thẻ để
+        `luat1-post` canh được, và để lần sau ai thêm tác giả ở chỗ thứ hai thì
+        cổng đỏ thay vì lọt như ba tháng vừa rồi.
+
+        THẲNG THẮN VỀ GIỚI HẠN: thẻ này CHƯA làm cổng canh được hôm nay. Header
+        của `luat1-post` khai tầng B "xét theo cột entity của §3.1 (bốn cột)" và
+        Article "nằm hoàn toàn ngoài từ vựng ALIAS/§3.1". Muốn cổng thật sự bắt
+        thì phải thêm cột Cẩm nang vào ma trận §3.1 — việc riêng, cần phiếu. */}
     {data.author && (
-      <div class="author-box">
+      <div class="author-box" data-region="author-box">
         <div class="author-info">
-          <strong>{data.author.title}</strong>
+          <strong data-field="author">{data.author.title}</strong>
           {data.author.jobTitle && <span>{data.author.jobTitle}</span>}
         </div>
       </div>

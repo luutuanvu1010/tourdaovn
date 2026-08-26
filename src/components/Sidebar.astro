@@ -1,7 +1,14 @@
 ---
 export interface Slot {
   name: string
-  component: 'BookingCTA' | 'BookingForm' | 'InfoCard' | 'Map' | 'Article' | 'custom'
+  // I4 fix round (2026-08-23): 'custom' từng khai cho ô FactStrip chèn qua slot
+  // 'info'. Bỏ khỏi union thay vì để mã chết (tiền lệ Ruling 2: hằng khai mà
+  // không dùng là nợ reviewer sẽ bắt).
+  // Cập nhật QĐ-2026-08-25-02: không còn "FactStrip inline" nào cả — Thông tin
+  // nhanh nay luôn là dải riêng phía trên `.two-col`, không đi qua Sidebar dưới
+  // bất kỳ hình thức nào.
+  // 'BookingForm' (nhánh đặt tour): ô đặt trong slot 'booking' khi tour có giá.
+  component: 'BookingCTA' | 'BookingForm' | 'InfoCard' | 'Map' | 'Article'
   visible: boolean
   props: Record<string, any>
 }
@@ -34,6 +41,11 @@ const anyVisible = slots.some(s => s.visible)
      Trước đây top:16px chết cứng nên sidebar chui xuống dưới header và thanh dính,
      hai dòng đầu của thẻ thông tin khuất — DR-033. */
   .sidebar {
+    /* grid-area 'sidebar' — tên vùng dùng chung với `.two-col` (DetailLayout.astro)
+       và cả hai bản grid-template-areas của nó (desktop/di động, I4). Đặt tên ở
+       đây để .sidebar tự đứng đúng ô dù bản mẫu nào đang chạy — không cần lặp lại
+       chọn lựa breakpoint. */
+    grid-area: sidebar;
     width: 340px;
     position: sticky;
     top: calc(var(--header-h) + var(--sidebar-offset, 0px) + var(--s4));

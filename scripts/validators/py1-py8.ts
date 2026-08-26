@@ -16,7 +16,7 @@ const ALLOWED_PAX_RATE_KEYS = new Set(['amount', 'note'])
 const PAX_NOTE_MAX = 40
 const FORBIDDEN_KEYS = /^(cost|commission|gia_von|hoa_hong|profit|margin|chiet_khau|wholesale|retail_price)$/i
 
-// bookingRef là object { key } trong mọi lược đồ Sanity (DR-044) — không phải chuỗi.
+// bookingRef là object { key } trong mọi lược đồ Sanity (DR-061) — không phải chuỗi.
 function refKey(doc: any): string | null {
   const k = doc?.bookingRef?.key
   return typeof k === 'string' && k.length > 0 ? k : null

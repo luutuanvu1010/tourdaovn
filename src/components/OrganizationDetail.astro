@@ -27,13 +27,13 @@ function hasPtContent(blocks: unknown[] | undefined | null): boolean {
 }
 
 const sidebarRows = [
-  { icon: '🏢', label: t('type'), value: typeLabel, visible: true },
-  { icon: '📍', label: t('office'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
-  { icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
-  { icon: '🌐', label: t('website'), value: data.url || '', visible: !!data.url, href: data.url || undefined },
-  { icon: '🔗', label: t('officialSource'), value: data.officialSource || '', visible: !!data.officialSource, href: data.officialSource || undefined },
-  { icon: '📋', label: t('license'), value: data.licenseInfo || '', visible: !!data.licenseInfo },
-  { icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
+  { field: 'orgType', icon: '🏢', label: t('type'), value: typeLabel, visible: true },
+  { field: 'address', icon: '📍', label: t('office'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
+  { field: 'telephone', icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
+  { field: 'url', icon: '🌐', label: t('website'), value: data.url || '', visible: !!data.url, href: data.url || undefined },
+  { field: 'officialSource', icon: '🔗', label: t('officialSource'), value: data.officialSource || '', visible: !!data.officialSource, href: data.officialSource || undefined },
+  { field: 'licenseInfo', icon: '📋', label: t('license'), value: data.licenseInfo || '', visible: !!data.licenseInfo },
+  { field: 'sameAs', icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
 ]
 
 const siteBase = siteBaseUrl(Astro.site)
@@ -65,7 +65,7 @@ const jsonLd = entityPageGraphToLd(organizationToJsonLd(data, siteBase, lang), d
 
     {hasPtContent(data.body) && (
       <Section contained={false}>
-        <Body blocks={data.body} />
+        <Body blocks={data.body} headingOffset={1} />
       </Section>
     )}
   </Fragment>

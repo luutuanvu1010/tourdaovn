@@ -29,6 +29,22 @@ const TYPE_HEADINGS: Record<string, string> = {
 // Thứ tự section theo ROUTE_MAP + touristDestination lên đầu
 const TYPE_ORDER = ['touristDestination', ...ROUTE_MAP.map(r => r.entity).filter(e => !e.startsWith('hub-'))]
 
+/**
+ * Ép một chuỗi về đúng MỘT dòng cho llms.txt.
+ *
+ * Định dạng llms.txt là `- [Tên](url): mô tả`, mỗi mục một dòng. `summary` của
+ * entity có thể chứa xuống dòng (biên tập gõ nhiều đoạn), và khi đó phần sau
+ * dấu xuống dòng tràn ra thành dòng riêng — máy đọc coi nó là văn bản độc lập,
+ * không còn thuộc về mục nào. Đo 2026-08-25: 5 dòng bị vỡ như vậy.
+ *
+ * Cắt ở 300 ký tự: đủ cho một mô tả, đủ ngắn để không nuốt cả bài.
+ */
+function motDong(t: string | undefined, tran = 300): string {
+  if (!t) return ''
+  const gon = t.replace(/\s+/g, ' ').trim()
+  return gon.length <= tran ? gon : gon.slice(0, tran - 1).replace(/\s+\S*$/, '') + '…'
+}
+
 export const GET: APIRoute = async () => {
   const dataset = await buildGeoDataset()
 
@@ -62,7 +78,7 @@ export const GET: APIRoute = async () => {
       const title = firstLangText(entity.title) ?? entity.id
       const summary = entity.summary?.vi ?? entity.summary?.en ?? ''
       const langNote = entity.languages.length > 1 ? ` (languages: ${entity.languages.join(', ')})` : ''
-      const summaryPart = summary ? `: ${summary}` : ''
+      const summaryPart = summary ? `: ${motDong(summary)}` : ''
       lines.push(`- [${title}](${entity.canonicalUrl})${summaryPart}${langNote}`)
     }
   }

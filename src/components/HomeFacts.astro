@@ -3,14 +3,21 @@ import type { KeyFact } from '../lib/types'
 
 export interface Props {
   facts?: KeyFact[]
+  /**
+   * Đứng CẠNH cột chữ thay vì thành dải riêng chạy hết bề ngang.
+   * Bỏ nền, viền và container của dải; lưới về một cột để vừa cột phụ 340px.
+   * Cùng nếp với prop `inline` của FactStrip — không phải API mới.
+   */
+  aside?: boolean
 }
 
 const facts = Array.isArray(Astro.props.facts) ? Astro.props.facts : []
+const { aside = false } = Astro.props
 ---
 
 {facts.length > 0 && (
-  <div class="facts-section">
-    <div class="container">
+  <div class:list={['facts-section', { 'facts-section--aside': aside }]}>
+    <div class:list={[{ container: !aside }]}>
       <div class="facts-grid">
         {facts.map(fact => (
           <div class="fact-card">
@@ -35,6 +42,28 @@ const facts = Array.isArray(Astro.props.facts) ? Astro.props.facts : []
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: var(--s4);
+  }
+
+  /* Biến thể cạnh cột chữ: bỏ dải, xếp dọc, chữ về căn trái cho khớp cột chữ
+     bên cạnh — căn giữa chỉ hợp khi bốn thẻ nằm ngang. */
+  /* Hai lớp, không phải một: `@media (max-width: 640px) { .facts-section }` ở
+     cuối file cũng là (0,1,0) và đứng SAU, nên một lớp sẽ thua và biến thể aside
+     lấy lại 32px đệm dọc trên di động — đúng thứ nó phải bỏ. */
+  .facts-section.facts-section--aside {
+    background: none;
+    border: 0;
+    padding: 0;
+  }
+
+  .facts-section--aside .facts-grid {
+    grid-template-columns: 1fr;
+    gap: var(--s3);
+  }
+
+  .facts-section--aside .fact-card {
+    text-align: left;
+    background: var(--c-primary-soft);
+    box-shadow: none;
   }
 
   .fact-card {
