@@ -149,6 +149,11 @@ export interface HomepageArticleCard extends EntityRef {
   }
 }
 
+/** Card điểm đến trên trang chủ — khối "Điểm đến khác" (ADR-0028). */
+export interface DestinationCard extends EntityRef {
+  _type: 'touristDestination'
+}
+
 // ---------- Base types cho query result ----------
 
 // Cho entity field-level i18n (13/14 entity)

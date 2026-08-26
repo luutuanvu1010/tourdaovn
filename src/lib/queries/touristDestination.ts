@@ -10,7 +10,7 @@ import {
 import type { TouristDestinationResult } from '../types'
 
 /**
- * GROQ query lấy TouristDestination (Nha Trang) theo slug.
+ * GROQ query lấy TouristDestination theo slug.
  * Deref tất cả featured* references để template dùng ngay.
  *
  * @param lang Ngôn ngữ hiện tại
@@ -53,7 +53,9 @@ export function touristDestinationBySlugQuery(lang: string): string {
       isActive,
       priority
     },
-    "homepagePlaces": *[_type == "place" && reviewStatus == "approved" && defined(slug.${lang}.current)] | order(
+    "homepagePlaces": *[_type == "place" && reviewStatus == "approved"
+      && defined(slug.${lang}.current)
+      && destination._ref == ^._id] | order(
       select(
         placeType == "area" => 0,
         placeType == "beach" => 1,
@@ -73,7 +75,9 @@ export function touristDestinationBySlugQuery(lang: string): string {
       ${mainImageFragment()},
       placeType
     },
-    "homepageArticles": *[_type == "article" && reviewStatus == "approved" && language == "${lang}" && defined(slug.current)] | order(
+    "homepageArticles": *[_type == "article" && reviewStatus == "approved"
+      && language == "${lang}" && defined(slug.current)
+      && destination._ref == ^._id] | order(
       select(
         articleType == "transport-guide" => 0,
         articleType == "itinerary" => 1,
@@ -109,6 +113,25 @@ export function touristDestinationBySlugQuery(lang: string): string {
     relatedDestinations,
     ${safetyNoteFragment(lang)},
     ${imageProvenanceFragment()}
+  }`
+}
+
+/**
+ * Các điểm đến KHÁC đang publish — cho khối "Điểm đến khác" ở trang chủ (ADR-0028).
+ * Nhận `$currentId` để tự loại điểm đến đang render khỏi danh sách.
+ */
+export function otherDestinationsQuery(lang: string): string {
+  return `*[
+    _type == "touristDestination" &&
+    reviewStatus == "approved" &&
+    _id != $currentId &&
+    defined(slug.${lang}.current)
+  ] | order(title.${lang} asc)[0...4]{
+    _id, _type,
+    "title": coalesce(title.${lang}, title.vi),
+    "slug": coalesce(slug.${lang}.current, slug.vi.current),
+    "summary": coalesce(summary.${lang}, summary.vi),
+    ${mainImageFragment()}
   }`
 }
 
