@@ -1600,3 +1600,23 @@ Tất cả dư AA. `npm --prefix scripts run check:token-parity` — **XANH, kh�
 **`origin/main` hiện CHƯA có bản vá ba nền phụ này** — nó nằm ở PR #6, chưa merge. Nếu đổi `theme` sang `cat-bien` ngay bây giờ rồi có ai deploy từ `main`, production nhận **`cat-bien` KHÔNG kèm bản vá** — tức đúng tổ hợp tệ nhất: nền kem cộng nền phụ xám lạnh, tách nền 1,005.
 
 **Nên thứ tự là: merge PR #6 → deploy → rồi mới đổi `theme` sang `cat-bien`.** Đảo thứ tự là tự bắn vào chân.
+
+---
+
+## QĐ-2026-08-26-02 — Google Sheet là bề mặt nhập giá; `data/prices.yaml` vẫn là nguồn sự thật, đồng bộ một chiều bằng `prices:pull`
+
+**Bối cảnh.** Sửa giá hiện là sửa tay `data/prices.yaml` — cú pháp YAML lồng nhau, khoá con enum đóng, ghi chú giới hạn 40 ký tự. Người nắm giá là người kinh doanh, không phải người viết mã. 21/28 tour đã xuất bản chưa có dòng giá, phần lớn vì rào cản này chứ không phải vì chưa có giá.
+
+**Chốt 1 — Sheet là bề mặt NHẬP, không phải nguồn.** `data/prices.yaml` vẫn là **nguồn sự thật duy nhất** về giá, vẫn là thứ được commit, và vẫn là thứ duy nhất bản dựng đọc. `ADR-0003`, `ADR-0007` và ràng buộc `I1` không đổi hiệu lực. Cái đổi là: yaml nay có thể được **sinh ra** từ Sheet thay vì gõ tay — nó vẫn là nguồn cho mọi thứ ở hạ lưu.
+
+**Chốt 2 — Đồng bộ MỘT CHIỀU, chạy bằng tay.** `npm run prices:pull` đọc Sheet → sinh lại `data/prices.yaml` → chạy validator → dừng để người xem diff rồi commit. **Không bao giờ chảy ngược** (yaml không ghi lên Sheet). **Không đọc lúc build, không đọc lúc chạy** — nên `BK1` (client và endpoint không đọc giá lúc runtime) nguyên vẹn, và không thêm phụ thuộc mạng vào đường dựng.
+
+**Chốt 3 — Vì sao không cho build đọc thẳng Sheet.** Đó mới là thứ tạo nguồn sự thật thứ hai: giá sẽ tồn tại ở hai nơi cùng lúc, bản dựng phụ thuộc một dịch vụ ngoài, và một lần Google chậm là hỏng phát hành. Đường một chiều giữ Sheet ở vị trí đúng của nó — chỗ soạn thảo, như Sanity với nội dung.
+
+**Chốt 4 — Sheet phải mở quyền đọc.** Đọc qua đường xuất công khai của Google (`gviz/tq?tqx=out:csv&sheet=<tên tab>`), không dùng khoá API, không dùng OAuth, **không thêm dependency**. Đổi lại: Sheet phải ở chế độ *bất kỳ ai có đường liên kết → người xem*. **Hệ quả phải biết: bảng giá bán là công khai với ai có link.** Giá bán vốn là thông tin công khai (đã hiện trên trang), nên chấp nhận được — nhưng **cấm để bất cứ gì không công khai vào Sheet này**: không giá vốn, không chiết khấu đại lý, không ghi chú nội bộ về khách. Có nhu cầu đó thì mở Sheet thứ hai không nối vào đây.
+
+**Chốt 5 — Xoá dòng phải ồn ào.** Khoá có trong yaml mà không có trong Sheet nghĩa là xoá một dòng giá, và xoá một dòng giá đang được trỏ tới là làm tour đó mất form. Script **không được tự xoá**: phải liệt kê và dừng, chỉ xoá khi người chạy thêm cờ tường minh. Cùng tinh thần "hỏng ồn ào, không hỏng câm" của `DR-064`.
+
+**Chốt 6 — Khối chú thích đầu `prices.yaml` phải sống sót.** Nó ghi bài học `DR-062` (khoá là định danh ổn định, đừng đổi theo slug). Sinh lại file mà xoá mất khối đó là xoá mất chính lời cảnh báo đã phải trả giá mới có.
+
+**Ranh giới.** Mục này chỉ nói về giá. Không mở đường cho Sheet điều khiển bất cứ thứ gì khác. Muốn thêm một Sheet cho nội dung, lịch trình, hay tồn kho là quyết định mới — `00-PROJECT_BRIEF` §5 "không quản lý chỗ trống" còn nguyên.
