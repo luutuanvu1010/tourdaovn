@@ -178,6 +178,23 @@ export const baseFieldsAfterGallery = [
   defineField({ name: 'updatedAt', type: 'datetime', group: 'quanTri', readOnly: true })
 ]
 
+// Cạnh phẳng "nội dung này thuộc điểm đến nào" (ADR-0028). CỐ Ý không nằm trong
+// baseFieldsBeforeGallery/AfterGallery: chính touristDestination cũng dùng hai mảng đó,
+// nhét vào đấy là cho Điểm đến một ô trỏ vào chính nó.
+//
+// Khác containedInPlace: containedInPlace trả lời "nằm trong đơn vị chứa TRỰC TIẾP nào"
+// và có thứ bậc; field này trả lời "thuộc điểm đến nào" và phẳng. Hai đường song song,
+// không suy ra nhau, không có kiểm máy nào bắt chúng phải khớp.
+export const destinationField = defineField({
+  name: 'destination', type: 'reference',
+  group: 'viTri',
+  to: [{ type: 'touristDestination' }],
+  title: 'Điểm đến',
+  description:
+    'Nội dung này thuộc điểm đến nào. Để trống thì nó không xuất hiện ở trang điểm đến nào ' +
+    '(vẫn lên trang danh mục bình thường).',
+})
+
 export const baseFields = [
   ...baseFieldsBeforeGallery,
   ...baseFieldsAfterGallery

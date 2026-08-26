@@ -55,46 +55,46 @@ const ENTITY_FIELDS: Record<string, string[]> = {
   place: [
     'placeType', 'sameAs', 'geo', 'address', 'containedInPlace',
     'containsPlace', 'hasMap', 'accessInfo', 'openingHours',
-    'isAccessibleForFree', 'body', 'gallery', 'highlights', 'faq',
+    'isAccessibleForFree', 'body', 'gallery', 'highlights', 'faq', 'destination',
   ],
   attraction: [
     'attractionType', 'sameAs', 'officialSource', 'geo', 'address',
     'containedInPlace', 'bookingRef', 'openingHours', 'isAccessibleForFree',
-    'accessInfo', 'hasMap', 'telephone', 'body', 'gallery', 'highlights', 'faq',
+    'accessInfo', 'hasMap', 'telephone', 'body', 'gallery', 'highlights', 'faq', 'destination',
   ],
   experience: [
     'experienceType', 'venue', 'isAccessibleForFree', 'duration',
     'includes', 'touristType', 'geo', 'bookingRef',
-    'body', 'gallery', 'highlights', 'faq',
+    'body', 'gallery', 'highlights', 'faq', 'destination',
   ],
   restaurant: [
     'geo', 'address', 'officialSource', 'sameAs',
     'servesCuisine', 'servesSpecialty', 'containedInPlace',
     'openingHours', 'acceptsReservations', 'hasMenu', 'telephone',
-    'body', 'gallery', 'highlights', 'faq',
+    'body', 'gallery', 'highlights', 'faq', 'destination',
   ],
   specialty: [
     'specialtyType', 'sameAs', 'originNote', 'season',
-    'whereToTry', 'body', 'gallery', 'faq',
+    'whereToTry', 'body', 'gallery', 'faq', 'destination',
   ],
   hotel: [
     'geo', 'address', 'officialSource', 'sameAs', 'starRating',
     'amenityFeature', 'checkinTime', 'checkoutTime', 'numberOfRooms',
     'petsAllowed', 'containedInPlace', 'bookingRef', 'beachAccess',
-    'accessInfo', 'body', 'gallery', 'highlights', 'faq',
+    'accessInfo', 'body', 'gallery', 'highlights', 'faq', 'destination',
   ],
   resort: [
     'geo', 'address', 'officialSource', 'sameAs', 'starRating',
     'amenityFeature', 'checkinTime', 'checkoutTime', 'numberOfRooms',
     'petsAllowed', 'containedInPlace', 'bookingRef', 'beachAccess',
     'accessInfo', 'body', 'gallery', 'highlights', 'faq',
-    'beachfront', 'onSiteActivities', 'landArea',
+    'beachfront', 'onSiteActivities', 'landArea', 'destination',
   ],
   tour: [
     'itinerary', 'operator', 'tourFormat', 'tripOrigin',
     'departureNote', 'duration', 'includes', 'excludes',
     'touristType', 'seasonNote', 'bookingRef',
-    'body', 'gallery', 'highlights', 'faq',
+    'body', 'gallery', 'highlights', 'faq', 'destination',
   ],
   organization: [
     'orgType', 'url', 'officialSource', 'sameAs', 'logo',
@@ -103,11 +103,11 @@ const ENTITY_FIELDS: Record<string, string[]> = {
   event: [
     'eventType', 'startDate', 'endDate', 'location', 'organizer',
     'eventStatus', 'isAccessibleForFree', 'bookingRef', 'ticketUrl',
-    'body', 'gallery', 'faq',
+    'body', 'gallery', 'faq', 'destination',
   ],
   article: [
     'articleType', 'author', 'body', 'about', 'mentions',
-    'faq', 'howTo', 'language',
+    'faq', 'howTo', 'language', 'destination',
   ],
   person: [
     'sameAs', 'jobTitle', 'knowsAbout', 'url', 'bio',

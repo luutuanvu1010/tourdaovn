@@ -33,6 +33,10 @@ const LODGING_BASE = [
 ]
 const LODGING_GALLERY = 'gallery'
 
+// Field dùng chung khai ở baseFields.ts rồi nhập vào từng entity (ADR-0028). Cùng cơ chế
+// với LODGING_BASE: regex bên dưới chỉ quét từng file schema nên không thấy field nhập vào.
+const DESTINATION_FIELD = ['destination']
+
 // Internal/system fields to ignore
 const IGNORE_FIELDS = new Set([
   '_id', '_type', '_rev', '_createdAt', '_updatedAt',
@@ -165,6 +169,8 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
     body: { required: false }, gallery: { required: false },
     highlights: { required: false }, faq: { required: false },
     imageProvenance: { required: false },
+    // ADR-0028: cạnh phẳng "thuộc điểm đến nào" — khai ở bảng field §2.x tương ứng
+    destination: { required: false },
   },
   attraction: {
     attractionType: { required: false }, sameAs: { required: false },
@@ -176,6 +182,8 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
     body: { required: false }, gallery: { required: false },
     highlights: { required: false }, faq: { required: false },
     imageProvenance: { required: false },
+    // ADR-0028: cạnh phẳng "thuộc điểm đến nào" — khai ở bảng field §2.x tương ứng
+    destination: { required: false },
   },
   experience: {
     experienceType: { required: false }, venue: { required: false },
@@ -185,6 +193,8 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
     body: { required: false }, gallery: { required: false },
     highlights: { required: false }, faq: { required: false },
     imageProvenance: { required: false },
+    // ADR-0028: cạnh phẳng "thuộc điểm đến nào" — khai ở bảng field §2.x tương ứng
+    destination: { required: false },
   },
   restaurant: {
     geo: { required: false }, address: { required: false },
@@ -196,6 +206,8 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
     body: { required: false }, gallery: { required: false },
     highlights: { required: false }, faq: { required: false },
     imageProvenance: { required: false },
+    // ADR-0028: cạnh phẳng "thuộc điểm đến nào" — khai ở bảng field §2.x tương ứng
+    destination: { required: false },
   },
   specialty: {
     specialtyType: { required: false }, sameAs: { required: false },
@@ -203,6 +215,8 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
     whereToTry: { required: false },
     body: { required: false }, gallery: { required: false },
     faq: { required: false }, imageProvenance: { required: false },
+    // ADR-0028: cạnh phẳng "thuộc điểm đến nào" — khai ở bảng field §2.x tương ứng
+    destination: { required: false },
   },
   hotel: {
     geo: { required: false }, address: { required: false },
@@ -215,6 +229,8 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
     body: { required: false }, gallery: { required: false },
     highlights: { required: false }, faq: { required: false },
     imageProvenance: { required: false },
+    // ADR-0028: cạnh phẳng "thuộc điểm đến nào" — khai ở bảng field §2.x tương ứng
+    destination: { required: false },
   },
   resort: {
     geo: { required: false }, address: { required: false },
@@ -229,6 +245,8 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
     body: { required: false }, gallery: { required: false },
     highlights: { required: false }, faq: { required: false },
     imageProvenance: { required: false },
+    // ADR-0028: cạnh phẳng "thuộc điểm đến nào" — khai ở bảng field §2.x tương ứng
+    destination: { required: false },
   },
   tour: {
     itinerary: { required: false }, operator: { required: false },
@@ -240,6 +258,8 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
     body: { required: false }, gallery: { required: false },
     highlights: { required: false }, faq: { required: false },
     imageProvenance: { required: false },
+    // ADR-0028: cạnh phẳng "thuộc điểm đến nào" — khai ở bảng field §2.x tương ứng
+    destination: { required: false },
   },
   organization: {
     orgType: { required: false }, url: { required: false },
@@ -258,6 +278,8 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
     body: { required: false }, gallery: { required: false },
     faq: { required: false },
     imageProvenance: { required: false },
+    // ADR-0028: cạnh phẳng "thuộc điểm đến nào" — khai ở bảng field §2.x tương ứng
+    destination: { required: false },
   },
   article: {
     articleType: { required: false }, author: { required: false },
@@ -265,6 +287,8 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
     mentions: { required: false }, faq: { required: false },
     howTo: { required: false }, language: { required: false },
     imageProvenance: { required: false },
+    // ADR-0028: cạnh phẳng "thuộc điểm đến nào" — khai ở bảng field §2.x tương ứng
+    destination: { required: false },
   },
   person: {
     sameAs: { required: false }, jobTitle: { required: false },
@@ -313,21 +337,22 @@ type SchemaConfig = {
   usesBaseAfter: boolean
   usesLodgingBase: boolean
   usesLodgingGallery: boolean
+  usesDestination?: boolean
 }
 
 const SCHEMA_CONFIG: Record<string, SchemaConfig> = {
   touristDestination: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: false, usesLodgingGallery: false },
-  place: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: false, usesLodgingGallery: false },
-  attraction: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: false, usesLodgingGallery: false },
-  experience: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: false, usesLodgingGallery: false },
-  restaurant: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: false, usesLodgingGallery: false },
-  specialty: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: false, usesLodgingGallery: false },
-  hotel: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: true, usesLodgingGallery: true },
-  resort: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: true, usesLodgingGallery: true },
-  tour: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: false, usesLodgingGallery: false },
+  place: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: false, usesLodgingGallery: false, usesDestination: true },
+  attraction: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: false, usesLodgingGallery: false, usesDestination: true },
+  experience: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: false, usesLodgingGallery: false, usesDestination: true },
+  restaurant: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: false, usesLodgingGallery: false, usesDestination: true },
+  specialty: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: false, usesLodgingGallery: false, usesDestination: true },
+  hotel: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: true, usesLodgingGallery: true, usesDestination: true },
+  resort: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: true, usesLodgingGallery: true, usesDestination: true },
+  tour: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: false, usesLodgingGallery: false, usesDestination: true },
   organization: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: false, usesLodgingGallery: false },
-  event: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: false, usesLodgingGallery: false },
-  article: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: false, usesLodgingGallery: false },
+  event: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: false, usesLodgingGallery: false, usesDestination: true },
+  article: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: false, usesLodgingGallery: false, usesDestination: true },
   person: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: false, usesLodgingGallery: false },
   category: { usesBaseBefore: true, usesBaseAfter: true, usesLodgingBase: false, usesLodgingGallery: false },
 }
@@ -392,6 +417,7 @@ function buildSchemaFieldSet(entityType: string, filePath: string): Set<string> 
     if (config.usesBaseAfter) BASE_AFTER_GALLERY.forEach(f => allFields.add(f))
     if (config.usesLodgingBase) LODGING_BASE.forEach(f => allFields.add(f))
     if (config.usesLodgingGallery) allFields.add(LODGING_GALLERY)
+    if (config.usesDestination) DESTINATION_FIELD.forEach(f => allFields.add(f))
   }
 
   // Add entity-specific fields from the schema file
