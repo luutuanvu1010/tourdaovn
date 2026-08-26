@@ -147,8 +147,8 @@ Trang TouristDestination giữ vai điều phối điểm đến, nhưng không 
 | Custom banners | `homepageBanners` active | tùy | ẩn | tối đa 3 banner, xếp theo priority; toàn card click nếu có linkUrl; không render Offer JSON-LD |
 | Khối featured (5 khối) | `featuredAttractions`, `featuredStays`, `featuredExperiences`, `featuredSpecialties`, `featuredTours` deref | tùy | khối nào rỗng ẩn khối đó | chỉ trỏ entity đã publish (2.1) |
 | Lối vào 4 hub | config (build): 4 hub 05 mục 1.3 | có | — | rollup đếm số entity mỗi hub là tùy chọn Design, dữ liệu sẵn từ build |
-| Các khu vực nên biết | rollup (build): Place approved, ưu tiên area, beach, island, landform, ward | tùy | ẩn | tối đa 4 card, URL từ ROUTE_MAP |
-| Cẩm nang bản địa | rollup (build): Article approved theo `language`, ưu tiên transport-guide, `itinerary`, guide | tùy | ẩn | tối đa 4 card; Article dùng document-level i18n |
+| Các khu vực nên biết | rollup (build): Place approved **có `destination` trỏ chính điểm đến này**, ưu tiên area, beach, island, landform, ward | tùy | ẩn | tối đa 4 card, URL từ ROUTE_MAP |
+| Cẩm nang bản địa | rollup (build): Article approved theo `language` **có `destination` trỏ chính điểm đến này**, ưu tiên transport-guide, `itinerary`, guide | tùy | ẩn | tối đa 4 card; Article dùng document-level i18n |
 | Điểm đến liên quan | `relatedDestinations` | tùy | ẩn | |
 | Lưu ý an toàn | `safetyNote` | tùy | ẩn | theo mùa |
 | Ngày cập nhật nhẹ | `updatedAt` | có nếu có | ẩn nếu thiếu | trust signal S2.4, hiển thị gần cuối trang, không biến thành banner cảnh báo |
@@ -343,6 +343,7 @@ Lý do: doanh thu công ty đến từ offline/đại lý/OTA, site là kênh m�
 | Đánh giá khách | `siteSettings.testimonials[]`: `quote`, `authorName`, `authorNote`, `sourceName`, `sourceUrl` | tùy | ẩn khối | **KHÔNG serialize ra JSON-LD** — Google cấm rich snippet tự phục vụ, xem QĐ-2026-08-06-09 |
 | Báo giá đoàn | `siteSettings.groupQuote`: `heading`, `text`, `ctaLabel` | tùy | ẩn khối | nút đọc `contact.zaloUrl`, không khai số thứ hai |
 | Vì sao chọn | config (build) | tùy | ẩn khối | bốn điểm khác biệt; xem việc 12 của kế hoạch 2026-08-06 |
+| Điểm đến khác | rollup (build): TouristDestination approved khác điểm đến trụ | tùy | ẩn khối | tối đa 4 card; URL là `/{slug}/` — trang chi tiết điểm đến ở gốc site, không nằm dưới `/diem-den/`; chỉ có một điểm đến thì khối không render (ADR-0028) |
 | Các khối nội dung | như §4.1 (trust bar, banner, hub grid, areas, guides, featured, faq, safety) | tùy | khối rỗng tự ẩn dù `hidden = false` | empty guard là cổng cứng, xem §4.1 |
 | JSON-LD | `WebSite` cộng `Organization`; `telephone`/`email` từ `siteSettings.contact`, `logo` từ `siteSettings.branding.logo` | có | field liên hệ trống thì không phát thuộc tính đó; chưa tải logo thì không phát `logo` | guard rỗng §5.1; `logo` thêm v1.0.17 — Google dùng cho nhận diện thương hiệu |
 

@@ -39,7 +39,7 @@ import TermIndex from './TermIndex.astro'
 
 // Destination hub
 import TouristDestinationHub from './TouristDestinationHub.astro'
-import { touristDestinationBySlugQuery } from '../lib/queries'
+import { touristDestinationBySlugQuery, allDestinationsQuery } from '../lib/queries'
 import { touristDestinationToJsonLd } from '../lib/serialize/touristDestination'
 import { entityPageGraphToLd, jsonLdScriptContent } from '../lib/serialize/utils'
 import type { TouristDestinationResult } from '../lib/types'
@@ -214,6 +214,9 @@ const INDEX_LABEL: Record<string, { title: string; desc: string }> = INDEX_COPY[
 
 // allXQuery cho index thường (trừ event/tour/experience xử lý riêng)
 const INDEX_QUERY: Record<string, (l: Lang) => string> = {
+  // Điểm đến: trang danh sách ở /diem-den/, nhưng card trỏ về gốc /{slug}/ — việc dựng
+  // link do EntityIndex hỏi `entityHref` dùng chung, đã xử ca này (ADR-0028).
+  touristDestination: allDestinationsQuery,
   place: allPlacesQuery, attraction: allAttractionsQuery,
   restaurant: allRestaurantsQuery, specialty: allSpecialtiesQuery,
   hotel: allHotelsQuery, resort: allResortsQuery,

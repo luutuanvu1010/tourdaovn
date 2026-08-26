@@ -1,0 +1,31 @@
+
+> backfill:destination
+> node --import ./node_modules/tsx/dist/esm/index.mjs migrate/backfill-destination.ts
+
+Nạp bù field destination (ADR-0028)
+Project: pgedy374  Dataset: production
+Mode: DRY-RUN
+Điểm đến trụ (site.config): nha-trang
+
+Target: seed.nha-trang
+
+Thiếu destination: 209 document
+  article        57
+  attraction     49
+  event          1
+  experience     17
+  hotel          20
+  place          28
+  resort         3
+  tour           34
+
+DRY-RUN: chưa ghi gì. Patch mẫu:
+{
+  "destination": {
+    "_type": "reference",
+    "_ref": "seed.nha-trang"
+  }
+}
+
+Khi đã duyệt, chạy:
+  npm --prefix scripts run backfill:destination -- --live

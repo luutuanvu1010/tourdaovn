@@ -1,0 +1,24 @@
+Bước 4 — npm run build, và kiểm trang chủ KHÔNG đổi
+
+build exit=0. astro check: 0 error (137 file). 144 trang trong dist/.
+
+Phép kiểm hồi quy trang chủ — đếm SỐ LẦN XUẤT HIỆN, không phải grep -c:
+(grep -c của kế hoạch đếm DÒNG; HTML dựng ra nằm trên một dòng nên luôn trả 1,
+ không đo được gì. Dùng `grep -o … | wc -l` thay thế.)
+
+  khối         trước (dist 24/8)   sau       phán quyết
+  area-card    4                   4         giữ nguyên
+  guide-card   4                   4         giữ nguyên
+  tour-card    3                   3         giữ nguyên
+  dest-card    0                   0         giữ nguyên
+
+  tiêu đề overview: "Tổng quan về Nha Trang"  (cả trước lẫn sau)
+
+Đọc — đây là phép kiểm quan trọng nhất của cả đợt:
+- 4 card khu vực và 4 card cẩm nang GIỮ NGUYÊN, tức mệnh đề lọc mới
+  `destination._ref == ^._id` (Task 4) khớp đúng dữ liệu Task 7 vừa nạp bù.
+  Nếu nạp bù trỏ sai (ví dụ vào bản nháp), hai khối này đã rỗng.
+- dest-card = 0 đúng như dự kiến: empty guard của khối "Điểm đến khác" hoạt động.
+  Dataset có 2 touristDestination nhưng cái thứ hai ("Tỉnh Khánh Hòa",
+  d5b267a3…) KHÔNG có slug.vi, nên không sinh trang và không lọt truy vấn.
+- Tiêu đề overview vẫn đúng sau khi đổi `sections.overview` từ chuỗi sang hàm.

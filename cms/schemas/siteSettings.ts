@@ -11,6 +11,7 @@ const SECTION_KEYS = [
   { title: '📝 Nội dung biên tập (body, highlights, facts)', value: 'editorialBody' },
   { title: '🎫 Banner', value: 'banners' },
   { title: '🧭 Hub điều hướng (3 hub)', value: 'hubGrid' },
+  { title: '🌏 Điểm đến khác', value: 'destinations' },
   { title: '🗺 Khu vực', value: 'areas' },
   { title: '🎯 Điểm tham quan nổi bật', value: 'attractions' },
   { title: '🏄 Trải nghiệm nổi bật', value: 'experiences' },

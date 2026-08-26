@@ -1,6 +1,6 @@
 import { defineType, defineField } from 'sanity'
 import { DocumentTextIcon } from '@sanity/icons'
-import { baseGroups } from './baseFields'
+import { baseGroups, destinationField } from './baseFields'
 import { ApprovedByInput } from '../components/ApprovedByInput'
 
 export default defineType({
@@ -79,6 +79,7 @@ export default defineType({
       group: 'noiDung',
       of: [{ type: 'block' }, { type: 'image' }],
     }),
+    destinationField,
     defineField({
       name: 'about', type: 'array',
       group: 'viTri',

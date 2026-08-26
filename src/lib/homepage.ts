@@ -8,7 +8,8 @@ export const HOME_COPY: Record<Lang, {
   hubDescriptions: Record<string, string>
   trustItems: Array<{ icon: string; title: string; description: string }>
   sections: {
-    overview: string
+    /** Nhận tên điểm đến đang render — trang Phú Quốc không được mang tiêu đề Nha Trang. */
+    overview: (name: string) => string
     highlights: string
     facts: string
     areas: string
@@ -19,6 +20,8 @@ export const HOME_COPY: Record<Lang, {
     specialties: string
     tours: string
     relatedDestinations: string
+    /** Nhãn khối "Điểm đến khác" trên trang chủ (ADR-0028). */
+    destinations: string
     faq: string
     /** Bốn khối thêm cho trang chủ hướng A (SPEC-2026-08-06). */
     whyUs: string
@@ -54,7 +57,7 @@ export const HOME_COPY: Record<Lang, {
       { icon: '💬', title: 'Thanh toán linh hoạt', description: 'Chốt qua Zalo với người thật, thống nhất cách thanh toán trước khi giữ chỗ.' },
     ],
     sections: {
-      overview: 'Tổng quan về Nha Trang',
+      overview: (name) => `Tổng quan về ${name}`,
       highlights: 'Điểm nổi bật',
       facts: 'Thông tin nền tảng',
       areas: 'Các khu vực nên biết',
@@ -65,6 +68,7 @@ export const HOME_COPY: Record<Lang, {
       specialties: 'Đặc sản và ẩm thực nổi bật',
       tours: 'Tour nổi bật',
       relatedDestinations: 'Điểm đến liên quan',
+      destinations: 'Điểm đến khác',
       faq: 'Câu hỏi thường gặp',
       whyUs: 'Vì sao chọn',
       partners: 'Chúng tôi làm việc cùng',
@@ -95,7 +99,7 @@ export const HOME_COPY: Record<Lang, {
       { icon: '🧭', title: 'Practical first', description: 'No ads, no sponsored content, facts only' },
     ],
     sections: {
-      overview: 'About Nha Trang',
+      overview: (name) => `About ${name}`,
       highlights: 'Highlights',
       facts: 'Useful basics',
       areas: 'Areas to know',
@@ -106,6 +110,7 @@ export const HOME_COPY: Record<Lang, {
       specialties: 'Food and specialties',
       tours: 'Featured tours',
       relatedDestinations: 'Related destinations',
+      destinations: 'Other destinations',
       faq: 'Frequently asked questions',
       whyUs: 'Why choose us',
       partners: 'We work with',
@@ -136,7 +141,7 @@ export const HOME_COPY: Record<Lang, {
       { icon: '🧭', title: '实用优先', description: '无广告，无赞助内容，仅提供事实' },
     ],
     sections: {
-      overview: '关于芽庄',
+      overview: (name) => `关于${name}`,
       highlights: '亮点',
       facts: '基础信息',
       areas: '值得了解的区域',
@@ -147,6 +152,7 @@ export const HOME_COPY: Record<Lang, {
       specialties: '美食和特产',
       tours: '精选旅行团',
       relatedDestinations: '相关目的地',
+      destinations: '其他目的地',
       faq: '常见问题',
       whyUs: '为什么选择我们',
       partners: '合作伙伴',
@@ -177,7 +183,7 @@ export const HOME_COPY: Record<Lang, {
       { icon: '🧭', title: '실용 정보 우선', description: '광고 없음, 후원 콘텐츠 없음, 사실만' },
     ],
     sections: {
-      overview: '나트랑 소개',
+      overview: (name) => `${name} 소개`,
       highlights: '하이라이트',
       facts: '기본 정보',
       areas: '알아두면 좋은 지역',
@@ -188,6 +194,7 @@ export const HOME_COPY: Record<Lang, {
       specialties: '음식과 특산품',
       tours: '추천 투어',
       relatedDestinations: '관련 목적지',
+      destinations: '다른 여행지',
       faq: '자주 묻는 질문',
       whyUs: '왜 저희를 선택하나요',
       partners: '함께하는 파트너',
@@ -218,7 +225,7 @@ export const HOME_COPY: Record<Lang, {
       { icon: '🧭', title: 'Практичность прежде всего', description: 'Без рекламы, без спонсоров, только факты' },
     ],
     sections: {
-      overview: 'О Нячанге',
+      overview: (name) => `О направлении ${name}`,
       highlights: 'Основные моменты',
       facts: 'Полезная база',
       areas: 'Районы, которые стоит знать',
@@ -229,6 +236,7 @@ export const HOME_COPY: Record<Lang, {
       specialties: 'Еда и деликатесы',
       tours: 'Избранные туры',
       relatedDestinations: 'Похожие направления',
+      destinations: 'Другие направления',
       faq: 'Частые вопросы',
       whyUs: 'Почему мы',
       partners: 'Мы работаем с',

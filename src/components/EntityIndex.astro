@@ -4,6 +4,7 @@ import { siteBaseUrl } from '../lib/siteUrl'
 import { uiCopy, ATTRACTION_TYPE_LABELS, SPECIALTY_TYPE_LABELS, ARTICLE_TYPE_LABELS, TOUR_FORMAT_LABELS } from '../lib/uiCopy'
 import { resolvePrice } from '../lib/resolver'
 import { ROUTE_MAP } from '../lib/routes'
+import { entityHref as sharedEntityHref } from '../lib/homepage'
 import { collectionPageToJsonLd, jsonLdScriptContent } from '../lib/serialize'
 import Card from './Card.astro'
 import EmptyState from './EmptyState.astro'
@@ -104,10 +105,13 @@ function getPriceLabel(entity: ListingEntity): string | undefined {
   return pv?.label
 }
 
+// Hỏi `entityHref` dùng chung thay vì tự dựng lại `/{segment}/{slug}/`. Không phải mọi
+// entity đều có trang chi tiết nằm dưới segment danh sách của nó: `touristDestination`
+// liệt kê ở /diem-den/ nhưng chi tiết ở gốc /{slug}/ (ADR-0028). Bản tự dựng cũ sẽ sinh
+// ra một loạt link /diem-den/{slug}/ trỏ vào trang không tồn tại. `sharedEntityHref` là
+// nơi DUY NHẤT biết ngoại lệ đó — không chép lại luật ấy ở đây.
 function entityHref(slug: string): string {
-  const seg = getSegment(entityType, lang)
-  const prefix = lang === 'vi' ? '' : `/${lang}`
-  return `${prefix}/${seg}/${slug}/`
+  return sharedEntityHref(entityType, slug, lang) ?? `${lang === 'vi' ? '' : `/${lang}`}/${getSegment(entityType, lang)}/${slug}/`
 }
 
 const hasEntities = entities.length > 0

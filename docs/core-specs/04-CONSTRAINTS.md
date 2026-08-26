@@ -56,6 +56,7 @@ Nguồn sự thật của phát biểu bất biến là CONTENT_MODEL mục 4; f
 | I17 | Specialty đủ specialtyType, sameAs; whereToTry là tập con của chiều servesSpecialty suy ngược | required-field cộng subset check: mọi Restaurant trong whereToTry phải publish và có servesSpecialty chứa chính Specialty đó | fail | QA2 |
 | I18 | Organization chỉ publish khi có quan hệ vào | reverse reference quét cả draft: tồn tại Tour.operator, Event.organizer hoặc Article.about trỏ tới | fail | QA2 |
 | I19 | Publish cần reviewStatus = approved kèm approvedBy và contentProvenance thuộc enum đóng; Category miễn | required-field cộng kiểm giá trị enum (draft, inReview, approved; human, ai-t1, mixed) | fail | QA2 |
+| I20 | Entity đã publish nên khai `destination` — thuộc điểm đến nào | required-field mức cảnh báo trên mười entity ở ADR-0028; thiếu thì document không hiện ở trang điểm đến nào, KHÔNG chặn publish | warn | QA2 |
 
 ## 1b. Validator nguồn giá `prices.yaml` (thi hành I1, I14, I16 theo ADR-0007 và SAD mục 3)
 

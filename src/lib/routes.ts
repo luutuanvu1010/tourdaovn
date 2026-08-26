@@ -38,6 +38,16 @@ export interface RouteEntry {
  * mục nào đang bật hay tắt.
  */
 const ROUTE_TABLE: RouteEntry[] = [
+  // ĐIỂM ĐẾN — entry DUY NHẤT có index và chi tiết ở hai chỗ khác nhau.
+  // `/diem-den/` là trang danh sách; trang chi tiết KHÔNG nằm dưới nó mà ở gốc site
+  // (`/nha-trang/`, `/ninh-thuan/`), do `[...path].astro` sinh riêng — xem ADR-0028 và
+  // 05-URL_MAP. Vì thế `touristDestination` bị loại khỏi `fieldLevelEntities` trong
+  // site.config: danh sách đó nuôi việc sinh trang chi tiết, để nó vào là sinh thêm
+  // `/diem-den/{slug}/` trùng nội dung với trang gốc.
+  // Giữ chi tiết ở gốc là quyết định có chủ đích: `/nha-trang/` đang xếp hạng trên
+  // Google, dời nó là một quyết định SEO riêng chứ không phải hệ quả của việc thêm
+  // trang danh sách.
+  { entity: 'touristDestination', segments: { vi:'diem-den',        en:'destinations',    zh:'目的地',     ko:'여행지',     ru:'направления' },            labels: { vi:'Điểm đến',      en:'Destinations',    zh:'目的地',     ko:'여행지',     ru:'Направления' },            hasIndex: true,  hasTerm: false },
   { entity: 'place',            segments: { vi:'dia-danh',         en:'places',          zh:'地点',       ko:'장소',       ru:'места' },                  labels: { vi:'Địa danh',      en:'Places',          zh:'地点',       ko:'장소',       ru:'Места' },                  hasIndex: true,  hasTerm: false },
   { entity: 'attraction',       segments: { vi:'diem-tham-quan',   en:'attractions',     zh:'景点',       ko:'명소',       ru:'достопримечательности' }, labels: { vi:'Điểm tham quan', en:'Attractions',     zh:'景点',       ko:'명소',       ru:'Достопримечательности' }, hasIndex: true,  hasTerm: false },
   { entity: 'experience',       segments: { vi:'trai-nghiem',      en:'experiences',     zh:'体验',       ko:'체험',       ru:'впечатления' },            labels: { vi:'Trải nghiệm',    en:'Experiences',     zh:'体验',       ko:'체험',       ru:'Впечатления' },            hasIndex: true,  hasTerm: true },
@@ -152,7 +162,7 @@ function resolveInternalPath(item: NavItem, lang: Lang): string | null {
     throw new Error(`\n\n[site.config] Mục menu "${item.label}": ${msg}\n`)
   }
 
-  if (!item.kind) bad('thiếu `kind`. Xem bảng sáu loại đích ở site.config.ts mục 7.')
+  if (!item.kind) bad('thiếu `kind`. Xem bảng tám loại đích ở site.config.ts mục 7.')
   if (!item.target) bad(`\`kind: '${item.kind}'\` cần có \`target\`.`)
   const target = item.target as string
 
@@ -160,6 +170,13 @@ function resolveInternalPath(item: NavItem, lang: Lang): string | null {
     if (!(staticPages as readonly string[]).includes(target)) {
       bad(`trang tĩnh "${target}" chưa khai trong \`staticPages\` ở site.config.ts.`)
     }
+    return `${prefix}/${target}/`
+  }
+
+  if (item.kind === 'destination') {
+    // Không tự kiểm slug có thật hay không tại đây: assertNavTargetsExist đối chiếu mọi
+    // mục menu với danh sách trang mà LẦN BUILD NÀY thực sự sinh ra, nên khai trỏ tới điểm
+    // đến chưa nhập nội dung là build dừng ngay trên máy, kèm đúng đường dẫn sai.
     return `${prefix}/${target}/`
   }
 

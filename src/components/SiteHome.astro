@@ -2,7 +2,7 @@
 import { HOME_COPY, indexHref } from '../lib/homepage'
 import { resolveNav } from '../lib/routes'
 import { imageUrl } from '../lib/sanity-image'
-import type { Lang, TouristDestinationResult, SiteSettingsResult } from '../lib/types'
+import type { Lang, TouristDestinationResult, SiteSettingsResult, DestinationCard } from '../lib/types'
 import { brand } from '../site.config'
 import Body from './Body.astro'
 import HomeTrustBar from './HomeTrustBar.astro'
@@ -17,6 +17,7 @@ import HomePartners from './HomePartners.astro'
 import HomeTestimonials from './HomeTestimonials.astro'
 import HomeGroupQuote from './HomeGroupQuote.astro'
 import HomeTourGrid from './HomeTourGrid.astro'
+import HomeDestinationGrid from './HomeDestinationGrid.astro'
 export interface Props {
   td: TouristDestinationResult | null
   lang: Lang
@@ -26,9 +27,11 @@ export interface Props {
   homeTours?: any[]
   /** Tổng số tour thật, cho nhãn "Xem tất cả N tour". */
   homeTourTotal?: number
+  /** Điểm đến khác cho khối "Điểm đến khác". Rỗng thì khối tự ẩn. */
+  otherDestinations?: DestinationCard[]
 }
 
-const { td, lang, destinationHref, config, homeTours = [], homeTourTotal = 0 } = Astro.props
+const { td, lang, destinationHref, config, homeTours = [], homeTourTotal = 0, otherDestinations = [] } = Astro.props
 const copy = HOME_COPY[lang]
 
 // Nút phụ ở hero lấy mục đầu tiên của menu (ADR-0023) thay vì hardcode hub-kham-pha.
@@ -141,6 +144,7 @@ const DEFAULT_SECTIONS = [
   { key: 'guides', hidden: false },
   { key: 'experiences', hidden: false },
   { key: 'hubGrid', hidden: false },
+  { key: 'destinations', hidden: false },
   { key: 'stays', hidden: false },
   { key: 'attractions', hidden: false },
   { key: 'areas', hidden: false },
@@ -217,7 +221,7 @@ const activeSections = rawSections.filter((s) => !s.hidden)
            trái. Thu hẹp nốt là đụng luật measure — cần phiếu riêng. */
         return (
           <section class="container editorial-section">
-            <h2 class="editorial-section-heading">{copy.sections.overview}</h2>
+            <h2 class="editorial-section-heading">{copy.sections.overview(td.title)}</h2>
             <div class="editorial-grid">
               <div class="editorial-main">
                 {hasBody && td.body && <Body blocks={td.body} />}
@@ -240,6 +244,10 @@ const activeSections = rawSections.filter((s) => !s.hidden)
         return td?.homepageBanners?.length ? <HomeBannerGrid banners={td.homepageBanners} lang={lang} /> : null
       case 'hubGrid':
         return <HomeHubGrid lang={lang} />
+      case 'destinations':
+        return otherDestinations.length ? (
+          <HomeDestinationGrid destinations={otherDestinations} lang={lang} heading={copy.sections.destinations} />
+        ) : null
       case 'areas':
         return td?.homepagePlaces?.length ? (
           <HomeAreaGrid places={td.homepagePlaces} lang={lang} heading={copy.sections.areas} viewAllLabel={copy.viewAll} viewAllHref={indexHref('place', lang)} />

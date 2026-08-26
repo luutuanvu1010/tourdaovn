@@ -4,7 +4,7 @@
 // B8.5.1 — Nền móng
 export { categoryByTermCodeQuery, categoryBySlugQuery, categoriesBySetQuery } from './category'
 export { personBySlugQuery, allPersonsQuery, articlesByPersonQuery } from './person'
-export { touristDestinationBySlugQuery } from './touristDestination'
+export { touristDestinationBySlugQuery, otherDestinationsQuery, allDestinationsQuery } from './touristDestination'
 export { placeBySlugQuery, allPlacesQuery, placesContainedInQuery, nearbyForPlaceQuery } from './place'
 
 // B8.5.2 — Entity phức tạp

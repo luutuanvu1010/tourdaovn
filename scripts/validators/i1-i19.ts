@@ -444,6 +444,28 @@ export function validateI_FAQ_TYPE(docs: any[]): ValidatorResult {
   return { passed: errors.length === 0, errors }
 }
 
+// ── I20: Entity đã publish nên khai mình thuộc điểm đến nào (ADR-0028) ──
+// Mức warn có chủ ý: thiếu ô này KHÔNG làm hỏng trang nào — document vẫn lên trang danh
+// mục bình thường, chỉ không xuất hiện ở trang điểm đến nào. Đặt fail ở đây là chặn publish
+// mọi nội dung chưa nạp bù, gồm cả nội dung đang chờ lên.
+
+const I20_SCOPE = new Set([
+  'place', 'attraction', 'experience', 'hotel', 'resort',
+  'tour', 'article', 'restaurant', 'specialty', 'event',
+])
+
+export function validateI20(docs: any[]): ValidatorResult {
+  const errors: string[] = []
+  for (const doc of docs) {
+    if (!I20_SCOPE.has(doc._type)) continue
+    if (doc.reviewStatus !== 'approved') continue
+    if (!refId(doc.destination)) {
+      errors.push(`${doc._id}: ${doc._type} đã publish nhưng thiếu destination — không hiện ở trang điểm đến nào (I20)`)
+    }
+  }
+  return { passed: errors.length === 0, errors }
+}
+
 // ── Dispatch map ──
 
 export const VALIDATORS: Record<string, (docs: any[], prices?: Map<string, PriceEntry>) => ValidatorResult> = {
@@ -466,6 +488,7 @@ export const VALIDATORS: Record<string, (docs: any[], prices?: Map<string, Price
   I17: (docs) => validateI17(docs),
   I18: (docs) => validateI18(docs),
   I19: (docs) => validateI19(docs),
+  I20: (docs) => validateI20(docs),
   'I-FAQ-TYPE': (docs) => validateI_FAQ_TYPE(docs)
 }
 
@@ -473,6 +496,6 @@ export const VALIDATOR_LEVELS: Record<string, 'fail' | 'warn'> = {
   I1: 'fail', I2: 'fail', I3: 'fail', I4: 'fail', I5: 'fail',
   I6: 'fail', I7: 'fail', I8: 'fail', I9: 'fail', I10: 'warn',
   I11: 'fail', I12: 'fail', I13: 'fail', I14: 'fail', I15: 'fail',
-  I16: 'fail', I17: 'fail', I18: 'fail', I19: 'fail',
+  I16: 'fail', I17: 'fail', I18: 'fail', I19: 'fail', I20: 'warn',
   'I-FAQ-TYPE': 'fail'
 }

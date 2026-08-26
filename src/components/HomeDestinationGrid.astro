@@ -1,0 +1,157 @@
+---
+// HomeDestinationGrid — lưới card "Điểm đến khác" trên trang chủ (ADR-0028).
+// Tự ẩn khi rỗng: chỉ có một điểm đến thì khối này không render gì.
+// Cùng token và cùng hình dạng card với HomeAreaGrid — cố ý, để trang chủ không có
+// hai ngôn ngữ thị giác cho cùng một loại khối.
+
+import { destinationHref } from '../lib/homepage'
+import { imageUrl } from '../lib/sanity-image'
+import type { DestinationCard, Lang } from '../lib/types'
+
+export interface Props {
+  destinations?: DestinationCard[]
+  lang: Lang
+  heading: string
+}
+
+const { destinations = [], lang, heading } = Astro.props
+
+const cards = destinations
+  .map(d => ({
+    ...d,
+    href: destinationHref(d.slug, lang),
+    image: imageUrl(d.mainImage, { width: 400 }),
+  }))
+  .filter(c => c.href && c.title && c.summary)
+  .slice(0, 4)
+---
+
+{cards.length > 0 && (
+  <section class="dest-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-header-left">
+          <h2 class="section-title">{heading}</h2>
+          <span class="section-underline" aria-hidden="true"></span>
+        </div>
+      </div>
+      <div class="dest-grid">
+        {cards.map(card => (
+          <a href={card.href!} class="dest-card">
+            <div class="dest-img-wrap">
+              {card.image ? (
+                <img src={card.image} alt={card.mainImage?.alt || card.title} loading="lazy" class="dest-img" />
+              ) : (
+                <div class="dest-img-fallback" aria-hidden="true"></div>
+              )}
+            </div>
+            <div class="dest-body">
+              <h3 class="dest-name">{card.title}</h3>
+              <p class="dest-desc line-clamp-2">{card.summary}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  .dest-section { padding: var(--s8) 0 var(--s7); }
+
+  .section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: var(--s5);
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-section);
+    letter-spacing: -0.015em;
+    font-weight: var(--fw-800);
+    color: var(--c-primary);
+    line-height: 1.2;
+    margin-bottom: var(--s2);
+  }
+
+  .section-underline {
+    display: block;
+    width: var(--underline-width);
+    height: var(--underline-height);
+    background: var(--c-sand);
+    border-radius: 2px;
+  }
+
+  .dest-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--s4);
+  }
+
+  .dest-card {
+    background: var(--c-card);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--c-border);
+    box-shadow: var(--shadow-card);
+    transition: box-shadow var(--m-fast) var(--m-ease);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .dest-card:hover { box-shadow: var(--shadow-raised); }
+
+  .dest-img-wrap {
+    aspect-ratio: 3/2;
+    overflow: hidden;
+    background: var(--c-primary-soft);
+  }
+
+  .dest-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--m-base) var(--m-ease);
+  }
+
+  .dest-card:hover .dest-img { transform: scale(1.05); }
+
+  .dest-img-fallback { width: 100%; height: 100%; }
+
+  .dest-body { padding: var(--s4); }
+
+  .dest-name {
+    font-family: var(--font-display);
+    font-weight: var(--fw-700);
+    font-size: var(--fs-sm);
+    color: var(--c-text);
+    margin-bottom: var(--s1);
+    line-height: 1.3;
+  }
+
+  .dest-desc {
+    font-weight: var(--fw-500);
+    font-size: var(--fs-label);
+    color: var(--c-text-muted);
+    line-height: 1.55;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @media (max-width: 1024px) {
+    .dest-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 640px) {
+    .dest-section { padding: var(--s7) 0 var(--s6); }
+    .dest-grid { grid-template-columns: 1fr; }
+    .section-title { font-size: var(--fs-h4); }
+  }
+</style>

@@ -35,18 +35,24 @@ export const structure: StructureResolver = (S) => {
     S.divider()
   )
 
-  // TouristDestination: Nha Trang (singleton seed)
+  // TouristDestination: danh sách, KHÔNG còn singleton (ADR-0028).
+  //
+  // Trước 2026-08-26 mục này ghim cứng `documentId('seed.nha-trang')`, nên bấm vào là
+  // mở thẳng form Nha Trang — không danh sách, không nút tạo mới. Cardinality đã đổi
+  // 1 → N ở 01-CONTENT_MODEL, schema đã có field, định tuyến vốn đã đa điểm đến, nhưng
+  // chỗ này còn sót lại và chặn đúng việc mà ADR-0028 sinh ra để cho phép: nhập điểm
+  // đến thứ hai. Nó cũng làm document `touristDestination` thứ hai đã có trong dataset
+  // trở nên không với tới được qua menu.
+  //
+  // Dùng đúng khuôn `documentTypeListItem` như chín entity kia — không đặc cách, không
+  // ghim cứng _id nào. Điểm đến trụ là cấu hình (`primaryDestinationSlug` trong
+  // site.config), không phải một vị trí đặc biệt trong menu.
   const tdMeta = getEntityMeta('touristDestination')
   if (tdMeta) {
     items.push(
-      S.listItem()
+      S.documentTypeListItem('touristDestination')
         .title(getEntityMenuLabel('touristDestination'))
-        .icon(tdMeta.icon)
-        .child(
-          S.document()
-            .schemaType('touristDestination')
-            .documentId('seed.nha-trang')
-        ),
+        .icon(tdMeta.icon),
       S.divider()
     )
   }

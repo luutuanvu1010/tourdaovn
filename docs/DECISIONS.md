@@ -1732,3 +1732,135 @@ Việc "mất 0 trang" là điều kiện `R3`, và là phép kiểm quan trọn
 ### Còn phải làm
 
 Chủ dự án vào `sanity.io/manage` đối chiếu **~400 lượt/lần dựng** với hạn mức và nhịp dựng thật. Vá `useCdn` chuyển tải sang endpoint có hạn mức riêng, nhưng nó **không làm giảm số lượt gọi** — chỉ đổi chỗ tính. Muốn giảm thật thì phải giảm số lần dựng, hoặc dựng tăng dần thay vì dựng lại toàn bộ.
+
+## ND-009 — Nhánh `feat-bo-kiem-tu-dong`: một lỗi Critical và năm Important chưa vá, chưa được gộp
+
+**Mở:** 2026-08-24 · **Trạng thái:** mở · **Chặn:** không gộp nhánh `feat-bo-kiem-tu-dong` trước khi xử `C1`.
+
+Nhánh dựng bộ kiểm tự động — 10 subagent, 4 hook, 4 script audit, 168 test xanh. 28 commit từ `ed27125`, HEAD `e7f10c6`. Thi hành `docs/plans/2026-08-23-bo-kiem-tu-dong.md`; diễn biến ghi ở `docs/NHAT-KY-2026-08-24-bo-kiem-tu-dong.md`.
+
+Vòng duyệt toàn nhánh phán quyết **gộp được sau khi sửa `C1`**. Phiên dừng trước khi đợt sửa chạy xong, nên toàn bộ danh sách dưới đây **chưa làm**.
+
+### C1 — Critical, chặn gộp
+
+`scripts/audit/gate-audit.ts:194`, hàm `dangChayThatTrongBaoCao`. File bằng chứng **không tồn tại** → mảng rỗng → verdict `pass`.
+
+Đo thật: đổi tên `scripts/reports/validator-status.json` rồi chạy `audit:gate`.
+
+```
+trước:  34 đạt, 28 trượt
+sau:    61 đạt,  1 trượt
+```
+
+**Xoá một file làm 27 mục trượt thật thành 27 mục đạt.** Nghịch đảo trực tiếp `CLAUDE.md` §6 — không có bằng chứng thì mặc định thành *đạt*. Nguy hiểm gấp đôi vì `scripts/reports/` sinh ra bởi build: một `git clean`, một máy CI mới, hay một lần validator hỏng là đủ.
+
+Sửa: phân biệt ba trạng thái — file **không có** → `skip`; file có, **không có mục** id đó → `pass`; file có, **có mục** → `fail`. Kèm test cho cả ba, đặc biệt trạng thái thứ nhất.
+
+### Important
+
+| Mã | Chỗ | Nội dung |
+|---|---|---|
+| `I1` | `gate-audit.ts:257` | `GA4` phát 0 check, 0 skip khi thư mục validator vắng. Báo cáo đi từ 62 xuống 47 mục mà không dòng nào nói `GA4` đã không chạy |
+| `I2` | `gate-audit.ts:235` | `GA3` biến mất im lặng khi thiếu `postbuild-status.json` |
+| `I3` | `deploy-verify.ts:47` | `soDauHieu` trả `pass` khi dấu hiệu vắng ở **cả hai** bên → gõ sai một tham số làm phép kiểm chống `DR-041` thành lời khai rỗng. **`deploy-verify.test.ts:26` đang khoá hành vi sai này bằng test** |
+| `I4` | `doc-reality.ts:215` | `trichLuatChuyenHuong` chỉ nhận dạng `<đường dẫn> <mũi tên> <URL>`, không nhận cú pháp `_redirects` mà dự án thật sự dùng. `DOC3` `skip` vĩnh viễn — phép kiểm chống `DR-043` chưa từng đối chiếu một luật thật nào |
+| `I5` | `guard-data-mutation.sh:79` | Mẫu khớp chuỗi lệnh thô nên chặn nhầm thao tác chỉ-đọc: `cat`, `wc`, `grep`, `git diff`, `git add` trên `seed/` và `migrate/` đều bị chặn. Người dùng sẽ học cách tạo cờ mở khoá để **đọc** — và cờ đó mở luôn đường **ghi**. Sửa: neo mẫu vào động từ thực thi (`node`, `npx`, `tsx`, `npm run`) |
+| `I6` | `code-reviewer.md`, `astro-auditor.md` | Luật mặc định "từ ba file trở lên" đẩy **mọi** diff sang `code-reviewer`, nhưng agent đó tự định nghĩa là reviewer **giao diện**. Diff thuần backend rơi vào sai lăng kính. Sửa hẹp: luật chỉ áp cho diff giao diện; diff khác dùng skill `/code-review` chung |
+
+Brief sửa đầy đủ cho cả sáu mục nằm trong `.superpowers/sdd/2026-08-23-bo-kiem-tu-dong/progress.md`, phần "KẾT QUẢ VÒNG DUYỆT TOÀN NHÁNH".
+
+### Đã phân loại là để lại được
+
+Vòng duyệt cuối kiểm và kết luận không chặn gộp: test `evidenceDir` trùng ngày (nay đã tự phân biệt được, nợ tự đóng); `demUrlSitemap` chỉ khớp `<loc>` trần; `DV3` bị bỏ khi `DV0` hết giờ; `kiemTrang` không loại chú thích HTML; `agents.test.ts` bỏ qua tên công cụ tiền tố `mcp__`; `exitCodeFor` cho `skip` thoát 0; năm commit có `doc-reality.ts` ở dạng nhị phân trong lịch sử.
+
+### Ba việc chờ chủ dự án chốt
+
+1. **27 control `status: gap` trong `control-registry.yaml`** (xem `DR-064`) — lật thành `live` toàn bộ, chỉ lật 15 cái đang xanh, hay để nguyên tới khi dữ liệu sạch? Hiện 11 validator đỏ vì **vi phạm dữ liệu thật**, không phải lỗi mã. Lật là cổng chuyển đỏ.
+2. **Ngưỡng "ba file"** trong luật định tuyến `astro-auditor` ↔ `code-reviewer` — con số do tác nhân chọn, chưa duyệt. Nên chốt cùng `I6` vì cùng một vấn đề.
+3. **Bốn hook chưa từng chạy thật.** Chúng chỉ nạp lúc phiên Claude Code khởi động. Phép thử sau khi khởi động lại: gõ `git add -A` trong repo này — **phải bị chặn**. Không bị chặn nghĩa là hook chưa nạp và mọi hàng rào còn lại cũng chưa có tác dụng.
+
+### Ghi chú vệ sinh
+
+`scripts/reports/validator-status.json` đang ở trạng thái đã sửa trong cây làm việc — do tác nhân chạy `validate` để kiểm chứng `DR-064`, chưa commit. Không phải dấu vết của phiên khác.
+
+---
+
+## QĐ-2026-08-25-07 — Để Growth Trial hết hạn, dự án Sanity rơi về Free
+
+**Bối cảnh.** Ngày 2026-08-25 Sanity gửi cảnh báo *"TourDaoVN has used 100% of API Requests"*. Kiểm ra: dự án `pgedy374` đang ở gói `growth-trial-2023-10-19`, đã dùng 247.5k/250.000 API request của tháng 8, `overageAllowed: false`, và trial hết hạn 2026-08-26T00:57Z — tức sáng hôm sau. Hai đường đi: nâng lên Growth (15 USD mỗi seat mỗi tháng, mở phí vượt 1 USD mỗi 25k request) hoặc không làm gì và tự rơi về Free.
+
+**Câu hỏi.** Có nâng gói không?
+
+**Chốt.** **Không.** Để trial hết hạn, dự án tự rơi về Free. Không thêm thẻ, không nâng cấp. Sanity không trừ tiền gì.
+
+**Ai chốt.** Chủ dự án, trong phiên 2026-08-25.
+
+**Hệ quả đã lường và chấp nhận.**
+- Hạn mức API **không đổi**: Free và Growth Trial đều 250.000 request mỗi tháng, reset 00:00 UTC ngày 1.
+- Bốn thành viên vai `editor` **thành `viewer` — mất quyền Publish trong Studio**. Free chỉ có hai vai `administrator` và `viewer`, không có nấc giữa. Tài khoản admin giữ nguyên toàn quyền. Ai cần publish thì hoặc nâng lên administrator (kèm quyền chạm mọi thiết lập dự án), hoặc nâng gói lại.
+- Mất Comments, Scheduled publishing, AI Assist. Đã kiểm trước khi chốt: **0 release / lịch publish hẹn giờ đang chờ**, nên không mất nội dung nào đã xếp lịch.
+- Dataset `production` vốn đã `public` nên không có gì đổi ở đó.
+
+**Ghi chú.** Phần định lượng — thao tác nào tốn hạn mức, thao tác nào không — tách thành sổ tay riêng ở `docs/SO-TAY-HAN-MUC-SANITY.md`. Nguyên nhân đốt hết hạn mức tháng 8 không phải khách truy cập mà là số lần dựng lại site: 157 commit push lên `main`, mỗi lần Workers Builds tự dựng và đọc lại toàn bộ nội dung, cộng một `astro dev` chạy nền 21 tiếng.
+
+---
+
+## QĐ-2026-08-26-01 — Nhiều điểm đến trên một site: TouristDestination là N
+
+**Bối cảnh.** Chủ dự án yêu cầu thêm được điểm đến ngoài Nha Trang vào CMS, và các điểm đến đó thừa hưởng toàn bộ cấu trúc trang chi tiết giống Nha Trang. Rà soát cho thấy khuôn trang đã đa điểm đến sẵn — `src/pages/[...path].astro:73-80` lặp qua mọi `touristDestination` đã duyệt, `src/lib/sitemap.ts:86` đưa hết vào sitemap, `RouteDispatch` render bằng `TouristDestinationHub` — nhưng **dữ liệu** thì không: hai khối tự động của trang điểm đến ("Các khu vực nên biết", "Cẩm nang bản địa") quét toàn bộ dataset, và không entity con nào khai mình thuộc điểm đến nào. `01-CONTENT_MODEL.md:42` khai cardinality TouristDestination là **1**.
+
+**Câu hỏi.** Site đóng vai gì sau khi thêm điểm đến; gắn nội dung vào điểm đến bằng cách nào; khách tìm thấy điểm đến mới bằng đường nào.
+
+**Chốt.** Sáu điểm, chủ dự án quyết trong phiên 2026-08-26:
+
+1. **Trang chủ `/` vẫn là Nha Trang.** Điểm đến khác là trang anh em `/‹slug›/` cùng khuôn. Các trang danh mục (`/tour/`, `/khach-san/`…) **vẫn gom chung toàn site**, chưa tách theo điểm đến.
+2. **Cardinality TouristDestination 1 → N**, và thêm một field `destination` (reference) vào **mười** entity: place, attraction, experience, hotel, resort, tour, article, restaurant, specialty, event. Chạy script nạp bù dữ liệu cũ về Nha Trang.
+3. **Lối vào là khối "Điểm đến khác" trên trang chủ cộng một mục menu** (loại đích `kind` thứ tám).
+4. **Không đặt `initialValue` mặc định** cho field mới. Mặc định im lặng sẽ gán nhãn Nha Trang cho nội dung điểm đến khác mà không có tín hiệu nào báo. Thiếu ô là **warn** (bất biến I20 mới), không **fail**; trỏ sai type vẫn là **fail** qua `references` trong `gate.config.ts`.
+5. **Hoãn sửa ~30 dòng meta description trong `src/lib/uiCopy.ts`** ("Khách sạn tại Nha Trang"…) — đó là mô tả của các trang danh mục toàn site đang xếp hạng trên Google, sửa là quyết định SEO riêng. Ghi nợ trong `DRIFT_LOG.md`, không im lặng bỏ qua.
+6. **Bản nháp ADR-0028 do Cowork soạn**, chủ dự án phê chuẩn cùng ngày.
+
+**Ai chốt.** Chủ dự án, trong phiên 2026-08-26. `ADR-0028` chuyển sang `accepted` cùng ngày.
+
+**Hệ quả đã lường và chấp nhận.**
+- Có **hai** đường mô tả vị trí trên cùng một document (`containedInPlace` có thứ bậc, `destination` phẳng), và **không có kiểm máy nào bắt hai đường mâu thuẫn**. Cố ý: chúng phục vụ hai vai khác nhau và không suy ra nhau.
+- Khoảng 57 document (số theo bản sao lưu 2026-08-14) bị script ghi vào. **Không lùi được bằng `git revert`** — phải sao lưu trước khi chạy.
+- Enum `siteSettings.sections` mở 19 → 20 khoá; `NavKind` 7 → 8 loại đích. Cả hai là enum đóng có kiểm, phải sửa đồng thời ở schema, đặc tả và mã.
+- Hai meta-validator `g1` và `g4` chép tay danh sách field nên **phải sửa cùng lúc**, nếu không cổng vẫn xanh nhưng nói sai về thực tế.
+
+**Ràng buộc thi hành.** Quota API Sanity đã chạm trần (xác minh 2026-08-26 bằng lỗi `plan_limit_reached`), reset **2026-09-01** theo `QĐ-2026-08-25-07`. Nạp bù dữ liệu và `npm run build` chưa chạy được tới lúc đó. **Thứ tự cứng:** nạp bù xong mới được dựng mã đổi truy vấn — ngược lại là trang chủ Nha Trang rỗng hai khối.
+
+**Tài liệu.** `docs/specs/SPEC-2026-08-26-da-diem-den.md`, `docs/adr/ADR-0028-da-diem-den.md`, kế hoạch thi công `docs/plans/2026-08-26-da-diem-den.md` (8 task).
+
+---
+
+## QĐ-2026-08-27-01 — Bật lại deploy tự động sau khi Publish, kèm sửa ba chỗ lệch của webhook
+
+**Ngày:** 2026-08-27 · **Người quyết:** chủ dự án · **Loại:** cửa hai chiều (đặt `isDisabledByUser: true` là hoàn nguyên)
+
+**Bối cảnh.** Webhook `Cloudflare rebuild` (`UCT8eZl6s8SXBtKP`) bị tắt từ 2026-08-22 theo `QĐ-2026-08-22-03`, vì mỗi lần bắn là một lần dựng lại đọc toàn bộ nội dung qua Sanity Content API, và tháng 8 đã đốt sạch hạn mức 250k theo cách đó. `DR-042` ghi ba chỗ lệch `ADR-0009` và đặt điều kiện: **xử xong mới được bật lại**.
+
+**Điều kiện đã thay đổi từ lúc tắt.** Hai việc do đợt khác làm đã tháo phần lớn rủi ro:
+
+1. **`QĐ-2026-08-25-06` chuyển bản dựng sang đọc qua CDN** (`src/lib/sanity.ts` nay `useCdn: true`). Bản dựng không còn ăn vào xô `api` 250k mà vào xô **`apicdn` 1.000.000/tháng, hiện gần như chưa dùng**. Đây là thứ đổi bản chất bài toán chi phí, không phải một tối ưu nhỏ.
+2. **Gói đã lên Growth trả phí** (xác minh 2026-08-26). Vượt hạn mức không còn là HTTP 402 dừng hẳn mà là hoá đơn — nhưng vượt CDN rẻ hơn vượt `api` **bốn lần** ($1/250k so với $1/25k), và xô CDN lớn gấp bốn.
+
+**Chốt.** Bật lại webhook, đồng thời sửa đúng hai trong ba chỗ lệch của `DR-042`:
+
+| | Trước | Nay | `ADR-0009` |
+|---|---|---|---|
+| Sự kiện | `create` | `create`, `update`, `delete` | mục 3 |
+| Dataset | `*` | `production` | mục 3 |
+| Lọc type | không có | 15 type có render trang | mục 3 |
+| Lọc draft | có | giữ nguyên | — |
+| Debounce | không | **vẫn không** | mục 4 cho phép MVP bỏ qua |
+
+**Vì sao chỉ nghe `create` là lỗi nặng nhất.** Sửa một trang **đã publish** rồi bấm Publish lại là sự kiện `update`. Theo cấu hình cũ, thao tác thường gặp nhất của biên tập viên **không kích build**. Nghĩa là hook vừa bắn thừa cho việc không cần, vừa im lặng đúng lúc cần nhất.
+
+**Vì sao bộ lọc type đáng giá hơn tưởng.** Dataset có 18 `_type`, trong đó **5 là của hệ thống**: `sanity.imageAsset` (sinh mỗi lần tải một tấm ảnh), `system.schema` (sinh mỗi lần `sanity deploy` — riêng ngày 2026-08-27 đã ba lần), `system.group`, `system.retention`, `sanity.canvas.link`. Với `dataset: "*"` không lọc type, **mỗi document hệ thống đó kích một lần dựng toàn site**. Đây nhiều khả năng là phần lớn tiếng ồn mà `DR-042` đo được (25 lần bắn/ngày, 4 lần trong 6 giây) — không phải biên tập viên bấm Publish 25 lần.
+
+**Nợ còn mở, cố ý.** Debounce (`ADR-0009` mục 4: Worker gom sự kiện, bắn sau khoảng lặng 120 giây) **chưa làm**. Chính ADR ghi "MVP có thể bỏ qua Worker và bắn thẳng, chấp nhận build xếp hàng". Với xô CDN 1M và bộ lọc type vừa thêm, chấp nhận được. Phải xem lại nếu mức dùng CDN vượt ~50%.
+
+**Hệ quả phải biết.** Bản dựng tự động lấy mã từ **`origin/main`**, không phải từ nhánh đang làm. PR #11 chưa gộp, nên tới khi gộp, bấm Publish sẽ phát hành **hành vi của `main`**: có trang `/ninh-thuan/` (định tuyến đa điểm đến vốn đã có trên `main`), nhưng **chưa có** `/diem-den/` và hai khối trang chủ **chưa lọc** theo điểm đến.
+
+**Đã kiểm.** Đọc lại cấu hình từ server sau khi ghi, không tin phản hồi của chính lệnh ghi: `dataset: production`, `on: [create, update, delete]`, `isDisabledByUser: false`, `isDisabled: false`, `includeDrafts: false`, filter đúng như khai. **Chưa kiểm đầu Cloudflare** — deploy hook đó chạy được trước khi bị tắt, nhưng lần bắn thật đầu tiên mới xác nhận trọn chuỗi.

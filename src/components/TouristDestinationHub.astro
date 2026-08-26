@@ -141,7 +141,7 @@ const hasReference = Boolean(td?.faq?.length || td?.safetyNote || td?.sameAs?.le
   /* Hai cột — cùng bố cục `SiteHome` đang dùng theo QĐ-2026-08-25-01: thân bài
      và điểm nổi bật ở cột chính, Thông tin nhanh về cột phụ 340px thay vì thành
      dải riêng chạy hết bề ngang. Dưới 1024px xếp chồng. */
-  <Section heading={copy.sections.overview}>
+  <Section heading={copy.sections.overview(title)}>
     <div class="editorial-grid">
       <div class="editorial-main">
         {hasBody && td?.body && <Body blocks={td.body} />}

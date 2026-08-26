@@ -18,22 +18,35 @@
 # không chạy validator nào. Các pipeline dưới đây là lệnh gọi TAY. Một control
 # `live` nghĩa là "chạy được khi gọi tay", không phải "tự chặn mọi lần deploy".
 #
-# ⚠️ TÌNH TRẠNG THẬT 2026-08-05: chỉ 4 trên 31 control chạy được.
+# ⚠️ CẬP NHẬT 2026-08-24 — TÌNH TRẠNG ĐÃ ĐỔI, PHẦN `controls:` DƯỚI ĐÂY CHƯA THEO KỊP.
 #
-#   live: I6, PY8, R3, R4 — bốn control post-build, đã chạy và xanh.
-#   gap:  27 control còn lại, toàn bộ I1–I5, I7–I19, PY1–PY7, R1, R2.
+# Khối "⚠️ TÌNH TRẠNG THẬT 2026-08-05" từng ghi ở đây (chỉ 4/31 control chạy
+# được, `shared/gates/` không tồn tại, ERR_MODULE_NOT_FOUND) đã SAI so với thực
+# tế hôm nay. Đã tự xác minh lại, không tin theo văn bản cũ:
 #
-# Vì sao gap chứ không phải live: cả ba module thi hành (i1-i19.ts, py1-py8.ts,
-# r1-r4.ts) chỉ tới được qua validate-constraints.ts, mà file đó chết ngay lúc
-# nhập module — `scripts/validators/i1-i19.ts:10` nhập `../../shared/gates/index.js`,
-# thư mục `shared/` không tồn tại trong repo này. Chạy `npm --prefix scripts run
-# validate` cho ERR_MODULE_NOT_FOUND.
+#   - `shared/gates/index.ts` và `shared/gates/types.ts` tồn tại thật trong repo,
+#     vào git từ commit `b73326c` (2026-08-06, "tra no ND-005 — bo kiem rang buoc
+#     chay duoc lan dau"). Thư mục `shared/` không còn thiếu.
+#   - Bộ kiểm ràng buộc pre-build CHẠY ĐƯỢC. Đo lại 2026-08-24 bằng
+#     `npm --prefix scripts run validate`: 31 validator, 15 pass, 11 FAIL, 2 WARN
+#     (0 stub, 3 defer). Không còn ERR_MODULE_NOT_FOUND.
+#   - `scripts/reports/validator-status.json` tồn tại thật và vừa được lệnh trên
+#     ghi lại (report timestamp 2026-08-24).
+#   - Theo `docs/DECISIONS.md` mục `QĐ-2026-08-06-03`, nợ ND-005 đã được trả ngày
+#     2026-08-06 (khi đó 24 pass/2 fail/2 warn/3 defer). Số fail tăng lên 11 kể
+#     từ đó là do dữ liệu CMS trôi thêm (vi phạm bất biến thật, ví dụ thiếu
+#     summary.vi / slug.vi cho S2.5), không phải bộ kiểm hỏng lại.
 #
-# Nói cách khác: bộ kiểm ràng buộc pre-build của dự án chưa từng chạy được ở
-# tourdaovn. Bộ thực thi có tồn tại và nối đúng pipeline — nên control-registry-gate
-# vẫn báo coherent — nhưng pipeline không khởi động nổi. Cổng này kiểm bản đồ,
-# không kiểm việc pipeline có chạy được hay không. Đó là giới hạn của nó, và là
-# lý do 27 dòng dưới đây khai `gap` thay vì `live`. Xem phiếu nợ ND-005.
+# CHƯA LÀM: 27 dòng `status: gap` / `evidence: "chưa có — sẽ là ..."` bên dưới
+# (I1–I5, I7–I19, PY1–PY7, R1, R2) vẫn giữ nguyên như bản 2026-08-05 và KHÔNG
+# được lật thành `live` trong đợt cập nhật này — đó là quyết định của chủ dự
+# án, không phải việc tự quyết ở đây. Lý do phải hỏi: 11/31 validator đang đỏ
+# thật (vi phạm dữ liệu, không phải lỗi code); nếu lật cả 27 dòng thành `live`
+# ngay bây giờ, `control-registry-gate` sẽ đòi bằng chứng cho tất cả và chuyển
+# đỏ vì 11 control trong số đó chưa có bằng chứng "xanh". Câu hỏi cần chủ dự án
+# trả lời: coi "chạy được, một số đỏ vì dữ liệu" có tính là `live` không, hay chỉ
+# phần đang pass (15/31) được lật, hay giữ nguyên `gap` cho tới khi dữ liệu sạch.
+# Xem phiếu nợ ND-005 (đã trả ở QĐ-2026-08-06-03) và DRIFT_LOG.md liên quan.
 
 pipelines:
   prebuild-validate:
@@ -259,6 +272,17 @@ controls:
     status: gap
     gap_id: ND-005
     evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục I19 khi ND-005 trả xong"
+
+  # I20 là control MỚI (ADR-0028), sinh ra đã chạy thật nên khai `live` ngay — khác 27 dòng
+  # `gap` phía trên vốn là nợ lịch sử. Khai `gap` cho một control đang chạy sẽ bị GA6 bắt.
+  - id: I20
+    source: docs/core-specs/04-CONSTRAINTS.md#I20
+    level: warn
+    stage: pre-build
+    executor: scripts/validators/i1-i19.ts
+    pipeline: prebuild-validate
+    status: live
+    evidence: scripts/reports/validator-status.json
 
   # ── Toàn vẹn nguồn giá PY1–PY8 ─────────────────────────────────────────────
   # Nguồn: 04-CONSTRAINTS bảng PY, dòng 64–71. Thi hành: py1-py8.ts.

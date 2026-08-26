@@ -39,7 +39,7 @@ Phần KHÔNG nhãn (cơ chế field 2.0, ba họ gate, quy tắc giá, khối q
 
 | Entity | schema.org @type | Mô tả một dòng | Số lượng dự kiến (mốc ra mắt) | Nguồn sự thật |
 |---|---|---|---|---|
-| TouristDestination | TouristDestination | Chính Nha Trang, container địa lý gốc | 1 | Sanity |
+| TouristDestination | TouristDestination | Điểm đến trụ, container gốc của một vùng nội dung | N (ADR-0028) | Sanity |
 | Place | Place | Vùng địa lý chứa: bãi biển, đảo, phường, khu vực | 8 đến 12 | Sanity |
 | Attraction | [TouristAttraction, type cụ thể theo attractionType] | Điểm đến hoặc venue cụ thể để đến | 10 đến 15 | Sanity (nội dung), nguồn giá (vé) |
 | Experience | TouristAttraction + additionalType | Hoạt động nổi bật tại một điểm (tắm bùn, lặn biển, 5D) | 15 đến 30 | Sanity (nội dung), nguồn giá (giá) |
@@ -117,9 +117,9 @@ Cấm mọi field con số giá hoặc tồn kho trong Sanity (I1). Giá render 
 
 Gate publish (I12, I3): title, slug, summary, officialSource, containedInPlace, cộng imageProvenance khi có ảnh. geo/address tùy chọn, ẩn khỏi layout khi thiếu.
 
-### 2.1 TouristDestination (Nha Trang)
+### 2.1 TouristDestination (điểm đến trụ)
 
-Bộ field hub tầng 1 dưới đây founder đã duyệt phiên 2026-06-10 (trước đó chỉ ghi ở CHECKLIST, chép vào đây 2026-06-11 theo P4). Trang TouristDestination ở `/{destinationSlug}/` giữ vai điều phối điểm đến, tách khỏi trang chủ site `/`: keyFacts, featured*, relatedDestinations là field riêng của nó, các entity con không kéo theo. Rollup (things to do, where to stay, ăn gì, tour, event, đi lại, guide) suy ở build, không phải field. i18n field-level (ADR-0004), cùng quy tắc slug với 2.2.
+Bộ field hub tầng 1 dưới đây founder đã duyệt phiên 2026-06-10 (trước đó chỉ ghi ở CHECKLIST, chép vào đây 2026-06-11 theo P4). **Mỗi** TouristDestination đã duyệt có một trang `/{destinationSlug}/` giữ vai điều phối điểm đến đó, dùng chung một khuôn; trang chủ site `/` là một vai riêng, trỏ tới điểm đến trụ khai ở `primaryDestinationSlug`. keyFacts, featured*, relatedDestinations là field riêng của nó, các entity con không kéo theo. Rollup (things to do, where to stay, ăn gì, tour, event, đi lại, guide) suy ở build, không phải field. i18n field-level (ADR-0004), cùng quy tắc slug với 2.2.
 
 | Field | Kiểu | Bắt buộc? | Dịch? | Bất biến / quy tắc | Ai cung cấp |
 |---|---|---|---|---|---|
@@ -157,6 +157,7 @@ Field chung (2.0) vẫn áp dụng. Bảng dưới là field riêng cộng quy t
 | geo | geopoint | tùy | không | điểm đại diện của vùng | người |
 | address | object | nên có, trừ ward | một phần | addressLocality là phường hiện hành, I15; ward không có address vì chính nó là addressLocality | người |
 | containedInPlace | reference đến Place hoặc TouristDestination | tùy | không | I8; trỏ đơn vị chứa TRỰC TIẾP, không nhảy cấp. Place cấp province là gốc, để trống. Riêng ward xem quy tắc serialize dưới | người |
+| destination | reference đến TouristDestination | tùy | không | I20 (warn). Cạnh phẳng "thuộc điểm đến nào", độc lập với chuỗi containedInPlace và không suy ra nhau (ADR-0028) | người |
 | containsPlace | không lưu | — | — | suy ở build bằng reverse GROQ (P6) | build |
 | incomingExperiences | string readOnly (Studio) | — | không | display-only trong Studio: custom input hiển thị rollup các Experience có venue trỏ tới place này; không lưu dữ liệu độc lập, không serialize, không nằm trong gate publish — cùng họ nguyên tắc "rollup suy ở build, không lưu" (P6), field này chỉ là bề mặt hiển thị cho biên tập viên. Từ v1.0.11 bị `placeHierarchy` thay thế và ẩn khỏi layout, giữ đăng ký để không mất dữ liệu | hệ thống |
 | placeHierarchy | string readOnly (Studio) | — | không | display-only trong Studio, cùng nguyên tắc với incomingExperiences (P6: không lưu, không serialize, không vào gate). Custom input đọc ngược `containedInPlace` lên gốc, rồi đọc xuôi các Place/Attraction/lưu trú trỏ vào và các Experience lấy nó làm venue — hiển thị trọn chuỗi thật cho biên tập viên: Tỉnh Khánh Hoà → Phường Nha Trang → Hòn Mun → Lặn biển. Có chặn vòng lặp (dừng ở 6 cấp hoặc khi gặp id đã đi qua) | hệ thống |
@@ -210,6 +211,7 @@ i18n field-level (ADR-0004), cùng quy tắc với Place: slug là object locali
 | geo | geopoint | tùy | không | — | người |
 | address | object | tùy | một phần | addressLocality là phường hiện hành, I15 | người |
 | containedInPlace | reference đến Place hoặc TouristDestination | có | không | I8, quyết định nền 4: Place là ưu tiên khi đúng; TouristDestination hợp lệ khi Nha Trang là container thực tế | người |
+| destination | reference đến TouristDestination | tùy | không | I20 (warn). Cạnh phẳng "thuộc điểm đến nào", độc lập với chuỗi containedInPlace và không suy ra nhau (ADR-0028) | người |
 | bookingRef | reference hoặc string | nên có với nơi bán vé | không | vé vào cửa, trỏ nguồn giá, không lưu số (I1, I16); giá gói hoạt động vẫn đi qua Experience | người |
 | openingHours, isAccessibleForFree | structured, boolean | nên có với nơi bán vé, tùy còn lại | không | không phải giá | người |
 | accessInfo | portable text | tùy | có | tầng 4, serialize nhập description, cấm property tự chế (5.1) | người hoặc AI T1 |
@@ -260,6 +262,7 @@ i18n field-level (ADR-0004), cùng quy tắc slug với 2.2. Field chung (2.0) v
 | gallery | array image | nên có | alt có | pattern dùng lại | người |
 | highlights | array | tùy | có | pattern dùng lại | người hoặc AI T1 |
 | faq | array | tùy | có | FAQPage, nơi hay bị hỏi giá và lịch | người hoặc AI T1 |
+| destination | reference đến TouristDestination | tùy | không | I20 (warn). Cạnh phẳng "thuộc điểm đến nào", độc lập với chuỗi containedInPlace và không suy ra nhau (ADR-0028) | người |
 | imageProvenance | text | có khi có ảnh | không | một dòng chung mức entity, theo quyết định lưu trú 2026-06-11 | người |
 Serialize: @type TouristAttraction, additionalType lấy từ experienceType qua Category.sameAs (Wikidata của loại hoạt động, vd lặn biển); khuyến nghị mỗi term bộ experience-type có sameAs. duration và includes nhập description hoặc bỏ, cấm property tự chế (5.1). Loại có chủ ý: aggregateRating và review (không UGC phase 1), offers (I1, giá ở nguồn giá), photo (dùng gallery), availableLanguage (chưa cần phase 1).
 
@@ -282,6 +285,7 @@ i18n field-level (ADR-0004), cùng quy tắc slug với 2.2. Field chung (2.0) v
 | servesCuisine | array string | nên có | có | property FoodEstablishment | người |
 | servesSpecialty | array reference đến Specialty | nên có | không | quan hệ sự kiện "quán có món này"; nguồn cho rollup "ăn ở đâu" suy ngược ở build (P6); serialize `makesOffer` (Offer/itemOffered trỏ Specialty, không giá — I1 nguyên vẹn; cạnh hợp lệ duy nhất Restaurant→Product, thay mapping hasMenu sai kiểu trước đây) (v1.0.8) | người |
 | containedInPlace | reference đến Place hoặc TouristDestination | có | không | I8 | người |
+| destination | reference đến TouristDestination | tùy | không | I20 (warn). Cạnh phẳng "thuộc điểm đến nào", độc lập với chuỗi containedInPlace và không suy ra nhau (ADR-0028) | người |
 | openingHours | structured | tùy | không | — | người |
 | acceptsReservations | boolean hoặc url | tùy | không | property FoodEstablishment | người |
 | hasMenu | url | tùy | không | link menu chính thức bên ngoài; giá nếu có sống ở đó, không lưu (I1) | người |
@@ -299,9 +303,15 @@ Gate publish (I12, I3): title, slug, summary, officialSource, containedInPlace; 
 
 ### 2.6 Hotel (đã audit, founder duyệt 2026-06-11)
 
-LodgingBase (2.0b) toàn phần, không có field riêng. @type Hotel. Lằn ranh theo sản phẩm chính (xem 2.0b): sản phẩm chính là phòng ngủ, trải nghiệm chính nằm ngoài cơ sở.
+LodgingBase (2.0b) toàn phần, cộng đúng một field riêng dưới đây. @type Hotel. Lằn ranh theo sản phẩm chính (xem 2.0b): sản phẩm chính là phòng ngủ, trải nghiệm chính nằm ngoài cơ sở.
 
 Tiện ích doanh nhân (phòng họp, hội nghị, dịch vụ văn phòng) không có field riêng: đi qua `amenityFeature` của LodgingBase (2.0b), cùng cấp với mọi tiện ích khác. Field `businessFacilities` cũ đã bị dẹp 2026-07-01 vì trùng vai trò với `amenityFeature`. Dữ liệu cũ migrate vào `amenityFeature`.
+
+Bảng field riêng:
+
+| Field | Kiểu | Bắt buộc? | Dịch? | Bất biến / quy tắc | Ai cung cấp |
+|---|---|---|---|---|---|
+| destination | reference đến TouristDestination | tùy | không | I20 (warn). Cạnh phẳng "thuộc điểm đến nào", độc lập với chuỗi containedInPlace và không suy ra nhau (ADR-0028) | người |
 
 ### 2.7 Resort (đã audit, founder duyệt 2026-06-11)
 
@@ -312,6 +322,7 @@ LodgingBase (2.0b) cộng field dưới. @type Resort. Lằn ranh theo sản ph�
 | beachfront | boolean | tùy | không | sát biển hay không | người |
 | onSiteActivities | array | tùy | có | hoạt động tại chỗ, có thể trỏ Experience | người |
 | landArea | number | tùy | không | diện tích khuôn viên | người |
+| destination | reference đến TouristDestination | tùy | không | I20 (warn). Cạnh phẳng "thuộc điểm đến nào", độc lập với chuỗi containedInPlace và không suy ra nhau (ADR-0028) | người |
 
 ### 2.8 Tour (đã audit chi tiết, founder duyệt 2026-06-11)
 
@@ -338,6 +349,7 @@ i18n field-level (ADR-0004), cùng quy tắc slug với 2.2. Field chung (2.0) v
 | gallery | array image | nên có | alt có | pattern dùng lại | người |
 | highlights | array | tùy | có | pattern dùng lại | người hoặc AI T1 |
 | faq | array | tùy | có | FAQPage, nơi hay bị hỏi giá, lịch và chính sách hủy | người hoặc AI T1 |
+| destination | reference đến TouristDestination | tùy | không | I20 (warn). Cạnh phẳng "thuộc điểm đến nào", độc lập với chuỗi containedInPlace và không suy ra nhau (ADR-0028) | người |
 | imageProvenance | text | có khi có ảnh | không | một dòng chung mức entity, theo quyết định lưu trú 2026-06-11 | người |
 Serialize: @type TouristTrip; itinerary xuất ItemList có thứ tự, stop nội vùng xuất Place dereference, externalStop xuất Place tối thiểu {name, geo, sameAs nếu có}; note của stop nhập description của ListItem. operator xuất provider. tourFormat không có property schema.org sạch, không phát property tự chế (5.1), nhập description khi cần. additionalType lấy từ category bộ tour-type qua sameAs của term.
 
@@ -409,6 +421,7 @@ i18n field-level (ADR-0004), cùng quy tắc slug với 2.2. Field chung (2.0) v
 | body | portable text | nên có | có | mô tả, chương trình, kinh nghiệm đi | người hoặc AI T1 |
 | gallery | array image | nên có | alt có | pattern dùng lại, gồm ảnh kỳ trước | người |
 | faq | array | tùy | có | FAQPage, nơi hay bị hỏi vé và lịch | người hoặc AI T1 |
+| destination | reference đến TouristDestination | tùy | không | I20 (warn). Cạnh phẳng "thuộc điểm đến nào", độc lập với chuỗi containedInPlace và không suy ra nhau (ADR-0028) | người |
 | imageProvenance | text | có khi có ảnh | không | một dòng chung mức entity, theo quyết định license ảnh 2026-06-11 | người |
 Bảng map eventType sang @type (đóng, thêm giá trị là cửa hai chiều theo 5.3):
 
@@ -444,6 +457,7 @@ Field chung (2.0) vẫn áp dụng. Bảng field riêng:
 | mentions | array reference | tùy | thực thể nhắc phụ | người hoặc AI |
 | faq | array faqItem {question, answer} | tùy | FAQPage, pattern dùng lại từ trang trụ; bài guide hay có hỏi đáp | người hoặc AI T1 |
 | howTo | array step {name, text} | có nếu transport-guide (ít nhất một trong howTo, faq) | serialize HowTo; thay object structuredData đa hình của nháp cũ | người hoặc AI T1 |
+| destination | reference đến TouristDestination | tùy | I20 (warn). Cạnh phẳng "thuộc điểm đến nào", độc lập với chuỗi containedInPlace và không suy ra nhau (ADR-0028) | người |
 | imageProvenance | text | có khi có ảnh | một dòng chung mức entity, theo nếp chung 2026-06-11 | người |
 
 Cấu trúc mục faq (dùng chung mọi entity có faq): mỗi item là named object type `faqItem` gồm `question` (string, bắt buộc) và `answer` (text, bắt buộc). Named type thay cho anonymous inline object để Studio luôn gán `_type: 'faqItem'` khi thêm tay, không ra `_type: null` (vỡ gate I-FAQ-TYPE và JSON-LD). Field `faq` ở entity bách khoa và venue là object localized {vi,en,zh,ko,ru}, mỗi ngôn ngữ là một `array faqItem`; ở Article (document-level i18n) là một `array faqItem` phẳng. Quyết định FIX-FAQ-TYPE 2026-06-24 (DECISIONS.md).
@@ -520,6 +534,7 @@ i18n field-level (ADR-0004), cùng quy tắc slug với 2.2. Field chung (2.0) v
 | body | portable text | nên có | có | mô tả, cách thưởng thức | người hoặc AI T1 |
 | gallery | array image | nên có | alt có | pattern dùng lại | người |
 | faq | array | tùy | có | FAQPage, vd "nem nướng ăn với gì" | người hoặc AI T1 |
+| destination | reference đến TouristDestination | tùy | không | I20 (warn). Cạnh phẳng "thuộc điểm đến nào", độc lập với chuỗi containedInPlace và không suy ra nhau (ADR-0028) | người |
 | imageProvenance | text | có khi có ảnh | không | một dòng chung mức entity, theo quyết định lưu trú 2026-06-11 | người |
 Serialize: @type Product (schema.org không có Dish hay FoodProduct, đã kiểm core hiện hành 2026-06-11; đề xuất FoodProduct treo từ 2015 không vào core); additionalType trỏ Wikidata của món gốc đóng vai loại, cùng pattern island Q23442 của 2.2 — lấy URL wikidata.org trong sameAs, không lấy sameAs[0] mù quáng vì URL Wikipedia là instance, sai vai class (v1.0.8). Không offers thì không rich result Product, chấp nhận: giá trị nằm ở entity rõ và sameAs cho GEO, JSON-LD vẫn hợp lệ 100% (I6). whereToTry không xuất JSON-LD: isRelatedTo expect Product/Service, Restaurant sai range (I6); cạnh Restaurant→Specialty đã có qua makesOffer của 2.5 (whereToTry là tập con của chiều suy ngược theo I17), whereToTry giữ vai trình bày (v1.0.8).
 
@@ -537,7 +552,7 @@ Cấu hình toàn site. Toàn bộ dataset chỉ có đúng 1 document. Không d
 |---|---|---|---|---|---|
 | title | string | tùy | không | mặc định "Trang chủ", hiển thị trên document header | hệ thống |
 | branding | object | tùy | không | ảnh nhận diện thương hiệu; 4 field con, ô nào trống thì lớp dự phòng trong code gánh (guard rỗng). **CHỮ** thương hiệu KHÔNG vào đây — tên site, tên pháp nhân, mô tả vẫn ở `src/site.config.ts` (ADR-0021 QĐ8, QĐ-2026-08-14-01) | founder |
-| sections | array object | tùy | không | thứ tự render là thứ tự trong mảng; `key` là enum đóng 19 giá trị; `hidden` mặc định false. Thiếu field `sections` hoặc mảng rỗng → homepage dùng DEFAULT_SECTIONS. | founder |
+| sections | array object | tùy | không | thứ tự render là thứ tự trong mảng; `key` là enum đóng 20 giá trị; `hidden` mặc định false. Thiếu field `sections` hoặc mảng rỗng → homepage dùng DEFAULT_SECTIONS. | founder |
 | hero | object | tùy | không (tiếng Việt) | chữ và ảnh Hero trang chủ; 7 ô con, ô nào trống thì lớp dự phòng trong code gánh. `summary` chỉ đè phần NGƯỜI ĐỌC thấy — `<meta description>` vẫn là `brand.description` cố định lúc build (QĐ-2026-08-14-03) | founder |
 | footer | object | tùy | không (tiếng Việt) | chữ và ảnh chân trang; 4 ô con. Tiêu đề cột và danh sách liên kết KHÔNG ở đây — sinh từ `ROUTE_MAP` (ADR-0023) | founder |
 | contact | object | tùy | không | 4 field con, dữ liệu trung lập ngôn ngữ; field con nào trống thì kênh đó không render (guard rỗng, không nút chết) | founder |
@@ -580,13 +595,16 @@ Field `footer` (thêm v1.0.18 — chữ và ảnh chân trang, QĐ-2026-08-14-03
 **Hai đường đọc:** `hero` đi trong `siteSettingsQuery()` (chỉ trang chủ có Hero). `footer` đọc qua `src/lib/siteFooter.ts`, cùng lý do với `branding` — `Footer.astro` render ở **mọi** trang còn truy vấn đầy đủ chỉ chạy ở trang chủ (N7).
 
 Field `sections[]`:
-- `key`: string enum đóng 19 giá trị — hero | stats | trustBar | partners | testimonials | editorialBody | banners | hubGrid | areas | attractions | experiences | guides | stays | specialties | tours | faq | safety | groupQuote | meta
+- `key`: string enum đóng 20 giá trị — hero | stats | trustBar | partners | testimonials | editorialBody | banners | hubGrid | destinations | areas | attractions | experiences | guides | stays | specialties | tours | faq | safety | groupQuote | meta
+
+  Khoá `destinations` thêm ở ADR-0028 — khối liệt kê các TouristDestination **khác** đang
+  publish. Empty guard áp dụng như mọi section: một điểm đến thì khối không render.
   - Bốn khoá `stats`, `partners`, `testimonials`, `groupQuote` thêm v1.0.16 cùng bốn field cùng tên. `trustBar` giữ nguyên khoá nhưng đổi vai thành khối "Vì sao chọn" (bốn điểm khác biệt, nguồn `config (build)`).
 - `hidden`: boolean, mặc định false
 
 Empty guard là cổng cứng: `hidden = false` nhưng section không có dữ liệu → section vẫn ẩn. `hidden` chỉ để chủ động tắt section đã có dữ liệu.
 
-Featured picks KHÔNG nằm trong siteSettings — luôn đọc từ `touristDestination` Nha Trang (single source of truth).
+Featured picks KHÔNG nằm trong siteSettings — luôn đọc từ `touristDestination` **của điểm đến đang render** — với trang chủ `/` thì đó là điểm đến trụ khai ở `primaryDestinationSlug` (single source of truth).
 
 Field `contact` (thêm v1.0.11 — kênh chốt khách, chuỗi CONV):
 - `hotline`: string — số điện thoại gọi được (ví dụ 0905xxxxxx); render `tel:` sau khi bỏ khoảng trắng
@@ -769,6 +787,7 @@ Mỗi bất biến kèm cách kiểm bằng máy (bằng chứng E1). Bản thi 
 | I17 | Specialty phải có specialtyType và sameAs mới publish; whereToTry chỉ trỏ Restaurant đã publish và Restaurant đó có servesSpecialty chứa chính Specialty này (tập con của chiều suy ngược) | Validator CI required-field cộng ref integrity cộng subset check | DECISIONS 2026-06-11 G3 |
 | I18 | Organization chỉ publish khi có ít nhất một quan hệ vào: Tour.operator, Event.organizer hoặc Article.about trỏ tới nó, kể cả từ draft (tránh vòng kẹt với I14) | Validator CI reverse reference quét cả draft | DECISIONS 2026-06-11 G4 |
 | I19 | Mọi entity chỉ publish khi reviewStatus = approved kèm approvedBy và contentProvenance; Category miễn (từ vựng đóng founder tuyển, việc tuyển chính là duyệt) | Validator CI required-field cộng kiểm giá trị enum đóng | DECISIONS 2026-06-11 G5 |
+| I20 | Entity đã publish nên khai destination | required-field mức warn | ADR-0028 |
 
 ### Nới bắt buộc v1.0.12 (chủ dự án chốt 2026-08-04)
 

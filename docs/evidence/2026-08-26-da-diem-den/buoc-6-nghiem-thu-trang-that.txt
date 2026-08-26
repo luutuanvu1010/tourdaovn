@@ -1,0 +1,111 @@
+Bước 6 — Dựng lại và nghiệm thu trên trang thật
+Chạy 2026-08-27, sau khi chủ dự án hoàn tất Bước 5.
+
+═══ Bước 5 do chủ dự án làm — trạng thái dữ liệu trước khi dựng ═══
+
+  _id                                    title            slug         status    summary  place  article
+  83a38820-1a6d-4c93-ac0f-e2865b4a2933   Ninh Thuận       ninh-thuan   approved  có       1      1
+  seed.nha-trang                         Nha Trang        nha-trang    approved  có       7      19
+  d5b267a3-a771-4cb2-8a50-8733da6372b5   Tỉnh Khánh Hòa   (không)      draft     không    0      0
+
+  Nha Trang giữ nguyên 7 Place / 19 Article → nội dung của Ninh Thuận là TẠO MỚI,
+  không phải chuyển từ Nha Trang sang. "Tỉnh Khánh Hòa" đã hạ về draft nên không
+  sinh trang và không lọt truy vấn card — đúng như mong muốn.
+
+═══ 1. Dựng lại ═══
+
+  npm run build → exit=0, astro check 0 error.
+  Số trang: 144 → 147 (+3: trang điểm đến, Place mới, Article mới).
+
+═══ 2. Trang điểm đến mới tồn tại ═══
+
+  dist/ninh-thuan/index.html — 23.974 byte.
+
+═══ 3. Trang chủ giờ CÓ card điểm đến ═══
+
+  dest-card: 0 → 1
+  Nhãn khối: "Điểm đến khác"
+  Link:      href="/ninh-thuan/"
+
+  → Hoàn tất tiêu chí nghiệm thu #6 của spec §7. Trước Bước 5 chỉ chứng minh được
+    nửa "ẩn khi chỉ có một"; giờ có cả nửa "hiện khi có hai".
+
+═══ 4. Tiêu đề overview mang tên điểm đến ĐANG RENDER ═══
+
+  /ninh-thuan/  →  "Tổng quan về Ninh Thuận"
+  /             →  "Tổng quan về Nha Trang"
+
+  → Đây là thứ Task 6 sinh ra để sửa (đổi sections.overview từ chuỗi sang hàm).
+    Trước đợt này mọi trang điểm đến đều mang cứng chữ "Nha Trang".
+
+═══ 5. Sitemap ═══
+
+  dist/sitemap-vi.xml : <url><loc>https://tourdao.vn/ninh-thuan/</loc></url>   ✓
+  dist/sitemap.xml    : 0 lần "ninh-thuan" — ĐÚNG THIẾT KẾ, file này là sitemap
+                        index, nội dung chỉ là <loc>https://tourdao.vn/sitemap-vi.xml</loc>.
+
+═══ 6. Hai khối tự động hiện nội dung CỦA ĐIỂM ĐẾN MỚI — phép kiểm quyết định ═══
+
+  Trang /ninh-thuan/          Trang chủ / (Nha Trang)
+  ─────────────────────────   ────────────────────────────────────────────
+  Các khu vực nên biết:       Các khu vực nên biết:
+    /dia-danh/deo-vinh-hy/      /dia-danh/cang-cap-treo-vinpearl/
+                                /dia-danh/cang-du-lich-nha-trang/
+                                /dia-danh/dao-hon-mieu/
+                                /dia-danh/dao-hon-mun/
+
+  Cẩm nang bản địa:           Cẩm nang bản địa:
+    /cam-nang/kinh-nghiem-      /cam-nang/hang-heo-nha-trang-.../
+      du-lich-vinh-hy/          /cam-nang/thien-duong-bien-dao-khanh-hoa-.../
+                                /cam-nang/top-7-ngon-nui-o-nha-trang-.../
+                                /cam-nang/tron-bo-cam-nang-ben-tau-.../
+
+  KHÔNG MỘT MỤC NÀO TRÙNG NHAU. Mệnh đề `destination._ref == ^._id` (Task 4) cô lập
+  nội dung theo từng điểm đến đúng như thiết kế. Đây là bằng chứng cuối cùng cho
+  toàn bộ kiến trúc ADR-0028: cạnh phẳng `destination` + một mệnh đề lọc là đủ.
+
+  Ghi chú về cách đếm: trang điểm đến dùng TouristDestinationHub.astro nên lớp CSS
+  khác trang chủ — nó dùng `rollup-card` và `art-card-*`, không dùng `area-card` /
+  `guide-card`. Đếm bằng lớp CSS của trang chủ sẽ ra 0 và gây hiểu nhầm; phải đếm
+  bằng link đích như trên. Cả hai tiêu đề khối đều có mặt đúng một lần.
+
+  Khối "Điểm đến khác" KHÔNG xuất hiện trên trang điểm đến — đúng thiết kế,
+  06-BINDING_MAP §5.7 khai nó là khối của trang chủ.
+
+═══ 7. Trang chủ Nha Trang không hỏng ═══
+
+  area-card   4 → 4    guide-card  4 → 4    tour-card  3 → 3
+
+═══ 8. Breadcrumb (DR-068) — kết quả KHÁC dự đoán, theo hướng tốt ═══
+
+  Trang /ninh-thuan/ KHÔNG có breadcrumb: `TouristDestinationHub.astro` không dùng
+  component Breadcrumb. Hợp lý — trang điểm đến nằm ngay dưới trang chủ, chuỗi
+  "Trang chủ › Ninh Thuận" không thêm thông tin gì.
+
+  Nhánh `entityType !== 'touristDestination'` ở Breadcrumb.astro:43 thực ra được
+  kích hoạt ở TRANG CHI TIẾT, qua chuỗi containedInPlace. Kiểm trên trang thật:
+
+    dist/dia-danh/deo-vinh-hy/index.html
+      1. Trang chủ    https://tourdao.vn/
+      2. Địa danh     https://tourdao.vn/dia-danh/
+      3. Ninh Thuận   https://tourdao.vn/ninh-thuan/     ← trỏ đúng điểm đến mới
+      4. Đèo Vĩnh Hy  (mục hiện tại, không link)
+
+  HTML hiển thị cũng mang href="/ninh-thuan/". DR-068 đã kiểm xong: đúng.
+
+═══ 9. Chạy lại bộ kiểm vì dữ liệu đã đổi ═══
+
+  validate:   11 FAIL — vẫn đúng bộ 11 có sẵn của DR-064, 0 fail mới. I20: pass.
+  audit:gate: GA3/I20 đạt. Cả năm dòng GA3 đều đạt.
+  npm run gate: vẫn đúng 4 cổng đỏ có sẵn (r3-r4-post, governance-post,
+                control-registry-gate, deferred-gate). g1/g3/g4 xanh.
+
+  R4 đi 54 → 57. Cả 3 lỗi thêm nằm trên BÀI VIẾT MỚI
+  /cam-nang/kinh-nghiem-du-lich-vinh-hy/ và đều đúng loại lỗi mà cả 54 lỗi trước
+  đó mắc phải (thiếu hreflang self + bất đối xứng với cùng một bài đích).
+
+  Trang /ninh-thuan/ và /dia-danh/deo-vinh-hy/ KHÔNG có lỗi R4 nào.
+
+  → Bài viết mới thừa hưởng khiếm khuyết hreflang hệ thống của MỌI Article, không
+    phải lỗi do đợt này gây ra. Nhưng nó cho thấy nợ đó sẽ lớn dần theo mỗi bài
+    viết mới, không tự đứng yên.

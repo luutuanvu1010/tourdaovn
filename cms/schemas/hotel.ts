@@ -1,6 +1,6 @@
 import { defineType, defineField } from 'sanity'
 import { HomeIcon } from '@sanity/icons'
-import { baseFieldsAfterGallery, baseFieldsBeforeGallery, baseGroups } from './baseFields'
+import { baseFieldsAfterGallery, baseFieldsBeforeGallery, baseGroups, destinationField } from './baseFields'
 import { lodgingBaseFields, lodgingGalleryField } from './lodgingBase'
 
 export default defineType({
@@ -13,6 +13,7 @@ export default defineType({
     ...baseFieldsBeforeGallery,
     lodgingGalleryField,
     ...baseFieldsAfterGallery,
+    destinationField,
     ...lodgingBaseFields
   ],
   preview: {

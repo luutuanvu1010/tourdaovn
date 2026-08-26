@@ -1,0 +1,28 @@
+Bước 2 — npm run gate  (astro check + post-build + spec)
+
+postbuild-status.json — TRƯỚC đợt (commit cc7a2bd, chạy 2026-08-21T23:51:37.803Z)
+                       so với NAY (chạy 2026-08-26T09:08:15.919Z)
+
+  cổng      trước                nay
+  I6        fail (4 lỗi)         pass (0 lỗi)
+  PY8       pass (0 lỗi)         pass (0 lỗi)
+  SEO       pass (0 lỗi)         pass (0 lỗi)
+  R3        fail (2 lỗi)         pass (0 lỗi)
+  R4        fail (42 lỗi)        fail (54 lỗi)
+
+Đọc: I6 và R3 ĐỎ→XANH. R4 vốn đã đỏ từ trước (42 lỗi) nay 54.
+R4: 100% lỗi nằm ở /cam-nang/ — 18 thiếu hreflang self, 36 hreflang không đối xứng.
+Không lỗi nào chạm trang chủ, trang điểm đến, hay field destination.
+Chênh 42→54 khớp với việc số bài viết tăng giữa 21/8 và 26/8 (dữ liệu đã tăng gấp nhiều lần).
+
+Bốn cổng đỏ trong lượt gate và lý do — không cái nào do đợt này:
+  r3-r4-post            R4, 54 lỗi hreflang bài viết. Đã đỏ trước đợt.
+  governance-post       S24-AUTHORITY-HTML, 6 lỗi thiếu approvedBy/tác giả trên 4 trang.
+                        Cùng họ với I19/I3 vốn đã đỏ. Không liên quan destination.
+  control-registry-gate "R4: post-build report tồn tại nhưng chưa pass" — hệ quả của R4.
+  deferred-gate         "I16: deferred nhưng registry không khai live post-build executor".
+                        Mục I16 trong control-registry.yaml KHÔNG bị đợt này đụng — diff
+                        cc7a2bd..HEAD trên file đó chỉ THÊM khối I20, 0 dòng nhắc I16.
+
+g1: fail 0 / warn 14  (đúng bằng mốc, kế hoạch đòi warn ≤ 14)
+g3: fail 0            g4: fail 0

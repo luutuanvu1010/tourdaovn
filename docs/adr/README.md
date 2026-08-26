@@ -52,7 +52,7 @@ Nhóm cần tổng quát hóa (có GHI CHÚ CORE — nguyên tắc engine, hằn
   fail-closed theo ADR-0010/0018.
 
 - [ADR-0023](ADR-0023-dieu-huong-theo-dong-dich-vu.md) — **Điều hướng theo dòng dịch vụ**,
-  và hai trang tĩnh sinh từ `siteSettings`. Cơ chế `nav` khai trong `site.config` (sáu `kind`,
+  và hai trang tĩnh sinh từ `siteSettings`. Cơ chế `nav` khai trong `site.config` (tám `kind`,
   kiểm lúc build) là khuôn tái dùng được; nội dung menu là của riêng site này.
 - [ADR-0024](ADR-0024-trang-chu-de-bang-chung-ganh.md) — **Trang chủ để bằng chứng gánh, không
   phải catalogue**. Khuôn tái dùng: khi catalogue mỏng, chuyển gánh nặng thuyết phục sang dữ
@@ -71,6 +71,11 @@ Nhóm cần tổng quát hóa (có GHI CHÚ CORE — nguyên tắc engine, hằn
   rộng lược đồ `prices.yaml` bằng `paxRates` (sửa ADR-0007 phần perPax). Accepted 2026-08-22.
   Khuôn tái dùng: *đơn* tách khỏi *giá* và *nội dung*, không lớp
   nào ghi chéo; bản ghi gốc ở D1, báo tin hỏng không hỏng đơn.
+- [ADR-0028](ADR-0028-da-diem-den.md) — **TouristDestination là N**, và mọi entity khai mình
+  thuộc điểm đến nào qua field `destination`. Accepted 2026-08-26. Khuôn tái dùng: cardinality
+  của entity trụ là tham số chứ không phải hằng; quan hệ `* → touristDestination` là cạnh
+  phẳng, độc lập với chuỗi `containedInPlace` và không suy ra nhau. Việc site này giữ Nha Trang
+  ở `/` là cấu hình (`primaryDestinationSlug`), không phải luật engine.
 
 ## ADR gốc KHÔNG mang vào Core (và vì sao)
 
