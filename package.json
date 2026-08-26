@@ -16,6 +16,7 @@
     "test": "vitest run",
     "gate": "astro check && npm --prefix scripts run gate:all",
     "audit:spec": "npm --prefix scripts run audit:spec",
+    "prices:pull": "npm --prefix scripts run prices:pull --",
     "deploy": "npm run build && env -u CLOUDFLARE_API_TOKEN -u CF_API_TOKEN wrangler deploy --env-file /dev/null",
     "deploy:preview": "npm run build && env -u CLOUDFLARE_API_TOKEN -u CF_API_TOKEN wrangler versions upload --env-file /dev/null"
   },

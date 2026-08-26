@@ -1,7 +1,7 @@
 import type { PriceEntry } from '../lib/price-loader.js'
 import type { ValidatorResult } from './i1-i19.js'
 
-const VALID_UNITS = new Set(['perPax', 'perRoomNight', 'perTicket'])
+export const VALID_UNITS = new Set(['perPax', 'perRoomNight', 'perTicket'])
 const COMMERCIAL_TYPES = new Set(['experience', 'tour', 'hotel', 'resort', 'attraction', 'event'])
 const ALLOWED_TOP_KEYS: Record<string, Set<string>> = {
   perPax: new Set(['unit', 'amount', 'tiers', 'paxRates']),   // paxRates — ADR-0027
@@ -11,9 +11,9 @@ const ALLOWED_TOP_KEYS: Record<string, Set<string>> = {
 const ALLOWED_TIER_KEYS = new Set(['maxPax', 'amount'])
 const ALLOWED_TICKET_KEYS = new Set(['name', 'amount'])
 // paxRates: khoá con enum đóng, mỗi khoá {amount, note} — SPEC-2026-08-21-dat-tour §4.2
-const ALLOWED_PAX_CODES = new Set(['child', 'senior', 'infant'])
+export const ALLOWED_PAX_CODES = new Set(['child', 'senior', 'infant'])
 const ALLOWED_PAX_RATE_KEYS = new Set(['amount', 'note'])
-const PAX_NOTE_MAX = 40
+export const PAX_NOTE_MAX = 40
 const FORBIDDEN_KEYS = /^(cost|commission|gia_von|hoa_hong|profit|margin|chiet_khau|wholesale|retail_price)$/i
 
 // bookingRef là object { key } trong mọi lược đồ Sanity (DR-061) — không phải chuỗi.

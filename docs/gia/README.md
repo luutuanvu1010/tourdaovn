@@ -94,3 +94,13 @@ vì xoá một dòng đang được trỏ tới là làm tour đó mất form.
   (điền sẵn, sinh thẳng từ `data/prices.yaml`), 21 tour chưa có giá kèm khoá đề xuất, và 1 dòng
   giá mồ côi. Đây là **hạt giống**, không phải nguồn — sau khi Sheet chạy thì `data/prices.yaml`
   và Sheet mới là cặp đang sống.
+
+## Bẫy khi thêm lệnh proxy
+
+`package.json` ở gốc repo chỉ **proxy** sang `scripts/` — `"prices:pull": "npm --prefix scripts run
+prices:pull --"` — để người vận hành không phải nhớ script nào nằm ở đâu. Nếu lệnh có nhận tham số
+thì dòng proxy **phải kết thúc bằng `--`**. Thiếu nó, tham số bị nuốt qua hai chặng `npm`: chặng
+ngoài bỏ mất dấu `--`, chặng trong thấy `--cho-phep-xoa` mà không có `--` đứng trước nên hiểu đó là
+tuỳ chọn của chính npm và **nuốt luôn, không báo lỗi** — chỉ ô trần như đường dẫn tệp sống sót.
+Hai dòng proxy có sẵn (`validate:git-governance`, `audit:spec`) **không** lộ bẫy này, chỉ vì cả hai
+đều không nhận tham số. Nghi ngờ thì đo: một script tạm in `process.argv.slice(2)` là thấy ngay.
