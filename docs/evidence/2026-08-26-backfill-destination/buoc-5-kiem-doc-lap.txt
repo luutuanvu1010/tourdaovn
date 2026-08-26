@@ -1,0 +1,30 @@
+Bước 5 — Kiểm độc lập, không tin dòng in của chính script.
+Chạy qua Sanity Content API (chỉ đọc), perspective: raw, project pgedy374 / dataset production.
+
+Truy vấn:
+
+{
+  "con_thieu_destination": count(*[_type in [<mười entity>] && !defined(destination)]),
+  "tong_muoi_entity":      count(*[_type in [<mười entity>]]),
+  "tro_dung_seed_nha_trang": count(*[_type in [<mười entity>] && destination._ref == "seed.nha-trang"]),
+  "tro_vao_BAN_NHAP_sai":  count(*[_type in [<mười entity>] && destination._ref in path("drafts.**")]),
+  "tro_di_dau_khac":       *[_type in [<mười entity>] && defined(destination) && destination._ref != "seed.nha-trang"]{_id, "ref": destination._ref},
+  "type_ngoai_pham_vi_bi_dinh": count(*[_type in ["touristDestination","person","organization","category","siteSettings"] && defined(destination)])
+}
+
+Kết quả:
+
+{
+  "con_thieu_destination": 0,
+  "tong_muoi_entity": 211,
+  "tro_dung_seed_nha_trang": 211,
+  "tro_vao_BAN_NHAP_sai": 0,
+  "tro_di_dau_khac": [],
+  "type_ngoai_pham_vi_bi_dinh": 0
+}
+
+Đọc:
+- 0 document còn thiếu → tiêu chí nghiệm thu #2 của kế hoạch ĐẠT.
+- 211/211 trỏ tới BẢN PUBLISHED seed.nha-trang, 0 trỏ vào draft → phép lọc
+  !(_id in path("drafts.**")) trong script hoạt động đúng.
+- 0 document thuộc năm type ngoài phạm vi bị dính field → không rò phạm vi.
