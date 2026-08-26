@@ -116,8 +116,14 @@ Gắn vào **mười** type. Bảy type đang bật cộng ba type còn đăng k
 | experience | `cms/schemas/experience.ts` | |
 | tour | `cms/schemas/tour.ts` | khác `tripOrigin` (điểm xuất phát) về nghĩa |
 | article | `cms/schemas/article.ts` | file này **không** dùng `baseFieldsBeforeGallery`, thêm trực tiếp |
-| hotel, resort | `cms/schemas/lodgingBase.ts` | thêm vào `lodgingBaseFields`, hai type tự thừa hưởng |
+| hotel, resort | `cms/schemas/hotel.ts`, `cms/schemas/resort.ts` | **không** qua `lodgingBase.ts` — xem ghi chú dưới |
 | restaurant, specialty, event | ba file tương ứng | đang tắt/ẩn nhưng còn đăng ký schema (xem `cms/schemas/index.ts`) |
+
+**Vì sao `hotel`/`resort` không đi qua `lodgingBase.ts`** dù đó là chỗ `containedInPlace` đang
+nằm: `g1` nhận diện field dùng chung bằng **cờ trong `SCHEMA_CONFIG`**, mỗi nguồn chung là một
+cờ riêng (`usesBaseBefore`, `usesLodgingBase`…). Cho mười entity nhận field qua cùng một đường
+nghĩa là `g1` chỉ phải học **một** cờ mới; tách hai type ra một đường riêng là hai cờ, và một
+ngoại lệ nữa cho người sau phải nhớ.
 
 **Không gắn** cho `person` và `organization`: tác giả và pháp nhân không thuộc về một điểm đến.
 **Không gắn** cho `category` và `siteSettings`.
@@ -316,8 +322,7 @@ docs/specs/SPEC-2026-08-26-da-diem-den.md   ← file này
 **Sửa (26 file mã/schema/script + 6 file tài liệu):**
 ```
 cms/schemas/baseFields.ts          + destinationField
-cms/schemas/lodgingBase.ts         + destination (hotel, resort)
-cms/schemas/{place,attraction,experience,tour,article,restaurant,specialty,event}.ts
+cms/schemas/{place,attraction,experience,hotel,resort,tour,article,restaurant,specialty,event}.ts
 cms/schemas/touristDestination.ts  mô tả containedInPlaceRef
 cms/schemas/siteSettings.ts        SECTION_KEYS 19 → 20
 src/site.config.ts                 NavKind + bảng chú thích 7 → 8 loại đích
