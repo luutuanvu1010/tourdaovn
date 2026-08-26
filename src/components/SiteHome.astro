@@ -246,7 +246,7 @@ const activeSections = rawSections.filter((s) => !s.hidden)
         return <HomeHubGrid lang={lang} />
       case 'destinations':
         return otherDestinations.length ? (
-          <HomeDestinationGrid destinations={otherDestinations} lang={lang} heading={copy.sections.destinations} />
+          <HomeDestinationGrid destinations={otherDestinations} lang={lang} heading={copy.sections.destinations} viewAllLabel={copy.viewAll} viewAllHref={indexHref('touristDestination', lang)} />
         ) : null
       case 'areas':
         return td?.homepagePlaces?.length ? (
