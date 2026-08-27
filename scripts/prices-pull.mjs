@@ -36,6 +36,7 @@ import { readFileSync, writeFileSync, renameSync, unlinkSync, existsSync } from 
 import { fileURLToPath } from 'node:url'
 import { resolve, isAbsolute } from 'node:path'
 import { parse as docYaml } from 'yaml'
+import { config as napEnv } from 'dotenv'
 // Luật hợp lệ KHÔNG chép tay: nhập thẳng từ cổng đang chạy, rồi chạy chính cổng đó trên nội
 // dung sắp ghi. Vì thế file này chạy bằng `tsx` chứ không phải `node` trần — xem package.json.
 import {
@@ -54,7 +55,28 @@ const GOC_REPO = fileURLToPath(new URL('..', import.meta.url))
 const DUONG_YAML = resolve(GOC_REPO, 'data/prices.yaml')
 const DUONG_HAT_GIONG = resolve(GOC_REPO, 'docs/gia/mau-nhap-gia.csv')
 
-const MA_SHEET = 'PRICES_SHEET_ID_TRONG_ENV'
+// Nạp `.env` ở gốc repo — cùng khuôn với các script khác trong `scripts/`. Không có bước
+// này thì `PRICES_SHEET_ID` chỉ đọc được khi người dùng tự export ra shell, và lệnh
+// `npm run prices:pull` sẽ chết ngay dòng kiểm bên dưới.
+napEnv({ path: resolve(GOC_REPO, '.env'), quiet: true })
+
+// Mã Sheet đọc từ biến môi trường, KHÔNG viết cứng vào kho.
+//
+// Vì sao: kho này là PUBLIC, và Sheet giá bật "Xuất bản lên web" nên `gviz/tq` đọc được
+// ẨN DANH — đã đo 2026-08-27: gọi không cookie trả HTTP 200 kèm dữ liệu thật. Nghĩa là mã
+// Sheet KHÔNG phải một định danh vô hại, nó là chìa khoá: ai có mã là đọc được bảng giá.
+// Thứ duy nhất đang che nó là chưa ai biết mã — viết cứng vào kho public là gỡ đúng lớp
+// che đó.
+//
+// Đặt trong `.env` ở gốc repo (file đó không được track):
+//   PRICES_SHEET_ID=<mã sheet>
+const MA_SHEET = process.env.PRICES_SHEET_ID
+if (!MA_SHEET) {
+  console.error('Thiếu PRICES_SHEET_ID. Đặt vào .env ở gốc repo:')
+  console.error('  PRICES_SHEET_ID=<mã sheet giá>')
+  console.error('Mã lấy ở URL của Sheet: docs.google.com/spreadsheets/d/<mã>/edit')
+  process.exit(1)
+}
 const TEN_TAB = 'gia'
 // Tìm tab THEO TÊN chứ không theo gid — thêm tab khác vào Sheet không làm hỏng đồng bộ.
 const URL_SHEET =

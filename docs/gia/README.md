@@ -6,7 +6,10 @@
 
 ## Sheet
 
-- **Tệp:** `PRICES_SHEET_ID_TRONG_ENV`
+- **Tệp:** mã Sheet **không ghi trong kho** — kho là public và Sheet bật "Xuất bản lên web"
+  nên `gviz/tq` đọc được ẩn danh, tức mã Sheet là chìa khoá chứ không phải định danh vô hại.
+  Đặt ở `.env` gốc repo: `PRICES_SHEET_ID=<mã>`. Mã nằm trong URL của Sheet:
+  `docs.google.com/spreadsheets/d/<mã>/edit`.
 - **Quyền:** *bất kỳ ai có đường liên kết → người xem*. Script đọc qua đường xuất công khai của
   Google, không dùng khoá API, không OAuth, không thêm dependency.
 - **Tab phải tên là `gia`** (viết thường, không dấu). Script tìm tab theo **tên**, nên thêm tab
