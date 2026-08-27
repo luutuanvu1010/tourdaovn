@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-08-27T08:32:12.650Z",
+  "generatedAt": "2026-08-27T08:40:38.451Z",
   "status": "pass",
   "summary": {
     "files": {
@@ -30,11 +30,11 @@
     "sitemapCoverageRatio": 1,
     "graph": {
       "nodes": 125,
-      "edges": 175,
+      "edges": 176,
       "danglingEdges": 0,
-      "orphanNodes": 27,
+      "orphanNodes": 25,
       "relations": {
-        "author": 20,
+        "author": 21,
         "about": 14,
         "mentions": 16,
         "containedInPlace": 34,
