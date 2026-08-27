@@ -223,7 +223,7 @@ export interface TermScan {
  */
 export async function scanTerms(): Promise<TermScan> {
   const c = getClient()
-  const query = `*[_type == "category" && inDefinedTermSet in ["experience-type", "tour-type"]]{
+  const query = `*[_type == "category" && inDefinedTermSet in ["experience-type", "tour-type", "attraction-type"]]{
     "termCode": termCode.current,
     "slug": slug.current,
     "name": coalesce(name.vi, termCode.current),

@@ -1782,3 +1782,33 @@ Nghĩa là **`main` cũng không tự push được qua chính hook của nó**.
 Nghĩa là nút "Xem trang live" không hiện trên Event **là hành vi đúng**, không phải nợ. Bản sửa của mục này (suy segment từ `ROUTE_MAP`) tình cờ làm đúng ngay: type không có route thì trả `null`.
 
 **Nợ thật còn lại, nhỏ hơn nhiều:** dataset có **1 document `event` đã duyệt** cho một entity mà site cố ý không dùng. Dữ liệu chết, không hại gì, nhưng nó là lý do khiến tôi tưởng đây là câu hỏi mở. Xoá hay giữ là việc của chủ dự án.
+
+---
+
+## DR-075 — `Category.slug` khai là "slug object localized" trong đặc tả, thực tế là slug phẳng
+
+**Trạng thái:** **mở**, cố ý không sửa trong đợt `QĐ-2026-08-27-03` (ngoài phạm vi).
+
+Phát hiện 2026-08-27 khi mở bộ term `attraction-type`, lúc đọc đường đi của `slug` từ đặc tả xuống mã.
+
+`01-CONTENT_MODEL` §2.13 khai:
+
+| Field | Kiểu | Bất biến |
+|---|---|---|
+| slug | **slug object localized** | URL trang listing theo term; **I9** |
+
+Thực tế mã:
+
+| Nơi | Khai / đọc | Khớp đặc tả? |
+|---|---|---|
+| `cms/schemas/category.ts:53` | `type: 'slug'` — **phẳng**, một giá trị | ✘ |
+| `src/lib/sanity.ts:228` (`scanTerms`) | `"slug": slug.current` — đọc phẳng | ✘ (nhất quán với schema, lệch đặc tả) |
+| `src/lib/serialize/category.ts:17` | `category.slug ?? category.termCode` | ✘ |
+
+**Hệ quả thật.** Trang term **không có bản đa ngôn ngữ**: `/trai-nghiem/tam-bun` tồn tại, `/en/experiences/mud-bath` thì không, vì không có chỗ nào lưu slug tiếng Anh của term. I9 (khóa duy nhất theo `(_type, slug từng ngôn ngữ)`) trên Category **hiện không có gì để kiểm** — nó rỗng chứ không phải đạt.
+
+**Vì sao chưa vỡ ra.** `src/site.config.ts` khai `langs = ['vi']`, nên phần đa ngôn ngữ chưa được yêu cầu. Drift này sẽ thành lỗi thật vào đúng lúc bật ngôn ngữ thứ hai — cùng thời điểm với các món i18n khác, không sớm hơn.
+
+**Vì sao không sửa cùng `QĐ-2026-08-27-03`.** Sửa kiểu `slug` của Category chạm **mọi** term đang có của hai bộ `experience-type` và `tour-type`, tức chạm URL đang chạy và đang được Google lập chỉ mục — rủi ro khác hẳn và không liên quan tới việc mở bộ term mới. Bộ `attraction-type` mở ra theo **đúng khuôn đang có** (slug phẳng), nên không làm drift nặng thêm, chỉ làm nó rộng thêm một bộ.
+
+**Điều kiện phải xử:** trước khi bật ngôn ngữ thứ hai trong `langs`. Khi xử, phải quyết một lượt cho cả ba bộ term, kèm di trú dữ liệu và bản đồ chuyển hướng cho URL term hiện có.

@@ -196,18 +196,21 @@ Gate publish (I12): title, slug — xem "Nới bắt buộc v1.0.11" ở §4. pl
 
 ### 2.3 Attraction (đã audit chi tiết, founder duyệt 2026-06-11)
 
-Lằn ranh với Place (đã chốt ở 2.2): Attraction là công trình hoặc điểm tham quan do con người tạo và quản lý. Phạm vi phase 1 gồm 4 nhóm: tâm linh và di tích, giải trí có vé, tắm bùn suối khoáng, bảo tàng chợ công viên. Hai nhóm gate:
+Lằn ranh với Place (đã chốt ở 2.2): Attraction là công trình hoặc điểm tham quan do con người tạo và quản lý. Phạm vi mở rộng v1.0.19: thêm ba nhóm bản chất mà tồn kho nội dung thật đã có nhưng từ vựng chưa có ô — biển và đảo, thiên nhiên sinh thái, làng chài và làng nghề. Hòn Mun, Dốc Lết, Bãi Dài giữ là Attraction chứ không chuyển sang Place (QĐ-2026-08-27-03): lằn ranh 2.2 phân định theo "địa danh tự nhiên" và "có quản lý", và những nơi này có ban quản lý, có vé, có giờ.
+
+Ba nhóm gate (I2):
 
 - Nhóm bách khoa (historic, temple, church, museum): có danh tính bách khoa sẵn, gate sameAs Wikidata hoặc Wikipedia (I2).
 - Nhóm venue thương mại (theme-park, aquarium, mud-spa, market, park): gate officialSource; geo/address tùy chọn, chỉ điền khi có nguồn chắc. sameAs vẫn điền khi có. Với park, officialSource là trang cơ quan quản lý.
+- Nhóm một trong hai (beach, island, nature, craft-village, general): gate là **có ít nhất một** trong sameAs hoặc officialSource. Trống cả hai là fail. beach/island/nature nằm ở đây chứ không ở nhóm bách khoa vì lằn ranh "tự nhiên" so với "có quản lý" **cắt ngang** ba loại này: Hòn Mun và thác Tà Gụ có mục bách khoa, còn rừng thông Khánh Sơn và Mini Beach là điểm du lịch có quản lý, chỉ có website chính thức. Đo trên dataset 2026-08-27: 18/22 doc thuộc ba loại này tự nguyện có sameAs, 4 doc chỉ có officialSource. Cổng không phân biệt được hai thứ nên không bắt nó đoán. Hình dạng gate này có tiền lệ ở I12 (Article transport-guide cần ít nhất một trong howTo, faq). Lý do tồn tại nhóm này: một giá trị không thuộc nhánh nào thì validator im lặng bỏ qua — không phải cho phép, mà là không kiểm; đó là lỗi đã xảy ra thật với aquarium trước v1.0.19.
 
 i18n field-level (ADR-0004), cùng quy tắc với Place: slug là object localized, I9 theo (_type, slug từng ngôn ngữ), không translationGroup. Field chung (2.0) vẫn áp dụng. Bảng field riêng:
 
 | Field | Kiểu | Bắt buộc? | Dịch? | Bất biến / quy tắc | Ai cung cấp |
 |---|---|---|---|---|---|
-| attractionType | string enum (historic, temple, church, museum, theme-park, aquarium, mud-spa, market, park) | có | không | quyết type thứ hai trong mảng @type theo bảng map đóng dưới, và quyết nhóm gate | người |
-| sameAs | array url | có với nhóm bách khoa (gate I2), nên có với nhóm venue | không | Wikidata hoặc Wikipedia | người |
-| officialSource | url | có với nhóm venue (gate), tùy với nhóm bách khoa | không | website chính thức hoặc trang cơ quan quản lý | người |
+| attractionType | string enum (historic, temple, church, museum, beach, island, nature, theme-park, aquarium, mud-spa, market, park, craft-village, general) | có | không | quyết type thứ hai trong mảng @type theo bảng map đóng dưới, và quyết nhóm gate. Trống thì tầng hiển thị coi như general, nhưng gate nguồn vẫn áp | người |
+| sameAs | array url | có với nhóm bách khoa (gate I2); một trong hai với beach, island, nature, craft-village, general; nên có với nhóm venue | không | Wikidata hoặc Wikipedia. Trang cơ quan quản lý chấp nhận được với craft-village khi không có mục bách khoa | người |
+| officialSource | url | có với nhóm venue (gate); một trong hai với beach, island, nature, craft-village, general; tùy với nhóm bách khoa | không | website chính thức hoặc trang cơ quan quản lý | người |
 | geo | geopoint | tùy | không | — | người |
 | address | object | tùy | một phần | addressLocality là phường hiện hành, I15 | người |
 | containedInPlace | reference đến Place hoặc TouristDestination | có | không | I8, quyết định nền 4: Place là ưu tiên khi đúng; TouristDestination hợp lệ khi Nha Trang là container thực tế | người |
@@ -224,21 +227,32 @@ i18n field-level (ADR-0004), cùng quy tắc với Place: slug là object locali
 | imageProvenance | text | có khi có ảnh | không | một dòng chung mức entity, phủ theo nếp chung khi soát v1.0.0; nhóm rủi ro ảnh sưu tầm cao nhất | người |
 Bảng map attractionType (đóng, thêm giá trị là cửa hai chiều theo 5.3). JSON-LD xuất @type dạng mảng hai type, vai du lịch cộng bản chất địa điểm:
 
-| attractionType | @type xuất ra | ví dụ |
-|---|---|---|
-| historic | [TouristAttraction, LandmarksOrHistoricalBuildings] | Tháp Bà Ponagar |
-| temple | [TouristAttraction, BuddhistTemple] | chùa Long Sơn |
-| church | [TouristAttraction, Church] | nhà thờ Núi |
-| museum | [TouristAttraction, Museum] | Bảo tàng Hải dương học |
-| theme-park | [TouristAttraction, AmusementPark] | VinWonders |
-| aquarium | [TouristAttraction, Aquarium] | thủy cung Trí Nguyên |
-| mud-spa | [TouristAttraction, DaySpa] | I-Resort, Tháp Bà spa |
-| market | [TouristAttraction, ShoppingCenter] | chợ Đầm |
-| park | [TouristAttraction, Park] | công viên bờ biển |
+| attractionType | @type xuất ra | additionalType | ví dụ |
+|---|---|---|---|
+| historic | [TouristAttraction, LandmarksOrHistoricalBuildings] | — | Tháp Bà Ponagar |
+| temple | [TouristAttraction, BuddhistTemple] | — | chùa Long Sơn |
+| church | [TouristAttraction, Church] | — | nhà thờ Núi |
+| museum | [TouristAttraction, Museum] | — | Bảo tàng Hải dương học |
+| beach | [TouristAttraction, Beach] | — | Bãi Dài Cam Lâm, Dốc Lết |
+| island | [TouristAttraction, Landform] | https://www.wikidata.org/wiki/Q23442 (island) | Hòn Mun, Hòn Tằm |
+| nature | [TouristAttraction, Landform] | — | thác Tà Gụ, vịnh Nha Trang, rừng thông Khánh Sơn |
+| theme-park | [TouristAttraction, AmusementPark] | — | VinWonders |
+| aquarium | [TouristAttraction, Aquarium] | — | Viện Hải dương học |
+| mud-spa | [TouristAttraction, DaySpa] | — | I-Resort, Tháp Bà spa |
+| market | [TouristAttraction, ShoppingCenter] | — | chợ Đầm |
+| park | [TouristAttraction, Park] | — | công viên bờ biển |
+| craft-village | TouristAttraction (đơn, không mảng) | — | làng chài Bích Đầm, làng nghề Trường Sơn |
+| general | TouristAttraction (đơn, không mảng) | — | bến du thuyền Ana Marina |
+
+Hai giá trị cuối phát @type **đơn**, không phải mảng: schema.org không có type sạch cho chúng, và lặp TouristAttraction hai lần trong mảng là tín hiệu rỗng. Nhãn hiển thị của general là **"Điểm thu hút khách"** — nói đúng thứ nó phát ra, không đặt là "Khác" để khỏi mời gọi dùng như sọt rác.
+
+beach dùng Beach, island và nature dùng Landform: cùng nguồn từ vựng với bảng map placeType ở 2.2, không tự chế. Đã kiểm trên schema.org V30.0 (2026-03-19), cùng bản đã kiểm cho Island ở 2.2 — Beach có cây Thing > Place > CivicStructure > Beach, Landform có cây Thing > Place > Landform với bốn subtype BodyOfWater, Continent, Mountain, Volcano. Ghi chú ngữ nghĩa: schema.org xếp Beach dưới CivicStructure chứ không thẳng dưới Place; đây là cách xếp của chuẩn, ta theo chuẩn chứ không sửa, và placeType beach ở 2.2 vốn đã phát Beach nên hai nơi nhất quán. nature gộp thác, suối, rừng, vịnh, núi — Landform là type cha trung thực của cả năm, tách ra sẽ cho các ô một tới ba doc; độ mịn lấy lại ở tầng nhãn 2.13 qua Wikidata. Tách sau là cửa hai chiều.
+
+additionalType của tầng nhãn (2.13, bộ attraction-type) **cộng dồn** với cột trên: một Attraction attractionType=island mang nhãn có sameAs sẽ xuất additionalType gồm Q23442 và các QID nhãn.
 
 Loại có chủ ý: aggregateRating và review (không UGC phase 1), photo (dùng gallery), tourBookingPage (đường giá duy nhất là bookingRef), event và Experience tại đây (rollup suy ở build từ Event.location và Experience.venue), maximumAttendeeCapacity, smokingAllowed.
 
-Gate publish (I12): title, slug, attractionType, containedInPlace, summary, cộng theo nhóm: sameAs (bách khoa) hoặc officialSource (venue); cộng imageProvenance khi có ảnh. geo/address và bookingRef không nằm trong gate.
+Gate publish (I12): title, slug, attractionType, containedInPlace, summary, cộng theo nhóm: sameAs (bách khoa), officialSource (venue), hoặc ít nhất một trong hai (beach, island, nature, craft-village, general); cộng imageProvenance khi có ảnh. geo/address và bookingRef không nằm trong gate. Nhãn 2.13 không nằm trong gate — thiếu nhãn vẫn publish được.
 
 ### 2.4 Experience (đã audit chi tiết, founder duyệt 2026-06-11)
 
@@ -497,7 +511,9 @@ Gate publish (I12): title, slug, summary, bio, mainImage, sameAs ≥1.
 
 ### 2.13 Category (DefinedTerm) (đã audit chi tiết, founder duyệt 2026-06-11)
 
-Từ vựng đóng do founder tuyển (I11), không phải tag tự do. Ba bộ phase 1: general-category (phân mục chung), experience-type (nguồn cho Experience.experienceType), tour-type (phân loại Tour qua category chung). Bộ experience-type và tour-type có trang công khai theo term ("tắm bùn Nha Trang", "tour 4 đảo" là cụm từ khóa thật; trang listing structured tự cập nhật khi thêm entity mới); general-category nội bộ.
+Từ vựng đóng do founder tuyển (I11), không phải tag tự do. Bốn bộ: general-category (phân mục chung), experience-type (nguồn cho Experience.experienceType), tour-type (phân loại Tour qua category chung), và attraction-type (nhãn phân loại cho Attraction, thêm v1.0.19). Ba bộ experience-type, tour-type, attraction-type có trang công khai theo term ("tắm bùn Nha Trang", "tour 4 đảo", "đảo & biển Nha Trang" là cụm từ khóa thật; trang listing structured tự cập nhật khi thêm entity mới); general-category nội bộ.
+
+Bộ attraction-type là **tầng nhãn**, đứng cạnh chứ không thay attractionType (2.3). Ranh giới cứng: nhãn đa trị, không quyết @type, không vào gate publish. attractionType đơn trị, quyết @type, nằm trong gate. Trộn hai vai vào một field là nguyên nhân đã làm 26/39 Attraction xếp sai hoặc bỏ trống trước v1.0.19 — người nhập liệu gặp danh sách không có ô đúng thì bỏ trống hoặc chọn ô gần nhất. Ba nhãn Trải nghiệm du lịch, Khu nghỉ dưỡng, Ẩm thực sống ở đây chứ không thành giá trị enum, vì chúng đã là entity riêng (2.4, 2.7, 2.5 và 2.14) và lằn ranh "việc để làm" so với "nơi để đến" ở 2.4 giữ nguyên.
 
 Miễn bộ quản trị reviewStatus, approvedBy, contentProvenance: việc founder tuyển term chính là duyệt, thêm vòng duyệt cho chính mình là thủ tục rỗng (founder chốt 2026-06-11; ngoại lệ duy nhất của I19).
 
@@ -507,10 +523,10 @@ i18n field-level (ADR-0004). Category là entity từ vựng tối giản, khôn
 |---|---|---|---|---|---|
 | name | string | có (gate) | có | tên hiển thị, serialize name; đổi tên không vỡ reference nhờ termCode | founder |
 | description | text | có (gate) | có | nghĩa của term, serialize description | founder |
-| inDefinedTermSet | string enum (general-category, experience-type, tour-type) | có (gate) | không | tên bộ, I11; thêm bộ mới là cửa hai chiều (cập nhật file này) | founder |
+| inDefinedTermSet | string enum (general-category, experience-type, tour-type, attraction-type) | có (gate) | không | tên bộ, I11; thêm bộ mới là cửa hai chiều (cập nhật file này) | founder |
 | termCode | slug | có (gate) | không | khóa ổn định, không đổi khi sửa tên hiển thị; GROQ filter theo termCode, không theo name; nâng từ nên có lên bắt buộc (G5: rẻ lúc tạo, đắt lúc bổ sau khi đã có reference trỏ vào) | founder |
-| slug | slug object localized | có với term thuộc bộ có trang công khai (experience-type, tour-type) | theo ngôn ngữ | URL trang listing theo term; I9 | founder |
-| sameAs | url | nên có với experience-type và tour-type | không | Wikidata của khái niệm, nguồn additionalType khi Experience và Tour serialize (khuyến nghị đã ghi 2.4, 2.8); url đơn có chủ ý, khác sameAs array của entity: term chỉ cần một QID làm additionalType | người |
+| slug | slug object localized | có với term thuộc bộ có trang công khai (experience-type, tour-type, attraction-type) | theo ngôn ngữ | URL trang listing theo term; I9 | founder |
+| sameAs | url | nên có với experience-type, tour-type và attraction-type | không | Wikidata của khái niệm, nguồn additionalType khi Experience, Tour và Attraction serialize (khuyến nghị đã ghi 2.3, 2.4, 2.8); url đơn có chủ ý, khác sameAs array của entity: term chỉ cần một QID làm additionalType. Term không có QID thì bỏ property, không phát chuỗi rỗng (5.1, I6) | người |
 
 Serialize: @type DefinedTerm kèm inDefinedTermSet; trang listing của term xuất CollectionPage chứa ItemList các entity trỏ tới term, rollup suy ở build (P6), không lưu field.
 
@@ -896,5 +912,6 @@ Lý do chi tiết và phương án đã loại của từng thay đổi nằm �
 
 - v1.0.17 (2026-08-14): thêm field `branding` vào siteSettings (§2.15) — bốn ô ảnh nhận diện: `logo`, `hideWordmark`, `favicon`, `ogImage`. Trước đó logo là SVG viết cứng **chép hai bản** ở `Header.astro` và `Footer.astro`, biên tập viên không đổi được nếu không có lập trình viên; `BaseLayout` lại trỏ `/favicon.svg` mà file đó không tồn tại, favicon 404 trên mọi trang. Đợt này gom dấu hiệu thương hiệu về một component `SiteLogo.astro` và thêm `public/favicon.svg` thật làm lớp dự phòng. Ranh giới với ADR-0021 QĐ8 được vẽ rõ: **chữ** thương hiệu ở `src/site.config.ts` (vào JSON-LD và meta mọi trang, phải cố định lúc build), **ảnh** ở Sanity (chỉ tham chiếu bằng URL). Kèm theo: `Organization.logo` nay được phát trong JSON-LD trang chủ khi đã tải logo. Không thêm document type mới nên là cửa hai chiều theo §5.3. Bản ghi `QĐ-2026-08-14-01`, spec `SPEC-2026-08-14-logo-tuy-bien.md`.
 - v1.0.18 (2026-08-14): thêm hai field `hero` và `footer` vào siteSettings (§2.15), và **gỡ `heroText`** — nó thành `hero.eyebrow` một tầng, nên document này không còn field localized nào. Trước đợt này bảy chỗ trên Hero và chân trang biên tập viên không sửa được: H1 trang chủ (`brand.headline`), mô tả Hero (`brand.description`), chữ hai nút Hero, tagline và disclaimer chân trang, dòng bản quyền, và không có chỗ nào treo giấy phép lữ hành. Ranh giới với `QĐ-2026-08-14-01` được vẽ thêm một đường, **không nới**: chữ **máy đọc** (`brand.name`, `brand.legalName`, và `brand.description` khi làm thẻ meta) ở lại `src/site.config.ts` cố định lúc build; chữ **người đọc** vào Sanity. Hệ quả có chủ ý: mô tả trên trang chủ có thể lệch meta description. Sáu ô chữ là tiếng Việt một tầng vì `site.config.ts` khai `langs = ['vi']`; tầng render bỏ qua chúng khi `lang !== 'vi'`. `badges[]` là **một mảng gộp** phân nhóm bằng `kind`, không ba mảng riêng. Hai chỗ cưỡng chế ở tầng render: lớp phủ 88% giữ tương phản chữ chân trang ≥ 4.5:1 trên ảnh nền, và badge thiếu `alt` mà có link thì lấy nhãn `kind` thay vì im lặng bỏ ảnh. Phần chuyển dữ liệu `heroText` → `hero.eyebrow` ở `cms/_migrate-hero-footer.mjs`, phải sao lưu trước. Không thêm document type mới nên là cửa hai chiều theo §5.3. Bản ghi `QĐ-2026-08-14-03`, spec `SPEC-2026-08-14-hero-footer-tuy-bien.md`.
+- v1.0.19 (2026-08-27): **loại điểm tham quan** — enum `attractionType` (§2.3) từ 9 lên **14 giá trị**, thêm `beach`, `island`, `nature`, `craft-village`, `general`; bảng map @type thêm cột `additionalType` và năm hàng tương ứng. **I2 nay ba nhánh** thay vì hai: bách khoa (`sameAs`), venue (`officialSource`), và **một trong hai** cho `beach`/`island`/`nature`/`craft-village`/`general` — nhánh thứ ba tồn tại vì một giá trị không thuộc nhánh nào thì validator **im lặng bỏ qua**, đúng lỗi đã xảy ra với `aquarium`. `aquarium` chốt về **venue**, đóng drift ba nơi (spec và validator CI xếp venue, Studio xếp bách khoa, synthesis không xếp đâu cả). Thêm bộ term **`attraction-type`** vào §2.13 làm **tầng nhãn** đa trị, không quyết @type và không vào gate; ba nhãn Trải nghiệm du lịch, Khu nghỉ dưỡng, Ẩm thực sống ở đây thay vì thành giá trị enum, giữ nguyên lằn ranh entity §2.4/§2.5/§2.7/§2.14. Hòn Mun, Dốc Lết, Bãi Dài **giữ là Attraction**, không chuyển sang Place. Bối cảnh đo được: 17/39 trang đang phát `["TouristAttraction","TouristAttraction"]` và 9 trang gán loại trái bản chất. Phần enum và bộ term là cửa hai chiều; phần sửa tập rẽ nhánh I2 là **gần một chiều** nên có bản ghi bắt buộc. Bản ghi `QĐ-2026-08-27-03`, spec `SPEC-2026-08-27-loai-diem-tham-quan.md`.
 
 Mỗi bảng field có cột "dịch được" để quyết i18n field-level, field bất biến không nhân bản (ADR-0004). Khi dựng một trang, tách rõ ba tầng: field của entity, rollup suy ở build từ entity liên quan, và trình bày của template. Đừng biến layout thành field (N1).

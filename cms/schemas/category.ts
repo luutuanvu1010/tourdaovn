@@ -38,7 +38,8 @@ export default defineType({
         list: [
           { title: 'Phân mục chung', value: 'general-category' },
           { title: 'Loại trải nghiệm', value: 'experience-type' },
-          { title: 'Loại tour', value: 'tour-type' }
+          { title: 'Loại tour', value: 'tour-type' },
+          { title: 'Nhãn điểm tham quan', value: 'attraction-type' }
         ]
       },
     }),

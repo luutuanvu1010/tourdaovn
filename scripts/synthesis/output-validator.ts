@@ -1,11 +1,13 @@
 // Kiểm output sau field-mapper, theo CONTENT_MODEL §2.2 (Place I12) và §2.3 (Attraction I12),
 // gate sameAs I2, khung geo DESIGN AUD-09.
-import { CLASSIFY_ENUMS, CLASSIFY_FIELD_BY_ENTITY, VENUE_ATTRACTION_TYPES } from './classify'
+import {
+  CLASSIFY_ENUMS, CLASSIFY_FIELD_BY_ENTITY,
+  ENCYCLOPEDIC_ATTRACTION_TYPES, VENUE_ATTRACTION_TYPES, EITHER_SOURCE_ATTRACTION_TYPES,
+} from './classify'
 
 const VN_LAT_RANGE: [number, number] = [8, 24]
 const VN_LNG_RANGE: [number, number] = [102, 110]
 
-const ENCYCLOPEDIC_ATTRACTION_TYPES = new Set(['historic', 'temple', 'church', 'museum'])
 
 export function validateOutput(
   entityType: string,
@@ -31,7 +33,7 @@ export function validateOutput(
   )
   const requiresSameAs =
     entityType === 'place' ||
-    (entityType === 'attraction' && ENCYCLOPEDIC_ATTRACTION_TYPES.has(mapped.attractionType))
+    (entityType === 'attraction' && ENCYCLOPEDIC_ATTRACTION_TYPES.includes(String(mapped.attractionType)))
   if (requiresSameAs && !hasWikiSameAs) {
     errors.push('Thiếu sameAs Wikidata/Wikipedia (gate I2)')
   }
@@ -104,11 +106,17 @@ export function validateOutput(
     }
   }
 
-  // N5b R3 — attraction nhóm venue thương mại: cần officialSource. Synthesis
-  // KHÔNG tự bịa (chưa có on-page harvester N3) → CẢNH BÁO để founder biết, không chặn ở tầng này.
-  if (entityType === 'attraction' && VENUE_ATTRACTION_TYPES.includes(String(mapped.attractionType))) {
-    if (!mapped.officialSource) {
+  // N5b R3 — nguồn xác minh theo nhóm. Synthesis KHÔNG tự bịa (chưa có on-page
+  // harvester N3) → CẢNH BÁO để founder biết, không chặn ở tầng này.
+  if (entityType === 'attraction') {
+    const atype = String(mapped.attractionType)
+    if (VENUE_ATTRACTION_TYPES.includes(atype) && !mapped.officialSource) {
       warnings.push('Venue (attractionType) cần officialSource — gate I2, synthesis không tự bịa (R3)')
+    }
+    if (EITHER_SOURCE_ATTRACTION_TYPES.includes(atype) && !mapped.officialSource && !hasWikiSameAs) {
+      warnings.push(
+        `${atype} cần ít nhất một trong sameAs hoặc officialSource — gate I2, synthesis không tự bịa (R3)`,
+      )
     }
   }
 

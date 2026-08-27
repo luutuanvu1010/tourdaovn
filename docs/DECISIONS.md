@@ -1917,3 +1917,127 @@ Sáu lỗi trên bốn trang, đều là **dữ liệu**:
 **Tôi không tự điền.** `approvedBy` trong dataset này có **bốn giá trị khác nhau** — "Tour đảo Nha Trang", "Trường Duy", "Vũ Lưu", "Vũ Lưu (Gạo tẻ)" — tức nó ghi **tên người duyệt thật**, không phải một hằng máy suy được. `contentProvenance` và `author` cũng vậy: cả ba đều là lời khẳng định về **con người đã làm gì**. Máy điền vào đó là tạo ra một bản ghi thẩm quyền không có thật — đúng loại việc `04-CONSTRAINTS` sinh ra để chặn.
 
 Toàn dataset còn **7 document approved thiếu `approvedBy`** (4 cái ngoài danh sách trên chưa làm S24 đỏ vì chưa render ra trang chi tiết). Điền xong bảng trên là `governance-post` xanh, và `pre-push` (`DR-073`) thôi đòi `--no-verify`.
+
+---
+
+## QĐ-2026-08-27-03 — Loại điểm tham quan: mở rộng enum bản thể, thêm tầng nhãn, sửa tập rẽ nhánh I2
+
+**Ngày:** 2026-08-27 · **Người quyết:** chủ dự án · **Loại:** phần lớn **cửa hai chiều**; riêng việc sửa tập rẽ nhánh của **I2** là **gần một chiều** nên bắt buộc có bản ghi này (`01-CONTENT_MODEL` §5.3)
+
+**Spec:** `docs/specs/SPEC-2026-08-27-loai-diem-tham-quan.md` (duyệt cùng ngày)
+
+### Bối cảnh — đo trên bản dựng, không phải cảm nhận
+
+Trích `@type` thứ hai trong JSON-LD của cả 39 trang `/diem-tham-quan/`:
+
+| Tình trạng | Số trang |
+|---|---|
+| `attractionType` trống → phát `["TouristAttraction","TouristAttraction"]` | **17** (44%) |
+| Gán `theme-park` nhưng sai bản chất (vịnh Nha Trang, vịnh Nha Phú, Ba Hồ, Yang Bay, Bãi Dài, Bãi Tranh, Hòn Sỏi, đảo Hoa Lan–Hòn Heo) cộng Hòn Tằm gán `mud-spa` | **9** |
+| Đúng | **13** |
+
+Nguyên nhân gốc không phải người nhập liệu cẩu thả: enum 9 giá trị **không có ô nào** cho ba nhóm chiếm phần lớn tồn kho — biển/đảo (9 doc), thiên nhiên (11 doc), làng chài/làng nghề (3 doc). Gặp danh sách không có ô đúng thì người ta bỏ trống hoặc chọn ô gần nhất. Đây là lỗi thiết kế từ vựng, sửa ở tầng từ vựng.
+
+### Chốt 1 — hai cơ chế, không trộn
+
+Dự án đã có sẵn hai tầng phân loại và đợt này phát biểu rõ ranh giới giữa chúng:
+
+| | `attractionType` | `category` bộ `attraction-type` (mới) |
+|---|---|---|
+| Số trị | **một** | nhiều |
+| Nhiệm vụ | quyết `@type` JSON-LD | nhãn lọc cho người đọc |
+| Ra schema.org bằng | type thứ hai trong mảng `@type` | `additionalType` + trang term `DefinedTerm`/`CollectionPage` |
+| Vào gate publish | có | **không** |
+
+Ba mục **Trải nghiệm du lịch**, **Khu nghỉ dưỡng**, **Ẩm thực** trong danh sách chủ dự án đưa **thành nhãn, không thành loại**. Lý do: chúng đã là entity riêng (`§2.4` Experience, `§2.7` Resort, `§2.5` Restaurant / `§2.14` Specialty), và lằn ranh `§2.4` — *"Experience là việc để làm, Attraction là nơi để đến"* — giữ nguyên, không mở ADR. Hệ quả cụ thể: Hòn Tằm nằm loại **đảo**, mang nhãn tắm bùn + nghỉ dưỡng + ẩm thực, thay vì bị ép chọn một.
+
+### Chốt 2 — enum 9 → 14 giá trị
+
+Năm giá trị mới: `beach` → `Beach`; `island` → `Landform` + `additionalType` Q23442 (chép tiền lệ `§2.2`); `nature` → `Landform`; `craft-village` và `general` → `TouristAttraction` **đơn**.
+
+`general` mang nhãn **"Điểm thu hút khách"**, không phải "Khác" — nhãn nói đúng thứ nó phát ra, và không mời gọi dùng như sọt rác.
+
+**Không gộp** `temple`/`church` và `theme-park`/`park`: giữ `BuddhistTemple`, `Church`, `AmusementPark`, `Park`. Gộp lại sẽ phải hạ về type cha và mất độ mịn — đó là đi lùi.
+
+**Ngoại lệ có ý thức:** `nature` gộp thác, suối, rừng, vịnh, núi (11 doc). `Landform` là type cha trung thực của cả năm; tách ra cho các ô 1–3 doc. Độ mịn lấy lại ở tầng nhãn qua Wikidata. Tách sau là cửa hai chiều.
+
+### Chốt 3 — I2 nay có **ba** nhánh (phần gần một chiều)
+
+| Nhánh | Bắt buộc | Gồm |
+|---|---|---|
+| Bách khoa | `sameAs` | historic, temple, church, museum, **beach, island, nature** |
+| Venue | `officialSource` | theme-park, **aquarium**, mud-spa, market, park |
+| **Một trong hai** | `sameAs` **hoặc** `officialSource` | **craft-village, general** |
+
+Nhánh thứ ba có tiền lệ hình dạng trong `04-CONSTRAINTS` I12 (Article transport-guide cần ít nhất một trong `howTo`, `faq`).
+
+**Vì sao phải có nhánh thứ ba thay vì để ô mặc định trống gate.** Một giá trị không thuộc nhánh nào thì `checkI2` **im lặng bỏ qua** — không phải "cho phép", mà là "không kiểm". Đó đúng là cơ chế đang làm `aquarium` hỏng (xem dưới). Để `general` rơi ra ngoài cả ba nhánh là biến một tai nạn thành thiết kế, và trái nguyên tắc nền: **không đăng thứ không dẫn được nguồn**.
+
+**Bằng chứng nhánh thứ ba là đúng liều, không phải nới lỏng:** làng nghề Trường Sơn không có Wikipedia nhưng có trang Tổng cục Du lịch — biên tập viên đã tự dán link đó vào `sameAs`. Ép đúng Wikidata sẽ đẩy người ta đi bịa; miễn hẳn nguồn thì mất kiểm soát. "Một trong hai" khớp thực tế đang diễn ra.
+
+### Chốt 4 — `aquarium` về nhóm venue, đóng drift ba nơi
+
+Trước đợt này thuỷ cung bị ba nơi đòi ba thứ khác nhau:
+
+| Nơi | Xếp nhóm | Đòi |
+|---|---|---|
+| `01-CONTENT_MODEL` §2.3 | venue | `officialSource` |
+| `shared/gates/index.ts:57` (validator CI) | venue | `officialSource` |
+| `cms/schemas/attraction.ts:59` (Studio) | **bách khoa** | `sameAs` |
+| `scripts/synthesis/classify.ts:27` + `output-validator.ts:8` | **không nhóm nào** | không gì |
+
+Hậu quả thật: nhập xong Studio báo đạt, tới lúc phát hành máy kiểm báo trượt. Chốt theo `01` và validator CI — **venue** — vì thuỷ cung về bản chất là cơ sở có chủ, có vé, có giờ mở cửa, và vì sửa Studio là sửa một chỗ thay vì hai. Viện Hải dương học giữ nguyên link Wikipedia đang có, không mất gì.
+
+### Phạm vi và cái không làm
+
+Không chuyển doc nào giữa Attraction và Place — Hòn Mun, Dốc Lết, Bãi Dài **giữ là Attraction** theo quyết định của chủ dự án. Không đụng entity Experience, Resort, Restaurant, Specialty. Không tách `nature`. Không sửa drift `slug` localized của Category (chỉ ghi `DRIFT_LOG`).
+
+### Nợ mở, cố ý
+
+**ĐÍNH CHÍNH cùng ngày, sau khi đo trên dataset thật.** Đoạn dưới đây viết lúc soạn là **SAI**, giữ lại nguyên văn để thấy sai ở đâu:
+
+> ~~`lang-chai-bich-dam` và `ben-du-thuyen-nha-trang` hiện **không có cả `sameAs` lẫn `officialSource`**.~~
+
+Sai vì đo bằng cách quét HTML đã dựng, ở đó `url` của `ImageObject` bị đọc nhầm thành `url` của chính thực thể. **Cả hai doc đều CÓ `officialSource`**, nên chúng qua nhánh "một trong hai" bình thường, không phải nợ.
+
+**Nợ thật, đo trên dataset (không phải trên `dist/`):** bốn doc sẽ trượt I2 sau khi xếp lại loại, đều cùng một hình dạng — **có `officialSource`, không có `sameAs`, nhưng bị nhánh bách khoa đòi `sameAs`**:
+
+| Doc | Loại mới | Có |
+|---|---|---|
+| `rung-thong-khanh-son` | `nature` | officialSource |
+| `dao-ga-nha-trang` | `island` | officialSource |
+| `khu-du-lich-dao-hoa-lan-hon-heo` | `island` | officialSource |
+| `khu-du-lich-mini-beach` | `beach` | officialSource |
+
+Cả bốn là **điểm du lịch có quản lý dựng trên nền tự nhiên**: có website chính thức, không có mục bách khoa. Lằn ranh "tự nhiên" và "có quản lý" **cắt ngang** ba giá trị `beach`/`island`/`nature`, nên một phép gán nhóm cứng không mô tả được. Món này để mở, xem mục cần quyết ở spec.
+
+**Đếm lại tồn kho:** dataset có **53** document `attraction` (41 approved đã publish, còn lại draft), không phải 39. Con số 39 lấy từ `dist/` — một bản dựng cũ. Bảng §8 của spec vì thế thiếu 5 doc, trong đó `Núi Cô Tiên` **approved nhưng không có `slug.vi`**, tức không render ra trang nào.
+
+**Máy không tự điền nguồn** — giữ nguyên lý do đã ghi ở `QĐ-2026-08-27-02` mục 3: nguồn dẫn là lời khẳng định về sự thật ngoài đời, không phải hằng suy được.
+
+### Bổ sung 1 (cùng ngày 2026-08-27) — `beach`/`island`/`nature` chuyển sang nhánh một trong hai
+
+Chốt sau khi **chạy thử migration trên dataset thật rồi đo**, không phải suy từ bàn giấy.
+
+Bốn doc trượt I2, tất cả cùng một hình dạng: **có `officialSource`, không có `sameAs`** —
+`rung-thong-khanh-son`, `dao-ga-nha-trang`, `khu-du-lich-dao-hoa-lan-hon-heo`, `khu-du-lich-mini-beach`.
+
+Xếp `beach`/`island`/`nature` vào nhóm bách khoa đã giả định **"tự nhiên thì có danh tính bách khoa"**. Dữ liệu bác bỏ: 18/22 doc thuộc ba loại này tự nguyện có `sameAs` — đó là địa danh thật (Hòn Mun, thác Tà Gụ, Hòn Chồng, vịnh Nha Trang); bốn cái còn lại là **điểm du lịch có quản lý dựng trên nền tự nhiên**, có website nhưng không ai viết Wikipedia về chúng. Lằn ranh "tự nhiên" so với "có quản lý" **cắt ngang** ba giá trị, nên một phép gán nhóm cứng không mô tả được thực tế.
+
+Ba nhánh I2 sau bổ sung:
+
+| Nhánh | Bắt buộc | Gồm |
+|---|---|---|
+| Bách khoa | `sameAs` | `historic`, `temple`, `church`, `museum` |
+| Venue | `officialSource` | `theme-park`, `aquarium`, `mud-spa`, `market`, `park` |
+| Một trong hai | ít nhất một trong hai | `beach`, `island`, `nature`, `craft-village`, `general` |
+
+**Không phải nới cổng.** Hợp ba tập vẫn phủ đúng 14 giá trị, không ô nào được miễn nguồn, và ca kiểm cưỡng chế điều đó vẫn xanh. Bốn nhóm `historic`/`temple`/`church`/`museum` giữ bách khoa nghiêm ngặt vì với chúng giả định trên đúng.
+
+### Bổ sung 2 — thứ tự thi hành: dữ liệu PHẢI đứng sau khi mã lên `main`
+
+Lượt chạy migration đầu tiên (07:42) đã **làm hỏng production trong ít phút**. Mỗi lần patch một `attraction` đã publish là một lần webhook `Cloudflare rebuild` bắn (bật lại theo `QĐ-2026-08-27-01`), và webhook dựng từ **`origin/main`** — nơi chưa có v1.0.19. Kết quả đo được trên `tourdao.vn/diem-tham-quan/lang-chai-bich-dam/`: huy hiệu hero hiện **chuỗi mã máy `craft-village`** cho khách, vì `uiCopy` trên `main` không có nhãn cho giá trị mới nên `typeLabel` rơi về chính mã.
+
+Đã hoàn nguyên toàn bộ 29 bản ghi từ `backups/backup-2026-08-27-07-42.ndjson` bằng `cms/_revert-attraction-types.mjs`; xác minh dataset khớp 53/53 và production trở lại đúng trạng thái cũ.
+
+**Luật rút ra, áp cho mọi đợt sau:** khi một thay đổi có **cả** phần dữ liệu Sanity **lẫn** phần mã, và mã còn nằm trên nhánh chưa gộp, thì **cấm chạm dữ liệu production** cho tới khi mã đã ở trên `main`. Lý do gốc: dataset là tài nguyên **dùng chung** giữa nhánh đang làm và bản đang chạy, nên dữ liệu luôn tới production trước mã. "Mã xong" không đồng nghĩa "mã đang chạy".

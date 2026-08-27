@@ -758,11 +758,11 @@ export function typeLabel(dict: LabelDict, lang: Lang, code: string | undefined)
 }
 
 export const ATTRACTION_TYPE_LABELS: LabelDict = {
-  vi: { historic: 'Di tích', temple: 'Chùa', church: 'Nhà thờ', museum: 'Bảo tàng', 'theme-park': 'Công viên giải trí', aquarium: 'Thủy cung', 'mud-spa': 'Tắm bùn', market: 'Chợ', park: 'Công viên' },
-  en: { historic: 'Historic site', temple: 'Temple', church: 'Church', museum: 'Museum', 'theme-park': 'Theme park', aquarium: 'Aquarium', 'mud-spa': 'Mud spa', market: 'Market', park: 'Park' },
-  zh: { historic: '古迹', temple: '寺庙', church: '教堂', museum: '博物馆', 'theme-park': '主题公园', aquarium: '水族馆', 'mud-spa': '泥浆浴', market: '市场', park: '公园' },
-  ko: { historic: '유적지', temple: '사원', church: '교회', museum: '박물관', 'theme-park': '테마파크', aquarium: '아쿠아리움', 'mud-spa': '머드 스파', market: '시장', park: '공원' },
-  ru: { historic: 'Памятник истории', temple: 'Храм', church: 'Церковь', museum: 'Музей', 'theme-park': 'Парк развлечений', aquarium: 'Океанариум', 'mud-spa': 'Грязевой спа', market: 'Рынок', park: 'Парк' },
+  vi: { historic: 'Di tích', temple: 'Chùa', church: 'Nhà thờ', museum: 'Bảo tàng', beach: 'Bãi biển', island: 'Đảo', nature: 'Thiên nhiên', 'theme-park': 'Công viên giải trí', aquarium: 'Thủy cung', 'mud-spa': 'Tắm bùn', market: 'Chợ', park: 'Công viên', 'craft-village': 'Làng nghề', general: 'Điểm thu hút khách' },
+  en: { historic: 'Historic site', temple: 'Temple', church: 'Church', museum: 'Museum', beach: 'Beach', island: 'Island', nature: 'Nature', 'theme-park': 'Theme park', aquarium: 'Aquarium', 'mud-spa': 'Mud spa', market: 'Market', park: 'Park', 'craft-village': 'Craft village', general: 'Tourist attraction' },
+  zh: { historic: '古迹', temple: '寺庙', church: '教堂', museum: '博物馆', beach: '海滩', island: '岛屿', nature: '自然生态', 'theme-park': '主题公园', aquarium: '水族馆', 'mud-spa': '泥浆浴', market: '市场', park: '公园', 'craft-village': '手工艺村', general: '旅游景点' },
+  ko: { historic: '유적지', temple: '사원', church: '교회', museum: '박물관', beach: '해변', island: '섬', nature: '자연', 'theme-park': '테마파크', aquarium: '아쿠아리움', 'mud-spa': '머드 스파', market: '시장', park: '공원', 'craft-village': '공예 마을', general: '관광 명소' },
+  ru: { historic: 'Памятник истории', temple: 'Храм', church: 'Церковь', museum: 'Музей', beach: 'Пляж', island: 'Остров', nature: 'Природа', 'theme-park': 'Парк развлечений', aquarium: 'Океанариум', 'mud-spa': 'Грязевой спа', market: 'Рынок', park: 'Парк', 'craft-village': 'Ремесленная деревня', general: 'Достопримечательность' },
 }
 
 export const PLACE_TYPE_LABELS: LabelDict = {

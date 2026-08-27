@@ -68,7 +68,9 @@ interface RawDoc {
   officialSource?: string
   url?: string
   mainImage?: { asset?: { url?: string }; alt?: string }
-  category?: Array<{ _id?: string; termCode?: string; name?: Record<string, string> | string }>
+  // `termCode` khai kiểu `slug` trong schema Sanity → GROQ trả object, không phải
+  // chuỗi. Khai đúng cả hai dạng thay vì nói dối kiểu rồi ép ở chỗ dùng.
+  category?: Array<{ _id?: string; termCode?: string | { current?: string }; name?: Record<string, string> | string }>
   bookingRef?: { key?: string }
   isAccessibleForFree?: boolean
   ticketUrl?: string
@@ -304,7 +306,20 @@ function entityFromRaw(doc: RawDoc, prices: Record<string, PriceEntry>): AiEntit
     hasPriceData: Boolean(bookingKey && prices[bookingKey]),
     ticketUrl: doc.ticketUrl,
     mainImage: doc.mainImage?.asset?.url ? { url: doc.mainImage.asset.url, alt: doc.mainImage.alt } : undefined,
-    topics: doc.category?.map((item) => item.termCode).filter((item): item is string => Boolean(item)),
+    // `termCode` khai kiểu `slug` trong cms/schemas/category.ts nên GROQ trả về
+    // {_type:'slug', current:'…'} chứ không phải chuỗi. Trước v1.0.19 chỗ này đẩy
+    // thẳng object vào `topics: string[]` — vị từ `is string` không kiểm lúc chạy,
+    // và Boolean(object) luôn true nên bộ lọc không chặn. Chuẩn hoá cả hai dạng.
+    topics: doc.category
+      ?.map((item) => {
+        const code: unknown = item.termCode
+        if (typeof code === 'string') return code
+        if (code && typeof code === 'object' && typeof (code as { current?: unknown }).current === 'string') {
+          return (code as { current: string }).current
+        }
+        return undefined
+      })
+      .filter((item): item is string => typeof item === 'string' && item !== ''),
     studioUrl: `https://${site.studioHost}.sanity.studio/desk/${doc._type};${cleanId(doc._id)}`,
   })
 }

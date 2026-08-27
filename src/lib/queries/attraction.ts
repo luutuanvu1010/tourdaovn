@@ -21,7 +21,7 @@ export function attractionBySlugQuery(lang: string): string {
       "metaTitle": seo.metaTitle.${lang},
       "metaDescription": seo.metaDescription.${lang}
     },
-    "category": category[]->{ _id, name, termCode, _type },
+    "category": category[]->{ _id, name, termCode, _type, sameAs, inDefinedTermSet },
     reviewStatus, approvedBy, contentProvenance,
     publishedAt, updatedAt,
     attractionType,

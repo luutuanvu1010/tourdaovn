@@ -281,7 +281,7 @@ Không gallery, highlights, faq (2.9). Không vùng giá (cấm mọi field giá
 | Ảnh | mainImage kèm alt | nên có | card thuần chữ, không ảnh placeholder | |
 | Tiêu đề, link | title cộng URL từ slug | có | — | |
 | Mô tả ngắn | summary (cắt ở build) | có | — | |
-| Nhãn phụ | theo entity: attractionType, experienceType, tourFormat, starRating, eventType cộng startDate, articleType cộng author | tùy | ẩn | một nhãn, không nhồi |
+| Nhãn phụ | theo entity: attractionType, experienceType, tourFormat, starRating, eventType cộng startDate, articleType cộng author | tùy | ẩn | một nhãn, không nhồi. Nhãn phụ luôn lấy từ **field loại** (đơn trị), không lấy từ `category` — nhãn bộ `attraction-type` chỉ sống ở lối lọc §5.2 và trang term §5.4, không chen vào card (v2.4) |
 | Nhãn giá | prices.yaml qua bookingRef | chỉ entity thương mại | ẩn | "từ X" với lodging; giá trực tiếp với Experience, Tour; quyết định nền 3 |
 
 ### 5.2 Index nhánh entity (`/dia-danh/`, `/diem-tham-quan/`, `/trai-nghiem/`, `/khach-san/`, `/resort/`, `/tour/`, `/cam-nang/`)
@@ -290,7 +290,7 @@ Không gallery, highlights, faq (2.9). Không vùng giá (cấm mọi field giá
 |---|---|---|---|---|
 | Tiêu đề, mô tả nhánh | config (build) theo ngôn ngữ | có | — | không phải field entity nào |
 | Lưới card | mọi entity publish cùng _type, card 5.1 | có | nhánh 0 entity không sinh trang index (quyết định nền 4) | phase 1 hiện tất, chưa phân trang (05 mục 1.1) |
-| Lối lọc theo term | các term có trang (R2) của nhánh | chỉ `/trai-nghiem/` và `/tour/` | ẩn khi chưa term nào đủ R2 | link tới trang term, không phải filter client |
+| Lối lọc theo term | các term có trang (R2) của nhánh | chỉ `/trai-nghiem/`, `/tour/` và `/diem-tham-quan/` (v2.4) | ẩn khi chưa term nào đủ R2 | link tới trang term, không phải filter client. Với `/diem-tham-quan/`, term lấy từ bộ `attraction-type` (01 §2.13) — đây là **nhãn**, không phải `attractionType`; hai thứ khác vai, xem dòng "Nhãn loại entity" ở §3.1 |
 | JSON-LD | CollectionPage cộng ItemList | có | — | I6 |
 
 Thứ tự sắp xếp card là trình bày, Design quyết ở bước 7; dữ liệu đủ cho mọi lựa chọn (publishedAt, updatedAt, title, startDate với Event).
@@ -306,13 +306,13 @@ Cấu trúc như 5.2, khác nguồn lưới card:
 | `/di-lai/` | `article` có `articleType = transport-guide` publish | card dùng nhãn phụ author; hub mỏng nhất phase 1 |
 | `/tat-ca/` | mọi entity đang bật, publish | trang gom toàn bộ; **không** hiện ở lưới hub trang chủ (`navHubs` loại `hub-all`) |
 
-### 5.4 Term listing (`/trai-nghiem/{term}`, `/tour/{term}`)
+### 5.4 Term listing (`/trai-nghiem/{term}`, `/tour/{term}`, `/diem-tham-quan/{term}`)
 
 | Vùng giao diện | Dữ liệu nuôi | Bắt buộc? | Khi rỗng thì hiện gì | Ghi chú |
 |---|---|---|---|---|
 | Tiêu đề | Category.name | có (gate 2.13) | — | |
 | Đoạn định nghĩa | Category.description | có (gate 2.13) | — | meta sinh từ đây (2.13) |
-| Lưới card | rollup (build): entity publish trỏ term qua experienceType hoặc category | có ≥1 (R2) | trang không sinh khi 0 entity (R2), không có trạng thái rỗng | |
+| Lưới card | rollup (build): entity publish trỏ term qua experienceType hoặc category | có ≥1 (R2) | trang không sinh khi 0 entity (R2), không có trạng thái rỗng | với `/diem-tham-quan/{term}` là Attraction trỏ term qua `category` |
 | JSON-LD | CollectionPage cộng ItemList cộng DefinedTerm | có | — | additionalType từ Category.sameAs khi có |
 
 ### 5.5 Index sự kiện `/su-kien/`

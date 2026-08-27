@@ -54,8 +54,12 @@ const PRICE_FIELD_NAMES = /^(price|gia|cost|fee|rate|fare|charge|tien|phi|money)
 const ALLOWED_NUMBER_FIELDS = new Set(['starRating', 'numberOfRooms', 'landArea', 'maxPax'])
 const PRICE_TEXT_PATTERN = /(\d{1,3}(?:[.,]\d{3})+\s*(?:đ|d|vnđ|k|VND|VNĐ)|\d+\s*(?:đồng|ngàn|nghìn|triệu|tiền))/i
 const COMMERCIAL_TYPES = new Set(['experience', 'tour', 'hotel', 'resort', 'attraction', 'event'])
+// I2 ba nhánh (01-CONTENT_MODEL §2.3 v1.0.19, QĐ-2026-08-27-03).
+// Hợp ba tập PHẢI phủ đúng enum attractionType: giá trị rơi ra ngoài cả ba không
+// phải "được cho phép" mà là "không được kiểm".
 const VENUE_ATTRACTION_TYPES = new Set(['theme-park', 'aquarium', 'mud-spa', 'market', 'park'])
 const ENCYCLOPEDIC_ATTRACTION_TYPES = new Set(['historic', 'temple', 'church', 'museum'])
+const EITHER_SOURCE_ATTRACTION_TYPES = new Set(['beach', 'island', 'nature', 'craft-village', 'general'])
 const VALID_PROVENANCE = new Set(['human', 'ai-t1', 'mixed'])
 // Denylist hẹp, tường minh: giá trị approvedBy giống tên role của API token,
 // không phải tên người duyệt thật (audit V3, ADR-0008 Hệ quả). So khớp đã trim +
@@ -107,6 +111,11 @@ export function checkI2(doc: any): Violation[] {
     } else if (VENUE_ATTRACTION_TYPES.has(atype)) {
       if (!doc.officialSource) {
         errors.push(`${doc._id}: Attraction (${atype}) venue thiếu officialSource (I2)`)
+      }
+    } else if (EITHER_SOURCE_ATTRACTION_TYPES.has(atype)) {
+      const hasSameAs = Array.isArray(doc.sameAs) && doc.sameAs.length > 0
+      if (!hasSameAs && !doc.officialSource) {
+        errors.push(`${doc._id}: Attraction (${atype}) thiếu cả sameAs lẫn officialSource — cần ít nhất một (I2)`)
       }
     }
   }

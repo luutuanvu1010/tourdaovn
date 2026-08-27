@@ -10,37 +10,63 @@ import {
 } from './utils'
 
 /**
- * Bảng map attractionType → @type cụ thể (type thứ hai trong mảng).
- * Type đầu tiên luôn là TouristAttraction.
+ * Bảng map attractionType → @type (01-CONTENT_MODEL §2.3 v1.0.19, bảng map ĐÓNG).
+ *
+ * Cùng hình dạng với PLACE_TYPE_MAP ở serialize/place.ts: `{type, additionalType}`.
+ * Hai giá trị cuối phát @type ĐƠN — schema.org không có type sạch cho chúng, và
+ * lặp TouristAttraction hai lần trong mảng là tín hiệu rỗng chứ không phải tín hiệu
+ * yếu. Trước v1.0.19 fallback `?? 'TouristAttraction'` tạo đúng mảng lặp đó trên
+ * 17/39 trang; nay giá trị lạ hoặc trống rơi về nhánh `general` bên dưới.
  */
-const ATTRACTION_TYPE_MAP: Record<string, string> = {
-  historic: 'LandmarksOrHistoricalBuildings',
-  temple: 'BuddhistTemple',
-  church: 'Church',
-  museum: 'Museum',
-  'theme-park': 'AmusementPark',
-  aquarium: 'Aquarium',
-  'mud-spa': 'DaySpa',
-  market: 'ShoppingCenter',
-  park: 'Park'
+const ATTRACTION_TYPE_MAP: Record<string, { type: string | string[]; additionalType?: string }> = {
+  historic: { type: ['TouristAttraction', 'LandmarksOrHistoricalBuildings'] },
+  temple: { type: ['TouristAttraction', 'BuddhistTemple'] },
+  church: { type: ['TouristAttraction', 'Church'] },
+  museum: { type: ['TouristAttraction', 'Museum'] },
+  beach: { type: ['TouristAttraction', 'Beach'] },
+  island: { type: ['TouristAttraction', 'Landform'], additionalType: 'https://www.wikidata.org/wiki/Q23442' },
+  nature: { type: ['TouristAttraction', 'Landform'] },
+  'theme-park': { type: ['TouristAttraction', 'AmusementPark'] },
+  aquarium: { type: ['TouristAttraction', 'Aquarium'] },
+  'mud-spa': { type: ['TouristAttraction', 'DaySpa'] },
+  market: { type: ['TouristAttraction', 'ShoppingCenter'] },
+  park: { type: ['TouristAttraction', 'Park'] },
+  'craft-village': { type: 'TouristAttraction' },
+  general: { type: 'TouristAttraction' }
 }
+
+/** Bộ term làm NHÃN cho Attraction — nguồn additionalType phụ (01 §2.13). */
+const ATTRACTION_LABEL_TERM_SET = 'attraction-type'
 
 /**
  * Serialize Attraction → JSON-LD [TouristAttraction, <type cụ thể>].
  *
- * Gate chia hai nhóm:
- * - Nhóm bách khoa (historic, temple, church, museum): bắt buộc sameAs
- * - Nhóm venue (theme-park, aquarium, mud-spa, market, park): bắt buộc geo + address + officialSource
+ * Gate chia BA nhóm (I2, 01 §2.3 v1.0.19):
+ * - Bách khoa (historic, temple, church, museum): bắt buộc sameAs
+ * - Venue (theme-park, aquarium, mud-spa, market, park): bắt buộc officialSource
+ * - Một trong hai (beach, island, nature, craft-village, general): ít nhất một trong hai
  */
 export function attractionToJsonLd(
   attraction: AttractionResult,
   baseUrl: string,
   lang?: Lang
 ): Record<string, unknown> {
-  const specificType = ATTRACTION_TYPE_MAP[attraction.attractionType] ?? 'TouristAttraction'
-  const types = ['TouristAttraction', specificType]
+  const mapped = ATTRACTION_TYPE_MAP[attraction.attractionType] ?? ATTRACTION_TYPE_MAP.general
 
-  const ld = ldRoot(baseUrl, types, 'attraction', attraction.slug, lang)
+  const ld = ldRoot(baseUrl, mapped.type, 'attraction', attraction.slug, lang)
+
+  // additionalType: QID của chính loại (island) cộng QID của các NHÃN thuộc bộ
+  // attraction-type. Term không có sameAs thì bỏ qua — cấm phát property rỗng (§5.1, I6).
+  const additional = [
+    ...(mapped.additionalType ? [mapped.additionalType] : []),
+    ...(attraction.category ?? [])
+      .filter(c => c?.inDefinedTermSet === ATTRACTION_LABEL_TERM_SET)
+      .map(c => c?.sameAs)
+      .filter((u): u is string => typeof u === 'string' && u !== '')
+  ]
+  const uniqueAdditional = [...new Set(additional)]
+  if (uniqueAdditional.length === 1) ld['additionalType'] = uniqueAdditional[0]
+  else if (uniqueAdditional.length > 1) ld['additionalType'] = uniqueAdditional
 
   // name
   ld['name'] = attraction.title

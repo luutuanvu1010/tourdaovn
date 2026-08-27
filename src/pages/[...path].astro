@@ -7,6 +7,16 @@ import type { Lang } from '../lib/types'
 // Disambiguation term vs detail: quyết ngay tại đây qua props.kind, không đoán ở render.
 // Detail path sinh từ fetchAllSlugs (entity), term path sinh từ fetchAllTerms (Category).
 // R1 (04 §1c) bảo đảm không trùng slug trong cùng nhánh; term hiện hoãn (B8.6.5 phiếu nợ).
+
+// Bộ term → nhánh entity mà trang term sống chung (05-URL_MAP mục 4).
+// PHẢI là bảng, không phải phép nhị phân: trước v1.0.19 chỗ này là
+// `inDefinedTermSet === 'experience-type' ? 'experience' : 'tour'`, nên bộ thứ ba
+// sẽ mọc nhầm dưới /tour/ mà không báo gì. Bộ lạ thì bỏ qua, không đoán.
+const TERM_SET_ENTITY: Record<string, string> = {
+  'experience-type': 'experience',
+  'tour-type': 'tour',
+  'attraction-type': 'attraction',
+}
 export async function getStaticPaths() {
   const lang: Lang = 'vi'
 
@@ -52,7 +62,8 @@ export async function getStaticPaths() {
   }
 
   for (const t of terms) {
-    const entityType = t.inDefinedTermSet === 'experience-type' ? 'experience' : 'tour'
+    const entityType = TERM_SET_ENTITY[t.inDefinedTermSet]
+    if (!entityType) continue
     const entry = ROUTE_MAP.find(r => r.entity === entityType)
     if (!entry) continue
     const path = `${entry.segments[lang]}/${t.slug}`
