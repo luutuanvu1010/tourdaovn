@@ -1,5 +1,5 @@
-import { ROUTE_MAP } from './routes'
-import { fetchAllDestinationSlugs, fetchAllSlugs, fetchAllTerms } from './sanity'
+import { ROUTE_MAP, TERM_SET_ENTITY } from './routes'
+import { fetchAllDestinationSlugs, fetchAllSlugs, fetchAllTerms, fetchUsedAttractionTermSlugs } from './sanity'
 import type { Lang } from './types'
 import { langs, publishedDevPages, staticPages } from '../site.config'
 
@@ -65,9 +65,10 @@ export async function buildSitemapPaths(lang: Lang): Promise<string[]> {
     paths.add(withTrailingSlash(`${langPrefix(lang)}/${page}`))
   }
 
-  const [slugs, terms] = await Promise.all([
+  const [slugs, terms, usedAttractionTerms] = await Promise.all([
     fetchAllSlugs(lang),
     fetchAllTerms(lang),
+    fetchUsedAttractionTermSlugs(),
   ])
 
   for (const item of slugs) {
@@ -76,8 +77,13 @@ export async function buildSitemapPaths(lang: Lang): Promise<string[]> {
     paths.add(withTrailingSlash(`${langPrefix(lang)}/${route.segments[lang]}/${item.slug}`))
   }
 
+  // Cùng nguồn ánh xạ với [...path].astro (TERM_SET_ENTITY ở routes.ts) và cùng luật
+  // R2. Hai nơi này PHẢI khớp nhau từng đường: lệch một chút là sitemap phát URL ma
+  // (R4) hoặc bỏ sót trang có thật (R3).
   for (const term of terms) {
-    const entity = term.inDefinedTermSet === 'experience-type' ? 'experience' : 'tour'
+    const entity = TERM_SET_ENTITY[term.inDefinedTermSet]
+    if (!entity) continue
+    if (term.inDefinedTermSet === 'attraction-type' && !usedAttractionTerms.has(term.slug)) continue
     const route = ROUTE_MAP.find((r) => r.entity === entity)
     if (!route) continue
     paths.add(withTrailingSlash(`${langPrefix(lang)}/${route.segments[lang]}/${term.slug}`))

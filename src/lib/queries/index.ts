@@ -8,7 +8,7 @@ export { touristDestinationBySlugQuery, otherDestinationsQuery, allDestinationsQ
 export { placeBySlugQuery, allPlacesQuery, placesContainedInQuery, nearbyForPlaceQuery } from './place'
 
 // B8.5.2 — Entity phức tạp
-export { attractionBySlugQuery, allAttractionsQuery, nearbyAttractionsQuery } from './attraction'
+export { attractionBySlugQuery, allAttractionsQuery, nearbyAttractionsQuery, attractionsByTermQuery } from './attraction'
 export { experienceBySlugQuery, experiencesByVenueQuery, allExperiencesQuery, experiencesByTypeQuery, nearbyExperiencesQuery } from './experience'
 export { restaurantBySlugQuery, allRestaurantsQuery, restaurantsBySpecialtyQuery, nearbyRestaurantsQuery } from './restaurant'
 export { specialtyBySlugQuery, allSpecialtiesQuery, nearbyForSpecialtyQuery } from './specialty'

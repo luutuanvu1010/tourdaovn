@@ -424,3 +424,38 @@ Doc `approved` nhưng thiếu `slug.vi` nên không render ra trang nào. Chủ 
 
 Đây là việc **sinh một URL mới** trên site, không phải sửa dữ liệu thuần, nên ghi lại rõ ở đây
 thay vì để lẫn trong bảng migration.
+
+
+## 18. Bật `hasTerm` để lộ ra một nguồn sự thật thứ hai (2026-08-27)
+
+Bật `hasTerm: true` cho nhánh Attraction làm nổ ra ba lỗi liên hoàn, đều từ **một** gốc:
+ánh xạ "bộ term → nhánh entity" bị **chép hai bản**, cả hai đều là phép nhị phân
+`inDefinedTermSet === 'experience-type' ? 'experience' : 'tour'`.
+
+| Nơi | Hậu quả khi có bộ thứ ba | Cổng bắt được |
+|---|---|---|
+| `[...path].astro` | 11 nhãn điểm tham quan mọc thành trang rỗng, không JSON-LD | không cổng nào — tôi tự phát hiện lúc đếm trang |
+| `sitemap.ts` | 11 URL ma `/tour/{nhãn}/` vào sitemap | **R4** |
+| (hệ quả) một bản dựng tự động đã kịp phát chúng ra production | gỡ đi thì URL biến mất khỏi sitemap cũ | **R3** |
+
+`RouteDispatch.astro` cũng chỉ có nhánh term cho `experience` và `tour`, nên trang
+Attraction rơi qua mọi nhánh và render rỗng mà không báo lỗi.
+
+**Đã sửa ba việc:**
+
+1. `TERM_SET_ENTITY` chuyển về `routes.ts` làm **nguồn duy nhất**; `[...path].astro` và
+   `sitemap.ts` cùng import. Bộ lạ trả `undefined` → bỏ qua, không đoán.
+2. `attractionsByTermQuery` + nhánh `attraction` trong `RouteDispatch`. Attraction trỏ term
+   qua mảng `category` đa trị nên lọc bằng bộ lọc mảng, khác `experienceType` một ref.
+3. **R2 cưỡng chế hai lưới**: lọc lúc sinh đường dẫn (`fetchUsedAttractionTermSlugs`) và
+   lưới thứ hai ở `RouteDispatch` (0 mục → `notFound`). Chỉ áp cho bộ `attraction-type`:
+   siết ngược lên hai bộ cũ là xoá URL đang chạy, đó là việc của R3 và phải có bản đồ
+   chuyển hướng riêng, không phải hệ quả phụ của đợt này.
+
+11 URL ma đã có redirect 301 trong `public/_redirects` về `/diem-tham-quan/` — chúng là
+URL **sai**, không phải URL tạm, nên 301 chứ không 302.
+
+**Bài học lặp lại lần thứ hai trong đợt này:** `astro check` xanh không nói gì về việc dựng
+thật. Lỗi `TERM_SET_ENTITY is not defined` (§14) và toàn bộ mục này đều chỉ lộ ra khi chạy
+`npm run build` rồi soi `dist/`. Cổng R3/R4 làm đúng việc của nó — bắt được thứ mà kiểm kiểu
+và test đơn vị đều không thấy.

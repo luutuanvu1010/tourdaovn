@@ -1,7 +1,7 @@
 ---
 import RouteDispatch from '../components/RouteDispatch.astro'
-import { fetchAllSlugs, scanTerms, fetchAllDestinationSlugs } from '../lib/sanity'
-import { ROUTE_MAP, assertNavTargetsExist, assertNavTermsHaveSlug, reportTermSlugGaps } from '../lib/routes'
+import { fetchAllSlugs, scanTerms, fetchAllDestinationSlugs, fetchUsedAttractionTermSlugs } from '../lib/sanity'
+import { ROUTE_MAP, TERM_SET_ENTITY, assertNavTargetsExist, assertNavTermsHaveSlug, reportTermSlugGaps } from '../lib/routes'
 import type { Lang } from '../lib/types'
 
 // Disambiguation term vs detail: quyết ngay tại đây qua props.kind, không đoán ở render.
@@ -11,23 +11,11 @@ import type { Lang } from '../lib/types'
 export async function getStaticPaths() {
   const lang: Lang = 'vi'
 
-  // Bộ term → nhánh entity mà trang term sống chung (05-URL_MAP mục 4).
-  // PHẢI là bảng, không phải phép nhị phân: trước v1.0.19 chỗ này là
-  // `inDefinedTermSet === 'experience-type' ? 'experience' : 'tour'`, nên bộ thứ ba
-  // sẽ mọc nhầm dưới /tour/ mà không báo gì. Bộ lạ thì bỏ qua, không đoán.
-  //
-  // Khai BÊN TRONG getStaticPaths, không phải ở frontmatter: Astro tách hàm này ra
-  // module riêng lúc dựng, nên hằng ở phạm vi component KHÔNG tồn tại ở đây —
-  // `astro check` xanh mà build đỏ "TERM_SET_ENTITY is not defined".
-  const TERM_SET_ENTITY: Record<string, string> = {
-    'experience-type': 'experience',
-    'tour-type': 'tour',
-    'attraction-type': 'attraction',
-  }
 
-  const [slugs, termScan] = await Promise.all([
+  const [slugs, termScan, usedAttractionTerms] = await Promise.all([
     fetchAllSlugs(lang),
     scanTerms(),
+    fetchUsedAttractionTermSlugs(),
   ])
   const terms = termScan.terms
 
@@ -69,6 +57,10 @@ export async function getStaticPaths() {
   for (const t of terms) {
     const entityType = TERM_SET_ENTITY[t.inDefinedTermSet]
     if (!entityType) continue
+    // R2: nhãn chưa có Attraction nào mang thì trang term CHƯA tồn tại — không phải
+    // gãy link, chỉ là chưa mọc. Tuyển từ vựng trước, trang tự mọc khi có dữ liệu
+    // (completeness over coverage). Chỉ áp cho bộ mới, xem chú thích ở fetchUsedAttractionTermSlugs.
+    if (t.inDefinedTermSet === 'attraction-type' && !usedAttractionTerms.has(t.slug)) continue
     const entry = ROUTE_MAP.find(r => r.entity === entityType)
     if (!entry) continue
     const path = `${entry.segments[lang]}/${t.slug}`

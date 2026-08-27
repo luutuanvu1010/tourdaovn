@@ -21,6 +21,22 @@ const DECLARED_KEYS = new Set<string>([
   ...Object.keys(HUB_FLAGS),
 ])
 
+/**
+ * Bộ term (Category.inDefinedTermSet) → nhánh entity mà trang term sống chung.
+ * 05-URL_MAP mục 4: term listing phẳng, cùng nhánh với entity tương ứng.
+ *
+ * Nguồn DUY NHẤT của ánh xạ này. Trước v1.0.19 nó là một phép nhị phân
+ * `inDefinedTermSet === 'experience-type' ? 'experience' : 'tour'` được CHÉP HAI BẢN
+ * ở `[...path].astro` và `sitemap.ts`; thêm bộ thứ ba làm cả hai nơi đẩy nhãn điểm
+ * tham quan xuống `/tour/` — nơi sinh trang thì mọc trang rác, nơi sinh sitemap thì
+ * phát URL ma (R4 bắt được 11 cái). Bộ lạ trả về undefined: bỏ qua, không đoán.
+ */
+export const TERM_SET_ENTITY: Record<string, string> = {
+  'experience-type': 'experience',
+  'tour-type': 'tour',
+  'attraction-type': 'attraction',
+}
+
 export interface RouteEntry {
   entity: string
   segments: Record<Lang, string>

@@ -52,6 +52,27 @@ export function attractionBySlugQuery(lang: string): string {
   }`
 }
 
+/**
+ * Rollup trang term `/diem-tham-quan/{term}` — Attraction trỏ tới term qua `category`.
+ *
+ * Khác Experience và Tour: chúng có field phân loại RIÊNG (`experienceType`), còn Attraction
+ * dùng mảng `category` đa trị, nên lọc bằng `references()` chứ không so sánh một ref.
+ * Chỉ nhận term thuộc bộ `attraction-type` — nhãn của bộ khác lọt vào đây là sai vai (01 §2.13).
+ */
+export function attractionsByTermQuery(lang: string): string {
+  return `*[_type == "attraction" && reviewStatus == "approved"
+    && count(category[@->slug.current == $slug && @->inDefinedTermSet == "attraction-type"]) > 0
+  ] | order(title.${lang} asc) {
+    _id, _type,
+    "title": title.${lang},
+    "slug": slug.${lang}.current,
+    "summary": summary.${lang},
+    ${mainImageFragment()},
+    attractionType,
+    isAccessibleForFree
+  }`
+}
+
 export function allAttractionsQuery(lang: string): string {
   return `*[_type == "attraction" && reviewStatus == "approved"] | order(title.${lang} asc) {
     _id, _type,

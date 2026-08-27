@@ -239,6 +239,24 @@ export async function scanTerms(): Promise<TermScan> {
   }
 }
 
+/**
+ * R2 (05-URL_MAP mục 9): trang term chỉ sinh khi có ít nhất một entity publish trỏ tới.
+ * Trả về slug của các term bộ `attraction-type` ĐÃ có Attraction approved trỏ vào.
+ *
+ * Chỉ áp cho bộ mới. Hai bộ `experience-type` và `tour-type` giữ nguyên hành vi cũ:
+ * siết R2 ngược lên chúng là xoá URL đang chạy và đang được lập chỉ mục — đó là việc
+ * của R3, phải có bản đồ chuyển hướng, không phải hệ quả phụ của đợt này.
+ */
+export async function fetchUsedAttractionTermSlugs(): Promise<Set<string>> {
+  const c = getClient()
+  const rows = await c.fetch<string[]>(
+    `*[_type == "category" && inDefinedTermSet == "attraction-type"
+       && count(*[_type == "attraction" && reviewStatus == "approved" && references(^._id)]) > 0
+     ].slug.current`
+  )
+  return new Set((rows ?? []).filter(Boolean))
+}
+
 export async function fetchAllTerms(_lang: string): Promise<TermEntry[]> {
   return (await scanTerms()).terms
 }

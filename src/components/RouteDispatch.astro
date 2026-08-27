@@ -53,7 +53,7 @@ import {
   allHotelsQuery, allResortsQuery, allToursQuery, allEventsQuery, allArticlesQuery,
   allPersonsQuery, allOrganizationsQuery,
   allExperiencesQuery, categoriesBySetQuery, categoryBySlugQuery,
-  experiencesByTypeQuery, toursByTypeQuery,
+  experiencesByTypeQuery, toursByTypeQuery, attractionsByTermQuery,
   nearbyForPlaceQuery, nearbyAttractionsQuery, nearbyExperiencesQuery,
   nearbyRestaurantsQuery, nearbyHotelsQuery, nearbyResortsQuery,
   nearbyToursQuery, nearbyEventsQuery, nearbyArticlesQuery,
@@ -361,15 +361,29 @@ if (kind === 'detail') {
   } else {
     notFound = true
   }
-} else if (kind === 'term' && slug && (entity === 'experience' || entity === 'tour')) {
+} else if (kind === 'term' && slug && (entity === 'experience' || entity === 'tour' || entity === 'attraction')) {
   alternates = routeAlternates(entity, slug)
   termData = await client.fetch(categoryBySlugQuery(lang), { slug })
   if (!termData) {
     notFound = true
   } else {
-    const q = entity === 'experience' ? experiencesByTypeQuery(lang) : toursByTypeQuery(lang)
+    // Attraction trỏ term qua mảng `category` đa trị, không qua field phân loại riêng
+    // như experienceType — nên có truy vấn riêng dùng bộ lọc trên mảng.
+    const q = entity === 'experience'
+      ? experiencesByTypeQuery(lang)
+      : entity === 'tour'
+        ? toursByTypeQuery(lang)
+        : attractionsByTermQuery(lang)
     const all = (await client.fetch<any[]>(q, { slug, lang })) ?? []
-    termEntities = toListings(all)
+    // R2 (05-URL_MAP mục 9): term chưa có entity nào trỏ tới thì trang KHÔNG tồn tại.
+    // Chỉ áp cho nhánh attraction: hai bộ term cũ đã có URL đang chạy, siết ngược lại
+    // là xoá trang đang sống, vi phạm R3. Đây là lưới thứ hai; lưới thứ nhất lọc ngay
+    // lúc sinh đường dẫn ở [...path].astro.
+    if (entity === 'attraction' && all.length === 0) {
+      notFound = true
+    } else {
+      termEntities = toListings(all)
+    }
   }
 } else if (kind === 'destination' && slug) {
   alternates = destinationAlternates(slug)

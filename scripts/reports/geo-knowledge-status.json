@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-08-27T08:40:38.451Z",
+  "generatedAt": "2026-08-27T09:05:26.308Z",
   "status": "pass",
   "summary": {
     "files": {
@@ -11,10 +11,10 @@
       "/ai/graph.json": "present",
       "/ai/reading-guide.json": "present"
     },
-    "totalEntities": 125,
+    "totalEntities": 127,
     "entityTypes": {
       "article": 21,
-      "attraction": 41,
+      "attraction": 43,
       "experience": 9,
       "hotel": 10,
       "organization": 3,
@@ -24,20 +24,20 @@
       "touristDestination": 2
     },
     "urlsByLanguage": {
-      "vi": 125
+      "vi": 127
     },
     "aiCoverageRatio": 1,
     "sitemapCoverageRatio": 1,
     "graph": {
-      "nodes": 125,
-      "edges": 176,
+      "nodes": 127,
+      "edges": 177,
       "danglingEdges": 0,
-      "orphanNodes": 25,
+      "orphanNodes": 26,
       "relations": {
         "author": 21,
         "about": 14,
         "mentions": 16,
-        "containedInPlace": 34,
+        "containedInPlace": 35,
         "venue": 8,
         "itineraryStop": 60,
         "operator": 23
@@ -45,7 +45,7 @@
     },
     "readiness": {
       "missingSource": 79,
-      "missingSameAs": 79,
+      "missingSameAs": 80,
       "commercialMissingBookingOrFreeFlag": 67,
       "missingLanguages": 0,
       "staleFiles": []
@@ -910,6 +910,22 @@
       "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;0ed0c632-14fc-481e-90ca-7433b898cdec"
     },
     {
+      "id": "d67f230e-1d45-490a-ba5f-8dd906671d06",
+      "type": "attraction",
+      "title": "Núi Cô Tiên",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/nui-co-tien/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;d67f230e-1d45-490a-ba5f-8dd906671d06"
+    },
+    {
       "id": "017c7164-9fe9-4f1e-881f-bb746996c20d",
       "type": "attraction",
       "title": "Rừng thông Khánh Sơn",
@@ -1036,6 +1052,22 @@
       "hasSameAs": true,
       "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;ccd81421-ee55-47d4-8d90-7d4f7568b7f9"
+    },
+    {
+      "id": "94851d92-87f9-4a29-bfe2-65d78e8b7414",
+      "type": "attraction",
+      "title": "Vịnh Ninh Vân",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/vinh-ninh-van/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;94851d92-87f9-4a29-bfe2-65d78e8b7414"
     },
     {
       "id": "b082a0d1-09f5-4c62-a71d-e3185ffc6f1c",

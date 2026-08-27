@@ -45,3 +45,24 @@
 # chú lại làm dấu vết, không xoá hẳn.
 
 #/    https://tourdaonhatrang.com/    302
+
+# ── 2026-08-27: dọn 11 URL ma dưới /tour/ do lỗi định tuyến term (QĐ-2026-08-27-03) ──
+# Khi mở bộ term `attraction-type`, cả `[...path].astro` lẫn `sitemap.ts` còn dùng phép
+# nhị phân "không phải experience-type thì là tour", nên 11 nhãn điểm tham quan bị đẩy
+# xuống /tour/. Một bản dựng tự động đã kịp phát chúng vào sitemap production trước khi
+# lỗi được sửa. Nay ánh xạ gom về `TERM_SET_ENTITY` ở routes.ts và các URL này biến mất.
+#
+# 301 chứ không phải 302: chúng là URL SAI, không phải URL tạm — không có ý định trả lại.
+# Đích là trang danh sách điểm tham quan, nơi các nhãn này thực sự thuộc về.
+# Gỡ được sau khi Google thôi ghé (kiểm bằng Search Console), không có hạn cứng.
+/tour/dao/                      /diem-tham-quan/    301
+/tour/bien/                     /diem-tham-quan/    301
+/tour/di-tich-lich-su/          /diem-tham-quan/    301
+/tour/chua-va-tam-linh/         /diem-tham-quan/    301
+/tour/cong-vien-khu-vui-choi/   /diem-tham-quan/    301
+/tour/bao-tang-van-hoa/         /diem-tham-quan/    301
+/tour/thien-nhien-sinh-thai/    /diem-tham-quan/    301
+/tour/cho-va-am-thuc/           /diem-tham-quan/    301
+/tour/diem-check-in/            /diem-tham-quan/    301
+/tour/trai-nghiem-du-lich/      /diem-tham-quan/    301
+/tour/khu-nghi-duong/           /diem-tham-quan/    301
