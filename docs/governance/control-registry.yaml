@@ -233,15 +233,21 @@ controls:
     gap_id: ND-005
     evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục I15 khi ND-005 trả xong"
 
+  # Sửa gap → deferred 2026-08-27 (QĐ-2026-08-27-02). Khai `gap` là SAI SỰ THẬT:
+  # I16 không phải nợ chưa làm, nó là quyết định kiến trúc về NƠI thi hành.
+  # `04-CONSTRAINTS` §1 dòng I16 ghi rõ "thi hành ở bảng PY (PY1, PY2, PY4)", và
+  # `validate-constraints` báo I16 là `defer`, không phải `fail`. Đúng định nghĩa
+  # `deferred` trong ValidatorResult: "Enforce thật sống ở nơi khác... quyết định
+  # kiến trúc về NƠI enforce, không phải nợ chưa làm."
   - id: I16
     source: docs/core-specs/04-CONSTRAINTS.md#I16
     level: fail
     stage: pre-build
     executor: scripts/validators/i1-i19.ts
     pipeline: prebuild-validate
-    status: gap
-    gap_id: ND-005
-    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục I16 khi ND-005 trả xong"
+    status: deferred
+    deferred_to: [PY1, PY2, PY4]
+    evidence: scripts/reports/validator-status.json
 
   - id: I17
     source: docs/core-specs/04-CONSTRAINTS.md#I17
@@ -299,25 +305,31 @@ controls:
   # ── Toàn vẹn nguồn giá PY1–PY8 ─────────────────────────────────────────────
   # Nguồn: 04-CONSTRAINTS bảng PY, dòng 64–71. Thi hành: py1-py8.ts.
 
+  # Lật gap → live 2026-08-27 (QĐ-2026-08-27-02). Căn cứ: control này CHẠY THẬT và
+  # XANH — `validator-status.json` ghi `PY1: pass`. Đây KHÔNG phải lần lật 27 dòng `gap`
+  # mà phần đầu file đang treo chờ chủ dự án; chỉ lật đúng ba control mà `I16` uỷ thác
+  # sang, và cả ba đều đang pass. Khai `gap` cho một control đang chạy bị GA6 bắt.
   - id: PY1
     source: docs/core-specs/04-CONSTRAINTS.md#PY1
     level: fail
     stage: pre-build
     executor: scripts/validators/py1-py8.ts
     pipeline: prebuild-validate
-    status: gap
-    gap_id: ND-005
-    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục PY1 khi ND-005 trả xong"
+    status: live
+    evidence: scripts/reports/validator-status.json
 
+  # Lật gap → live 2026-08-27 (QĐ-2026-08-27-02). Căn cứ: control này CHẠY THẬT và
+  # XANH — `validator-status.json` ghi `PY2: pass`. Đây KHÔNG phải lần lật 27 dòng `gap`
+  # mà phần đầu file đang treo chờ chủ dự án; chỉ lật đúng ba control mà `I16` uỷ thác
+  # sang, và cả ba đều đang pass. Khai `gap` cho một control đang chạy bị GA6 bắt.
   - id: PY2
     source: docs/core-specs/04-CONSTRAINTS.md#PY2
     level: fail
     stage: pre-build
     executor: scripts/validators/py1-py8.ts
     pipeline: prebuild-validate
-    status: gap
-    gap_id: ND-005
-    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục PY2 khi ND-005 trả xong"
+    status: live
+    evidence: scripts/reports/validator-status.json
 
   - id: PY3
     source: docs/core-specs/04-CONSTRAINTS.md#PY3
@@ -329,15 +341,18 @@ controls:
     gap_id: ND-005
     evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục PY3 khi ND-005 trả xong"
 
+  # Lật gap → live 2026-08-27 (QĐ-2026-08-27-02). Căn cứ: control này CHẠY THẬT và
+  # XANH — `validator-status.json` ghi `PY4: pass`. Đây KHÔNG phải lần lật 27 dòng `gap`
+  # mà phần đầu file đang treo chờ chủ dự án; chỉ lật đúng ba control mà `I16` uỷ thác
+  # sang, và cả ba đều đang pass. Khai `gap` cho một control đang chạy bị GA6 bắt.
   - id: PY4
     source: docs/core-specs/04-CONSTRAINTS.md#PY4
     level: fail
     stage: pre-build
     executor: scripts/validators/py1-py8.ts
     pipeline: prebuild-validate
-    status: gap
-    gap_id: ND-005
-    evidence: "chưa có — sẽ là scripts/reports/validator-status.json mục PY4 khi ND-005 trả xong"
+    status: live
+    evidence: scripts/reports/validator-status.json
 
   - id: PY5
     source: docs/core-specs/04-CONSTRAINTS.md#PY5

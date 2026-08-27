@@ -1738,7 +1738,9 @@ Hệ quả: mục tiêu đã duyệt của ADR-0028 (*"Chủ dự án nhập m�
 
 ## DR-073 — Hook `pre-push` chặn mọi push vì hai cổng đỏ mà chính `main` cũng mắc
 
-**Trạng thái:** mở. Phát hiện 2026-08-27 khi push nhánh `feat-da-diem-den` sau lần gộp `origin/main`.
+**Trạng thái:** **thu hẹp còn một nửa 2026-08-27** (`QĐ-2026-08-27-02`). `deferred-gate` ĐÃ XANH — hai chỗ khai sai trong `control-registry.yaml` đã sửa (`I16` là `deferred` chứ không `gap`; `PY1`/`PY2`/`PY4` chạy thật và xanh nên là `live`). `npm run gate` từ 2/11 đỏ xuống **1/11**. **Còn `governance-post` (S24)** — sáu lỗi dữ liệu trên bốn trang, cần chủ dự án điền `approvedBy` / `contentProvenance` / nguồn hoặc tác giả; máy không được tự điền vì đó là bản ghi về việc con người đã duyệt và đã viết. Chừng nào chưa điền, push vẫn phải `--no-verify`. Danh sách chính xác bốn trang và field thiếu ghi ở `QĐ-2026-08-27-02`.
+
+Phát hiện 2026-08-27 khi push nhánh `feat-da-diem-den` sau lần gộp `origin/main`.
 
 `.githooks/pre-push` (dựng ở `DR-056`, vốn chưa từng chạy vì thiếu bit thực thi) nay chạy thật: nó gọi `npm run gate` và **huỷ push nếu bất kỳ cổng nào đỏ**. Ý định đúng — cổng sớm ở máy tốt hơn phát hiện muộn.
 
@@ -1775,4 +1777,8 @@ Nghĩa là **`main` cũng không tự push được qua chính hook của nó**.
 
 **Kiểm.** Chạy chính hàm đó trên mẫu thật của 11 type: `article`, `place`, `person`, `touristDestination`, `tour`, `hotel`, `organization` đều ra URL; `event`, `restaurant`, `specialty`, `category` trả `null` (nút không hiện) thay vì trỏ 404. Hai URL của document **đã duyệt** đối chiếu ngược vào `dist/`: `/cam-nang/tron-bo-cam-nang-ben-tau-…/` và `/dia-danh/ben-cang-da-chong/` đều tồn tại thật. Bundle Studio dựng lại không còn chuỗi `nha-hang`.
 
-**Nợ để lại.** `event` là entity có nội dung thật (1 document đã duyệt) nhưng **không có trang chi tiết nào** trong `ROUTE_MAP`. Nút không hiện là đúng với hiện trạng, nhưng câu hỏi thật — *Sự kiện có nên có trang riêng không* — chưa ai trả lời. Ghi ở đây để không rơi.
+**Đính chính 2026-08-27.** Bản đầu của mục này ghi *"câu hỏi thật — Sự kiện có nên có trang riêng không — chưa ai trả lời"*. **Sai.** Câu trả lời đã có sẵn trong `src/site.config.ts`, ngay trên ba công tắc đang tắt: *"Ba mục dưới thuộc engine gốc (site du lịch Nha Trang), site này không dùng. Code và schema vẫn còn để không gãy tham chiếu chéo."* `restaurant`, `specialty`, `event` **cố ý không có trang** — và `ROUTE_TABLE` cũng không có dòng nào cho chúng, nên bật công tắc thôi cũng không sinh ra route.
+
+Nghĩa là nút "Xem trang live" không hiện trên Event **là hành vi đúng**, không phải nợ. Bản sửa của mục này (suy segment từ `ROUTE_MAP`) tình cờ làm đúng ngay: type không có route thì trả `null`.
+
+**Nợ thật còn lại, nhỏ hơn nhiều:** dataset có **1 document `event` đã duyệt** cho một entity mà site cố ý không dùng. Dữ liệu chết, không hại gì, nhưng nó là lý do khiến tôi tưởng đây là câu hỏi mở. Xoá hay giữ là việc của chủ dự án.
