@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-08-27T00:05:00.782Z",
+  "generatedAt": "2026-08-27T08:32:12.650Z",
   "status": "pass",
   "summary": {
     "files": {
@@ -11,10 +11,10 @@
       "/ai/graph.json": "present",
       "/ai/reading-guide.json": "present"
     },
-    "totalEntities": 122,
+    "totalEntities": 125,
     "entityTypes": {
-      "article": 20,
-      "attraction": 39,
+      "article": 21,
+      "attraction": 41,
       "experience": 9,
       "hotel": 10,
       "organization": 3,
@@ -24,17 +24,17 @@
       "touristDestination": 2
     },
     "urlsByLanguage": {
-      "vi": 122
+      "vi": 125
     },
     "aiCoverageRatio": 1,
     "sitemapCoverageRatio": 1,
     "graph": {
-      "nodes": 122,
-      "edges": 174,
+      "nodes": 125,
+      "edges": 175,
       "danglingEdges": 0,
-      "orphanNodes": 25,
+      "orphanNodes": 27,
       "relations": {
-        "author": 19,
+        "author": 20,
         "about": 14,
         "mentions": 16,
         "containedInPlace": 34,
@@ -44,9 +44,9 @@
       }
     },
     "readiness": {
-      "missingSource": 78,
-      "missingSameAs": 78,
-      "commercialMissingBookingOrFreeFlag": 66,
+      "missingSource": 79,
+      "missingSameAs": 79,
+      "commercialMissingBookingOrFreeFlag": 67,
       "missingLanguages": 0,
       "staleFiles": []
     },
@@ -76,6 +76,22 @@
       "hasSameAs": false,
       "hasBookingOrFreeFlag": true,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/article;f82e13ae-d8e0-42b6-86a5-a9a56edf9122"
+    },
+    {
+      "id": "d0036276-0843-4f4d-9110-6b6037751dc9",
+      "type": "article",
+      "title": "Cano riêng hay tour ghép: Lựa chọn nào phù hợp hơn?",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/cano-rieng-hay-tour-ghep-lua-chon-nao-phu-hop-hon/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;d0036276-0843-4f4d-9110-6b6037751dc9"
     },
     {
       "id": "609586c0-b74e-4b49-8f2a-3c7168eb6189",
@@ -478,6 +494,22 @@
       "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;4c66c156-2395-44d8-a53e-f1c8c716dfe1"
     },
     {
+      "id": "599ba70f-ed24-424a-9750-91fc44fe2400",
+      "type": "attraction",
+      "title": "Chùa Từ Vân (Chùa Ốc)",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/chua-tu-van-chua-oc/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;599ba70f-ed24-424a-9750-91fc44fe2400"
+    },
+    {
       "id": "ecd003fa-a88d-48c1-841a-7bab79918257",
       "type": "attraction",
       "title": "Công viên giải trí VinWonders",
@@ -636,6 +668,22 @@
       "hasSameAs": false,
       "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;92ea5327-cdfe-456c-98a6-0b4618ad721e"
+    },
+    {
+      "id": "a3c02625-088f-4a20-b875-3f547bd5475f",
+      "type": "attraction",
+      "title": "Khu du lịch Đảo Khỉ (Hòn Lao)",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/khu-du-lich-dao-khi-hon-lao/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": false,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;a3c02625-088f-4a20-b875-3f547bd5475f"
     },
     {
       "id": "82d3b891-855d-4025-98a3-4288cf8a497e",

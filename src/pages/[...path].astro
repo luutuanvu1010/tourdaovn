@@ -8,17 +8,22 @@ import type { Lang } from '../lib/types'
 // Detail path sinh từ fetchAllSlugs (entity), term path sinh từ fetchAllTerms (Category).
 // R1 (04 §1c) bảo đảm không trùng slug trong cùng nhánh; term hiện hoãn (B8.6.5 phiếu nợ).
 
-// Bộ term → nhánh entity mà trang term sống chung (05-URL_MAP mục 4).
-// PHẢI là bảng, không phải phép nhị phân: trước v1.0.19 chỗ này là
-// `inDefinedTermSet === 'experience-type' ? 'experience' : 'tour'`, nên bộ thứ ba
-// sẽ mọc nhầm dưới /tour/ mà không báo gì. Bộ lạ thì bỏ qua, không đoán.
-const TERM_SET_ENTITY: Record<string, string> = {
-  'experience-type': 'experience',
-  'tour-type': 'tour',
-  'attraction-type': 'attraction',
-}
 export async function getStaticPaths() {
   const lang: Lang = 'vi'
+
+  // Bộ term → nhánh entity mà trang term sống chung (05-URL_MAP mục 4).
+  // PHẢI là bảng, không phải phép nhị phân: trước v1.0.19 chỗ này là
+  // `inDefinedTermSet === 'experience-type' ? 'experience' : 'tour'`, nên bộ thứ ba
+  // sẽ mọc nhầm dưới /tour/ mà không báo gì. Bộ lạ thì bỏ qua, không đoán.
+  //
+  // Khai BÊN TRONG getStaticPaths, không phải ở frontmatter: Astro tách hàm này ra
+  // module riêng lúc dựng, nên hằng ở phạm vi component KHÔNG tồn tại ở đây —
+  // `astro check` xanh mà build đỏ "TERM_SET_ENTITY is not defined".
+  const TERM_SET_ENTITY: Record<string, string> = {
+    'experience-type': 'experience',
+    'tour-type': 'tour',
+    'attraction-type': 'attraction',
+  }
 
   const [slugs, termScan] = await Promise.all([
     fetchAllSlugs(lang),
