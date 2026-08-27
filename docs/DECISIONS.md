@@ -1864,3 +1864,56 @@ Vòng duyệt cuối kiểm và kết luận không chặn gộp: test `evidence
 **Hệ quả phải biết.** Bản dựng tự động lấy mã từ **`origin/main`**, không phải từ nhánh đang làm. PR #11 chưa gộp, nên tới khi gộp, bấm Publish sẽ phát hành **hành vi của `main`**: có trang `/ninh-thuan/` (định tuyến đa điểm đến vốn đã có trên `main`), nhưng **chưa có** `/diem-den/` và hai khối trang chủ **chưa lọc** theo điểm đến.
 
 **Đã kiểm.** Đọc lại cấu hình từ server sau khi ghi, không tin phản hồi của chính lệnh ghi: `dataset: production`, `on: [create, update, delete]`, `isDisabledByUser: false`, `isDisabled: false`, `includeDrafts: false`, filter đúng như khai. **Chưa kiểm đầu Cloudflare** — deploy hook đó chạy được trước khi bị tắt, nhưng lần bắn thật đầu tiên mới xác nhận trọn chuỗi.
+
+---
+
+## QĐ-2026-08-27-02 — Đóng ba việc treo cuối đợt đa điểm đến
+
+**Ngày:** 2026-08-27 · **Người quyết:** chủ dự án (mục 1, 2 xác nhận lại quyết định đã có; mục 3 là đính chính sự kiện) · **Loại:** cửa hai chiều
+
+Cuối đợt `ADR-0028` còn ba việc treo. Rà lại thì **hai trong ba đã có câu trả lời từ trước** — chúng treo vì tôi ghi sai, không phải vì thiếu quyết định.
+
+### 1. Menu chính giữ đúng bảy mục — không thêm "Điểm đến"
+
+`src/site.config.ts` khai thành chữ: *"menu chính giữ đúng bảy mục bán hàng"*. Khi tôi nêu việc Ninh Thuận không có mặt trên menu, chủ dự án **chọn phương án khác** thay vì phá luật đó: đổi nút phụ ở hero từ "Xem trang điểm đến" thành **"Tất cả địa danh"** trỏ `/diem-den/`.
+
+Vậy `/diem-den/` có **ba** lối vào: nút hero, chân trang (tự sinh từ `ROUTE_MAP`), và khối "Điểm đến khác" trên trang chủ kèm link "Xem tất cả". Luật bảy mục giữ nguyên. Việc này **đóng**, không phải treo.
+
+### 2. Event cố ý không có trang — không phải câu hỏi mở
+
+`src/site.config.ts` đã ghi lý do ngay trên ba công tắc đang tắt: *"Ba mục dưới thuộc engine gốc (site du lịch Nha Trang), site này không dùng."* `restaurant`, `specialty`, `event` **không có dòng nào trong `ROUTE_TABLE`**, nên bật công tắc thôi cũng không sinh route.
+
+Nút "Xem trang live" không hiện trên Event **là hành vi đúng**. `DR-074` đã đính chính. Còn lại một nợ nhỏ: dataset có **1 document `event` đã duyệt** cho entity site không dùng — dữ liệu chết, xoá hay giữ là việc chủ dự án.
+
+### 3. `deferred-gate` — sửa hai chỗ khai sai trong `control-registry.yaml`
+
+**`I16` khai `gap` là sai sự thật.** I16 không phải nợ chưa làm; nó là quyết định kiến trúc về **nơi** thi hành. `04-CONSTRAINTS` §1 ghi rõ *"thi hành ở bảng PY (PY1, PY2, PY4)"*, và `validate-constraints` báo I16 là `defer`, không phải `fail`. Đổi thành `status: deferred` kèm `deferred_to: [PY1, PY2, PY4]` — đúng khuôn mà `deferred-gate` đòi.
+
+**`PY1`/`PY2`/`PY4` khai `gap` cũng sai.** Cả ba **chạy thật và xanh**: `validator-status.json` ghi `pass` cho từng cái. Lật sang `live`.
+
+⚠ **Đây KHÔNG phải lần lật 27 dòng `gap`** mà phần đầu `control-registry.yaml` đang treo chờ chủ dự án. Câu hỏi đó vẫn mở. Ở đây chỉ lật đúng **ba** control, và chỉ vì `I16` uỷ thác sang chúng — cả ba đều đang pass, nên không control nào chuyển đỏ. Lý do phải hỏi trước khi lật cả 27 (11 control đỏ vì dữ liệu) không áp cho ba cái này.
+
+**Kết quả đo được:**
+
+| | Trước | Sau |
+|---|---|---|
+| `npm run gate` | 2/11 đỏ | **1/11 đỏ** |
+| `audit:gate` | 40 đạt / 27 trượt | **46 đạt / 23 trượt** |
+| Mục trượt mới | — | **không có** |
+
+Bốn mục `GA6/I16`, `GA6/PY1`, `GA6/PY2`, `GA6/PY4` biến mất; `GA1`/`GA3` cho ba control vừa lật đều đạt.
+
+### Còn lại: `governance-post` (S24), và vì sao tôi KHÔNG tự đóng
+
+Sáu lỗi trên bốn trang, đều là **dữ liệu**:
+
+| Trang | Thiếu |
+|---|---|
+| `cam-nang/review-mini-beach-…` | `approvedBy`; và `officialSource` hoặc `author` |
+| `cam-nang/top-7-ngon-nui-…` | `approvedBy` (đã có tác giả Nguyễn Phạm Trường Duy) |
+| `dia-danh/ben-cang-da-chong` | `approvedBy`; và `officialSource` hoặc `author` |
+| `tac-gia/ho-dac-duy` | `contentProvenance` (đã có `approvedBy`) |
+
+**Tôi không tự điền.** `approvedBy` trong dataset này có **bốn giá trị khác nhau** — "Tour đảo Nha Trang", "Trường Duy", "Vũ Lưu", "Vũ Lưu (Gạo tẻ)" — tức nó ghi **tên người duyệt thật**, không phải một hằng máy suy được. `contentProvenance` và `author` cũng vậy: cả ba đều là lời khẳng định về **con người đã làm gì**. Máy điền vào đó là tạo ra một bản ghi thẩm quyền không có thật — đúng loại việc `04-CONSTRAINTS` sinh ra để chặn.
+
+Toàn dataset còn **7 document approved thiếu `approvedBy`** (4 cái ngoài danh sách trên chưa làm S24 đỏ vì chưa render ra trang chi tiết). Điền xong bảng trên là `governance-post` xanh, và `pre-push` (`DR-073`) thôi đòi `--no-verify`.
