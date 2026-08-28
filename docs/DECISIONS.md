@@ -2111,7 +2111,7 @@ Cái sai nằm chỗ khác: **một component, một nguồn chữ, hai hàng đ
 
 ## QĐ-2026-08-28-03 — Một định dạng Hero duy nhất cho mọi trang chi tiết entity
 
-**Bối cảnh.** Chủ dự án yêu cầu (2026-08-28) áp cùng một định dạng Hero cho tất cả entity type ở trang chi tiết. Yêu cầu đọc được theo hai nghĩa — đồng bộ **chiều cao**, hay đồng bộ **bố cục** (mosaic hay ảnh đơn) — nên đã hỏi lại trước khi làm. Chủ dự án chọn **cả hai**.
+**Bối cảnh.** Chủ dự án yêu cầu (2026-08-28) áp cùng một định dạng Hero cho tất cả entity type ở trang chi tiết. Yêu cầu đọc được theo hai nghĩa — đồng bộ **chiều cao**, hay đồng bộ **bố cục** (mosaic hay ảnh đơn) — nên đã hỏi lại trước khi làm. Chủ dự án chọn **cả hai**. *(Cùng ngày, sau khi xem số đo, chủ dự án chốt lại phần bố cục: dùng cơ chế fallback đã có sẵn thay vì ép mọi trang thành mosaic. Xem mục "Phần bố cục" bên dưới — đó mới là nội dung có hiệu lực.)*
 
 **Hiện trạng đo được trước khi sửa.**
 - Chiều cao: `QĐ-2026-08-28-02` vừa dựng biến thể `tall` cho riêng trang điểm đến (430px), trang chi tiết giữ 380px. Hai loại trang, hai chiều cao.
@@ -2123,19 +2123,50 @@ Cái sai nằm chỗ khác: **một component, một nguồn chữ, hai hàng đ
 
 Chưa thành vi phạm sống vì `sticky-bar__price` render trên **0 trang** — thanh dính hiện chỉ mang CTA. **Điều kiện bắt buộc: phải xét lại TRƯỚC khi vùng giá render trên bất kỳ trang nào.** Không xét lại thì ngày bật giá là ngày vi phạm Luật 3 trên toàn bộ trang chi tiết.
 
-**Phần bố cục — KHÔNG LÀM ĐƯỢC BẰNG MÃ, chặn ở dữ liệu và ở đặc tả.** "Luôn mosaic" đòi 4 ảnh gallery sau khi loại trùng `mainImage`. Đếm trên dataset production (2026-08-28, `reviewStatus == "approved"`):
+**Phần bố cục — CHỐT DÙNG CƠ CHẾ FALLBACK ĐÃ CÓ SẴN.** *(Sửa cùng ngày, sau khi chủ dự án xem số đo. Bản đầu của phiếu này ghi phần bố cục là "không làm được, chặn ở dữ liệu", kèm 17 + 30 document thành nợ phải nạp ảnh. Cách ghi đó SAI HƯỚNG: nó coi "luôn mosaic" là đích, trong khi đích thật là **khung hero đồng nhất**, còn ruột thì thích ứng theo dữ liệu.)*
 
-| Nhóm | Số document | Tình trạng |
+Chủ dự án chốt: **đủ ảnh thì dựng đúng cấu trúc hero; thiếu ảnh thì hiện một ảnh.** Đó chính là thứ `Hero.astro` đã làm từ trước, không phải việc phải xây. Ba tầng, rẽ tự động theo dữ liệu:
+
+| Điều kiện | Kết quả | Mã |
 |---|---|---|
-| 9 loại có field `gallery` | 105 | **88 đủ 4 ảnh**, **17 thiếu** |
-| `article`, `person`, `organization` | 30 | **không có field `gallery` trong schema** |
+| ≥ 4 ảnh `gallery` sau khi loại trùng `mainImage` | mosaic: ảnh chính + lưới 2×2 | `Hero.astro:44` `hasGallery = galleryItems.length === 4` → `:49`, `:64` |
+| Có `mainImage`, < 4 ảnh gallery | **một ảnh**, trải hết khung | nhánh `else` của `:49` |
+| Không ảnh nào | khối `.hero-gradient` + huy hiệu loại | `:76` |
 
-- **17 document thiếu ảnh** → cần nạp khoảng **68 ảnh**. Là việc nội dung, không phải việc mã.
-- **30 document** thuộc ba loại không có `gallery`: `cms/schemas/article.ts`, `person.ts`, `organization.ts` đều không khai field này, và `06` §3 hàng Gallery khai rõ *"không áp dụng: article, person, organization"*. Cho ba loại đó vào mosaic đòi **ba việc cùng lúc**: sửa schema (thêm field), sửa đặc tả (gỡ dòng loại trừ), và nạp khoảng **120 ảnh**. Đó là quyết định riêng, chưa có phiếu.
+Sau `QĐ-2026-08-28-03` cả **ba** tầng cùng cao `--hero-h`, nên **khung ngoài đồng nhất tuyệt đối** dù ruột khác nhau. Đó là nghĩa đã chốt của "cùng một định dạng Hero".
 
-Không lấp bằng ô trống hay lặp lại ảnh chính: **R7** cấm khung trang trí rỗng, và ảnh lặp là nội dung giả.
+**Hệ quả: không còn nợ dữ liệu.** Phân bố đo trên production 2026-08-28 (`reviewStatus == "approved"`) nay đọc là *phân bố tầng*, không phải *danh sách phải sửa*:
 
-**Danh sách 17 document thiếu ảnh** (loại · slug · đang có mấy ảnh): event ·(chưa có slug vi)· 0; experience · `di-bo-duoi-day-bien-sea-walker` · 3; experience · `phao-bay` · 0; hotel · `comodo-nha-trang` · 0; hotel · `la-vague-nha-trang` · 0; hotel · `nha-trang-palace` · 0; hotel · `vinpearl-beachfront-nha-trang` · 0; hotel · `vinpearl-empire-nha-trang` · 0; hotel · `xavia-nha-trang` · 0; place · `ben-cang-da-chong` · 0; place · `deo-vinh-hy` · 0; place ·(chưa có slug vi)· 0; resort ·(ba document chưa có slug vi)· 0; tour · `tour-dao-khi-suoi-hoa-lan` · 0; tour · `ve-hon-tam-tam-bien-tour-hon-tam-nua-ngay` · 0.
+| Nhóm | Số document | Tầng đang rơi vào |
+|---|---|---|
+| 9 loại có field `gallery` | 105 | **88 → mosaic**, **17 → một ảnh** |
+| `article`, `person`, `organization` | 30 | một ảnh, hoặc gradient nếu không có `mainImage` — ba loại này **không có field `gallery`** trong schema, và `06` §3 hàng Gallery khai rõ *"không áp dụng"*. Đúng thiết kế, không phải thiếu sót |
+
+Nạp thêm ảnh cho 17 document kia là **nâng cấp tuỳ chọn** — trang tự lên mosaic khi đủ 4 ảnh, không cần đụng mã. Không còn là điều kiện để trang đúng. Nặng nhất là `khach-san`: sáu khách sạn đều 0 ảnh gallery.
+
+Vẫn giữ nguyên: **không** lấp ô trống, **không** lặp lại ảnh chính. `R7` cấm khung trang trí rỗng, và ảnh lặp là nội dung giả. Fallback là hiện ít đi, không phải bịa thêm.
+
+**Một ca ở giữa, ghi để không ai tưởng là lỗi.** Ngưỡng là "đủ **4**", nên document có **3** ảnh cũng rơi về một ảnh và ba ảnh kia không hiện. Hiện đúng một trang như vậy: `trai-nghiem/di-bo-duoi-day-bien-sea-walker`. Đúng chữ đã chốt. Muốn có tầng giữa (2–3 ảnh xếp lưới hẹp hơn) thì đó là bố cục mới, cần phiếu riêng.
+
+**Phụ lục — 17 document đang ở tầng "một ảnh".** Không phải việc phải làm; nạp đủ 4 ảnh `gallery` thì trang tự lên mosaic, không cần đụng mã.
+
+| Loại | Slug | Đang có |
+|---|---|---|
+| event | *(chưa có slug vi)* | 0 |
+| experience | `di-bo-duoi-day-bien-sea-walker` | 3 |
+| experience | `phao-bay` | 0 |
+| hotel | `comodo-nha-trang` | 0 |
+| hotel | `la-vague-nha-trang` | 0 |
+| hotel | `nha-trang-palace` | 0 |
+| hotel | `vinpearl-beachfront-nha-trang` | 0 |
+| hotel | `vinpearl-empire-nha-trang` | 0 |
+| hotel | `xavia-nha-trang` | 0 |
+| place | `ben-cang-da-chong` | 0 |
+| place | `deo-vinh-hy` | 0 |
+| place | *(chưa có slug vi)* | 0 |
+| resort | *(ba document chưa có slug vi)* | 0 |
+| tour | `tour-dao-khi-suoi-hoa-lan` | 0 |
+| tour | `ve-hon-tam-tam-bien-tour-hon-tam-nua-ngay` | 0 |
 
 **Bổ sung sau khi phát hành (cùng ngày).** Lượt đầu bỏ sót **biến thể hero thứ ba**: khối `.hero-gradient` dựng khi trang không có ảnh giữ công thức riêng `clamp(280px, 36vw, 420px)` — hệ số `36vw` và trần `420px` đều khác hai biến thể có ảnh. Đo trên production tại `/dia-danh/deo-vinh-hy/` ở viewport 1710: hero ra **420px** trong khi mọi trang khác ra 430px. Biến thể này dễ sót vì nó **không có `.hero-main`**, nên mọi phép đo neo vào `.hero-main` đều bỏ qua nó. Đã cho dùng chung `--hero-h`. Ảnh hưởng 2 trang: `/dia-danh/deo-vinh-hy/` và `/cam-nang/kinh-nghiem-du-lich-vinh-hy/`.
 
