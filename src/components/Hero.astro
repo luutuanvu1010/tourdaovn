@@ -21,21 +21,11 @@ export interface Props {
    * lớp phủ lẫn `.hero-overlay` cho những trang đó.
    */
   hasOverlay?: boolean
-  /**
-   * Hero cao thêm 50px ở mọi khổ (QĐ-2026-08-28-02).
-   *
-   * CHỈ trang điểm đến được bật. Trang chi tiết KHÔNG được: đã đo ở 1366, hero
-   * cao thêm 50px đẩy thanh dính từ 618 xuống 668, vượt mốc màn đầu 657px mà
-   * 06 §3 dùng — tức giá rơi khỏi màn đầu với MỌI tiêu đề, chứ không chỉ tiêu
-   * đề hai dòng như hiện nay. Đó đúng là thứ QĐ-2026-08-25-01 đã cắt 430→380 để
-   * tránh. Trang điểm đến không có thanh dính nên Luật 3 không trói ở đó.
-   */
-  tall?: boolean
 }
 
 // Không dùng default `= []` ở đây: nó chỉ kích hoạt với `undefined`, mà caller
 // đưa `null` (GROQ). Chặn bằng `?? []` ở điểm dùng bên dưới.
-const { image, gallery, imageAlt, fullBleed = false, hasOverlay = true, tall = false } = Astro.props
+const { image, gallery, imageAlt, fullBleed = false, hasOverlay = true } = Astro.props
 const src = typeof image === 'string' ? image : imageUrl(image, { width: 1200 })
 const alt = imageAlt || (typeof image === 'object' ? image?.alt : undefined) || ''
 const mainImageKey = typeof image === 'object' ? (image?.asset?._id || image?.asset?.url) : src
@@ -54,7 +44,7 @@ const hasMedia = !!src
 const hasGallery = galleryItems.length === 4
 ---
 
-<section class:list={["hero-shell", { "hero-shell--full": fullBleed, "hero-shell--tall": tall }]}>
+<section class:list={["hero-shell", { "hero-shell--full": fullBleed }]}>
   {hasMedia ? (
     <div class={hasGallery ? 'hero-block hero-block--mosaic' : 'hero-block'}>
       <div class="hero-media-grid">
@@ -96,20 +86,21 @@ const hasGallery = galleryItems.length === 4
   .hero-shell {
     /* no margin — InfoBar sits tight against hero bottom */
 
-    /* MỘT nguồn cho chiều cao hero, thay vì lặp cùng biểu thức ở bốn luật.
-       Trước QĐ-2026-08-28-02, `clamp(280px, 30vw, 380px)` được chép ở cả
-       `.hero-main` lẫn `.hero-block--mosaic .hero-media-grid`, và mỗi điểm ngắt
-       lại chép thêm một cặp nữa — sáu chỗ cho một con số. Gom về biến thì biến
-       thể `--tall` chỉ cần đặt lại biến, không cần nhân đôi từng luật. */
-    --hero-h: clamp(280px, 30vw, 380px);
-  }
-
-  /* +50px ở MỌI khổ — xem chú thích prop `tall`.
-     Lưu ý con số: nâng TRẦN 380→430 KHÔNG cho +50px ở mọi khổ, vì `30vw` mới là
-     số đang trói. Đã đo: chỉ nâng trần thì được +4px ở 1280, +30px ở 1366, và
-     đủ +50px chỉ từ 1440 trở lên. Muốn +50 thật thì phải cộng vào chính số
-     giữa, tức `calc(30vw + 50px)`, và nâng cả sàn lẫn trần theo. */
-  .hero-shell--tall {
+    /* MỘT nguồn cho chiều cao hero, và MỘT giá trị cho mọi loại trang.
+       QĐ-2026-08-28-03: bỏ biến thể `--tall`. QĐ-2026-08-28-02 dựng nó ra để
+       riêng trang điểm đến cao 430px còn trang chi tiết giữ 380px; chủ dự án
+       quyết mọi trang chi tiết entity dùng CÙNG MỘT định dạng hero, nên hai
+       giá trị gộp làm một. Một biến thể mà mọi nơi gọi đều bật thì không còn
+       là biến thể.
+       Trước QĐ-2026-08-28-02 con số này được chép ở sáu chỗ — `.hero-main`,
+       `.hero-block--mosaic .hero-media-grid`, và một cặp nữa cho mỗi điểm ngắt.
+       Gom về biến thì không nhánh nào lệch được nhánh nào.
+       Lưu ý số học: nâng riêng TRẦN 380→430 KHÔNG cho +50px ở mọi khổ, vì
+       `30vw` mới là số đang trói — đã đo, chỉ +4px ở 1280 và +30px ở 1366. Phải
+       cộng vào chính SỐ GIỮA, và nâng cả sàn lẫn trần theo.
+       ⚠ Luật 3: ở 1366 con số này đẩy thanh dính xuống 668, vượt mốc màn đầu
+       657px. Ngoại lệ có ghi phiếu, kèm điều kiện phải xét lại TRƯỚC khi
+       `sticky-bar__price` render trên bất kỳ trang nào — xem QĐ-2026-08-28-03. */
     --hero-h: clamp(330px, calc(30vw + 50px), 430px);
   }
 
@@ -271,14 +262,11 @@ const hasGallery = galleryItems.length === 4
 
     /* 06 v2.5: 280 → 240px, theo mockup Design chặng 2. Trên 390px, hero 280px
        chiếm 33% màn nên nội dung đầu tiên chưa vào tầm mắt ở lần cuộn thứ nhất.
-       QĐ-2026-08-28-02: biến thể `--tall` là 290px, và CHỈ trang điểm đến bật.
-       Đo ở khung 386px: hero-shell 328 → 378px, tức 41% → 47% của màn 800px.
-       Con số đó ăn vào chính lý do đã cắt 280→240, nên trang chi tiết giữ 240. */
+       QĐ-2026-08-28-03: 240 → 290px cho MỌI trang. Đo ở khung 386px: hero-shell
+       328 → 378px, tức 41% → 47% của màn 800px. Con số đó ăn vào chính lý do đã
+       cắt 280→240 ở trên; chủ dự án chấp nhận, đổi lấy một định dạng hero duy
+       nhất. Ghi lại để lần sau không ai tưởng 290 là số ngẫu nhiên. */
     .hero-shell {
-      --hero-h: 240px;
-    }
-
-    .hero-shell--tall {
       --hero-h: 290px;
     }
 
@@ -307,10 +295,6 @@ const hasGallery = galleryItems.length === 4
 
   @media (min-width: 769px) and (max-width: 1023px) {
     .hero-shell {
-      --hero-h: 340px;
-    }
-
-    .hero-shell--tall {
       --hero-h: 390px;
     }
 

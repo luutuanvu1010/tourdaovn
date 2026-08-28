@@ -2106,3 +2106,35 @@ Cái sai nằm chỗ khác: **một component, một nguồn chữ, hai hàng đ
 **Nợ ghi lại, chủ dự án quyết hoãn.**
 1. `AuthorityMeta` cho `kind === 'destination'` + nạp `sameAs` wikidata cho bốn document `touristDestination` — điều kiện để trang điểm đến có tín hiệu tin cậy thật (xem `ADR-0029`).
 2. `RouteDispatch.astro` còn ép kiểu `entity as 'experience' | 'tour'` khi gọi `TermIndex`, trong khi runtime nay truyền cả `'attraction'`; hệ quả là card ở trang term attraction chưa hiện nhãn loại dù dữ liệu đã có (xem `DR-077`).
+
+---
+
+## QĐ-2026-08-28-03 — Một định dạng Hero duy nhất cho mọi trang chi tiết entity
+
+**Bối cảnh.** Chủ dự án yêu cầu (2026-08-28) áp cùng một định dạng Hero cho tất cả entity type ở trang chi tiết. Yêu cầu đọc được theo hai nghĩa — đồng bộ **chiều cao**, hay đồng bộ **bố cục** (mosaic hay ảnh đơn) — nên đã hỏi lại trước khi làm. Chủ dự án chọn **cả hai**.
+
+**Hiện trạng đo được trước khi sửa.**
+- Chiều cao: `QĐ-2026-08-28-02` vừa dựng biến thể `tall` cho riêng trang điểm đến (430px), trang chi tiết giữ 380px. Hai loại trang, hai chiều cao.
+- Bố cục: **86 trang mosaic / 40 trang ảnh đơn** trên bản dựng. Lệch cả *trong* một loại (`khach-san` 4 mosaic / 6 ảnh đơn) lẫn *giữa* các loại.
+
+**Chốt phần chiều cao — ĐÃ LÀM.** Bỏ hẳn biến thể `tall`, nâng chính giá trị nền: `clamp(330px, calc(30vw + 50px), 430px)` desktop, **390px** ở 769–1023px, **290px** di động, áp cho mọi trang. Một biến thể mà mọi nơi gọi đều bật thì không còn là biến thể.
+
+**⚠ Ngoại lệ Luật 3, chấp nhận có chủ ý.** Chiều cao này đẩy thanh dính ở 1366 từ 618 xuống **668px**, vượt mốc màn đầu **657px** — với MỌI tiêu đề, chứ không riêng tiêu đề hai dòng như trước. Đây đúng là thứ `QĐ-2026-08-25-01` đã cắt 430→380 để tránh; nay đảo lại, đổi lấy một định dạng hero duy nhất. Đã nêu hệ quả này trong câu hỏi trước khi chủ dự án chọn.
+
+Chưa thành vi phạm sống vì `sticky-bar__price` render trên **0 trang** — thanh dính hiện chỉ mang CTA. **Điều kiện bắt buộc: phải xét lại TRƯỚC khi vùng giá render trên bất kỳ trang nào.** Không xét lại thì ngày bật giá là ngày vi phạm Luật 3 trên toàn bộ trang chi tiết.
+
+**Phần bố cục — KHÔNG LÀM ĐƯỢC BẰNG MÃ, chặn ở dữ liệu và ở đặc tả.** "Luôn mosaic" đòi 4 ảnh gallery sau khi loại trùng `mainImage`. Đếm trên dataset production (2026-08-28, `reviewStatus == "approved"`):
+
+| Nhóm | Số document | Tình trạng |
+|---|---|---|
+| 9 loại có field `gallery` | 105 | **88 đủ 4 ảnh**, **17 thiếu** |
+| `article`, `person`, `organization` | 30 | **không có field `gallery` trong schema** |
+
+- **17 document thiếu ảnh** → cần nạp khoảng **68 ảnh**. Là việc nội dung, không phải việc mã.
+- **30 document** thuộc ba loại không có `gallery`: `cms/schemas/article.ts`, `person.ts`, `organization.ts` đều không khai field này, và `06` §3 hàng Gallery khai rõ *"không áp dụng: article, person, organization"*. Cho ba loại đó vào mosaic đòi **ba việc cùng lúc**: sửa schema (thêm field), sửa đặc tả (gỡ dòng loại trừ), và nạp khoảng **120 ảnh**. Đó là quyết định riêng, chưa có phiếu.
+
+Không lấp bằng ô trống hay lặp lại ảnh chính: **R7** cấm khung trang trí rỗng, và ảnh lặp là nội dung giả.
+
+**Danh sách 17 document thiếu ảnh** (loại · slug · đang có mấy ảnh): event ·(chưa có slug vi)· 0; experience · `di-bo-duoi-day-bien-sea-walker` · 3; experience · `phao-bay` · 0; hotel · `comodo-nha-trang` · 0; hotel · `la-vague-nha-trang` · 0; hotel · `nha-trang-palace` · 0; hotel · `vinpearl-beachfront-nha-trang` · 0; hotel · `vinpearl-empire-nha-trang` · 0; hotel · `xavia-nha-trang` · 0; place · `ben-cang-da-chong` · 0; place · `deo-vinh-hy` · 0; place ·(chưa có slug vi)· 0; resort ·(ba document chưa có slug vi)· 0; tour · `tour-dao-khi-suoi-hoa-lan` · 0; tour · `ve-hon-tam-tam-bien-tour-hon-tam-nua-ngay` · 0.
+
+**Tài liệu.** `06-BINDING_MAP` v2.8.0 → **v2.9.0** (§3 hàng Hero).
