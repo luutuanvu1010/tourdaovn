@@ -48,6 +48,14 @@ const ANH_XA = {
   'line-height.display': '--lh-display',
   'line-height.eyebrow': '--lh-eyebrow',
   'letter-spacing.eyebrow': '--ls-eyebrow',
+  // Chiều cao hero entity — QĐ-2026-08-29-01. Bốn dòng này PHẢI có mặt: không
+  // khai ánh xạ thì vòng lặp bên dưới `continue` qua, và cổng im lặng đúng
+  // kiểu DR-050 đã nấp mười ngày. Chỉ khai bốn giá trị vô hướng; biểu thức
+  // `--hero-entity-h` không so được vì bộ chuẩn hoá cắt ở dấu ngoặc đầu tiên.
+  'layout.hero.entity.max': '--hero-entity-h-max',
+  'layout.hero.entity.min': '--hero-entity-h-min',
+  'layout.hero.entity.tablet': '--hero-entity-h-tablet',
+  'layout.hero.entity.mobile': '--hero-entity-h-mobile',
 }
 
 /** Token trong `07` cố ý không thành một biến — có lý do, không phải sót. */

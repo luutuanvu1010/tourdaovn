@@ -86,23 +86,12 @@ const hasGallery = galleryItems.length === 4
   .hero-shell {
     /* no margin — InfoBar sits tight against hero bottom */
 
-    /* MỘT nguồn cho chiều cao hero, và MỘT giá trị cho mọi loại trang.
-       QĐ-2026-08-28-03: bỏ biến thể `--tall`. QĐ-2026-08-28-02 dựng nó ra để
-       riêng trang điểm đến cao 430px còn trang chi tiết giữ 380px; chủ dự án
-       quyết mọi trang chi tiết entity dùng CÙNG MỘT định dạng hero, nên hai
-       giá trị gộp làm một. Một biến thể mà mọi nơi gọi đều bật thì không còn
-       là biến thể.
-       Trước QĐ-2026-08-28-02 con số này được chép ở sáu chỗ — `.hero-main`,
-       `.hero-block--mosaic .hero-media-grid`, và một cặp nữa cho mỗi điểm ngắt.
-       Gom về biến thì không nhánh nào lệch được nhánh nào.
-       Lưu ý số học: nâng riêng TRẦN 380→430 KHÔNG cho +50px ở mọi khổ, vì
-       `30vw` mới là số đang trói — đã đo, chỉ +4px ở 1280 và +30px ở 1366. Phải
-       cộng vào chính SỐ GIỮA, và nâng cả sàn lẫn trần theo.
-       ⚠ Luật 3: ở 1366 con số này đẩy thanh dính xuống 668, vượt mốc màn đầu
-       657px. Ngoại lệ có ghi phiếu, kèm điều kiện phải xét lại TRƯỚC khi
-       `sticky-bar__price` render trên bất kỳ trang nào — xem QĐ-2026-08-28-03. */
-    --hero-h: clamp(330px, calc(30vw + 50px), 430px);
+    /* Chiều cao hero KHÔNG khai ở đây nữa. QĐ-2026-08-29-01 chuyển toàn bộ con
+       số sang `--hero-entity-h*` trong `src/styles/tokens.css`, kèm cả hai
+       điểm ngắt. File này chỉ ĐỌC biến, không giữ giá trị nào — đổi chiều cao
+       hero là sửa đúng một chỗ trong tokens.css và mọi loại trang đổi theo. */
   }
+
 
   .hero-block {
     border-radius: var(--radius-lg);
@@ -126,7 +115,7 @@ const hasGallery = galleryItems.length === 4
        sticky-bar__price render trên 0 trang; xem 06 §3 hàng Hero.
        380 là chiều cao hero desktop trong mockup Design chặng 2.
        QĐ-2026-08-28-02: con số chuyển vào `--hero-h` trên `.hero-shell`. */
-    height: var(--hero-h);
+    height: var(--hero-entity-h);
     background: var(--c-card);
   }
 
@@ -141,7 +130,7 @@ const hasGallery = galleryItems.length === 4
        không thể xảy ra. Dùng chung một biểu thức thì nó đúng thật.
        QĐ-2026-08-28-02: "dùng chung một biểu thức" nay là dùng chung một BIẾN,
        nên hai biến thể không thể lệch nhau nữa dù ai sửa. */
-    height: var(--hero-h);
+    height: var(--hero-entity-h);
     overflow: hidden;
   }
 
@@ -234,7 +223,7 @@ const hasGallery = galleryItems.length === 4
        trong khi mọi hero khác ra 430. Đo được trên production 2026-08-28 tại
        `/dia-danh/deo-vinh-hy/`. Đây là biến thể hero THỨ BA, dễ sót vì nó không
        có `.hero-main` nên mọi phép đo neo vào `.hero-main` đều bỏ qua nó. */
-    min-height: var(--hero-h);
+    min-height: var(--hero-entity-h);
     overflow: hidden;
     border-radius: var(--radius-lg);
     background:
@@ -272,16 +261,12 @@ const hasGallery = galleryItems.length === 4
        328 → 378px, tức 41% → 47% của màn 800px. Con số đó ăn vào chính lý do đã
        cắt 280→240 ở trên; chủ dự án chấp nhận, đổi lấy một định dạng hero duy
        nhất. Ghi lại để lần sau không ai tưởng 290 là số ngẫu nhiên. */
-    .hero-shell {
-      --hero-h: 290px;
-    }
-
     .hero-main {
-      height: var(--hero-h);
+      height: var(--hero-entity-h);
     }
 
     .hero-block--mosaic .hero-main {
-      height: var(--hero-h);
+      height: var(--hero-entity-h);
     }
 
     .hero-gallery-grid {
@@ -300,10 +285,6 @@ const hasGallery = galleryItems.length === 4
   }
 
   @media (min-width: 769px) and (max-width: 1023px) {
-    .hero-shell {
-      --hero-h: 390px;
-    }
-
     .hero-block--mosaic .hero-media-grid {
       grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
     }

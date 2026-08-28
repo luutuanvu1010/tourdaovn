@@ -2171,3 +2171,33 @@ Vẫn giữ nguyên: **không** lấp ô trống, **không** lặp lại ảnh c
 **Bổ sung sau khi phát hành (cùng ngày).** Lượt đầu bỏ sót **biến thể hero thứ ba**: khối `.hero-gradient` dựng khi trang không có ảnh giữ công thức riêng `clamp(280px, 36vw, 420px)` — hệ số `36vw` và trần `420px` đều khác hai biến thể có ảnh. Đo trên production tại `/dia-danh/deo-vinh-hy/` ở viewport 1710: hero ra **420px** trong khi mọi trang khác ra 430px. Biến thể này dễ sót vì nó **không có `.hero-main`**, nên mọi phép đo neo vào `.hero-main` đều bỏ qua nó. Đã cho dùng chung `--hero-h`. Ảnh hưởng 2 trang: `/dia-danh/deo-vinh-hy/` và `/cam-nang/kinh-nghiem-du-lich-vinh-hy/`.
 
 **Tài liệu.** `06-BINDING_MAP` v2.8.0 → **v2.9.0** (§3 hàng Hero).
+
+---
+
+## QĐ-2026-08-29-01 — Chiều cao hero về `tokens.css`: đổi một chỗ, mọi template đổi theo
+
+**Bối cảnh.** Chủ dự án yêu cầu áp cấu trúc Hero và khung template cho cả `article`, và nêu rõ mục đích: *"để sau này tôi có điều chỉnh thông số 1 nơi thì tất cả đều đổi theo, ví dụ: đổi chiều cao của Hero thì sẽ áp dụng với mọi templates chỉ với việc đổi 1 chỗ"*.
+
+**Rà soát cho thấy yêu cầu gồm hai phần, và một phần đã xong từ trước.**
+
+*Phần khung — ĐÃ ĐÚNG, không phải làm gì.* `ArticleDetail.astro:5` đã `import DetailLayout`, và cả kho chỉ có **hai** nơi render `<Hero>`: `DetailLayout.astro` và `TouristDestinationHub.astro`. Mọi entity detail — kể cả `article`, `person`, `organization` — đều đi qua đúng khung chung và đúng component Hero. Đo trên bản dựng: `/cam-nang/kinh-nghiem-du-lich-vinh-hy/` cao 430px, y hệt tour và điểm đến. Riêng `article` không có field `gallery` (đúng `06` §3 hàng Gallery) nên rơi tầng "một ảnh" hoặc "không ảnh" theo cơ chế fallback ở `QĐ-2026-08-28-03` — đó là thiết kế, không phải lệch.
+
+*Phần thông số — CHƯA ĐÚNG, và đây là việc thật.* Ba con số chiều cao hero (430 / 390 / 290) nằm trong khối `<style>` của `Hero.astro`, không nằm trong `tokens.css`. Mà `07-DESIGN_TOKENS` mở đầu khai: *"Nguồn token duy nhất của dự án: mọi giá trị giao diện trong code phải sinh từ đây, hardcode ngoài nguồn token là vi phạm P6/N7"*. Hero là chỗ vi phạm còn sót.
+
+**Chốt.**
+
+1. **Bốn token mới trong `src/styles/tokens.css`**: `--hero-entity-h-min` 330px, `--hero-entity-h-max` 430px, `--hero-entity-h-tablet` 390px, `--hero-entity-h-mobile` 290px, và biểu thức tổng hợp `--hero-entity-h`. **Cả hai điểm ngắt cũng chuyển về `tokens.css`**, không còn nằm trong component.
+2. **`Hero.astro` không giữ con số chiều cao nào nữa** — chỉ đọc `var(--hero-entity-h)` ở bốn điểm dùng, phủ cả ba biến thể hero (mosaic, ảnh đơn, không-ảnh).
+3. **Nối vào cổng đối chiếu token**: thêm bốn dòng vào `ANH_XA` của `scripts/check-token-parity.mjs` và bốn hàng vào `07` §3. Không khai ánh xạ thì vòng lặp `continue` qua và cổng im lặng — đúng kiểu `DR-050` đã nấp mười ngày.
+
+**Bằng chứng cổng biết đỏ.** Đổi `--hero-entity-h-max` 430 → 460 trong `tokens.css` mà giữ `07` khai 430: `ĐỎ — 1 lệch MỚI, chưa có phiếu: layout.hero.entity.max (--hero-entity-h-max): 07 khai "430px", mã chạy "460px"`, **mã thoát 1**. Khôi phục → xanh.
+
+**Bằng chứng đạt mục đích.** Đổi đúng **một** token `--hero-entity-h-max` 430px → 520px trên bản dựng, đo lại sáu loại trang: `article`, điểm đến, tour, điểm tham quan, khách sạn, địa danh — **cả sáu cùng đổi 430 → 460**, phủ cả ba biến thể hero.
+
+Ra 460 chứ không 520 vì ở 1366 số trói là `calc(30vw + 50px)` = 459,8 — chính cái bẫy `clamp` đã ghi ở `QĐ-2026-08-28-02`. Nâng **trần** chỉ nới chặn trên; muốn cao thêm ở mọi khổ thì phải sửa số giữa.
+
+**⚠ Bẫy tên gọi, ghi để không ai sửa nhầm.** `tokens.css` đã có sẵn `--hero-min-h` và `--hero-min-h-mobile` — **của `HomeHero.astro`, hero TRANG CHỦ**, một component khác và một chiều cao khác. Tên chỉ khác thứ tự từ so với `--hero-entity-h-min`. Đã chú thích cảnh báo ở cả hai cụm trong `tokens.css`. Đổi tên cho hết nhập nhằng là việc dọn dẹp riêng, chưa làm ở đây.
+
+**Phát hiện phụ, không xử ở đây.** `--card-img-h` trong `tokens.css` không có nơi nào dùng — token chết. Ghi lại, chưa gỡ vì ngoài phạm vi.
+
+**Tài liệu.** `07-DESIGN_TOKENS` §3 (bốn hàng `layout.hero.entity.*`).

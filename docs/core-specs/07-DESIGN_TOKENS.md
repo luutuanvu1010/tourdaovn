@@ -136,6 +136,10 @@ Nợ có chủ ý: chưa đo LCP sau hai lần đổi chữ.
 | space.scale | 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 / 96 px | mọi margin, padding, gap sinh từ thang này |
 | space.section | 48 mobile / 96 desktop | nhịp dọc giữa các vùng trang chi tiết |
 | container.max | 1200px | khung nội dung; thân bài Article hẹp hơn theo measure 70ch |
+| layout.hero.entity.max | 430px | **trần** chiều cao hero của trang chi tiết entity và trang điểm đến. Nguồn duy nhất là `--hero-entity-h-max` trong `tokens.css`; `Hero.astro` không giữ con số nào. Đổi ở đây là mọi loại trang đổi theo, cả ba biến thể hero (mosaic, ảnh đơn, không-ảnh). ⚠ Khác `--hero-min-h` — token đó của `HomeHero`, hero **trang chủ** |
+| layout.hero.entity.min | 330px | **sàn** của cùng biểu thức. Số giữa là `calc(30vw + 50px)`, không phải `30vw` — nâng riêng trần chỉ cho +4px ở 1280 và +30px ở 1366 (`QĐ-2026-08-28-02`) |
+| layout.hero.entity.tablet | 390px | khoảng 769–1023px, giá trị phẳng |
+| layout.hero.entity.mobile | 290px | ≤768px, giá trị phẳng |
 
 | Token | Giá trị | Dùng cho |
 |---|---|---|
