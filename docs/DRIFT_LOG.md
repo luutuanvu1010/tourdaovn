@@ -1861,3 +1861,30 @@ Một caller đánh rơi prop thì mọi cổng vẫn xanh.
 
 **Xác nhận sau sửa:** `dist/nha-trang/index.html` và `dist/ninh-thuan/index.html` đều ra `hero-block hero-block--mosaic` với 4 ô; đo trên trình duyệt ở 1366: ảnh chính 735×380 + lưới 627×380 — trùng hình dạng trang chi tiết.
 
+## DR-077 — Hai danh sách bộ term không khớp nhau, nên trang term attraction xuất bản ra 404
+
+**Trạng thái:** **đóng** 2026-08-28.
+
+Phát hiện 2026-08-28 khi chạy lại bộ cổng sau dựng: 4/8 cổng đỏ, tất cả quy về đúng hai trang.
+
+**Lệch gì.** Có HAI danh sách bộ term, ở hai nơi, và chúng không khớp:
+
+| Nơi | Phủ bộ nào |
+|---|---|
+| `src/pages/[...path].astro` (sinh đường dẫn, qua `TERM_SET_ENTITY`) | experience-type, tour-type, **attraction-type** |
+| `src/lib/queries/category.ts` (`categoryBySlugQuery`) | experience-type, tour-type — **thiếu attraction-type** |
+
+Đường dẫn vẫn sinh ra, nhưng truy vấn trả `null`, `RouteDispatch` bật `notFound`, và trang 404 **được xuất bản như một trang thật**.
+
+**Hệ quả đo được** (bản dựng 2026-08-28, trước khi sửa): `/diem-tham-quan/di-tich-lich-su/` và `/diem-tham-quan/thien-nhien-sinh-thai/` ra `<title>Không tìm thấy trang</title>`, không JSON-LD, không meta description. Bốn cổng đỏ vì chúng: `jsonld-post` (I6 + SEO), `governance-post` (S24-UPDATED-HTML, S24-AUTHORITY-HTML), và hai cổng phụ thuộc `control-registry-gate`, `deferred-gate`.
+
+**Vì sao lọt.** `RouteDispatch.astro` đã nối đủ nhánh attraction từ trước — có `attractionsByTermQuery`, có chốt R2 "term chưa có entity nào trỏ tới thì trang không tồn tại". Chỉ mỗi bộ lọc trong truy vấn là chưa mở. Không cổng nào đối chiếu **hai danh sách bộ term** với nhau; cổng chỉ soi trang đã dựng, mà trang 404 vẫn là một file HTML hợp lệ nên chỉ đỏ ở tầng nội dung, không chỉ ra nguyên nhân.
+
+**Vì sao báo cáo đã commit vẫn xanh.** `scripts/reports/postbuild-status.json` ở `d85f113` ghi `ranAt: 2026-08-27T09:05` và tất cả pass. Hai trang này chỉ mọc ra khi có Attraction mang nhãn mới — tức sau lượt migration, muộn hơn lần chạy cổng cuối. Bản dựng xanh không bảo chứng cho dữ liệu nạp sau nó.
+
+**Đã xử.** `categoryBySlugQuery` thêm `"attraction-type"`. Kèm chú thích tại chỗ nêu rõ ràng buộc: danh sách này phải phủ đúng mọi khoá của `TERM_SET_ENTITY`.
+
+**Xác nhận sau sửa:** hai trang ra trang term thật — `/di-tich-lich-su/` 8 card, `/thien-nhien-sinh-thai/` 15 card; JSON-LD có `CollectionPage`, `DefinedTerm`, `ItemList`, `TouristAttraction`; có meta description. Bộ cổng sau dựng **8/8 xanh**.
+
+**Nợ còn lại (không đóng ở đây).** `RouteDispatch.astro` vẫn ép kiểu `entityType={entity as 'experience' | 'tour'}` khi gọi `TermIndex`, trong khi runtime nay truyền cả `'attraction'`. Ép kiểu đó chính là thứ che nhánh attraction khỏi mắt TypeScript. Hệ quả nhìn thấy được: `TermIndex` chỉ tính nhãn phụ cho experience và tour, nên card ở trang term attraction không hiện nhãn loại dù `toListings` đã mang sẵn `attractionType`. Không có cổng nào đối chiếu hai danh sách bộ term với nhau — đó mới là chỗ đáng dựng lưới.
+
