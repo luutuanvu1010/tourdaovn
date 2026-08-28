@@ -81,7 +81,18 @@
   --fs-xs:   0.75rem;     /* 12px */
   --fs-label: 0.875rem;   /* 14px */
   --fs-sm:    0.9375rem;  /* 15px */
-  --fs-base:  1.0625rem;  /* 17px */
+  /* 19px — nâng từ 17px theo QĐ-2026-08-28-02.
+     ĐÃ ĐO trước khi đổi (Chrome, bản dựng, 2026-08-28), không phải ước lượng:
+     • Thanh dính KHÔNG nhúc nhích — 618→675 (h1 một dòng) và 674→731 (hai dòng)
+       y hệt ở 17 lẫn 19px. Dải breadcrumb, dải tiêu đề và hero đều không đọc
+       token này, nên Luật 3 "giá trước, chữ sau" không bị đụng.
+     • Số ký tự mỗi dòng KHÔNG đổi (83) vì cột chữ khai bằng `ch` — cột nở theo
+       chữ. Không tràn ngang ở 1366 lẫn 386px.
+     • Giá phải trả: trang dài thêm ~5,8% desktop, ~9,3% di động.
+     TRẦN CỦA THANG NÀY LÀ 19. Cột chữ 70ch ở 19px đo 764px, còn cột chính của
+     lưới `1fr 340px` trong khung 1200 rộng 812px — hở 48px. Ở 20px cột chữ
+     thành ~804px, tức chạm. Muốn lên nữa phải nới `--container` trước. */
+  --fs-base:  1.1875rem;  /* 19px */
   /* 21px — đẩy lên từ 18px. Thang cũ dồn cục ở khoảng giữa: nội dung 17, tiêu đề
      thẻ 18, chữ menu 18, tiêu đề nhỏ 20 — bốn bậc trong 3px nên mắt không phân
      biệt được cấp. Đây là gốc của "chữ đều đều, không phân cấp". */
@@ -96,7 +107,8 @@
   --card-lift: -3px;
   --fs-h4:    1.625rem;   /* 26px */
   --fs-section: 2rem;     /* 32px — đẩy lên từ 28px, để tiêu đề mục tách hẳn
-                             khỏi tiêu đề thẻ (21px) và nội dung (17px) */
+                             khỏi tiêu đề thẻ (21px) và nội dung (19px, nâng từ
+                             17 theo QĐ-2026-08-28-02) */
   --fs-h3:    2rem;       /* 32px */
   --fs-h2:    2.5rem;     /* 40px */
   --fs-h1:    2.625rem;   /* 42px */

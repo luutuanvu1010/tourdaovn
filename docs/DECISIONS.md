@@ -2068,3 +2068,41 @@ Cái sai nằm chỗ khác: **một component, một nguồn chữ, hai hàng đ
 **Việc kéo theo, tách phiếu.** Nếu vẫn muốn tín hiệu tin cậy thật trên trang điểm đến thì **không thiếu chỗ mà thiếu dữ liệu**: (1) mở `AuthorityMeta` cho `kind === 'destination'` trong `RouteDispatch.astro`; (2) nạp `sameAs` wikidata cho bốn document `touristDestination` để `HomeMetaBar` render được. Cố ý không gộp — đó là thêm tính năng, còn quyết định này chỉ gỡ một vùng sai chỗ.
 
 **Tài liệu.** `docs/adr/ADR-0029-go-trust-bar-khoi-trang-diem-den.md`, `docs/core-specs/06-BINDING_MAP.md` (v2.7.0).
+
+---
+
+## QĐ-2026-08-28-02 — Chữ thân bài 17 → 19px toàn trang; hero cao thêm 50px CHỈ ở trang điểm đến
+
+**Bối cảnh.** Chủ dự án yêu cầu (2026-08-28) nâng chiều cao khung Hero thêm khoảng 50px và tăng cỡ chữ thân bài thêm 2px, áp cho toàn trang. Trước khi sửa, đã đo trên bản dựng thật (Chrome, tiêm CSS đè rồi đo lại). Đường nền tái lập **đúng** con số `06` §3 đã ghi — thanh dính 618→675 khi h1 một dòng, 674→731 khi hai dòng — nên số đo so được thẳng với mốc màn đầu **657px** mà đặc tả dùng.
+
+**Chốt.** Chủ dự án quyết theo khuyến nghị:
+
+1. **`--fs-base` 17 → 19px (`1.0625rem` → `1.1875rem`), áp toàn trang.**
+2. **Hero +50px, CHỈ trang điểm đến.** Thêm prop `tall` cho `Hero.astro`; `TouristDestinationHub` bật, `DetailLayout` không.
+3. Hai việc còn lại của lượt rà soát ghi **nợ**, không làm trong đợt này (xem cuối phiếu).
+
+**Vì sao chữ 19px an toàn — số đo, không phải phán đoán.**
+
+| | 17px | 19px |
+|---|---|---|
+| Thanh dính, h1 một dòng / hai dòng | 618 / 674 | **618 / 674 — không nhúc nhích** |
+| Ký tự mỗi dòng | 83 | **83 — không đổi** |
+| Tràn ngang ở 1366 và 386px | không | **không** |
+| Chiều dài trang desktop | 10.919 | 11.551 (**+5,8%**) |
+| Chiều dài trang di động | 15.520 | 16.969 (**+9,3%**) |
+
+**Luật 3 không bị đụng** vì dải breadcrumb, dải tiêu đề và hero đều không đọc `--fs-base`. Số ký tự mỗi dòng đứng yên vì cột chữ khai bằng `ch` — cột nở theo chữ.
+
+**19 là TRẦN của thang này.** Cột chữ 70ch ở 19px đo 764px; cột chính của lưới `1fr 340px` trong khung 1200 rộng 812px — hở 48px. Ở 20px cột chữ thành ~804px, tức chạm. Muốn lên nữa phải nới `--container` trước.
+
+**Vì sao hero +50px KHÔNG áp cho trang chi tiết.** Đo ở 1366 với +50px thật: thanh dính 618→**668** (h1 một dòng), 674→**724** (hai dòng). Mốc màn đầu là 657px. Nghĩa là hôm nay chỉ tiêu đề hai dòng rơi khỏi màn đầu; nâng 50px thì **mọi tiêu đề đều rơi**. Đó đúng là thứ `QĐ-2026-08-25-01` đã cắt 430→380 để tránh. Di động cũng vậy: 240→290 đưa hero từ 41% lên **47%** màn 800px, ăn vào chính lý do đã cắt 280→240. Trang điểm đến **không có thanh dính** nên Luật 3 không trói ở đó — được nâng miễn phí.
+
+**Một cái bẫy số học đã tránh.** Nâng riêng **trần** `clamp` 380→430 KHÔNG cho +50px ở mọi khổ, vì `30vw` mới là số đang trói: đo được +4px ở 1280, +30px ở 1366, và đủ +50px chỉ từ 1440 trở lên. Muốn +50 thật phải cộng vào **số giữa** — `clamp(330px, calc(30vw + 50px), 430px)`.
+
+**Cách thi hành.** Chiều cao hero gom về **một biến** `--hero-h` đặt trên `.hero-shell`, thay vì lặp cùng biểu thức ở sáu chỗ như trước. Biến thể `.hero-shell--tall` chỉ đặt lại biến. Nhờ vậy hai biến thể ảnh-đơn và mosaic không thể lệch nhau nữa — đúng lỗi mà chú thích cũ trong `Hero.astro` từng mô tả là "không thể xảy ra" trong khi nó đang xảy ra.
+
+**Tài liệu.** `06-BINDING_MAP` v2.7.0 → **v2.8.0** (§3 hàng Hero); `07-DESIGN_TOKENS` §2 (`font.size.base`, `font.size.scale`).
+
+**Nợ ghi lại, chủ dự án quyết hoãn.**
+1. `AuthorityMeta` cho `kind === 'destination'` + nạp `sameAs` wikidata cho bốn document `touristDestination` — điều kiện để trang điểm đến có tín hiệu tin cậy thật (xem `ADR-0029`).
+2. `RouteDispatch.astro` còn ép kiểu `entity as 'experience' | 'tour'` khi gọi `TermIndex`, trong khi runtime nay truyền cả `'attraction'`; hệ quả là card ở trang term attraction chưa hiện nhãn loại dù dữ liệu đã có (xem `DR-077`).

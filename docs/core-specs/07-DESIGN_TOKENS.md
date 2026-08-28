@@ -101,8 +101,8 @@ Thêm bộ mới: thêm một dòng ở đây, một khối `:root[data-theme=".
 | font.family.heading | "Nunito", "Be Vietnam Pro", system-ui, sans-serif | heading mọi cấp |
 | font.family.body | "Nunito", "Be Vietnam Pro", system-ui, sans-serif | body, card, nhãn, breadcrumb, meta, nav |
 | font.weight | 500, 600, 700, 800, 900 | body 500; nhãn, nút, nhãn phụ card 600; heading 700; chữ hiển thị 800. **900 không có tác dụng**: Nunito dừng ở 800, trình duyệt kẹp xuống — xem DR-031 |
-| font.size.base | 17px (1.0625rem) | body; không nhỏ hơn 17px trên nội dung chính |
-| font.size.scale | 1,2-1,25 | bậc thang runtime: 17 / 22 / 26 / 32 / 40 / 42 / 46 / 60 |
+| font.size.base | **19px (1.1875rem)** | body; không nhỏ hơn 19px trên nội dung chính. Nâng từ 17px theo `QĐ-2026-08-28-02`. **ĐÃ ĐO trước khi đổi** (Chrome, bản dựng, 2026-08-28): thanh dính không nhúc nhích (618→675 và 674→731 y hệt ở 17 lẫn 19px, vì dải breadcrumb/tiêu đề/hero đều không đọc token này, nên **Luật 3** không bị đụng); số ký tự mỗi dòng không đổi (83) vì cột chữ khai bằng `ch`; không tràn ngang ở 1366 lẫn 386px. Giá phải trả: trang dài thêm ~5,8% desktop, ~9,3% di động. **19 là TRẦN của thang này** — cột chữ 70ch ở 19px đo 764px so với cột chính 812px của lưới `1fr 340px` trong khung 1200; ở 20px thành ~804px, tức chạm. Muốn lên nữa phải nới `--container` trước |
+| font.size.scale | 1,2-1,25 | bậc thang runtime: **19** / 22 / 26 / 32 / 40 / 42 / 46 / 60 (bậc đầu nâng từ 17, `QĐ-2026-08-28-02`) |
 | font.size.display | 60px (3,75rem) | **chỉ** câu định vị ở hero trang chủ. Trên khung 1200px, 46px là cỡ của một tiêu đề mục chứ không phải cỡ của câu định vị. Cấm dùng cho heading khác |
 | font.size.sm | 15px (0.9375rem) | nhãn phụ card, breadcrumb, ngày cập nhật; không nhỏ hơn cỡ này trong UI chính |
 | font.size.label | 14px (0.875rem) | nhãn, chip, meta ngắn |

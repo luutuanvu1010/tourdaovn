@@ -116,9 +116,13 @@ const hasReference = Boolean(td?.faq?.length || td?.safetyNote || td?.sameAs?.le
     article/person/organization, và §4.1 khai trang này là *"khung chung áp
     dụng, cộng"*. Truy vấn đã lấy sẵn (`queries/touristDestination.ts`,
     `galleryFragment()`) và kiểu đã khai (`types.ts`) — chỉ CHỖ GỌI NÀY đánh
-    rơi, nên mọi trang điểm đến rơi về hero ảnh đơn. DR-076. */}
+    rơi, nên mọi trang điểm đến rơi về hero ảnh đơn. DR-076.
+    `tall` — cao thêm 50px, QĐ-2026-08-28-02. CHỈ trang này được bật, vì nó
+    không có thanh dính nên Luật 3 "giá trước, chữ sau" không trói. Trang chi
+    tiết bật `tall` là đẩy thanh giá khỏi màn đầu; xem chú thích prop ở
+    `Hero.astro`. */}
 {hasHeroImage && (
-  <Hero image={heroImage} gallery={td?.gallery} imageAlt={(heroImage as any)?.alt || title} fullBleed hasOverlay={false} />
+  <Hero image={heroImage} gallery={td?.gallery} imageAlt={(heroImage as any)?.alt || title} fullBleed hasOverlay={false} tall />
 )}
 
 {/* Ghi công ảnh: giữ lại nhưng đưa XUỐNG DƯỚI ảnh. Bản cũ đặt nó đè lên góc
