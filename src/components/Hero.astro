@@ -228,7 +228,13 @@ const hasGallery = galleryItems.length === 4
   /* ── No-image variant ── */
   .hero-gradient {
     position: relative;
-    min-height: clamp(280px, 36vw, 420px);
+    /* QĐ-2026-08-28-03: dùng CHUNG `--hero-h` với hai biến thể kia.
+       Trước đó khối này giữ công thức riêng `clamp(280px, 36vw, 420px)` — hệ số
+       36vw và trần 420px đều khác hai biến thể có ảnh, nên ở 1710px nó ra 420
+       trong khi mọi hero khác ra 430. Đo được trên production 2026-08-28 tại
+       `/dia-danh/deo-vinh-hy/`. Đây là biến thể hero THỨ BA, dễ sót vì nó không
+       có `.hero-main` nên mọi phép đo neo vào `.hero-main` đều bỏ qua nó. */
+    min-height: var(--hero-h);
     overflow: hidden;
     border-radius: var(--radius-lg);
     background:

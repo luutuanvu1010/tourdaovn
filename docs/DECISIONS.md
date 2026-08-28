@@ -2137,4 +2137,6 @@ Không lấp bằng ô trống hay lặp lại ảnh chính: **R7** cấm khung 
 
 **Danh sách 17 document thiếu ảnh** (loại · slug · đang có mấy ảnh): event ·(chưa có slug vi)· 0; experience · `di-bo-duoi-day-bien-sea-walker` · 3; experience · `phao-bay` · 0; hotel · `comodo-nha-trang` · 0; hotel · `la-vague-nha-trang` · 0; hotel · `nha-trang-palace` · 0; hotel · `vinpearl-beachfront-nha-trang` · 0; hotel · `vinpearl-empire-nha-trang` · 0; hotel · `xavia-nha-trang` · 0; place · `ben-cang-da-chong` · 0; place · `deo-vinh-hy` · 0; place ·(chưa có slug vi)· 0; resort ·(ba document chưa có slug vi)· 0; tour · `tour-dao-khi-suoi-hoa-lan` · 0; tour · `ve-hon-tam-tam-bien-tour-hon-tam-nua-ngay` · 0.
 
+**Bổ sung sau khi phát hành (cùng ngày).** Lượt đầu bỏ sót **biến thể hero thứ ba**: khối `.hero-gradient` dựng khi trang không có ảnh giữ công thức riêng `clamp(280px, 36vw, 420px)` — hệ số `36vw` và trần `420px` đều khác hai biến thể có ảnh. Đo trên production tại `/dia-danh/deo-vinh-hy/` ở viewport 1710: hero ra **420px** trong khi mọi trang khác ra 430px. Biến thể này dễ sót vì nó **không có `.hero-main`**, nên mọi phép đo neo vào `.hero-main` đều bỏ qua nó. Đã cho dùng chung `--hero-h`. Ảnh hưởng 2 trang: `/dia-danh/deo-vinh-hy/` và `/cam-nang/kinh-nghiem-du-lich-vinh-hy/`.
+
 **Tài liệu.** `06-BINDING_MAP` v2.8.0 → **v2.9.0** (§3 hàng Hero).
