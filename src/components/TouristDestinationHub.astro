@@ -24,7 +24,6 @@ import HomeGuideGrid from './HomeGuideGrid.astro'
 import HomeHubGrid from './HomeHubGrid.astro'
 import HomeMetaBar from './HomeMetaBar.astro'
 import HomeRollupSection from './HomeRollupSection.astro'
-import HomeTrustBar from './HomeTrustBar.astro'
 import Section from './Section.astro'
 import { HOME_COPY, indexHref } from '../lib/homepage'
 import type { Lang, TouristDestinationHubProps } from '../lib/types'
@@ -139,11 +138,15 @@ const hasReference = Boolean(td?.faq?.length || td?.safetyNote || td?.sameAs?.le
   </div>
 )}
 
-{/* Không truyền `heading` — bản cũ của trang này không có tiêu đề mục cho dải
-    tin cậy, mỗi mục tự là một h2. Giữ nguyên nội dung; bản refactor này chỉ đổi
-    cấu trúc. Trang chủ có truyền tiêu đề; muốn khớp nốt thì là một quyết định
-    nội dung, cần chủ dự án duyệt riêng. */}
-<HomeTrustBar items={copy.trustItems} />
+{/* KHÔNG có dải "tin cậy" ở đây — gỡ theo `ADR-0029` / `QĐ-2026-08-28-01`.
+    Trước đó chỗ này render `HomeTrustBar` với `HOME_COPY.trustItems`, tức
+    NGUYÊN khối bán hàng của trang chủ: xe đưa đón, hướng dẫn viên, giá tốt,
+    thanh toán. Hàng "Trust bar" của 06 §4.1 lại đòi thứ ngược hẳn — *"cam kết
+    hệ thống về nội dung duyệt, dữ liệu có nguồn, cập nhật rõ; KHÔNG PHẢI CTA
+    marketing"*. Một component, một nguồn chữ, hai hàng đặc tả ngược nhau.
+    Hàng §4.1 đó nay đã xoá; `HomeTrustBar` từ nay chỉ phục vụ §5.7 "Vì sao
+    chọn" trên trang chủ, nơi nội dung bán hàng là đúng vai. Nội dung bốn mục
+    giữ NGUYÊN, không đổi chữ nào. */}
 
 {hasOverview && (
   /* Hai cột — cùng bố cục `SiteHome` đang dùng theo QĐ-2026-08-25-01: thân bài

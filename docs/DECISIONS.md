@@ -2041,3 +2041,30 @@ Lượt chạy migration đầu tiên (07:42) đã **làm hỏng production tron
 Đã hoàn nguyên toàn bộ 29 bản ghi từ `backups/backup-2026-08-27-07-42.ndjson` bằng `cms/_revert-attraction-types.mjs`; xác minh dataset khớp 53/53 và production trở lại đúng trạng thái cũ.
 
 **Luật rút ra, áp cho mọi đợt sau:** khi một thay đổi có **cả** phần dữ liệu Sanity **lẫn** phần mã, và mã còn nằm trên nhánh chưa gộp, thì **cấm chạm dữ liệu production** cho tới khi mã đã ở trên `main`. Lý do gốc: dataset là tài nguyên **dùng chung** giữa nhánh đang làm và bản đang chạy, nên dữ liệu luôn tới production trước mã. "Mã xong" không đồng nghĩa "mã đang chạy".
+
+---
+
+## QĐ-2026-08-28-01 — Gỡ vùng "Trust bar" khỏi trang điểm đến; bốn điểm khác biệt chỉ còn ở trang chủ
+
+**Bối cảnh.** Chủ dự án hỏi khối bốn ô ngay trên "Tổng quan về Nha Trang" (*Xe đưa đón tận nơi*, *Hướng dẫn viên đi cùng*, *Giá tốt*, *Thanh toán linh hoạt*) là tham chiếu hay viết cứng. Rà soát cho thấy nó viết cứng ở `src/lib/homepage.ts:53-58`, lặp cho năm ngôn ngữ — nhưng viết cứng **không sai đặc tả**, vì cả hai hàng chi phối vùng này đều khai nguồn là `config (build)`.
+
+Cái sai nằm chỗ khác: **một component, một nguồn chữ, hai hàng đặc tả ngược nhau.** `06` §5.7 "Vì sao chọn" (trang chủ) đòi lập luận bán hàng — `SiteHome.astro:204` làm đúng. `06` §4.1 "Trust bar" (trang điểm đến) đòi *"cam kết hệ thống về nội dung duyệt, dữ liệu có nguồn, cập nhật rõ; **không phải CTA marketing**"* — nhưng `TouristDestinationHub.astro:146` lấp ô đó bằng chính khối bán hàng của trang chủ.
+
+**Số đo quyết định.** Bản dựng 2026-08-28, cả bốn trang điểm đến đang xuất bản: khối bán hàng hiện 1/1 trên cả bốn; "Xác minh dữ liệu: Wikidata" **0/4**; "Cập nhật lần cuối" **0/4**; `AuthorityMeta` **0/4** (chỉ chạy ở nhánh `kind === 'detail'`). Tức ba cam kết mà hàng §4.1 gọi tên **đạt con số không trên mọi trang điểm đến**, dù hàng đó khai "bắt buộc / luôn hiện".
+
+**Chốt.** Chủ dự án quyết trong phiên 2026-08-28, chọn phương án gỡ hẳn:
+
+1. **Gỡ `<HomeTrustBar>` khỏi `TouristDestinationHub.astro`.** Trang điểm đến đi thẳng từ đoạn mở sang "Tổng quan về {tên}".
+2. **Xoá hàng "Trust bar" khỏi `06` §4.1** và khỏi danh sách khối của §5.7. Nâng `06` lên **v2.7.0**.
+3. **GIỮ NGUYÊN TOÀN BỘ module "Vì sao chọn Tour Đảo" trên trang chủ** — yêu cầu minh thị của chủ dự án. Không đổi một chữ nào trong bốn mục; `HOME_COPY.trustItems`, `HomeTrustBar.astro`, `SiteHome.astro:204` và khoá `trustBar` trong `siteSettings.sections` đều giữ y nguyên.
+
+**Phương án bị loại.** *Giữ ô, thay ruột bằng ba cam kết thật* — loại vì cả ba là dữ liệu per-document (`reviewStatus`/`approvedBy`, `sameAs`, `updatedAt`), không phải `config (build)`, và chúng đã có vùng riêng là `HomeMetaBar` + `AuthorityMeta`; dựng thêm vùng thứ hai cho cùng field là đúng thứ **Luật 1** cấm. *Đưa bốn mục lên Sanity* — loại vì đi ngược cả hai hàng khai `config (build)`, và nội dung là định vị công ty, đổi theo chiến lược chứ không theo biên tập.
+
+**Hệ quả đã lường và chấp nhận.**
+- Ý "cam kết hệ thống" không còn hàng nào chở trong `06` §4.1. Chấp nhận vì số đo cho thấy ý đó hiện **đang bằng không** — gỡ hàng là ghi nhận sự thật, không phải đánh mất thứ đang có.
+- Trang điểm đến ngắn đi một dải, không có khối nào thế chỗ. Theo **R7**, vùng rỗng ẩn hẳn chứ không dựng khung thay thế.
+- `HomeTrustBar` từ nay có đúng một nơi dùng và đúng một hàng đặc tả.
+
+**Việc kéo theo, tách phiếu.** Nếu vẫn muốn tín hiệu tin cậy thật trên trang điểm đến thì **không thiếu chỗ mà thiếu dữ liệu**: (1) mở `AuthorityMeta` cho `kind === 'destination'` trong `RouteDispatch.astro`; (2) nạp `sameAs` wikidata cho bốn document `touristDestination` để `HomeMetaBar` render được. Cố ý không gộp — đó là thêm tính năng, còn quyết định này chỉ gỡ một vùng sai chỗ.
+
+**Tài liệu.** `docs/adr/ADR-0029-go-trust-bar-khoi-trang-diem-den.md`, `docs/core-specs/06-BINDING_MAP.md` (v2.7.0).
