@@ -2201,3 +2201,45 @@ Ra 460 chứ không 520 vì ở 1366 số trói là `calc(30vw + 50px)` = 459,8 
 **Phát hiện phụ, không xử ở đây.** `--card-img-h` trong `tokens.css` không có nơi nào dùng — token chết. Ghi lại, chưa gỡ vì ngoài phạm vi.
 
 **Tài liệu.** `07-DESIGN_TOKENS` §3 (bốn hàng `layout.hero.entity.*`).
+
+---
+
+## QĐ-2026-08-29-02 — Trang Bài viết vào đúng khung chung: `InfoCard` → `FactStrip`
+
+**Bối cảnh.** Chủ dự án yêu cầu áp template cho trang Bài viết dùng chung khung với mọi entity khác, trong đó có yêu cầu đã chốt trước về định dạng Hero.
+
+Lượt trả lời đầu của Cowork nói "đã đúng rồi" vì `ArticleDetail.astro:5` có `import DetailLayout`. **Đó là câu trả lời ở tầng import, chưa phải ở tầng trang thật.** Chủ dự án bác lại. Đo lại bằng cách so chuỗi vùng render của hai trang production:
+
+```
+Bài viết      crumb-band → title-band → hero-shell → summary-band → content-main
+              → author-box → updated-section → sidebar → info-card
+Điểm tham quan crumb-band → title-band → hero-shell → sticky-bar → summary-band
+              → fact-strip → content-main → updated-section → sidebar
+```
+
+**Kết quả đo — ba khác biệt, chỉ MỘT là lệch khung thật:**
+
+1. **`info-card` thay vì `fact-strip`** — lệch khung thật. Đây là `DR-046`: ba template `Article`/`Organization`/`Person` cố ý ở ngoài phạm vi đóng Luật 1, phiếu ghi rõ *"cần một quyết định riêng nếu muốn ba template này cũng chuyển"*. Chủ dự án nay ra quyết định đó cho Bài viết.
+2. **Thiếu `sticky-bar`** — **không** phải lệch khung. `jumpLinks` sinh từ `howTo`/`about`/`mentions`/`faq`; trang lấy mẫu đầu không có mục nào nên thanh không render. Kiểm ba trang cẩm nang khác: **3/3 đều có `sticky-bar`**.
+3. **`author-box`** — vùng riêng của Bài viết theo `06` §3 hàng "Hộp tác giả". Đúng đặc tả.
+
+**Về định dạng Hero — đã chung từ trước, có số đo.** Cả kho chỉ có **hai** nơi render `<Hero>`. `/cam-nang/kinh-nghiem-du-lich-vinh-hy/` cao **430px**, cùng biểu thức `--hero-entity-h`, y hệt tour, điểm tham quan, khách sạn, địa danh và trang điểm đến. Bài viết không có field `gallery` nên rơi tầng "một ảnh"/"không ảnh" — đó là **cơ chế fallback đã chốt ở `QĐ-2026-08-28-03`**, không phải lệch.
+
+**Chốt.**
+
+1. `ArticleDetail` truyền `facts` cho `DetailLayout`; gỡ `import InfoCard`, gỡ slot `info`, gỡ `infoBarItems={[]}`. Ba field `articleType`, `publishedAt`, `updatedAt` chuyển từ cột phụ ra dải **Thông tin nhanh** trải ngang.
+2. Chuyển đổi gần như cơ học: kiểu `Fact` của `FactStrip` đúng bằng `{field, icon, label, value, visible}` mà `sidebarRows` vốn có.
+3. `entity-layout-post.ts`: `ArticleDetail.astro` chuyển từ `ENTITIES_WITHOUT_FACTSTRIP` sang `ENTITIES_WITH_FACTSTRIP`. Để nguyên thì cổng vẫn xanh nhưng **nói sai về thực tế** — đúng loại lỗi `DR-050`.
+4. `06` §3.1 khai vùng ba field của Bài viết. `06` v2.9.0 → **v2.10.0**.
+
+**Không xoá `InfoCard.astro`, không xoá slot `info` của `DetailLayout`.** `OrganizationDetail` và `PersonDetail` vẫn dùng. `DR-046` chuyển sang **mở một phần**.
+
+**Hồi quy phát hiện và đóng ngay trong lượt.** Đưa Thông tin nhanh ra khỏi cột phụ làm 16/24 trang cẩm nang không còn gì ở cột phụ. `Sidebar` tự ẩn khi rỗng, nhưng `.two-col` vẫn giữ rãnh `340px` cộng `gap` — đo được **436px bỏ trống** trên khung 1200, cột chữ bị ép còn 764px dù không có gì bên cạnh. Đúng thứ **R7** cấm.
+
+Sửa ở `DetailLayout`: thêm `showSidebar` (soi cùng điều kiện `Sidebar.astro` dùng) và lớp `two-col--solo` thu lưới về một cột. Sửa ở đây nên đóng luôn **cả các trang không phải Bài viết**: tổng **18** trang có `.two-col` mà không có `.sidebar` — cẩm nang 16 (mới), địa danh 1 và tác giả 1 (**lỗi CÓ SẴN**, không phải hệ quả lượt này).
+
+Lần đếm đầu ra 31 vì gộp nhầm trang term — trang term dùng `TermIndex`, không có `.two-col`. Đếm đúng là *"có two-col mà không có sidebar"*.
+
+Kèm theo: neo containment của `entity-layout-post.ts` đổi từ `<div class="container two-col">` sang `["container", "two-col"` vì markup chuyển sang `class:list`.
+
+**Phạm vi cố ý dừng ở Bài viết.** Chủ dự án chỉ định Bài viết. Sau lượt này: **10 template dùng `FactStrip`, 2 còn `InfoCard`**. Muốn dọn nốt Organization và Person thì cần quyết định riêng — đề xuất làm, vì để hai template lẻ loi chính là thứ đã sinh ra `DR-046`.

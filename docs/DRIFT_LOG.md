@@ -905,7 +905,13 @@ round — Lodging convert theo ruling".
 
 ## DR-046 — `InfoCard.astro` còn sống cho ba template ngoài phạm vi đóng Luật 1
 
-**Trạng thái:** mở (có chủ đích — không phải quên dọn).
+**Trạng thái:** **mở một phần** — còn `OrganizationDetail` và `PersonDetail`.
+
+**Cập nhật 2026-08-29 (`QĐ-2026-08-29-02`): phần Bài viết ĐÃ ĐÓNG.** Chủ dự án yêu cầu trang Bài viết dùng chung khung với mọi entity khác. Đo trên trang thật cho thấy đây là chỗ lệch khung **cuối cùng** của Bài viết: `/cam-nang/…` render `info-card`, còn `/diem-tham-quan/…` render `fact-strip`; hero, breadcrumb, dải tiêu đề, đoạn mở, thanh dính và hộp tác giả thì đã chung từ trước. `ArticleDetail` nay truyền `facts` cho `DetailLayout` và không còn `InfoCard`. Chuyển đổi gần như cơ học vì kiểu `Fact` của `FactStrip` đúng bằng `{field, icon, label, value, visible}` mà `sidebarRows` vốn có. `ArticleDetail.astro` đã chuyển sang `ENTITIES_WITH_FACTSTRIP` trong `entity-layout-post.ts` để sổ hợp đồng khai đúng thực tế.
+
+**`InfoCard.astro` và slot `info` của `DetailLayout` KHÔNG được xoá** — hai template còn lại vẫn dùng. Đoạn dưới đây giữ nguyên văn bản gốc, đọc là mô tả tình trạng TRƯỚC 2026-08-29.
+
+**Trạng thái gốc khi ghi phiếu:** mở (có chủ đích — không phải quên dọn).
 
 Kế hoạch đóng Luật 1 (Task 5–7) chỉ bao trùm sáu entity có/không có hàng ở
 `06` §3.1 dùng cặp `InfoBar`/`InfoCard`: Điểm tham quan, Địa danh, Trải

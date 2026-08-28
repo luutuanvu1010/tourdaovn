@@ -5,7 +5,6 @@ import { uiCopy, typeLabel as lookupLabel, ARTICLE_TYPE_LABELS } from '../lib/ui
 import DetailLayout from './DetailLayout.astro'
 import FAQ from './FAQ.astro'
 import Section from './Section.astro'
-import InfoCard from './InfoCard.astro'
 import Body from './Body.astro'
 import { articleToJsonLd, jsonLdScriptContent } from '../lib/serialize'
 import { formatDate } from '../lib/dates'
@@ -55,7 +54,17 @@ const jumpLinks = [
   { id: 'faq', label: t('faqHeading'), on: !!data.faq?.length },
 ].filter(x => x.on).map(x => ({ href: `#${x.id}`, label: x.label }))
 
-const sidebarRows = [
+// Thông tin nhanh — QĐ-2026-08-29-02 chuyển Bài viết từ `InfoCard` ở cột phụ
+// sang `FactStrip` trải dải, tức CÙNG vùng mà chín entity kia đã dùng từ Task 7.
+// Đây là chỗ lệch khung CUỐI CÙNG của trang Bài viết. Đo trên trang thật
+// 2026-08-29: Bài viết ra `info-card`, Điểm tham quan ra `fact-strip`; còn
+// hero, breadcrumb, dải tiêu đề, đoạn mở, thanh dính và hộp tác giả thì đã
+// chung từ trước. Shape không phải đổi — `Fact` của FactStrip đúng bằng
+// `{field, icon, label, value, visible}` mà mảng này vốn có.
+// Đóng PHẦN BÀI VIẾT của DR-046; Organization và Person vẫn còn `InfoCard`,
+// chưa có quyết định, nên `InfoCard.astro` và slot `info` của DetailLayout
+// KHÔNG được xoá.
+const facts = [
   // `author` đã gỡ khỏi đây — QĐ-2026-08-25-02. Vùng duy nhất của nó là Hộp tác
   // giả (`06` §3, dòng "Hộp tác giả"), dựng ở phần thân bên dưới.
   { field: 'articleType', icon: '📂', label: t('category'), value: typeLabel, visible: true },
@@ -73,9 +82,8 @@ const sidebarRows = [
   summary={data.summary}
   speakable
   jumpLinks={jumpLinks}
-  infoBarItems={[]}
+  facts={facts}
   sidebarSlots={[
-    { name: 'info', component: 'InfoCard', visible: sidebarRows.some(r => r.visible), props: { rows: sidebarRows } },
     { name: 'about', component: 'Article', visible: !!(data.about && data.about.length > 0), props: {} },
   ]}
   nearbyTitle={t('relatedArticles')}
@@ -150,7 +158,6 @@ const sidebarRows = [
     {data.faq && data.faq.length > 0 && <FAQ faq={data.faq} lang={lang} contained={false} id="faq" />}
   </Fragment>
 
-  {sidebarRows.some(r => r.visible) && <InfoCard slot="info" rows={sidebarRows} lang={lang} />}
   {data.about && data.about.length > 0 && (
     <div slot="about" class="about-links">
       <h5>{t('aboutEntity')}</h5>

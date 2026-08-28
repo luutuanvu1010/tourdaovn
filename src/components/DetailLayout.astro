@@ -69,6 +69,20 @@ const jumps = jumpLinks ?? []
 // render — vùng rỗng ẩn hẳn, 06-BINDING_MAP quyết định nền 2.
 const showStickyBar = jumps.length > 0 || !!priceLabel || !!(ctaHref && ctaLabel)
 
+// Cột phụ có gì để hiện hay không. PHẢI soi cùng điều kiện mà `Sidebar.astro`
+// dùng (`slots.some(s => s.visible)`), nếu không hai bên lệch nhau.
+//
+// Vì sao cần: `Sidebar` tự ẩn khi rỗng, nhưng `.two-col` vẫn giữ rãnh `340px`
+// cộng `gap` — tức 436px BỎ TRỐNG trên khung 1200, và cột chữ bị ép còn 764px
+// dù không có gì bên cạnh. Đúng thứ R7 cấm ("vùng rỗng ẩn hẳn").
+// ĐÃ ĐO trên bản dựng 2026-08-29: **18** trang có `.two-col` mà không có
+// `.sidebar` — cẩm nang 16/24 (mới, sau khi QĐ-2026-08-29-02 đưa Thông tin
+// nhanh của Bài viết ra khỏi cột phụ), địa danh 1 và tác giả 1 (lỗi CÓ SẴN).
+// Lần đếm đầu ra 31 vì gộp nhầm cả trang term — trang term dùng `TermIndex`,
+// không có `.two-col`, nên không thuộc ca này. Đếm đúng là "có two-col mà
+// không có sidebar", không phải "thiếu sidebar".
+const showSidebar = sidebarSlots.some(s => s.visible)
+
 // QĐ-2026-08-25-02: BỎ luật "≤ 2 ô thì không trải dải".
 //
 // Luật cũ cắt theo SỐ LƯỢNG DỮ LIỆU, không theo loại trang — nên cùng một loại
@@ -184,7 +198,7 @@ const hasHeroImage = typeof image === 'string' ? Boolean(image) : Boolean(image?
 
 {factsVisible.length > 0 && <FactStrip facts={facts!} max={factsMax} />}
 
-<div class="container two-col">
+<div class:list={["container", "two-col", { "two-col--solo": !showSidebar }]}>
   <div class="content-main">
     <slot name="content" />
 
@@ -385,6 +399,13 @@ const hasHeroImage = typeof image === 'string' ? Boolean(image) : Boolean(image?
 
   .content-main {
     grid-area: main;
+  }
+
+  /* Không có gì ở cột phụ thì trả bề ngang cho cột chữ, không để rãnh 340px
+     trống — R7. Xem chú thích `showSidebar` ở phần script. */
+  .two-col--solo {
+    grid-template-columns: 1fr;
+    grid-template-areas: 'main';
   }
 
   .updated-section {

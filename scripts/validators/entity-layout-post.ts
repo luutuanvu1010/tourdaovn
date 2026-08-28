@@ -310,9 +310,13 @@ function main() {
     'src/components/LodgingDetail.astro',
     'src/components/TourDetail.astro',
     'src/components/EventDetail.astro',
+    // QĐ-2026-08-29-02: Bài viết chuyển từ InfoCard sang FactStrip, tức vào
+    // đúng khung chung mà chín entity kia đã dùng. Chuyển hàng ở đây để sổ hợp
+    // đồng khai đúng thực tế — để nguyên ở danh sách "không có FactStrip" thì
+    // cổng vẫn xanh nhưng nói sai, đúng loại lỗi DR-050.
+    'src/components/ArticleDetail.astro',
   ]
   const ENTITIES_WITHOUT_FACTSTRIP = [
-    'src/components/ArticleDetail.astro',
     'src/components/PersonDetail.astro',
     'src/components/OrganizationDetail.astro',
   ]
@@ -359,7 +363,11 @@ function main() {
   // ── Tầng 2: Container containment ──
   const SHARED_CONTAINMENT = [
     { file: 'src/components/Breadcrumb.astro', needle: '<div class="container">', note: 'Breadcrumb must wrap nav in container' },
-    { file: 'src/components/DetailLayout.astro', needle: '<div class="container two-col">', note: 'DetailLayout must have container two-col' },
+    // QĐ-2026-08-29-02 đổi markup sang `class:list` để bật `two-col--solo` khi
+    // cột phụ rỗng, nên neo cũ `<div class="container two-col">` không còn khớp.
+    // Neo mới vẫn kiểm đúng điều cần kiểm: hai lớp `container` và `two-col`
+    // cùng nằm trên một phần tử.
+    { file: 'src/components/DetailLayout.astro', needle: '["container", "two-col"', note: 'DetailLayout must have container two-col' },
   ]
   for (const item of SHARED_CONTAINMENT) {
     if (!readRel(item.file).includes(item.needle)) {
