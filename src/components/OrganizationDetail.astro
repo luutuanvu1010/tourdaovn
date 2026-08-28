@@ -4,7 +4,6 @@ import { siteBaseUrl, hostLabel } from '../lib/siteUrl'
 import { uiCopy, typeLabel as lookupLabel, ORG_TYPE_LABELS } from '../lib/uiCopy'
 import DetailLayout from './DetailLayout.astro'
 import Section from './Section.astro'
-import InfoCard from './InfoCard.astro'
 import Body from './Body.astro'
 import MapView from './MapView.astro'
 import { entityPageGraphToLd, organizationToJsonLd, jsonLdScriptContent } from '../lib/serialize'
@@ -26,14 +25,18 @@ function hasPtContent(blocks: unknown[] | undefined | null): boolean {
   return blocks.some((b: any) => b._type === 'block' && b.children?.some((c: any) => (c.text || '').trim()))
 }
 
-const sidebarRows = [
+// Thông tin nhanh — QĐ-2026-08-29-03 chuyển sang `FactStrip`, cùng vùng mà
+// mười template kia đã dùng. Đóng nốt DR-046; `InfoCard.astro` đã xoá.
+// `sameAs` KHÔNG nằm ở đây: `06` §3.1 khai nó là dòng "Nguồn tham khảo" cạnh
+// Cập nhật ở cuối nội dung, "không nằm trong sidebar" — nay truyền qua prop
+// `sameAs` của DetailLayout, đúng vùng, thay vì làm ô thứ bảy.
+const facts = [
   { field: 'orgType', icon: '🏢', label: t('type'), value: typeLabel, visible: true },
   { field: 'address', icon: '📍', label: t('office'), value: data.address ? [data.address.street, data.address.ward].filter(Boolean).join(', ') : '', visible: !!data.address },
   { field: 'telephone', icon: '📞', label: t('phone'), value: data.telephone || '', visible: !!data.telephone },
   { field: 'url', icon: '🌐', label: t('website'), value: data.url || '', visible: !!data.url, href: data.url || undefined },
   { field: 'officialSource', icon: '🔗', label: t('officialSource'), value: data.officialSource || '', visible: !!data.officialSource, href: data.officialSource || undefined },
   { field: 'licenseInfo', icon: '📋', label: t('license'), value: data.licenseInfo || '', visible: !!data.licenseInfo },
-  { field: 'sameAs', icon: '🔗', label: t('referenceSource'), value: hostLabel(data.sameAs?.[0]), href: data.sameAs?.[0], visible: !!(data.sameAs && data.sameAs.length > 0) },
 ]
 
 const siteBase = siteBaseUrl(Astro.site)
@@ -45,9 +48,9 @@ const jsonLd = entityPageGraphToLd(organizationToJsonLd(data, siteBase, lang), d
   lang={lang}
   entityType="organization"
   image={data.mainImage}
-  infoBarItems={[]}
+  sameAs={data.sameAs}
+  facts={facts}
   sidebarSlots={[
-    { name: 'info', component: 'InfoCard', visible: sidebarRows.some(r => r.visible), props: { rows: sidebarRows } },
     { name: 'map', component: 'Map', visible: !!(data.geo), props: {} },
   ]}
   nearbyTitle={t('toursAndEvents')}
@@ -70,7 +73,6 @@ const jsonLd = entityPageGraphToLd(organizationToJsonLd(data, siteBase, lang), d
     )}
   </Fragment>
 
-  {sidebarRows.some(r => r.visible) && <InfoCard slot="info" rows={sidebarRows} lang={lang} />}
   {data.geo && <MapView slot="map" geo={data.geo} title={data.title} height={240} />}
 </DetailLayout>
 

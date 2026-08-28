@@ -39,7 +39,6 @@ const SHARED_PRIMITIVES = [
   'src/components/NearbySection.astro',
   'src/components/Sidebar.astro',
   'src/components/BookingCTA.astro',
-  'src/components/InfoCard.astro',
   'src/components/LodgingDetail.astro',
   'src/styles/tokens.css',
 ]
@@ -315,11 +314,14 @@ function main() {
     // đồng khai đúng thực tế — để nguyên ở danh sách "không có FactStrip" thì
     // cổng vẫn xanh nhưng nói sai, đúng loại lỗi DR-050.
     'src/components/ArticleDetail.astro',
-  ]
-  const ENTITIES_WITHOUT_FACTSTRIP = [
+    // QĐ-2026-08-29-03: hai template cuối cùng chuyển nốt. ENTITIES_WITHOUT_
+    // FACTSTRIP nay RỖNG — mọi entity detail đều đi qua FactStrip. Giữ mảng
+    // rỗng thay vì xoá: vòng lặp bên dưới vẫn chạy, và mảng rỗng nói rõ "không
+    // còn ngoại lệ", khác hẳn với việc xoá đi rồi không ai biết từng có.
     'src/components/PersonDetail.astro',
     'src/components/OrganizationDetail.astro',
   ]
+  const ENTITIES_WITHOUT_FACTSTRIP: string[] = []
 
   for (const file of ENTITIES_WITH_FACTSTRIP) {
     if (!existsSync(resolve(REPO_ROOT, file))) continue

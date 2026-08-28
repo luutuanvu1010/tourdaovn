@@ -905,7 +905,7 @@ round — Lodging convert theo ruling".
 
 ## DR-046 — `InfoCard.astro` còn sống cho ba template ngoài phạm vi đóng Luật 1
 
-**Trạng thái:** **mở một phần** — còn `OrganizationDetail` và `PersonDetail`.
+**Trạng thái:** **ĐÓNG** 2026-08-29 (`QĐ-2026-08-29-03`). `InfoCard.astro` đã xoá; slot `info` của `DetailLayout`, prop `infoBarItems`, và nhánh `'InfoCard'` trong `Sidebar` đều đã gỡ. `ENTITIES_WITHOUT_FACTSTRIP` nay **rỗng** — mọi entity detail đi qua `FactStrip`. Xác minh bản dựng: **0 trang** còn `class="info-card"`.
 
 **Cập nhật 2026-08-29 (`QĐ-2026-08-29-02`): phần Bài viết ĐÃ ĐÓNG.** Chủ dự án yêu cầu trang Bài viết dùng chung khung với mọi entity khác. Đo trên trang thật cho thấy đây là chỗ lệch khung **cuối cùng** của Bài viết: `/cam-nang/…` render `info-card`, còn `/diem-tham-quan/…` render `fact-strip`; hero, breadcrumb, dải tiêu đề, đoạn mở, thanh dính và hộp tác giả thì đã chung từ trước. `ArticleDetail` nay truyền `facts` cho `DetailLayout` và không còn `InfoCard`. Chuyển đổi gần như cơ học vì kiểu `Fact` của `FactStrip` đúng bằng `{field, icon, label, value, visible}` mà `sidebarRows` vốn có. `ArticleDetail.astro` đã chuyển sang `ENTITIES_WITH_FACTSTRIP` trong `entity-layout-post.ts` để sổ hợp đồng khai đúng thực tế.
 

@@ -7,7 +7,7 @@ export interface Slot {
   // Cập nhật QĐ-2026-08-25-02: không còn "FactStrip inline" nào cả — Thông tin
   // nhanh nay luôn là dải riêng phía trên `.two-col`, không đi qua Sidebar dưới
   // bất kỳ hình thức nào.
-  component: 'BookingCTA' | 'InfoCard' | 'Map' | 'Article'
+  component: 'BookingCTA' | 'Map' | 'Article'
   visible: boolean
   props: Record<string, any>
 }
@@ -27,7 +27,6 @@ const anyVisible = slots.some(s => s.visible)
     {slots.filter(s => s.visible).map((s) => (
       <div class="sidebar-card">
         {s.name === 'booking' && <slot name="booking" />}
-        {s.name === 'info' && <slot name="info" />}
         {s.name === 'map' && <slot name="map" />}
         {s.name === 'about' && <slot name="about" />}
       </div>

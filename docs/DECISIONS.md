@@ -2243,3 +2243,21 @@ Lần đếm đầu ra 31 vì gộp nhầm trang term — trang term dùng `Term
 Kèm theo: neo containment của `entity-layout-post.ts` đổi từ `<div class="container two-col">` sang `["container", "two-col"` vì markup chuyển sang `class:list`.
 
 **Phạm vi cố ý dừng ở Bài viết.** Chủ dự án chỉ định Bài viết. Sau lượt này: **10 template dùng `FactStrip`, 2 còn `InfoCard`**. Muốn dọn nốt Organization và Person thì cần quyết định riêng — đề xuất làm, vì để hai template lẻ loi chính là thứ đã sinh ra `DR-046`.
+
+---
+
+## QĐ-2026-08-29-03 — Đóng hẳn DR-046: Tổ chức và Người chuyển nốt sang `FactStrip`, xoá `InfoCard.astro`
+
+**Bối cảnh.** Sau `QĐ-2026-08-29-02` còn **10 template dùng `FactStrip`, 2 còn `InfoCard`** (`OrganizationDetail`, `PersonDetail`). Để hai template lẻ loi chính là thứ đã sinh ra `DR-046`. Chủ dự án yêu cầu dọn nốt.
+
+**Chốt.**
+
+1. Cả hai template truyền `facts` cho `DetailLayout`, gỡ `import InfoCard`, gỡ slot `info`, gỡ `infoBarItems={[]}`.
+2. **`sameAs` KHÔNG chuyển vào Thông tin nhanh.** `06` §3.1 khai nó là dòng "Nguồn tham khảo" cạnh Cập nhật ở cuối nội dung, *"không nằm trong sidebar"*. Nay truyền qua prop `sameAs` sẵn có của `DetailLayout` — đúng vùng, thay vì làm ô thứ bảy trong dải. Chuyển nguyên si sang `facts` sẽ là một vi phạm Luật 1 mới, dù `Fact` có đỡ `href`.
+3. **Gỡ đường ống chết:** xoá `src/components/InfoCard.astro`; gỡ `<slot name="info">` và prop `infoBarItems` khỏi `DetailLayout`; gỡ `'InfoCard'` khỏi union và nhánh `s.name === 'info'` trong `Sidebar`; gỡ `InfoCard.astro` khỏi `SHARED_PRIMITIVES`.
+4. `ENTITIES_WITHOUT_FACTSTRIP` nay **rỗng** — giữ mảng rỗng thay vì xoá, để nó nói rõ "không còn ngoại lệ".
+5. `06` v2.10.0 → **v2.11.0**; `DR-046` **đóng**.
+
+**Xác minh bản dựng.** `class="info-card"` còn **0 trang** trên toàn site. `cong-ty` 3/3 có `fact-strip`; `tac-gia` 2/3 — trang thứ ba không có field nào hiển thị nên dải tự ẩn, đúng **R7**. Dòng "Nguồn tham khảo" vẫn render trên 3 trang, tức `sameAs` không mất khi đổi vùng. Số trang thu cột `two-col--solo` tăng 18 → **20** vì cột phụ của hai loại trang này nay cũng rỗng — cùng lối sửa đã dựng ở `QĐ-2026-08-29-02`, không phải lỗi mới.
+
+`gate:all` 11/11 xanh.

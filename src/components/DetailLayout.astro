@@ -29,14 +29,6 @@ export interface Props {
    *  (vd khách sạn — chỉ ràng buộc bởi Luật 1, không ràng buộc trần 6) truyền
    *  cao hơn qua đây. Task 7 fix round, 2026-08-23. */
   factsMax?: number
-  /** @deprecated Không còn render gì — `InfoBar` đã gỡ (Task 7 fix round,
-   *  2026-08-23, LodgingDetail là template cuối chuyển sang `facts`). Giữ
-   *  prop này (kiểu lỏng, không còn phụ thuộc `InfoBar.astro`) chỉ để
-   *  `ArticleDetail`/`OrganizationDetail`/`PersonDetail` — ba template ngoài
-   *  phạm vi việc đóng Luật 1, vẫn dùng `InfoCard` trực tiếp qua slot `info`,
-   *  xem DRIFT_LOG DR-046 — khỏi vỡ kiểu vì vẫn truyền `infoBarItems={[]}`.
-   *  Xoá hẳn khi ba template đó cũng dọn theo. */
-  infoBarItems?: unknown[]
   sidebarSlots: Slot[]
   nearbyTitle: string
   nearby: NearbyEntity[]
@@ -221,14 +213,10 @@ const hasHeroImage = typeof image === 'string' ? Boolean(image) : Boolean(image?
   {/* stickyBar: Sidebar cộng chiều cao thanh dính vào chỗ dính của nó (DR-033). */}
   <Sidebar slots={sidebarSlots} stickyBar={showStickyBar}>
     <slot name="booking" slot="booking" />
-    {/* Forward cho InfoCard — VẪN CẦN, không phải hàng chết. Ba template
-       ngoài phạm vi việc đóng Luật 1 (ArticleDetail, OrganizationDetail,
-       PersonDetail — không có hàng ở 06 §3.1, không dùng FactStrip) vẫn
-       truyền <InfoCard slot="info"> qua đây. Mọi template có hàng ở §3.1 đã
-       chuyển sang `facts` không truyền gì vào slot này nên nhánh trống, không
-       render thừa. Xem DRIFT_LOG DR-046 — không xoá tới khi ba template đó
-       cũng chuyển hoặc có quyết định khác. */}
-    <slot name="info" slot="info" />
+    {/* Slot `info` ĐÃ GỠ — QĐ-2026-08-29-03. Đường forward này tồn tại chỉ để
+       ba template ArticleDetail/OrganizationDetail/PersonDetail truyền
+       `<InfoCard slot="info">` (DR-046). Cả ba nay đã chuyển sang `facts`, và
+       `InfoCard.astro` đã xoá, nên giữ lại là hàng chết. */}
     <slot name="map" slot="map" />
     <slot name="about" slot="about" />
   </Sidebar>
