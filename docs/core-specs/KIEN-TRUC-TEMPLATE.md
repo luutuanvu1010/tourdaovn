@@ -8,6 +8,10 @@
 - **Ngày:** 2026-08-29   **Người soạn:** Cowork   **Người phê chuẩn:** Lưu Tuấn Vũ
 - **Liên quan:** `06-BINDING_MAP.md` (hợp đồng vùng ↔ field), `07-DESIGN_TOKENS.md` (nguồn token), `02-SAD.md` §2, `scripts/validators/entity-layout-post.ts` (cổng canh)
 
+> **File này canh bằng `doc-reality-auditor`, KHÔNG bằng validator.** Phần lớn nội dung dưới đây là phán đoán bằng lời, không phải giá trị so được bằng chuỗi; một cổng chỉ đối chiếu được một danh sách rồi in `[pass]` sẽ tạo tin cậy giả. Danh sách sáu điểm phải đối chiếu nằm trong `.claude/agents/doc-reality-auditor.md`, mục "Phạm vi thứ hai". Chủ dự án chốt 2026-08-29.
+>
+> Chạy sau khi đổi cấu trúc template, đổi token hero, hoặc thêm/bớt entity type.
+
 ---
 
 ## 1. Ba tầng — bảng tra nhanh

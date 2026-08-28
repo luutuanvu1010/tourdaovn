@@ -19,7 +19,7 @@ CoreSchema
   thật — N7). Xem `playbook/README.md` và `playbook/.PINNED_VERSION`.
 - **Lớp engine** là hiện thực code tuân theo luật trong `playbook/`. Các ADR cụ thể của
   engine ở `docs/adr/`; runbook deploy ở `SETUP-NEW-SITE.md`.
-- **`docs/core-specs/`** — 11 đặc tả **đã điền, đã nghiên cứu kỹ** lấy từ nhatrangtravel
+- **`docs/core-specs/`** — 11 đặc tả **đã điền, đã nghiên cứu kỹ** lấy từ nhatrangtravel, cộng `KIEN-TRUC-TEMPLATE.md` soạn tại site này
   (SAD, CONSTRAINTS, CONTENT_MODEL, BINDING_MAP, URL_MAP, i18n, DESIGN_TOKENS,
   DESIGN_PATTERNS, QA_CHECKLIST, SCHEMA_PLAN, PROJECT_BRIEF). Khác với `playbook/templates/`
   (rỗng), đây là mẫu có nội dung thật, đã đánh dấu `🔧 SITE-SPECIFIC` tại chỗ riêng site.

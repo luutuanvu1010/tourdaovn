@@ -25,6 +25,25 @@ Gốc rễ đi kèm: một quyết định đòi "ghi mục mới trong sổ đ�
 3. Với mỗi mục trượt, **kiểm chứng bằng thực tế** trước khi báo — ví dụ `DOC3` trượt thì chạy `curl -sI https://tourdao.vn/<đường dẫn>` xem mã trả về thật là gì.
 4. Báo cáo.
 
+## Phạm vi thứ hai: `docs/core-specs/KIEN-TRUC-TEMPLATE.md`
+
+Thêm 2026-08-29. File này là **bản đồ file tầng giao diện** — nó nói "muốn đổi X thì mở file nào". Nó mô tả **cấu trúc mã**, không mô tả production, nên `audit:doc` (nhắm vào `BUILD-NOTES`/`README`/`ADR` và luật chuyển hướng) **không phủ nó**. Phải đối chiếu bằng tay.
+
+Vì sao là vai này chứ không phải một validator: phần lớn file đó là **phán đoán bằng lời** — *"frame chung quyết định thứ tự khối"*, *"template con không tự vẽ bố cục"*, *"`--hero-min-h` là bẫy tên gọi"*. Không regex nào kiểm được những câu đó. Một cổng chỉ so được một danh sách rồi in `[pass]` sẽ tạo **tin cậy giả** — đúng thứ `gate-auditor` sinh ra để bắt. Chủ dự án chốt điều này 2026-08-29.
+
+Sáu điểm phải đối chiếu, mỗi điểm kèm lệnh:
+
+| Doc khai | Kiểm bằng |
+|---|---|
+| 13 entity type, 11 đi thẳng + Hotel/Resort uỷ quyền qua `LodgingDetail` | `grep -l "import DetailLayout" src/components/*.astro` và `grep -l "import LodgingDetail" src/components/*.astro` |
+| Frame chung là `DetailLayout.astro`, thứ tự khối như §2.1 | Đọc phần template của `DetailLayout.astro`; đối chiếu chuỗi vùng trên một trang đã dựng |
+| Bốn token `--hero-entity-h-*` khai ở `tokens.css`, `Hero.astro` không giữ con số | `grep -n "hero-entity-h" src/styles/tokens.css` và `grep -nE "height:" src/components/Hero.astro` — mọi dòng chiều cao phải là `var()` |
+| Năm primitive mà `DetailLayout` gọi | `grep "^import .* from './" src/components/DetailLayout.astro` |
+| Bảy loại trang KHÔNG đi qua `DetailLayout` | `grep -L "import DetailLayout"` trên nhóm `SiteHome`/`*Index`/`TouristDestinationHub` |
+| Cổng có bốn tầng, tầng 4 chặn `<Hero>` thiếu `gallery` | Đọc `scripts/validators/entity-layout-post.ts`; thử gỡ prop rồi chạy, phải ĐỎ |
+
+**Bẫy đếm:** doc khai "13 entity" và "7 loại trang ngoài frame". Đếm lại từ mã mỗi lần, đừng tin con số trong doc — chính con số là thứ hay lệch trước nhất khi ai đó thêm entity.
+
 ## Ràng buộc cứng
 
 - **Không tự sửa tài liệu.** Nhiều mục trong đây là văn bản lõi hoặc multi-site; `DR-040` ghi rõ sửa `README.md`, `ADR-0009`, `ADR-0022` "phải có quyết định riêng". Sửa không có quyết định là vượt thẩm quyền theo `CLAUDE.md` §5.

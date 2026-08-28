@@ -119,7 +119,7 @@ export const DANH_SACH_NEN_DOC2_DOCS: DiemNenDaBiet[] = [
   },
   {
     file: 'README.md',
-    dong: '- **`docs/core-specs/`** — 11 đặc tả **đã điền, đã nghiên cứu kỹ** lấy từ nhatrangtravel',
+    dong: '- **`docs/core-specs/`** — 11 đặc tả **đã điền, đã nghiên cứu kỹ** lấy từ nhatrangtravel, cộng `KIEN-TRUC-TEMPLATE.md` soạn tại site này',
     lyDo: 'ghi nguồn gốc của bộ đặc tả, không phải rò cấu hình đang chạy',
   },
   {
