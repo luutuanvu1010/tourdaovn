@@ -91,7 +91,9 @@ const hasReference = Boolean(td?.faq?.length || td?.safetyNote || td?.sameAs?.le
     §3 hàng Hero: *"trên ảnh chỉ còn huy hiệu loại. `title` và `summary` đều đã
     ra ngoài … KHÔNG CÒN CHỮ NÀO ĐÈ LÊN ẢNH."*
     §3.1 hàng Nhãn loại entity: *"không áp dụng: … touristDestination"* — trang
-    này không có huy hiệu, nên hero còn đúng một tấm ảnh.
+    này không có huy hiệu, nên hero KHÔNG CÓ LỚP PHỦ. Hàng đó chi phối lớp phủ,
+    KHÔNG chi phối thành phần ảnh. Bản trước suy từ "không huy hiệu" sang "hero
+    còn đúng một tấm ảnh" rồi bỏ luôn prop `gallery` — DR-076.
     Thứ tự khối (§6, v2.5): breadcrumb → tiêu đề → hero → đoạn mở → nội dung.
     Trang điểm đến không có thanh dính (đó là thiết bị của trang chi tiết), nên
     đoạn mở nối thẳng sau hero. */}
@@ -109,9 +111,15 @@ const hasReference = Boolean(td?.faq?.length || td?.safetyNote || td?.sameAs?.le
 {/* R7: không ảnh thì bỏ hẳn hero, không dựng khung rỗng. Trang này không có
     huy hiệu nên ảnh là điều kiện duy nhất. `hasOverlay={false}` — lớp phủ tối
     sinh ra CHỈ để chữ đè trên ảnh đọc được; không còn chữ thì nó chỉ làm tối
-    55% dưới của một tấm ảnh không lý do. */}
+    55% dưới của một tấm ảnh không lý do.
+    `gallery` PHẢI truyền: §3 hàng Hero bắt *"`gallery` đủ 4 ảnh sau khi loại
+    trùng `mainImage` thì đi qua Hero mosaic"*, §3 hàng Gallery chỉ loại trừ
+    article/person/organization, và §4.1 khai trang này là *"khung chung áp
+    dụng, cộng"*. Truy vấn đã lấy sẵn (`queries/touristDestination.ts`,
+    `galleryFragment()`) và kiểu đã khai (`types.ts`) — chỉ CHỖ GỌI NÀY đánh
+    rơi, nên mọi trang điểm đến rơi về hero ảnh đơn. DR-076. */}
 {hasHeroImage && (
-  <Hero image={heroImage} imageAlt={(heroImage as any)?.alt || title} fullBleed hasOverlay={false} />
+  <Hero image={heroImage} gallery={td?.gallery} imageAlt={(heroImage as any)?.alt || title} fullBleed hasOverlay={false} />
 )}
 
 {/* Ghi công ảnh: giữ lại nhưng đưa XUỐNG DƯỚI ảnh. Bản cũ đặt nó đè lên góc

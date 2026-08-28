@@ -1812,3 +1812,52 @@ Thực tế mã:
 **Vì sao không sửa cùng `QĐ-2026-08-27-03`.** Sửa kiểu `slug` của Category chạm **mọi** term đang có của hai bộ `experience-type` và `tour-type`, tức chạm URL đang chạy và đang được Google lập chỉ mục — rủi ro khác hẳn và không liên quan tới việc mở bộ term mới. Bộ `attraction-type` mở ra theo **đúng khuôn đang có** (slug phẳng), nên không làm drift nặng thêm, chỉ làm nó rộng thêm một bộ.
 
 **Điều kiện phải xử:** trước khi bật ngôn ngữ thứ hai trong `langs`. Khi xử, phải quyết một lượt cho cả ba bộ term, kèm di trú dữ liệu và bản đồ chuyển hướng cho URL term hiện có.
+
+## DR-076 — Hero trang điểm đến đánh rơi `gallery`, nên không trang nào vào được mosaic
+
+**Trạng thái:** **đóng** 2026-08-28. Sửa cùng lượt phát hiện.
+
+Phát hiện 2026-08-28 khi đối chiếu bố cục hero của `/nha-trang/` với khung chung của các entity khác.
+
+**Lệch gì.** `TouristDestinationHub.astro` gọi `<Hero>` mà **không truyền `gallery`**, trong khi `DetailLayout.astro` — khung chung của mọi trang chi tiết — có truyền. Không có prop đó thì `Hero.astro` tính `hasGallery = galleryItems.length === 4` luôn ra `false`, nên trang điểm đến **không bao giờ** vào được biến thể `.hero-block--mosaic`.
+
+**Đặc tả nói gì.** `06-BINDING_MAP` §4.1 khai trang điểm đến là *"khung chung áp dụng, cộng"*, tức §3 áp cho nó. §3 hàng Hero: *"`gallery` đủ 4 ảnh sau khi loại trùng `mainImage` thì đi qua Hero mosaic"*. §3 hàng Gallery: *"gallery detail phải đi qua Hero mosaic"*, loại trừ **`article, person, organization`** — `touristDestination` **không** nằm trong danh sách loại trừ.
+
+**Dữ liệu không thiếu, chỉ bị bỏ rơi ở tầng template.**
+
+| Tầng | Trạng thái trước khi sửa |
+|---|---|
+| GROQ `queries/touristDestination.ts` | có `${galleryFragment()}` |
+| Kiểu `lib/types.ts` | có `gallery?: ImageAsset[] \| null` |
+| Sanity, doc `nha-trang` | `mainImage` + 4 ảnh gallery, không ảnh nào trùng ảnh chính |
+| `TouristDestinationHub.astro` | chuỗi `gallery` **không xuất hiện lần nào** |
+
+Cả 5 điểm đến approved đều đủ điều kiện mosaic (Đà Lạt 4, Ninh Thuận 4, Lâm Đồng 4, Khánh Hòa 14, Nha Trang 4). Không trang nào từng render được nó.
+
+**Đo được** (bản dựng, Chrome, viewport 1366, trước khi sửa):
+
+| Trang | ảnh chính | lưới gallery |
+|---|---|---|
+| `/nha-trang/` | **1366**×380 | **không có** |
+| `/diem-tham-quan/bai-bien-doc-let/` | 735×380 | 627×380, 4 ô |
+
+Khung ngoài của hero trùng khít từng pixel ở hai trang — lệch nằm hẳn **bên trong** hero, không phải lệch vị trí.
+
+**Gốc của cái sai.** Chú thích ngay tại chỗ gọi dẫn §3.1 hàng *Nhãn loại entity* (`không áp dụng: … touristDestination`) rồi kết luận *"trang này không có huy hiệu, nên hero còn đúng một tấm ảnh"*. Hàng đó chi phối **lớp phủ**, không chi phối **thành phần ảnh**. `hasOverlay={false}` là đúng; suy tiếp sang bỏ `gallery` là sai. Chú thích đã viết lại để câu suy luận hỏng không tái sinh.
+
+**Vì sao không cổng nào bắt được — hai khoảng mù chồng nhau.**
+
+1. `entity-layout-post.ts` quét tự động **chỉ file kết thúc bằng `Detail.astro`**, nên `TouristDestinationHub.astro` nằm ngoài toàn bộ sổ hợp đồng layout (13 file ghi danh, không có nó).
+2. `HERO_MOSAIC_CONTRACT` chỉ đọc `Hero.astro`, tức chỉ kiểm Hero **có cài** mosaic. Nó chưa bao giờ kiểm nơi gọi **có truyền** `gallery`.
+
+Một caller đánh rơi prop thì mọi cổng vẫn xanh.
+
+**Đã xử.**
+
+- `TouristDestinationHub.astro`: truyền `gallery={td?.gallery}`; viết lại chú thích.
+- `entity-layout-post.ts`: thêm **tầng 4 — Hero caller contract**. Mọi file render `<Hero>` phải ghi danh trong `HERO_CALLERS`, và mỗi thẻ `<Hero>` phải có prop `gallery`. Bộ cắt thẻ đếm ngoặc nhọn chứ không cắt ở `>` đầu tiên, vì `hasOverlay={badgeList.length > 0}` có `>` nằm trong biểu thức.
+
+**Bằng chứng cổng biết đỏ** (chạy 2026-08-28): gỡ lại prop `gallery` → `[FAIL] … <Hero> thiếu prop gallery`, mã thoát **1**; thêm một component mới render `<Hero>` chưa ghi danh → `[FAIL] … chưa khai trong HERO_CALLERS`; khôi phục → `[pass]`, mã thoát **0**.
+
+**Xác nhận sau sửa:** `dist/nha-trang/index.html` và `dist/ninh-thuan/index.html` đều ra `hero-block hero-block--mosaic` với 4 ô; đo trên trình duyệt ở 1366: ảnh chính 735×380 + lưới 627×380 — trùng hình dạng trang chi tiết.
+
