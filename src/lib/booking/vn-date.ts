@@ -31,6 +31,22 @@ export function formatDateVN(iso: string): string {
   return `${d}/${m}/${y}`
 }
 
+const hhmm = new Intl.DateTimeFormat('en-GB', { timeZone: VN_TZ, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+
+/**
+ * Dấu thời gian ISO (UTC) → 'HH:mm dd/mm/yyyy' theo giờ Việt Nam, ví dụ
+ * '2026-08-29T16:36:59.736Z' → '23:36 29/08/2026'.
+ *
+ * Dùng chung đúng `VN_TZ` với `todayVN`/`yymmddVN` để múi giờ chỉ có MỘT nguồn sự thật:
+ * đơn đặt sau 17h UTC trước đây in ra ngày lệch hẳn so với chính mã đơn (mã đơn vốn tính
+ * theo giờ Việt Nam). Chuỗi không đọc được thì trả nguyên si, không ném.
+ */
+export function formatDateTimeVN(iso: string): string {
+  const t = new Date(iso)
+  if (Number.isNaN(t.getTime())) return iso
+  return `${hhmm.format(t)} ${formatDateVN(ymd.format(t))}`
+}
+
 /** 'yymmdd' theo giờ Việt Nam, dùng trong mã đơn. */
 export function yymmddVN(now: Date = new Date()): string {
   const [y, m, d] = todayVN(now).split('-')

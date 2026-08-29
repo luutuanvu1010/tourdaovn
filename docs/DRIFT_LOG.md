@@ -2485,3 +2485,32 @@ tiếng Việt, trong khi `data-date-required="Chọn ngày khởi hành."` đã
 Đảo thứ tự, và đổi `focus()` trần thành `focus({preventScroll:true})` + `scrollIntoView({block:
 'center'})` vì `focus()` cuộn tối thiểu, để ô ngày dừng sát mép trên nơi header và thanh dính che
 mất nó lẫn dòng báo lỗi — người bấm chỉ thấy trang nhảy.
+
+## DR-103 — Thêm MỘT mục vào `siteSettings.sections` làm biến mất 16 khối trang chủ
+
+**Trạng thái:** đã khắc phục 2026-08-29 khuya (xoá trường `sections`, publish); phiếu này ghi
+lại **cơ chế**, vì nó sẽ nổ lại y hệt lần sau nếu không ai biết.
+
+**Chuyện đã xảy ra.** Lúc 10:25:24Z (17:25 giờ VN) `siteSettings.sections` chuyển từ **rỗng**
+sang **đúng một mục** `{key: 'areas'}`. Trang chủ production tụt từ 17 khối xuống 1 — đo được
+24.351 byte / 3 `<section>`, so với 60.044 byte / 14 `<section>` sau khi sửa. Không phát hiện
+sớm vì bản dựng cục bộ và production khớp nhau từng byte: hệ thống chạy **đúng** như dữ liệu
+bảo, chỉ là dữ liệu bảo sai.
+
+**Cơ chế.** `SiteHome.astro`: `const rawSections = config?.sections?.length ? config.sections :
+DEFAULT_SECTIONS`. Danh sách **rỗng** nghĩa là "dùng mặc định 17 khối"; danh sách **có một mục**
+nghĩa là "biên tập đã chọn tay, dựng đúng ngần này". Không có trạng thái trung gian nào. Nên
+thao tác vô hại nhất trong Studio — kéo thêm một mục vào một mảng đang rỗng — **xoá 16 khối
+còn lại** mà không cảnh báo gì.
+
+**Vì sao không cổng nào bắt được.** Đây không phải lệch giữa spec và mã: mã thi hành đúng
+`06-BINDING_MAP`. Cũng không phải dữ liệu thiếu: `touristDestination` vẫn đủ 4 điểm tham quan,
+3 trải nghiệm, 5 nơi ở, 5 tour. Đây là một **cấu hình hợp lệ nhưng ngoài ý muốn**, loại mà
+validator hiện không có khái niệm để bắt.
+
+**Đề xuất (chưa làm, cần quyết ở tầng phù hợp).** Một trong hai:
+1. Trong Studio, cho `sections` một mô tả rõ: "Để TRỐNG thì trang chủ hiện đủ 17 khối theo thứ
+   tự mặc định. Thêm mục vào đây nghĩa là **chỉ** hiện những mục bạn liệt kê."
+2. Hoặc đổi ngữ nghĩa: `sections` chỉ dùng để **sắp thứ tự và ẩn** (`hidden`), khối nào không
+   được nhắc thì vẫn hiện theo mặc định. An toàn hơn nhưng là đổi hợp đồng dữ liệu — cần
+   quyết định riêng vì chạm `06-BINDING_MAP`.

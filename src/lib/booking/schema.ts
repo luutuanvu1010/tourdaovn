@@ -120,10 +120,19 @@ export function parseBookingPayload(raw: unknown): BookingInput {
   }
 }
 
-/** Bỏ mọi ký tự không phải số; +84/84 đầu → 0; phải là 0 + 9–10 số. */
+/**
+ * Bỏ mọi ký tự không phải số; bỏ tiền tố `84`; nếu phần còn lại chưa bắt đầu bằng `0` thì
+ * thêm `0`; phải là 0 + 9–10 số.
+ *
+ * Bản cũ luôn dán `'0'` sau khi cắt `84`, nên `+84 0905 123 456` — khách gõ cả mã quốc gia
+ * lẫn số `0` đầu, rất phổ biến — ra `00905123456`, vẫn khớp `/^0\d{9,10}$/` (0 + 10 số) nên
+ * lọt cổng và nhân viên nhận số KHÔNG gọi được. SĐT là kênh liên lạc bắt buộc duy nhất của
+ * đơn, nên đây là lỗi mất đơn chứ không phải lỗi hiển thị.
+ */
 export function normalizePhone(raw: string): string | null {
   let digits = (raw || '').replace(/\D/g, '')
-  if (digits.startsWith('84')) digits = '0' + digits.slice(2)
+  if (digits.startsWith('84')) digits = digits.slice(2)
+  if (!digits.startsWith('0')) digits = '0' + digits
   return /^0\d{9,10}$/.test(digits) ? digits : null
 }
 

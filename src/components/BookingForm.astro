@@ -8,7 +8,7 @@ import type { Lang, SiteContact } from '../lib/types'
 import { uiCopy } from '../lib/uiCopy'
 import { formatPrice } from '../lib/renderer'
 import { availablePaxCodes, computeQuote, emptyPax, type PaxCode, type PriceTable } from '../lib/booking/quote'
-import { addDaysISO, todayVN } from '../lib/booking/vn-date'
+import { addDaysISO, formatDateVN, todayVN } from '../lib/booking/vn-date'
 import { LIMITS, MSG } from '../lib/booking/schema'
 
 export interface Props {
@@ -53,6 +53,11 @@ const quotedAt = new Date().toISOString()
 const today = todayVN()
 const minDate = addDaysISO(today, 1)
 const maxDate = addDaysISO(today, LIMITS.MAX_DAYS_AHEAD)
+// Câu chỉ phạm vi ngày, giữ dạng KHUÔN có {min}/{max} chứ không nướng sẵn hai mốc: script
+// tính lại min/max theo giờ Việt Nam lúc khách mở trang, nên chuỗi cố định lúc build sẽ lệch
+// mốc ngay hôm sau. Server dựng sẵn một bản để không JS vẫn đọc được phạm vi.
+const dateRangeTpl = 'Chọn ngày từ {min} đến {max}'
+const dateRangeText = dateRangeTpl.replace('{min}', formatDateVN(minDate)).replace('{max}', formatDateVN(maxDate))
 
 const zaloUrl = contact?.zaloUrl || ''
 const hotline = contact?.hotline || ''
@@ -79,6 +84,7 @@ if (!turnstileSiteKey) {
   data-total-max={String(LIMITS.TOTAL_MAX)}
   data-per-type-max={String(LIMITS.PER_TYPE_MAX)}
   data-date-required={MSG.dateRequired}
+  data-date-range={dateRangeTpl}
   data-date-label={t('bookingDepartDate')}
   data-subtotal-label={t('bookingSubtotal')}
 >
@@ -98,7 +104,8 @@ if (!turnstileSiteKey) {
 
   <section class="bf__step" data-step="1">
     <label class="bf__label" for="bf-date">{t('bookingDepartDate')}</label>
-    <input id="bf-date" class="bf__input" type="date" name="departDate" required min={minDate} max={maxDate} />
+    <input id="bf-date" class="bf__input" type="date" name="departDate" required min={minDate} max={maxDate} aria-describedby="bf-date-range" />
+    <p class="bf__note" id="bf-date-range" data-date-range-text>{dateRangeText}</p>
     <p class="bf__err" data-err="departDate" aria-live="polite"></p>
 
     <p class="bf__label" id="bf-pax-label">{t('bookingPax')}</p>
@@ -197,8 +204,8 @@ if (!turnstileSiteKey) {
 <script>
   import { PAX_ORDER, computeQuote, type PaxCode, type PaxCounts, type PriceTable, type Quote } from '../lib/booking/quote'
   import { formatPrice } from '../lib/renderer'
-  import { addDaysISO, todayVN } from '../lib/booking/vn-date'
-  import { LIMITS } from '../lib/booking/schema'
+  import { addDaysISO, formatDateVN, todayVN } from '../lib/booking/vn-date'
+  import { LIMITS, MSG } from '../lib/booking/schema'
 
   declare global {
     interface Window {
@@ -231,6 +238,7 @@ if (!turnstileSiteKey) {
     const linesEl = q<HTMLElement>('[data-quote-lines]')!
     const totalEl = q<HTMLElement>('[data-total]')!
     const hintEl = q<HTMLElement>('[data-large-group]')!
+    const paxErrEl = q<HTMLElement>('[data-err="pax"]')!
     const totalInput = q<HTMLInputElement>('[data-quoted-total]')!
     const tokenInput = q<HTMLInputElement>('[data-turnstile-token]')!
     const widgetEl = q<HTMLElement>('[data-turnstile]')!
@@ -242,6 +250,14 @@ if (!turnstileSiteKey) {
     const today = todayVN()
     dateEl.min = addDaysISO(today, 1)
     dateEl.max = addDaysISO(today, LIMITS.MAX_DAYS_AHEAD)
+
+    // Câu phạm vi ngày dựng lại từ min/max VỪA tính, không dùng bản server nướng lúc build.
+    const dateRangeTpl = form.dataset.dateRange || ''
+    const dateRangeMsg = () => dateRangeTpl
+      ? dateRangeTpl.replace('{min}', formatDateVN(dateEl.min)).replace('{max}', formatDateVN(dateEl.max))
+      : ''
+    const rangeTextEl = q<HTMLElement>('[data-date-range-text]')
+    if (rangeTextEl) rangeTextEl.textContent = dateRangeMsg()
 
     // Bộ đếm
     const rows = new Map<PaxCode, { input: HTMLInputElement; label: string; inc: HTMLButtonElement; dec: HTMLButtonElement }>()
@@ -256,15 +272,28 @@ if (!turnstileSiteKey) {
       input.addEventListener('change', update)
     })
 
+    // Lý do một thao tác vừa bị kéo về giới hạn. Chỉ sống tới lần update() kế tiếp: thao tác
+    // hợp lệ sau đó phải xoá được thông báo, không để nó đọng lại trên màn hình.
+    let clampMsg = ''
     function readPax(): PaxCounts {
       const pax: PaxCounts = { adult: 0, child: 0, senior: 0, infant: 0 }
       rows.forEach((r, code) => {
         const min = Number(r.input.min) || 0
-        const v = Math.min(perTypeMax, Math.max(min, parseInt(r.input.value, 10) || 0))
+        const raw = parseInt(r.input.value, 10) || 0
+        const v = Math.min(perTypeMax, Math.max(min, raw))
+        // Gõ tay số dưới mức tối thiểu thì bị kéo về im lặng; ghi lại để update() nói ra.
+        if (raw < min && code === 'adult') clampMsg = MSG.adultMin
         r.input.value = String(v)
         pax[code] = v
       })
       return pax
+    }
+
+    // Tắt một nút đang giữ tiêu điểm sẽ ném `activeElement` về `<body>`, và phím Tab kế tiếp
+    // bắt đầu lại từ đầu trang chi tiết (cao ~19.000px). Dời tiêu điểm sang ô số cùng hàng trước.
+    function setBtnDisabled(btn: HTMLButtonElement, off: boolean, fallback: HTMLElement) {
+      if (off && !btn.disabled && document.activeElement === btn) fallback.focus({ preventScroll: true })
+      btn.disabled = off
     }
 
     let quote: Quote | null = null
@@ -291,8 +320,22 @@ if (!turnstileSiteKey) {
       })
 
       const atCap = total >= totalMax || !quote
-      rows.forEach(r => { r.inc.disabled = atCap || (parseInt(r.input.value, 10) || 0) >= perTypeMax })
-      hintEl.hidden = !(total >= totalMax || !quote)
+      rows.forEach(r => {
+        const v = parseInt(r.input.value, 10) || 0
+        setBtnDisabled(r.inc, atCap || v >= perTypeMax, r.input)
+        // "+" biết tự tắt còn "-" thì không: ở mức tối thiểu nó vẫn sáng nhưng bấm vô ích.
+        setBtnDisabled(r.dec, v <= (Number(r.input.min) || 0), r.input)
+      })
+
+      // Nút mờ đi mà không một chữ nào là lỗi đo được: khách tưởng nút hỏng. Nói ra lý do
+      // đang chặn, ưu tiên trần tổng vì nó khoá mọi hàng chứ không riêng hàng nào.
+      let paxMsg = clampMsg
+      clampMsg = ''
+      if (!paxMsg && total >= totalMax) paxMsg = MSG.totalMax
+      if (!paxMsg && PAX_ORDER.some(c => pax[c] >= perTypeMax)) paxMsg = MSG.perTypeMax
+      paxErrEl.textContent = paxMsg
+      // MSG.totalMax đã chứa sẵn lời mời nhắn Zalo y như hintEl, nên chỉ hiện một trong hai.
+      hintEl.hidden = !!paxMsg || !!quote
       openBtn.disabled = !quote
     }
     update()
@@ -330,7 +373,9 @@ if (!turnstileSiteKey) {
       document.head.appendChild(s)
     }
 
-    openBtn.addEventListener('click', () => {
+    // Thân của nút "Đặt tour ngay" tách thành hàm để Enter ở bước 1 gọi lại được ĐÚNG luồng
+    // này (xem chốt trong handler submit), không phải một bản chép đôi dễ lệch.
+    function openStep2() {
       clearErrs()
       if (!dateEl.value) {
         // Câu của mình TRƯỚC `validationMessage`. Thứ tự cũ (validationMessage trước) đưa chuỗi
@@ -344,17 +389,34 @@ if (!turnstileSiteKey) {
         dateEl.scrollIntoView({ block: 'center' })
         return
       }
+      // `min`/`max` của ô ngày chỉ chặn được mũi tên lịch, không chặn ngày gõ tay. Không chốt
+      // ở đây thì ngày ngoài phạm vi lọt hết bước 1 và khách chỉ biết sau khi server trả về.
+      if (!dateEl.checkValidity()) {
+        showErr('departDate', dateRangeMsg() || dateEl.validationMessage || '')
+        dateEl.focus({ preventScroll: true })
+        dateEl.scrollIntoView({ block: 'center' })
+        return
+      }
       step2.hidden = false
       openBtn.hidden = true
       q<HTMLInputElement>('[name="name"]')?.focus()
       loadTurnstile()
-    })
+    }
+    openBtn.addEventListener('click', openStep2)
     backBtn.addEventListener('click', () => { step2.hidden = true; openBtn.hidden = false; openBtn.focus() })
 
     // Gửi
     form.addEventListener('submit', async (ev) => {
       ev.preventDefault()
       clearErrs()
+      // Nút [data-submit] nằm trong bước 2 nhưng vẫn là nút mặc định của form, nên Enter ở ô
+      // ngày lúc bước 2 đang gấp vẫn kích hoạt implicit submission: một POST thật đi ra với
+      // tên/SĐT/token rỗng, còn lỗi trả về rơi vào các ô đang bị ẩn nên khách không thấy gì.
+      // Bước 2 chưa mở thì Enter phải chạy đúng luồng của nút mở, rồi dừng.
+      if (step2.hidden) {
+        if (!openBtn.disabled) openStep2()
+        return
+      }
       if (!quote) return
       const fd = new FormData(form)
       const val = (k: string) => String(fd.get(k) ?? '').trim()

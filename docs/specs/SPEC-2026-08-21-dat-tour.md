@@ -215,7 +215,7 @@ Kiểm, theo thứ tự, dừng ở lỗi đầu tiên của mỗi trường (m�
 | `pax` | số nguyên; `adult` 1–20; `child`/`senior`/`infant` 0–20; tổng ≤ 30 |
 | `quoted` | số nguyên ≥ 0; `total` ≤ 1.000.000.000; server tính lại `Σ count × perPax` bằng đúng `quote.ts`, lệch `total` → 400 (kiểm nhất quán, **không** phải tin giá) |
 | `name` | 2–80 ký tự sau khi cắt khoảng trắng |
-| `phone` | bỏ mọi ký tự không phải số; `+84`/`84` đầu → `0`; phải khớp `/^0\d{9,10}$/`; lưu dạng đã chuẩn hoá |
+| `phone` | bỏ mọi ký tự không phải số; bỏ tiền tố `84`; nếu phần còn lại **chưa** bắt đầu bằng `0` thì thêm `0` (khách gõ cả `+84` lẫn `0` đầu, ví dụ `+84 0905 123 456`, vẫn ra `0905123456` chứ không ra `00905123456`); phải khớp `/^0\d{9,10}$/`; lưu dạng đã chuẩn hoá |
 | `email` | tuỳ; nếu có: ≤ 120, khớp biểu thức email đơn giản |
 | `pickup` ≤ 200, `note` ≤ 1000 | cắt khoảng trắng hai đầu |
 | `website` (honeypot) | phải rỗng; **không rỗng → trả 200 `{ok:true, code:"TD-…"}` giả, không lưu, không báo** (không mách bot) |

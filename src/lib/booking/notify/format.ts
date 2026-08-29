@@ -2,7 +2,7 @@
 // Đây là nơi DUY NHẤT PII rời D1 (BK3): chỉ vào thư/tin gửi cho nhân viên.
 import { formatPrice } from '../../renderer'
 import { PAX_ORDER, type PaxCode } from '../quote'
-import { formatDateVN } from '../vn-date'
+import { formatDateTimeVN, formatDateVN } from '../vn-date'
 import type { NewBooking } from '../store'
 
 export const PAX_LABEL_VI: Record<PaxCode, string> = {
@@ -42,7 +42,9 @@ export function formatText(b: NewBooking): string {
   if (b.email) lines.push(`Email: ${b.email}`)
   if (b.pickup) lines.push(`Điểm đón: ${b.pickup}`)
   if (b.note) lines.push(`Ghi chú: ${b.note}`)
-  lines.push(``, `Gửi lúc: ${b.createdAt} · nguồn: ${b.source}`)
+  // `createdAt` là ISO UTC. In nguyên si thì nhân viên đọc lệch 7 tiếng, và đơn đặt sau 17h
+  // UTC còn lệch cả ngày so với chính mã đơn (mã đơn tính theo giờ Việt Nam).
+  lines.push(``, `Gửi lúc: ${formatDateTimeVN(b.createdAt)} · nguồn: ${b.source}`)
   return lines.join('\n')
 }
 

@@ -26,6 +26,26 @@ describe('normalizePhone', () => {
     expect(normalizePhone('abc')).toBeNull()
     expect(normalizePhone('')).toBeNull()
   })
+
+  // Bảng ca đầy đủ. Hai hàng đánh dấu ← là lỗ hổng thật: bản cũ cắt `84` rồi LUÔN dán `'0'`,
+  // nên khách gõ cả `+84` lẫn số `0` đầu ra `00905123456` — vẫn khớp `/^0\d{9,10}$/` nên lọt
+  // cổng, và nhân viên nhận một số KHÔNG gọi được. SĐT là kênh liên lạc bắt buộc duy nhất.
+  const CASES: Array<[string, string | null]> = [
+    ['0905123456', '0905123456'],
+    ['+84905123456', '0905123456'],
+    ['84905123456', '0905123456'],
+    ['+84 905 123 456', '0905123456'],
+    ['+84 0905 123 456', '0905123456'], // ← ca đang hỏng
+    ['84 0905 123 456', '0905123456'],  // ← cùng gốc
+    ['(090) 512-3456', '0905123456'],
+    ['0905 123 456', '0905123456'],
+    ['0084905123456', null],
+    ['8484905123456', null],
+    ['090512345', null],
+  ]
+  it.each(CASES)('%s → %s', (raw, want) => {
+    expect(normalizePhone(raw)).toBe(want)
+  })
 })
 
 describe('validateBooking', () => {

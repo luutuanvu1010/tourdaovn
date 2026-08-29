@@ -234,7 +234,14 @@ export async function handleBooking(request: Request, env: BookingEnv, ctx: Wait
       try {
         const status = await notifyAll(notifiers, record)
         await updateNotifyStatus(env.BOOKING_DB, record.code, status)
-        console.log(`[dat-tour] ${record.code} email=${status.email ?? '-'} zalo=${status.zalo ?? '-'}`)
+        const line = `[dat-tour] ${record.code} email=${status.email ?? '-'} zalo=${status.zalo ?? '-'}`
+        // Nghiệp vụ giữ nguyên: đơn đã nằm trong D1, KHÔNG fail-closed ở đây. Nhưng khi cả hai
+        // kênh `skipped`/`failed` (đã xảy ra thật đêm 29/08 lúc build xoá sạch secrets) thì
+        // khách vẫn thấy "sẽ gọi lại xác nhận" mà KHÔNG ai được báo — nên nâng lên
+        // `console.error` để `wrangler tail` và bảng điều khiển bắt được. Chỉ mã đơn +
+        // trạng thái kênh, không PII (BK3).
+        if (Object.values(status).some(s => s === 'sent')) console.log(line)
+        else console.error(`${line} — KHÔNG kênh nào báo được đơn này`)
       } catch (e) {
         // Chỉ log mã đơn + lý do lỗi, không log PII (BK3).
         console.error(`[dat-tour] ${record.code} lỗi báo tin:`, e instanceof Error ? e.message : String(e))
