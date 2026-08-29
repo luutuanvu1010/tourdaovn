@@ -39,7 +39,7 @@ Mọi cặp màu chữ trên nền dưới đây đã kiểm WCAG AA (≥ 4,5:1 
 | color.surface | #FFFFFF | nền trang mặc định — **chủ dự án chốt 2026-08-06, giải DR-003**; `08-QA_CHECKLIST` B4 phải sửa theo |
 | color.surface.alt | **#EAF2F8** | nền xen kẽ khối, nền card trên nền trắng. **v2026-08-25 (`QĐ-2026-08-25-04`): từ #F8FAFC.** Giá trị cũ chỉ cách nền trắng **1,046** nên khối xen kẽ đọc thành một mảng trắng liền — đúng bệnh "thiếu diện tích màu" mà §1 mô tả. Nay **1,132** |
 | color.sea | #0E7490 | ngọc lam vịnh nông — nhãn tự nhiên, tiện ích, trạng thái thành công; chữ trắng đạt 5.36 (AA) |
-| color.sand | #F5A623 | cát biển — nhãn ấm, gạch chân trang trí. **Không dùng làm nền CTA**: phân vai màu — `color.accent` đã giữ vai CTA và nhãn giá, cát giữ vai gạch chân và nút trên nền đậm; cho cát thêm vai CTA là một màu hai vai (`QĐ-2026-08-29`, sửa lý do — điều khoản giữ nguyên) |
+| color.sand | #F5A623 | cát biển — nhãn ấm, gạch chân trang trí. **Không dùng làm nền CTA**: phân vai màu — `color.accent` đã giữ vai CTA và nhãn giá, cát giữ vai gạch chân và nút trên nền đậm; cho cát thêm vai CTA là một màu hai vai (`QĐ-2026-08-29-06`, sửa lý do — điều khoản giữ nguyên; số đo được: `--c-text-inverse` trên `--c-sand` chỉ **3,28:1**, dưới AA — xem `HomeStatsBand.astro:38-39`) |
 | color.text | #0F172A | chữ chính trên surface và surface.alt |
 | color.text.muted | #475569 | mô tả ngắn trên card, ngày cập nhật, nhãn phụ, breadcrumb |
 | color.text.inverse | #F8FAFC | chữ trên primary, primary.strong, accent |
