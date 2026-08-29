@@ -711,6 +711,31 @@ Sửa ở đợt 4A: bỏ `flex:1` khỏi `.card-summary`, đẩy `margin-top:au
 
 ---
 
+## DR-039 — `bookingRef.key` của 8 tour chứa chuỗi giá thay vì khoá
+
+**Trạng thái:** đã xử 2026-08-22 — giá chuyển sang `data/prices.yaml`, `bookingRef.key` thôi
+chứa chuỗi giá; xem `QĐ-2026-08-21-01`. Lúc chạy, script đặt khoá = slug cho 16 document
+(8 tour approved + 8 nháp; kế hoạch dự kiến 14 — xem `task-11-report.md`).
+
+**Đính chính cùng ngày:** câu "khoá = slug" mô tả *thời điểm chạy*, không phải một bất biến.
+Chủ dự án sửa nội dung trong Studio sau đó (đổi slug nhiều tour, thêm tour mới), nên tới tối
+2026-08-22 chỉ còn 1 document có `key == slug`. **Đây không phải hỏng:** `resolvePrice()` đọc
+thẳng `bookingRef.key` rồi tra `prices.yaml`, không suy khoá lại từ slug — 7/8 dòng giá vẫn
+trỏ đúng. Khoá là **định danh ổn định**, không buộc bằng slug; xem `DR-062`.
+
+`01-CONTENT_MODEL` §2.8: `bookingRef` là con trỏ tới dòng giá, "không lưu số, I1, I16".
+Dataset production có 8 document `tour` approved (và 6 bản nháp của chúng) mang
+`bookingRef.key` dạng `"Người lớn: 850.000 VNĐ | Trẻ em: 600.000 VNĐ"`. Hệ quả: (1) vi phạm
+I1 — con số giá nằm trong Sanity; (2) `resolvePrice()` không tra được dòng nào trong
+`data/prices.yaml` (file đang trống) nên không tour nào hiện giá; PY4 sẽ báo trỏ hụt nếu
+chạy. Không cổng nào bắt vì validator đã rời đường phát hành (ADR-0022).
+
+Xử ở kế hoạch `docs/plans/2026-08-22-dat-tour.md` Task 11: khoá = slug tiếng Việt của tour,
+con số chuyển sang `data/prices.yaml` (`amount` + `paxRates`). Không sửa mục này; đóng bằng
+một dòng "đã xử" khi Task 11 xong.
+
+---
+
 ## DR-040 — Đường phát hành tự động là Workers Builds, tài liệu ghi Cloudflare Pages
 
 **Trạng thái:** **đã xử 2026-08-22** ở `BUILD-NOTES.md` (mục Deploy nay mô tả đúng chuỗi thật). Còn **mở** ở `README.md:66`, `SETUP-NEW-SITE.md:109–111`, `ADR-0009`, `ADR-0022` mục "Muốn quay lại" — đó là văn bản lõi/multi-site, sửa phải có quyết định riêng.
@@ -2224,3 +2249,174 @@ Ba thẻ 103px cạnh nhau trên màn 390px, mỗi thẻ mang ảnh 4:3 và tiê
 **Vì sao không sửa ở đây.** `NearbySection.astro` không nằm trong danh sách file của bất kỳ Task nào trong kế hoạch `docs/plans/2026-08-29-thi-giac-di-dong.md`, và đợt sửa sau review này (mục A–J) chỉ được giao đúng phạm vi lượt review đã nêu — mục I của lượt review nói rõ "KHÔNG sửa `NearbySection.astro`". Sửa ở đây là mở rộng phạm vi ngoài spec đã duyệt (`CLAUDE.md` §5).
 
 **Đã xử.** Chưa. Việc cần làm ở một Task riêng có phạm vi bao gồm `NearbySection.astro`: nhắc lại nguyên bộ chọn `:has(> :last-child:nth-child(2))` và `:has(> :last-child:nth-child(3))` bên trong khối `@media (max-width: 640px)` (`:171-175`), đúng khuôn đã dùng ở `HomeRollupSection.astro:157-163` và `EntityIndex.astro`.
+
+## DR-096 — `PY3`/`PY4`/`PY5` so sai kiểu `bookingRef`, ba validator giá gần như vô hiệu
+
+**Trạng thái:** đã xử 2026-08-23 — Task 17 sửa `validatePY3`/`validatePY4`/`validatePY5`
+(`scripts/validators/py1-py8.ts`) đọc `bookingRef?.key` qua một hàm dùng chung `refKey()` thay
+vì `typeof doc.bookingRef === 'string'`; xem
+`.superpowers/sdd/2026-08-22-dat-tour/task-17-report.md`. Chạy lại `npm --prefix scripts run
+validate` sau sửa: `PY4` từ 8 mục "mồ côi" giả xuống còn **1** (dòng `ve-hon-tam-tam-tron-goi`
+— mồ côi thật, xem `DR-097`); `PY5` từ 79 xuống **72** lỗi (7 tour có `bookingRef.key` hợp lệ
+nay được nhận đúng, còn tour `8dda44cb` thiếu `bookingRef` thật vẫn bị báo — đúng như `DR-097`
+dự đoán); `PY3` vẫn `[pass]` nhưng nay kiểm thật thay vì luôn luôn bỏ qua. `I1` không đổi (119
+lỗi cả trước lẫn sau lần chạy của Task 17) — không thuộc phạm vi sửa này.
+
+Phát hiện 2026-08-22, khi Task 11 (module đặt tour,
+`docs/plans/2026-08-22-dat-tour.md`) thêm 8 dòng giá thật vào `data/prices.yaml` và chạy
+`npm run validate` để đối chiếu.
+
+`scripts/validators/py1-py8.ts`: `validatePY3` (~dòng 99-104) và `validatePY4` (~dòng 118-133)
+đọc `doc.bookingRef` rồi kiểm `typeof doc.bookingRef === 'string'` — coi `bookingRef` là một
+field CHUỖI. Nhưng schema Sanity thật (`cms/schemas/tour.ts` dòng 136, và tương tự ở
+`lodgingBase.ts`, `attraction.ts`, `experience.ts`, `event.ts`) định nghĩa `bookingRef` là
+`type: 'object'` với field con `key` — khớp với mọi component frontend
+(`src/components/TourDetail.astro`, `HubIndex.astro`, `EntityIndex.astro`, …, đều đọc
+`data.bookingRef?.key`). Vì vậy `typeof doc.bookingRef === 'string'` **luôn luôn false** với dữ
+liệu thật, bất kể `bookingRef.key` có đúng hay không — bug có từ trước Task 11, Task 11 không
+gây ra nó, chỉ làm nó lộ ra lần đầu.
+
+Bằng chứng: sau khi Task 11 chuyển đúng cả 16 document (8 tour + 8 nháp) sang
+`bookingRef.key = slug.vi.current` (xác nhận bằng truy vấn Sanity trực tiếp, khớp 100%), chạy
+`npm run validate` vẫn cho:
+- `PY4` báo "mồ côi" — `prices.yaml: dòng "<khoá>" không có entity nào trỏ bookingRef (PY4)`
+  cho cả 8 khoá mới, dù cả 8 tour đều có `bookingRef.key` đúng.
+- `PY5` báo cả 8 tour "thiếu cả bookingRef lẫn isAccessibleForFree", dù `bookingRef.key` hợp lệ.
+
+Trước Task 11 bug không hiện vì `data/prices.yaml` từng trống (0 dòng), nên vòng lặp "mồ côi"
+của PY4 không có gì để lặp; PY3 âm thầm bỏ qua mọi tour ở mọi thời điểm vì điều kiện
+`typeof === 'string'` luôn sai, bất kể nội dung `bookingRef.key`.
+
+Không sửa ở đây — nằm ngoài phạm vi 3 file của Task 11
+(`data/prices.yaml`, `cms/_migrate-bookingref-keys.mjs`, `docs/DRIFT_LOG.md`). Cần một task
+riêng: sửa `validatePY3`/`validatePY4`/`validatePY5` đọc `doc.bookingRef?.key` thay vì
+`typeof doc.bookingRef === 'string'`. Xem
+`.superpowers/sdd/2026-08-22-dat-tour/task-11-report.md` mục "Lệch so với brief" để có bằng
+chứng chi tiết (lệnh chạy, output đầy đủ).
+
+---
+
+## DR-097 — `bookingRef.key` rời khỏi slug sau đợt sửa nội dung 2026-08-22; một dòng giá mồ côi, một tour mất giá
+
+**Trạng thái:** mở. Phát hiện 2026-08-22 khi review Task 11 của module đặt tour truy vấn lại
+dataset production.
+
+Task 11 (07:58Z) đặt `bookingRef.key = slug.vi.current` cho 16 document. Sau đó có ba đợt sửa
+nội dung trong Studio: 08:07–08:14Z (thêm khoảng 7 tour vé VinWonders / Vin Harbour, không
+document nào có `bookingRef`), 12:35–12:59Z (đổi slug bốn tour cũ, thêm ba tour mới),
+14:40–14:57Z (tách nhóm Hòn Tằm). Kết quả đo lúc tối 2026-08-22 (`perspective: raw`):
+**44** document `tour`, **10** có `bookingRef.key`, **1** có `key == slug`.
+
+**Không phải hỏng, và không được "sửa" bằng cách chạy lại script.** `resolvePrice()`
+(`src/lib/resolver.ts`) đọc thẳng `bookingRef.key` rồi tra `data/prices.yaml`; nó không suy
+khoá lại từ slug. Khoá trong `prices.yaml` là slug *cũ*, và `bookingRef.key` vẫn giữ đúng giá
+trị cũ đó, nên 7/8 dòng giá vẫn trỏ đúng. Chạy lại `cms/_migrate-bookingref-keys.mjs` sẽ đặt
+khoá = slug *mới* và biến cả 7 liên kết đang sống thành mồ côi. Đề xuất "chạy lại cho khớp"
+trong báo cáo review Task 11 vì vậy bị bác.
+
+**Bài học ghi lại.** Lấy slug làm *giá trị* của khoá là gắn hai thứ có vòng đời khác nhau:
+slug đổi theo biên tập, khoá phải đứng yên theo dòng giá. `01-CONTENT_MODEL` §2.8 chỉ đòi
+`bookingRef` là con trỏ tới dòng giá — **không** đòi nó bằng slug. Luật đọc đúng là: khoá là
+định danh ổn định, phải khớp một dòng trong `prices.yaml`, không buộc bằng slug.
+
+**Hai việc còn lại, thuộc chủ dự án, chưa quyết:**
+
+1. Dòng giá `ve-hon-tam-tam-tron-goi` trong `data/prices.yaml` **mồ côi** — không document nào
+   trỏ tới (đã đếm: 0).
+2. Tour `Tour Hòn Tằm trọn gói: Cano 2 chiều - Tắm bùn - Tắm biển - Buffet`
+   (`8dda44cb`, slug `tour-hon-tam-tron-goi`) **không có `bookingRef`** nên không có giá và sẽ
+   không có form đặt tour. Nhiều khả năng dòng giá mồ côi ở trên là dành cho nó, nhưng tên
+   không khớp nên không tự nối được.
+
+Task 17 sửa `PY4`/`PY5` sẽ khiến cổng validator tự báo cả hai mục này thay vì im lặng như hiện nay.
+
+---
+
+## DR-098 — Sáu URL `/tour/` chết sau đợt đổi slug 22/08; lệch luật R3 có ý thức
+
+**Trạng thái:** đã quyết 2026-08-23 — xem `QĐ-2026-08-23-01` trong `docs/DECISIONS.md`. Mục này
+không giữ số liệu riêng; quyết định đó là bản ghi đầy đủ.
+
+Đợt biên tập nội dung 2026-08-22 (xem `DR-097`) đổi slug nhiều tour. Sau khi phát hành, sáu URL
+`/tour/` cũ trả 404 mà `public/_redirects` không có dòng 301 nào — lệch `04-CONSTRAINTS` §1c luật
+R3 ("một URL đã từng tồn tại không được biến mất câm"). Chủ dự án xác nhận đợt đổi slug là **có
+chủ ý** và **chấp nhận bỏ** sáu URL đó; `QĐ-2026-08-23-01` giữ danh sách sáu URL, ánh xạ cũ→mới
+phòng khi sau này muốn thêm 301, và mức tin của ánh xạ đó.
+
+**Phần còn mở, không thuộc quyết định trên:** `build:ci` = `npm run build` = `astro check &&
+astro build`, **không gọi** `npm --prefix scripts run validate:post` — mà cổng R3 (so sitemap
+production với sitemap bản dựng) nằm ở đó. Nên đường dựng tự động không bao giờ bắt được URL biến
+mất; lần này người bắt là một tác nhân, không phải máy. Chưa quyết vá thế nào.
+
+---
+
+## DR-099 — Cổng Turnstile bị bỏ qua câm lặng khi thiếu secret; SPEC §4.4/§4.7 tự mâu thuẫn, mã sửa trước SPEC
+
+**Trạng thái:** đã xử 2026-08-23 — SPEC đã sửa theo mã ở cùng ngày
+(`docs/specs/SPEC-2026-08-21-dat-tour.md` §4.4 hàng `turnstileToken`, §4.7 hàng
+`PUBLIC_TURNSTILE_SITE_KEY`, và đoạn mã phản hồi của endpoint). Mục này ghi lại vì sao mã đi
+trước SPEC.
+
+Vòng review cuối tìm ra: thiếu bí mật thì endpoint tụt xuống chế độ không có lớp chặn nào và
+không phát tín hiệu nào. Bằng chứng thực nghiệm chứ không phải suy đoán: báo cáo Task 12 ghi một
+`curl` POST **không mang token nào** và nhận **201** kèm dòng `TD-260823-98N8` trong D1.
+
+SPEC **tự mâu thuẫn**: §4.4 (hàng `turnstileToken`) nói "thiếu secret ở môi trường → bỏ qua kiểm
+(chỉ dev)"; §4.7 (hàng `PUBLIC_TURNSTILE_SITE_KEY`) nói "production phải có cả site key lẫn
+secret, thiếu một trong hai thì mọi đơn bị 400 — hỏng ồn ào, không hỏng câm". Bản thi hành trước
+lượt sửa này theo đúng nhánh §4.4 nhưng bỏ mất phần `console.warn` mà chính §4.4 đòi — tức không
+theo trọn vẹn nhánh nào trong hai nhánh mà SPEC tự nêu.
+
+Phán quyết của controller 2026-08-23: thi hành **cả hai**. Thêm `console.warn` một lần mỗi
+isolate ở `turnstile.ts` (đúng chữ §4.4), và chặn hẳn ở production bằng một cổng cấu hình chạy
+TRƯỚC `readBody` ở `handler.ts` — thiếu `TURNSTILE_SECRET_KEY` mà không có
+`BOOKING_ALLOW_NO_TURNSTILE === '1'` thì trả **503**, không đọc thân, không chạm D1, không gọi
+mạng (đúng ý định §4.7). Cửa thoát `BOOKING_ALLOW_NO_TURNSTILE` chỉ đặt được ở `.dev.vars`, không
+khai trong `wrangler.toml` (không có `[vars]`, BK4). Đây là hoà giải **trong cùng một tài liệu**
+bằng chính triết lý nó tuyên bố — §4.4 và §4.7 không sai lẫn nhau, chỉ khác phạm vi (dev vs
+production) mà chưa từng viết rõ ranh giới đó — không phải một luật mới đặt ra ở tầng code.
+
+Vì sao mã đi trước SPEC: lỗ này chặn gộp nhánh, nên được sửa ngay trong lượt sửa cuối; SPEC theo
+sau trong cùng ngày. Ghi lại để lần sau ai thấy 503 ở `/api/dat-tour` thì biết nó có chủ ý, không
+phải hàng chưa xong.
+
+**Nợ để lại:** cờ `BOOKING_ALLOW_NO_TURNSTILE` là một chân tự bắn — đặt nó thành secret trên
+production là vô hiệu hoá đúng cổng vừa dựng. Cổng máy duy nhất canh được rủi ro đó là `SPEC` §7
+mục 7 (`wrangler secret list` phải đúng 8 tên, không thừa không thiếu, và không có
+`BOOKING_ALLOW_NO_TURNSTILE`). Không có kiểm tự động nào khác — ba lớp bảo vệ còn lại (chú thích
+trong `handler.ts`, chú thích trong `env.d.ts`, và mục này) đều chỉ là chữ.
+
+
+## DR-100 — SPEC đòi "nút Zalo" trên trang HTML tối giản, BK1 không cho endpoint biết liên kết Zalo
+
+**Trạng thái:** mở 2026-08-29 — mã giữ nguyên theo phán quyết phiên nghiệm thu; chờ chủ dự án
+duyệt sửa câu chữ SPEC.
+
+SPEC §4.4 (đoạn trang HTML tối giản) và §7 tiêu chí 6/13d yêu cầu trang lỗi/cảm ơn không-JS có
+"nút Zalo". Nhưng liên kết Zalo sống trong Sanity ("Liên kết Zalo", Studio), mà BK1
+(`04-CONSTRAINTS`) cấm endpoint đọc Sanity — tầng ràng buộc đứng trên SPEC theo thứ tự thẩm
+quyền. `src/lib/booking/html.ts` (chú thích đầu file) đã chọn: trang tối giản chỉ liên kết
+`/lien-he/` (nơi có đủ kênh Zalo/hotline) + liên kết về trang tour. Nghiệm thu 2026-08-29 tính
+tiêu chí 6/13d **đạt-với-ngoại-lệ**. Chi phí nếu phán quyết sai: khách không-JS mất một cú bấm
+để tới Zalo. Việc còn lại: sửa câu chữ SPEC §4.4/§7 ("nút Zalo" → "liên kết trang liên hệ"),
+cần chủ dự án duyệt.
+
+## DR-101 — Build tự động từ `main` xoá sạch toàn bộ `wrangler secret` của Worker
+
+**Trạng thái:** mở 2026-08-29 — đã có đường tránh (tạm dừng builds); gốc rễ chỉ khép được sau
+khi merge module về `main`. **Sau merge bắt buộc:** đặt lại 8 secrets, bấm Publish thử, đếm lại
+đủ 8 rồi mới mở khách.
+
+Bằng chứng 2026-08-29: ba đợt đặt secret đều bị mất đúng phần đặt trước bản build gần nhất; thí
+nghiệm sạch chốt hạ — 8 secrets nằm yên từ 11:38:36Z, không lệnh nào chạy xen, chủ dự án bấm
+Publish ở Sanity, build `version_upload` deploy 11:45:12Z, `wrangler secret list` → `[]`.
+So bindings hai version cạnh nhau: version "Secret Change" mang danh sách secret; version build
+mang **0 binding** — khớp `wrangler.toml` trên `main` hiện là bản assets-only (không `main =`,
+không binding nào), trong khi bản có module chỉ nằm trên nhánh `worktree-feat+dat-tour`.
+Hệ quả: "thứ tự bắt buộc" trong BUILD-NOTES (secrets trước lần deploy đầu có `main`) không khả
+thi chừng nào auto-build (hook Sanity, bật lại 27/08 — sau khi kế hoạch được viết) còn sống.
+Xử lý trong phiên: chủ dự án tạm dừng Workers Builds; secrets đặt lại một phát bằng
+`wrangler secret bulk` từ file `.env.*` cục bộ (gitignore); nghiệm thu chạy trên
+`versions upload` từ nhánh — version này kế thừa đủ 8 secrets, chứng tỏ upload từ cấu hình có
+`main` giữ secrets. Nghi vấn gốc (upload assets-only không kế thừa secret bindings) chưa xác
+nhận chính thức với Cloudflare.

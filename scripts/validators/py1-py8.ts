@@ -1,16 +1,26 @@
 import type { PriceEntry } from '../lib/price-loader.js'
 import type { ValidatorResult } from './i1-i19.js'
 
-const VALID_UNITS = new Set(['perPax', 'perRoomNight', 'perTicket'])
+export const VALID_UNITS = new Set(['perPax', 'perRoomNight', 'perTicket'])
 const COMMERCIAL_TYPES = new Set(['experience', 'tour', 'hotel', 'resort', 'attraction', 'event'])
 const ALLOWED_TOP_KEYS: Record<string, Set<string>> = {
-  perPax: new Set(['unit', 'amount', 'tiers']),
+  perPax: new Set(['unit', 'amount', 'tiers', 'paxRates']),   // paxRates — ADR-0027
   perRoomNight: new Set(['unit', 'from', 'asOf']),
   perTicket: new Set(['unit', 'tickets']),
 }
 const ALLOWED_TIER_KEYS = new Set(['maxPax', 'amount'])
 const ALLOWED_TICKET_KEYS = new Set(['name', 'amount'])
+// paxRates: khoá con enum đóng, mỗi khoá {amount, note} — SPEC-2026-08-21-dat-tour §4.2
+export const ALLOWED_PAX_CODES = new Set(['child', 'senior', 'infant'])
+const ALLOWED_PAX_RATE_KEYS = new Set(['amount', 'note'])
+export const PAX_NOTE_MAX = 40
 const FORBIDDEN_KEYS = /^(cost|commission|gia_von|hoa_hong|profit|margin|chiet_khau|wholesale|retail_price)$/i
+
+// bookingRef là object { key } trong mọi lược đồ Sanity (DR-096) — không phải chuỗi.
+function refKey(doc: any): string | null {
+  const k = doc?.bookingRef?.key
+  return typeof k === 'string' && k.length > 0 ? k : null
+}
 
 // ── PY1: unit thuộc enum perPax/perRoomNight/perTicket ──
 
@@ -43,6 +53,21 @@ export function validatePY2(prices: Map<string, PriceEntry>): ValidatorResult {
           const t = tiers[i]
           if (typeof t.maxPax !== 'number' || typeof t.amount !== 'number') {
             errors.push(`${key}: tiers[${i}] thiếu maxPax hoặc amount (PY2)`)
+          }
+        }
+      }
+      if ('paxRates' in entry) {
+        const pr = (entry as any).paxRates
+        if (hasTiers) {
+          errors.push(`${key}: paxRates không được đi cùng tiers[] (PY2)`)
+        }
+        if (pr === null || typeof pr !== 'object' || Array.isArray(pr)) {
+          errors.push(`${key}: paxRates phải là object {child|senior|infant: {amount, note}} (PY2)`)
+        } else {
+          for (const [code, rate] of Object.entries(pr as Record<string, any>)) {
+            if (!rate || typeof rate !== 'object' || typeof rate.amount !== 'number') {
+              errors.push(`${key}: paxRates.${code} thiếu amount (PY2)`)
+            }
           }
         }
       }
@@ -79,8 +104,8 @@ export function validatePY3(docs: any[], prices: Map<string, PriceEntry>): Valid
   const errors: string[] = []
   for (const doc of docs) {
     if (doc._type !== 'tour') continue
-    const ref = doc.bookingRef
-    if (!ref || typeof ref !== 'string') continue
+    const ref = refKey(doc)
+    if (!ref) continue
     const entry = prices.get(ref)
     if (!entry) continue // PY4 handles missing refs
     if (entry.unit !== 'perPax') {
@@ -98,15 +123,14 @@ export function validatePY4(docs: any[], prices: Map<string, PriceEntry>): Valid
 
   const refsFromSanity = new Set<string>()
   for (const doc of docs) {
-    if (doc.bookingRef && typeof doc.bookingRef === 'string') {
-      refsFromSanity.add(doc.bookingRef)
-    }
+    const ref = refKey(doc)
+    if (ref) refsFromSanity.add(ref)
   }
 
   // Trỏ hụt: bookingRef trong Sanity nhưng không có dòng giá → fail
   for (const doc of docs) {
-    const ref = doc.bookingRef
-    if (!ref || typeof ref !== 'string') continue
+    const ref = refKey(doc)
+    if (!ref) continue
     if (!prices.has(ref)) {
       errors.push(`${doc._id}: bookingRef="${ref}" không có dòng giá tương ứng trong prices.yaml (PY4)`)
       hasFail = true
@@ -130,7 +154,7 @@ export function validatePY5(docs: any[]): ValidatorResult {
   const errors: string[] = []
   for (const doc of docs) {
     if (!COMMERCIAL_TYPES.has(doc._type)) continue
-    const hasBookingRef = doc.bookingRef && typeof doc.bookingRef === 'string'
+    const hasBookingRef = refKey(doc) !== null
     const hasFree = doc.isAccessibleForFree === true
     const hasTicketUrl = doc._type === 'event' && doc.ticketUrl && typeof doc.ticketUrl === 'string'
 
@@ -205,6 +229,29 @@ export function validatePY7(prices: Map<string, PriceEntry>): ValidatorResult {
           if (!ALLOWED_TICKET_KEYS.has(k)) {
             errors.push(`${key}: tickets[${i}] có khóa lạ "${k}" không thuộc lược đồ (PY7)`)
           }
+        }
+      }
+    }
+
+    // Kiểm paxRates: khoá con đóng, khoá trong từng hạng đóng, amount ≥ 0, note ≤ 40 ký tự
+    // (chỉ perPax mới có paxRates — ALLOWED_TOP_KEYS đã chặn ở unit khác, gán rõ ở đây để không phụ thuộc thứ tự)
+    if (entry.unit === 'perPax' && raw.paxRates && typeof raw.paxRates === 'object' && !Array.isArray(raw.paxRates)) {
+      for (const [code, rate] of Object.entries(raw.paxRates as Record<string, any>)) {
+        if (!ALLOWED_PAX_CODES.has(code)) {
+          errors.push(`${key}: paxRates.${code} không thuộc enum [child, senior, infant] (PY7)`)
+          continue
+        }
+        if (!rate || typeof rate !== 'object') continue
+        for (const k of Object.keys(rate)) {
+          if (!ALLOWED_PAX_RATE_KEYS.has(k)) {
+            errors.push(`${key}: paxRates.${code} có khóa lạ "${k}" không thuộc lược đồ (PY7)`)
+          }
+        }
+        if (typeof rate.amount === 'number' && (!Number.isInteger(rate.amount) || rate.amount < 0)) {
+          errors.push(`${key}: paxRates.${code}.amount=${rate.amount} phải là số nguyên ≥ 0 VND (PY7)`)
+        }
+        if (rate.note !== undefined && (typeof rate.note !== 'string' || rate.note.length > PAX_NOTE_MAX)) {
+          errors.push(`${key}: paxRates.${code}.note phải là chuỗi ≤ ${PAX_NOTE_MAX} ký tự (PY7)`)
         }
       }
     }

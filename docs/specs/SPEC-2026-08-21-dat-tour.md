@@ -219,7 +219,7 @@ Kiểm, theo thứ tự, dừng ở lỗi đầu tiên của mỗi trường (m�
 | `email` | tuỳ; nếu có: ≤ 120, khớp biểu thức email đơn giản |
 | `pickup` ≤ 200, `note` ≤ 1000 | cắt khoảng trắng hai đầu |
 | `website` (honeypot) | phải rỗng; **không rỗng → trả 200 `{ok:true, code:"TD-…"}` giả, không lưu, không báo** (không mách bot) |
-| `turnstileToken` | `POST https://challenges.cloudflare.com/turnstile/v0/siteverify` với `TURNSTILE_SECRET_KEY`; không đạt → 400 "Xác minh không thành công, thử lại"; **thiếu secret ở môi trường** → bỏ qua kiểm (chỉ dev), ghi `console.warn` một lần |
+| `turnstileToken` | `POST https://challenges.cloudflare.com/turnstile/v0/siteverify` với `TURNSTILE_SECRET_KEY`; không đạt → 400 "Xác minh không thành công, thử lại"; **cổng cấu hình chạy TRƯỚC mọi tác dụng phụ** — thiếu `TURNSTILE_SECRET_KEY` mà không có `BOOKING_ALLOW_NO_TURNSTILE === '1'` → **503**, không đọc thân yêu cầu, không chạm D1, không gọi mạng; nhánh "bỏ qua kiểm, ghi `console.warn` một lần" chỉ còn tồn tại **khi có cờ dev đó** (xem `DR-099`, `docs/DRIFT_LOG.md`) |
 | tần suất | cùng `ip_hash` có ≥ 5 đơn trong 10 phút → 429 "Bạn vừa gửi nhiều yêu cầu, vui lòng thử lại sau ít phút" |
 | trùng | cùng `phone` + `tour_slug` + `depart_date` trong 24 giờ → **không tạo mới**, trả 200 `{ok:true, code:<mã cũ>, duplicate:true}`, không báo lại |
 
@@ -227,7 +227,13 @@ Mã đơn: `TD-` + `yymmdd` (giờ Việt Nam) + `-` + 4 ký tự từ bảng `A
 (bỏ 0/O/1/I/L); cột `code` UNIQUE; trùng thì sinh lại, tối đa 5 lần.
 
 Trả về: `201 {ok:true, code, summary}`; `400 {ok:false, error:"validation", fields:{tên_ô:"thông điệp"}, message}`;
-`403`, `405`, `429`, `500 {ok:false, message:"Chưa gửi được, vui lòng thử lại hoặc nhắn Zalo"}`.
+`403`, `405`,
+`413 {ok:false, message:"Dữ liệu gửi lên quá lớn"}` (thân yêu cầu vượt 16 KB — hai lớp kiểm trong
+`readBody`: `content-length` rồi byte thật của thân; có từ trước lượt sửa 503 bên dưới, không
+phải phần mới), `429`,
+`500 {ok:false, message:"Chưa gửi được, vui lòng thử lại hoặc nhắn Zalo"}`,
+`503 {ok:false, message:"Chưa gửi được, vui lòng thử lại hoặc nhắn Zalo"}` (cổng cấu hình thiếu
+`TURNSTILE_SECRET_KEY`, chạy trước `readBody` — xem hàng `turnstileToken` ở trên và `DR-099`).
 Nếu `Accept` không có `application/json` (form gửi không JS): trả **trang HTML tối giản**
 cùng nội dung (tên site, mã đơn hoặc thông điệp lỗi, nút Zalo, liên kết về tour) —
 không tạo trang tĩnh `/cam-on/` nào, không đụng sitemap.
@@ -302,7 +308,11 @@ kênh đó `skipped`, không ném lỗi.
   nhóm không, giới hạn tần suất. Nếu không gửi nhóm được thì gửi từng người — thiết kế đã
   là danh sách `chat_id` nên không đổi mã.
 - **Cố ý chưa có:** gửi lại khi hỏng, ZNS xác nhận cho khách, email bản sao cho khách.
-  Ghi ở §8. Đơn "chưa báo được" vẫn truy vấn được: `SELECT code FROM booking WHERE notify_email NOT IN ('sent') AND notify_zalo NOT IN ('sent')`.
+  Ghi ở §8. Đơn "chưa báo được" vẫn truy vấn được: `SELECT code FROM booking WHERE COALESCE(notify_email,'') <> 'sent' AND COALESCE(notify_zalo,'') <> 'sent'`.
+  **Phải có `COALESCE`** (rà soát 2026-08-29, chứng minh bằng SQLite thật): hai cột này là `NULL`
+  cho tới khi tác vụ nền ghi xong trạng thái — nếu tác vụ đó chết (worker bị thu hồi, D1 lỗi
+  thoáng qua) thì chúng ở lại `NULL` mãi, và `NULL <> 'sent'` trong SQL cho ra `NULL` chứ không
+  phải đúng, tức **đơn tệ nhất — chưa báo được ai — tàng hình trước truy vấn không có `COALESCE`**.
 
 ### 4.7 Bí mật và cấu hình
 
@@ -313,7 +323,7 @@ kênh đó `skipped`, không ném lỗi.
 | `ZALO_BOT_TOKEN`, `ZALO_BOT_CHAT_IDS` | secret | `wrangler secret put` | Zalo Bot |
 | `TURNSTILE_SECRET_KEY` | secret | `wrangler secret put` | siteverify |
 | `IP_HASH_SALT` | secret | `wrangler secret put` | muối băm IP cho bộ đếm tần suất. **Không có trong spec gốc** — sinh từ phán xét F4 vòng review Task 8: dùng chung `TURNSTILE_SECRET_KEY` làm muối là tái dụng bí mật sai mục đích. Thiếu thì `ipHash = null` (mất đếm tần suất ở dev, không băm bằng muối đoán được) |
-| `PUBLIC_TURNSTILE_SITE_KEY` | biến build (công khai) | `.env` máy dev và biến build Cloudflare | widget; thiếu lúc build → `BookingForm` không render widget và `astro build` in một dòng cảnh báo; production **phải** có cả site key lẫn secret, thiếu một trong hai thì mọi đơn bị 400 — hỏng ồn ào, không hỏng câm |
+| `PUBLIC_TURNSTILE_SITE_KEY` | biến build (công khai) | `.env` máy dev và biến build Cloudflare | widget; thiếu lúc build → `BookingForm` không render widget và `astro build` in một dòng cảnh báo; production **phải** có cả site key lẫn secret. Hai đường hỏng khác nhau, **cả hai đều ồn ào, không cái nào hỏng câm** (`DR-099`): thiếu **secret** → cổng cấu hình chặn ngay, mọi đơn bị **503**, không đọc thân, không chạm D1, không gọi mạng; thiếu **site key** mà vẫn có secret → widget không render nên client không gửi token, mọi đơn bị **400** `missing-token` |
 | `BOOKING_DB` | binding D1 | `wrangler.toml` | bảng `booking` |
 
 Cục bộ: `.dev.vars` (thêm vào `.gitignore`) cho `astro dev` và vitest; `platformProxy` của
@@ -443,7 +453,7 @@ không cần build Astro; `fetch` ra SES/Zalo/Turnstile được **stub** trong 
 | `handler.ts` | hợp lệ → 201 + dòng D1; honeypot → 200 giả, không dòng; Turnstile hỏng → 400; 6 đơn/10 phút cùng IP → 429; trùng phone+tour+ngày → trả mã cũ, không INSERT; notifier ném lỗi → vẫn 201, cột `notify_*` = `failed:…`; `Accept: text/html` → HTML |
 | `sigv4.ts` | vector kiểm cố định của AWS (`aws-sig-v4-test-suite`, khoá `AKIDEXAMPLE`): cùng đầu vào → đúng chuỗi `Authorization` đã biết; đổi một byte thân → đổi chữ ký; `now` cố định nên tất định |
 | `ses.ts` | đủ ba khoá → `sent` khi 200, `failed:http 403` khi 403; thiếu `AWS_SECRET_ACCESS_KEY` → `skipped` và **không** gọi mạng; thân JSON đúng hình dạng `Content.Simple` |
-| `py1-py8` | `paxRates` hợp lệ → xanh; `paxRates.baby` → PY7 fail; `paxRates` cùng `tiers` → PY2 fail; `child.amount: -1` → PY7 fail; **`DR-040`:** tour có `bookingRef.key` trỏ đúng dòng giá → PY4 **không** báo mồ côi và PY5 **không** báo thiếu |
+| `py1-py8` | `paxRates` hợp lệ → xanh; `paxRates.baby` → PY7 fail; `paxRates` cùng `tiers` → PY2 fail; `child.amount: -1` → PY7 fail; **`DR-096`:** tour có `bookingRef.key` trỏ đúng dòng giá → PY4 **không** báo mồ côi và PY5 **không** báo thiếu |
 
 ## 6. Vận hành: việc một lần (chép vào `BUILD-NOTES.md` khi thi hành)
 
@@ -456,12 +466,23 @@ không cần build Astro; `fetch` ra SES/Zalo/Turnstile được **stub** trong 
    `wrangler secret put AWS_SECRET_ACCESS_KEY`, `wrangler secret put AWS_SES_REGION` (vùng đã
    verify tên miền, ví dụ `ap-southeast-1`); `wrangler secret put BOOKING_NOTIFY_EMAIL`.
 4. Zalo: trong ứng dụng Zalo tìm OA **Zalo Bot Manager** → "Create bot" → nhận token qua
-   tin nhắn → `wrangler secret put ZALO_BOT_TOKEN`. Mỗi nhân viên trực mở bot, nhắn một
-   tin; chạy `GET https://bot-api.zaloplatforms.com/bot<TOKEN>/getUpdates` đọc `chat_id` →
-   `wrangler secret put ZALO_BOT_CHAT_IDS` (phân tách dấu phẩy).
+   tin nhắn → `wrangler secret put ZALO_BOT_TOKEN`. Lấy `chat_id` theo **đúng thứ tự: chạy
+   `POST https://bot-api.zaloplatforms.com/bot<TOKEN>/getUpdates` (vòng lặp, lệnh cụ thể ở kế
+   hoạch Task 13 bước 3) TRƯỚC, rồi nhân viên nhắn cho bot TRONG LÚC lệnh đang nghe** — đọc
+   `chat.id` trong kết quả → `wrangler secret put ZALO_BOT_CHAT_IDS` (phân tách dấu phẩy).
+   Hai lỗi liên tiếp của runbook, kiểm bằng tài liệu chính thức và bằng chạy thật 2026-08-29:
+   bản một ghi `GET` (đúng là `POST`); bản hai bảo nhắn trước rồi chạy lệnh — ngược, vì
+   `getUpdates` là **long polling**: tin gửi trước khi bắt đầu nghe không được trả về, và
+   `{"ok":false,…,"error_code":408}` chỉ nghĩa là "chờ hết 30 giây không có tin" chứ không phải
+   cấu hình sai. Không dùng chung được với Webhook. Mã sản phẩm (`notify/zalo.ts`) vốn đã đúng.
 5. Turnstile: dashboard Cloudflare → Turnstile → thêm site `tourdao.vn` (managed) → site key
-   vào `.env` và biến build Cloudflare (`PUBLIC_TURNSTILE_SITE_KEY`), secret →
-   `wrangler secret put TURNSTILE_SECRET_KEY`.
+   `PUBLIC_TURNSTILE_SITE_KEY` khai vào **cả hai chỗ** — `.env` ở gốc repo **và** Workers →
+   Settings → Build → Variables; secret → `wrangler secret put TURNSTILE_SECRET_KEY`.
+   **Cần cả hai, không phải chọn một:** lệnh phát hành dựng site **trên máy dev**
+   (`npm run build` rồi `wrangler deploy`), và Astro nướng biến này vào HTML lúc build, đọc từ
+   `.env`. Thiếu ở `.env` thì widget không render dù Cloudflare đã khai biến, và mọi đơn bị
+   **400 `missing-token`**. Biến ở Workers chỉ dùng khi Cloudflare tự dựng từ git (`ADR-0009`).
+   Site key là **công khai** (nằm trong HTML), không phải bí mật.
 5b. `wrangler secret put IP_HASH_SALT` — một chuỗi ngẫu nhiên đủ dài, sinh tại chỗ
    (`openssl rand -hex 32`), không dùng lại bí mật nào khác.
 6. WAF: Security → Rate limiting rules → `/api/dat-tour`, 10 yêu cầu / 10 giây / IP, chặn.
@@ -490,11 +511,80 @@ Kiểm được, đặt ra trước khi thi công. Im lặng là trượt.
    không phá `not_found_handling`).
 7. BK1: `grep -l "lib/prices\|lib/sanity\|lib/resolver" src/pages/api src/lib/booking` rỗng.
    BK4: `git grep -n "re_\|ZALO_BOT_TOKEN=\|TURNSTILE_SECRET_KEY="` rỗng; `wrangler secret list`
-   đủ 5 tên.
+   phải là **đúng 8 tên sau, không thừa không thiếu** (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`,
+   `AWS_SES_REGION`, `BOOKING_NOTIFY_EMAIL`, `ZALO_BOT_TOKEN`, `ZALO_BOT_CHAT_IDS`,
+   `TURNSTILE_SECRET_KEY`, `IP_HASH_SALT`). "5 tên" là con số của bản spec đầu, trước khi
+   `QĐ-2026-08-22-07` đổi một khoá nhà cung cấp email thành ba biến `AWS_*` và trước khi F4 tách
+   `IP_HASH_SALT` ra. **`BOOKING_ALLOW_NO_TURNSTILE` không được có mặt trong danh sách này** — nó
+   là cửa thoát chỉ dành cho dev (`.dev.vars`), và nếu lọt vào `wrangler secret list` nghĩa là ai
+   đó đã đặt nó trên production, vô hiệu hoá cổng cấu hình 503 mà `DR-099` ghi lại. Đây là cổng
+   máy DUY NHẤT canh được rủi ro đó — ba lớp bảo vệ còn lại chỉ là chữ trong chú thích.
 8. Lighthouse mobile trang tour có form: performance ≥ 90, accessibility ≥ 95 (`04` §3).
 9. `npm --prefix scripts run validate` (hoặc gọi tay `py1-py8`) với `prices.yaml` có
    `paxRates` → xanh; thêm khoá lạ → fail đúng mã PY7.
 10. `npm run audit:spec` không đỏ hơn baseline (G1/G3/G4).
+11. **`_worker.js` không lộ ra ngoài.** `curl -I https://<preview>/_worker.js/index.js` phải
+    trả **404** (kiểm luôn `/_routes.json`). `public/.assetsignore` đã loại hai đường dẫn này
+    khỏi lần tải asset lên, nhưng tới trước tiêu chí này **không có cổng nào canh việc đó còn
+    đúng** — một lần đổi adapter hay đổi `directory` của `[assets]` là mã Worker thành asset
+    tĩnh tải về được, kèm mọi thứ nướng trong đó.
+12. **`_redirects` còn hiệu lực sau khi `wrangler.toml` có `main`.** Luật **R3** của
+    `04-CONSTRAINTS` §1c (URL đã từng tồn tại không được biến mất câm) đứng hoàn toàn trên file
+    này, mà từ ADR-0027 site có Worker chạy trước asset — phải chứng minh Worker không nuốt mất
+    nó. Cách kiểm: thêm một dòng thử vào `public/_redirects`
+    (`/kiem-redirect-tam  /  301`), `npm run deploy:preview`,
+    `curl -sI https://<preview>/kiem-redirect-tam` phải trả **301** kèm `location: /`, rồi
+    **gỡ dòng đó ra** và deploy lại. Không để dòng thử ở lại.
+13. **Bốn hạng mục phải kiểm trên trình duyệt thật** (Task 12 không kiểm được vì extension
+    không kết nối; chúng nằm trong mục "điều còn lo ngại" của báo cáo task đó, chỗ không ai đọc
+    lại, nên đưa lên đây thì mới thành cổng):
+    a. **Bấm bộ đếm số người** — dấu +/− đổi số thật, không xuống dưới 1 người lớn, không vượt
+       20 mỗi hạng, không vượt 30 một đơn, và dòng "Tạm tính" đổi theo ngay.
+    b. **Mở bước 2 và đưa tiêu điểm** — bấm "Đặt tour" thì phần thông tin khách hiện ra và
+       tiêu điểm nhảy vào ô Họ và tên; bấm "Quay lại" thì tiêu điểm về đúng nút "Đặt tour".
+    c. **Giao diện ≤ 640px** — trên bề rộng 360px và 640px: không tràn ngang, bộ đếm không vỡ
+       hàng, nút bấm đủ lớn để chạm, thanh dính không che nút gửi.
+    d. **Tắt JavaScript bằng DevTools** — thấy dòng `<noscript>` kèm Zalo/hotline; bấm gửi thì
+       nhận **trang HTML** báo lỗi có nút Zalo (không phải JSON thô, không phải trang trắng).
+14. **Xoá dòng đơn thử khỏi D1 production sau khi nghiệm thu.** `npm run deploy:preview` dùng
+    **chung D1 thật** — không có cơ sở riêng cho bản thử — nên mọi đơn gửi ở mục 4 và mục 5 là
+    dòng thật trong bảng `booking`. Xong nghiệm thu thì xoá theo mã đơn đã ghi lại:
+
+    ```
+    env -u CLOUDFLARE_API_TOKEN -u CF_API_TOKEN npx wrangler d1 execute tourdao-booking \
+      --remote --env-file /dev/null --command "DELETE FROM booking WHERE code IN ('TD-…','TD-…')"
+    ```
+
+    Rồi `SELECT COUNT(*) FROM booking` phải về **0** trước khi mở cho khách thật. Xoá theo mã,
+    **không** `DELETE FROM booking` trần.
+
+## 4b. Kết quả nghiệm thu (chạy 2026-08-29)
+
+Nghiệm thu trên bản `deploy:preview` (version `e4ab1e31-6c8d-4eed-9da9-a2b3782524c5`; hai version
+phụ `278a4d0d…`, `c6e61c8e…` cho các mục chạy trước bản vá 13c). Điều kiện hạ tầng: **builds tự
+động đang tạm dừng** theo quyết định chủ dự án — xem `DR-101` (build từ `main` xoá sạch secrets);
+sau merge phải đặt lại 8 secrets và thử Publish trước khi mở khách. Tour mẫu có giá:
+`ve-hon-tam-tron-goi-tour-hon-tam-1-ngay` (540.000/430.000); không giá: `du-thuyen`.
+
+| # | Kết quả | Bằng chứng |
+|---|---|---|
+| 1 | **đạt** | vitest 82/82; `astro check` 0 errors/0 warnings; py-paxrates 10/10; hai lần build preview xanh |
+| 2 | **đạt** | dist có đúng 7 trang `id="dat-tour"`; curl preview: trang có giá đếm 1 form, `du-thuyen` có `contact-channels`, 0 form |
+| 3 | **đạt** | trình duyệt thật: 2 NL + 1 TE → "Tạm tính 1.510.000₫" (biến thiên từng cú bấm 540.000 → 1.080.000 → 1.510.000); NL không xuống dưới 1; hạng dừng ở 20; tổng dừng ở 30 (TE dừng 10 khi NL=20; NCT giữ 0 khi tổng=30) |
+| 4 | **đạt** | đơn thật `TD-260829-GQ7N` 19:57 VN: POST 201; D1 đúng 1 dòng, `notify_email=sent`, `notify_zalo=sent`; chủ dự án xác nhận cả email lẫn Zalo tới ngay sau cú gửi |
+| 5 | **đạt** | thiếu SĐT → 400 (preview); honeypot → 200 mã giả `TD-260829-H37Z`, D1 vẫn 0 dòng (preview); 6 đơn/10 phút cùng IP → đơn 6 nhận 429; gửi trùng SĐT/tour/ngày → 200 `duplicate:true` mã cũ `TD-260829-P5XE`, không thêm dòng (hai mục sau chạy dev cục bộ vì nằm sau verifyTurnstile; `.dev.vars` thêm `IP_HASH_SALT` dev — thiếu là khối đếm bị nhảy qua) |
+| 6 | **đạt, có ngoại lệ ghi `DR-100`** | `<noscript>` nguyên văn "Cần bật JavaScript để gửi yêu cầu. Hoặc nhắn Zalo / gọi hotline."; POST không JS → trang HTML "Chưa gửi được yêu cầu" (không JSON); `/khong-ton-tai/` → 404 trang riêng. Ngoại lệ: "nút Zalo" trên trang HTML tối giản = liên kết `/lien-he/` theo BK1 |
+| 7 | **đạt** | BK1 grep rỗng; BK4 git grep rỗng; `wrangler secret list` đúng 8 tên sau `secret bulk`, không có `BOOKING_ALLOW_NO_TURNSTILE` |
+| 8 | **đạt** | Lighthouse mobile trang tour có form (preview): performance **94**, accessibility **99** |
+| 9 | **đạt** | PY1–PY3, PY6, PY7 pass (PY4 WARN = dòng mồ côi đã chốt để báo; PY5 WARN = nợ dữ liệu 21 tour chưa giá); thêm khoá lạ `student` → PY7 FAIL đúng thông điệp, đã hoàn tác |
+| 10 | **đạt** | audit:spec 3/3 xanh + gap g2 (ND-001, baseline) |
+| 11 | **đạt** | `/_worker.js/index.js` → 404; `/_routes.json` → 404 |
+| 12 | **đạt** | dòng thử `/kiem-redirect-tam` → 301 + `location: /` (version `c6e61c8e`); đã gỡ dòng thử, `_redirects` sạch |
+| 13 | **đạt** | a) +/− đổi số và tạm tính tức thì; b) "Đặt tour" → focus vào Họ và tên (ngày trống thì gập về ô ngày — hành vi client validate), "Quay lại" → focus về nút; c) 360/640px: 0 tràn ngang, bộ đếm một hàng, nút +/− **44×44** sau vá `f466a4c` (đo trước vá 36×36 — fail duy nhất của đợt, đã sửa), nút chính 47px, sticky không che nút gửi; d) như mục 6 |
+| 14 | **đạt** | `DELETE … WHERE code IN ('TD-260829-GQ7N')` (changes: 1); `SELECT COUNT(*)` sau xoá = **0** |
+
+Ghi chú nhỏ chuyển thiết kế duyệt: dòng breakdown khi đọc dạng text liền mạch thành "Người lớn × 21.080.000₫"
+("× 2" dính "1.080.000₫") — kiểm lại ngăn cách thị giác giữa số lượng và thành tiền.
 
 ## 8. Còn nợ (ghi để không rơi)
 
@@ -507,8 +597,31 @@ Kiểm được, đặt ra trước khi thi công. Im lặng là trượt.
   định thì ghi `DRIFT_LOG`.
 - **`control-registry.yaml`** chưa có dòng cho BK1–BK5 (kiểm bằng review/grep, không có
   executor script); thêm khi có kiểm máy.
-- **Lịch khởi hành cố định**, **mã tour hiển thị**, **đa ngôn ngữ cho form** — ngoài phạm vi
-  theo ba quyết định §3; mở lại là quyết định mới.
+- **Lịch khởi hành cố định** và **đa ngôn ngữ cho form** — ngoài phạm vi theo ba quyết định §3;
+  mở lại là quyết định mới.
+
+- **Mã tour chảy xuống tới thư báo đơn.** Chủ dự án chốt 2026-08-26: mã tour (`TD101`…`TD306`,
+  tiền tố `TD`, ≤ 10 ký tự) **dừng ở Google Sheet**, dùng để quản lý danh mục. Không vào
+  `prices.yaml`, không hiện trên trang, không vào đơn.
+
+  *Vì sao có thể muốn mở sau này:* tên tour dài như "Tour 3 đảo Vip Nha Trang: Mini Beach - Làng
+  Chài - Hòn Tằm" dễ đọc nhầm qua điện thoại; một mã 5 ký tự trong thư báo giúp nhân viên đối
+  chiếu nhanh hơn.
+
+  *Phác thảo nếu mở — sáu chỗ, một task:*
+  1. `data/prices.yaml`: thêm field tuỳ chọn `maTour` cho mỗi dòng giá.
+  2. `scripts/validators/py1-py8.ts`: `validatePY2` có **danh sách khoá đóng**
+     (`unit`, `amount`, `tiers`, `paxRates`) — phải mở thêm `maTour`, và thêm một luật kiểm
+     định dạng `^TD[A-Z0-9-]{0,8}$`. **Đây là chỗ khiến việc này thành quyết định chứ không phải
+     một cột:** đổi lược đồ giá là chạm tầng `ADR-0027`.
+  3. `scripts/prices-pull.mjs`: thôi bỏ qua cột `Mã tour`, ghi xuống yaml. Script đã được viết
+     sao cho chỉ phải sửa một chỗ.
+  4. `BookingForm.astro`: nướng vào `data-ma-tour` lúc build (không đọc giá lúc chạy — `BK1`).
+  5. `src/lib/booking/schema.ts` + `store.ts` + migration `0002_*.sql`: nhận `maTour` trong
+     payload (có chặn độ dài, qua `clean()`), thêm cột `ma_tour` vào bảng `booking`.
+  6. `notify/format.ts`: đưa mã vào tiêu đề thư và tin Zalo.
+
+  *Chi phí thật nằm ở bước 2 và 5*, không ở việc thêm một cột.
 - **Nhãn `zh`/`ko`/`ru` của form đang chép nguyên tiếng Anh** (kiểu `Record<UIKey,string>` buộc đủ
   khoá; site chạy `langs = ['vi']`). Dịch khi mở ngôn ngữ mới.
 - **Phối hợp với audit giao diện vòng 4** (`docs/plans/2026-08-21-audit-va-ke-hoach-giao-dien-vong-4.md`,

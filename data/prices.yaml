@@ -1,6 +1,66 @@
-# Seam giá (một chiều). Giá KHÔNG nhập vào Sanity; entity giữ priceKey, build tra ở đây.
-# Thêm mục theo mẫu dưới khi có giá thật:
-# tour-dao-binh-ba:
-#   currency: VND
-#   amount: 550000
-#   asOf: 2026-07-01
+# prices.yaml — nguồn giá một chiều (ADR-0003, ADR-0007, ADR-0027). Giá bán công khai, VND,
+# số nguyên. KHÔNG nhập con số giá vào Sanity: entity chỉ giữ bookingRef.key = khoá ở đây.
+#
+# Hình dạng perPax (04-CONSTRAINTS PY2/PY7):
+#   <khoá>:
+#     unit: perPax
+#     amount: <giá NGƯỜI LỚN>            # vào nhãn "Giá từ" và JSON-LD
+#     paxRates:                           # tuỳ chọn, nuôi form đặt tour; khoá đóng child | senior | infant
+#       child:  { amount: <số>, note: "5–11 tuổi" }
+#       senior: { amount: <số>, note: "từ 60 tuổi" }
+# Khoá là ĐỊNH DANH ỔN ĐỊNH của một dòng giá, không phải slug (DR-097). Nhiều khoá hiện nay
+# trùng slug chỉ vì lịch sử (DR-039 đặt như vậy ngày 2026-08-22); ĐỪNG đổi khoá khi biên tập
+# đổi slug — đổi là làm mồ côi dòng giá. Thêm dòng mới: chọn một chuỗi ổn định, mô tả sản phẩm,
+# rồi gắn đúng chuỗi đó vào Tour → bookingRef → key trong Studio. PY4 sẽ báo nếu hai bên lệch.
+
+tour-3-dao-hon-mun-mini-beach-lang-chai:
+  unit: perPax
+  amount: 800000
+  paxRates:
+    child: { amount: 560000 }
+
+tour-hon-tam-tron-goi:
+  unit: perPax
+  amount: 540000
+  paxRates:
+    child: { amount: 430000 }
+    senior: { amount: 430000 }
+
+tour-3-dao-nha-trang-hon-mun-hon-tam:
+  unit: perPax
+  amount: 850000
+  paxRates:
+    child: { amount: 600000 }
+
+ve-hon-tam-seaday-tour-03:
+  unit: perPax
+  amount: 430000
+  paxRates:
+    child: { amount: 340000 }
+    senior: { amount: 340000 }
+
+ve-hon-tam-tam-tron-goi:
+  unit: perPax
+  amount: 540000
+  paxRates:
+    child: { amount: 430000 }
+    senior: { amount: 430000 }
+
+tour-3-dao-nha-trang-mini-beach-hon-tam:
+  unit: perPax
+  amount: 850000
+  paxRates:
+    child: { amount: 600000 }
+
+tour-dao-khi-suoi-hoa-lan:
+  unit: perPax
+  amount: 730000
+  paxRates:
+    child: { amount: 510000 }
+
+ve-hon-tam-tam-bun-tam-bien:
+  unit: perPax
+  amount: 540000
+  paxRates:
+    child: { amount: 430000 }
+    senior: { amount: 430000 }

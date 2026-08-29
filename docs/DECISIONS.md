@@ -970,11 +970,11 @@ Kiểm hết bốn nơi dùng field này trong mã nguồn (bỏ bundle `cms/dis
 
 **Chốt 4 — Danh sách bí mật production lên 7.** `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SES_REGION`, `BOOKING_NOTIFY_EMAIL`, `ZALO_BOT_TOKEN`, `ZALO_BOT_CHAT_IDS`, `TURNSTILE_SECRET_KEY`, cộng `IP_HASH_SALT`. Trong đó `IP_HASH_SALT` **không có trong spec gốc**: nó sinh ra từ phán xét F4 của vòng review Task 8 (muối băm IP dùng chung `TURNSTILE_SECRET_KEY` là tái sử dụng bí mật sai mục đích). Mục này ghi nó vào sổ để `SPEC` §4.7 và runbook `BUILD-NOTES` khớp với mã đang chạy.
 
-**Chốt 5 — `DR-044` (mở dưới số `DR-040` trên nhánh, va với `DR-040` của `main`, đánh lại ở Task 15) xử ngay trong luồng đặt tour.** `scripts/validators/py1-py8.ts` kiểm `typeof doc.bookingRef === 'string'` trong khi lược đồ Sanity khai `bookingRef` là object có field con `key`, làm `PY3`/`PY4`/`PY5` gần như vô hiệu cho mọi entity thương mại. Bug có từ trước, Task 11 chỉ làm nó lộ ra. Sửa luôn ở đây thay vì tách task riêng, vì chính module này vừa đưa 8 dòng giá thật vào `prices.yaml` — để ba validator hỏng thì cổng giá của module mới mở ra đã rỗng.
+**Chốt 5 — `DR-061` (mở dưới số `DR-040` trên nhánh, va với `DR-040` của `main` nên đánh lại thành `DR-044` ở Task 15, rồi va tiếp với `DR-044` của `main` nên đánh lại thành `DR-061` ở lượt gộp `main` thứ ba) xử ngay trong luồng đặt tour.** `scripts/validators/py1-py8.ts` kiểm `typeof doc.bookingRef === 'string'` trong khi lược đồ Sanity khai `bookingRef` là object có field con `key`, làm `PY3`/`PY4`/`PY5` gần như vô hiệu cho mọi entity thương mại. Bug có từ trước, Task 11 chỉ làm nó lộ ra. Sửa luôn ở đây thay vì tách task riêng, vì chính module này vừa đưa 8 dòng giá thật vào `prices.yaml` — để ba validator hỏng thì cổng giá của module mới mở ra đã rỗng.
 
 **Chốt 6 — Task 11 phải qua review như mọi task khác.** Phiên thi hành trước commit Task 11 (`798d2b2`, `f1795b9`) rồi dừng mà chưa dispatch reviewer. Không miễn cổng: task này là task duy nhất ghi vào dataset production, càng phải có cổng.
 
-**Hệ quả tài liệu.** `SPEC-2026-08-21-dat-tour.md` sửa §3, §4.6, §4.7, §5, §6 theo mục này. `ADR-0027` thêm một mục đính chính giữ nguyên phần đã ghi (`04-CONSTRAINTS` §2.5, sổ chỉ-thêm). `docs/plans/2026-08-22-dat-tour.md` thêm Task 15 (gộp `main`), Task 16 (SES), Task 17 (`DR-044`).
+**Hệ quả tài liệu.** `SPEC-2026-08-21-dat-tour.md` sửa §3, §4.6, §4.7, §5, §6 theo mục này. `ADR-0027` thêm một mục đính chính giữ nguyên phần đã ghi (`04-CONSTRAINTS` §2.5, sổ chỉ-thêm). `docs/plans/2026-08-22-dat-tour.md` thêm Task 15 (gộp `main`), Task 16 (SES), Task 17 (`DR-061`).
 
 ---
 
@@ -1833,6 +1833,24 @@ Vòng duyệt cuối kiểm và kết luận không chặn gộp: test `evidence
 **Tài liệu.** `docs/specs/SPEC-2026-08-26-da-diem-den.md`, `docs/adr/ADR-0028-da-diem-den.md`, kế hoạch thi công `docs/plans/2026-08-26-da-diem-den.md` (8 task).
 
 ---
+
+## QĐ-2026-08-26-02 — Google Sheet là bề mặt nhập giá; `data/prices.yaml` vẫn là nguồn sự thật, đồng bộ một chiều bằng `prices:pull`
+
+**Bối cảnh.** Sửa giá hiện là sửa tay `data/prices.yaml` — cú pháp YAML lồng nhau, khoá con enum đóng, ghi chú giới hạn 40 ký tự. Người nắm giá là người kinh doanh, không phải người viết mã. 21/28 tour đã xuất bản chưa có dòng giá, phần lớn vì rào cản này chứ không phải vì chưa có giá.
+
+**Chốt 1 — Sheet là bề mặt NHẬP, không phải nguồn.** `data/prices.yaml` vẫn là **nguồn sự thật duy nhất** về giá, vẫn là thứ được commit, và vẫn là thứ duy nhất bản dựng đọc. `ADR-0003`, `ADR-0007` và ràng buộc `I1` không đổi hiệu lực. Cái đổi là: yaml nay có thể được **sinh ra** từ Sheet thay vì gõ tay — nó vẫn là nguồn cho mọi thứ ở hạ lưu.
+
+**Chốt 2 — Đồng bộ MỘT CHIỀU, chạy bằng tay.** `npm run prices:pull` đọc Sheet → sinh lại `data/prices.yaml` → chạy validator → dừng để người xem diff rồi commit. **Không bao giờ chảy ngược** (yaml không ghi lên Sheet). **Không đọc lúc build, không đọc lúc chạy** — nên `BK1` (client và endpoint không đọc giá lúc runtime) nguyên vẹn, và không thêm phụ thuộc mạng vào đường dựng.
+
+**Chốt 3 — Vì sao không cho build đọc thẳng Sheet.** Đó mới là thứ tạo nguồn sự thật thứ hai: giá sẽ tồn tại ở hai nơi cùng lúc, bản dựng phụ thuộc một dịch vụ ngoài, và một lần Google chậm là hỏng phát hành. Đường một chiều giữ Sheet ở vị trí đúng của nó — chỗ soạn thảo, như Sanity với nội dung.
+
+**Chốt 4 — Sheet phải mở quyền đọc.** Đọc qua đường xuất công khai của Google (`gviz/tq?tqx=out:csv&sheet=<tên tab>`), không dùng khoá API, không dùng OAuth, **không thêm dependency**. Đổi lại: Sheet phải ở chế độ *bất kỳ ai có đường liên kết → người xem*. **Hệ quả phải biết: bảng giá bán là công khai với ai có link.** Giá bán vốn là thông tin công khai (đã hiện trên trang), nên chấp nhận được — nhưng **cấm để bất cứ gì không công khai vào Sheet này**: không giá vốn, không chiết khấu đại lý, không ghi chú nội bộ về khách. Có nhu cầu đó thì mở Sheet thứ hai không nối vào đây.
+
+**Chốt 5 — Xoá dòng phải ồn ào.** Khoá có trong yaml mà không có trong Sheet nghĩa là xoá một dòng giá, và xoá một dòng giá đang được trỏ tới là làm tour đó mất form. Script **không được tự xoá**: phải liệt kê và dừng, chỉ xoá khi người chạy thêm cờ tường minh. Cùng tinh thần "hỏng ồn ào, không hỏng câm" của `DR-099`.
+
+**Chốt 6 — Khối chú thích đầu `prices.yaml` phải sống sót.** Nó ghi bài học `DR-097` (khoá là định danh ổn định, đừng đổi theo slug). Sinh lại file mà xoá mất khối đó là xoá mất chính lời cảnh báo đã phải trả giá mới có.
+
+**Ranh giới.** Mục này chỉ nói về giá. Không mở đường cho Sheet điều khiển bất cứ thứ gì khác. Muốn thêm một Sheet cho nội dung, lịch trình, hay tồn kho là quyết định mới — `00-PROJECT_BRIEF` §5 "không quản lý chỗ trống" còn nguyên.
 
 ## QĐ-2026-08-27-01 — Bật lại deploy tự động sau khi Publish, kèm sửa ba chỗ lệch của webhook
 

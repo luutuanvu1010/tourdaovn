@@ -1,10 +1,23 @@
 name = "tourdaovn"
+# Worker của adapter Astro — sinh ra ở mọi build; từ ADR-0027 được deploy để chạy
+# route on-demand /api/dat-tour. Mọi trang khác vẫn là asset tĩnh, phục vụ trước Worker.
+main = "./dist/_worker.js/index.js"
 compatibility_date = "2026-06-01"
 compatibility_flags = ["nodejs_compat"]
 
 [assets]
 directory = "./dist"
+binding = "ASSETS"
 not_found_handling = "404-page"
+
+# D1 — bản ghi gốc đơn đặt tour (SPEC-2026-08-21-dat-tour §4.5).
+# database_id: điền sau `wrangler d1 create tourdao-booking` (runbook BUILD-NOTES). Cục bộ
+# (astro dev, vitest) không cần id thật.
+[[d1_databases]]
+binding = "BOOKING_DB"
+database_name = "tourdao-booking"
+database_id = "554d340d-0a3d-48bd-9ee5-7f697ec1c41d"
+migrations_dir = "migrations"
 
 [build]
 command = "npm run build:ci"

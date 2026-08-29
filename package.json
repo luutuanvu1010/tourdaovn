@@ -13,22 +13,27 @@
     "validate:git-governance": "npm --prefix scripts run validate:git-governance",
     "preview": "astro preview",
     "check": "astro check",
+    "test": "vitest run",
     "gate": "astro check && npm --prefix scripts run gate:all",
     "audit:spec": "npm --prefix scripts run audit:spec",
+    "prices:pull": "npm --prefix scripts run prices:pull --",
     "deploy": "npm run build && env -u CLOUDFLARE_API_TOKEN -u CF_API_TOKEN wrangler deploy --env-file /dev/null",
     "deploy:preview": "npm run build && env -u CLOUDFLARE_API_TOKEN -u CF_API_TOKEN wrangler versions upload --env-file /dev/null"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.0.0",
-    "astro": "^5.0.0",
     "@sanity/client": "^6.28.0",
     "@sanity/image-url": "^1.1.0",
+    "astro": "^5.0.0",
     "yaml": "^2.7.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.0",
+    "@cloudflare/vitest-pool-workers": "^0.22.0",
+    "@cloudflare/workers-types": "^5.20260822.1",
     "@types/node": "^22.0.0",
     "typescript": "^5.7.0",
+    "vitest": "^4.1.11",
     "wrangler": "^4.0.0"
   }
 }

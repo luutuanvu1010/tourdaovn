@@ -1,0 +1,162 @@
+import { describe, expect, it } from 'vitest'
+import { LIMITS, MSG, normalizePhone, parseBookingPayload, validateBooking, type BookingInput } from '../../src/lib/booking/schema'
+
+const TODAY = '2026-09-01'
+function good(over: Partial<BookingInput> = {}): BookingInput {
+  return {
+    tourSlug: 'tour-3-dao-nha-trang', tourTitle: 'Tour 3 đảo Nha Trang', bookingRef: 'tour-3-dao',
+    departDate: '2026-09-05',
+    pax: { adult: 2, child: 1, senior: 0, infant: 0 },
+    quoted: { perPax: { adult: 550000, child: 350000 }, total: 1450000, quotedAt: '2026-08-21T02:00:00Z' },
+    name: 'Nguyễn Văn A', phone: '0905 123 456', email: '', pickup: 'KS Mường Thanh', note: '',
+    turnstileToken: 'tok', website: '',
+    ...over,
+  }
+}
+
+describe('normalizePhone', () => {
+  it('ba dạng đầu vào về 0905123456', () => {
+    expect(normalizePhone('0905 123 456')).toBe('0905123456')
+    expect(normalizePhone('+84905123456')).toBe('0905123456')
+    expect(normalizePhone('84905123456')).toBe('0905123456')
+    expect(normalizePhone('0258.3521.123')).toBe('02583521123')
+  })
+  it('số ngắn, chữ, rỗng → null', () => {
+    expect(normalizePhone('0123')).toBeNull()
+    expect(normalizePhone('abc')).toBeNull()
+    expect(normalizePhone('')).toBeNull()
+  })
+})
+
+describe('validateBooking', () => {
+  it('đơn hợp lệ → ok, phone chuẩn hoá, email rỗng → null', () => {
+    const r = validateBooking(good(), TODAY)
+    expect(r.ok).toBe(true)
+    if (r.ok) {
+      expect(r.value.phone).toBe('0905123456')
+      expect(r.value.email).toBeNull()
+      expect(r.value.name).toBe('Nguyễn Văn A')
+    }
+  })
+  it('ngày hôm nay → lỗi departDate; +366 → lỗi; ngày ảo → lỗi', () => {
+    for (const d of ['2026-09-01', '2027-09-02', '2026-02-30']) {
+      const r = validateBooking(good({ departDate: d }), TODAY)
+      expect(r.ok).toBe(false)
+      if (!r.ok) expect(r.fields.departDate).toBeTruthy()
+    }
+    expect(validateBooking(good({ departDate: '2026-09-02' }), TODAY).ok).toBe(true)
+    expect(validateBooking(good({ departDate: '2027-09-01', quoted: { perPax: { adult: 550000, child: 350000 }, total: 1450000, quotedAt: 'x' } }), TODAY).ok).toBe(true)
+  })
+  it('adult 0 → lỗi; tổng 31 → lỗi; 21 một hạng → lỗi', () => {
+    const r1 = validateBooking(good({ pax: { adult: 0, child: 1, senior: 0, infant: 0 }, quoted: { perPax: { child: 350000 }, total: 350000, quotedAt: 'x' } }), TODAY)
+    expect(r1.ok).toBe(false); if (!r1.ok) expect(r1.fields['pax.adult']).toBe(MSG.adultMin)
+    const r2 = validateBooking(good({ pax: { adult: 20, child: 11, senior: 0, infant: 0 }, quoted: { perPax: { adult: 1, child: 1 }, total: 31, quotedAt: 'x' } }), TODAY)
+    expect(r2.ok).toBe(false); if (!r2.ok) expect(r2.fields.pax).toBe(MSG.totalMax)
+    const r3 = validateBooking(good({ pax: { adult: 21, child: 0, senior: 0, infant: 0 }, quoted: { perPax: { adult: 1 }, total: 21, quotedAt: 'x' } }), TODAY)
+    expect(r3.ok).toBe(false); if (!r3.ok) expect(r3.fields['pax.adult']).toBe(MSG.perTypeMax)
+  })
+  it('total lệch với Σ count×perPax → lỗi quoted', () => {
+    const r = validateBooking(good({ quoted: { perPax: { adult: 550000, child: 350000 }, total: 1000, quotedAt: 'x' } }), TODAY)
+    expect(r.ok).toBe(false); if (!r.ok) expect(r.fields.quoted).toBe(MSG.quotedMismatch)
+  })
+  it('thiếu SĐT / tên 1 ký tự / email sai → từng lỗi đúng ô', () => {
+    const r = validateBooking(good({ phone: '', name: 'A', email: 'khong-phai-email' }), TODAY)
+    expect(r.ok).toBe(false)
+    if (!r.ok) {
+      expect(r.fields.phone).toBe(MSG.phoneRequired)
+      expect(r.fields.name).toBe(MSG.nameShort)
+      expect(r.fields.email).toBe(MSG.emailInvalid)
+      expect(r.message).toBe(MSG.formInvalid)
+    }
+  })
+  it('slug lạ, title quá dài, note quá dài → lỗi đúng ô', () => {
+    const rSlug = validateBooking(good({ tourSlug: '../x' }), TODAY)
+    expect(rSlug.ok).toBe(false); if (!rSlug.ok) expect(rSlug.fields.tour).toBe(MSG.tourInvalid)
+    const rTitle = validateBooking(good({ tourTitle: 'x'.repeat(LIMITS.TITLE_MAX + 1) }), TODAY)
+    expect(rTitle.ok).toBe(false); if (!rTitle.ok) expect(rTitle.fields.tour).toBe(MSG.tourInvalid)
+    const rNote = validateBooking(good({ note: 'x'.repeat(LIMITS.NOTE_MAX + 1) }), TODAY)
+    expect(rNote.ok).toBe(false); if (!rNote.ok) expect(rNote.fields.note).toBe(MSG.noteLong)
+  })
+  it('quoted.perPax thiếu giá cho hạng đang có người → lỗi quoted; giá 0 khai tường minh vẫn hợp lệ', () => {
+    const rMissing = validateBooking(good({
+      pax: { adult: 2, child: 0, senior: 0, infant: 0 },
+      quoted: { perPax: {}, total: 0, quotedAt: 'x' },
+    }), TODAY)
+    expect(rMissing.ok).toBe(false)
+    if (!rMissing.ok) expect(rMissing.fields.quoted).toBe(MSG.quotedMismatch)
+
+    const rFree = validateBooking(good({
+      pax: { adult: 2, child: 0, senior: 0, infant: 0 },
+      quoted: { perPax: { adult: 0 }, total: 0, quotedAt: 'x' },
+    }), TODAY)
+    expect(rFree.ok).toBe(true)
+  })
+})
+
+describe('parseBookingPayload', () => {
+  it('đọc object phẳng từ form (pax.adult, quoted.total) thành BookingInput', () => {
+    const p = parseBookingPayload({
+      tourSlug: 't', tourTitle: 'T', bookingRef: 'r', departDate: '2026-09-05',
+      'pax.adult': '2', 'pax.child': '1', 'quoted.perPax.adult': '550000', 'quoted.perPax.child': '350000',
+      'quoted.total': '1450000', 'quoted.quotedAt': 'x', name: 'A B', phone: '0905123456',
+    })
+    expect(p.pax).toEqual({ adult: 2, child: 1, senior: 0, infant: 0 })
+    expect(p.quoted).toEqual({ perPax: { adult: 550000, child: 350000 }, total: 1450000, quotedAt: 'x' })
+    expect(p.email).toBe('')
+    expect(p.website).toBe('')
+  })
+  it('đọc JSON lồng nhau, ép kiểu chuỗi/số, bỏ khoá lạ', () => {
+    const p = parseBookingPayload({ tourSlug: 't', pax: { adult: '3', child: 'x' }, quoted: { perPax: { adult: 1 }, total: '3' }, name: 5, extra: 1 } as any)
+    expect(p.pax).toEqual({ adult: 3, child: 0, senior: 0, infant: 0 })
+    expect(p.quoted.total).toBe(3)
+    expect(p.name).toBe('5')
+    expect((p as any).extra).toBeUndefined()
+  })
+})
+
+// Vòng review toàn nhánh 2026-08-23 — mục 6 và 7.
+describe('lọc ký tự điều khiển, chặn trên cho quotedAt, email có <>', () => {
+  it('CR/LF/TAB và ký tự điều khiển trong tourTitle/name/pickup/note → thành khoảng trắng', () => {
+    // Vì sao quan trọng: `note`/`name` có xuống dòng GIẢ MẠO được dòng trong thân thư văn bản
+    // thuần và tin Zalo — một `note` chứa xuống dòng rồi "SĐT: 0999999999" trông y hệt một
+    // trường thật với nhân viên đang đọc. `tourTitle` thì đi thẳng vào tiêu đề thư SES
+    // (`notify/format.ts:17`), ký tự điều khiển ở đó dễ làm SES trả 400 và MẤT LUÔN thư báo.
+    const p = parseBookingPayload({
+      tourTitle: 'Tour\r\n3 đảo',
+      name: 'Nguyễn Văn A\nSĐT: 0999999999',
+      pickup: 'KS\tMường Thanh',
+      note: 'ghi chú\u0000cuối',
+    })
+    expect(p.tourTitle).toBe('Tour  3 đảo')
+    expect(p.name).toBe('Nguyễn Văn A SĐT: 0999999999')
+    expect(p.pickup).toBe('KS Mường Thanh')
+    expect(p.note).toBe('ghi chú cuối')
+    for (const v of [p.tourTitle, p.name, p.pickup, p.note]) expect(v).not.toMatch(/[\u0000-\u001F\u007F]/)
+  })
+
+  it('ký tự điều khiển ở hai rìa không để lại khoảng trắng thừa (thay rồi mới trim)', () => {
+    const p = parseBookingPayload({ tourTitle: '\r\n Tour 3 đảo \n', name: 'A B', pickup: '\n', note: '\r\n' })
+    expect(p.tourTitle).toBe('Tour 3 đảo')
+    expect(p.name).toBe('A B')
+    expect(p.pickup).toBe('')
+    expect(p.note).toBe('')
+  })
+
+  it('quotedAt cắt còn 40 ký tự — trường duy nhất trước đây không có chặn trên', () => {
+    const p = parseBookingPayload({ quoted: { quotedAt: 'x'.repeat(15_000) } })
+    expect(p.quoted.quotedAt.length).toBe(40)
+    const ok = parseBookingPayload({ quoted: { quotedAt: '2026-08-21T02:00:00Z' } })
+    expect(ok.quoted.quotedAt).toBe('2026-08-21T02:00:00Z')
+  })
+
+  it('email chứa < hoặc > → lỗi email (lọt xuống ReplyToAddresses thì SES trả 400, mất thư báo)', () => {
+    const r1 = validateBooking(good({ email: 'a<b@c.dd' }), TODAY)
+    expect(r1.ok).toBe(false)
+    expect((r1 as { fields: Record<string, string> }).fields.email).toBe(MSG.emailInvalid)
+    const r2 = validateBooking(good({ email: 'a@b.cc>' }), TODAY)
+    expect(r2.ok).toBe(false)
+    expect((r2 as { fields: Record<string, string> }).fields.email).toBe(MSG.emailInvalid)
+    // Email thường vẫn qua — không siết nhầm sang chối bỏ địa chỉ hợp lệ.
+    expect(validateBooking(good({ email: 'khach.hang+dat@gmail.com' }), TODAY).ok).toBe(true)
+  })
+})

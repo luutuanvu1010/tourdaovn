@@ -63,6 +63,93 @@ Giữ lại vì cơ chế còn đúng cho mọi lần chuyển hướng sau. Đ�
 
 ---
 
+## Module đặt tour (ADR-0027) — việc một lần và cách xem đơn
+
+Đơn từ form trên trang tour đi vào D1 `tourdao-booking` (bảng `booking`), rồi báo về email
+(**Amazon SES**) và Zalo Bot. Bí mật đặt bằng `wrangler secret put`, **8 tên**:
+`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SES_REGION`, `BOOKING_NOTIFY_EMAIL`,
+`ZALO_BOT_TOKEN`, `ZALO_BOT_CHAT_IDS`, `TURNSTILE_SECRET_KEY`, `IP_HASH_SALT`. Site key
+Turnstile là biến build `PUBLIC_TURNSTILE_SITE_KEY` trong `.env`. Chi tiết từng bước
+(D1, SES, tạo bot Zalo, Turnstile, WAF): `docs/specs/SPEC-2026-08-21-dat-tour.md` §6,
+`docs/plans/2026-08-22-dat-tour.md` Task 13.
+
+### Thứ tự bắt buộc: đặt bí mật và tạo luật WAF TRƯỚC lần deploy đầu tiên
+
+Không phải mục tham khảo. Đây là **điều kiện tiên quyết** của lần `npm run deploy` đầu tiên có
+`main` trong `wrangler.toml`. Làm đủ **8 `wrangler secret put`** ở trên **và** luật WAF Rate
+limiting cho `/api/dat-tour` (SPEC §6 bước 6) **rồi mới** deploy.
+
+Deploy trước khi làm hai việc đó thì `/api/dat-tour` là **đường ghi công khai duy nhất của
+site** trong trạng thái hỏng, mỗi thứ hỏng một kiểu:
+
+| Thiếu | Hậu quả thật |
+|---|---|
+| `TURNSTILE_SECRET_KEY` | endpoint **từ chối mọi đơn bằng 503** (cổng cấu hình trong `handler.ts`; xem SPEC §4.7 "hỏng ồn ào, không hỏng câm"). Form trên trang tour coi như chết — khách bấm gửi, nhận "Chưa gửi được", và **không có đơn nào tới**. Cửa thoát `BOOKING_ALLOW_NO_TURNSTILE=1` chỉ đặt ở `.dev.vars`, **không bao giờ** trên production |
+| `IP_HASH_SALT` | `ip_hash` = `null` → **toàn bộ khối đếm tần suất bị nhảy qua**, đơn vẫn vào D1 bình thường. Chỉ có một dòng `console.warn` báo, không có tín hiệu nào khác |
+| luật WAF | không có gì chặn **lượt yêu cầu** (xem mục dưới) |
+| `AWS_*` / `BOOKING_NOTIFY_EMAIL` / `ZALO_*` | đơn vẫn vào D1, nhưng **không ai được báo** — cột `notify_email`/`notify_zalo` ghi `skipped`, và không ai gọi lại cho khách |
+
+### Bộ đếm tần suất trong endpoint KHÔNG phải là chặn lượt yêu cầu
+
+Bộ đếm trong `handler.ts` đếm **số đơn đã tạo** (đã qua Turnstile, đã INSERT) trong 10 phút cho
+mỗi `ip_hash` — 5 đơn/10 phút. Nó **không** giới hạn số **lượt yêu cầu**. Chặn theo lượt nằm
+**hoàn toàn** ở luật WAF Rate limiting (10 yêu cầu / 10 giây / IP, SPEC §4.10 lớp 3).
+
+Không có luật WAF nghĩa là **không có gì chặn lượt** — kể cả khi Turnstile đã bật, vì mỗi lượt
+sai token vẫn tốn một lời gọi siteverify và một vòng xử lý của Worker.
+
+### Đường lùi nếu deploy hỏng
+
+Đây là **cửa một chiều đầu tiên** của hệ: từ lúc `wrangler.toml` có `main`, `npm run deploy`
+đưa cả một Worker lên trước mọi asset tĩnh — trước đó site chỉ là asset.
+
+Nếu sau deploy site lỗi 500 hàng loạt (không riêng `/api/dat-tour`):
+
+1. Gỡ dòng `main = "./dist/_worker.js/index.js"` khỏi `wrangler.toml`.
+2. `npm run deploy` lại.
+
+Site quay về đúng trạng thái trước ADR-0027: mọi trang là asset tĩnh, `/api/dat-tour` trả 404,
+form đặt tour hỏng nhưng **phần còn lại của site sống**. Đơn đã nằm trong D1 không mất.
+`npx wrangler rollback` cũng lùi được một version, nhưng gỡ `main` là đường chắc chắn hơn vì nó
+bỏ hẳn Worker khỏi đường phục vụ thay vì đổi sang một bản Worker khác.
+
+### Cho nhân viên đọc đơn: mọi con số trong thư báo là chữ khách gửi lên
+
+Thư báo và tin Zalo dựng lại từ **payload do trình duyệt khách gửi** — tên tour, ngày, số
+người, giá mỗi hạng, **kể cả dòng "Tạm tính"**. Server chỉ kiểm **nhất quán** (tổng có khớp
+Σ số người × đơn giá khách gửi không), **không** đối chiếu lại với bảng giá thật: `BK1` cấm
+endpoint đọc giá lúc chạy.
+
+Nghĩa là một khách sửa được số trong trình duyệt có thể làm thư báo hiện "Tạm tính 10.000₫" mà
+vẫn hợp lệ về mặt kiểm. **Gọi điện xác nhận vẫn là bước bắt buộc**, và giá chốt là giá trong
+`data/prices.yaml`, không phải số trong thư.
+
+Kênh email hỏng thì đơn **vẫn vào D1** — luôn đọc cột `notify_email`, đừng chỉ nhìn HTTP 201.
+`failed:http 403` nghĩa là chữ ký/quyền IAM sai; `failed:http 400` thường là SES còn trong
+sandbox hoặc sai `AWS_SES_REGION`; `skipped` nghĩa là thiếu bí mật.
+
+Xem đơn:
+
+```
+env -u CLOUDFLARE_API_TOKEN -u CF_API_TOKEN npx wrangler d1 execute tourdao-booking --remote --env-file /dev/null \
+  --command "SELECT code, created_at, tour_title, depart_date, customer_name, phone, status, notify_email, notify_zalo FROM booking ORDER BY id DESC LIMIT 50"
+```
+
+Đơn chưa báo được: thêm `WHERE COALESCE(notify_email,'') <> 'sent' AND COALESCE(notify_zalo,'') <> 'sent'`.
+**Phải có `COALESCE`, không bỏ được:** hai cột này là `NULL` cho tới khi tác vụ nền ghi xong
+trạng thái. Tác vụ đó chết giữa chừng (worker bị thu hồi, D1 lỗi thoáng qua) thì cột ở lại
+`NULL` mãi — và `NULL <> 'sent'` trong SQL không phải đúng, nên **đơn tệ nhất — chưa một kênh
+nào báo được — sẽ tàng hình** trước bản truy vấn không có `COALESCE`. Đã chứng minh bằng SQLite
+thật ngày 2026-08-29 (rà soát toàn module).
+Sao lưu: `… wrangler d1 export tourdao-booking --remote --output backups/booking-$(date +%F).sql`.
+Đổi trạng thái: `UPDATE booking SET status='contacted' WHERE code='TD-…'`.
+
+Thêm tour có giá: thêm dòng vào `data/prices.yaml` (khoá = slug tour, `amount` + `paxRates`),
+rồi ghi đúng khoá đó vào Tour → bookingRef → key trong Studio; build lại là có form.
+
+Nhớ: đã có `main` trong `wrangler.toml` nên `npm run deploy` deploy cả Worker; `wrangler d1
+migrations apply … --remote` là bước riêng khi có migration mới.
+
 ## Deploy
 
 ```

@@ -7,7 +7,9 @@ export interface Slot {
   // Cập nhật QĐ-2026-08-25-02: không còn "FactStrip inline" nào cả — Thông tin
   // nhanh nay luôn là dải riêng phía trên `.two-col`, không đi qua Sidebar dưới
   // bất kỳ hình thức nào.
-  component: 'BookingCTA' | 'Map' | 'Article'
+  // 'BookingForm' (nhánh đặt tour): ô đặt trong slot 'booking' khi tour có giá.
+  // 'InfoCard' đã rời union theo main (InfoCard.astro đã xoá, DR-046 / QĐ-2026-08-29-03).
+  component: 'BookingCTA' | 'BookingForm' | 'Map' | 'Article'
   visible: boolean
   props: Record<string, any>
 }

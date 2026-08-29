@@ -1,0 +1,30 @@
+﻿Mã tour,Tên tour,Khoá giá,Đường dẫn,Đơn vị,Giá người lớn,Giá trẻ em,Ghi chú trẻ em,Giá người cao tuổi,Ghi chú người cao tuổi,Giá em bé,Ghi chú em bé,Ghi chú nội bộ
+TD101,Tour 3 đảo Hòn Mun: Hòn Mun - Làng Chài - Hòn Tằm,tour-3-dao-nha-trang-hon-mun-hon-tam,tour-3-dao-hon-mun-hon-mun-lang-chai-hon-tam,perPax,850000,600000,,,,,,
+TD102,Tour 3 đảo Mini Beach: Hòn Mun - Làng Chài - Mini Beach,tour-3-dao-hon-mun-mini-beach-lang-chai,tour-3-dao-mini-beach-hon-mun-lang-chai-mini-beach,perPax,800000,560000,,,,,,
+TD103,Tour 3 đảo Vip Nha Trang: Mini Beach - Làng Chài - Hòn Tằm,tour-3-dao-nha-trang-mini-beach-hon-tam,tour-3-dao-vip-nha-trang-mini-beach-lang-chai-hon-tam,perPax,850000,600000,,,,,,
+TD104,Tour Đảo Khỉ Suối Hoa Lan,tour-dao-khi-suoi-hoa-lan,tour-dao-khi-suoi-hoa-lan,perPax,730000,510000,,,,,,
+TD105,Tour Hòn Tằm tắm bùn tắm biển - Vé Hòn Tằm nữa ngày,ve-hon-tam-tam-bun-tam-bien,tour-hon-tam-tam-bun-tam-bien-ve-hon-tam-nua-ngay,perPax,540000,430000,,430000,,,,
+TD106,Vé Hòn Tằm tắm biển - Tour Hòn Tằm nữa ngày,ve-hon-tam-seaday-tour-03,ve-hon-tam-tam-bien-tour-hon-tam-nua-ngay,perPax,430000,340000,,340000,,,,
+TD107,Vé Hòn Tằm trọn gói - Tour Hòn Tằm 1 ngày,tour-hon-tam-tron-goi,ve-hon-tam-tron-goi-tour-hon-tam-1-ngay,perPax,540000,430000,,430000,,,,
+TD108,Tour 1 đảo Hòn Tằm lặn biển sea walker,tour-1-dao-hon-tam-lan-bien,tour-1-dao-hon-tam-lan-bien-sea-walker,perPax,,,,,,,,
+TD109,Tour 2 đảo Hòn Mun Hòn Tằm buffet trưa,tour-2-dao-hon-mun-hon-tam-buffet,tour-2-dao-hon-mun-hon-tam-buffet-trua,perPax,,,,,,,,
+TD110,Tour 3 đảo Nha Trang: Bãi Tranh - Làng Chài - Hòn Tằm,tour-3-dao-bai-tranh-lang-chai-hon-tam,tour-3-dao-nha-trang-bai-tranh-lang-chai-hon-tam,perPax,,,,,,,,
+TD111,Tour 3 đảo Nha Trang Deluxe: Bãi Tranh - Làng Chài - Vịnh San Hô,tour-3-dao-deluxe-bai-tranh-vinh-san-ho,tour-3-dao-nha-trang-deluxe-bai-tranh-lang-chai-vinh-san-ho,perPax,,,,,,,,
+TD112,Tour Hòn Tằm trọn gói: Cano 2 chiều - Tắm bùn - Tắm biển - Buffet,tour-hon-tam-tron-goi-cano-buffet,tour-hon-tam-tron-goi-cano-2-chieu-tam-bun-tam-bien-buffet,perPax,,,,,,,,Kiểm xem có trùng sản phẩm với TD107 không
+TD113,Tour snorkeling Nha Trang,tour-snorkeling-nha-trang,tour-snorkeling-nha-trang,perPax,,,,,,,,
+TD201,Vé Vin Harbour,ve-vin-harbour,ve-vin-harbour,perPax,,,,,,,,
+TD202,Vé Vin Harbour + Tata Show,ve-vin-harbour-tata-show,ve-vin-harbour-tata-show,perPax,,,,,,,,
+TD203,Vé Vinwonders Nha Trang 2 ngày không giới hạn,ve-vinwonders-2-ngay,ve-vinwonders-nha-trang-2-ngay-khong-gioi-han,perPax,,,,,,,,
+TD204,Vé Vinwonders Nha Trang 3 ngày không giới hạn,ve-vinwonders-3-ngay,ve-vinwonders-nha-trang-3-ngay-khong-gioi-han,perPax,,,,,,,,
+TD205,Vé Vinwonders Nha Trang sau 16:00,ve-vinwonders-sau-16h,ve-vinwonders-nha-trang-sau-16-00,perPax,,,,,,,,
+TD206,Vé Vinwonders Nha Trang sau 16:00 + Buffet tối,ve-vinwonders-sau-16h-buffet-toi,ve-vinwonders-nha-trang-sau-16-00-buffet-toi,perPax,,,,,,,,
+TD207,Vé Vinwonders tiêu chuẩn,ve-vinwonders-tieu-chuan,ve-vinwonders-tieu-chuan,perPax,,,,,,,,
+TD208,"Vé Vinwonders tiêu chuẩn + Buffet 350,000 VNĐ",ve-vinwonders-tieu-chuan-buffet-350,ve-vinwonders-tieu-chuan-buffet-350-000-vnd,perPax,,,,,,,,
+TD209,"Vé Vinwonders tiêu chuẩn + Buffet 500,000 VNĐ",ve-vinwonders-tieu-chuan-buffet-500,ve-vinwonders-tieu-chuan-buffet-500-000-vnd,perPax,,,,,,,,
+TD301,Tour Du Thuyền Emperor Khám Phá Vịnh Nha Trang,du-thuyen-emperor-kham-pha-vinh,tour-du-thuyen-emperor-kham-pha-vinh-nha-trang,perPax,,,,,,,,DU THUYỀN — bán theo người hay theo chuyến?
+TD302,Tour Du Thuyền Emperor Ngắm Hoàng Hôn Nha Trang,du-thuyen-emperor-hoang-hon,tour-du-thuyen-emperor-ngam-hoang-hon-nha-trang,perPax,,,,,,,,DU THUYỀN — bán theo người hay theo chuyến?
+TD303,Tour du thuyền Marmoris Sunset Chilling Nha Trang,du-thuyen-marmoris-sunset-chilling,tour-du-thuyen-marmoris-sunset-chilling-nha-trang,perPax,,,,,,,,DU THUYỀN — bán theo người hay theo chuyến?
+TD304,Tour du thuyền Marmoris Tropical Yachting Nha Trang,du-thuyen-marmoris-tropical-yachting,tour-du-thuyen-marmoris-tropical-yachting-nha-trang,perPax,,,,,,,,DU THUYỀN — bán theo người hay theo chuyến?
+TD305,Tour du thuyền Vega Yacht Nha Trang (Day Tour),du-thuyen-vega-day-tour,tour-du-thuyen-vega-yacht-nha-trang-day-tour,perPax,,,,,,,,DU THUYỀN — bán theo người hay theo chuyến?
+TD306,Tour du thuyền Vega Yacht Nha Trang (Sunset Tour),du-thuyen-vega-sunset-tour,tour-du-thuyen-vega-yacht-nha-trang-sunset-tour,perPax,,,,,,,,DU THUYỀN — bán theo người hay theo chuyến?
+,(chưa tour nào trỏ tới),ve-hon-tam-tam-tron-goi,,perPax,540000,430000,,430000,,,,MỒ CÔI — xoá hay gắn cho một tour? Xem DR-062

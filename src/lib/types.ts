@@ -1,9 +1,13 @@
 // Đơn vị giá — enum đóng khớp SAD §3.1
 export type PriceUnit = 'perPax' | 'perRoomNight' | 'perTicket'
 
+// Hạng khách cho form đặt tour (SPEC-2026-08-21-dat-tour §4.2, ADR-0027).
+export type PaxCode = 'adult' | 'child' | 'senior' | 'infant'
+export type PaxRate = { amount: number; note?: string }
+
 // Dữ liệu thô từ prices.yaml
 export type PriceEntry =
-  | { unit: 'perPax'; amount: number }
+  | { unit: 'perPax'; amount: number; paxRates?: Partial<Record<Exclude<PaxCode, 'adult'>, PaxRate>> }
   | { unit: 'perPax'; tiers: { maxPax: number; amount: number }[] }
   | { unit: 'perRoomNight'; from: number; asOf: string }
   | { unit: 'perTicket'; tickets: { name: string; amount: number }[] }
