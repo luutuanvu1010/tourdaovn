@@ -76,9 +76,15 @@ const sectionId = id ?? (heading ? slugify(heading) : undefined)
     }
   }
 
-  /* Nhịp dọc về một mốc duy nhất ≤640 (SPEC-2026-08-29 R3). Trước đây ba mốc lẫn
-     nhau (768/767/640) nên ở viewport 700px .section đã rút còn 24px trong khi
-     .why-section vẫn 96px — lệch nhịp ở đúng khổ máy tính bảng nhỏ. */
+  /* Nhịp dọc về một mốc duy nhất ≤640 (SPEC-2026-08-29 R3) — CHỈ ở ≤640, không
+     phải cả dải máy tính bảng nhỏ. Trước đây ba mốc lẫn nhau (768/767/640) khiến
+     các khối rút nhịp ở các viewport khác nhau trong dải 641-768px.
+     Bản sửa này KHÔNG thống nhất dải 641–767px: đo trên `/` ở 700px sau khi sửa
+     vẫn còn năm cặp đệm phân biệt giữa các khối trang chủ (48/48, 96/96, 48/64,
+     64/48, 64/64) — `.section` đã lên var(--s7)=48px (trước là var(--s5)=24px)
+     nhưng `.why-section` (HomeTrustBar.astro) vẫn var(--s9)=96px vì nó chỉ hạ ở
+     ≤640. Đọc bản này đừng suy ra dải 641–767px đã thống nhất — chỉ ≤640 mới có
+     một nhịp chung. */
   @media (max-width: 640px) {
     .section {
       padding: var(--s6) 0;
