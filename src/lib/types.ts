@@ -469,6 +469,7 @@ export interface EventResult extends BaseEntityFields {
 }
 
 export interface ArticleResult extends BaseDocEntityFields {
+  gallery?: ImageAsset[] | null
   _type: 'article'
   articleType: 'guide' | 'list' | 'news' | 'review' | 'itinerary' | 'transport-guide'
   author: EntityRef & { sameAs?: string[] | null; url?: string; jobTitle?: string }

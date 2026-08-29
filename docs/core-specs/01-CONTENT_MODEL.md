@@ -472,6 +472,7 @@ Field chung (2.0) vẫn áp dụng. Bảng field riêng:
 | faq | array faqItem {question, answer} | tùy | FAQPage, pattern dùng lại từ trang trụ; bài guide hay có hỏi đáp | người hoặc AI T1 |
 | howTo | array step {name, text} | có nếu transport-guide (ít nhất một trong howTo, faq) | serialize HowTo; thay object structuredData đa hình của nháp cũ | người hoặc AI T1 |
 | destination | reference đến TouristDestination | tùy | I20 (warn). Cạnh phẳng "thuộc điểm đến nào", độc lập với chuỗi containedInPlace và không suy ra nhau (ADR-0028) | người |
+| gallery | array image (mỗi ảnh có alt), trần 30 | tùy | **thêm v1.0.20 (`QĐ-2026-08-29-05`)**: nuôi hero mosaic như mọi entity khác. Trước đó Article không có field này nên hero trang cẩm nang luôn rơi về biến thể một ảnh. Cần **đủ 4 ảnh** sau khi loại trùng `mainImage` thì hero mới lên lưới; dưới 4 thì fallback một ảnh (`QĐ-2026-08-28-03`). Khuôn field chép từ `attraction.ts` | người |
 | imageProvenance | text | có khi có ảnh | một dòng chung mức entity, theo nếp chung 2026-06-11 | người |
 
 Cấu trúc mục faq (dùng chung mọi entity có faq): mỗi item là named object type `faqItem` gồm `question` (string, bắt buộc) và `answer` (text, bắt buộc). Named type thay cho anonymous inline object để Studio luôn gán `_type: 'faqItem'` khi thêm tay, không ra `_type: null` (vỡ gate I-FAQ-TYPE và JSON-LD). Field `faq` ở entity bách khoa và venue là object localized {vi,en,zh,ko,ru}, mỗi ngôn ngữ là một `array faqItem`; ở Article (document-level i18n) là một `array faqItem` phẳng. Quyết định FIX-FAQ-TYPE 2026-06-24 (DECISIONS.md).

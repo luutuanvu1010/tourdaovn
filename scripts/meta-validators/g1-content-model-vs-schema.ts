@@ -287,6 +287,11 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
     mentions: { required: false }, faq: { required: false },
     howTo: { required: false }, language: { required: false },
     imageProvenance: { required: false },
+    // QĐ-2026-08-29-05: Bài viết có gallery để hero vào được mosaic. Danh sách
+    // này CHÉP TAY từ 01-CONTENT_MODEL §2 — sửa đặc tả mà quên sửa đây thì cổng
+    // đỏ; sửa đây mà quên đặc tả thì cổng xanh nhưng nói sai. Cảnh báo này đã
+    // ghi ở QĐ-2026-08-26-01, nay gặp thật.
+    gallery: { required: false },
     // ADR-0028: cạnh phẳng "thuộc điểm đến nào" — khai ở bảng field §2.x tương ứng
     destination: { required: false },
   },

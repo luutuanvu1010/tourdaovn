@@ -2,6 +2,8 @@ import { defineType, defineField } from 'sanity'
 import { DocumentTextIcon } from '@sanity/icons'
 import { baseGroups, destinationField } from './baseFields'
 import { ApprovedByInput } from '../components/ApprovedByInput'
+import { BulkGalleryInput } from '../components/BulkGalleryInput'
+import { brand } from '../../src/site.config'
 
 export default defineType({
   name: 'article',
@@ -54,6 +56,29 @@ export default defineType({
           name: 'alt', type: 'string',
         })
       ],
+    }),
+    // QĐ-2026-08-29-05: Bài viết nay CÓ gallery, để hero đi được qua biến thể
+    // mosaic như mọi entity khác. Trước bản này `06` §3 hàng Gallery loại trừ
+    // article, nên trang cẩm nang luôn rơi về hero ảnh đơn — đúng đặc tả cũ,
+    // không phải lỗi. Khuôn field chép nguyên từ `attraction.ts` để hai bên
+    // không lệch nhau.
+    defineField({
+      name: 'gallery', type: 'array',
+      group: 'coBan',
+      options: { layout: 'grid' },
+      components: { input: BulkGalleryInput },
+      validation: Rule => Rule.max(30),
+      of: [{
+        type: 'image',
+        options: { hotspot: true },
+        fields: [
+          defineField({
+            name: 'alt', type: 'string',
+            initialValue: (_value: unknown, context: Record<string, unknown>) =>
+              ((context.document as Record<string,unknown>)?.title as string || '') + ' — Ảnh ' + brand.name
+          })
+        ]
+      }]
     }),
     defineField({
       name: 'articleType', type: 'string',

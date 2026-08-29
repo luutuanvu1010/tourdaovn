@@ -2306,3 +2306,35 @@ Hai biến thể khai rõ thay vì giả vờ giống nhau: `detail` (nền ph�
 **Tài liệu.** `06` v2.11.0 → **v2.12.0**; `KIEN-TRUC-TEMPLATE.md` cập nhật §1, §2.0 mới, §2, §5.
 
 **Còn lại đúng một trang ngoài frame: `SiteHome`.**
+
+---
+
+## QĐ-2026-08-29-05 — Bài viết có `gallery`: hero vào được mosaic như mọi entity khác
+
+**Bối cảnh.** Chủ dự án báo hero trang cẩm nang vẫn chỉ một ảnh, không phải lưới.
+
+**Nguyên nhân — không phải lỗi, là đặc tả cũ.** Bài viết **không có field `gallery` ở bất kỳ tầng nào**: `cms/schemas/article.ts` không khai, `src/lib/queries/article.ts` không lấy, `ArticleResult` không có, và `06` §3 hàng Gallery ghi thẳng *"không áp dụng: article, person, organization"*. `Hero` cần đủ 4 ảnh sau khi loại trùng `mainImage` mới vào mosaic, nên trang cẩm nang luôn rơi về tầng "một ảnh" của cơ chế fallback (`QĐ-2026-08-28-03`).
+
+**Chốt.** Mở `gallery` cho Bài viết ở cả bốn tầng:
+
+1. `cms/schemas/article.ts` — thêm field `gallery`, khuôn **chép nguyên** từ `attraction.ts` (mảng ảnh, `BulkGalleryInput`, trần 30, `alt` tự điền) để hai bên không lệch.
+2. `src/lib/queries/article.ts` — thêm `galleryFragment()` vào truy vấn theo slug. **Không** thêm vào các truy vấn danh sách: card không dùng gallery, thêm vào là kéo dữ liệu thừa mỗi lần dựng.
+3. `src/lib/types.ts` — `ArticleResult.gallery`.
+4. `ArticleDetail.astro` — truyền `gallery={data.gallery}` xuống `DetailLayout`.
+5. `06` §3 hàng Gallery — **gỡ `article`** khỏi danh sách loại trừ. `06` v2.12.0 → **v2.13.0**.
+
+**⚠ Đổi mã KHÔNG tự làm trang đổi hình.** Đo trên production ngay sau khi dựng lại: **24** bài viết approved, **23** có ảnh chính, **0** bài có bất kỳ ảnh gallery nào — vì field vừa mới sinh ra. Cả 24 trang vẫn hiển thị hero một ảnh, đúng cơ chế fallback.
+
+Muốn thấy lưới ảnh thì phải **nạp đủ 4 ảnh gallery cho từng bài** — khoảng **96 ảnh** cho 24 bài. Đó là việc nội dung, không phải việc mã. Nạp tới đâu, trang tự lên mosaic tới đó, không cần đụng mã lần nữa.
+
+**Việc còn lại của chủ dự án:** schema mới phải được **deploy lên Sanity Studio** thì biên tập viên mới thấy ô Gallery ở tài liệu Bài viết. Chưa deploy thì field tồn tại trong mã nhưng không ai nhập được.
+
+**Cổng bắt được một chỗ tôi quên, ghi lại vì nó lặp lại một cảnh báo cũ.** Lần push đầu bị `pre-push` chặn: `g1-content-model-vs-schema` báo *"Field gallery có trong schema article.ts nhưng KHÔNG có trong CONTENT_MODEL §2 — vi phạm P4"*. Phải sửa **ba** chỗ chứ không phải một:
+
+1. `01-CONTENT_MODEL` §2.11 — thêm hàng `gallery` (`01` v1.0.19 → **v1.0.20**).
+2. `scripts/meta-validators/g1-content-model-vs-schema.ts` — `g1` **không phân tích markdown**, nó giữ một danh sách field **chép tay**. Sửa đặc tả mà quên sửa đây thì cổng đỏ; sửa đây mà quên đặc tả thì cổng **xanh nhưng nói sai**.
+3. Schema.
+
+Đây đúng cảnh báo đã ghi ở `QĐ-2026-08-26-01`: *"Hai meta-validator g1 và g4 chép tay danh sách field nên phải sửa cùng lúc, nếu không cổng vẫn xanh nhưng nói sai về thực tế."* Nay gặp thật.
+
+**Không mở cho `person` và `organization`** — chủ dự án chỉ định Bài viết. Hai loại đó vẫn nằm trong danh sách loại trừ ở §3.
