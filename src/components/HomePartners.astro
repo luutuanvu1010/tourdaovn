@@ -125,6 +125,7 @@ const items = (partners ?? []).filter(p => p.name || p.logo)
   }
 
   @media (max-width: 640px) {
+    .partners-section { padding: var(--s6) 0; }
     .partners-grid { grid-template-columns: repeat(2, 1fr); }
   }
 </style>

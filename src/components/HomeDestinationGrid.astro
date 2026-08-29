@@ -95,6 +95,7 @@ const cards = destinations
     color: var(--c-primary);
     display: flex;
     align-items: center;
+    min-height: 44px;
     gap: var(--s1);
     transition: opacity var(--m-fast) var(--m-ease);
   }
@@ -167,7 +168,7 @@ const cards = destinations
   }
 
   @media (max-width: 640px) {
-    .dest-section { padding: var(--s7) 0 var(--s6); }
+    .dest-section { padding: var(--s6) 0; }
     .dest-grid { grid-template-columns: 1fr; }
     .section-title { font-size: var(--fs-h4); }
   }

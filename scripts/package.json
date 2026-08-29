@@ -20,7 +20,7 @@
     "translate": "node --import ./node_modules/tsx/dist/esm/index.mjs translate/index.ts",
     "snapshot:slugs": "node --import ./node_modules/tsx/dist/esm/index.mjs tools/snapshot-slugs.ts",
     "gen:slug-redirects": "node --import ./node_modules/tsx/dist/esm/index.mjs tools/gen-slug-redirects.ts",
-    "test": "tsx --test synthesis/__tests__/*.test.ts audit/__tests__/*.test.ts validators/__tests__/*.test.ts",
+    "test": "tsx --test synthesis/__tests__/*.test.ts audit/__tests__/*.test.ts validators/__tests__/*.test.ts ../src/lib/__tests__/*.test.ts",
     "audit:spec": "node run-gates.mjs spec",
     "audit:gate": "node --import ./node_modules/tsx/dist/esm/index.mjs audit/gate-audit.ts",
     "audit:deploy": "node --import ./node_modules/tsx/dist/esm/index.mjs audit/deploy-verify.ts",

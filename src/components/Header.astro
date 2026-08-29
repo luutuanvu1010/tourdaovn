@@ -232,6 +232,9 @@ const languages = langs.map(code => ({ code, label: LANG_LABELS[code] }));
     position: absolute;
     top: -100%;
     left: var(--s4);
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
     padding: var(--s2) var(--s4);
     background: var(--c-primary);
     color: var(--c-text-inverse);
@@ -262,6 +265,7 @@ const languages = langs.map(code => ({ code, label: LANG_LABELS[code] }));
   .logo {
     display: flex;
     align-items: center;
+    min-height: 44px;
     gap: var(--s3);
     font-family: var(--font-display);
     font-weight: var(--fw-800);

@@ -114,6 +114,8 @@ const cards = items
 
   .home-view-all {
     display: inline-flex;
+    align-items: center;
+    min-height: 44px;
     margin-top: var(--s5);
     font-size: var(--fs-sm);
     font-weight: var(--fw-600);
@@ -158,6 +160,22 @@ const cards = items
     .home-card-grid:has(> :last-child:nth-child(2)),
     .home-card-grid:has(> :last-child:nth-child(3)) {
       grid-template-columns: 1fr;
+    }
+
+    /* R1 chỉ thắng ở đây nếu nhắc lại NGUYÊN bộ chọn :has(). Để `.card` trần là
+       thua đặc hiệu — (0,2,0) so với (0,5,0) — đúng lỗi DR-062.
+       height PHẢI là 88px tường minh, KHÔNG dùng `auto`: align-items:stretch nằm ở
+       luật gốc ngoài mọi media query (:83) nên vẫn sống ở đây, và một grid item
+       đang stretch mà height:auto thì giãn hết chiều cao hàng, aspect-ratio bị bỏ
+       qua — ra đúng cột ảnh 88px cao hết thẻ, y hệt lỗi height:100%. */
+    .home-card-grid:has(> :last-child:nth-child(1)) :global(.card) {
+      grid-template-columns: 88px 1fr;
+      align-items: start;
+    }
+
+    .home-card-grid:has(> :last-child:nth-child(1)) :global(.card-img-wrap) {
+      height: 88px;
+      min-height: 0;
     }
   }
 </style>

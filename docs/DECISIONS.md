@@ -2338,3 +2338,26 @@ Muốn thấy lưới ảnh thì phải **nạp đủ 4 ảnh gallery cho từng
 Đây đúng cảnh báo đã ghi ở `QĐ-2026-08-26-01`: *"Hai meta-validator g1 và g4 chép tay danh sách field nên phải sửa cùng lúc, nếu không cổng vẫn xanh nhưng nói sai về thực tế."* Nay gặp thật.
 
 **Không mở cho `person` và `organization`** — chủ dự án chỉ định Bài viết. Hai loại đó vẫn nằm trong danh sách loại trừ ở §3.
+
+---
+
+## QĐ-2026-08-29-06 — Chốt phạm vi và bốn câu hỏi cho đợt "chữa thị giác di động"
+
+**Bối cảnh.** Nhánh `feat/thi-giac-di-dong` sửa `docs/core-specs/07-DESIGN_TOKENS.md` (tài liệu **tầng 2**) và đảo ba điều khoản đã duyệt, và cả ba chỗ viện dẫn một mã quyết định **trần** `QĐ-2026-08-29`. Lượt review toàn nhánh (2026-08-29) kiểm sổ này và thấy chỉ có `QĐ-2026-08-29-01`…`-05`, cả năm thuộc việc khác (chiều cao hero, `InfoCard`→`FactStrip`, đóng `DR-046`, `PageHead`, gallery bài viết) — **mã trần không tồn tại**. `CLAUDE.md` §6: cổng mặc định không đạt nếu không có bằng chứng. Mục này mở mã đúng và tóm lại nội dung chủ dự án đã chốt cho đợt "chữa thị giác di động"; bản ghi đầy đủ nằm ở `docs/specs/SPEC-2026-08-29-thi-giac-di-dong.md` §0.1 và §9.
+
+**Chốt — năm điểm chủ dự án đã duyệt cho đợt này (`SPEC-2026-08-29-thi-giac-di-dong.md`):**
+
+1. **Phạm vi = chữa thị giác, giữ nguyên cấu trúc** (SPEC §0, §1). Ba cánh cửa đóng: không thêm dữ liệu/entity/hub, không thêm token hay giá trị ngoài thang `tokens.css`, không đụng `siteSettings` trong Studio.
+2. **Hình dạng thẻ di động = thẻ ngang, thumbnail 88px**, áp cho mọi chỗ dùng `Card` (SPEC §1, R1).
+3. **`07-DESIGN_TOKENS` §1 thắng `SPEC-2026-08-14` §3.3 về màu nút khối tour** (SPEC §0.1, R2). Hai tầng tài liệu chỏi nhau: `07` (tầng 2) cấm `color.sand` làm nền CTA; `SPEC-2026-08-14` §3.3 (tầng 6) từng đổi nút "Xem tất cả" của khối tour sang `--c-sand` để né luật đó. `CLAUDE.md` §5 gọi đây là hard stop; đã hỏi, chủ dự án chốt **`07` thắng** — nút khối tour và nhãn giá quay lại cùng `--c-accent`. Kéo theo **ba** phiếu drift (`DR-090`/`DR-091`/`DR-092`), không phải một.
+4. **Gộp hai khối "Tour nổi bật" làm một, không phải gỡ** (SPEC §0.1, R6). Hai khối cũ ăn hai nguồn dữ liệu khác nhau nên gỡ trùng đơn thuần là mất nội dung. Chốt phương án gộp thật: `HomeTourGrid` chọn tour theo `td.featuredTours` (giữ đúng thứ tự biên tập xếp), nhưng lấy dữ liệu hiển thị từ `allTours` đã fetch sẵn trong `index.astro` — **không chạm GROQ, không đổi prop nào** của `HomeTourGrid`.
+5. **Bốn câu Q1–Q4** do QA nội bộ nêu ở lượt review v2, chốt như bảng dưới (SPEC §9).
+
+| Câu | Chốt |
+|---|---|
+| **Q1** — biên tập chọn 1–2 tour thì lưới 3 cột để một thẻ lẻ loi | **Lưới co theo số thẻ.** Chép khuôn `:has()` đã có ở `HomeRollupSection.astro:76`/`:92`/`:96` sang `HomeTourGrid` (R7 mới) |
+| **Q2** — `ADR-0026` neo ngưỡng đảo bài vào số tour đã publish, R6 lại tách hiển thị khỏi publish | **Chỉ ghi phiếu drift, KHÔNG sửa ADR ở đây.** `CLAUDE.md` §1: ADR là tầng 3, spec task là tầng 6 — spec không có quyền sửa ADR (`DR-n`) |
+| **Q3** — nhánh dự phòng của R6a (rơi về ba tour đầu kho khi biên tập chưa chọn) không bao giờ chạy khi dựng, nên nhìn bản dựng rồi tích ô là pass giả | **Tách hàm thuần + test đơn vị.** Đưa phép chọn ra thành `chonTourTrangChu` (`src/lib/homepage.ts`), bốn ca test bắt buộc; bộ chạy đã có sẵn (`scripts/package.json`, `tsx --test`) (R6a-bis) |
+| **Q4** — `07` §1 cấm cát làm nền CTA bằng một lý do không với tới nút này (nút thật đo được **6,76:1**, đạt AA; lý do cũ "tương phản với chữ trắng không đạt AA" không với tới vì nút dùng chữ tối `--c-sand-text-strong`) | **Giữ luật, sửa lý do.** Cát không làm nền CTA vì **phân vai màu** — `07` §1 đã giao `--c-accent` cho CTA và nhãn giá, cát cho gạch chân và nút trên nền đậm; cho cát thêm vai CTA là một màu hai vai (R2c mới) |
+
+**Tài liệu.** `docs/core-specs/07-DESIGN_TOKENS.md` §1 (lý do cấm `color.sand` làm nền CTA, viết lại theo Q4). `docs/DRIFT_LOG.md` — `DR-090`/`DR-091`/`DR-092` (điểm 3), `DR-080` (điểm Q2, tiền thân của `DR-n`).

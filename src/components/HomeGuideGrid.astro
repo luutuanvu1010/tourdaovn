@@ -109,6 +109,7 @@ const cards = articles
     color: var(--c-primary);
     display: flex;
     align-items: center;
+    min-height: 44px;
     gap: var(--s1);
     transition: opacity var(--m-fast) var(--m-ease);
   }
@@ -219,7 +220,7 @@ const cards = articles
 
   @media (max-width: 640px) {
     .guide-section {
-      padding: var(--s6) 0 var(--s7);
+      padding: var(--s6) 0;
     }
     .guide-grid {
       grid-template-columns: 1fr;

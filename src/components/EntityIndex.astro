@@ -299,8 +299,28 @@ const termPrefix = lang === 'vi' ? '' : `/${lang}`
   }
 
   @media (max-width: 640px) {
-    .card-grid {
+    /* Phải nhắc lại NGUYÊN bộ chọn :has(> :last-child:nth-child(2)) (:276) ở đây —
+       để `.card-grid` trần là thua đặc hiệu: (0,2,0) so với (0,4,0) — đúng lỗi
+       DR-062. Khuôn chép từ HomeRollupSection.astro:157-163. */
+    .card-grid,
+    .card-grid:has(> :last-child:nth-child(2)) {
       grid-template-columns: 1fr;
+    }
+
+    /* R1 chỉ thắng ở đây nếu nhắc lại NGUYÊN bộ chọn :has(). Để `.card` trần là
+       thua đặc hiệu — (0,2,0) so với (0,5,0) — đúng lỗi DR-062.
+       height PHẢI là 88px tường minh, KHÔNG dùng `auto`: align-items:stretch nằm ở
+       luật gốc ngoài mọi media query (:268) nên vẫn sống ở đây, và một grid item
+       đang stretch mà height:auto thì giãn hết chiều cao hàng, aspect-ratio bị bỏ
+       qua — ra đúng cột ảnh 88px cao hết thẻ, y hệt lỗi height:100%. */
+    .card-grid:has(> :last-child:nth-child(1)) :global(.card) {
+      grid-template-columns: 88px 1fr;
+      align-items: start;
+    }
+
+    .card-grid:has(> :last-child:nth-child(1)) :global(.card-img-wrap) {
+      height: 88px;
+      min-height: 0;
     }
   }
 </style>

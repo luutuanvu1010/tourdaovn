@@ -6,9 +6,12 @@
 // thấy sản phẩm. Đó là hệ quả có chủ ý của ADR-0024, quyết khi kho chỉ có 1 tour;
 // nay đã 7 nên tiền đề ấy hết hiệu lực (xem ADR-0026).
 //
-// Đây cũng là dải màu đậm đầu tiên của trang (--c-band-bg): thẻ trắng nổi lên trên
-// nền xanh, cắt mạch trắng liền vốn làm cả trang trôi thành một mảng.
+// Nền sáng (--c-surface-alt), KHÔNG còn là dải màu đậm — QĐ-2026-08-29. Ba khối đầu
+// trang chủ (hero, khối này, stats-band) từng cùng --c-primary nên đọc thành một dải
+// xanh liền ~2.000px ở khổ điện thoại. Vai "dải đậm đầu tiên" nay chuyển hẳn cho
+// stats-band; khối này lùi về nền xen kẽ để nhịp trang thành đậm/sáng/đậm/sáng.
 import { imageUrl } from '../lib/sanity-image'
+import { HOME_COPY } from '../lib/homepage'
 import type { Lang } from '../lib/types'
 
 export interface Props {
@@ -20,11 +23,10 @@ export interface Props {
   total: number
 }
 
-const { tours, indexHref, total } = Astro.props
+const { tours, lang, indexHref, total } = Astro.props
 
 const COPY = {
   eyebrow: 'TOUR BIỂN ĐẢO',
-  heading: 'Tour nổi bật',
   sub: 'Khởi hành hằng ngày từ Nha Trang, có xe đón tận khách sạn nội thành.',
   all: (n: number) => `Xem tất cả ${n} tour`,
 }
@@ -34,7 +36,7 @@ const COPY = {
   <section class="home-tours">
     <div class="container">
       <p class="tours-eyebrow">{COPY.eyebrow}</p>
-      <h2 class="tours-heading">{COPY.heading}</h2>
+      <h2 class="tours-heading">{HOME_COPY[lang].sections.tours}</h2>
       <p class="tours-sub">{COPY.sub}</p>
 
       <ul class="tours-grid">
@@ -70,7 +72,7 @@ const COPY = {
 
 <style>
   .home-tours {
-    background: var(--c-band-bg);
+    background: var(--c-surface-alt);
     padding: var(--s7) 0;
   }
 
@@ -79,7 +81,7 @@ const COPY = {
     font-size: var(--fs-xs);
     font-weight: var(--fw-800);
     letter-spacing: 0.12em;
-    color: var(--c-sand);
+    color: var(--c-primary);
     margin: 0;
   }
 
@@ -89,14 +91,14 @@ const COPY = {
     font-weight: var(--fw-800);
     letter-spacing: -0.015em;
     line-height: var(--lh-heading);
-    color: var(--c-band-text);
+    color: var(--c-primary);
     margin: var(--s1) 0 var(--s1);
   }
 
   .tours-sub {
     font-size: var(--fs-base);
     line-height: var(--lh-body);
-    color: var(--c-band-muted);
+    color: var(--c-text-muted);
     margin: 0 0 var(--s4);
     max-width: 56ch;
   }
@@ -108,6 +110,22 @@ const COPY = {
     list-style: none;
     margin: 0;
     padding: 0;
+  }
+
+  /* Biên tập chọn 1–2 tour là hợp lệ sau R6a. Không có hai luật này thì một thẻ
+     nằm trong cột 1/3 bề ngang, hai phần ba trống — đúng thứ EntityIndex.astro:258
+     gọi là "một thẻ dọc nằm lẻ loi bên trái, trông như trang lỗi".
+     Khuôn chép từ HomeRollupSection.astro:76/:92/:96 — KỂ CẢ phần nhắc lại
+     trong khối @media ≤600px bên dưới. Phần nhắc lại đó bắt buộc, không phải
+     trang trí: :has() mang độ đặc hiệu (0,3,0), còn `.tours-grid` trần trong
+     media query chỉ (0,1,0) — media query không cộng đặc hiệu, nên thiếu phần
+     nhắc lại thì luật ≤600px thua, lưới giữ 2 cột bóp trên điện thoại (R-06). */
+  .tours-grid:has(> :last-child:nth-child(1)) {
+    grid-template-columns: 1fr;
+  }
+
+  .tours-grid:has(> :last-child:nth-child(2)) {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .tour-card {
@@ -151,13 +169,15 @@ const COPY = {
     margin: var(--s1) 0 0;
   }
 
-  /* Nút vàng cát, KHÔNG dùng --c-accent: trên nền xanh đậm thì đỏ gạch chìm, và
-     --c-accent còn là màu của giá — hai vai khác nhau không nên cùng màu. */
+  /* Nút dùng --c-accent (san hô), KHÔNG dùng --c-sand — QĐ-2026-08-29. Nền khối đã
+     chuyển sang sáng nên lý do gạch chìm hết hiệu lực; lý do đúng là phân vai màu:
+     07-DESIGN_TOKENS §1 giao --c-accent cho CTA và nhãn giá, cát cho gạch chân/nút
+     trên nền đậm — cho cát thêm vai CTA là một màu hai vai. */
   .tours-all {
     display: inline-block;
     margin-top: var(--s4);
-    background: var(--c-sand);
-    color: var(--c-sand-text-strong);
+    background: var(--c-accent);
+    color: var(--c-text-inverse);
     font-family: var(--font-display);
     font-weight: var(--fw-700);
     font-size: var(--fs-base);
@@ -170,7 +190,23 @@ const COPY = {
     .tours-grid { grid-template-columns: repeat(2, 1fr); }
   }
 
+  /* Thứ tự giảm dần bắt buộc: 900 → 640 → 600. Khối ≤640 phải đứng TRƯỚC khối
+     ≤600 dù hôm nay chúng chạm bộ chọn rời nhau (padding vs grid-template-columns)
+     — nếu không, một luật .tours-grid nào rơi vào khối ≤640 sau này sẽ thắng
+     im lặng luật tương ứng ở ≤600, vì cùng đặc hiệu thì luật đứng sau thắng. */
+  @media (max-width: 640px) {
+    .home-tours {
+      padding: var(--s6) 0;
+    }
+  }
+
   @media (max-width: 600px) {
-    .tours-grid { grid-template-columns: 1fr; }
+    /* Nhắc lại nguyên bộ chọn :has() — để `.tours-grid` trần là thua đặc hiệu.
+       Cùng khuôn HomeRollupSection dùng ở khối ≤640 của nó. */
+    .tours-grid,
+    .tours-grid:has(> :last-child:nth-child(1)),
+    .tours-grid:has(> :last-child:nth-child(2)) {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
