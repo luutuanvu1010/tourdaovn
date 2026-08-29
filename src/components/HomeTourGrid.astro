@@ -9,6 +9,7 @@
 // Đây cũng là dải màu đậm đầu tiên của trang (--c-band-bg): thẻ trắng nổi lên trên
 // nền xanh, cắt mạch trắng liền vốn làm cả trang trôi thành một mảng.
 import { imageUrl } from '../lib/sanity-image'
+import { HOME_COPY } from '../lib/homepage'
 import type { Lang } from '../lib/types'
 
 export interface Props {
@@ -20,11 +21,10 @@ export interface Props {
   total: number
 }
 
-const { tours, indexHref, total } = Astro.props
+const { tours, lang, indexHref, total } = Astro.props
 
 const COPY = {
   eyebrow: 'TOUR BIỂN ĐẢO',
-  heading: 'Tour nổi bật',
   sub: 'Khởi hành hằng ngày từ Nha Trang, có xe đón tận khách sạn nội thành.',
   all: (n: number) => `Xem tất cả ${n} tour`,
 }
@@ -34,7 +34,7 @@ const COPY = {
   <section class="home-tours">
     <div class="container">
       <p class="tours-eyebrow">{COPY.eyebrow}</p>
-      <h2 class="tours-heading">{COPY.heading}</h2>
+      <h2 class="tours-heading">{HOME_COPY[lang].sections.tours}</h2>
       <p class="tours-sub">{COPY.sub}</p>
 
       <ul class="tours-grid">
@@ -108,6 +108,19 @@ const COPY = {
     list-style: none;
     margin: 0;
     padding: 0;
+  }
+
+  /* Biên tập chọn 1–2 tour là hợp lệ sau R6a. Không có hai luật này thì một thẻ
+     nằm trong cột 1/3 bề ngang, hai phần ba trống — đúng thứ EntityIndex.astro:258
+     gọi là "một thẻ dọc nằm lẻ loi bên trái, trông như trang lỗi".
+     Khuôn chép từ HomeRollupSection.astro:76/:92/:96. Ở đây KHÔNG dùng :global()
+     nên không dính lớp bẫy đặc hiệu của DR-062 mà R1b phải xử. */
+  .tours-grid:has(> :last-child:nth-child(1)) {
+    grid-template-columns: 1fr;
+  }
+
+  .tours-grid:has(> :last-child:nth-child(2)) {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .tour-card {

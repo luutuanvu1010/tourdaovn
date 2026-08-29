@@ -1894,3 +1894,39 @@ Phát hiện 2026-08-28 khi chạy lại bộ cổng sau dựng: 4/8 cổng đ�
 
 **Nợ còn lại (không đóng ở đây).** `RouteDispatch.astro` vẫn ép kiểu `entityType={entity as 'experience' | 'tour'}` khi gọi `TermIndex`, trong khi runtime nay truyền cả `'attraction'`. Ép kiểu đó chính là thứ che nhánh attraction khỏi mắt TypeScript. Hệ quả nhìn thấy được: `TermIndex` chỉ tính nhãn phụ cho experience và tour, nên card ở trang term attraction không hiện nhãn loại dù `toListings` đã mang sẵn `attractionType`. Không có cổng nào đối chiếu hai danh sách bộ term với nhau — đó mới là chỗ đáng dựng lưới.
 
+## DR-a — `06` §5.7 vẫn khai `tours` trong thứ tự khối mặc định, đặc tả và mã lệch sau khi gỡ khoá
+
+**Trạng thái:** mở. Phát hiện 2026-08-29, cùng lượt gỡ khoá `tours` khỏi `DEFAULT_SECTIONS` (đợt "thị giác di động", Task 3).
+
+**Lệch gì.** `06-BINDING_MAP` §5.7 liệt kê `tours` trong thứ tự khối mặc định của trang chủ — viết trước khi `SPEC-2026-08-14-be-mat-vong-3` §3.4 thêm khối `HomeTourGrid` (khối "biên tập chọn", đứng ngoài `activeSections`). Task này gỡ dòng `{ key: 'tours', hidden: false }` khỏi `DEFAULT_SECTIONS` trong `SiteHome.astro:139-148` — khối rollup nó điều khiển nay thừa, vì `HomeTourGrid` đã ăn `featuredTours` qua `chonTourTrangChu` (Task 2). `06` §5.7 không được sửa cùng lượt — ràng buộc toàn cục của đợt cấm việc đó trong Task này.
+
+**Hệ quả đo được.** `06` §5.7 và `DEFAULT_SECTIONS` trong mã nay liệt kê khác nhau: `06` còn `tours`, mã thì không. Nhánh `case 'tours':` trong switch render (`SiteHome.astro:282`, gọi `HomeRollupSection` với `td?.featuredTours`) thành mã chết — không phần tử nào của `activeSections` còn trỏ tới nó, nhưng nhánh vẫn đứng nguyên trong file.
+
+**Vì sao lọt.** Ràng buộc toàn cục của đợt cấm sửa `06-BINDING_MAP` trong Task này — hai tầng thẩm quyền khác nhau (`CLAUDE.md` §1: `06`/`GOVERNANCE` trên spec task). Không có cổng nào đối chiếu danh sách khối trong `DEFAULT_SECTIONS` với danh sách khối liệt kê ở `06` §5.7.
+
+**Đã xử.** Chưa. Cần chủ dự án chốt ở tầng đặc tả: sửa `06` §5.7 để bỏ `tours` khỏi thứ tự khối rollup mặc định (ghi chú nó đã tách thành khối biên tập chọn cố định), hoặc quyết định khác.
+
+## DR-e — `HomeTourGrid` render ngoài `activeSections`, nên sau Task này nó là khối tour duy nhất mà biên tập không tắt/đảo được
+
+**Trạng thái:** mở. Phát hiện 2026-08-29.
+
+**Lệch gì.** `SiteHome.astro:195` gọi `<HomeTourGrid>` ngay trong markup, ngoài vòng `activeSections.map(...)` — khối duy nhất trong danh sách hàng đầu trang chủ không đi qua cơ chế bật/tắt và đảo thứ tự bằng `siteSettings.sections` mà `06` §5.7 khai là hợp đồng chung. Việc này có từ khi `HomeTourGrid` được thêm (`SPEC-2026-08-14` §3.4), không phải do Task này tạo ra.
+
+**Hệ quả đo được.** Trước Task này, trang chủ có hai khối "Tour nổi bật": một do `HomeTourGrid` (ngoài `activeSections`, luôn hiện, vị trí cố định ngay sau hero), một do nhánh rollup `case 'tours'` (trong `activeSections`, biên tập tắt/đảo được qua Studio). Sau Task này (gỡ khoá `tours` khỏi `DEFAULT_SECTIONS`), chỉ còn khối `HomeTourGrid` — tức khối tour **duy nhất** trên trang chủ nay nằm hoàn toàn ngoài tầm điều khiển của `siteSettings.sections`. Biên tập mất quyền tắt khối tour hoặc đổi vị trí nó tương đối với các khối khác qua Studio.
+
+**Vì sao lọt.** `HomeTourGrid` được viết như một khối cố định có chủ đích (dải màu đậm đầu tiên của trang, xem chú thích đầu file component) — không nằm trong phạm vi cơ chế `activeSections` ngay từ đầu. Task này chỉ được giao gỡ khoá rollup thừa; đưa `HomeTourGrid` vào `activeSections` là thay đổi kiến trúc, ngoài phạm vi spec Task này.
+
+**Đã xử.** Chưa. Cần quyết định ở tầng đặc tả: đưa `HomeTourGrid` vào cơ chế `activeSections` (tốn công tái cấu trúc), hoặc ghi nhận chính thức trong `06` rằng khối tour là khối cố định, không thuộc hợp đồng bật/tắt của §5.7.
+
+## DR-n — `ADR-0026` neo ngưỡng đảo bài vào số tour đã publish, R6 lại tách hiển thị khỏi publish
+
+**Trạng thái:** mở. Phát hiện 2026-08-29.
+
+**Lệch gì.** `ADR-0026` §Quyết định 4 (`docs/adr/ADR-0026-trang-chu-ganh-ca-san-pham.md:53`) khai: *"Nếu số tour đã publish rơi xuống dưới 3, khối này mất ý nghĩa (lưới 3 thẻ không đầy một hàng) và nên cân nhắc quay về tinh thần ADR-0024."* Tiền đề của quyết định này là khối tour hiển thị = tất cả tour đã publish (rollup toàn kho), nên đếm publish cũng là đếm hiển thị. Đợt R6 (Task 2, hàm `chonTourTrangChu`; Task này, R6b/R6d/R7) tách khối hiển thị khỏi rollup toàn kho: `HomeTourGrid` nay hiển thị theo `featuredTours` — danh sách biên tập chọn tay — không còn suy trực tiếp từ tổng số document `tour` đã publish.
+
+**Hệ quả đo được.** Điều kiện kích hoạt ngưỡng của `ADR-0026` (đếm tour đã publish trong kho) và điều kiện thực tế điều khiển hiển thị (độ dài `featuredTours` sau `chonTourTrangChu`) nay là hai đại lượng độc lập. Kho có thể có N tour publish (N ≥ 3 hoặc N < 3) trong khi trang chủ hiển thị M tour biên tập chọn (M cố định theo lựa chọn biên tập, không tự đổi theo N) — luật lưới co theo số thẻ mà Task này thêm (R7, `:has()` trong `HomeTourGrid.astro`) xử đúng vấn đề hình ảnh mà `ADR-0026` §4 nêu (lưới không đầy hàng), nhưng bằng cơ chế khác hẳn ngưỡng publish mà ADR đã ghi.
+
+**Vì sao lọt.** R6 giải quyết một vấn đề khác (biên tập kiểm soát tour nổi bật thay vì auto-rollup toàn kho theo `publishedAt`) mà không có bước đối chiếu ngược lại tiền đề đã chốt của `ADR-0026`. `CLAUDE.md` §1 xếp ADR ở tầng 3, spec của Task này ở tầng 6 — Task này không có thẩm quyền sửa ADR.
+
+**Đã xử.** Chưa. Cần chủ dự án chốt ở tầng ADR: viết lại `ADR-0026` §Quyết định 4 để ngưỡng neo vào `featuredTours.length` thay vì tổng số tour đã publish, hoặc xác nhận đây là hai cơ chế cố ý độc lập (ngưỡng ADR nói về việc CÓ nên duy trì khối tour hay không khi kho cạn; R7 nói về cách khối đó tự thích ứng hình ảnh khi đang hiển thị) và không cần hoà giải.
+
