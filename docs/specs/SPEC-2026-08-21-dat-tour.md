@@ -558,6 +558,34 @@ Kiểm được, đặt ra trước khi thi công. Im lặng là trượt.
     Rồi `SELECT COUNT(*) FROM booking` phải về **0** trước khi mở cho khách thật. Xoá theo mã,
     **không** `DELETE FROM booking` trần.
 
+## 4b. Kết quả nghiệm thu (chạy 2026-08-29)
+
+Nghiệm thu trên bản `deploy:preview` (version `e4ab1e31-6c8d-4eed-9da9-a2b3782524c5`; hai version
+phụ `278a4d0d…`, `c6e61c8e…` cho các mục chạy trước bản vá 13c). Điều kiện hạ tầng: **builds tự
+động đang tạm dừng** theo quyết định chủ dự án — xem `DR-097` (build từ `main` xoá sạch secrets);
+sau merge phải đặt lại 8 secrets và thử Publish trước khi mở khách. Tour mẫu có giá:
+`ve-hon-tam-tron-goi-tour-hon-tam-1-ngay` (540.000/430.000); không giá: `du-thuyen`.
+
+| # | Kết quả | Bằng chứng |
+|---|---|---|
+| 1 | **đạt** | vitest 82/82; `astro check` 0 errors/0 warnings; py-paxrates 10/10; hai lần build preview xanh |
+| 2 | **đạt** | dist có đúng 7 trang `id="dat-tour"`; curl preview: trang có giá đếm 1 form, `du-thuyen` có `contact-channels`, 0 form |
+| 3 | **đạt** | trình duyệt thật: 2 NL + 1 TE → "Tạm tính 1.510.000₫" (biến thiên từng cú bấm 540.000 → 1.080.000 → 1.510.000); NL không xuống dưới 1; hạng dừng ở 20; tổng dừng ở 30 (TE dừng 10 khi NL=20; NCT giữ 0 khi tổng=30) |
+| 4 | **đạt** | đơn thật `TD-260829-GQ7N` 19:57 VN: POST 201; D1 đúng 1 dòng, `notify_email=sent`, `notify_zalo=sent`; chủ dự án xác nhận cả email lẫn Zalo tới ngay sau cú gửi |
+| 5 | **đạt** | thiếu SĐT → 400 (preview); honeypot → 200 mã giả `TD-260829-H37Z`, D1 vẫn 0 dòng (preview); 6 đơn/10 phút cùng IP → đơn 6 nhận 429; gửi trùng SĐT/tour/ngày → 200 `duplicate:true` mã cũ `TD-260829-P5XE`, không thêm dòng (hai mục sau chạy dev cục bộ vì nằm sau verifyTurnstile; `.dev.vars` thêm `IP_HASH_SALT` dev — thiếu là khối đếm bị nhảy qua) |
+| 6 | **đạt, có ngoại lệ ghi `DR-096`** | `<noscript>` nguyên văn "Cần bật JavaScript để gửi yêu cầu. Hoặc nhắn Zalo / gọi hotline."; POST không JS → trang HTML "Chưa gửi được yêu cầu" (không JSON); `/khong-ton-tai/` → 404 trang riêng. Ngoại lệ: "nút Zalo" trên trang HTML tối giản = liên kết `/lien-he/` theo BK1 |
+| 7 | **đạt** | BK1 grep rỗng; BK4 git grep rỗng; `wrangler secret list` đúng 8 tên sau `secret bulk`, không có `BOOKING_ALLOW_NO_TURNSTILE` |
+| 8 | **đạt** | Lighthouse mobile trang tour có form (preview): performance **94**, accessibility **99** |
+| 9 | **đạt** | PY1–PY3, PY6, PY7 pass (PY4 WARN = dòng mồ côi đã chốt để báo; PY5 WARN = nợ dữ liệu 21 tour chưa giá); thêm khoá lạ `student` → PY7 FAIL đúng thông điệp, đã hoàn tác |
+| 10 | **đạt** | audit:spec 3/3 xanh + gap g2 (ND-001, baseline) |
+| 11 | **đạt** | `/_worker.js/index.js` → 404; `/_routes.json` → 404 |
+| 12 | **đạt** | dòng thử `/kiem-redirect-tam` → 301 + `location: /` (version `c6e61c8e`); đã gỡ dòng thử, `_redirects` sạch |
+| 13 | **đạt** | a) +/− đổi số và tạm tính tức thì; b) "Đặt tour" → focus vào Họ và tên (ngày trống thì gập về ô ngày — hành vi client validate), "Quay lại" → focus về nút; c) 360/640px: 0 tràn ngang, bộ đếm một hàng, nút +/− **44×44** sau vá `f466a4c` (đo trước vá 36×36 — fail duy nhất của đợt, đã sửa), nút chính 47px, sticky không che nút gửi; d) như mục 6 |
+| 14 | **đạt** | `DELETE … WHERE code IN ('TD-260829-GQ7N')` (changes: 1); `SELECT COUNT(*)` sau xoá = **0** |
+
+Ghi chú nhỏ chuyển thiết kế duyệt: dòng breakdown khi đọc dạng text liền mạch thành "Người lớn × 21.080.000₫"
+("× 2" dính "1.080.000₫") — kiểm lại ngăn cách thị giác giữa số lượng và thành tiền.
+
 ## 8. Còn nợ (ghi để không rơi)
 
 - **ZNS xác nhận cho khách** và **email bản sao cho khách** — cần OA xác thực và mẫu tin;

@@ -1650,3 +1650,38 @@ production là vô hiệu hoá đúng cổng vừa dựng. Cổng máy duy nhấ
 mục 7 (`wrangler secret list` phải đúng 8 tên, không thừa không thiếu, và không có
 `BOOKING_ALLOW_NO_TURNSTILE`). Không có kiểm tự động nào khác — ba lớp bảo vệ còn lại (chú thích
 trong `handler.ts`, chú thích trong `env.d.ts`, và mục này) đều chỉ là chữ.
+
+
+## DR-096 — SPEC đòi "nút Zalo" trên trang HTML tối giản, BK1 không cho endpoint biết liên kết Zalo
+
+**Trạng thái:** mở 2026-08-29 — mã giữ nguyên theo phán quyết phiên nghiệm thu; chờ chủ dự án
+duyệt sửa câu chữ SPEC.
+
+SPEC §4.4 (đoạn trang HTML tối giản) và §7 tiêu chí 6/13d yêu cầu trang lỗi/cảm ơn không-JS có
+"nút Zalo". Nhưng liên kết Zalo sống trong Sanity ("Liên kết Zalo", Studio), mà BK1
+(`04-CONSTRAINTS`) cấm endpoint đọc Sanity — tầng ràng buộc đứng trên SPEC theo thứ tự thẩm
+quyền. `src/lib/booking/html.ts` (chú thích đầu file) đã chọn: trang tối giản chỉ liên kết
+`/lien-he/` (nơi có đủ kênh Zalo/hotline) + liên kết về trang tour. Nghiệm thu 2026-08-29 tính
+tiêu chí 6/13d **đạt-với-ngoại-lệ**. Chi phí nếu phán quyết sai: khách không-JS mất một cú bấm
+để tới Zalo. Việc còn lại: sửa câu chữ SPEC §4.4/§7 ("nút Zalo" → "liên kết trang liên hệ"),
+cần chủ dự án duyệt.
+
+## DR-097 — Build tự động từ `main` xoá sạch toàn bộ `wrangler secret` của Worker
+
+**Trạng thái:** mở 2026-08-29 — đã có đường tránh (tạm dừng builds); gốc rễ chỉ khép được sau
+khi merge module về `main`. **Sau merge bắt buộc:** đặt lại 8 secrets, bấm Publish thử, đếm lại
+đủ 8 rồi mới mở khách.
+
+Bằng chứng 2026-08-29: ba đợt đặt secret đều bị mất đúng phần đặt trước bản build gần nhất; thí
+nghiệm sạch chốt hạ — 8 secrets nằm yên từ 11:38:36Z, không lệnh nào chạy xen, chủ dự án bấm
+Publish ở Sanity, build `version_upload` deploy 11:45:12Z, `wrangler secret list` → `[]`.
+So bindings hai version cạnh nhau: version "Secret Change" mang danh sách secret; version build
+mang **0 binding** — khớp `wrangler.toml` trên `main` hiện là bản assets-only (không `main =`,
+không binding nào), trong khi bản có module chỉ nằm trên nhánh `worktree-feat+dat-tour`.
+Hệ quả: "thứ tự bắt buộc" trong BUILD-NOTES (secrets trước lần deploy đầu có `main`) không khả
+thi chừng nào auto-build (hook Sanity, bật lại 27/08 — sau khi kế hoạch được viết) còn sống.
+Xử lý trong phiên: chủ dự án tạm dừng Workers Builds; secrets đặt lại một phát bằng
+`wrangler secret bulk` từ file `.env.*` cục bộ (gitignore); nghiệm thu chạy trên
+`versions upload` từ nhánh — version này kế thừa đủ 8 secrets, chứng tỏ upload từ cấu hình có
+`main` giữ secrets. Nghi vấn gốc (upload assets-only không kế thừa secret bindings) chưa xác
+nhận chính thức với Cloudflare.
