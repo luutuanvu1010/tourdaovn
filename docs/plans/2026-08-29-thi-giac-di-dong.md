@@ -404,14 +404,32 @@ Thêm ngay sau khối `.tours-grid`:
   /* Biên tập chọn 1–2 tour là hợp lệ sau R6a. Không có hai luật này thì một thẻ
      nằm trong cột 1/3 bề ngang, hai phần ba trống — đúng thứ EntityIndex.astro:258
      gọi là "một thẻ dọc nằm lẻ loi bên trái, trông như trang lỗi".
-     Khuôn chép từ HomeRollupSection.astro:76/:92/:96. Ở đây KHÔNG dùng :global()
-     nên không dính lớp bẫy đặc hiệu của DR-062 mà R1b phải xử. */
+     Khuôn chép từ HomeRollupSection.astro:76/:92/:96 — KỂ CẢ phần nhắc lại
+     trong media query ở dưới, phần đó là bắt buộc chứ không phải trang trí. */
   .tours-grid:has(> :last-child:nth-child(1)) {
     grid-template-columns: 1fr;
   }
 
   .tours-grid:has(> :last-child:nth-child(2)) {
     grid-template-columns: repeat(2, 1fr);
+  }
+```
+
+⚠️ **SỬA (R-06) — hai luật trên VẪN dính bẫy DR-062. Phải nhắc lại chúng trong media query.**
+
+Bản đầu của mục này khẳng định `:has()` trong phạm vi component thì an toàn vì không dùng `:global()`. **Sai, và đã kiểm trên mã đã dựng.** `:global()` không phải thứ tạo bẫy — **khoảng cách đặc hiệu** mới là. `.tours-grid:has(> :last-child:nth-child(2))` là **(0,3,0)**, còn `@media (max-width: 600px) { .tours-grid }` chỉ **(0,1,0)**: media query **không cộng đặc hiệu**. Nên ở `≤600px` với **2 tour**, luật `:has()` thắng và lưới ra **2 cột bóp trên điện thoại**, trái Luật 5 (`06` §6).
+
+Sửa khối `@media (max-width: 600px)` sẵn có của file thành:
+
+```css
+  @media (max-width: 600px) {
+    /* Nhắc lại nguyên bộ chọn :has() — để `.tours-grid` trần là thua đặc hiệu.
+       Cùng khuôn HomeRollupSection dùng ở khối ≤640 của nó. */
+    .tours-grid,
+    .tours-grid:has(> :last-child:nth-child(1)),
+    .tours-grid:has(> :last-child:nth-child(2)) {
+      grid-template-columns: 1fr;
+    }
   }
 ```
 
