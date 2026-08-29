@@ -22,7 +22,7 @@
 
   **Đây KHÔNG phải một lời hứa của R4 bị bỏ sót.** Đối chiếu `docs/plans/2026-08-29-thi-giac-di-dong.md` dòng 42-49 (bảng file bị đụng theo Task) và Task 7 (dòng 772-830): danh sách file R4 sửa là `HomeRollupSection.astro`, `HomeAreaGrid/HomeGuideGrid/HomeDestinationGrid.astro`, `Footer.astro`, `FAQ.astro`, `SiteHome.astro`, `Header.astro` — **`Breadcrumb.astro` và `AttractionDetail.astro`/`PlaceDetail.astro` không có mặt**, và Bước 1 của Task 7 tự giới hạn phạm vi bằng chính lệnh đo (`Chạy await __do('/')` — chỉ trang chủ). "32 đích chạm" ở §2.5 spec cũng toàn là thành phần trang chủ (`.home-view-all`, `.see-all`, footer nav, `summary` FAQ, `.logo`, `.skip-link`). Không `core-specs/` hay `adr/` nào khai một hợp đồng "44px trên mọi trang" (`grep -rln "44px" docs/core-specs/ docs/adr/` → 0 kết quả) — nên đây không phải drift theo định nghĩa của `DRIFT_LOG.md` dòng 3 (đặc tả và sản phẩm không khớp), mà là một **khoảng trống chưa từng được đặc tả nhắm tới**, có khả năng lặp lại trên mọi trang chi tiết entity khác (không chỉ ba trang đo ở đây, vì `Breadcrumb`/`.map-card-link` dùng chung).
 
-  **Cam kết "K3 32 → 0" trong tóm tắt đợt chỉ áp cho trang chủ** (khớp `truoc.md` dòng trang chủ = 32, khớp §8 "Kết quả dự kiến" của spec dùng đúng số 32, và mọi dòng khác trong bảng đối chiếu Bước 4 của Task 9 — trừ K2 được gắn nhãn rõ — đều là số riêng của trang chủ). Ba trang lưới 1 thẻ có K3 riêng, không nằm trong cam kết đó và trước đây đã khác 0 (24/27/24 ở `truoc.md`), nay còn 2/5/2.
+  **Cam kết "K3 32 → 0" trong tóm tắt đợt chỉ áp cho trang chủ** (khớp `truoc.md` dòng trang chủ = 32, khớp §8 "Kết quả dự kiến" của spec dùng đúng số 32, và mọi dòng khác trong bảng đối chiếu Bước 4 của Task 9 — trừ K2 được gắn nhãn rõ — đều là số riêng của trang chủ). **Chủ dự án xác nhận (vòng sửa 1): phán quyết đúng là K3 có phạm vi trang chủ — K3 = 0 trên trang chủ là ĐẠT, không phải nửa vời.** Ba trang lưới 1 thẻ có K3 riêng, không nằm trong cam kết đó và trước đây đã khác 0 (24/27/24 ở `truoc.md`), nay còn 2/5/2 — phát hiện này nay có phiếu riêng, **`DR-094`** trong `docs/DRIFT_LOG.md`, để không chết trong báo cáo.
 - K6 (h2 trùng): trang chủ hết trùng ("Tour nổi bật" ở `truoc.md` nay chỉ còn 0 h2 trùng). Ba trang lưới 1 thẻ tiếp tục không có h2 trùng, như `truoc.md`.
 - K7 (hero %): chỉ trang chủ có `.site-home-hero`; ba trang còn lại trả `null`, đúng như `truoc.md`.
 
@@ -68,11 +68,22 @@ Khác 0, đúng kỳ vọng 16px ở khổ ≤480px. Đệm ngang của `.contai
 2. **Bốn khối của R3 không xác nhận được.** `.tm-section`, `.gq-section`, `.banner-section`, `.home-safety-section` đo được **0 lần xuất hiện** trên trang chủ hôm nay (đếm trực tiếp bằng `querySelectorAll` trên cùng bản dựng). R3 không được K1–K7 hay bất kỳ phép đo nào ở đây xác nhận cho bốn khối này.
 3. **Nhánh dự phòng của R6a không chạy khi dựng.** Dữ liệu thật (63 tour trong dataset) không rỗng nên nhánh dự phòng của hàm chọn tour không có cơ hội chạy trên `dist/`. Nó được canh bằng 6 ca test đơn vị của Task 2 (nằm trong 211 ca `npm --prefix scripts test` xanh), không bằng phép đo trên trang thật.
 
-## Câu hỏi mở cần quyết định ở đúng tầng — KHÔNG tự chọn một bên
+## Câu hỏi mở — ĐÃ TRẢ LỜI ở vòng sửa 1
 
-Tin nhắn giao việc cho Task 9 nói có **bảy** phiếu drift ghi bằng nhãn chữ cái cần đổi số: `DR-a, DR-e, DR-n, DR-b1, DR-b2, DR-b3, DR-k`. Nhưng cả `task-9-brief.md` (Bước 5a) lẫn `docs/plans/2026-08-29-thi-giac-di-dong.md` (dòng 978–986, hai tài liệu khớp nhau) chỉ đổi số **ba** phiếu: `DR-a → DR-078`, `DR-e → DR-079`, `DR-n → DR-080`. Không tài liệu kế hoạch nào cấp số cho `DR-b1`, `DR-b2`, `DR-b3`, `DR-k` — và nếu chúng cần số, dải `DR-081…088` đã bị Bước 5 dùng hết cho `DR-c/f/g/h/i/j/l/m`, nên không có dải trống nào để gán.
+Bản đầu của `sau.md` nêu câu hỏi mở: brief chỉ cấp số cho ba phiếu chữ cái (`DR-a/e/n → 078-080`), không cấp số cho bốn phiếu còn lại (`DR-b1/b2/b3/k`), và dải `081-088` đã dùng hết nên không có chỗ tự đoán số. Đã báo lên thay vì tự chọn một bên.
 
-Task này **giữ nguyên** `DR-b1`, `DR-b2`, `DR-b3`, `DR-k` với nhãn chữ cái như hiện có trong `DRIFT_LOG.md` (dòng ~1933–1973) — đây là lựa chọn an toàn, không phá huỷ gì, và khớp với văn bản kế hoạch cụ thể duy nhất đang có. Nhưng bốn phiếu này tiếp tục vi phạm quy ước `DR-<số>` mà chính `DRIFT_LOG.md` dòng 7 tự khai. **Cần chủ dự án xác nhận:** có đổi số bốn phiếu này không, và nếu có thì đổi thành số nào (dải mới, không đụng `081–088` đã cấp)?
+**Chủ dự án xác nhận (vòng sửa 1, R-12):** đây là lỗ trong kế hoạch (quên bốn phiếu này khi cấp dải số) — không phải quyết định có chủ ý để giữ nhãn chữ cái. Đã cấp số:
+
+| Đang là | Đổi thành |
+|---|---|
+| `DR-b1` | `DR-090` |
+| `DR-b2` | `DR-091` |
+| `DR-b3` | `DR-092` |
+| `DR-k` | `DR-093` |
+
+Đã đổi tại chỗ trong `DRIFT_LOG.md`, giữ nguyên nội dung, mỗi phiếu thêm dòng `Nhãn nội bộ trong SPEC-2026-08-29: DR-b1` (tương ứng). Xác nhận `docs/DRIFT_LOG.md` không còn nhãn chữ cái nào: `grep -oE "^## DR-[0-9a-z]+" docs/DRIFT_LOG.md | grep -v "DR-[0-9]"` → rỗng.
+
+**Phiếu mới, R-13:** phát hiện K3 trên ba trang lưới 1 thẻ (xem ghi chú số liệu K3 ở trên) nay có phiếu riêng — **`DR-094`** — theo đúng phán quyết của chủ dự án: K3 có phạm vi trang chủ (mốc "32 → 0" đạt, không phải nửa vời), nhưng phát hiện breadcrumb/`.map-card-link` dưới 44px trên trang chi tiết là thật và đáng có phiếu để không chết trong báo cáo.
 
 ## Ba cổng máy
 

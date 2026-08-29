@@ -1936,7 +1936,9 @@ Phát hiện 2026-08-28 khi chạy lại bộ cổng sau dựng: 4/8 cổng đ�
 
 **Đã xử.** Chưa. Cần chủ dự án chốt ở tầng ADR: viết lại `ADR-0026` §Quyết định 4 để ngưỡng neo vào `featuredTours.length` thay vì tổng số tour đã publish, hoặc xác nhận đây là hai cơ chế cố ý độc lập (ngưỡng ADR nói về việc CÓ nên duy trì khối tour hay không khi kho cạn; R7 nói về cách khối đó tự thích ứng hình ảnh khi đang hiển thị) và không cần hoà giải.
 
-## DR-b1 — Task 5 đảo lại `SPEC-2026-08-14` §3.3: nút "Xem tất cả" quay về `--c-accent`, không còn `--c-sand`
+## DR-090 — Task 5 đảo lại `SPEC-2026-08-14` §3.3: nút "Xem tất cả" quay về `--c-accent`, không còn `--c-sand`
+
+**Nhãn nội bộ trong SPEC-2026-08-29: DR-b1**
 
 **Trạng thái:** đã xử 2026-08-29, có chủ ý. Chủ dự án chốt `07-DESIGN_TOKENS` §1 thắng (`QĐ-2026-08-29`).
 
@@ -1948,7 +1950,9 @@ Phát hiện 2026-08-28 khi chạy lại bộ cổng sau dựng: 4/8 cổng đ�
 
 **Đã xử.** Rồi — code khớp `07` §1 (điều khoản, không phải bản SPEC §3.3 cũ). `SPEC-2026-08-14` §3.3 **không được sửa** theo ràng buộc toàn cục của Task này; phiếu này là bản ghi chính thức của việc đảo, không phải một khoản nợ chờ xử thêm.
 
-## DR-b2 — Task 5 đảo lại `SPEC-2026-08-14` §3.4: khối tour thôi là "dải màu đầu tiên"
+## DR-091 — Task 5 đảo lại `SPEC-2026-08-14` §3.4: khối tour thôi là "dải màu đầu tiên"
+
+**Nhãn nội bộ trong SPEC-2026-08-29: DR-b2**
 
 **Trạng thái:** đã xử 2026-08-29, có chủ ý. `QĐ-2026-08-29`.
 
@@ -1962,13 +1966,15 @@ Task 5 (Bước 1) đổi `.home-tours { background: var(--c-band-bg) }` thành 
 
 **Đã xử.** Rồi — code không còn khớp câu "vừa là khối tour vừa là dải màu đầu tiên" của `SPEC-2026-08-14` §3.4. Spec đó **không được sửa** theo ràng buộc toàn cục của Task này; phiếu này là bản ghi chính thức của việc đảo.
 
-## DR-b3 — Task 5 đảo lại `ADR-0026` Hệ quả › Được, gạch đầu dòng 2
+## DR-092 — Task 5 đảo lại `ADR-0026` Hệ quả › Được, gạch đầu dòng 2
+
+**Nhãn nội bộ trong SPEC-2026-08-29: DR-b3**
 
 **Trạng thái:** mở — Task này không có thẩm quyền đóng. Phát hiện và đảo tại code 2026-08-29, `QĐ-2026-08-29`.
 
 **Lệch gì.** `ADR-0026-trang-chu-ganh-ca-san-pham.md` (**Trạng thái: accepted**), mục Hệ quả › Được, gạch đầu dòng thứ hai: *"Khối tour cũng là dải màu đậm đầu tiên của trang, cắt mạch trắng liền — xem `SPEC-2026-08-14-be-mat-vong-3` §3.3."* ADR ghi đây là một **lợi ích đã đạt được** của quyết định thêm `HomeTourGrid`.
 
-Sau Task 5, khối tour không còn nền đậm (xem `DR-b2`) — lợi ích này không còn đúng với code đang chạy. ADR vẫn đứng nguyên văn, không sửa, theo ràng buộc toàn cục của Task này (không chạm `ADR-0026*`).
+Sau Task 5, khối tour không còn nền đậm (xem `DR-091`, nhãn nội bộ `DR-b2`) — lợi ích này không còn đúng với code đang chạy. ADR vẫn đứng nguyên văn, không sửa, theo ràng buộc toàn cục của Task này (không chạm `ADR-0026*`).
 
 **Hệ quả đo được.** `ADR-0026` là ADR **tầng 3** theo thứ tự thẩm quyền `CLAUDE.md` §1 — cao hơn spec bề mặt (tầng 6) mà Task 5 thực thi. Task 5 không có quyền sửa ADR để khớp lại; nó chỉ có quyền ghi phiếu drift. Nghĩa là tài liệu tầng 3 nay mô tả sai một hệ quả thị giác đã bị chính một Task tầng thấp hơn đảo — hợp lệ về thẩm quyền (chủ dự án đã ký `QĐ-2026-08-29` cho phép đảo ở tầng bề mặt) nhưng để lại một câu sai sự thật trong một tài liệu `accepted`.
 
@@ -1976,7 +1982,9 @@ Sau Task 5, khối tour không còn nền đậm (xem `DR-b2`) — lợi ích n�
 
 **Đã xử.** Chưa, và Task này không đóng được. Cần chủ dự án chốt ở tầng ADR: sửa gạch đầu dòng 2 của mục Hệ quả › Được (gỡ câu "dải màu đậm đầu tiên", hoặc ghi chú nó đã hết hiệu lực từ `QĐ-2026-08-29` và trỏ sang `stats-band`), hoặc xác nhận giữ nguyên làm bản ghi lịch sử tại thời điểm ADR được chấp thuận.
 
-## DR-k — Task 5 làm ba token `--c-band-bg`/`-text`/`-muted` thành mồ côi, còn 0 người đọc, nhưng không được gỡ khỏi `tokens.css` trong đợt này
+## DR-093 — Task 5 làm ba token `--c-band-bg`/`-text`/`-muted` thành mồ côi, còn 0 người đọc, nhưng không được gỡ khỏi `tokens.css` trong đợt này
+
+**Nhãn nội bộ trong SPEC-2026-08-29: DR-k**
 
 **Trạng thái:** mở. Phát hiện 2026-08-29, cùng lượt Task 5.
 
@@ -2149,3 +2157,27 @@ Khớp đúng mẫu xác minh đã ghi trong `SPEC-2026-08-29 §7` mục 7 — l
 
 **Đã xử.** Chưa — và **không sửa trong đợt "thị giác di động"** (ràng buộc toàn cục điểm 6 của Task 9: không sửa `containedInPlace`/`mentions` dù đang gây 404, cần quyết định riêng). **Cần quyết định riêng, ở tầng nội dung/kiến trúc:** lọc trong GROQ (thêm `select(reviewStatus == "approved" ...)`, khuôn có sẵn ở `event.ts`/`tour.ts`), hiện tên không kèm link cho entity chưa duyệt, hoặc khoá ô chọn reference trong Studio bằng `options.filter`. Việc trước mắt độc lập với quyết định trên: 67 document `draft` đang lẫn trong `published` perspective là dữ liệu cần rà lại, không phải lỗi mã.
 
+
+---
+
+## DR-094 — Breadcrumb và link "Mở bản đồ" dưới 44px trên trang chi tiết entity — vùng chưa từng được đặc tả nhắm tới, không phải mã lệch đặc tả
+
+**Trạng thái:** mở. Phát hiện 2026-08-29 khi Task 9 (đợt "thị giác di động") đo K3 ngoài trang chủ để đối chiếu R1b; chủ dự án xác nhận phạm vi và yêu cầu mở phiếu riêng (vòng sửa 1 của Task 9).
+
+**Lệch gì.** `.breadcrumb-item a` (`Breadcrumb.astro:84`, thẻ `<a href={crumb.href}>{crumb.label}</a>` không mang class riêng) và `.map-card-link` (`AttractionDetail.astro:171`, link "Mở bản đồ") đều **không khai `min-height`** trong CSS của chúng (`Breadcrumb.astro:125-128`, `AttractionDetail.astro:184-192`). Ở khổ điện thoại, cả hai co về chiều cao nội dung chữ — dưới ngưỡng 44px.
+
+**Đo được.** Đo lại 2026-08-29 trên `dist/` tại HEAD `b2a88e5` (`do.js`, iframe 390×844):
+
+| Trang | Số đích chạm <44px |
+|---|---|
+| `/diem-tham-quan/di-tich-lich-su/` | 2 (`a. h=25` ×2) |
+| `/diem-tham-quan/khu-du-lich-hon-mun/` | 5 (`a. h=25` ×4, `a.map-card-link h=25` ×1) |
+| `/tour/vinh-san-ho/` | 2 (`a. h=25` ×2) |
+
+Giảm từ 24/27/24 (đo nền `truoc.md`) xuống 2/5/2 — phần lớn nhờ hiệu ứng phụ của các sửa khác trong đợt này, không phải một sửa nhắm trực tiếp vào hai component này. **Chưa về 0.**
+
+**Dữ liệu lịch sử liên quan.** Task 7 (R4, cùng đợt) đã tình cờ phát hiện đúng lớp vấn đề này khi đo thêm để xác minh `FAQ.astro`: báo cáo Task 7 (`task-7-report.md`, mục "Điểm nghi ngại còn lại") ghi nhận **11 đích chạm nhỏ khác trên một trang chi tiết `/diem-tham-quan/...`** (`a. h=25/26`, `a.astro-nmbp33ka h=24`, `a.map-card-link h=25`), nêu rõ "không thuộc 8 file trong phạm vi Task 7", không sửa, và đề nghị "Task khác (nếu R4 mở rộng sang trang chi tiết) biết chỗ cần nhắm". Task 9 nay xác nhận lại phát hiện đó bằng phép đo độc lập trên bản dựng cuối, khoanh đúng danh tính hai component gây ra.
+
+**Vì sao lọt — và vì sao đây KHÔNG PHẢI drift theo nghĩa thông thường của sổ này.** `DRIFT_LOG.md` dòng 3 định nghĩa drift là "đặc tả và sản phẩm không khớp nhau". Không `docs/core-specs/` hay `docs/adr/` nào khai một hợp đồng "mọi đích chạm trên mọi trang phải ≥44px" (`grep -rln "44px" docs/core-specs/ docs/adr/` → 0 kết quả). R4 của `SPEC-2026-08-29-thi-giac-di-dong.md` (§2.5, "32 đích chạm dưới 44px") tự giới hạn phạm vi vào các thành phần trang chủ — toàn bộ danh sách 32 đích chạm liệt kê đều là `.home-view-all`/`.see-all`/link chân trang/`summary` FAQ/`.logo`/`.skip-link`, và Task 7 (thi hành R4) chỉ đụng 8 file trang chủ/layout dùng chung, xác nhận qua `Chạy await __do('/')` ở Bước 1. `Breadcrumb.astro` và `AttractionDetail.astro`/`PlaceDetail.astro` **không có mặt** trong danh sách file của bất kỳ Task nào trong toàn kế hoạch `docs/plans/2026-08-29-thi-giac-di-dong.md`. Nói cách khác: đây không phải chỗ đặc tả hứa một điều rồi mã không làm đúng — đây là **một vùng mà không đặc tả nào của đợt này từng nhắm tới**, nên không có "hứa" nào để lệch. Ghi phiếu vì hệ quả thị giác/khả năng bấm là thật và đo được, và vì hai component này dùng chung site-wide nên nhiều khả năng lặp trên mọi trang chi tiết entity khác, không chỉ ba trang đo ở đây.
+
+**Chưa xử.** Cần một quyết định **ở tầng đặc tả trước khi có Task sửa**: 44px là chuẩn chỉ áp cho trang chủ (như R4 đã làm), hay là chuẩn toàn site (áp cả breadcrumb, map-card-link, và mọi đích chạm khác trên trang chi tiết/index)? Nếu chọn toàn site: cần một lượt quét đích chạm <44px trên đại diện đủ các loại trang (không chỉ ba trang lưới 1 thẻ), không chỉ hai component đã nêu ở đây.
