@@ -1,5 +1,6 @@
 ---
 import { imageUrl } from '../lib/sanity-image'
+import { planBody } from '../lib/portableText'
 
 export interface Props {
   blocks: any[] | undefined | null
@@ -25,101 +26,45 @@ export interface Props {
 
 const { blocks, class: className, headingOffset = 0 } = Astro.props
 
-const esc = (t: string) =>
-  t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-
 /**
- * Link trong Portable Text là ANNOTATION, không phải mark đơn giản: `marks` của
- * một span chứa `_key` trỏ vào `block.markDefs[]`.
+ * Phần dịch Portable Text → HTML nằm ở `../lib/portableText.ts`, kèm docblock
+ * về link-là-annotation, escape, gỡ rác `cite`, và luật hạ cấp tiêu đề. Tách ra
+ * để test được bằng `node:test` — `.astro` không nạp được vào test runner, và
+ * chính vì không test được mà lỗi "mất `<ul>`" sống qua 108 document mà không
+ * cổng nào thấy (`scripts/audit/__tests__/portable-text.test.ts`).
  *
- * Bản cũ chỉ so chuỗi với 'strong' và 'em', nên mọi `_key` rơi vào nhánh
- * không-khớp và **link biến thành chữ thường** — 11 trang đã phát hành mất link
- * mà không cổng nào thấy, vì HTML vẫn hợp lệ, chỉ thiếu một thẻ `<a>`.
- *
- * Bản cũ cũng nhả thẳng `c.text` vào `set:html` mà không escape. Nay escape
- * trước rồi mới bọc thẻ.
- *
- * (Docblock của `goRac` ngay dưới đây; hàm đó chạy TRƯỚC escape.)
+ * File này chỉ còn quyết định THẺ BỌC và CSS.
  */
-
-/**
- * Gỡ rác `<cite index="…">` do công cụ sinh nội dung để lại trong `body`.
- *
- * Trước khi có escape, trình duyệt lặng lẽ nuốt chúng như thẻ không biết. Sau
- * khi escape, chúng thành CHỮ HIỆN RA — đo được **25 thẻ trên 2 trang**
- * (`dia-danh/noi-thanh-nha-trang` 24, `dia-danh/cang-cap-treo-vinpearl` 1).
- * Tức bản vá escape đúng về bảo mật nhưng làm lộ một nợ dữ liệu có sẵn.
- *
- * Gỡ ở tầng render là chữa triệu chứng: nguồn vẫn bẩn. Nợ dọn hai tài liệu đó
- * trong Sanity ghi ở QĐ-2026-08-25-03. Làm ở đây vì không có nó thì đợt phát
- * hành này đẩy rác lên trang sống.
- */
-const goRac = (t: string) => t.replace(/<\/?cite\b[^>]*>/gi, '')
-
-function renderInline(children: any[], markDefs: any[] = []): string {
-  return children.map((c: any) => {
-    if (!c || typeof c !== 'object') return ''
-    const text = goRac(c.text || '')
-    if (!text) return ''
-    if (!c.marks || c.marks.length === 0) return esc(text)
-    let out = esc(text)
-    for (const mark of c.marks) {
-      if (mark === 'strong') out = `<strong>${out}</strong>`
-      else if (mark === 'em') out = `<em>${out}</em>`
-      else if (mark === 'underline') out = `<u>${out}</u>`
-      else {
-        const def = markDefs.find((d: any) => d && d._key === mark)
-        if (def && def._type === 'link' && def.href) {
-          const href = String(def.href)
-          // Link ra ngoài site mở tab mới kèm rel bảo vệ; link nội bộ thì không.
-          const raNgoai = /^https?:\/\//i.test(href) && !href.includes('tourdao.vn')
-          const them = raNgoai ? ' target="_blank" rel="noopener nofollow"' : ''
-          out = `<a href="${esc(href)}"${them}>${out}</a>`
-        }
-      }
-    }
-    return out
-  }).join('')
-}
-
-// h2 → h3 → h4 → h5 khi headingOffset = 1. Kẹp ở h5: không hạ sâu hơn.
-const capTieuDe = (style: string): string => {
-  const n = Number(style.slice(1))
-  if (!Number.isFinite(n)) return 'p'
-  return 'h' + Math.min(n + headingOffset, 5)
-}
+const nodes = planBody(blocks, { headingOffset })
 ---
 
-{blocks && blocks.length > 0 && (
+{nodes.length > 0 && (
   <div class:list={['body-block', className]}>
-    {blocks.map((block: any) => {
-      if (!block || typeof block !== 'object') return null
-
-      if (block._type === 'image') {
-        const src = imageUrl(block, { width: 800 }) || block.asset?.url
+    {nodes.map((node) => {
+      if (node.kind === 'image') {
+        const src = imageUrl(node.block, { width: 800 }) || node.block.asset?.url
         if (!src) return null
         return (
           <figure>
-            <img src={src} alt={block.alt || ''} loading="lazy" />
-            {block.caption && <figcaption>{block.caption}</figcaption>}
+            <img src={src} alt={node.block.alt || ''} loading="lazy" />
+            {node.block.caption && <figcaption>{node.block.caption}</figcaption>}
           </figure>
         )
       }
 
-      if (block._type === 'block' && block.children) {
-        const html = renderInline(block.children, block.markDefs)
-        const text = goRac(block.children.map((c: any) => c.text || '').join(''))
-        if (!text.trim()) return null
+      // Danh sách phải vào bằng `Fragment` vì `<ul>` có thể lồng `<ul>` con —
+      // cây nhiều tầng, không phải một thẻ bọc. Hệ quả: `ul/ol/li` KHÔNG mang
+      // `data-astro-cid-*`, nên luật CSS của chúng dưới đây phải `:global()`.
+      if (node.kind === 'list') return <Fragment set:html={node.html} />
 
-        const style = block.style || 'normal'
-        if (/^h[2-4]$/.test(style)) {
-          const The = capTieuDe(style)
-          return <The set:html={html} />
-        }
-        return <p set:html={html} />
+      if (node.kind === 'quote') return <blockquote set:html={node.html} />
+
+      if (node.kind === 'heading') {
+        const The = node.tag
+        return <The set:html={node.html} />
       }
 
-      return null
+      return <p set:html={node.html} />
     })}
   </div>
 )}
@@ -191,6 +136,55 @@ const capTieuDe = (style: string): string => {
 
   .body-block :global(strong) { font-weight: var(--fw-700); }
   .body-block :global(em) { font-style: italic; }
+  .body-block :global(s) { text-decoration: line-through; }
+
+  /* `code` không khai font-family: `07` chưa có token chữ đơn cách, và bịa một
+     họ chữ ở đây là mở nguồn sự thật thứ hai về typography. Mặc định `<code>`
+     của trình duyệt đã là đơn cách; ở đây chỉ thêm nền cho tách khỏi chữ chạy. */
+  .body-block :global(code) {
+    background: var(--c-surface-alt);
+    border-radius: var(--radius-sm);
+    padding: 0 var(--s1);
+    font-size: var(--fs-sm);
+  }
+
+  /* Danh sách. `tokens.css` reset `* { padding: 0 }`, nên KHÔNG khai
+     padding-left ở đây thì dấu chấm đầu dòng nằm ngoài hộp nội dung và bị cắt
+     — có `<ul>` mà vẫn trông như mất gạch đầu dòng. `:global()` vì `ul/ol/li`
+     vào bằng `set:html` (xem chú thích ở khối render). */
+  .body-block :global(ul),
+  .body-block :global(ol) {
+    margin-bottom: var(--s4);
+    padding-left: var(--s5);
+  }
+
+  .body-block :global(ul) { list-style: disc; }
+  .body-block :global(ol) { list-style: decimal; }
+  .body-block :global(ul ul) { list-style: circle; }
+
+  .body-block :global(li) { margin-bottom: var(--s2); }
+  .body-block :global(li:last-child) { margin-bottom: 0; }
+
+  /* List lồng: bám sát mục cha, không ăn khoảng cách của một khối rời. */
+  .body-block :global(li > ul),
+  .body-block :global(li > ol) {
+    margin-top: var(--s2);
+    margin-bottom: 0;
+  }
+
+  /* Không dùng viền trái: bề dày viền chưa có token nào trong `07`, mà viết
+     cứng `3px` ở đây là đúng thứ luật cứng 1 của `CLAUDE.md` §8 cấm, còn mượn
+     `--underline-height` (gạch chân tiêu đề mục) là buộc hai thứ không liên
+     quan vào nhau. Nền phụ + bo góc đạt cùng mục đích "khối tách khỏi chữ
+     chạy" bằng token đã có — `07` khai `surface.alt` đúng cho khối xen kẽ. */
+  .body-block blockquote {
+    margin: var(--s5) 0;
+    padding: var(--s4);
+    background: var(--c-surface-alt);
+    border-radius: var(--radius-md);
+    color: var(--c-text-muted);
+    font-style: italic;
+  }
 
   .body-block figure {
     margin: var(--s5) 0;
