@@ -862,7 +862,7 @@ chữ ở những chỗ đó đúng vai, sai là vùng bấm."
 >
 > `.site-home-inner` mang **cả hai class trên cùng một element**: `class="container site-home-inner"` (xác nhận trong `dist/index.html`). `.container` là luật **global không scope** với `padding-inline: var(--s5)`, đặc hiệu **(0,1,0)**; còn `.site-home-inner` được Astro scope nên thành **(0,2,0)**.
 >
-> Viết shorthand `padding: var(--s7) 0` sẽ đặt `padding-left/right: 0` ở đặc hiệu cao hơn và **đè mất đệm ngang của `.container`** — nội dung chạm mép màn hình ở `≤640px`. Task 6 đã vấp đúng chỗ này ở ba section khác (`.editorial-section`, `.home-faq-section`) và phải dùng `padding-block` để tránh.
+> Viết shorthand `padding: var(--s7) 0` sẽ đặt `padding-left/right: 0` ở đặc hiệu cao hơn và **đè mất đệm ngang của `.container`** — nội dung chạm mép màn hình ở `≤640px`. Task 6 đã vấp đúng chỗ này ở hai section khác (`.editorial-section`, `.home-faq-section`) và phải dùng `padding-block` để tránh.
 >
 > Ba class dính bẫy này: `container editorial-section`, `container home-faq-section`, `container site-home-inner`.
 
