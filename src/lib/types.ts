@@ -153,6 +153,11 @@ export interface HomepageArticleCard extends EntityRef {
   }
 }
 
+/** Card điểm đến trên trang chủ — khối "Điểm đến khác" (ADR-0028). */
+export interface DestinationCard extends EntityRef {
+  _type: 'touristDestination'
+}
+
 // ---------- Base types cho query result ----------
 
 // Cho entity field-level i18n (13/14 entity)
@@ -166,7 +171,10 @@ export interface BaseEntityFields {
   summary: string
   mainImage?: ImageAsset
   seo?: { metaTitle?: string; metaDescription?: string }
-  category?: Array<{ _id: string; name: string; termCode: string; _type: 'category' }> | null
+  // `sameAs` và `inDefinedTermSet` chỉ có khi projection của truy vấn lấy — nuôi
+  // additionalType (01 §2.13) và việc lọc term theo bộ. Optional để không bắt mọi
+  // truy vấn phải lấy đủ.
+  category?: Array<{ _id: string; name: string; termCode: string; _type: 'category'; sameAs?: string; inDefinedTermSet?: string }> | null
   reviewStatus?: 'draft' | 'inReview' | 'approved'
   approvedBy?: string
   contentProvenance?: 'human' | 'ai-t1' | 'mixed'
@@ -276,7 +284,12 @@ export interface PlaceResult extends BaseEntityFields {
 
 export interface AttractionResult extends BaseEntityFields {
   _type: 'attraction'
-  attractionType: 'historic' | 'temple' | 'church' | 'museum' | 'theme-park' | 'aquarium' | 'mud-spa' | 'market' | 'park'
+  // 01-CONTENT_MODEL §2.3 v1.0.19 — enum đóng 14 giá trị.
+  attractionType:
+    | 'historic' | 'temple' | 'church' | 'museum'
+    | 'beach' | 'island' | 'nature'
+    | 'theme-park' | 'aquarium' | 'mud-spa' | 'market' | 'park'
+    | 'craft-village' | 'general'
   sameAs?: string[] | null
   officialSource?: string
   geo?: GeoPoint
@@ -460,6 +473,7 @@ export interface EventResult extends BaseEntityFields {
 }
 
 export interface ArticleResult extends BaseDocEntityFields {
+  gallery?: ImageAsset[] | null
   _type: 'article'
   articleType: 'guide' | 'list' | 'news' | 'review' | 'itinerary' | 'transport-guide'
   author: EntityRef & { sameAs?: string[] | null; url?: string; jobTitle?: string }

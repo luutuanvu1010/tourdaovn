@@ -5,6 +5,8 @@
  *          Hero/Section/Gallery/FactStrip/NearbySection/Sidebar (primitive chung).
  * Tầng 2 — Container containment: mọi visible element trong detail phải nằm trong container.
  * Tầng 3 — FactStrip contract: 9 entity có FactStrip, 3 không có.
+ * Tầng 4 — Hero caller contract: mọi NƠI GỌI Hero phải ghi danh và phải truyền
+ *          `gallery`. Xem khối HERO_CALLERS bên dưới (DR-076).
  *
  * Nguyên tắc container policy (chốt 2026-06-30):
  *   Mỗi component visible trong detail phải tự bọc <div class="container">,
@@ -30,6 +32,7 @@ type DetailRule = {
 
 const SHARED_PRIMITIVES = [
   'src/components/DetailLayout.astro',
+  'src/components/PageHead.astro',
   'src/components/Hero.astro',
   'src/components/Section.astro',
   'src/components/Gallery.astro',
@@ -37,7 +40,6 @@ const SHARED_PRIMITIVES = [
   'src/components/NearbySection.astro',
   'src/components/Sidebar.astro',
   'src/components/BookingCTA.astro',
-  'src/components/InfoCard.astro',
   'src/components/LodgingDetail.astro',
   'src/styles/tokens.css',
 ]
@@ -122,6 +124,33 @@ function readRel(path: string): string {
   return readFileSync(resolve(REPO_ROOT, path), 'utf-8')
 }
 
+/**
+ * Cắt ra từng thẻ mở `<Hero ...>` trong một file.
+ *
+ * Đếm ngoặc nhọn chứ không cắt ở dấu `>` đầu tiên: `hasOverlay={badgeList.length > 0}`
+ * có `>` NẰM TRONG biểu thức, cắt thô sẽ nuốt mất phần đuôi của thẻ và làm cổng
+ * báo thiếu prop trong khi prop có thật.
+ */
+function heroOpenTags(content: string): string[] {
+  const tags: string[] = []
+  let from = 0
+  for (;;) {
+    const start = content.indexOf('<Hero', from)
+    if (start < 0) break
+    let depth = 0
+    let end = content.length - 1
+    for (let i = start; i < content.length; i++) {
+      const ch = content[i]
+      if (ch === '{') depth++
+      else if (ch === '}') depth--
+      else if (ch === '>' && depth === 0) { end = i; break }
+    }
+    tags.push(content.slice(start, end + 1))
+    from = start + '<Hero'.length
+  }
+  return tags
+}
+
 function main() {
   console.log('=== Entity layout contract ===\n')
 
@@ -190,6 +219,44 @@ function main() {
     }
   }
 
+  // ── Tầng 4: Hero caller contract (DR-076) ──
+  // Vì sao phải có tầng này: HERO_MOSAIC_CONTRACT ở trên chỉ đọc `Hero.astro`,
+  // tức chỉ kiểm Hero CÓ CÀI mosaic. Nó không kiểm nơi gọi CÓ TRUYỀN `gallery`.
+  // Và vòng quét tự động của tầng 1 chỉ nhặt file kết thúc bằng `Detail.astro`,
+  // nên `TouristDestinationHub.astro` nằm ngoài MỌI cổng. Hai khoảng mù đó cộng
+  // lại: chỗ gọi ở trang điểm đến đánh rơi `gallery` mà cả bộ kiểm vẫn xanh —
+  // hero điểm đến không bao giờ vào được mosaic dù dữ liệu đủ 4 ảnh. DR-076.
+  const HERO_CALLERS: { file: string; note: string }[] = [
+    { file: 'src/components/DetailLayout.astro', note: 'khung chung trang chi tiết' },
+    { file: 'src/components/TouristDestinationHub.astro', note: 'trang điểm đến — 06 §4.1 "khung chung áp dụng, cộng"' },
+  ]
+  const heroCallerFiles = new Set(HERO_CALLERS.map((caller) => caller.file))
+  for (const name of readdirSync(detailDir)) {
+    if (!name.endsWith('.astro')) continue
+    const rel = `src/components/${name}`
+    if (rel === 'src/components/Hero.astro') continue
+    if (!readRel(rel).includes('<Hero')) continue
+    if (!heroCallerFiles.has(rel)) {
+      errors.push(`${rel}: render <Hero> nhưng chưa khai trong HERO_CALLERS — nơi gọi Hero mới phải được ghi danh`)
+    }
+  }
+  for (const caller of HERO_CALLERS) {
+    if (!existsSync(resolve(REPO_ROOT, caller.file))) {
+      errors.push(`${caller.file}: khai trong HERO_CALLERS nhưng file không tồn tại`)
+      continue
+    }
+    const tags = heroOpenTags(readRel(caller.file))
+    if (tags.length === 0) {
+      errors.push(`${caller.file}: khai là nơi gọi Hero nhưng không render <Hero>`)
+      continue
+    }
+    for (const tag of tags) {
+      if (!/\bgallery=/.test(tag)) {
+        errors.push(`${caller.file}: <Hero> thiếu prop gallery — 06 §3 hàng Hero bắt gallery đủ 4 ảnh đi qua Hero mosaic (${caller.note})`)
+      }
+    }
+  }
+
   const renderDetailFiles = DETAIL_RULES
     .map((rule) => rule.file)
     .filter((file) => !['src/components/HotelDetail.astro', 'src/components/ResortDetail.astro'].includes(file))
@@ -243,11 +310,19 @@ function main() {
     'src/components/LodgingDetail.astro',
     'src/components/TourDetail.astro',
     'src/components/EventDetail.astro',
-  ]
-  const ENTITIES_WITHOUT_FACTSTRIP = [
-    'src/components/ArticleDetail.astro',
+    // QĐ-2026-08-29-03: hai template cuối cùng chuyển nốt. ENTITIES_WITHOUT_
+    // FACTSTRIP nay RỖNG — mọi entity detail đều đi qua FactStrip. Giữ mảng
+    // rỗng thay vì xoá: vòng lặp bên dưới vẫn chạy, và mảng rỗng nói rõ "không
+    // còn ngoại lệ", khác hẳn với việc xoá đi rồi không ai biết từng có.
     'src/components/PersonDetail.astro',
     'src/components/OrganizationDetail.astro',
+  ]
+  // QĐ-2026-08-29-04: Bài viết quay lại danh sách này. Không phải lùi bước —
+  // ba field của nó (chuyên mục, tác giả, ngày đăng) chuyển lên BYLINE dưới
+  // tiêu đề theo yêu cầu "gọn gàng, không nền", nên nó không còn ô Thông tin
+  // nhanh nào. Khung vẫn là khung chung; có ô hay không là chuyện dữ liệu.
+  const ENTITIES_WITHOUT_FACTSTRIP: string[] = [
+    'src/components/ArticleDetail.astro',
   ]
 
   for (const file of ENTITIES_WITH_FACTSTRIP) {
@@ -292,7 +367,11 @@ function main() {
   // ── Tầng 2: Container containment ──
   const SHARED_CONTAINMENT = [
     { file: 'src/components/Breadcrumb.astro', needle: '<div class="container">', note: 'Breadcrumb must wrap nav in container' },
-    { file: 'src/components/DetailLayout.astro', needle: '<div class="container two-col">', note: 'DetailLayout must have container two-col' },
+    // QĐ-2026-08-29-02 đổi markup sang `class:list` để bật `two-col--solo` khi
+    // cột phụ rỗng, nên neo cũ `<div class="container two-col">` không còn khớp.
+    // Neo mới vẫn kiểm đúng điều cần kiểm: hai lớp `container` và `two-col`
+    // cùng nằm trên một phần tử.
+    { file: 'src/components/DetailLayout.astro', needle: '["container", "two-col"', note: 'DetailLayout must have container two-col' },
   ]
   for (const item of SHARED_CONTAINMENT) {
     if (!readRel(item.file).includes(item.needle)) {

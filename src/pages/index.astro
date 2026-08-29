@@ -2,10 +2,10 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import SiteHome from '../components/SiteHome.astro'
 import { getClient } from '../lib/sanity'
-import { touristDestinationBySlugQuery, siteSettingsQuery } from '../lib/queries'
+import { touristDestinationBySlugQuery, siteSettingsQuery, otherDestinationsQuery } from '../lib/queries'
 import { allToursQuery } from '../lib/queries/tour'
 import { homeAlternates } from '../lib/sitemap'
-import { destinationHref } from '../lib/homepage'
+import { destinationHref, chonTourTrangChu } from '../lib/homepage'
 import { jsonLdScriptContent, imageToLd } from '../lib/serialize/utils'
 import type { TouristDestinationResult, SiteSettingsResult, Lang } from '../lib/types'
 import { brand, primaryDestinationSlug } from '../site.config'
@@ -33,13 +33,24 @@ if (!td) {
 
 const config: SiteSettingsResult | null = await client.fetch(siteSettingsQuery())
 
-// Tour cho khối "Tour nổi bật" trên trang chủ (SPEC-2026-08-14-be-mat-vong-3 §3.4).
-// Dùng ĐÚNG truy vấn mà trang /tour/ đang dùng, không viết truy vấn mới — một nguồn
-// sự thật cho "tour nào được hiển thị". Cắt 3 mục đầu; `homeTourTotal` giữ tổng thật
-// để nhãn "Xem tất cả N tour" không nói dối.
+// Tour cho khối "Tour nổi bật" trên trang chủ (SPEC-2026-08-14-be-mat-vong-3 §3.4,
+// chọn lựa theo SPEC-2026-08-29 R6a). Dữ liệu lấy từ `allToursQuery` — nơi DUY NHẤT
+// có `duration` và đã lọc trạng thái duyệt (reviewStatus); KHÔNG viết truy vấn mới.
+// Nhưng "tour nào hiện" KHÔNG chỉ do truy vấn này quyết: `chonTourTrangChu`
+// (src/lib/homepage.ts) lấy giao giữa kho này với `td?.featuredTours` — biên tập
+// chọn trong Studio — nên có nguồn thứ hai cho thứ tự và lựa chọn hiển thị. Rơi về
+// ba tour đầu kho khi biên tập chưa chọn gì. `homeTourTotal` giữ tổng thật để nhãn
+// "Xem tất cả N tour" không nói dối.
 const allTours: any[] = (await client.fetch<any[]>(allToursQuery(lang), { lang })) ?? []
-const homeTours = allTours.filter(t => t.slug && t.title).slice(0, 3)
+const homeTours = chonTourTrangChu(allTours, td?.featuredTours)
 const homeTourTotal = allTours.filter(t => t.slug && t.title).length
+
+// Điểm đến khác cho khối "Điểm đến khác" (ADR-0028). `td` có thể null (đã cảnh báo ở trên);
+// khi đó bỏ hẳn lệnh fetch thay vì gọi với `$currentId` undefined — GROQ thiếu tham số là lỗi
+// lúc chạy, và trang chủ không có điểm đến trụ thì khối này cũng không có nghĩa gì.
+const otherDestinations = td
+  ? (await client.fetch<any[]>(otherDestinationsQuery(lang), { currentId: td._id })) ?? []
+  : []
 
 const siteBase = siteBaseUrl(Astro.site)
 
@@ -95,5 +106,6 @@ const jsonLd = [
     config={config}
     homeTours={homeTours}
     homeTourTotal={homeTourTotal}
+    otherDestinations={otherDestinations}
   />
 </BaseLayout>

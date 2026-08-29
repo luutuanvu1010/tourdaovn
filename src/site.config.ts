@@ -144,6 +144,10 @@ export const defaultLang: Lang = 'vi'
 
 export const entities = {
   // ── Điểm đến & trải nghiệm ────────────────────────────────────────────
+  // Công tắc này chỉ bật/tắt trang DANH SÁCH `/diem-den/`. Trang chi tiết của từng
+  // điểm đến sống ở gốc site (`/nha-trang/`) và do `[...path].astro` sinh riêng, KHÔNG
+  // phụ thuộc công tắc này — tắt ở đây là mất trang danh sách, không mất trang điểm đến.
+  touristDestination: true, // Điểm đến (danh sách) → /diem-den/
   place:        true,   // Địa danh          → /dia-danh/
   attraction:   true,   // Điểm tham quan    → /diem-tham-quan/
   experience:   true,   // Trải nghiệm       → /trai-nghiem/
@@ -245,7 +249,7 @@ export const primaryDestinationSlug = 'nha-trang'
 //   dòng sai. Đây là cố ý: thà đỏ trên máy còn hơn khách bấm vào trang trắng.
 //
 //  ─────────────────────────────────────────────────────────────────────────
-//  BẢY LOẠI ĐÍCH  (`kind`)
+//  TÁM LOẠI ĐÍCH  (`kind`)
 //  ─────────────────────────────────────────────────────────────────────────
 //
 //   kind        target là gì                         Ví dụ
@@ -256,6 +260,7 @@ export const primaryDestinationSlug = 'nha-trang'
 //   'term'      '<danh mục>/<đường dẫn danh mục con>' 'experience/lan-bien'
 //   'detail'    '<danh mục>/<đường dẫn document>'    'tour/tour-hon-tam'
 //   'static'    tên trang tĩnh                       'lien-he'
+//   'destination' đường dẫn của một Điểm đến        'phu-quoc'
 //   'zalo'      KHÔNG có target — tự lấy "Liên kết Zalo" trong Sanity Studio
 //
 //   Mục có `children` trở thành menu thả xuống.
@@ -263,7 +268,7 @@ export const primaryDestinationSlug = 'nha-trang'
 //   Riêng 'zalo': chưa điền Liên kết Zalo trong Studio thì mục này tự ẩn.
 //   Không có nút chết.
 
-export type NavKind = 'home' | 'index' | 'hub' | 'term' | 'detail' | 'static' | 'zalo'
+export type NavKind = 'home' | 'index' | 'hub' | 'term' | 'detail' | 'static' | 'zalo' | 'destination'
 
 export interface NavItem {
   /** Chữ hiện trên menu */
@@ -359,9 +364,19 @@ export const enabledRoutes: string[] = [...enabledEntities, ...enabledHubs]
  */
 const DOC_LEVEL_ENTITIES: string[] = ['article']
 
+/**
+ * Danh mục có trang DANH SÁCH nhưng trang CHI TIẾT không nằm dưới segment danh sách.
+ * Chỉ `touristDestination`: danh sách ở `/diem-den/`, chi tiết ở gốc `/{slug}/` (ADR-0028).
+ * Phải loại khỏi `fieldLevelEntities` vì danh sách đó nuôi `fetchAllSlugs`, tức nuôi việc
+ * SINH TRANG CHI TIẾT — để nó vào là dựng thêm `/diem-den/{slug}/` trùng nội dung với
+ * trang gốc, hai URL cùng một nội dung.
+ */
+const ROOT_DETAIL_ENTITIES: string[] = ['touristDestination']
+
 /** Danh mục bật, kiểu field-level — dùng cho truy vấn Sanity lúc build */
 export const fieldLevelEntities: string[] = enabledEntities
   .filter((e) => !DOC_LEVEL_ENTITIES.includes(e))
+  .filter((e) => !ROOT_DETAIL_ENTITIES.includes(e))
 
 /** Hỏi nhanh: danh mục này có đang bật không? */
 export function isEntityEnabled(entity: string): boolean {

@@ -1,18 +1,21 @@
 ---
 import RouteDispatch from '../components/RouteDispatch.astro'
-import { fetchAllSlugs, scanTerms, fetchAllDestinationSlugs } from '../lib/sanity'
-import { ROUTE_MAP, assertNavTargetsExist, assertNavTermsHaveSlug, reportTermSlugGaps } from '../lib/routes'
+import { fetchAllSlugs, scanTerms, fetchAllDestinationSlugs, fetchUsedAttractionTermSlugs } from '../lib/sanity'
+import { ROUTE_MAP, TERM_SET_ENTITY, assertNavTargetsExist, assertNavTermsHaveSlug, reportTermSlugGaps } from '../lib/routes'
 import type { Lang } from '../lib/types'
 
 // Disambiguation term vs detail: quyết ngay tại đây qua props.kind, không đoán ở render.
 // Detail path sinh từ fetchAllSlugs (entity), term path sinh từ fetchAllTerms (Category).
 // R1 (04 §1c) bảo đảm không trùng slug trong cùng nhánh; term hiện hoãn (B8.6.5 phiếu nợ).
+
 export async function getStaticPaths() {
   const lang: Lang = 'vi'
 
-  const [slugs, termScan] = await Promise.all([
+
+  const [slugs, termScan, usedAttractionTerms] = await Promise.all([
     fetchAllSlugs(lang),
     scanTerms(),
+    fetchUsedAttractionTermSlugs(),
   ])
   const terms = termScan.terms
 
@@ -52,7 +55,12 @@ export async function getStaticPaths() {
   }
 
   for (const t of terms) {
-    const entityType = t.inDefinedTermSet === 'experience-type' ? 'experience' : 'tour'
+    const entityType = TERM_SET_ENTITY[t.inDefinedTermSet]
+    if (!entityType) continue
+    // R2: nhãn chưa có Attraction nào mang thì trang term CHƯA tồn tại — không phải
+    // gãy link, chỉ là chưa mọc. Tuyển từ vựng trước, trang tự mọc khi có dữ liệu
+    // (completeness over coverage). Chỉ áp cho bộ mới, xem chú thích ở fetchUsedAttractionTermSlugs.
+    if (t.inDefinedTermSet === 'attraction-type' && !usedAttractionTerms.has(t.slug)) continue
     const entry = ROUTE_MAP.find(r => r.entity === entityType)
     if (!entry) continue
     const path = `${entry.segments[lang]}/${t.slug}`

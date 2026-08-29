@@ -13,14 +13,14 @@
  *      Bộ đọc CSV viết tay ở dưới — vì tên tour có dấu phẩy nên phải xử ô trong ngoặc kép.
  *   2. XOÁ PHẢI ỒN ÀO. Khoá có trong yaml mà không có trong Sheet = xoá một dòng giá, và
  *      xoá một dòng đang được trỏ tới là làm tour đó mất form đặt. Script liệt kê rồi DỪNG.
- *      Chỉ xoá khi chạy kèm cờ `--cho-phep-xoa`. Cùng tinh thần "hỏng ồn ào" của DR-064.
+ *      Chỉ xoá khi chạy kèm cờ `--cho-phep-xoa`. Cùng tinh thần "hỏng ồn ào" của DR-099.
  *   3. KIỂM TRƯỚC KHI GHI. Một dòng sai là không ghi gì cả. Không có chuyện ghi một nửa.
  *      Luật hợp lệ NHẬP THẲNG từ scripts/validators/py1-py8.ts, và ngay trước khi ghi thì
  *      chạy chính PY1/PY2/PY7 trên nội dung sắp ghi. Không có bản chép tay nào để lệch câm,
  *      và bước "chạy validator" mà chốt 2 của quyết định đòi là được THI HÀNH, không phải
  *      được nhắc. Ghi ra tệp tạm rồi `renameSync`, để chết giữa chừng không để lại file rỗng.
  *   4. KHỐI CHÚ THÍCH đầu prices.yaml được đọc lại từ chính file cũ và chép nguyên văn.
- *      Nó ghi bài học DR-062 (khoá là định danh ổn định, đừng đổi theo slug) — sinh lại
+ *      Nó ghi bài học DR-097 (khoá là định danh ổn định, đừng đổi theo slug) — sinh lại
  *      file mà mất khối đó là xoá mất lời cảnh báo đã phải trả giá mới có.
  *   5. BẤT BIẾN. Thứ tự khoá và cách xuống dòng cố định (xem `tachKhoiCu` + `xepKhoiRa`). Sheet
  *      không đổi thì chạy bao nhiêu lần yaml cũng không đổi một byte.
@@ -635,7 +635,7 @@ async function chay() {
   if (khoiChuThich.length === 0) {
     dungLai(
       'data/prices.yaml không còn khối chú thích ở đầu file.\n\n' +
-      '  Khối đó ghi bài học DR-062 (khoá là định danh ổn định, đừng đổi theo slug) và phải\n' +
+      '  Khối đó ghi bài học DR-097 (khoá là định danh ổn định, đừng đổi theo slug) và phải\n' +
       '  sống sót qua mọi lần sinh lại. Khôi phục file từ lịch sử git rồi chạy lại.'
     )
   }

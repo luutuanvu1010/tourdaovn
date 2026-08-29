@@ -38,7 +38,7 @@ Nguồn sự thật của phát biểu bất biến là CONTENT_MODEL mục 4; f
 | Mã | Thi hành | Validator (E1, máy chạy được) | Mức | Cổng |
 |---|---|---|---|---|
 | I1 | Sanity không lưu con số giá | quét schema Sanity và dataset: cấm field kiểu number mang nghĩa tiền tệ, cấm pattern giá trong field text của entity thương mại; đối chiếu danh sách field từng entity với CONTENT_MODEL mục 2 | fail | QA2 cộng hook |
-| I2 | sameAs cho nhóm bách khoa; officialSource cho Attraction nhóm venue thương mại; geo/address là tùy chọn với mọi entity | validator rẽ nhánh theo `attractionType` và `placeType`, field gate không rỗng | fail | QA2 |
+| I2 | **Ba nhánh** theo `attractionType` (CONTENT_MODEL §2.3 v1.0.19): (a) nhóm bách khoa — `historic`, `temple`, `church`, `museum` — bắt buộc `sameAs`; (b) nhóm venue thương mại — `theme-park`, `aquarium`, `mud-spa`, `market`, `park` — bắt buộc `officialSource`; (c) nhóm một trong hai — `beach`, `island`, `nature`, `craft-village`, `general` — bắt buộc **có ít nhất một** trong `sameAs` hoặc `officialSource`. Place vẫn bắt buộc `sameAs`. geo/address là tùy chọn với mọi entity | validator rẽ nhánh theo `attractionType` và `placeType`, field gate không rỗng. **Mọi giá trị enum phải rơi vào đúng một nhánh**: giá trị không thuộc nhánh nào bị bỏ qua trong im lặng, không phải được cho phép — kiểm bằng cách đối chiếu hợp ba tập với enum ở CONTENT_MODEL §2.3 | fail | QA2 |
 | I3 | Restaurant, Hotel, Resort: officialSource; Organization: url, officialSource; geo/address là tùy chọn với mọi entity | validator rẽ nhánh theo `_type`, field gate không rỗng | fail | QA2 |
 | I4 | Article có author trỏ Person tồn tại | required-field cộng ref integrity | fail | QA2 |
 | I5 | Event đủ eventType, startDate, location; quá endDate chuyển past, không xóa | required-field cộng ref integrity; job theo ngày so endDate với trạng thái | fail (field); warn (job nhắc chuyển past) | QA2 |
@@ -56,6 +56,8 @@ Nguồn sự thật của phát biểu bất biến là CONTENT_MODEL mục 4; f
 | I17 | Specialty đủ specialtyType, sameAs; whereToTry là tập con của chiều servesSpecialty suy ngược | required-field cộng subset check: mọi Restaurant trong whereToTry phải publish và có servesSpecialty chứa chính Specialty đó | fail | QA2 |
 | I18 | Organization chỉ publish khi có quan hệ vào | reverse reference quét cả draft: tồn tại Tour.operator, Event.organizer hoặc Article.about trỏ tới | fail | QA2 |
 | I19 | Publish cần reviewStatus = approved kèm approvedBy và contentProvenance thuộc enum đóng; Category miễn | required-field cộng kiểm giá trị enum (draft, inReview, approved; human, ai-t1, mixed) | fail | QA2 |
+| I20 | Entity đã publish nên khai `destination` — thuộc điểm đến nào | required-field mức cảnh báo trên mười entity ở ADR-0028; thiếu thì document không hiện ở trang điểm đến nào, KHÔNG chặn publish | warn | QA2 |
+| I21 | Mục nổi bật của một điểm đến phải thuộc chính điểm đến đó | ref integrity hai phía trên năm ô `featured*` của touristDestination (ADR-0028); trỏ sang điểm đến khác là trang hiện nội dung sai sự thật | fail | QA2 |
 
 ## 1b. Validator nguồn giá `prices.yaml` (thi hành I1, I14, I16 theo ADR-0007 và SAD mục 3)
 

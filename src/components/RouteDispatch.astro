@@ -39,7 +39,7 @@ import TermIndex from './TermIndex.astro'
 
 // Destination hub
 import TouristDestinationHub from './TouristDestinationHub.astro'
-import { touristDestinationBySlugQuery } from '../lib/queries'
+import { touristDestinationBySlugQuery, allDestinationsQuery } from '../lib/queries'
 import { touristDestinationToJsonLd } from '../lib/serialize/touristDestination'
 import { entityPageGraphToLd, jsonLdScriptContent } from '../lib/serialize/utils'
 import type { TouristDestinationResult } from '../lib/types'
@@ -53,7 +53,7 @@ import {
   allHotelsQuery, allResortsQuery, allToursQuery, allEventsQuery, allArticlesQuery,
   allPersonsQuery, allOrganizationsQuery,
   allExperiencesQuery, categoriesBySetQuery, categoryBySlugQuery,
-  experiencesByTypeQuery, toursByTypeQuery,
+  experiencesByTypeQuery, toursByTypeQuery, attractionsByTermQuery,
   nearbyForPlaceQuery, nearbyAttractionsQuery, nearbyExperiencesQuery,
   nearbyRestaurantsQuery, nearbyHotelsQuery, nearbyResortsQuery,
   nearbyToursQuery, nearbyEventsQuery, nearbyArticlesQuery,
@@ -214,6 +214,9 @@ const INDEX_LABEL: Record<string, { title: string; desc: string }> = INDEX_COPY[
 
 // allXQuery cho index thường (trừ event/tour/experience xử lý riêng)
 const INDEX_QUERY: Record<string, (l: Lang) => string> = {
+  // Điểm đến: trang danh sách ở /diem-den/, nhưng card trỏ về gốc /{slug}/ — việc dựng
+  // link do EntityIndex hỏi `entityHref` dùng chung, đã xử ca này (ADR-0028).
+  touristDestination: allDestinationsQuery,
   place: allPlacesQuery, attraction: allAttractionsQuery,
   restaurant: allRestaurantsQuery, specialty: allSpecialtiesQuery,
   hotel: allHotelsQuery, resort: allResortsQuery,
@@ -358,15 +361,29 @@ if (kind === 'detail') {
   } else {
     notFound = true
   }
-} else if (kind === 'term' && slug && (entity === 'experience' || entity === 'tour')) {
+} else if (kind === 'term' && slug && (entity === 'experience' || entity === 'tour' || entity === 'attraction')) {
   alternates = routeAlternates(entity, slug)
   termData = await client.fetch(categoryBySlugQuery(lang), { slug })
   if (!termData) {
     notFound = true
   } else {
-    const q = entity === 'experience' ? experiencesByTypeQuery(lang) : toursByTypeQuery(lang)
+    // Attraction trỏ term qua mảng `category` đa trị, không qua field phân loại riêng
+    // như experienceType — nên có truy vấn riêng dùng bộ lọc trên mảng.
+    const q = entity === 'experience'
+      ? experiencesByTypeQuery(lang)
+      : entity === 'tour'
+        ? toursByTypeQuery(lang)
+        : attractionsByTermQuery(lang)
     const all = (await client.fetch<any[]>(q, { slug, lang })) ?? []
-    termEntities = toListings(all)
+    // R2 (05-URL_MAP mục 9): term chưa có entity nào trỏ tới thì trang KHÔNG tồn tại.
+    // Chỉ áp cho nhánh attraction: hai bộ term cũ đã có URL đang chạy, siết ngược lại
+    // là xoá trang đang sống, vi phạm R3. Đây là lưới thứ hai; lưới thứ nhất lọc ngay
+    // lúc sinh đường dẫn ở [...path].astro.
+    if (entity === 'attraction' && all.length === 0) {
+      notFound = true
+    } else {
+      termEntities = toListings(all)
+    }
   }
 } else if (kind === 'destination' && slug) {
   alternates = destinationAlternates(slug)
@@ -421,7 +438,7 @@ const destinationJsonLd = kind === 'destination' && detailData && !notFound
   {kind === 'detail' && detailData && <AuthorityMeta data={detailData} lang={lang} />}
 
   {kind === 'index' && !notFound && entity === 'event' && (
-    <EventIndex upcoming={eventUpcoming} past={eventPast} lang={lang} />
+    <EventIndex upcoming={eventUpcoming} past={eventPast} lang={lang} title={indexInfo.title} description={indexInfo.desc} />
   )}
   {kind === 'index' && !notFound && entity === 'tour' && (
     <TourIndex tours={tourList} terms={indexTerms} lang={lang} />
@@ -430,7 +447,7 @@ const destinationJsonLd = kind === 'destination' && detailData && !notFound
     <EntityIndex entities={indexEntities} entityType={entity} lang={lang} title={indexInfo.title} description={indexInfo.desc} terms={indexTerms} />
   )}
 
-  {kind === 'hub' && !notFound && <HubIndex sections={hubSections} lang={lang} />}
+  {kind === 'hub' && !notFound && <HubIndex sections={hubSections} lang={lang} title={HUB[entity]?.title} description={HUB[entity]?.desc} />}
 
   {kind === 'term' && !notFound && termData && (
     <TermIndex term={termData} entities={termEntities} entityType={entity as 'experience' | 'tour'} lang={lang} />

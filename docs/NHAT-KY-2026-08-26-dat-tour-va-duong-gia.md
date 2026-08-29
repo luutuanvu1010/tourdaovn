@@ -4,7 +4,7 @@
 **Thi hành:** `docs/plans/2026-08-22-dat-tour.md` (17 task) · **Chưa gộp, chưa push, chưa lên production**
 
 Ghi lại thứ tự thật sự xảy ra, các chỗ rẽ hướng, và cả những chỗ tôi làm sai rồi phải quay lại.
-Bản ghi có cấu trúc nằm ở `QĐ-2026-08-22-07`, `QĐ-2026-08-26-02`, và `DR-061`→`DR-064`.
+Bản ghi có cấu trúc nằm ở `QĐ-2026-08-22-07`, `QĐ-2026-08-26-02`, và `DR-096`→`DR-099`.
 
 ---
 
@@ -43,24 +43,24 @@ suất. Cả hai không phát một tín hiệu nào. Bằng chứng không ph�
 `curl` POST **không mang token nào** và nhận 201. Tôi đã đọc con số `TD-260823-98N8` đó như bằng
 chứng "đường ghi chạy được"; reviewer đọc cùng con số và thấy nó chứng minh thêm rằng đường ghi
 chạy được **kể cả khi không có gì bảo vệ**. Nay chặn hẳn ở production, cửa thoát tường minh cho
-dev — `DR-064`.
+dev — `DR-099`.
 
 **Ba validator giá đã hỏng từ trước dự án này.** `PY3`/`PY4`/`PY5` kiểm
 `typeof doc.bookingRef === 'string'` trong khi lược đồ Sanity khai `bookingRef` là object có
 `.key` — điều kiện **luôn false** với dữ liệu thật. Chúng luôn báo "không có gì sai", kể cả khi
 có. Việc thêm 8 dòng giá thật làm nó lộ ra. Sửa xong, cổng lập tức chỉ ra hai chỗ thật: một dòng
-giá mồ côi và một tour quên gắn giá — `DR-061`.
+giá mồ côi và một tour quên gắn giá — `DR-096`.
 
 **Khoá giá bằng slug mục trong vài giờ.** Task 11 đặt `bookingRef.key = slug` lúc 07:58Z; cùng
 ngày có ba đợt biên tập đổi slug, và tới tối chỉ còn 1/10 document có `key == slug`. Reviewer đề
 nghị "chạy lại script cho khớp" — **tôi bác**: script đặt khoá = slug *hiện tại*, mà khoá trong
 `prices.yaml` là slug *cũ*, nên chạy lại sẽ biến 7 liên kết đang sống thành mồ côi hết. Luật
-đúng: khoá là **định danh ổn định**, không buộc bằng slug — `DR-062`.
+đúng: khoá là **định danh ổn định**, không buộc bằng slug — `DR-097`.
 
 **Sáu URL `/tour/` chết sau đợt đổi slug.** Phát hiện trước khi phát hành, báo phiên đang chuẩn
 bị push; họ dừng lại và đưa lên chủ dự án. Chốt: đổi slug là có chủ ý, sáu URL cũ được phép chết
 (`QĐ-2026-08-23-01`). Lỗ hổng cổng lộ ra và **chưa vá**: `build:ci` không gọi `validate:post`, nên
-đường dựng tự động không bao giờ bắt được URL biến mất — `DR-063`.
+đường dựng tự động không bao giờ bắt được URL biến mất — `DR-098`.
 
 ---
 
@@ -100,7 +100,7 @@ lộ bẫy chỉ vì chúng không nhận tham số. Đã ghi cảnh báo ở `d
 
 **Sổ drift va số bốn lần.** Hai luồng cùng ghi vào một sổ đánh số tuần tự mà không khoá dải. Lần
 này cả hai bên đều dùng `DR-044`→`DR-047` cho tám chuyện khác nhau; bốn mục của nhánh phải dời
-sang `DR-061`→`DR-064`, kéo theo sửa tham chiếu chéo ở 7 file — trong khi 21 chỗ trỏ tới số **của
+sang `DR-096`→`DR-099`, kéo theo sửa tham chiếu chéo ở 7 file — trong khi 21 chỗ trỏ tới số **của
 `main`** phải giữ nguyên. Một lần `sed` toàn repo là hỏng cả hai bên.
 
 **Sổ tiến độ SDD mất trắng.** Thư mục worktree bị gỡ trong khoảng 23→26/08; `.superpowers/` bị
@@ -129,7 +129,7 @@ rõ bản cũ mất gì.
 |---|---|---|
 | 3 | **6 tour du thuyền: bán theo người hay theo chuyến?** | Chặn nhóm sản phẩm lớn nhất chưa có giá. Nếu theo chuyến thì `perPax` không mô tả đúng và form hai bước cũng không hợp |
 | 4 | **21/28 tour chưa có dòng giá** | Không phải lỗi mã — mã làm đúng luật "không giá thì không form". Là thiếu dữ liệu |
-| 5 | **Dòng giá mồ côi `ve-hon-tam-tam-tron-goi`** | Xoá hay gắn cho một tour? `DR-062` |
+| 5 | **Dòng giá mồ côi `ve-hon-tam-tam-tron-goi`** | Xoá hay gắn cho một tour? `DR-097` |
 | 6 | **Nhánh trùng trả về mã đơn cũ** | Ai biết một SĐT có thể xác nhận người đó đã đặt tour X ngày Y chưa. Là **yêu cầu nguyên văn của SPEC** §4.4, không phải lỗi thi hành |
 | 7 | **Bảng giá không dòng nào ghi độ tuổi** | Khách thấy "Trẻ em 560.000₫" mà không biết mấy tuổi. Chỗ điền đã dựng sẵn |
 
@@ -137,7 +137,7 @@ rõ bản cũ mất gì.
 
 | # | Nợ | Ghi chú |
 |---|---|---|
-| 8 | `DR-063` — cổng R3 không chạy trên đường dựng tự động | `build:ci` không gọi `validate:post`. Lần này người bắt là một tác nhân, không phải máy |
+| 8 | `DR-098` — cổng R3 không chạy trên đường dựng tự động | `build:ci` không gọi `validate:post`. Lần này người bắt là một tác nhân, không phải máy |
 | 9 | `wrangler.toml` `[build]` làm `npm run deploy` dựng site **hai lần** | Mỗi lần gọi ra Sanity. Một vòng nghiệm thu = 4 lần dựng. Là lỗi của SPEC được thi hành trung thành |
 | 10 | Test validator `PY` nằm **ngoài** `npm test` | Con số "82 test" không bao gồm chúng |
 | 11 | Bốn Minor của `prices:pull` | `\r` sống sót trong ô có ngoặc kép · chưa có chế độ `--thu` · chưa parse lại văn bản vừa dựng trước khi ghi · trùng khoá chỉ bắt giữa các hàng có giá |

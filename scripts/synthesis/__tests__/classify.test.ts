@@ -14,6 +14,10 @@ import assert from 'node:assert/strict'
 import { mapFields } from '../field-mapper'
 import { validateOutput } from '../output-validator'
 import { fieldsFor } from '../entity-fields'
+import {
+  CLASSIFY_ENUMS,
+  ENCYCLOPEDIC_ATTRACTION_TYPES, VENUE_ATTRACTION_TYPES, EITHER_SOURCE_ATTRACTION_TYPES,
+} from '../classify'
 
 // ── (a) enum hợp lệ → map đúng ───────────────────────────────────────────────
 test('classify (a) — placeType hợp lệ map đúng', () => {
@@ -121,5 +125,83 @@ test('classify (R3) — attraction venue (theme-park) cảnh báo cần official
   assert.ok(
     v.warnings.some(w => /officialSource/.test(w)),
     'cảnh báo venue cần officialSource',
+  )
+})
+
+// ── v1.0.19: năm giá trị mới + nhánh gate thứ ba (QĐ-2026-08-27-03) ─────────
+test('classify (v1.0.19) — năm giá trị mới đều thuộc enum đóng', () => {
+  for (const v of ['beach', 'island', 'nature', 'craft-village', 'general']) {
+    const { mapped } = mapFields('attraction', { title: 'X', attractionType: v })
+    assert.equal(mapped.attractionType, v, `${v} phải map đúng`)
+  }
+})
+
+test('classify (v1.0.19) — hợp ba tập gate PHỦ ĐÚNG enum attractionType', () => {
+  const union = new Set([
+    ...ENCYCLOPEDIC_ATTRACTION_TYPES,
+    ...VENUE_ATTRACTION_TYPES,
+    ...EITHER_SOURCE_ATTRACTION_TYPES,
+  ])
+  const enumVals = CLASSIFY_ENUMS.attractionType
+  // Giá trị lọt ra ngoài cả ba tập KHÔNG được I2 kiểm — im lặng, không phải cho phép.
+  // Đây đúng là lỗi đã xảy ra với `aquarium` trước v1.0.19.
+  for (const v of enumVals) {
+    assert.ok(union.has(v), `${v} không thuộc nhánh gate nào — I2 sẽ bỏ qua trong im lặng`)
+  }
+  assert.equal(union.size, enumVals.length, 'ba tập không được chồng lấn hay dư giá trị')
+})
+
+test('classify (v1.0.19) — aquarium thuộc nhóm venue, không còn bách khoa', () => {
+  assert.ok(VENUE_ATTRACTION_TYPES.includes('aquarium'))
+  assert.ok(!ENCYCLOPEDIC_ATTRACTION_TYPES.includes('aquarium'))
+})
+
+test('classify (v1.0.19) — general thiếu CẢ HAI nguồn → cảnh báo một-trong-hai', () => {
+  const { mapped } = mapFields('attraction', {
+    title: 'X', summary: 's', body: 'b', attractionType: 'general',
+    geo: { lat: 12, lng: 109 },
+  })
+  const v = validateOutput('attraction', mapped)
+  assert.ok(
+    v.warnings.some(w => /ít nhất một/.test(w)),
+    'cảnh báo cần ít nhất một trong sameAs hoặc officialSource',
+  )
+})
+
+test('classify (v1.0.19) — craft-village có officialSource thì KHÔNG cảnh báo', () => {
+  const { mapped } = mapFields('attraction', {
+    title: 'X', summary: 's', body: 'b', attractionType: 'craft-village',
+    officialSource: 'https://vietnamtourism.gov.vn/post/53352',
+    geo: { lat: 12, lng: 109 },
+  })
+  const v = validateOutput('attraction', mapped)
+  assert.ok(
+    !v.warnings.some(w => /ít nhất một/.test(w)),
+    'có officialSource là đủ, không đòi thêm sameAs',
+  )
+})
+
+test('classify (v1.0.19) — beach thuộc nhánh một-trong-hai, officialSource là đủ', () => {
+  // Lằn ranh "tự nhiên" so với "có quản lý" cắt ngang beach/island/nature: Mini Beach
+  // là điểm du lịch có quản lý, chỉ có website chính thức, không ai viết Wikipedia.
+  const { mapped } = mapFields('attraction', {
+    title: 'Mini Beach', summary: 's', body: 'b', attractionType: 'beach',
+    officialSource: 'https://vi.example-resort.vn/',
+    geo: { lat: 12, lng: 109 },
+  })
+  const v = validateOutput('attraction', mapped)
+  assert.ok(!v.errors.some(e => /sameAs/.test(e)), 'beach KHÔNG bị đòi sameAs nữa')
+  assert.ok(!v.warnings.some(w => /ít nhất một/.test(w)), 'có officialSource là đủ')
+})
+
+test('classify (v1.0.19) — beach trống CẢ HAI nguồn thì vẫn bị cảnh báo', () => {
+  const { mapped } = mapFields('attraction', {
+    title: 'X', summary: 's', body: 'b', attractionType: 'beach',
+    geo: { lat: 12, lng: 109 },
+  })
+  const v = validateOutput('attraction', mapped)
+  assert.ok(
+    v.warnings.some(w => /ít nhất một/.test(w)),
+    'không ô nào được miễn nguồn — nới nhánh không có nghĩa là bỏ cổng',
   )
 })

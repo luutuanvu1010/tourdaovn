@@ -67,10 +67,10 @@ export default defineType({
       name: 'containedInPlaceRef', type: 'array',
       group: 'viTri',
       of: [{ type: 'url' }],
-      title: 'Nằm trong tỉnh (URL Wikidata)',
+      title: 'Nằm trong tỉnh/thành (URL Wikidata)',
       description:
-        'Trỏ tỉnh Khánh Hoà qua Wikidata URL (I15). ' +
-        'Nếu đã tạo Place cấp Tỉnh cho Khánh Hoà thì ô này chỉ còn để xuất JSON-LD; ' +
+        'Trỏ tỉnh/thành chứa điểm đến này qua Wikidata URL. ' +
+        'Nếu đã tạo Place cấp Tỉnh tương ứng thì ô này chỉ còn để xuất JSON-LD; ' +
         'chuỗi điều hướng đi theo Place.containedInPlace.'
     }),
     defineField({

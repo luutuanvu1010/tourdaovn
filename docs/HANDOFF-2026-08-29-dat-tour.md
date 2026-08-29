@@ -21,7 +21,7 @@ lỗi của nhánh này. Đừng `--no-verify`. Bundle là bản sao lưu thay t
 
 **`main` đã đi thêm ~86 commit** kể từ lần gộp thứ ba (`62bc5a4`). Trước khi gộp nhánh này về
 `main` sẽ cần **gộp `main` vào lần thứ tư** — tiền lệ ba lần trước đều va số `DR-*` (lần ba va
-BỐN số một lúc, phải dời `DR-044..047` của nhánh thành `DR-061..064`). Khi gộp: so danh sách
+BỐN số một lúc, phải dời `DR-044..047` của nhánh thành `DR-061..064`; lần bốn va tiếp — main cũng đã cấp 061..064 — nên dời lần nữa thành `DR-096..099`). Khi gộp: so danh sách
 `DR-*` hai bên TRƯỚC, đừng tìm-thay mù, và nhớ hai lần trước chỉ 2–4 file xung đột thật.
 
 ## Trạng thái: 15/17 task xong
@@ -46,7 +46,7 @@ Cổng máy lúc bàn giao: `npx vitest run` **82/82** · `npx astro check` 0 er
 | Zalo: bot đã tạo, **`chat_id` chưa lấy** | ❌ — xem bẫy getUpdates dưới |
 | **8 bí mật** (`wrangler secret put`) | ❌ `secret list` = `[]` (đo 29/08) |
 
-**Endpoint hiện trả 503 cho mọi đơn** (cổng cấu hình fail-closed, `DR-064`) — đúng thiết kế,
+**Endpoint hiện trả 503 cho mọi đơn** (cổng cấu hình fail-closed, `DR-099`) — đúng thiết kế,
 an toàn cho tới khi đặt xong bí mật.
 
 Sau khi đặt bí mật, **đếm phải ra ĐÚNG 8 tên, không tên nào khác**. Cấm tuyệt đối
@@ -107,7 +107,7 @@ rename, xoá phải có cờ `--cho-phep-xoa`).
 mỗi tiêu đề task đáng tin hơn ô tick) → 3. `docs/specs/SPEC-2026-08-21-dat-tour.md` §4.4–4.7, §6,
 §7 (14 tiêu chí) → 4. `BUILD-NOTES.md` mục "Module đặt tour" (thứ tự bắt buộc + đường lùi gỡ
 `main` khỏi `wrangler.toml`) → 5. `docs/DECISIONS.md`: `QĐ-2026-08-22-07` (SES), `QĐ-2026-08-26-02`
-(Sheet) → 6. `docs/DRIFT_LOG.md`: `DR-061`…`DR-064` → 7. Nhật ký
+(Sheet) → 6. `docs/DRIFT_LOG.md`: `DR-096`…`DR-099` → 7. Nhật ký
 `docs/NHAT-KY-2026-08-26-dat-tour-va-duong-gia.md` (14 mục nợ, phán quyết, bài học).
 
 ## Việc kế tiếp, đúng thứ tự

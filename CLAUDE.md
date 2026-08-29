@@ -94,7 +94,12 @@ Không được làm:
 3. Spec hiện tại đã qua QA1
 4. `04-CONSTRAINTS.md`
 5. Schema / URL map / binding map liên quan
-6. Prompt vai Code nếu có
+6. `KIEN-TRUC-TEMPLATE.md` — **nếu task chạm tầng giao diện.** Đọc trước khi mở
+   bất kỳ file `.astro` hay `.css` nào. Nó trả lời "sửa X thì ở file nào" và
+   chặn ba lỗi hay gặp: viết cứng giá trị lẽ ra là token, sửa bố cục trong
+   template con thay vì trong frame chung, và thêm entity mới mà quên ghi danh
+   vào cổng.
+7. Prompt vai Code nếu có
 
 ### Nếu task là thiết kế
 
@@ -103,7 +108,9 @@ Không được làm:
 2. `GOVERNANCE.md` phần role boundary liên quan
 3. `06-BINDING_MAP`
 4. `07-DESIGN_TOKENS`
-5. Prompt vai Design nếu có
+5. `KIEN-TRUC-TEMPLATE.md` — bản đồ file của tầng giao diện: frame chung nằm ở
+   đâu, entity nào dùng file nào, token hero khai ở đâu.
+6. Prompt vai Design nếu có
 
 Chỉ đọc phần liên quan trực tiếp tới task hiện tại. Không nạp toàn bộ tài liệu nếu không cần.
 
@@ -167,6 +174,14 @@ Mỗi output nên có tối thiểu:
 - Không sửa nhiều lớp cùng lúc chỉ để “đồng bộ hóa cho đẹp”.
 - Không thêm framework, dependency, hoặc pattern mới nếu chưa có quyết định ở tầng phù hợp.
 - Khi phát hiện drift giữa spec và code, ghi lại drift thay vì âm thầm chọn một bên.
+
+### Tầng giao diện — ba luật cứng
+
+Áp khi task chạm `.astro` hoặc `.css`. Chi tiết và bản đồ file: `docs/core-specs/KIEN-TRUC-TEMPLATE.md`.
+
+1. **Giá trị giao diện đi vào `src/styles/tokens.css`, không viết cứng trong component.** Chiều cao, cỡ chữ, màu, khoảng cách. Viết cứng ngoài nguồn token là vi phạm P6/N7 (`07` mở đầu).
+2. **Bố cục dùng chung sửa ở frame chung, không sửa trong template của một entity.** Trang chi tiết: `src/components/DetailLayout.astro`. Sửa ở template con là tạo nhánh lệch cho đúng một loại trang — đúng gốc của `DR-046` và `DR-061`.
+3. **Thêm entity detail mới thì phải ghi danh vào `scripts/validators/entity-layout-post.ts`.** Không ghi danh thì build đỏ. Cổng quét theo tên file `*Detail.astro`, nên file đặt tên khác kiểu sẽ **lọt** — đó là cách `TouristDestinationHub.astro` từng đứng ngoài mọi cổng suốt nhiều tuần (`DR-076`).
 
 ## 9. When in doubt
 

@@ -16,3 +16,9 @@ cms/.sanity/
 
 # Bản sao lưu dữ liệu Sanity (cms/_export-backup.mjs) — nội dung thật, không vào git
 backups/
+
+# Cờ mở khoá tạm cho hook guard-data-mutation.sh — không bao giờ commit.
+.claude/.cho-phep-ghi-du-lieu
+
+# Dấu chống dội của hook post-edit-lint.sh.
+.claude/.last-astro-check

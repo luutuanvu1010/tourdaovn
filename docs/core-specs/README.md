@@ -44,6 +44,10 @@ riêng site cần lược.
 - `00-PROJECT_BRIEF.md` — khuôn PR-FAQ định vị dự án.
 - `07-DESIGN_TOKENS.md` — khung design token (giá trị để mỗi site tự điền).
 - `DESIGN_PATTERNS.md` — catalog pattern UI có code thật.
+- `KIEN-TRUC-TEMPLATE.md` — **bản đồ file tầng giao diện**: sửa X thì mở file nào.
+  Soạn 2026-08-29 tại tourdaovn, không lấy từ nhatrangtravel. Khuôn ba tầng
+  (token / frame chung / template từng entity) tái dùng được; tên file và danh
+  sách entity là riêng site.
 
 **Để lại (không đưa vào, quá riêng):** `DESIGN.md` (bản sắc Nha Trang), các file
 `AUDIT_*`, `HOMEPAGE_*`, `LOOP-*`, `*EVIDENCE*`, `DRIFT_LOG` (log phiên).

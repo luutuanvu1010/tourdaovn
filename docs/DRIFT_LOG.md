@@ -768,7 +768,9 @@ Cạm bẫy nằm ở chỗ **không có tín hiệu hỏng nào**: `wrangler de
 
 ## DR-042 — Webhook Sanity lệch `ADR-0009` mục 3 và 4
 
-**Trạng thái:** mở. Phát hiện 2026-08-22. Hook đang tắt (`QĐ-2026-08-22-03`) nên chưa gây hại; phải xử **trước** khi bật lại.
+**Trạng thái:** **xử 2/3 và đã bật lại hook 2026-08-27** (`QĐ-2026-08-27-01`). Lệch 1 (chỉ nghe `create`) và lệch 2 (`dataset: "*"`, không lọc type) đã sửa: nay `on: [create, update, delete]`, `dataset: production`, và bộ lọc nêu đúng 15 type có render trang — loại 5 type hệ thống (`sanity.imageAsset`, `system.schema`, `system.group`, `system.retention`, `sanity.canvas.link`) vốn mỗi cái đều đang kích một lần dựng toàn site. **Lệch 3 (debounce) còn mở, cố ý** — `ADR-0009` mục 4 cho phép MVP bỏ qua, và rủi ro chi phí đã giảm mạnh nhờ `QĐ-2026-08-25-06` chuyển bản dựng sang xô CDN 1M. Xem lại nếu CDN vượt ~50%.
+
+Phát hiện 2026-08-22, khi hook đang tắt (`QĐ-2026-08-22-03`).
 
 Cấu hình thật của hook `Cloudflare rebuild` (id `UCT8eZl6s8SXBtKP`, tạo 2026-07-27), đọc bằng management API `v2021-10-04`:
 
@@ -928,7 +930,13 @@ round — Lodging convert theo ruling".
 
 ## DR-046 — `InfoCard.astro` còn sống cho ba template ngoài phạm vi đóng Luật 1
 
-**Trạng thái:** mở (có chủ đích — không phải quên dọn).
+**Trạng thái:** **ĐÓNG** 2026-08-29 (`QĐ-2026-08-29-03`). `InfoCard.astro` đã xoá; slot `info` của `DetailLayout`, prop `infoBarItems`, và nhánh `'InfoCard'` trong `Sidebar` đều đã gỡ. `ENTITIES_WITHOUT_FACTSTRIP` nay **rỗng** — mọi entity detail đi qua `FactStrip`. Xác minh bản dựng: **0 trang** còn `class="info-card"`.
+
+**Cập nhật 2026-08-29 (`QĐ-2026-08-29-02`): phần Bài viết ĐÃ ĐÓNG.** Chủ dự án yêu cầu trang Bài viết dùng chung khung với mọi entity khác. Đo trên trang thật cho thấy đây là chỗ lệch khung **cuối cùng** của Bài viết: `/cam-nang/…` render `info-card`, còn `/diem-tham-quan/…` render `fact-strip`; hero, breadcrumb, dải tiêu đề, đoạn mở, thanh dính và hộp tác giả thì đã chung từ trước. `ArticleDetail` nay truyền `facts` cho `DetailLayout` và không còn `InfoCard`. Chuyển đổi gần như cơ học vì kiểu `Fact` của `FactStrip` đúng bằng `{field, icon, label, value, visible}` mà `sidebarRows` vốn có. `ArticleDetail.astro` đã chuyển sang `ENTITIES_WITH_FACTSTRIP` trong `entity-layout-post.ts` để sổ hợp đồng khai đúng thực tế.
+
+**`InfoCard.astro` và slot `info` của `DetailLayout` KHÔNG được xoá** — hai template còn lại vẫn dùng. Đoạn dưới đây giữ nguyên văn bản gốc, đọc là mô tả tình trạng TRƯỚC 2026-08-29.
+
+**Trạng thái gốc khi ghi phiếu:** mở (có chủ đích — không phải quên dọn).
 
 Kế hoạch đóng Luật 1 (Task 5–7) chỉ bao trùm sáu entity có/không có hàng ở
 `06` §3.1 dùng cặp `InfoBar`/`InfoCard`: Điểm tham quan, Địa danh, Trải
@@ -1511,19 +1519,746 @@ Không tràn ngang (`scrollWidth` = 390) — các lưới **bị bóp** chứ kh
 
 **Còn nợ, không thuộc phiếu này.** Khối `640px` đặt `.feature-grid--stays` về **2 cột** chứ không phải 1 (~171px mỗi thẻ ở 390px). Đó là ý tác giả viết rõ, không phải lỗi `var()`, và lưới đó không render trên `/nha-trang/` nên chưa lộ. Trang điểm đến nào có mục lưu trú sẽ dính. Xử cùng lúc đồng bộ bố cục.
 
-**Nợ lớn hơn mà phiếu này chạm vào.** `06` §4.1 khai trang điểm đến *"khung chung áp dụng"*, và §5.7 khai khối nội dung trang chủ là *"như §4.1"* — tức một bộ khối cho cả hai. Mã thì có **hai bản**: trang chủ dùng `SiteHome.astro` (532 dòng, ghép 12 component `Home*`), `/nha-trang/` dùng `TouristDestinationHub.astro` (1086 dòng, tự vẽ lại toàn bộ, không dùng `DetailLayout`/`Breadcrumb`/`Hero`/`FactStrip`/`Section` nào). `/nha-trang/` không có `crumb-band`, `title-band`, `summary-band`, `fact-strip` — trang chi tiết có đủ cả bốn. Chính vì tự vẽ lại mà nó có riêng ba media query hỏng này. Đồng bộ về bộ `Home*` là **thi hành đặc tả đang có**, không phải quyết định kiến trúc mới — nhưng là một diff lớn, chủ dự án đã chốt làm ở vòng riêng có bản xem trước.
+**Nợ lớn hơn mà phiếu này chạm vào.** `06` §4.1 khai trang điểm đến *"khung chung áp dụng"*, và §5.7 khai khối nội dung trang chủ là *"như §4.1"* — tức một bộ khối cho cả hai. Mã thì có **hai bản**: trang chủ dùng `SiteHome.astro` (532 dòng, ghép 12 component `Home*`), `/nha-trang/` dùng `TouristDestinationHub.astro` (1091 dòng, tự vẽ lại toàn bộ, không dùng `DetailLayout`/`Breadcrumb`/`Hero`/`FactStrip`/`Section` nào). `/nha-trang/` không có `crumb-band`, `title-band`, `summary-band`, `fact-strip` — trang chi tiết có đủ cả bốn. Chính vì tự vẽ lại mà nó có riêng ba media query hỏng này. Đồng bộ về bộ `Home*` là **thi hành đặc tả đang có**, không phải quyết định kiến trúc mới — nhưng là một diff lớn, chủ dự án đã chốt làm ở vòng riêng có bản xem trước.
 
 ---
 
-## DR-061 — `PY3`/`PY4`/`PY5` so sai kiểu `bookingRef`, ba validator giá gần như vô hiệu
+## DR-061 — Trang điểm đến và trang chủ dựng cùng một bộ khối bằng hai bản mã khác nhau, lệch từ ngày fork
+
+**Trạng thái:** **đã xử 2026-08-25** (`src/components/TouristDestinationHub.astro`, 1091 → 390 dòng). Chủ dự án duyệt cùng ngày, xem `QĐ-2026-08-25-05`.
+
+**Đặc tả nói gì.** `06` §4.1 khai trang điểm đến: *"**Khung chung áp dụng**, cộng:"* rồi liệt kê các khối riêng. §5.7 dòng 346 khai khối nội dung trang chủ là *"**như §4.1**"*. Tức một bộ khối cho cả hai trang.
+
+**Mã làm gì.** Hai bản:
+
+| | `SiteHome.astro` | `TouristDestinationHub.astro` |
+|---|---|---|
+| Dòng | 532 | **1091** |
+| Cách dựng | ghép 12 component `Home*` | tự vẽ toàn bộ markup + CSS |
+| Vùng cấu trúc chung | — | **không có** `crumb-band`, `title-band`, `summary-band` |
+
+Cả hai render **cùng bộ khoá** `copy.sections.*` từ `src/lib/homepage.ts` — cùng vốn từ nội dung, khác cách vẽ. Chín trên mười hai khối ánh xạ một-đối-một vào component đã có sẵn; riêng năm lưới `attractions`/`experiences`/`stays`/`specialties`/`tours` đều là cùng một `HomeRollupSection`.
+
+**Không ai viết tay sai khung ở đây — lệch có từ ngày fork.** `git log --diff-filter=A` cho cả hai file trả về **cùng một commit** `d7bac08` (2026-07-22, *"fork engine Core"*). Bộ `Home*` đã tồn tại từ giây phút đầu và hub ngay từ đầu đã không dùng. Lệch này **thừa kế theo bản fork**, không phải quyết định ở dự án này.
+
+**Cái sai thật: khoảng cách bị nới ra qua từng vòng bề mặt.**
+
+| | `SiteHome` | `TouristDestinationHub` |
+|---|---|---|
+| Tổng commit sau fork | 13 | 8 |
+| Vòng bề mặt đã nhận | vòng 2, vòng 3, Site Settings, **vòng 5** | chỉ vòng 3 (`59cab03`) |
+
+Vòng 5 — đúng vòng làm mobile-first — đụng **17 file nguồn** và **không có file này**. Đó không phải sơ suất: `SPEC-2026-08-22-be-mat-vong-5` §9 và dòng 379 ghi thẳng *"Design **không** được vẽ lại bố cục trang chủ, header, hay footer trong vòng này"*, vì bốn điều chủ dự án nêu hồi đó là về trang chi tiết. **Một ranh giới phạm vi vạch có chủ đích, rồi không ai quay lại gỡ.**
+
+**Hệ quả đo được.** Vì tự vẽ lại nên hub có riêng ba media query hỏng của `DR-060` — chúng cũng sinh ra ở `d7bac08` và **chết suốt 34 ngày**. Đồng bộ về bộ `Home*` xoá luôn cả lớp lỗi đó chứ không chỉ vá một lần.
+
+**Đã sửa.** Hub nay ghép từ chính các component trang chủ dùng: `HomeTrustBar`, `HomeHubGrid`, `HomeBannerGrid`, `HomeRollupSection` ×5, `HomeAreaGrid`, `HomeGuideGrid`, `HomeFacts`, cộng `Breadcrumb` + `Hero` + `Section` + `FAQ` + `HomeMetaBar`. Chỉ còn CSS cho ba thứ không có component chung: lưới hai cột mục Tổng quan, khối Điểm đến liên quan, cụm tham chiếu cuối trang.
+
+**Bốn thay đổi bố cục thấy được, chủ dự án đã duyệt** — chi tiết ở `QĐ-2026-08-25-05`.
+
+**Còn nợ, cố ý không làm trong đợt này.** `HomeHero.astro` nay **không còn ai gọi** (hub là consumer duy nhất; `SiteHome` có hero riêng và chỉ nhắc tên nó trong một chú thích ở dòng 363). Xoá một component là quyết định riêng, chưa làm. `06` §4.1 nên có thêm hàng khai rõ ba dải quanh hero cho trang điểm đến thay vì để chúng thừa hưởng ngầm qua câu *"khung chung áp dụng"* — sửa `06` đụng R9, cần phiếu riêng.
+
+**Bài học.** Fork mang theo cả nợ của dự án gốc, và nợ đó **không thuộc về ai** cho tới khi có người nhận. Ba vòng bề mặt đi qua file này mà không ai mở nó ra, vì mỗi vòng đều có một câu "ngoài phạm vi" hợp lý. Ranh giới phạm vi cần một ngày hết hạn, không thì nó thành nơi nợ đọng lại.
+
+---
+
+## DR-062 — `:has()` đè media query trong `HomeRollupSection`: khối 2 hoặc 3 mục không bao giờ đổ về một cột
+
+**Trạng thái:** **đã xử 2026-08-25** (`src/components/HomeRollupSection.astro`). Lỗi **có sẵn từ trước**, không do đợt refactor tạo ra; refactor chỉ làm nó lộ ra.
+
+**Lỗi.** Component chọn số cột theo số thẻ bằng `:has()`, rồi thu hẹp theo bề ngang bằng media query nhắm bộ chọn trần:
+
+```css
+.home-card-grid:has(> :last-child:nth-child(3)) { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 640px) { .home-card-grid { grid-template-columns: 1fr; } }
+```
+
+**Độ đặc hiệu, không phải thứ tự.** `:has()` lấy độ đặc hiệu của đối số bên trong, nên bộ chọn trên là **(0,3,0)**; `.home-card-grid` trần chỉ **(0,1,0)**. Đặc hiệu cao thắng bất kể đứng trước hay sau và bất kể nằm trong media query hay không. Ba khối thu hẹp **không bao giờ áp được** cho khối có đúng 2 hoặc 3 mục.
+
+**Vì sao sống lâu.** Khối **4 mục trở lên** không khớp luật `:has()` nào (chỉ có nhánh cho 1, 2, 3) nên rơi đúng xuống media query và thu bình thường. Hai lưới cạnh nhau cho hai kết quả khác hẳn — người xem dễ kết luận "lưới này thu được, chắc lưới kia cũng thế".
+
+**Đo trên production, khung 390×844, CDP:**
+
+| Trang | Khối | Trước | Sau |
+|---|---|---|---|
+| `/` (trang chủ) | rollup 3 mục | **3 cột · ô 119px** | 1 cột · 358px |
+| `/nha-trang/` | Trải nghiệm nổi bật (3 mục) | *(xem ghi chú)* | 1 cột · 358px |
+
+**Ghi chú về hàng thứ hai — sửa sau review 2026-08-25.** Bản đầu của phiếu này ghi `/nha-trang/`
+"trước: 3 cột · ô 119px". **Sai, và sai theo cách dễ tin.** Hub cũ chưa từng import
+`HomeRollupSection`, không có `.home-card-grid` nào, nên lỗi `:has()` không với tới nó; `DR-060`
+ngay trên cùng sổ này còn ghi lưới đó đo được **1 cột, 358px** sau bản vá `ab03f1b` đã ở `main`.
+Con số 119px là thật, nhưng nó đo ở **trạng thái giữa chừng** của nhánh refactor — sau khi hub
+chuyển sang `HomeRollupSection`, trước khi vá độ đặc hiệu. Trạng thái đó **chưa bao giờ lên
+production**. Giữ hàng lại vì nó là bằng chứng cơ chế; sửa cột "trước" để không đọc thành một
+lỗi từng chạy thật.
+
+Chỉ **trang chủ** mới dính lỗi này trên production, và **từ trước đợt refactor** — không phải hồi
+quy. Vi phạm **Luật 5** (`06` §6).
+
+**Đã sửa.** Ba khối media query nay nhắc lại các bộ chọn `:has()` để đạt đủ độ đặc hiệu. Số cột thật = nhỏ hơn giữa *(số mục)* và *(mức bề ngang cho phép)*: ≤1024px trần 3 cột, ≤768px trần 2 (phải hạ khối 3 mục), ≤640px trần 1 (phải hạ cả khối 2 và 3 mục).
+
+**Bài học.** `:has()` mang độ đặc hiệu của thứ nằm trong nó, nên nó **âm thầm vô hiệu hoá** mọi luật sau viết bằng bộ chọn đơn giản hơn — kể cả luật trong media query. Cùng họ với `DR-060`: CSS không hợp lệ hoặc bị đè thì **hỏng im lặng**, bản dựng vẫn xanh. Bắt được chỉ bằng cách **đo thứ đã dựng ra**, không phải đọc thứ đã viết vào.
+
+---
+
+## DR-063 — `FAQPage.speakable` trỏ vào bộ chọn cũng khớp đoạn mở, trên MỌI trang có FAQ
+
+**Trạng thái:** mở, phát hiện 2026-08-25 khi review nhánh `feat/dong-bo-trang-diem-den`. **Không sửa trong nhánh đó** — đây là lệch toàn hệ thống, sửa lệch trên đúng một trang sẽ tạo ra bất đối xứng mới.
+
+**Đường đi.** JSON-LD của trang chi tiết và trang điểm đến đều gắn `speakable` vào `subjectOf` → **`FAQPage`**, với `cssSelector: ["[data-speakable]"]`. Kiểm bằng cách đi cây JSON-LD trong `dist/`:
+
+| Trang | Nơi `speakable` treo |
+|---|---|
+| `dia-danh/dao-hon-mun/` | `subjectOf` → `FAQPage` |
+| `trai-nghiem/cano-keo-du-bay/` | `subjectOf` → `FAQPage` |
+| `nha-trang/` | `subjectOf` → `FAQPage` |
+
+Cả ba trang đều có **5** phần tử mang `data-speakable`: bốn `.faq-answer` và **một `.detail-summary`**.
+
+**Vì sao đáng ngờ.** Bộ chọn của `FAQPage` khớp trúng cả đoạn mở, mà đoạn mở **không phải câu trả lời nào** của FAQ đó. Trợ lý giọng nói đọc theo khai báo này sẽ đọc một đoạn không thuộc cặp hỏi–đáp nào.
+
+**Vì sao KHÔNG phải lỗi của nhánh refactor.** Reviewer nêu mục này như một lỗi mới do nhánh tạo ra ("bản cũ không hề phát thẻ này"). Vế đó đúng với **hub cũ**, nhưng sai về hệ thống: `DetailLayout.astro:180` đã gắn `data-speakable` lên đoạn mở từ trước, và `06` §4.1 khai thẳng *"speakable | build từ `summary` và `faq`"*. Nhánh refactor **khớp đúng nếp trang chi tiết**; nó không tạo lệch mới mà chỉ làm lệch sẵn có phủ thêm một trang.
+
+**Ba lối đi, chưa chọn.**
+1. Tách bộ chọn: `FAQPage.speakable` chỉ nhận `.faq-answer`, còn đoạn mở treo dưới `WebPage`/`mainEntityOfPage`.
+2. Bỏ `data-speakable` khỏi đoạn mở trên mọi trang, chấp nhận `06` §4.1 chỉ còn nuôi speakable bằng `faq`.
+3. Kết luận rằng cách khai hiện tại chấp nhận được và ghi nó thành chữ trong `06`.
+
+Lối (1) hợp `06` §4.1 nhất vì nó giữ được cả `summary` lẫn `faq` làm nguồn. Cần một phiếu quyết định và một lượt sửa `src/lib/serialize/`, ngoài phạm vi đợt này.
+
+**Bài học.** Reviewer bắt đúng **hiện tượng** nhưng quy sai **phạm vi** — cùng loại nhầm mà `DR-061` mô tả ở chiều ngược lại. Trước khi ghi một lệch là "do nhánh này gây ra", phải kiểm xem các trang KHÔNG thuộc nhánh có lệch y hệt không. Ở đây một lệnh đếm trên hai trang chi tiết là đủ.
+
+## DR-064 — `control-registry.yaml` khai bộ kiểm pre-build "chưa từng chạy được", trong khi nó chạy và 11 validator đang đỏ
+
+**Trạng thái:** **đã xử phần văn xuôi 2026-08-24** (commit `2a62297`, nhánh `feat-bo-kiem-tu-dong`). Phần khai `live`/`gap` của 27 control **còn mở** — chờ chủ dự án quyết, xem `ND-009`.
+
+Phần đầu `docs/governance/control-registry.yaml` (soạn 2026-08-05) khai bốn điều. Kiểm ngày 2026-08-24 thì **cả bốn đều sai với hiện tại**:
+
+| Sổ nói | Thực tế 2026-08-24 |
+|---|---|
+| `scripts/validators/i1-i19.ts:10` nhập `../../shared/gates/index.js`, "thư mục `shared/` không tồn tại trong repo này" | `shared/gates/index.ts` và `types.ts` tồn tại, vào git ở commit `b73326c` ngày **2026-08-06** — một ngày sau khi sổ được soạn |
+| "bộ kiểm ràng buộc pre-build của dự án chưa từng chạy được ở tourdaovn" | `npm --prefix scripts run validate` chạy được |
+| "chỉ 4 trên 31 control chạy được", 27 khai `gap` | 31 validator chạy |
+| Evidence của 27 control: "chưa có — sẽ là `scripts/reports/validator-status.json` ... khi ND-005 trả xong" | File đó tồn tại và được ghi mỗi lần chạy |
+
+Kết quả chạy thật:
+
+```
+Validator: 31 (0 stub, 3 defer)
+Pass: 15    FAIL: 11    WARN: 2
+[report] Ghi scripts/reports/validator-status.json (overall=fail)
+```
+
+**Hệ quả thật, không phải chuyện chữ nghĩa: 11 ràng buộc dữ liệu đang bị vi phạm mà không ai nhìn** — vì sổ nói bộ kiểm không chạy được, nên không ai chạy nó. Danh sách: `I1`, `I2`, `I3`, `I4`, `I5`, `I12`, `I13`, `I14`, `I19`, `R2`, `S25-FIVE-LANGUAGE-COVERAGE`. Vài ví dụ cụ thể — hotel publish thiếu `slug` (`I12`), Tour thiếu `itinerary` ≥1 chặng (`I14`), Article thiếu `author` (`I4`), Category "Ẩm thực" có 0 experience publish trỏ tới (`R2`).
+
+Đây là lỗi dữ liệu, không phải lỗi mã. `DR-024` đã dự báo đúng: *"Chưa nổ vì chuỗi pre-build đang chết theo ND-005; sẽ nổ hàng loạt ngay khi ND-005 trả xong."* ND-005 trả xong lúc nào không ai ghi lại, nên tiếng nổ diễn ra trong im lặng.
+
+**Vì sao không cổng nào bắt được.** `control-registry-gate` kiểm control khai `live` có trỏ tới bộ thực thi có thật không. Nó **không kiểm chiều ngược**: control khai `gap` mà thực ra đang chạy. Cùng loại điểm mù với `DR-021`, chỉ khác chiều — `DR-021` là "khai đã kiểm mà chưa kiểm", cái này là "khai chưa kiểm mà đã kiểm và đang đỏ".
+
+Đã thêm `GA6` trong `scripts/audit/gate-audit.ts` để bắt đúng chiều này: control khai `gap` mà file bằng chứng của nó tồn tại và có mục mang đúng `id` thì trượt. Chạy thử: `audit:gate` đi từ 34 đạt/1 trượt lên **34 đạt/28 trượt**, bắt đủ cả 27 control. **Cảnh báo:** bản `GA6` hiện tại có lỗi Critical chưa vá — xem `ND-009`.
+
+**Gốc rễ đi kèm, cùng họ với `DR-043`.** Sổ ghi lúc **phát hiện**, không phải lúc **đóng**. Trong phiên 2026-08-24 tôi trích ba tiền đề từ `DRIFT_LOG` và cả ba đều đã lỗi thời: `DR-015` (thư mục `shared/`), `DR-043` (gốc rễ đã đóng ở `QĐ-2026-08-22-04`), và một con số trang. Không mục nào sai lúc viết; chúng chỉ không được cập nhật lúc thực tế đổi.
+
+---
+
+## DR-065 — Mô tả trang danh mục còn gắn cứng "Nha Trang"
+
+**Trạng thái:** mở, **hoãn có chủ ý**. Phát hiện 2026-08-26 khi soạn `SPEC-2026-08-26-da-diem-den` §8. Hoãn theo quyết định chủ dự án cùng phiên (`QĐ-2026-08-26-01` chốt 5).
+
+`src/lib/uiCopy.ts:893-1108` — `INDEX_COPY` (893), `HUB_COPY` (966), `HUB_PART_COPY` (1000) và `fallbackDescription` (1099) mô tả các trang danh mục **toàn site** bằng cụm "tại Nha Trang"; 37 dòng trong file chứa tên riêng đó. Sau ADR-0028 các trang danh mục vẫn gom chung mọi điểm đến, nên ngay khi điểm đến thứ hai có nội dung, những mô tả này **thành sai sự thật**: `/khach-san/` sẽ liệt kê khách sạn Phú Quốc dưới thẻ meta "Khách sạn tại Nha Trang".
+
+Không sửa trong đợt này vì đây là `<meta description>` của những trang **đang xếp hạng trên Google**. Đổi hàng loạt là một quyết định SEO riêng, không phải hệ quả kỹ thuật của ADR-0028.
+
+## DR-066 — Trang danh mục chưa lọc được theo điểm đến
+
+**Trạng thái:** mở, **cố ý không làm**. Phát hiện 2026-08-26. Nguồn: `QĐ-2026-08-26-01` chốt 1.
+
+ADR-0028 chọn hướng A: điểm đến thứ hai có trang trụ riêng, còn các trang danh mục (`/tour/`, `/khach-san/`…) **vẫn gom chung toàn site**. Chưa có đường nào để khách xem "chỉ tour Phú Quốc" — không `/tour/?diem-den=…`, không `/‹diem-den›/tour/`.
+
+Field `destination` thêm ở ADR-0028 đã đặt sẵn dữ liệu cho việc đó. Mở ra là một đợt riêng, đụng `ROUTE_MAP` trong `src/site.config.ts` và bảng địa chỉ ở `05-URL_MAP-and-DB_SCHEMA.md`.
+
+## DR-067 — `brand.description` / `headline` / `tagline` nói riêng về Nha Trang
+
+**Trạng thái:** mở, **hoãn có chủ ý**. Phát hiện 2026-08-26. Cùng loại quyết định với `DR-065`.
+
+`src/site.config.ts:94-106` — `description` (94), `headline` (103), `tagline` (106) đều mang tên riêng "Nha Trang". `description` là `<meta description>` mặc định của **mọi** trang trong site (`QĐ-2026-08-14-03` khoá nó thành hằng lúc build, `hero.summary` trong Studio không đè được).
+
+Site có nhiều điểm đến thì ba chuỗi này mô tả thiếu. Sửa là quyết định thương hiệu cộng SEO, không phải hệ quả kỹ thuật.
+
+## DR-068 — Breadcrumb của trang điểm đến thứ hai chưa từng được kiểm bằng trang thật
+
+**Trạng thái:** **đã đóng 2026-08-27** — kiểm xong trên trang thật sau khi có điểm đến thứ hai (Ninh Thuận). Kết quả **khác dự đoán, theo hướng tốt**; xem "Kết quả kiểm" ở cuối mục. Phát hiện 2026-08-26.
+
+`src/components/Breadcrumb.astro:43` đã có nhánh riêng cho `touristDestination` (`if (entityType !== 'touristDestination')`), viết từ trước đợt này. Nhưng dataset mới chỉ có **một** TouristDestination có slug (`seed.nha-trang`), nên nhánh đó chưa bao giờ chạy trên một trang điểm đến **không phải trang chủ**.
+
+Lần đầu kiểm được là Task 8 bước 6 của `docs/plans/2026-08-26-da-diem-den.md`, sau khi chủ dự án nhập điểm đến thứ hai trong Studio.
+
+**Kết quả kiểm (2026-08-27, điểm đến thứ hai là Ninh Thuận).** Tiền đề của mục này sai một nửa: trang điểm đến **không hề render breadcrumb**, vì `TouristDestinationHub.astro` không dùng component đó. Hợp lý — trang điểm đến nằm ngay dưới trang chủ, chuỗi "Trang chủ › Ninh Thuận" không thêm thông tin gì.
+
+Nhánh `entityType !== 'touristDestination'` ở `Breadcrumb.astro:43` thực ra được kích hoạt ở **trang chi tiết**, qua chuỗi `containedInPlace`. Kiểm trên `dist/dia-danh/deo-vinh-hy/index.html`:
+
+```
+1. Trang chủ    https://tourdao.vn/
+2. Địa danh     https://tourdao.vn/dia-danh/
+3. Ninh Thuận   https://tourdao.vn/ninh-thuan/     ← trỏ đúng điểm đến mới
+4. Đèo Vĩnh Hy  (mục hiện tại, không link)
+```
+
+Đúng cả trong JSON-LD `BreadcrumbList` lẫn HTML hiển thị. Không phải sửa gì.
+
+Bằng chứng: `docs/evidence/2026-08-26-da-diem-den/buoc-6-nghiem-thu-trang-that.txt`.
+
+## DR-069 — Chữ trong `HOME_COPY` bản en/zh/ko/ru còn tên riêng "Nha Trang"
+
+**Trạng thái:** mở, **chưa gây hại**. Phát hiện 2026-08-26.
+
+`src/lib/homepage.ts` giữ `HOME_COPY` cho năm ngôn ngữ. Task 6 của đợt này đã đổi `sections.overview` thành hàm nhận tên điểm đến, nên tiêu đề tổng quan hết gắn cứng. Nhưng các chuỗi **khác** trong bốn bản en/zh/ko/ru vẫn còn tên riêng "Nha Trang" / "芽庄" / "나트랑" / "Нячанг".
+
+Chưa render vì `src/site.config.ts:130` khai `langs = ['vi']` — bốn bản kia không có trang nào. Phải soát lại **trước** khi mở thêm ngôn ngữ, nếu không mỗi ngôn ngữ mở ra là một lần rò tên riêng lên trang thật.
+
+## DR-070 — `GA3` đóng cứng `postbuild-status.json`, nên mọi control `live` chặng pre-build trượt vĩnh viễn
+
+**Trạng thái:** **đã xử 2026-08-26**, nhánh `feat-da-diem-den`. Phát hiện khi thêm control `I20` (ADR-0028).
+
+`GA3` trong `scripts/audit/gate-audit.ts` lặp qua **mọi** control khai `live` và đối chiếu với `scripts/reports/postbuild-status.json` — không nhìn `stage`. Nhưng hai chặng ghi hai file khác nhau: bộ kiểm pre-build (`scripts/validate-constraints.ts:150`) ghi `validator-status.json`, bộ kiểm post-build ghi `postbuild-status.json`. Hai file cùng hình dạng `items: [{id, status}]`.
+
+Hệ quả: **một control `live` ở `stage: pre-build` không bao giờ qua được `GA3`** — bộ kiểm của nó không ghi vào file mà `GA3` đọc, nên chạy bao nhiêu lần cũng vô ích.
+
+Vì sao tới giờ chưa ai thấy: bốn control `live` trước đó (`I6`, `PY8`, `R3`, `R4`) **đều** là post-build. `I20` là control `live` đầu tiên ở chặng pre-build, và nó dẫm ngay vào điểm mù.
+
+Điểm nguy hiểm nằm ở chỗ thông điệp lỗi *nghe như* một việc sửa được: "khai live nhưng không có mục nào trong postbuild-status.json". Người đọc sẽ đi chạy lại bộ kiểm — và không có gì thay đổi. Kế hoạch thi công `docs/plans/2026-08-26-da-diem-den.md` Task 8 Bước 3 đã hứa đúng như vậy: "bước 1 vừa sinh `validator-status.json` có mục `I20`, nên control khai `live` giờ đã có bằng chứng thật". Lời hứa đó **sai** với bản `GA3` cũ.
+
+**Đã sửa.** Tách `GA3` thành hàm thuần `kiemLiveCoTrongBaoCao`, tra báo cáo theo `stage` qua bảng `BAO_CAO_THEO_STAGE`; `stage` lạ hoặc thiếu thì `skip` kèm lý do chứ không đoán. Dùng lại đúng vị từ `dangChayThatTrongBaoCao` mà `GA6` đang dùng — cùng câu hỏi "file này có mục mang id này không", chỉ khác chiều kết luận. Sáu test hồi quy trong `scripts/audit/__tests__/gate-audit.test.ts`, gồm một ca chốt: control pre-build **không** được tính là đạt chỉ vì id của nó tình cờ có mặt trong `postbuild-status.json`.
+
+Cùng họ với `DR-021` và `DR-064`: cổng nói một câu nghe như sự thật, mà phép kiểm đằng sau không làm được điều nó tự nhận.
+
+## DR-071 — Hàng rào chặn ghi dữ liệu chép tay tên lệnh, nên lệnh mới mặc định LỌT
+
+**Trạng thái:** **đã xử 2026-08-26**, nhánh `feat-da-diem-den`. Phát hiện ngay sau khi Task 7 (ADR-0028) ghi thật 211 document.
+
+`guard-data-mutation.sh` giữ một biểu thức `MAU_GHI` chép tay từ `scripts/package.json`. Với họ lệnh nạp bù, nó chép **tên cụ thể** của đúng một lệnh đang có lúc soạn. Lệnh nạp bù thêm sau đó — sinh ra trong chính đợt này — **không khớp mẫu nào**, nên chạy thẳng với `--live` và ghi 211 document mà hook không hé một tiếng.
+
+Cờ `.claude/.cho-phep-ghi-du-lieu` có được tạo trước khi chạy, theo đúng kế hoạch. Nhưng **cờ ấy không phải thứ đã cho phép lệnh chạy** — lệnh vốn không bị chặn. Đây mới là điểm đáng sợ: quy trình *trông như* đã qua một cổng kiểm soát, trong khi cổng ấy không hề đóng. Cùng họ với `DR-021`, `DR-064`, `DR-070`.
+
+**Hàng rào còn lộn ngược ở chiều kia.** Mẫu khớp trên **chuỗi lệnh**, nên lệnh chỉ *nhắc tới* một đường dẫn mà không chạy nó cũng bị chặn: trong phiên này `git add` một tệp và `sed -n` đọc một tệp đều bị chặn, và đến lượt chính lệnh vá hook cũng bị chặn vì phần chú thích của nó có nhắc đường dẫn. Vậy là hàng rào chặn thứ vô hại và để lọt thứ nguy hiểm.
+
+**Đã sửa — chỉ một chiều, có chủ ý.** Đổi từ khớp tên cụ thể sang khớp **tiền tố**, để lệnh nạp bù mới mặc định **bị chặn** thay vì mặc định lọt. Cùng triết lý đảo chiều mà vòng sửa 1 đã áp cho nhánh MCP Sanity (danh sách cho phép thay cho danh sách chặn).
+
+Chiều over-blocking **cố ý giữ nguyên**: phân biệt "chạy một tệp" với "nhắc tới một tệp" bằng regex trên chuỗi lệnh là việc dễ làm sai, và làm sai theo hướng nới một hàng rào an toàn. Phiền tay không phải lý do đủ mạnh.
+
+**Kiểm.** Bơm 12 lệnh mẫu qua chính hook: bảy lệnh ghi — gồm một lệnh nạp bù *chưa từng tồn tại* — đều CHẶN; năm lệnh chỉ đọc (`test`, `audit:gate`, `npm run build`, `git status`, triển khai Studio) đều lọt. Chạy với cờ đã xoá.
+
+**Nợ còn lại.** Mẫu vẫn là danh sách chép tay cho các họ lệnh khác (`patch:n5`, `publish:drafts`, `translate`). Cách chữa tận gốc là sinh mẫu từ chính `scripts/package.json` lúc chạy, thay vì chép. Chưa làm — cần quyết định riêng, vì nó cho hook đọc file trong repo và đổi hành vi theo nội dung file đó.
+
+## DR-072 — Đặc tả khai TouristDestination là N, điều hướng Studio vẫn khai là 1
+
+**Trạng thái:** **đã xử 2026-08-26**, nhánh `feat-da-diem-den`. Phát hiện khi chủ dự án thử làm Task 8 bước 5 và không tìm thấy nút tạo điểm đến mới.
+
+`cms/lib/structure.ts` khai mục menu "Điểm đến" bằng `S.document().documentId('seed.nha-trang')` — ghim cứng đúng một document. Bấm vào là mở thẳng form Nha Trang: **không danh sách, không nút tạo mới**. Chín entity còn lại đều dùng `S.documentTypeListItem(...)` và vì thế đều tạo mới được.
+
+ADR-0028 đã đổi cardinality **1 → N** ở `01-CONTENT_MODEL` §2, schema đã có field `destination` trên mười entity, hạ tầng định tuyến vốn đã lặp qua mọi điểm đến đã duyệt (`src/pages/[...path].astro`), và 211 document đã nạp bù xong. Nhưng khâu cuối — **lối vào để người nhập liệu tạo điểm đến thứ hai** — thì không ai đụng tới.
+
+Hệ quả: mục tiêu đã duyệt của ADR-0028 (*"Chủ dự án nhập một document Điểm đến thứ hai trong Sanity Studio và được ngay một trang `/‹slug›/`"*) **không thực hiện được**, dù mọi tầng phía dưới đã sẵn sàng. Kế hoạch thi công `docs/plans/2026-08-26-da-diem-den.md` không liệt kê `cms/lib/structure.ts` trong bản đồ file, nên Task 8 bước 5 yêu cầu một việc mà Studio không cho làm.
+
+Đây cũng là lý do document `touristDestination` thứ hai đã có trong dataset — "Tỉnh Khánh Hòa" (`d5b267a3-a771-4cb2-8a50-8733da6372b5`, đã `approved`) — **không với tới được qua menu**, và vì thế thiếu cả `slug.vi` lẫn `summary.vi` mà không ai thấy.
+
+**Đã sửa.** Thay khối singleton bằng `S.documentTypeListItem('touristDestination')`, đúng khuôn chín entity kia. Không đặc cách, không ghim cứng `_id` nào: điểm đến trụ là **cấu hình** (`primaryDestinationSlug` trong `src/site.config.ts`), không phải một vị trí đặc biệt trong menu — đúng tinh thần ADR-0028. Chỉ còn `siteSettings` giữ `documentId` ghim cứng, và đó là singleton thật.
+
+**Bài học chung.** Đổi cardinality của một entity không chỉ là đổi con số trong đặc tả và thêm field. Nó chạm ít nhất bốn tầng: content model, schema, truy vấn/định tuyến, **và lối vào nhập liệu**. Ba tầng đầu có cổng máy kiểm (g1, g3, g4, astro check); tầng thứ tư không có cổng nào, nên nó im lặng cho tới khi có người thật ngồi xuống nhập liệu.
+
+## DR-073 — Hook `pre-push` chặn mọi push vì hai cổng đỏ mà chính `main` cũng mắc
+
+**Trạng thái:** **thu hẹp còn một nửa 2026-08-27** (`QĐ-2026-08-27-02`). `deferred-gate` ĐÃ XANH — hai chỗ khai sai trong `control-registry.yaml` đã sửa (`I16` là `deferred` chứ không `gap`; `PY1`/`PY2`/`PY4` chạy thật và xanh nên là `live`). `npm run gate` từ 2/11 đỏ xuống **1/11**. **Còn `governance-post` (S24)** — sáu lỗi dữ liệu trên bốn trang, cần chủ dự án điền `approvedBy` / `contentProvenance` / nguồn hoặc tác giả; máy không được tự điền vì đó là bản ghi về việc con người đã duyệt và đã viết. Chừng nào chưa điền, push vẫn phải `--no-verify`. Danh sách chính xác bốn trang và field thiếu ghi ở `QĐ-2026-08-27-02`.
+
+Phát hiện 2026-08-27 khi push nhánh `feat-da-diem-den` sau lần gộp `origin/main`.
+
+`.githooks/pre-push` (dựng ở `DR-056`, vốn chưa từng chạy vì thiếu bit thực thi) nay chạy thật: nó gọi `npm run gate` và **huỷ push nếu bất kỳ cổng nào đỏ**. Ý định đúng — cổng sớm ở máy tốt hơn phát hiện muộn.
+
+Nhưng repo hiện có **hai cổng đỏ thường trực** mà không nhánh nào đóng được bằng mã:
+
+| Cổng | Lỗi | Bản chất |
+|---|---|---|
+| `governance-post` | `S24-AUTHORITY-HTML`, 6 lỗi trên 4 trang: thiếu `approvedBy`, thiếu nguồn xác minh hoặc tác giả, thiếu `contentProvenance` hợp lệ | **dữ liệu** — phải sửa trong Studio, không sửa được bằng commit |
+| `deferred-gate` | `I16: deferred nhưng registry không khai live post-build executor` | **quản trị** — `I16` khai `gap`/`pre-build` trong `control-registry.yaml`, mà validator xếp nó `deferred`. Đóng nó là trả lời câu hỏi "27 dòng `gap`" mà chính file registry đang treo chờ chủ dự án |
+
+Đã xác minh **cả hai có sẵn trên `main`**, không phải do nhánh này gây ra: mục `I16` trong `control-registry.yaml` của `main` giống hệt bản đã gộp, và `git diff origin/main..HEAD` trên file đó **không có dòng nào nhắc I16**; sáu lỗi S24 nằm trên bốn trang cũ, không trang nào thuộc nội dung mới.
+
+Nghĩa là **`main` cũng không tự push được qua chính hook của nó**. Hook nghiêm hơn hiện trạng thật của repo.
+
+**Hệ quả đã thấy.** Push nhánh này phải dùng `--no-verify`. Đó là một hàng rào an toàn bị vô hiệu bằng tay — và một khi đã quen tay, nó vô hiệu cho mọi lần push sau, kể cả lần đáng ra phải chặn.
+
+**Đáng ghi thêm:** lần gộp này làm cổng **tốt lên**, không xấu đi — từ 4 đỏ xuống 2. `r3-r4-post` (R4 hreflang) chuyển xanh nhờ bản sửa của `main` (`DR-057`), `control-registry-gate` cũng xanh.
+
+**Hướng xử, cần chủ dự án quyết:** (a) điền dữ liệu còn thiếu cho 4 document để đóng S24; (b) trả lời câu hỏi "27 dòng `gap`" để đóng `deferred-gate`; hoặc (c) cho hook phân biệt "nợ có sẵn" với "lỗi mới do lần push này gây ra" — chỉ chặn loại thứ hai. Cách (c) khó làm đúng và dễ nới nhầm, nên (a)+(b) là đường sạch hơn.
+
+## DR-074 — "Xem trang live" không bao giờ hiện trên Article, và trỏ vào 404 cho ba entity khác
+
+**Trạng thái:** **đã xử 2026-08-27**, nhánh `feat-da-diem-den`. Phát hiện khi chủ dự án yêu cầu rà lại nút "Xem trang live" trong Studio.
+
+`cms/sanity.config.ts` gắn `ViewLiveAction` cho **mọi** schemaType trừ `category`, nên nhìn từ cấu hình thì nút đã phủ hết. Khoảng trống nằm trong `cms/lib/resolveProductionUrl.ts`: hàm này trả `null` thì nút **im lặng biến mất**, không báo gì.
+
+**Lỗi 1 — Article không bao giờ có nút.** Hàm đọc `doc.slug?.vi?.current` cho **mọi** type. Nhưng Article dùng i18n **cấp document** (ADR-0004) và lưu slug ở `slug.current`, không phải `slug.vi.current`. Đo trên dữ liệu thật: một Article có `slug.current = "snorkeling-lan-dau-can-biet-gi"` và `slug.vi.current = null`. Nên hàm trả `null` cho **toàn bộ** Article, và nút chưa từng xuất hiện trên loại nội dung được sản xuất nhiều nhất.
+
+**Lỗi 2 — ba entity trỏ vào trang không tồn tại.** Hàm giữ một bảng `SEGMENT_MAP` **chép tay**, khai `restaurant → /nha-hang/`, `specialty → /dac-san/`, `event → /su-kien/`. Đối chiếu với `ROUTE_MAP`: cả ba **không có route nào**, và `dist/` không có thư mục nào tên như vậy. Bấm nút trên một Event đã duyệt là mở thẳng vào 404. Hiện có 1 Event, 0 Restaurant, 0 Specialty — nên mới chỉ một document dính.
+
+**Gốc rễ chung: nguồn sự thật thứ hai.** `ROUTE_MAP` trong `src/lib/routes.ts` là nguồn duy nhất cho địa chỉ URL, và nó **đã lọc sẵn theo route đang bật**. `SEGMENT_MAP` là bản chép tay của nó, và như mọi bản chép tay, nó trôi. Cùng loại bệnh với `g1`/`g4` (chép tay bảng field) và với `MAU_GHI` của hook (`DR-071`).
+
+**Đã sửa.** Bỏ hẳn `SEGMENT_MAP`; suy segment từ `ROUTE_MAP`, nên type không có route tự trả `null` thay vì dựng URL ma. Chọn chỗ đọc slug theo `getDocI18nTypes()` — cùng danh sách mà Studio đang dùng để cấu hình i18n, không khai thêm một danh sách nữa.
+
+**Kiểm.** Chạy chính hàm đó trên mẫu thật của 11 type: `article`, `place`, `person`, `touristDestination`, `tour`, `hotel`, `organization` đều ra URL; `event`, `restaurant`, `specialty`, `category` trả `null` (nút không hiện) thay vì trỏ 404. Hai URL của document **đã duyệt** đối chiếu ngược vào `dist/`: `/cam-nang/tron-bo-cam-nang-ben-tau-…/` và `/dia-danh/ben-cang-da-chong/` đều tồn tại thật. Bundle Studio dựng lại không còn chuỗi `nha-hang`.
+
+**Đính chính 2026-08-27.** Bản đầu của mục này ghi *"câu hỏi thật — Sự kiện có nên có trang riêng không — chưa ai trả lời"*. **Sai.** Câu trả lời đã có sẵn trong `src/site.config.ts`, ngay trên ba công tắc đang tắt: *"Ba mục dưới thuộc engine gốc (site du lịch Nha Trang), site này không dùng. Code và schema vẫn còn để không gãy tham chiếu chéo."* `restaurant`, `specialty`, `event` **cố ý không có trang** — và `ROUTE_TABLE` cũng không có dòng nào cho chúng, nên bật công tắc thôi cũng không sinh ra route.
+
+Nghĩa là nút "Xem trang live" không hiện trên Event **là hành vi đúng**, không phải nợ. Bản sửa của mục này (suy segment từ `ROUTE_MAP`) tình cờ làm đúng ngay: type không có route thì trả `null`.
+
+**Nợ thật còn lại, nhỏ hơn nhiều:** dataset có **1 document `event` đã duyệt** cho một entity mà site cố ý không dùng. Dữ liệu chết, không hại gì, nhưng nó là lý do khiến tôi tưởng đây là câu hỏi mở. Xoá hay giữ là việc của chủ dự án.
+
+---
+
+## DR-075 — `Category.slug` khai là "slug object localized" trong đặc tả, thực tế là slug phẳng
+
+**Trạng thái:** **mở**, cố ý không sửa trong đợt `QĐ-2026-08-27-03` (ngoài phạm vi).
+
+Phát hiện 2026-08-27 khi mở bộ term `attraction-type`, lúc đọc đường đi của `slug` từ đặc tả xuống mã.
+
+`01-CONTENT_MODEL` §2.13 khai:
+
+| Field | Kiểu | Bất biến |
+|---|---|---|
+| slug | **slug object localized** | URL trang listing theo term; **I9** |
+
+Thực tế mã:
+
+| Nơi | Khai / đọc | Khớp đặc tả? |
+|---|---|---|
+| `cms/schemas/category.ts:53` | `type: 'slug'` — **phẳng**, một giá trị | ✘ |
+| `src/lib/sanity.ts:228` (`scanTerms`) | `"slug": slug.current` — đọc phẳng | ✘ (nhất quán với schema, lệch đặc tả) |
+| `src/lib/serialize/category.ts:17` | `category.slug ?? category.termCode` | ✘ |
+
+**Hệ quả thật.** Trang term **không có bản đa ngôn ngữ**: `/trai-nghiem/tam-bun` tồn tại, `/en/experiences/mud-bath` thì không, vì không có chỗ nào lưu slug tiếng Anh của term. I9 (khóa duy nhất theo `(_type, slug từng ngôn ngữ)`) trên Category **hiện không có gì để kiểm** — nó rỗng chứ không phải đạt.
+
+**Vì sao chưa vỡ ra.** `src/site.config.ts` khai `langs = ['vi']`, nên phần đa ngôn ngữ chưa được yêu cầu. Drift này sẽ thành lỗi thật vào đúng lúc bật ngôn ngữ thứ hai — cùng thời điểm với các món i18n khác, không sớm hơn.
+
+**Vì sao không sửa cùng `QĐ-2026-08-27-03`.** Sửa kiểu `slug` của Category chạm **mọi** term đang có của hai bộ `experience-type` và `tour-type`, tức chạm URL đang chạy và đang được Google lập chỉ mục — rủi ro khác hẳn và không liên quan tới việc mở bộ term mới. Bộ `attraction-type` mở ra theo **đúng khuôn đang có** (slug phẳng), nên không làm drift nặng thêm, chỉ làm nó rộng thêm một bộ.
+
+**Điều kiện phải xử:** trước khi bật ngôn ngữ thứ hai trong `langs`. Khi xử, phải quyết một lượt cho cả ba bộ term, kèm di trú dữ liệu và bản đồ chuyển hướng cho URL term hiện có.
+
+## DR-076 — Hero trang điểm đến đánh rơi `gallery`, nên không trang nào vào được mosaic
+
+**Trạng thái:** **đóng** 2026-08-28. Sửa cùng lượt phát hiện.
+
+Phát hiện 2026-08-28 khi đối chiếu bố cục hero của `/nha-trang/` với khung chung của các entity khác.
+
+**Lệch gì.** `TouristDestinationHub.astro` gọi `<Hero>` mà **không truyền `gallery`**, trong khi `DetailLayout.astro` — khung chung của mọi trang chi tiết — có truyền. Không có prop đó thì `Hero.astro` tính `hasGallery = galleryItems.length === 4` luôn ra `false`, nên trang điểm đến **không bao giờ** vào được biến thể `.hero-block--mosaic`.
+
+**Đặc tả nói gì.** `06-BINDING_MAP` §4.1 khai trang điểm đến là *"khung chung áp dụng, cộng"*, tức §3 áp cho nó. §3 hàng Hero: *"`gallery` đủ 4 ảnh sau khi loại trùng `mainImage` thì đi qua Hero mosaic"*. §3 hàng Gallery: *"gallery detail phải đi qua Hero mosaic"*, loại trừ **`article, person, organization`** — `touristDestination` **không** nằm trong danh sách loại trừ.
+
+**Dữ liệu không thiếu, chỉ bị bỏ rơi ở tầng template.**
+
+| Tầng | Trạng thái trước khi sửa |
+|---|---|
+| GROQ `queries/touristDestination.ts` | có `${galleryFragment()}` |
+| Kiểu `lib/types.ts` | có `gallery?: ImageAsset[] \| null` |
+| Sanity, doc `nha-trang` | `mainImage` + 4 ảnh gallery, không ảnh nào trùng ảnh chính |
+| `TouristDestinationHub.astro` | chuỗi `gallery` **không xuất hiện lần nào** |
+
+Cả 5 điểm đến approved đều đủ điều kiện mosaic (Đà Lạt 4, Ninh Thuận 4, Lâm Đồng 4, Khánh Hòa 14, Nha Trang 4). Không trang nào từng render được nó.
+
+**Đo được** (bản dựng, Chrome, viewport 1366, trước khi sửa):
+
+| Trang | ảnh chính | lưới gallery |
+|---|---|---|
+| `/nha-trang/` | **1366**×380 | **không có** |
+| `/diem-tham-quan/bai-bien-doc-let/` | 735×380 | 627×380, 4 ô |
+
+Khung ngoài của hero trùng khít từng pixel ở hai trang — lệch nằm hẳn **bên trong** hero, không phải lệch vị trí.
+
+**Gốc của cái sai.** Chú thích ngay tại chỗ gọi dẫn §3.1 hàng *Nhãn loại entity* (`không áp dụng: … touristDestination`) rồi kết luận *"trang này không có huy hiệu, nên hero còn đúng một tấm ảnh"*. Hàng đó chi phối **lớp phủ**, không chi phối **thành phần ảnh**. `hasOverlay={false}` là đúng; suy tiếp sang bỏ `gallery` là sai. Chú thích đã viết lại để câu suy luận hỏng không tái sinh.
+
+**Vì sao không cổng nào bắt được — hai khoảng mù chồng nhau.**
+
+1. `entity-layout-post.ts` quét tự động **chỉ file kết thúc bằng `Detail.astro`**, nên `TouristDestinationHub.astro` nằm ngoài toàn bộ sổ hợp đồng layout (13 file ghi danh, không có nó).
+2. `HERO_MOSAIC_CONTRACT` chỉ đọc `Hero.astro`, tức chỉ kiểm Hero **có cài** mosaic. Nó chưa bao giờ kiểm nơi gọi **có truyền** `gallery`.
+
+Một caller đánh rơi prop thì mọi cổng vẫn xanh.
+
+**Đã xử.**
+
+- `TouristDestinationHub.astro`: truyền `gallery={td?.gallery}`; viết lại chú thích.
+- `entity-layout-post.ts`: thêm **tầng 4 — Hero caller contract**. Mọi file render `<Hero>` phải ghi danh trong `HERO_CALLERS`, và mỗi thẻ `<Hero>` phải có prop `gallery`. Bộ cắt thẻ đếm ngoặc nhọn chứ không cắt ở `>` đầu tiên, vì `hasOverlay={badgeList.length > 0}` có `>` nằm trong biểu thức.
+
+**Bằng chứng cổng biết đỏ** (chạy 2026-08-28): gỡ lại prop `gallery` → `[FAIL] … <Hero> thiếu prop gallery`, mã thoát **1**; thêm một component mới render `<Hero>` chưa ghi danh → `[FAIL] … chưa khai trong HERO_CALLERS`; khôi phục → `[pass]`, mã thoát **0**.
+
+**Xác nhận sau sửa:** `dist/nha-trang/index.html` và `dist/ninh-thuan/index.html` đều ra `hero-block hero-block--mosaic` với 4 ô; đo trên trình duyệt ở 1366: ảnh chính 735×380 + lưới 627×380 — trùng hình dạng trang chi tiết.
+
+## DR-077 — Hai danh sách bộ term không khớp nhau, nên trang term attraction xuất bản ra 404
+
+**Trạng thái:** **đóng** 2026-08-28.
+
+Phát hiện 2026-08-28 khi chạy lại bộ cổng sau dựng: 4/8 cổng đỏ, tất cả quy về đúng hai trang.
+
+**Lệch gì.** Có HAI danh sách bộ term, ở hai nơi, và chúng không khớp:
+
+| Nơi | Phủ bộ nào |
+|---|---|
+| `src/pages/[...path].astro` (sinh đường dẫn, qua `TERM_SET_ENTITY`) | experience-type, tour-type, **attraction-type** |
+| `src/lib/queries/category.ts` (`categoryBySlugQuery`) | experience-type, tour-type — **thiếu attraction-type** |
+
+Đường dẫn vẫn sinh ra, nhưng truy vấn trả `null`, `RouteDispatch` bật `notFound`, và trang 404 **được xuất bản như một trang thật**.
+
+**Hệ quả đo được** (bản dựng 2026-08-28, trước khi sửa): `/diem-tham-quan/di-tich-lich-su/` và `/diem-tham-quan/thien-nhien-sinh-thai/` ra `<title>Không tìm thấy trang</title>`, không JSON-LD, không meta description. Bốn cổng đỏ vì chúng: `jsonld-post` (I6 + SEO), `governance-post` (S24-UPDATED-HTML, S24-AUTHORITY-HTML), và hai cổng phụ thuộc `control-registry-gate`, `deferred-gate`.
+
+**Vì sao lọt.** `RouteDispatch.astro` đã nối đủ nhánh attraction từ trước — có `attractionsByTermQuery`, có chốt R2 "term chưa có entity nào trỏ tới thì trang không tồn tại". Chỉ mỗi bộ lọc trong truy vấn là chưa mở. Không cổng nào đối chiếu **hai danh sách bộ term** với nhau; cổng chỉ soi trang đã dựng, mà trang 404 vẫn là một file HTML hợp lệ nên chỉ đỏ ở tầng nội dung, không chỉ ra nguyên nhân.
+
+**Vì sao báo cáo đã commit vẫn xanh.** `scripts/reports/postbuild-status.json` ở `d85f113` ghi `ranAt: 2026-08-27T09:05` và tất cả pass. Hai trang này chỉ mọc ra khi có Attraction mang nhãn mới — tức sau lượt migration, muộn hơn lần chạy cổng cuối. Bản dựng xanh không bảo chứng cho dữ liệu nạp sau nó.
+
+**Đã xử.** `categoryBySlugQuery` thêm `"attraction-type"`. Kèm chú thích tại chỗ nêu rõ ràng buộc: danh sách này phải phủ đúng mọi khoá của `TERM_SET_ENTITY`.
+
+**Xác nhận sau sửa:** hai trang ra trang term thật — `/di-tich-lich-su/` 8 card, `/thien-nhien-sinh-thai/` 15 card; JSON-LD có `CollectionPage`, `DefinedTerm`, `ItemList`, `TouristAttraction`; có meta description. Bộ cổng sau dựng **8/8 xanh**.
+
+**Nợ còn lại (không đóng ở đây).** `RouteDispatch.astro` vẫn ép kiểu `entityType={entity as 'experience' | 'tour'}` khi gọi `TermIndex`, trong khi runtime nay truyền cả `'attraction'`. Ép kiểu đó chính là thứ che nhánh attraction khỏi mắt TypeScript. Hệ quả nhìn thấy được: `TermIndex` chỉ tính nhãn phụ cho experience và tour, nên card ở trang term attraction không hiện nhãn loại dù `toListings` đã mang sẵn `attractionType`. Không có cổng nào đối chiếu hai danh sách bộ term với nhau — đó mới là chỗ đáng dựng lưới.
+
+## DR-078 — `06` §5.7 vẫn khai `tours` trong thứ tự khối mặc định, đặc tả và mã lệch sau khi gỡ khoá
+
+**Nhãn nội bộ trong SPEC-2026-08-29: DR-a**
+
+**Trạng thái:** mở. Phát hiện 2026-08-29, cùng lượt gỡ khoá `tours` khỏi `DEFAULT_SECTIONS` (đợt "thị giác di động", Task 3).
+
+**Lệch gì.** `06-BINDING_MAP` §5.7 liệt kê `tours` trong thứ tự khối mặc định của trang chủ — viết trước khi `SPEC-2026-08-14-be-mat-vong-3` §3.4 thêm khối `HomeTourGrid` (khối "biên tập chọn", đứng ngoài `activeSections`). Task này gỡ dòng `{ key: 'tours', hidden: false }` khỏi `DEFAULT_SECTIONS` trong `SiteHome.astro:139-148` — khối rollup nó điều khiển nay thừa, vì `HomeTourGrid` đã ăn `featuredTours` qua `chonTourTrangChu` (Task 2). `06` §5.7 không được sửa cùng lượt — ràng buộc toàn cục của đợt cấm việc đó trong Task này.
+
+**Hệ quả đo được.** `06` §5.7 và `DEFAULT_SECTIONS` trong mã nay liệt kê khác nhau: `06` còn `tours`, mã thì không. Nhánh `case 'tours':` trong switch render (`SiteHome.astro:282`, gọi `HomeRollupSection` với `td?.featuredTours`) thành mã chết — không phần tử nào của `activeSections` còn trỏ tới nó, nhưng nhánh vẫn đứng nguyên trong file.
+
+**Vì sao lọt.** Ràng buộc toàn cục của đợt cấm sửa `06-BINDING_MAP` trong Task này — hai tầng thẩm quyền khác nhau (`CLAUDE.md` §1: `06`/`GOVERNANCE` trên spec task). Không có cổng nào đối chiếu danh sách khối trong `DEFAULT_SECTIONS` với danh sách khối liệt kê ở `06` §5.7.
+
+**Đã xử.** Chưa. Cần chủ dự án chốt ở tầng đặc tả: sửa `06` §5.7 để bỏ `tours` khỏi thứ tự khối rollup mặc định (ghi chú nó đã tách thành khối biên tập chọn cố định), hoặc quyết định khác.
+
+## DR-079 — `HomeTourGrid` render ngoài `activeSections`, nên sau Task này nó là khối tour duy nhất mà biên tập không tắt/đảo được
+
+**Nhãn nội bộ trong SPEC-2026-08-29: DR-e**
+
+**Trạng thái:** mở. Phát hiện 2026-08-29.
+
+**Lệch gì.** `SiteHome.astro:195` gọi `<HomeTourGrid>` ngay trong markup, ngoài vòng `activeSections.map(...)` — khối duy nhất trong danh sách hàng đầu trang chủ không đi qua cơ chế bật/tắt và đảo thứ tự bằng `siteSettings.sections` mà `06` §5.7 khai là hợp đồng chung. Việc này có từ khi `HomeTourGrid` được thêm (`SPEC-2026-08-14` §3.4), không phải do Task này tạo ra.
+
+**Hệ quả đo được.** Trước Task này, trang chủ có hai khối "Tour nổi bật": một do `HomeTourGrid` (ngoài `activeSections`, luôn hiện, vị trí cố định ngay sau hero), một do nhánh rollup `case 'tours'` (trong `activeSections`, biên tập tắt/đảo được qua Studio). Sau Task này (gỡ khoá `tours` khỏi `DEFAULT_SECTIONS`), chỉ còn khối `HomeTourGrid` — tức khối tour **duy nhất** trên trang chủ nay nằm hoàn toàn ngoài tầm điều khiển của `siteSettings.sections`. Biên tập mất quyền tắt khối tour hoặc đổi vị trí nó tương đối với các khối khác qua Studio.
+
+**Vì sao lọt.** `HomeTourGrid` được viết như một khối cố định có chủ đích (dải màu đậm đầu tiên của trang, xem chú thích đầu file component) — không nằm trong phạm vi cơ chế `activeSections` ngay từ đầu. Task này chỉ được giao gỡ khoá rollup thừa; đưa `HomeTourGrid` vào `activeSections` là thay đổi kiến trúc, ngoài phạm vi spec Task này.
+
+**Đã xử.** Chưa. Cần quyết định ở tầng đặc tả: đưa `HomeTourGrid` vào cơ chế `activeSections` (tốn công tái cấu trúc), hoặc ghi nhận chính thức trong `06` rằng khối tour là khối cố định, không thuộc hợp đồng bật/tắt của §5.7.
+
+## DR-080 — `ADR-0026` neo ngưỡng đảo bài vào số tour đã publish, R6 lại tách hiển thị khỏi publish
+
+**Nhãn nội bộ trong SPEC-2026-08-29: DR-n**
+
+**Trạng thái:** mở. Phát hiện 2026-08-29.
+
+**Lệch gì.** `ADR-0026` §Quyết định 4 (`docs/adr/ADR-0026-trang-chu-ganh-ca-san-pham.md:53`) khai: *"Nếu số tour đã publish rơi xuống dưới 3, khối này mất ý nghĩa (lưới 3 thẻ không đầy một hàng) và nên cân nhắc quay về tinh thần ADR-0024."* Tiền đề của quyết định này là khối tour hiển thị = tất cả tour đã publish (rollup toàn kho), nên đếm publish cũng là đếm hiển thị. Đợt R6 (Task 2, hàm `chonTourTrangChu`; Task này, R6b/R6d/R7) tách khối hiển thị khỏi rollup toàn kho: `HomeTourGrid` nay hiển thị theo `featuredTours` — danh sách biên tập chọn tay — không còn suy trực tiếp từ tổng số document `tour` đã publish.
+
+**Hệ quả đo được.** Điều kiện kích hoạt ngưỡng của `ADR-0026` (đếm tour đã publish trong kho) và điều kiện thực tế điều khiển hiển thị (độ dài `featuredTours` sau `chonTourTrangChu`) nay là hai đại lượng độc lập. Kho có thể có N tour publish (N ≥ 3 hoặc N < 3) trong khi trang chủ hiển thị M tour biên tập chọn (M cố định theo lựa chọn biên tập, không tự đổi theo N) — luật lưới co theo số thẻ mà Task này thêm (R7, `:has()` trong `HomeTourGrid.astro`) xử đúng vấn đề hình ảnh mà `ADR-0026` §4 nêu (lưới không đầy hàng), nhưng bằng cơ chế khác hẳn ngưỡng publish mà ADR đã ghi.
+
+**Vì sao lọt.** R6 giải quyết một vấn đề khác (biên tập kiểm soát tour nổi bật thay vì auto-rollup toàn kho theo `publishedAt`) mà không có bước đối chiếu ngược lại tiền đề đã chốt của `ADR-0026`. `CLAUDE.md` §1 xếp ADR ở tầng 3, spec của Task này ở tầng 6 — Task này không có thẩm quyền sửa ADR.
+
+**Đã xử.** Chưa. Cần chủ dự án chốt ở tầng ADR: viết lại `ADR-0026` §Quyết định 4 để ngưỡng neo vào `featuredTours.length` thay vì tổng số tour đã publish, hoặc xác nhận đây là hai cơ chế cố ý độc lập (ngưỡng ADR nói về việc CÓ nên duy trì khối tour hay không khi kho cạn; R7 nói về cách khối đó tự thích ứng hình ảnh khi đang hiển thị) và không cần hoà giải.
+
+## DR-090 — Task 5 đảo lại `SPEC-2026-08-14` §3.3: nút "Xem tất cả" quay về `--c-accent`, không còn `--c-sand`
+
+**Nhãn nội bộ trong SPEC-2026-08-29: DR-b1**
+
+**Trạng thái:** đã xử 2026-08-29, có chủ ý. Chủ dự án chốt `07-DESIGN_TOKENS` §1 thắng (`QĐ-2026-08-29-06`).
+
+**Lệch gì.** `SPEC-2026-08-14-be-mat-vong-3.md` §3.3 khai: *"Nút chính đổi từ `--c-accent` (`#C0392B`) sang `--c-sand` (`#F5A623`) với chữ `--c-sand-text-strong` (`#3d2a05`), để nút thôi đụng màu với giá."* Đây là quyết định **có chủ ý** ở thời điểm spec được duyệt — né luật *"Không dùng làm nền CTA"* của `07-DESIGN_TOKENS` §1 bằng cách đổi chữ nút sang tối màu thay vì trắng, vì lý do gốc của `07` viện dẫn khi đó là *"tương phản với chữ trắng không đạt AA"* — và nút thật không dùng chữ trắng nên đọc như thoát được luật.
+
+`HomeTourGrid.astro` `.tours-all` (Task này, Bước 1) đổi ngược lại: `background: var(--c-accent)`, `color: var(--c-text-inverse)` — đúng như trước khi `SPEC-2026-08-14` can thiệp.
+
+**Vì sao đảo.** Task 5 sửa lại **lý do** trong `07-DESIGN_TOKENS` §1 (xem diff dòng khai `color.sand`): lý do thật không phải tương phản (nút `--c-sand` + `--c-sand-text-strong` đo **6,76:1**, đạt AA) mà là **phân vai màu** — `07` §1 đã giao `--c-accent` cho CTA và nhãn giá, cát cho gạch chân và nút trên nền đậm. Điều khoản *"Không dùng làm nền CTA"* giữ nguyên, không nới; SPEC §3.3 đổi màu nút để né luật đó mới là thứ lệch, không phải luật. Chủ dự án chốt trực tiếp `07` thắng qua `QĐ-2026-08-29-06` — đây là quyết định ở đúng tầng (chủ dự án), không phải suy ra từ thứ tự thẩm quyền mặc định của `CLAUDE.md` §1 (danh sách đó không liệt tên `07-DESIGN_TOKENS.md`).
+
+**Đã xử.** Rồi — code khớp `07` §1 (điều khoản, không phải bản SPEC §3.3 cũ). `SPEC-2026-08-14` §3.3 **không được sửa** theo ràng buộc toàn cục của Task này; phiếu này là bản ghi chính thức của việc đảo, không phải một khoản nợ chờ xử thêm.
+
+## DR-091 — Task 5 đảo lại `SPEC-2026-08-14` §3.4: khối tour thôi là "dải màu đầu tiên"
+
+**Nhãn nội bộ trong SPEC-2026-08-29: DR-b2**
+
+**Trạng thái:** đã xử 2026-08-29, có chủ ý. `QĐ-2026-08-29-06`.
+
+**Lệch gì.** `SPEC-2026-08-14-be-mat-vong-3.md` §3.4 khai: *"Khối này dùng nền `--c-band-bg` của §3.3 — nó vừa là khối tour vừa là dải màu đầu tiên."* Đây là tiền đề thiết kế gốc: `HomeTourGrid` được giao hai vai cùng lúc — khối bán tour VÀ dải màu đậm mở đầu nhịp trang.
+
+Task 5 (Bước 1) đổi `.home-tours { background: var(--c-band-bg) }` thành `background: var(--c-surface-alt)`. Khối tour thôi mang vai "dải màu đầu tiên".
+
+**Hệ quả đo được.** Trước Task này, ba khối đầu trang chủ (hero, `HomeTourGrid`, `stats-band`) đều nền `--c-primary`/tổ hợp trỏ về nó, đọc thành một dải xanh liền ~2.000px ở khổ điện thoại (xem chú thích đầu `HomeTourGrid.astro`, viết lại ở Task này). Sau Task này, nhịp trang là đậm (hero) / sáng (`HomeTourGrid`) / đậm (`stats-band`) / sáng — vai "dải đậm đầu tiên" chuyển hẳn cho `stats-band`, không còn ai giữ chung hai vai.
+
+**Vì sao đảo.** Tiền đề của `SPEC-2026-08-14` §3.4 đúng ở thời điểm chỉ có hai khối đậm liền kề; nó không tính tới việc `stats-band` (khối số liệu) cũng dùng cùng token `--c-primary`, biến ba khối liên tiếp thành một mảng. Task 5 sửa hệ quả thị giác này bằng cách tách vai — không đổi mã màu nào, chỉ đổi khối nào giữ vai nào (đúng khuôn ràng buộc toàn cục: không sửa `tokens.css`). Một Task khác cùng đợt ("thị giác di động") sẽ đo lại dải xanh trên trạng thái mới này bằng số.
+
+**Đã xử.** Rồi — code không còn khớp câu "vừa là khối tour vừa là dải màu đầu tiên" của `SPEC-2026-08-14` §3.4. Spec đó **không được sửa** theo ràng buộc toàn cục của Task này; phiếu này là bản ghi chính thức của việc đảo.
+
+## DR-092 — Task 5 đảo lại `ADR-0026` Hệ quả › Được, gạch đầu dòng 2
+
+**Nhãn nội bộ trong SPEC-2026-08-29: DR-b3**
+
+**Trạng thái:** mở — Task này không có thẩm quyền đóng. Phát hiện và đảo tại code 2026-08-29, `QĐ-2026-08-29-06`.
+
+**Lệch gì.** `ADR-0026-trang-chu-ganh-ca-san-pham.md` (**Trạng thái: accepted**), mục Hệ quả › Được, gạch đầu dòng thứ hai: *"Khối tour cũng là dải màu đậm đầu tiên của trang, cắt mạch trắng liền — xem `SPEC-2026-08-14-be-mat-vong-3` §3.3."* ADR ghi đây là một **lợi ích đã đạt được** của quyết định thêm `HomeTourGrid`.
+
+Sau Task 5, khối tour không còn nền đậm (xem `DR-091`, nhãn nội bộ `DR-b2`) — lợi ích này không còn đúng với code đang chạy. ADR vẫn đứng nguyên văn, không sửa, theo ràng buộc toàn cục của Task này (không chạm `ADR-0026*`).
+
+**Hệ quả đo được.** `ADR-0026` là ADR **tầng 3** theo thứ tự thẩm quyền `CLAUDE.md` §1 — cao hơn spec bề mặt (tầng 6) mà Task 5 thực thi. Task 5 không có quyền sửa ADR để khớp lại; nó chỉ có quyền ghi phiếu drift. Nghĩa là tài liệu tầng 3 nay mô tả sai một hệ quả thị giác đã bị chính một Task tầng thấp hơn đảo — hợp lệ về thẩm quyền (chủ dự án đã ký `QĐ-2026-08-29-06` cho phép đảo ở tầng bề mặt) nhưng để lại một câu sai sự thật trong một tài liệu `accepted`.
+
+**Vì sao không sửa cùng lượt.** Ràng buộc toàn cục của Task 5: *"KHÔNG sửa … `docs/adr/ADR-0026*`. … việc của bạn là ghi phiếu drift, không phải sửa chúng."* Sửa nội dung ADR là quyết định ở tầng ADR (đổi mô tả một hệ quả đã ghi trong hồ sơ accepted), không phải việc của một Task thực thi bề mặt.
+
+**Đã xử.** Chưa, và Task này không đóng được. Cần chủ dự án chốt ở tầng ADR: sửa gạch đầu dòng 2 của mục Hệ quả › Được (gỡ câu "dải màu đậm đầu tiên", hoặc ghi chú nó đã hết hiệu lực từ `QĐ-2026-08-29-06` và trỏ sang `stats-band`), hoặc xác nhận giữ nguyên làm bản ghi lịch sử tại thời điểm ADR được chấp thuận.
+
+## DR-093 — Task 5 làm ba token `--c-band-bg`/`-text`/`-muted` thành mồ côi, còn 0 người đọc, nhưng không được gỡ khỏi `tokens.css` trong đợt này
+
+**Nhãn nội bộ trong SPEC-2026-08-29: DR-k**
+
+**Trạng thái:** mở. Phát hiện 2026-08-29, cùng lượt Task 5.
+
+**Lệch gì.** `tokens.css` khai ba token tổ hợp `--c-band-bg: var(--c-primary)`, `--c-band-text: #FFFFFF`, `--c-band-muted: #c5dcea` (thêm theo `SPEC-2026-08-14` §3.3, phục vụ đúng `HomeTourGrid.astro`). Trước Task 5, cả ba có đúng **ba người đọc**, cả ba đều trong `HomeTourGrid.astro`:
+
+```
+src/components/HomeTourGrid.astro:73:    background: var(--c-band-bg);
+src/components/HomeTourGrid.astro:92:    color: var(--c-band-text);
+src/components/HomeTourGrid.astro:99:    color: var(--c-band-muted);
+```
+
+Task 5 (Bước 1) thay cả ba dòng này bằng `--c-surface-alt` / `--c-primary` / `--c-text-muted`. Đo lại sau khi sửa:
+
+```
+grep -rn "c-band-" src/ | grep -v tokens.css
+```
+
+→ **0 kết quả.** Ba token vẫn khai trong `tokens.css:43-45`, nhưng không còn nơi nào trong `src/` đọc chúng.
+
+**Hệ quả đo được.** `tokens.css` nay có ba token sống nhưng vô dụng — không phá gì (chúng không được ai gọi nên không ảnh hưởng render), nhưng là rác kiến trúc: người đọc `07-DESIGN_TOKENS` hoặc `tokens.css` sau này sẽ thấy `--c-band-*` và tưởng có nơi dùng, phải tự tra mới biết là mồ côi.
+
+**Vì sao không gỡ luôn.** Ràng buộc toàn cục của Task 5 điểm 1: *"KHÔNG sửa `src/styles/tokens.css`, không thêm token, không đổi giá trị token."* Gỡ ba dòng khai báo là sửa `tokens.css`, ngoài phạm vi Task này dù có lý do chính đáng.
+
+**Đã xử.** Chưa. Việc cần làm ở lượt sau: xác nhận lại `grep -rn "c-band-" src/ | grep -v tokens.css` vẫn ra 0 kết quả (đề phòng một Task khác trong cùng đợt lỡ thêm người đọc mới), rồi gỡ ba dòng `--c-band-bg`/`-text`/`-muted` khỏi `tokens.css` và khỏi bảng token tương ứng trong `07-DESIGN_TOKENS.md` (nếu có liệt kê) qua một Task riêng có quyền chạm `tokens.css`.
+
+## DR-081 — `HomeHero.astro` là mã chết, ôm hai token sống mà không component nào khác đọc
+
+**Nhãn nội bộ trong SPEC-2026-08-29: DR-c**
+
+**Trạng thái:** mở. Phát hiện 2026-08-29, đợt "thị giác di động" (Task 9, đo lại cuối đợt).
+
+**Lệch gì.** `src/components/HomeHero.astro` không được import ở bất kỳ file nào khác trong `src/` (xác nhận bằng `grep -rn "HomeHero" src --include="*.astro"` — chỉ một kết quả là chú thích trong chính `SiteHome.astro:378`, không phải import). Nó là người đọc duy nhất của hai token `--hero-min-h` / `--hero-min-h-mobile`, và tự khai `padding: 72px 0` / `80px` (`HomeHero.astro:130-131`) — số cứng ngoài thang khoảng cách. Hero trang chủ **thật sự đang chạy** là khối trong `SiteHome.astro`, hardcode `min-height: 560px` (`:315`) và `520px` (`:541`), độc lập hoàn toàn với `HomeHero.astro`.
+
+**Hệ quả đo được.** Hai bề mặt hero cùng tồn tại trong `src/components/`: một là mã chết (`HomeHero.astro`) giữ hai token sống làm chúng trông như đang được dùng, một là mã đang chạy (`SiteHome.astro`) với số cứng riêng không đi qua token nào. Người đọc sau `07-DESIGN_TOKENS` gặp `--hero-min-h*` sẽ tưởng có nơi dùng thật.
+
+**Vì sao lọt.** R5c (Task 3) cân nhắc nối `--hero-min-h-mobile` vào `.site-home-hero` rồi quyết định KHÔNG làm — lý do ghi trong `SPEC-2026-08-29 §…`: nối vào sẽ tạo hai vai cho một token, vì token đó thuộc về mã chết. Quyết định đúng cho phạm vi Task đó, nhưng để lại `HomeHero.astro` nguyên trạng vì gỡ file là ngoài phạm vi R5c.
+
+**Đã xử.** Chưa. Cần quyết định ở tầng đặc tả: gỡ hẳn `HomeHero.astro` (và hai token `--hero-min-h*` nếu không còn người đọc nào khác), hoặc nối nó vào `SiteHome.astro` để hero trang chủ có một bản dựng duy nhất.
+
+## DR-082 — `NearbySection.astro` tự dựng thẻ riêng, sau R1 là thẻ duy nhất còn hình dọc ở di động
+
+**Nhãn nội bộ trong SPEC-2026-08-29: DR-f**
+
+**Trạng thái:** mở. Phát hiện 2026-08-29.
+
+**Lệch gì.** `NearbySection.astro:33-46` không import `Card.astro` — nó tự dựng cấu trúc thẻ riêng (`.nearby-card`, `.nearby-card-img`, `.nearby-card-body`, `.nearby-card-title`, xác nhận bằng đọc trực tiếp file). R1 (đợt "thị giác di động") đổi mọi thẻ dùng `Card.astro` từ dọc sang ngang ở di động; `NearbySection` không đi qua `Card.astro` nên không nhận thay đổi đó.
+
+**Hệ quả đo được.** Sau R1, trên mọi trang chi tiết entity có khối "Gần đây", thẻ trong khối đó **giữ nguyên bố cục dọc** trong khi mọi thẻ khác trên cùng trang (dựng bằng `Card.astro`, qua `.card-grid`) đã chuyển ngang ở di động — một trang có hai kiểu thẻ khác hình dạng ở cùng khổ màn hình.
+
+**Vì sao lọt.** Đặc tả R1 (v1 của kế hoạch) kê nhầm cả hai chiều: thiếu bốn loại trang (`AttractionDetail`, `EventIndex`, `PlaceDetail`, `TourIndex`) khỏi danh sách cần sửa, đồng thời liệt kê thừa `NearbySection` như thể nó dùng `Card.astro`. Không có cổng nào đối chiếu "danh sách component tự nhận là dùng `Card`" với "danh sách component thật sự import `Card`".
+
+**Đã xử.** Chưa. Cùng họ với `DR-061` (hai bản mã dựng cùng một loại khối, lệch từ ngày fork). Việc cần làm: đưa `NearbySection` qua `Card.astro`, hoặc xác nhận có chủ đích giữ nó khác biệt và ghi lại lý do.
+
+## DR-083 — `SiteHome.astro` tự dựng `<details>/<summary>` cho FAQ dù `FAQ.astro` đã tồn tại — bản dựng FAQ thứ hai
+
+**Nhãn nội bộ trong SPEC-2026-08-29: DR-g**
+
+**Trạng thái:** mở. Phát hiện 2026-08-29.
+
+**Lệch gì.** `src/components/FAQ.astro` tồn tại như component FAQ dùng chung. `SiteHome.astro:289-297` (nhánh `case 'faq':` trong switch render khối) không gọi `FAQ.astro` — nó tự dựng `<details><summary>{item.question}</summary><p>{item.answer}</p></details>` trực tiếp trong markup.
+
+**Hệ quả đo được.** Hai bản dựng FAQ độc lập cùng sống trong `src/`: `FAQ.astro` (dùng ở các trang khác) và bản tự dựng trong `SiteHome.astro`. Sửa cấu trúc, style, hay hành vi accessibility (N7) cho FAQ phải nhớ sửa cả hai chỗ — Task 9 gặp đúng cảnh báo này khi rà spec (xem ghi chú "sửa cả hai chỗ là hợp thức hoá một bản dựng trùng").
+
+**Vì sao lọt.** `SiteHome.astro` là file lâu đời nhất trong nhóm trang chủ, viết trước khi `FAQ.astro` được tách thành component dùng chung; không có bước dọn lại chỗ gọi cũ khi tách component.
+
+**Đã xử.** Chưa. Việc cần làm: thay nhánh `case 'faq':` trong `SiteHome.astro` bằng lời gọi `<FAQ>`, kiểm lại props hai bên khớp nhau trước khi đổi.
+
+## DR-084 — Số cứng ngoài thang khoảng cách: `HomeHubGrid.astro:93` (`72px`) và `:174` (`10px`)
+
+**Nhãn nội bộ trong SPEC-2026-08-29: DR-h**
+
+**Trạng thái:** mở. Phát hiện 2026-08-29.
+
+**Lệch gì.** `tokens.css:3` tuyên bố "0 hardcoded value bên ngoài file này" cho khoảng cách. `HomeHubGrid.astro:93` khai `padding: 72px 0;` và `:174` khai `padding: 4px 10px;` — cả hai không khớp giá trị nào trong thang khoảng cách hiện có (`--s1`…`--s9` hay tương đương). Cùng họ với số cứng `72px`/`80px` trong `HomeHero.astro:130-131` (xem `DR-081`).
+
+**Hệ quả đo được.** Hai điểm khoảng cách trong `HomeHubGrid.astro` không đi qua token — đổi thang khoảng cách toàn site sau này sẽ không chạm hai điểm này, tạo lệch âm thầm.
+
+**Vì sao lọt.** Không có cổng cơ giới quét toàn `src/` để bắt số cứng ngoài thang khoảng cách (khác với token màu, vốn có `check:token-parity` dù chính nó cũng có nợ, xem `DR-059`).
+
+**Đã xử.** Chưa. Việc cần làm: đổi hai số cứng này sang token gần nhất trong thang, hoặc nếu 72px/10px có chủ đích riêng (không phải rãnh/đệm chung) thì ghi rõ lý do miễn trừ.
+
+## DR-085 — Tracking (letter-spacing) trái `07-DESIGN_TOKENS` §2 ở nhiều heading
+
+**Nhãn nội bộ trong SPEC-2026-08-29: DR-i**
+
+**Trạng thái:** mở. Phát hiện 2026-08-29.
+
+**Lệch gì.** `HomeTourGrid.astro:83` khai `letter-spacing: 0.12em` cho một eyebrow — thang khai `--ls-eyebrow: 0.08em` (`tokens.css:126`) và bắt buộc đi kèm `--lh-eyebrow: 1.5` (`tokens.css:131`, chú thích: chữ hoa tiếng Việt vẫn mang dấu nên cần line-height cao hơn kèm tracking dương, nếu không dấu bị dòng trên cắt). `HomeTourGrid.astro:83` dùng tracking dương ngoài thang mà không kèm `--lh-eyebrow`. Cộng thêm nhiều chỗ tracking **âm** trên heading tiếng Việt — xác nhận trực tiếp ba ví dụ: `Card.astro:134` (`-0.01em`), `HomeTourGrid.astro:92` (`-0.015em`), `Section.astro:56` (`-0.015em`) — đặc tả đợt này ghi nhận tổng cộng 7 chỗ thuộc họ này trên toàn `src/` (chưa liệt kê lại đủ 7 ở đây).
+
+**Hệ quả đo được.** Tracking âm trên chữ có dấu tiếng Việt có nguy cơ làm dấu chồng lên ký tự liền kề, đặc biệt ở cỡ chữ nhỏ trên di động — rủi ro thị giác trực tiếp, không chỉ lệch token.
+
+**Vì sao lọt.** Không có cổng kiểm `letter-spacing` âm trên heading tiếng Việt; token parity hiện chỉ theo dõi giá trị token đã khai, không theo dõi việc dùng số cứng thay token ở thuộc tính này.
+
+**Đã xử.** Chưa. Việc cần làm: rà toàn bộ 7 điểm, đổi về `--ls-eyebrow` kèm `--lh-eyebrow` cho trường hợp eyebrow, và xác nhận có nên tiếp tục dùng tracking âm nào trên heading tiếng Việt không.
+
+## DR-086 — Cả họ field `featured*` không lọc `reviewStatus` khi deref lên trang chủ và trang điểm đến — 10 ô, R6c mới đóng 1
+
+**Nhãn nội bộ trong SPEC-2026-08-29: DR-j**
+
+**Trạng thái:** mở. Phát hiện 2026-08-29 (mở rộng từ 1 field lên 10 ô ở v3 của đặc tả đợt này).
+
+**Lệch gì.** `src/lib/queries/touristDestination.ts:108-112` deref **năm** field bằng `entityRefFragment(lang)` (`src/lib/queries/fragments.ts:90`) không lọc `reviewStatus`: `featuredAttractions`, `featuredStays`, `featuredExperiences`, `featuredSpecialties`, `featuredTours` — xác nhận trực tiếp bằng đọc file, cả năm dòng liền kề đều gọi `${entityRefFragment(lang)}` mà không có mệnh đề `select(...)` hay điều kiện `reviewStatus` đi kèm. Năm field này deref lên **hai** trang: trang chủ và `TouristDestinationHub.astro:150-167` → **10 ô**. R6 (Task 2, hàm `chonTourTrangChu`) đóng đúng **1 ô** ("tour × trang chủ") bằng cơ chế lọc riêng ở tầng chọn hiển thị, không sửa GROQ; **chín ô còn lại vẫn hở**. Hợp đồng đã khai luật rõ ràng (`01-CONTENT_MODEL §2.1`: "chỉ trỏ entity đã publish"; `06-BINDING_MAP:155`) nên đây là drift, không phải chỗ thiếu quyết định. Khuôn thi hành đã có sẵn trong cùng codebase: `src/lib/queries/event.ts:29` và `tour.ts:41` dùng `select(… reviewStatus == "approved" …)`. Lệch ngay trong cùng file `touristDestination.ts`: `:56` (`homepagePlaces`) và `:78` (`homepageArticles`) **có** lọc `reviewStatus == "approved"`, chỉ năm field `featured*` là không.
+
+**Hệ quả đo được.** Chín trong mười ô còn có thể lọt entity `draft`/chưa duyệt lên bề mặt sống (trang chủ, trang điểm đến) qua các field `featuredAttractions`/`featuredStays`/`featuredExperiences`/`featuredSpecialties` (cả hai trang) và `featuredTours` (riêng trang điểm đến — trang chủ đã đóng qua R6).
+
+**Vì sao lọt.** `entityRefFragment` là fragment dùng chung, viết như một tiện ích deref tổng quát, không tự mang điều kiện `reviewStatus` — người viết mỗi query phải tự thêm `select()` khi cần lọc, và bốn trong năm field `featured*` (`homepagePlaces`/`homepageArticles` là ngoại lệ đã lọc đúng) chưa được thêm. Cùng họ với lỗi production `DR-089` (`containedInPlace`/`mentions`), nhưng khác ở chỗ họ `featured*` có hợp đồng khai rõ để viện dẫn, còn `DR-089` là hợp đồng im lặng.
+
+**Đã xử.** Chưa. R6c chỉ đóng 1/10 vì phạm vi Task đó là chọn tour hiển thị trang chủ, không phải sửa GROQ toàn diện. Việc cần làm: thêm `select(reviewStatus == "approved" || _type == "category" ...)` (khuôn của `event.ts`/`tour.ts`) vào cả năm field `featured*`, tại cả hai nơi gọi.
+
+## DR-087 — Trang chủ đa ngôn ngữ mất khối tour sau R6b — bẫy ngủ yên, đã lên cò
+
+**Nhãn nội bộ trong SPEC-2026-08-29: DR-l**
+
+**Trạng thái:** mở. Phát hiện 2026-08-29.
+
+**Lệch gì.** `src/pages/[lang]/index.astro:98` render `<SiteHome td={td} lang={lang} destinationHref={destinationUrl} config={config} />` — **không truyền** prop `homeTours`. `SiteHome.astro:34` mặc định `homeTours = []` khi prop không được truyền. `HomeTourGrid.astro:33` tự ẩn khối khi `tours.length === 0` (`{tours.length > 0 && (...)}`). Xác nhận cả ba điểm bằng đọc trực tiếp file.
+
+**Hệ quả đo được.** Nếu route `[lang]/` sinh ra trang, trang chủ ngôn ngữ đó sẽ có **0** khối tour — không lỗi, không cảnh báo, chỉ đơn giản khối biến mất. R6b (đợt "thị giác di động") gỡ nhánh rollup `tours` khỏi `activeSections` cho phiên bản tiếng Việt nhưng không rà việc `[lang]/index.astro` có đường dữ liệu riêng cho `homeTours` hay không.
+
+**Vì sao lọt.** Bẫy hiện đang **ngủ yên**: `langs = ['vi']` (`site.config`) nên `nonDefaultLangs` rỗng, `getStaticPaths` trả mảng rỗng, route `[lang]/` không sinh trang nào trong `dist/` hôm nay — không có URL sống nào để đo hay để cổng bắt được. Nhưng chú thích tại chỗ trong chính file (`[lang]/index.astro:15`) ghi rõ: route này "tự bật lại khi thêm ngôn ngữ" — nghĩa là bẫy đã lên cò, chỉ chờ `langs` có phần tử thứ hai.
+
+**Đã xử.** Chưa. Việc cần làm trước khi bật ngôn ngữ thứ hai: truyền `homeTours`/`homeTourTotal` vào `<SiteHome>` trong `[lang]/index.astro`, lấy từ cùng nguồn `chonTourTrangChu` mà trang chủ mặc định dùng.
+
+## DR-088 — Bất biến "reference deref lên bề mặt sống phải trỏ entity đã duyệt" không cổng nào kiểm, và `ADR-0008` làm nó vô hình theo thiết kế
+
+**Nhãn nội bộ trong SPEC-2026-08-29: DR-m**
+
+**Trạng thái:** mở. Phát hiện 2026-08-29.
+
+**Lệch gì.** `scripts/validate-constraints.ts:52-54` khai `FULL_CORPUS_VALIDATORS = new Set(['I1','I4','I7','I8','I13','I14','I15','I17','I18','I-FAQ-TYPE'])` — các validator này cố ý chạy trên **toàn corpus, kể cả document nháp** (`reviewStatus !== 'approved'`), theo `ADR-0008` §Quyết định 4: validator quan hệ/ref-integrity và điều cấm cần thấy đủ corpus để bắt tham chiếu hỏng ngay cả khi trỏ tới draft. Nhưng hệ quả là: không validator nào trong bộ này, và không validator nào ngoài bộ này, thật sự kiểm bất biến "field deref lên một **bề mặt sống** (trang đã publish) phải trỏ entity **đã duyệt**" — đây là bất biến khác với "tham chiếu không hỏng" (ref-integrity) mà `FULL_CORPUS_VALIDATORS` đang kiểm. `g1`/`g3`/`g4` (bộ cổng meta) cũng không phủ: `g3` không parse cột ghi chú review trong `06-BINDING_MAP`, `g4` chỉ xét field có tồn tại trong schema hay không, không xét điều kiện lọc lúc deref.
+
+**Hệ quả đo được.** `DR-086` (9/10 ô hở `reviewStatus`) là một biểu hiện CỤ THỂ của bất biến này bị vi phạm, nhưng không có cổng nào tự phát hiện được nó — Task 9 tìm ra bằng cách đọc trực tiếp `touristDestination.ts`, không bằng một `[fail]` từ bộ kiểm. Nếu không có lượt rà thủ công này, lớp lỗi này vô hình vĩnh viễn.
+
+**Vì sao lọt.** `ADR-0008` Quyết định 4 là quyết định có chủ đích (không lọc toàn cục ở `fetchAllDocs`, để giữ khả năng bắt ref-integrity hỏng trên draft) — nhưng tác dụng phụ của quyết định đó là che luôn lớp lỗi "deref hiện draft lên bề mặt sống", vì không có validator thứ hai bù lại khoảng trống này. Mở lại `ADR-0008` là việc tầng ADR (tầng 3), không phải việc sửa mã ở tầng Task.
+
+**Đã xử.** Chưa. Cần quyết định ở tầng ADR: hoặc viết thêm một validator mới chuyên kiểm "deref lên bề mặt sống trỏ entity đã duyệt" (khác nhiệm vụ với `FULL_CORPUS_VALIDATORS`), hoặc mở rộng phạm vi `g4`/`g3` để phủ điều kiện lọc lúc deref, không chỉ field có tồn tại.
+
+---
+
+## DR-089 — ⚠ LỖI PRODUCTION ĐANG SỐNG, ngoài phạm vi đợt "thị giác di động" nhưng nặng hơn mọi phiếu trên: `containedInPlace`/`mentions` deref không lọc `reviewStatus`, hợp đồng im lặng nên không đóng được bằng cách viện điều khoản
+
+**Trạng thái:** mở. Phát hiện và ghi trong `SPEC-2026-08-29-thi-giac-di-dong.md §7` mục 7; Task 9 đo lại 2026-08-29 để phiếu mang số tươi (khác `DR-086`/`DR-j`: đây là lỗi **đang gây 404 trên site thật hôm nay**, không phải rủi ro tiềm ẩn).
+
+**Lệch gì.** Cùng họ với `DR-086` (field `featured*` deref không lọc `reviewStatus`), nhưng ở đây là hai field khác: `containedInPlace` và `mentions`. Khác biệt quan trọng: họ `featured*` có hợp đồng khai rõ ("chỉ trỏ entity đã publish", `01-CONTENT_MODEL §2.1`, `06-BINDING_MAP:155`) nên có căn cứ để viện dẫn khi đóng phiếu; `containedInPlace`/`mentions` **không có hợp đồng khai lọc nào** (im lặng) — nghĩa là không thể đóng phiếu này bằng cách chỉ ra một điều khoản đã có rồi thi hành đúng điều khoản đó, như cách `DR-086` có thể làm. Cần một quyết định nội dung mới (lọc ở đâu, theo cơ chế nào), không chỉ một bản vá kỹ thuật.
+
+**Đo lại 2026-08-29 (Task 9), dùng đúng bộ lệnh của brief:**
+
+```
+/dia-danh/hon-ba/            404
+/dia-danh/cam-ranh/          404
+/dia-danh/nui-co-tien/       404
+```
+
+```
+curl -s "https://tourdao.vn/diem-tham-quan/khu-du-lich-kong-forest/?cb=$RANDOM" | grep -o 'href="/dia-danh/[a-z-]*/"'
+→ href="/dia-danh/hon-ba/"
+```
+
+Khớp đúng mẫu xác minh đã ghi trong `SPEC-2026-08-29 §7` mục 7 — lỗi vẫn sống, chưa ai sửa kể từ khi spec ghi nhận.
+
+**Số liệu bối cảnh (từ `SPEC-2026-08-29 §7` mục 7, không đo lại toàn bộ trong Task 9 — phạm vi đo lại của Task 9 chỉ là ba lệnh `curl` và một lệnh `grep` ở trên):**
+- **7 trang sống, 5 link vào 404**, cộng JSON-LD (`containedInPlace`) trỏ thẳng vào URL 404 — ví dụ `"containedInPlace":{"@id":"https://tourdao.vn/dia-danh/hon-ba/", ...}`.
+- **67/208** document trong perspective `published` mang `reviewStatus: "draft"`.
+- **2/26** deref trong `src/lib/queries/` có lọc `reviewStatus`.
+- `cms/schemas/*.ts` có **0** chỗ khai `options.filter` — ô chọn reference trong Sanity Studio vẫn mời biên tập chọn document chưa duyệt cho các field này.
+
+**Hệ quả đo được.** Người dùng thật bấm vào các link tự sinh từ `containedInPlace`/`mentions` trên trang sống và gặp 404. Máy tìm kiếm đọc JSON-LD cũng thấy `@id` trỏ vào URL 404 — hại SEO kỹ thuật trực tiếp, không chỉ hại trải nghiệm.
+
+**Vì sao lọt.** Cùng nguyên nhân kỹ thuật với `DR-086`/`DR-088` (deref chung không tự lọc `reviewStatus`, người viết từng query phải tự thêm), nhưng ở đây còn thiếu cả hợp đồng khai báo — không ai từng quyết định `containedInPlace`/`mentions` có phải lọc hay không, nên không có điều khoản nào để thi hành hay để một cổng đối chiếu.
+
+**Đã xử.** Chưa — và **không sửa trong đợt "thị giác di động"** (ràng buộc toàn cục điểm 6 của Task 9: không sửa `containedInPlace`/`mentions` dù đang gây 404, cần quyết định riêng). **Cần quyết định riêng, ở tầng nội dung/kiến trúc:** lọc trong GROQ (thêm `select(reviewStatus == "approved" ...)`, khuôn có sẵn ở `event.ts`/`tour.ts`), hiện tên không kèm link cho entity chưa duyệt, hoặc khoá ô chọn reference trong Studio bằng `options.filter`. Việc trước mắt độc lập với quyết định trên: 67 document `draft` đang lẫn trong `published` perspective là dữ liệu cần rà lại, không phải lỗi mã.
+
+
+---
+
+## DR-094 — Breadcrumb và link "Mở bản đồ" dưới 44px trên trang chi tiết entity — vùng chưa từng được đặc tả nhắm tới, không phải mã lệch đặc tả
+
+**Trạng thái:** mở. Phát hiện 2026-08-29 khi Task 9 (đợt "thị giác di động") đo K3 ngoài trang chủ để đối chiếu R1b; chủ dự án xác nhận phạm vi và yêu cầu mở phiếu riêng (vòng sửa 1 của Task 9).
+
+**Lệch gì.** `.breadcrumb-item a` (`Breadcrumb.astro:84`, thẻ `<a href={crumb.href}>{crumb.label}</a>` không mang class riêng) và `.map-card-link` (`AttractionDetail.astro:171`, link "Mở bản đồ") đều **không khai `min-height`** trong CSS của chúng (`Breadcrumb.astro:125-128`, `AttractionDetail.astro:184-192`). Ở khổ điện thoại, cả hai co về chiều cao nội dung chữ — dưới ngưỡng 44px.
+
+**Đo được.** Đo lại 2026-08-29 trên `dist/` tại HEAD `b2a88e5` (`do.js`, iframe 390×844):
+
+| Trang | Số đích chạm <44px |
+|---|---|
+| `/diem-tham-quan/di-tich-lich-su/` | 2 (`a. h=25` ×2) |
+| `/diem-tham-quan/khu-du-lich-hon-mun/` | 5 (`a. h=25` ×4, `a.map-card-link h=25` ×1) |
+| `/tour/vinh-san-ho/` | 2 (`a. h=25` ×2) |
+
+Giảm từ 24/27/24 (đo nền `truoc.md`) xuống 2/5/2 — phần lớn nhờ hiệu ứng phụ của các sửa khác trong đợt này, không phải một sửa nhắm trực tiếp vào hai component này. **Chưa về 0.**
+
+**Bổ sung 2026-08-29 (đợt sửa sau review toàn nhánh) — thêm một lớp nữa.** `a.term-pill` (`EntityIndex.astro`, lối lọc theo term trên trang danh sách; định nghĩa `.term-pill` không khai `min-height`) cũng dưới 44px. Đo trên `/tour/`: **41px**, **9** đích chạm dưới ngưỡng. Khác hai lớp đã ghi ở trên (`breadcrumb-item a`, `.map-card-link`) ở chỗ nó nằm trên trang **danh sách** (`EntityIndex.astro`), không phải trang **chi tiết** — tức vùng "chưa từng được đặc tả nhắm tới" ở phiếu này rộng hơn tiêu đề ban đầu ghi, không chỉ trang chi tiết entity.
+
+**Dữ liệu lịch sử liên quan.** Task 7 (R4, cùng đợt) đã tình cờ phát hiện đúng lớp vấn đề này khi đo thêm để xác minh `FAQ.astro`: báo cáo Task 7 (`task-7-report.md`, mục "Điểm nghi ngại còn lại") ghi nhận **11 đích chạm nhỏ khác trên một trang chi tiết `/diem-tham-quan/...`** (`a. h=25/26`, `a.astro-nmbp33ka h=24`, `a.map-card-link h=25`), nêu rõ "không thuộc 8 file trong phạm vi Task 7", không sửa, và đề nghị "Task khác (nếu R4 mở rộng sang trang chi tiết) biết chỗ cần nhắm". Task 9 nay xác nhận lại phát hiện đó bằng phép đo độc lập trên bản dựng cuối, khoanh đúng danh tính hai component gây ra.
+
+**Vì sao lọt — và vì sao đây KHÔNG PHẢI drift theo nghĩa thông thường của sổ này.** `DRIFT_LOG.md` dòng 3 định nghĩa drift là "đặc tả và sản phẩm không khớp nhau". Không `docs/core-specs/` hay `docs/adr/` nào khai một hợp đồng "mọi đích chạm trên mọi trang phải ≥44px" (`grep -rln "44px" docs/core-specs/ docs/adr/` → 0 kết quả). R4 của `SPEC-2026-08-29-thi-giac-di-dong.md` (§2.5, "32 đích chạm dưới 44px") tự giới hạn phạm vi vào các thành phần trang chủ — toàn bộ danh sách 32 đích chạm liệt kê đều là `.home-view-all`/`.see-all`/link chân trang/`summary` FAQ/`.logo`/`.skip-link`, và Task 7 (thi hành R4) chỉ đụng 8 file trang chủ/layout dùng chung, xác nhận qua `Chạy await __do('/')` ở Bước 1. `Breadcrumb.astro` và `AttractionDetail.astro`/`PlaceDetail.astro` **không có mặt** trong danh sách file của bất kỳ Task nào trong toàn kế hoạch `docs/plans/2026-08-29-thi-giac-di-dong.md`. Nói cách khác: đây không phải chỗ đặc tả hứa một điều rồi mã không làm đúng — đây là **một vùng mà không đặc tả nào của đợt này từng nhắm tới**, nên không có "hứa" nào để lệch. Ghi phiếu vì hệ quả thị giác/khả năng bấm là thật và đo được, và vì hai component này dùng chung site-wide nên nhiều khả năng lặp trên mọi trang chi tiết entity khác, không chỉ ba trang đo ở đây.
+
+**Chưa xử.** Cần một quyết định **ở tầng đặc tả trước khi có Task sửa**: 44px là chuẩn chỉ áp cho trang chủ (như R4 đã làm), hay là chuẩn toàn site (áp cả breadcrumb, map-card-link, và mọi đích chạm khác trên trang chi tiết/index)? Nếu chọn toàn site: cần một lượt quét đích chạm <44px trên đại diện đủ các loại trang (không chỉ ba trang lưới 1 thẻ), không chỉ hai component đã nêu ở đây.
+
+---
+
+## DR-095 — ⚠ LỖI ĐANG SỐNG, ngoài phạm vi mọi Task: `NearbySection.astro` dính đúng cơ chế `DR-062`, đang chạy trên ít nhất 4 trang production
+
+**Trạng thái:** mở. Phát hiện 2026-08-29, lượt review toàn nhánh `feat/thi-giac-di-dong`, khi đối chiếu khuôn `:has()` mà `Card.astro`/`EntityIndex.astro`/`HomeRollupSection.astro` dùng với các component lưới khác trong repo dùng cùng khuôn. **Ngoài phạm vi mọi Task của đợt "chữa thị giác di động"** — chỉ ghi phiếu, không sửa (xem "Vì sao không sửa ở đây" dưới).
+
+**Lệch gì.** `NearbySection.astro:95-96` (ngoài mọi media query) khai:
+
+```css
+.nearby-grid:has(> :last-child:nth-child(2)) { grid-template-columns: repeat(2, 1fr); }
+.nearby-grid:has(> :last-child:nth-child(3)) { grid-template-columns: repeat(3, 1fr); }
+```
+
+— `:has()` lấy độ đặc hiệu của đối số bên trong nên hai luật này đặc hiệu cao. `:171-175` thu hẹp ở khổ điện thoại bằng bộ chọn trần:
+
+```css
+@media (max-width: 640px) {
+  .nearby-grid { grid-template-columns: 1fr; }
+}
+```
+
+— đặc hiệu thấp hơn, thua. **Đúng cơ chế `DR-062`:** khối có đúng 2 hoặc 3 mục không bao giờ đổ về một cột ở `≤640px`; khối 1 mục hoặc ≥4 mục không khớp luật `:has()` nào (chỉ có nhánh cho 2 và 3) nên vẫn rơi xuống media query và thu bình thường — đó là lý do lưới bên cạnh trông đúng còn lưới 2-3 mục thì không, và vì sao lỗi khó bị nhận ra bằng mắt khi lướt qua nhiều trang.
+
+**Đo được**, khung 390px, trên bản dựng hiện tại:
+
+| Trang | số mục | `.nearby-grid` computed |
+|---|---|---|
+| `/diem-tham-quan/khu-du-lich-bai-tranh/` | 2 | `167px 167px` |
+| `/diem-tham-quan/khu-du-lich-mini-beach/` | 2 | 2 cột |
+| `/diem-tham-quan/lang-chai-hon-mieu/` | 2 | 2 cột |
+| `/khach-san/sunkiss-hotel/` | 3 | **`103.3px × 3`** |
+| `/diem-tham-quan/vinh-nha-trang/` | 1 | `358px` ✓ (đối chứng — 1 mục không khớp luật `:has()` nào nên thu đúng) |
+
+Ba thẻ 103px cạnh nhau trên màn 390px, mỗi thẻ mang ảnh 4:3 và tiêu đề cắt 2 dòng — vi phạm **Luật 5** (`06` §6: mỗi thẻ một hàng, chiếm trọn bề ngang ở khổ điện thoại). Hôm nay có vẻ hiếm gặp (lưới phổ biến nhất là ≥4 mục lân cận), nhưng **đây không phải trường hợp dựng riêng để minh hoạ** — bốn trang trên là ví dụ thật đo được trên bản dựng hiện tại; bất kỳ entity nào có đúng 2 hoặc 3 lân cận cùng loại thì trang chi tiết của nó dính lỗi.
+
+**`DR-062` tự đóng bằng một câu nay không còn đúng.** `DR-062` (dòng 1571 sổ này) viết: *"Chỉ **trang chủ** mới dính lỗi này trên production, và **từ trước đợt refactor** — không phải hồi quy."* Câu đó đúng tại thời điểm `DR-062` được ghi và đóng (2026-08-25) — lượt vá khi đó chỉ sửa `HomeRollupSection.astro`. `NearbySection.astro` dùng đúng khuôn `:has()` lỗi, chưa từng được vá theo khuôn ba media query nhắc lại đầy đủ bộ chọn (như `HomeRollupSection.astro:157-163` hay `EntityIndex.astro` sau đợt sửa này) — cơ chế y hệt, tệp khác, chưa ai đụng tới. "Đã xử" của `DR-062` chỉ đóng đúng một tệp, không đóng cơ chế; câu tổng kết phạm vi của nó cần đọc lại là "đã đúng tại thời điểm đó", không phải "còn đúng hôm nay".
+
+**Vì sao không sửa ở đây.** `NearbySection.astro` không nằm trong danh sách file của bất kỳ Task nào trong kế hoạch `docs/plans/2026-08-29-thi-giac-di-dong.md`, và đợt sửa sau review này (mục A–J) chỉ được giao đúng phạm vi lượt review đã nêu — mục I của lượt review nói rõ "KHÔNG sửa `NearbySection.astro`". Sửa ở đây là mở rộng phạm vi ngoài spec đã duyệt (`CLAUDE.md` §5).
+
+**Đã xử.** Chưa. Việc cần làm ở một Task riêng có phạm vi bao gồm `NearbySection.astro`: nhắc lại nguyên bộ chọn `:has(> :last-child:nth-child(2))` và `:has(> :last-child:nth-child(3))` bên trong khối `@media (max-width: 640px)` (`:171-175`), đúng khuôn đã dùng ở `HomeRollupSection.astro:157-163` và `EntityIndex.astro`.
+
+## DR-096 — `PY3`/`PY4`/`PY5` so sai kiểu `bookingRef`, ba validator giá gần như vô hiệu
 
 **Trạng thái:** đã xử 2026-08-23 — Task 17 sửa `validatePY3`/`validatePY4`/`validatePY5`
 (`scripts/validators/py1-py8.ts`) đọc `bookingRef?.key` qua một hàm dùng chung `refKey()` thay
 vì `typeof doc.bookingRef === 'string'`; xem
 `.superpowers/sdd/2026-08-22-dat-tour/task-17-report.md`. Chạy lại `npm --prefix scripts run
 validate` sau sửa: `PY4` từ 8 mục "mồ côi" giả xuống còn **1** (dòng `ve-hon-tam-tam-tron-goi`
-— mồ côi thật, xem `DR-062`); `PY5` từ 79 xuống **72** lỗi (7 tour có `bookingRef.key` hợp lệ
-nay được nhận đúng, còn tour `8dda44cb` thiếu `bookingRef` thật vẫn bị báo — đúng như `DR-062`
+— mồ côi thật, xem `DR-097`); `PY5` từ 79 xuống **72** lỗi (7 tour có `bookingRef.key` hợp lệ
+nay được nhận đúng, còn tour `8dda44cb` thiếu `bookingRef` thật vẫn bị báo — đúng như `DR-097`
 dự đoán); `PY3` vẫn `[pass]` nhưng nay kiểm thật thay vì luôn luôn bỏ qua. `I1` không đổi (119
 lỗi cả trước lẫn sau lần chạy của Task 17) — không thuộc phạm vi sửa này.
 
@@ -1561,7 +2296,7 @@ chứng chi tiết (lệnh chạy, output đầy đủ).
 
 ---
 
-## DR-062 — `bookingRef.key` rời khỏi slug sau đợt sửa nội dung 2026-08-22; một dòng giá mồ côi, một tour mất giá
+## DR-097 — `bookingRef.key` rời khỏi slug sau đợt sửa nội dung 2026-08-22; một dòng giá mồ côi, một tour mất giá
 
 **Trạng thái:** mở. Phát hiện 2026-08-22 khi review Task 11 của module đặt tour truy vấn lại
 dataset production.
@@ -1597,12 +2332,12 @@ Task 17 sửa `PY4`/`PY5` sẽ khiến cổng validator tự báo cả hai mục
 
 ---
 
-## DR-063 — Sáu URL `/tour/` chết sau đợt đổi slug 22/08; lệch luật R3 có ý thức
+## DR-098 — Sáu URL `/tour/` chết sau đợt đổi slug 22/08; lệch luật R3 có ý thức
 
 **Trạng thái:** đã quyết 2026-08-23 — xem `QĐ-2026-08-23-01` trong `docs/DECISIONS.md`. Mục này
 không giữ số liệu riêng; quyết định đó là bản ghi đầy đủ.
 
-Đợt biên tập nội dung 2026-08-22 (xem `DR-062`) đổi slug nhiều tour. Sau khi phát hành, sáu URL
+Đợt biên tập nội dung 2026-08-22 (xem `DR-097`) đổi slug nhiều tour. Sau khi phát hành, sáu URL
 `/tour/` cũ trả 404 mà `public/_redirects` không có dòng 301 nào — lệch `04-CONSTRAINTS` §1c luật
 R3 ("một URL đã từng tồn tại không được biến mất câm"). Chủ dự án xác nhận đợt đổi slug là **có
 chủ ý** và **chấp nhận bỏ** sáu URL đó; `QĐ-2026-08-23-01` giữ danh sách sáu URL, ánh xạ cũ→mới
@@ -1615,7 +2350,7 @@ mất; lần này người bắt là một tác nhân, không phải máy. Chưa
 
 ---
 
-## DR-064 — Cổng Turnstile bị bỏ qua câm lặng khi thiếu secret; SPEC §4.4/§4.7 tự mâu thuẫn, mã sửa trước SPEC
+## DR-099 — Cổng Turnstile bị bỏ qua câm lặng khi thiếu secret; SPEC §4.4/§4.7 tự mâu thuẫn, mã sửa trước SPEC
 
 **Trạng thái:** đã xử 2026-08-23 — SPEC đã sửa theo mã ở cùng ngày
 (`docs/specs/SPEC-2026-08-21-dat-tour.md` §4.4 hàng `turnstileToken`, §4.7 hàng
@@ -1652,7 +2387,7 @@ mục 7 (`wrangler secret list` phải đúng 8 tên, không thừa không thi�
 trong `handler.ts`, chú thích trong `env.d.ts`, và mục này) đều chỉ là chữ.
 
 
-## DR-096 — SPEC đòi "nút Zalo" trên trang HTML tối giản, BK1 không cho endpoint biết liên kết Zalo
+## DR-100 — SPEC đòi "nút Zalo" trên trang HTML tối giản, BK1 không cho endpoint biết liên kết Zalo
 
 **Trạng thái:** mở 2026-08-29 — mã giữ nguyên theo phán quyết phiên nghiệm thu; chờ chủ dự án
 duyệt sửa câu chữ SPEC.
@@ -1666,7 +2401,7 @@ tiêu chí 6/13d **đạt-với-ngoại-lệ**. Chi phí nếu phán quyết sai
 để tới Zalo. Việc còn lại: sửa câu chữ SPEC §4.4/§7 ("nút Zalo" → "liên kết trang liên hệ"),
 cần chủ dự án duyệt.
 
-## DR-097 — Build tự động từ `main` xoá sạch toàn bộ `wrangler secret` của Worker
+## DR-101 — Build tự động từ `main` xoá sạch toàn bộ `wrangler secret` của Worker
 
 **Trạng thái:** mở 2026-08-29 — đã có đường tránh (tạm dừng builds); gốc rễ chỉ khép được sau
 khi merge module về `main`. **Sau merge bắt buộc:** đặt lại 8 secrets, bấm Publish thử, đếm lại

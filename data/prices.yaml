@@ -8,7 +8,7 @@
 #     paxRates:                           # tuỳ chọn, nuôi form đặt tour; khoá đóng child | senior | infant
 #       child:  { amount: <số>, note: "5–11 tuổi" }
 #       senior: { amount: <số>, note: "từ 60 tuổi" }
-# Khoá là ĐỊNH DANH ỔN ĐỊNH của một dòng giá, không phải slug (DR-062). Nhiều khoá hiện nay
+# Khoá là ĐỊNH DANH ỔN ĐỊNH của một dòng giá, không phải slug (DR-097). Nhiều khoá hiện nay
 # trùng slug chỉ vì lịch sử (DR-039 đặt như vậy ngày 2026-08-22); ĐỪNG đổi khoá khi biên tập
 # đổi slug — đổi là làm mồ côi dòng giá. Thêm dòng mới: chọn một chuỗi ổn định, mô tả sản phẩm,
 # rồi gắn đúng chuỗi đó vào Tour → bookingRef → key trong Studio. PY4 sẽ báo nếu hai bên lệch.

@@ -26,7 +26,7 @@ Phần KHÔNG nhãn (nguyên tắc cấu trúc URL, slug/redirect/hreflang về 
 1. Tiếng Việt là canonical và sống ở root, không prefix. Bốn ngôn ngữ còn lại prefix một cấp: `/en/`, `/zh/`, `/ko/`, `/ru/`. Không trộn ngôn ngữ trong một cây (S2.5); trang chủ ngôn ngữ là bản dịch trang trụ (`/en/`, `/zh/`...).
 2. Prefix nhánh nội dung dịch trọn theo từng ngôn ngữ (bảng 1.2). zh, ko, ru dùng chữ bản ngữ cho cả prefix lẫn slug; chấp nhận percent-encode khi copy link, đổi lại URL tự nhiên với người đọc bản ngữ và đúng hướng dịch trọn.
 3. Mỗi entity một nhánh phẳng riêng, không phân cấp theo `containedInPlace`: đổi quan hệ cha không vỡ URL; breadcrumb render từ `containedInPlace` ở tầng trình bày, quan hệ là dữ liệu chứ không phải địa chỉ. Nhánh phẳng khớp một-một với I9 (slug duy nhất theo _type) nên trang entity không thể va chạm URL.
-4. Term listing (Category bộ experience-type và tour-type, 2.13) sống chung nhánh với entity tương ứng, cũng phẳng: `/trai-nghiem/tam-bun` là trang term, `/trai-nghiem/lan-bien-hon-mun` là trang Experience. URL trang từ khóa chủ lực ngắn nhất; va chạm slug giữa term và entity chặn bằng R1 (04 mục 1c).
+4. Term listing (Category bộ experience-type, tour-type và attraction-type, 2.13) sống chung nhánh với entity tương ứng, cũng phẳng: `/trai-nghiem/tam-bun` là trang term, `/trai-nghiem/lan-bien-hon-mun` là trang Experience; `/diem-tham-quan/dao-va-bien` là trang term, `/diem-tham-quan/hon-chong` là trang Attraction. URL trang từ khóa chủ lực ngắn nhất; va chạm slug giữa term và entity chặn bằng R1 (04 mục 1c). Nhánh Attraction có mật độ slug cao nhất dự án (39 doc lúc mở bộ term), nên R1 phải chạy trước khi tuyển term, không phải sau.
 5. Bốn hub đa entity cấp 1 nhắm bốn intent lớn: chơi gì, ở đâu, ăn gì, đi lại (bảng 1.3). CollectionPage rollup suy ở build, không phải field (khớp 2.1).
 6. Event mỗi kỳ một document: slug kỳ bắt buộc kèm năm (`festival-bien-2026`, khớp startDate là danh tính). URL bất biến trọn đời, quá endDate không redirect, không dời; trang gắn nhãn đã diễn ra ở tầng trình bày (I5). Index `/su-kien/` chia hai khối sắp tới và đã qua ở build.
 7. Slug bất biến sau publish. Buộc phải đổi (sai chính tả...) thì đổi được nhưng bắt buộc kèm dòng 301 trong `public/_redirects` (Cloudflare Pages); R3 kiểm URL cũ có lối đi mới cho qua build.
@@ -68,14 +68,17 @@ Cột mẫu dùng cây vi làm ví dụ; ngôn ngữ khác thay prefix ngôn ng�
 | Mẫu URL | Loại trang | Entity nguồn | Ghi chú (canonical, redirect) |
 |---|---|---|---|
 | `/` | trang chủ site | WebSite / cấu hình build | bản ngôn ngữ ở `/en/`, `/zh/`...; x-default = `/`; không phải trang entity |
-| `/{destinationSlug}/` | trang điểm đến | TouristDestination | ví dụ `/nha-trang/`; bản ngôn ngữ ở `/en/nha-trang/`, `/zh/nha-trang/`... |
+| `/{destinationSlug}/` | trang điểm đến | TouristDestination | **một trang cho MỖI** TouristDestination đã duyệt (ADR-0028), ví dụ `/nha-trang/`, `/phu-quoc/`; bản ngôn ngữ ở `/en/nha-trang/`, `/zh/nha-trang/`... Slug trùng với một segment trong ROUTE_MAP thì bị bỏ qua kèm cảnh báo `[B11]` (`src/pages/[...path].astro:71-74`) |
+| `/diem-den/` | trang danh sách điểm đến | TouristDestination approved | CollectionPage. Liệt kê MỌI điểm đến đã duyệt có `slug.vi`; card trỏ về **trang gốc** `/{destinationSlug}/`, **không** phải `/diem-den/{slug}/`. Đây là entry DUY NHẤT trong `ROUTE_MAP` có danh sách và chi tiết ở hai nhánh URL khác nhau — giữ chi tiết ở gốc vì `/nha-trang/` đang xếp hạng, dời nó là quyết định SEO riêng. Thi hành: `touristDestination` bị loại khỏi `fieldLevelEntities` (`src/site.config.ts`) nên `fetchAllSlugs` không sinh trang dưới segment này |
 | `/kham-pha/` | hub rollup chơi gì | Attraction cộng Experience (suy ở build) | CollectionPage |
 | `/luu-tru/` | hub rollup ở đâu | Hotel cộng Resort | CollectionPage |
 | `/am-thuc/` | hub rollup ăn gì | Restaurant cộng Specialty | CollectionPage |
 | `/di-lai/` | hub rollup đi lại | Article articleType=transport-guide | CollectionPage |
 | `/dia-danh/` | index nhánh | Place | CollectionPage |
 | `/dia-danh/{slug}` | chi tiết | Place | |
-| `/diem-tham-quan/`, `/diem-tham-quan/{slug}` | index và chi tiết | Attraction | |
+| `/diem-tham-quan/` | index nhánh | Attraction | CollectionPage |
+| `/diem-tham-quan/{term}` | term listing | Category bộ attraction-type | CollectionPage cộng ItemList; sinh theo R2; chống trùng theo R1 (v1.0.19) |
+| `/diem-tham-quan/{slug}` | chi tiết | Attraction | cùng nhánh với term, R1 |
 | `/trai-nghiem/` | index nhánh | Experience | CollectionPage |
 | `/trai-nghiem/{term}` | term listing | Category bộ experience-type | CollectionPage cộng ItemList; sinh theo R2; chống trùng theo R1 |
 | `/trai-nghiem/{slug}` | chi tiết | Experience | cùng nhánh với term, R1 |
@@ -119,7 +122,7 @@ Nguồn sự thật của field là `01-CONTENT_MODEL.md` mục 2; bảng dướ
 | Event | event | field-level | (_type, slug ngôn ngữ) | 01 mục 2.10 cộng I19 | theo eventType (bảng map 2.10) |
 | Article | article | document-level | (language, _type) | 01 mục 2.11 cộng I19 | NewsArticle khi news, còn lại Article |
 | Person | person | field-level | (_type, slug ngôn ngữ) | 01 mục 2.12 cộng I19 | Person |
-| Category | category | field-level | termCode; slug chỉ bộ công khai | 01 mục 2.13, miễn I19 | DefinedTerm |
+| Category | category | field-level | termCode; slug chỉ bộ công khai (experience-type, tour-type, attraction-type) | 01 mục 2.13, miễn I19 | DefinedTerm |
 | Specialty | specialty | field-level | (_type, slug ngôn ngữ) | 01 mục 2.14 cộng I19 | Product cộng additionalType |
 
 Nguồn giá: file `prices.yaml` trong repo, lược đồ ở SAD 3.1 (khóa cấp cao nhất là bookingRef, unit enum đóng ba giá trị, hình dạng theo unit), thi hành PY1 đến PY8 (04 mục 1b). Đường dẫn đề xuất `data/prices.yaml`, chốt khi dựng site (món treo giữ nguyên, SAD mục 6).

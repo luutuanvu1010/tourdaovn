@@ -1,6 +1,6 @@
 import { defineType, defineField } from 'sanity'
 import { PinIcon } from '@sanity/icons'
-import { baseFieldsAfterGallery, baseFieldsBeforeGallery, baseGroups } from './baseFields'
+import { baseFieldsAfterGallery, baseFieldsBeforeGallery, baseGroups, destinationField } from './baseFields'
 import { BulkGalleryInput } from '../components/BulkGalleryInput'
 import { IncomingExperiences } from '../components/IncomingExperiences'
 import { PlaceHierarchy } from '../components/PlaceHierarchy'
@@ -33,6 +33,7 @@ export default defineType({
       }]
     }),
     ...baseFieldsAfterGallery,
+    destinationField,
     defineField({
       name: 'placeType', type: 'string',
       group: 'coBan',

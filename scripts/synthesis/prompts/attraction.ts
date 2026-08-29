@@ -10,7 +10,7 @@ Extract structured data about the attraction "${name}" in Nha Trang, Vietnam fro
 - title: The Vietnamese name of the attraction (string)
 - summary: 2-3 sentence overview in Vietnamese (string)
 - body: Detailed description in Vietnamese covering history, architecture, significance, visitor experience. Multiple paragraphs. (string or array of strings)
-- attractionType: One of: historic, temple, church, museum, theme-park, aquarium, mud-spa, market, park (string, lowercase). Infer from the type of place: temple=chùa, church=nhà thờ, museum=bảo tàng, historic=di tích, theme-park=công viên giải trí, aquarium=thủy cung, mud-spa=tắm bùn/suối khoáng, market=chợ, park=công viên.
+- attractionType: One of: historic, temple, church, museum, beach, island, nature, theme-park, aquarium, mud-spa, market, park, craft-village, general (string, lowercase). Infer from the essential nature of the place, not from what visitors do there: temple=chùa, church=nhà thờ, museum=bảo tàng, historic=di tích, beach=bãi biển, island=đảo/hòn, nature=thác/suối/rừng/vịnh/núi/khu sinh thái, theme-park=công viên giải trí, aquarium=thủy cung, mud-spa=tắm bùn/suối khoáng, market=chợ, park=công viên, craft-village=làng chài/làng nghề. Use general ONLY when none of the others fits — do not use it as a default.
 - officialSource: URL of the official website or fanpage (string, for commercial venue types)
 - containedInPlace: Name of the containing area/place (string, e.g. "Trung tâm Nha Trang") — a text suggestion only, resolved to a database reference later
 - highlights: 3-5 interesting facts or notable features (array of strings, in Vietnamese)

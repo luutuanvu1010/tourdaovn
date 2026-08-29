@@ -1603,6 +1603,237 @@ Tất cả dư AA. `npm --prefix scripts run check:token-parity` — **XANH, kh�
 
 ---
 
+## QĐ-2026-08-25-05 — Đưa trang điểm đến vào phạm vi bề mặt; đồng bộ nó về bộ khối dùng chung
+
+**Ngày:** 2026-08-25 · **Người quyết:** chủ dự án · **Loại:** cửa hai chiều (hoàn nguyên bằng `git revert`)
+
+**Bối cảnh.** Chủ dự án yêu cầu refactor `https://tourdao.vn/nha-trang/` cho (1) đồng bộ bố cục chung và (2) ưu tiên hiển thị di động, rồi nêu nghi vấn *"dường như trước đó có sai lầm khi cấu trúc wireframe đã được viết tay mà không theo khung của hệ thống"*.
+
+Điều tra cho thấy nghi vấn **đúng về hiện tượng, khác về nguyên nhân** — chi tiết ở `DR-061`. Tóm tắt: lệch thừa kế từ commit fork `d7bac08`, rồi bị nới rộng vì ba vòng bề mặt liên tiếp đều để trang này ngoài phạm vi.
+
+**Chốt 1 — đảo ranh giới phạm vi của vòng 5.** `SPEC-2026-08-22-be-mat-vong-5` §9 và dòng 379 ghi *"Design **không** được vẽ lại bố cục trang chủ, header, hay footer trong vòng này"*. Ranh giới đó **hết hiệu lực đối với trang điểm đến**. Lý do vạch nó hồi 22/8 là bốn điều chủ dự án nêu khi ấy đều về trang chi tiết; nay chủ dự án nêu trực tiếp về trang điểm đến.
+
+Vòng 5 **không** bị mở lại: spec đó đã đóng và đã phát hành. Đây là một đợt riêng, phạm vi đúng một trang.
+
+**Chốt 2 — hero chỉ chứa ảnh.** Chủ dự án nêu: *"toàn bộ Hero không chứa mô tả, chỉ có thể chứa Tiêu đề - Heading"*. Áp đúng luật `06` v2.5 §3 vốn đã có: *"trên ảnh chỉ còn huy hiệu loại; `title` và `summary` đều đã ra ngoài — không còn chữ nào đè lên ảnh"*, cộng §3.1 *"Nhãn loại entity … không áp dụng: … touristDestination"*. Hai câu đó cộng lại cho kết quả: **hero trang này còn đúng một tấm ảnh.**
+
+Thứ tự khối nay theo `06` §6 v2.5: breadcrumb → tiêu đề → hero → đoạn mở → nội dung. Trang điểm đến không có thanh dính (thiết bị của trang chi tiết) nên đoạn mở nối thẳng sau hero.
+
+Bỏ theo cùng luật: **lớp phủ tối** (sinh ra chỉ để chữ trên ảnh đọc được; hết chữ thì nó chỉ làm tối 55% dưới của ảnh) và **con dấu trang trí**. Ghi công ảnh **giữ lại** nhưng chuyển xuống dưới ảnh — `Hero` dùng chung không có chỗ cho nó vì trang chi tiết không hiện ghi công.
+
+**Chốt 3 — bốn thay đổi bố cục phần thân, đã duyệt.**
+
+| Khối | Trước | Sau |
+|---|---|---|
+| Tổng quan | xếp dọc, dải Thông tin nhanh chạy hết bề ngang | hai cột: chữ trái, Thông tin nhanh cột phụ 340px — cùng bố cục trang chủ (`QĐ-2026-08-25-01`) |
+| Dải tin cậy | bó trong khung đọc 752px | rộng hết khung 1152px |
+| Điểm tham quan | **cắt cứng còn 3** dù dữ liệu có 4 | hiện đủ 4 — component chung không cắt |
+| Cẩm nang bản địa | 2 thẻ ngang, dạng riêng | 4 thẻ dọc, cùng dạng các mục khác |
+
+Bốn mục cam kết và "Điểm nổi bật" chuyển từ `h2` xuống `h3`. Không mất chữ nào, và đúng hơn về ngữ nghĩa vì chúng vốn nằm trong mục khác.
+
+**Chốt 4 — vá `HomeRollupSection` dù nó ngoài phạm vi một-trang.** Xem `DR-062`. Vá này **cũng đổi trang chủ**: khối rollup 3 mục ở đó đang hiện 3 cột, mỗi ô 119px trên khung 390px, và sẽ về 1 cột. Chấp nhận vì (a) đó là vi phạm Luật 5 đang sống trên production, (b) không vá thì chính `/nha-trang/` vẫn còn một khối 3 cột sau khi đồng bộ, tức mục tiêu (2) không đạt.
+
+**Bằng chứng.** `astro check` 0 lỗi. `gate:all` 9/11 — hai cổng đỏ còn lại là `S24-AUTHORITY-HTML` (6) và `Deferred`/`I16` (1), cả hai chờ dữ liệu chủ dự án, không liên quan. `BM-ORPHAN-REGION`, `BM-EMPTY-REGION`, `Luật 1` (140 trang) đều xanh sau khi gắn `data-region="summary-band"` lên trang này. Đo CDP 390×844: mọi lưới về 1 cột, không tràn ngang. Component 1091 → 390 dòng.
+
+**Còn nợ, ghi để khỏi rơi.**
+1. `HomeHero.astro` nay không còn ai gọi. Xoá là quyết định riêng.
+2. `06` §4.1 nên có hàng khai rõ ba dải quanh hero cho trang điểm đến thay vì thừa hưởng ngầm qua *"khung chung áp dụng"*. Sửa `06` đụng R9, cần phiếu riêng.
+3. `keyFacts` hiện nằm trong cột phụ mục Tổng quan (nếp trang chủ). Khung chung `06` §6 đặt "Thông tin nhanh" ngay sau đoạn mở. Chưa đổi, chưa quyết.
+4. `.feature-grid--stays` trong `DR-060` đã hết ý nghĩa — khối đó nay do `HomeRollupSection` dựng.
+
+---
+
+## QĐ-2026-08-25-06 — Đọc Sanity qua `apicdn` lúc dựng, sau khi hạn mức `api` cạn
+
+**Ngày:** 2026-08-25 · **Người quyết:** chủ dự án · **Loại:** cửa hai chiều (đổi `useCdn` về `false` là hoàn nguyên)
+
+**Chuyện đã xảy ra.** PR #8 merge lúc `09:05:44Z`. Workers Builds chạy, qua hết `astro check` (**0 lỗi**), dựng xong server và client, rồi chết ở lần gọi Sanity **đầu tiên** trong bước prerender:
+
+```
+[ERROR] [build] Failed to call getStaticPaths for src/pages/[...path].astro
+plan_limit_reached - API Requests quota limit reached. Go to sanity.io/manage to upgrade your plan.
+Failed: error occurred while running build command
+```
+
+**Không phải lỗi mã.** Kiểm lại bằng tay cùng token:
+
+| Endpoint | Kết quả |
+|---|---|
+| `pgedy374.api.sanity.io` | **HTTP 402** `plan_limit_reached` |
+| `pgedy374.apicdn.sanity.io` | **HTTP 200**, `count(*)` = 1262 |
+
+`src/lib/sanity.ts:131` đặt `useCdn: false`, nên mọi bản dựng nện vào đúng endpoint đã cạn.
+
+**Hậu quả thực tế — không có gì gãy.** Build hỏng thì không sinh ra bản deploy nào để đè lên bản đang chạy. Production vẫn phục vụ bản `2026-08-25T07:25:31Z` của PR #7; kiểm 5 điểm (`/`, `/nha-trang/`, một trang tour, `/ai/index.json`, `/sitemap-vi.xml`) đều **200**. PR #8 đã vào `main` nhưng chưa lên trang.
+
+**Vì sao hạn mức cạn.** Bản dựng là hộ tiêu thụ lớn nhất: mỗi lần dựng đọc lại toàn bộ dữ liệu cho ~140 trang cộng bốn endpoint `/ai/*`, `llms.txt` và sitemap. Ngày 2026-08-25 có số lần dựng bất thường — tác nhân dựng lại sau gần như mỗi thay đổi trong lúc làm hai đợt `feat/dong-no-ky-thuat` và `feat/dong-bo-trang-diem-den`, cộng bốn subagent mỗi con dựng ít nhất một lần, cộng hai lần Workers Builds. **Đây là lỗi vận hành của tác nhân, ghi lại để không lặp:** đo một lần rồi dùng lại `dist/`, đừng dựng lại sau mỗi sửa nhỏ.
+
+**Chốt — `useCdn: true`.**
+
+**Đánh đổi:** CDN có thể trả nội dung trễ tới ~60 giây. Ở dự án này không thành vấn đề vì publish và deploy **vốn đã tách rời**: webhook Sanity đang tắt theo `QĐ-2026-08-22-03`, nên nội dung chỉ lên trang khi có người đẩy mã — độ trễ 60 giây nằm gọn trong khoảng đó.
+
+**Đo lúc chuyển, không phải suy đoán.** Dựng lại với `useCdn: true` thành công. So sitemap với production:
+
+- **141 URL** so với **140** đang chạy
+- Thêm: `cam-nang/ngam-hoang-hon-nha-trang-o-dau-dep-top-dia-diem-khong-the-bo-lo/` — bài publish sau bản dựng 07:25
+- **Mất: 0 trang** — `R3` an toàn
+
+Nói cách khác CDN ở đây **không cũ hơn** mà còn mới hơn bản đang chạy.
+
+**Không bật lại webhook Sanity lúc này.** Chủ dự án đã đồng ý bật lại (`QĐ-2026-08-22-03` sẽ bị đảo), nhưng tác nhân không có token quản trị nên chưa thi hành. **Giữ nguyên trạng thái tắt** cho tới khi hạn mức rõ ràng đã hồi: mỗi lần webhook bắn là một lần dựng toàn site, và log của chính webhook đó cho thấy ngày 2026-08-22 nó bắn **25 lần trong khoảng một tiếng**.
+
+**Còn phải làm.** Chủ dự án vào `sanity.io/manage` xem chu kỳ hạn mức và mức tiêu thụ thật. Nếu lượng dựng cần vượt hạn mức gói hiện tại thì đây là quyết định nâng gói, không phải quyết định kỹ thuật.
+
+---
+
+## Bổ sung cho `QĐ-2026-08-25-06` — đã đo chi phí một lần dựng, và kết quả sau phát hành
+
+**Ngày:** 2026-08-25, sau khi PR #9 merge. Phần này viết sau phiếu gốc vì lúc chốt chưa ai có con số.
+
+### Một lần dựng tốn hơn 400 lượt gọi Sanity
+
+Đo bằng cách gắn tạm bộ đếm vào `client.fetch` trong `src/lib/sanity.ts` — đúng chỗ duy nhất `createClient` được gọi, nên mọi đường đọc đều bị phủ — rồi chạy `npm run build` một lần. Bộ đếm in mỗi 25 lượt; lần in cuối là **400**, nên tổng thật nằm khoảng **400–420**. Bộ đếm đã gỡ ngay sau khi đo, không commit.
+
+Vì sao nhiều đến vậy: site sinh HTML từ nội dung Sanity, nên mỗi lần dựng phải hỏi *"có những trang nào"* (`getStaticPaths` → `fetchAllSlugs`) rồi *"nội dung từng trang là gì"* cho ~140 trang, cộng bốn endpoint `/ai/*`, `llms.txt` và sitemap.
+
+**Hệ quả — đây mới là phần đáng nhớ:**
+
+| Tình huống | Lượt gọi |
+|---|---|
+| Một lần dựng | **~400** |
+| Một PR chỉ sửa CSS, hoặc chỉ sửa tài liệu | **~400** — vẫn dựng lại toàn bộ |
+| 10 lần dựng/ngày | ~4.000/ngày ≈ **~120.000/tháng** |
+| Webhook Sanity bắn 25 lần trong một giờ (đo thật 2026-08-22) | **~10.000 trong một giờ** |
+
+Hàng cuối là bằng chứng số cho `QĐ-2026-08-22-03`. Lúc ấy phiếu đó chỉ nói "25 lần bắn"; nay biết mỗi lần bắn là ~400 lượt gọi. **Không bật lại webhook cho tới khi hạn mức rõ ràng đã hồi và có cơ chế chặn dội.**
+
+### Ba điều rút ra cho vận hành
+
+1. **Đo một lần rồi dùng lại `dist/`.** Đừng dựng lại sau mỗi sửa nhỏ. Ngày 2026-08-25 tác nhân dựng lại sau gần như mỗi thay đổi qua hai đợt refactor, cộng bốn subagent — cỡ 7.000–8.000 lượt trong một ngày. Đó là nguyên nhân trực tiếp làm hạn mức cạn.
+2. **Merge một PR chỉ-tài-liệu cũng tốn ~400 lượt gọi**, vì Workers Builds dựng lại toàn site bất kể diff đụng gì. Nên gộp thay đổi tài liệu vào cùng PR với thay đổi mã khi có thể.
+3. **`npm run deploy` bỏ qua `gate:all`.** Nó chỉ chạy `astro check && astro build`, không gọi validator nào — `R3`, `R4`, `Luật 1`, `BM-*` đều không được kiểm. Deploy tay thì chạy `npm run gate` trước.
+
+### Kết quả sau phát hành
+
+PR #9 merge `09:55:34Z`, bản dựng lên `09:58:41Z` — **3 phút 7 giây**. Bản này mang cả PR #8 (giao diện trang điểm đến) lẫn PR #9 (đổi endpoint) lên cùng lúc.
+
+| Phép kiểm trên production | Kết quả |
+|---|---|
+| Ba dải quanh hero (`crumb-band`, `title-band`, `summary-band`) | có đủ |
+| Chữ đè lên ảnh hero | **hết cả 5 lớp** (`hero-title`, `hero-summary`, `hero-eyebrow`, `hero-stamp`, `hero-gradient`) |
+| Rãnh lưới thẻ | có |
+| Mọi lưới ở khung 390×844 | **1 cột, 358px**; tràn ngang **0px** |
+| Sitemap | 142 URL — **mất 0**, thêm 2 bài mới publish |
+| CORS `/ai/*` và chuyển hướng 301 của PR #7 | còn nguyên |
+
+Việc "mất 0 trang" là điều kiện `R3`, và là phép kiểm quan trọng nhất với một thay đổi nguồn đọc.
+
+### Còn phải làm
+
+Chủ dự án vào `sanity.io/manage` đối chiếu **~400 lượt/lần dựng** với hạn mức và nhịp dựng thật. Vá `useCdn` chuyển tải sang endpoint có hạn mức riêng, nhưng nó **không làm giảm số lượt gọi** — chỉ đổi chỗ tính. Muốn giảm thật thì phải giảm số lần dựng, hoặc dựng tăng dần thay vì dựng lại toàn bộ.
+
+## ND-009 — Nhánh `feat-bo-kiem-tu-dong`: một lỗi Critical và năm Important chưa vá, chưa được gộp
+
+**Mở:** 2026-08-24 · **Trạng thái:** mở · **Chặn:** không gộp nhánh `feat-bo-kiem-tu-dong` trước khi xử `C1`.
+
+Nhánh dựng bộ kiểm tự động — 10 subagent, 4 hook, 4 script audit, 168 test xanh. 28 commit từ `ed27125`, HEAD `e7f10c6`. Thi hành `docs/plans/2026-08-23-bo-kiem-tu-dong.md`; diễn biến ghi ở `docs/NHAT-KY-2026-08-24-bo-kiem-tu-dong.md`.
+
+Vòng duyệt toàn nhánh phán quyết **gộp được sau khi sửa `C1`**. Phiên dừng trước khi đợt sửa chạy xong, nên toàn bộ danh sách dưới đây **chưa làm**.
+
+### C1 — Critical, chặn gộp
+
+`scripts/audit/gate-audit.ts:194`, hàm `dangChayThatTrongBaoCao`. File bằng chứng **không tồn tại** → mảng rỗng → verdict `pass`.
+
+Đo thật: đổi tên `scripts/reports/validator-status.json` rồi chạy `audit:gate`.
+
+```
+trước:  34 đạt, 28 trượt
+sau:    61 đạt,  1 trượt
+```
+
+**Xoá một file làm 27 mục trượt thật thành 27 mục đạt.** Nghịch đảo trực tiếp `CLAUDE.md` §6 — không có bằng chứng thì mặc định thành *đạt*. Nguy hiểm gấp đôi vì `scripts/reports/` sinh ra bởi build: một `git clean`, một máy CI mới, hay một lần validator hỏng là đủ.
+
+Sửa: phân biệt ba trạng thái — file **không có** → `skip`; file có, **không có mục** id đó → `pass`; file có, **có mục** → `fail`. Kèm test cho cả ba, đặc biệt trạng thái thứ nhất.
+
+### Important
+
+| Mã | Chỗ | Nội dung |
+|---|---|---|
+| `I1` | `gate-audit.ts:257` | `GA4` phát 0 check, 0 skip khi thư mục validator vắng. Báo cáo đi từ 62 xuống 47 mục mà không dòng nào nói `GA4` đã không chạy |
+| `I2` | `gate-audit.ts:235` | `GA3` biến mất im lặng khi thiếu `postbuild-status.json` |
+| `I3` | `deploy-verify.ts:47` | `soDauHieu` trả `pass` khi dấu hiệu vắng ở **cả hai** bên → gõ sai một tham số làm phép kiểm chống `DR-041` thành lời khai rỗng. **`deploy-verify.test.ts:26` đang khoá hành vi sai này bằng test** |
+| `I4` | `doc-reality.ts:215` | `trichLuatChuyenHuong` chỉ nhận dạng `<đường dẫn> <mũi tên> <URL>`, không nhận cú pháp `_redirects` mà dự án thật sự dùng. `DOC3` `skip` vĩnh viễn — phép kiểm chống `DR-043` chưa từng đối chiếu một luật thật nào |
+| `I5` | `guard-data-mutation.sh:79` | Mẫu khớp chuỗi lệnh thô nên chặn nhầm thao tác chỉ-đọc: `cat`, `wc`, `grep`, `git diff`, `git add` trên `seed/` và `migrate/` đều bị chặn. Người dùng sẽ học cách tạo cờ mở khoá để **đọc** — và cờ đó mở luôn đường **ghi**. Sửa: neo mẫu vào động từ thực thi (`node`, `npx`, `tsx`, `npm run`) |
+| `I6` | `code-reviewer.md`, `astro-auditor.md` | Luật mặc định "từ ba file trở lên" đẩy **mọi** diff sang `code-reviewer`, nhưng agent đó tự định nghĩa là reviewer **giao diện**. Diff thuần backend rơi vào sai lăng kính. Sửa hẹp: luật chỉ áp cho diff giao diện; diff khác dùng skill `/code-review` chung |
+
+Brief sửa đầy đủ cho cả sáu mục nằm trong `.superpowers/sdd/2026-08-23-bo-kiem-tu-dong/progress.md`, phần "KẾT QUẢ VÒNG DUYỆT TOÀN NHÁNH".
+
+### Đã phân loại là để lại được
+
+Vòng duyệt cuối kiểm và kết luận không chặn gộp: test `evidenceDir` trùng ngày (nay đã tự phân biệt được, nợ tự đóng); `demUrlSitemap` chỉ khớp `<loc>` trần; `DV3` bị bỏ khi `DV0` hết giờ; `kiemTrang` không loại chú thích HTML; `agents.test.ts` bỏ qua tên công cụ tiền tố `mcp__`; `exitCodeFor` cho `skip` thoát 0; năm commit có `doc-reality.ts` ở dạng nhị phân trong lịch sử.
+
+### Ba việc chờ chủ dự án chốt
+
+1. **27 control `status: gap` trong `control-registry.yaml`** (xem `DR-064`) — lật thành `live` toàn bộ, chỉ lật 15 cái đang xanh, hay để nguyên tới khi dữ liệu sạch? Hiện 11 validator đỏ vì **vi phạm dữ liệu thật**, không phải lỗi mã. Lật là cổng chuyển đỏ.
+2. **Ngưỡng "ba file"** trong luật định tuyến `astro-auditor` ↔ `code-reviewer` — con số do tác nhân chọn, chưa duyệt. Nên chốt cùng `I6` vì cùng một vấn đề.
+3. **Bốn hook chưa từng chạy thật.** Chúng chỉ nạp lúc phiên Claude Code khởi động. Phép thử sau khi khởi động lại: gõ `git add -A` trong repo này — **phải bị chặn**. Không bị chặn nghĩa là hook chưa nạp và mọi hàng rào còn lại cũng chưa có tác dụng.
+
+### Ghi chú vệ sinh
+
+`scripts/reports/validator-status.json` đang ở trạng thái đã sửa trong cây làm việc — do tác nhân chạy `validate` để kiểm chứng `DR-064`, chưa commit. Không phải dấu vết của phiên khác.
+
+---
+
+## QĐ-2026-08-25-07 — Để Growth Trial hết hạn, dự án Sanity rơi về Free
+
+**Bối cảnh.** Ngày 2026-08-25 Sanity gửi cảnh báo *"TourDaoVN has used 100% of API Requests"*. Kiểm ra: dự án `pgedy374` đang ở gói `growth-trial-2023-10-19`, đã dùng 247.5k/250.000 API request của tháng 8, `overageAllowed: false`, và trial hết hạn 2026-08-26T00:57Z — tức sáng hôm sau. Hai đường đi: nâng lên Growth (15 USD mỗi seat mỗi tháng, mở phí vượt 1 USD mỗi 25k request) hoặc không làm gì và tự rơi về Free.
+
+**Câu hỏi.** Có nâng gói không?
+
+**Chốt.** **Không.** Để trial hết hạn, dự án tự rơi về Free. Không thêm thẻ, không nâng cấp. Sanity không trừ tiền gì.
+
+**Ai chốt.** Chủ dự án, trong phiên 2026-08-25.
+
+**Hệ quả đã lường và chấp nhận.**
+- Hạn mức API **không đổi**: Free và Growth Trial đều 250.000 request mỗi tháng, reset 00:00 UTC ngày 1.
+- Bốn thành viên vai `editor` **thành `viewer` — mất quyền Publish trong Studio**. Free chỉ có hai vai `administrator` và `viewer`, không có nấc giữa. Tài khoản admin giữ nguyên toàn quyền. Ai cần publish thì hoặc nâng lên administrator (kèm quyền chạm mọi thiết lập dự án), hoặc nâng gói lại.
+- Mất Comments, Scheduled publishing, AI Assist. Đã kiểm trước khi chốt: **0 release / lịch publish hẹn giờ đang chờ**, nên không mất nội dung nào đã xếp lịch.
+- Dataset `production` vốn đã `public` nên không có gì đổi ở đó.
+
+**Ghi chú.** Phần định lượng — thao tác nào tốn hạn mức, thao tác nào không — tách thành sổ tay riêng ở `docs/SO-TAY-HAN-MUC-SANITY.md`. Nguyên nhân đốt hết hạn mức tháng 8 không phải khách truy cập mà là số lần dựng lại site: 157 commit push lên `main`, mỗi lần Workers Builds tự dựng và đọc lại toàn bộ nội dung, cộng một `astro dev` chạy nền 21 tiếng.
+
+---
+
+## QĐ-2026-08-26-01 — Nhiều điểm đến trên một site: TouristDestination là N
+
+**Bối cảnh.** Chủ dự án yêu cầu thêm được điểm đến ngoài Nha Trang vào CMS, và các điểm đến đó thừa hưởng toàn bộ cấu trúc trang chi tiết giống Nha Trang. Rà soát cho thấy khuôn trang đã đa điểm đến sẵn — `src/pages/[...path].astro:73-80` lặp qua mọi `touristDestination` đã duyệt, `src/lib/sitemap.ts:86` đưa hết vào sitemap, `RouteDispatch` render bằng `TouristDestinationHub` — nhưng **dữ liệu** thì không: hai khối tự động của trang điểm đến ("Các khu vực nên biết", "Cẩm nang bản địa") quét toàn bộ dataset, và không entity con nào khai mình thuộc điểm đến nào. `01-CONTENT_MODEL.md:42` khai cardinality TouristDestination là **1**.
+
+**Câu hỏi.** Site đóng vai gì sau khi thêm điểm đến; gắn nội dung vào điểm đến bằng cách nào; khách tìm thấy điểm đến mới bằng đường nào.
+
+**Chốt.** Sáu điểm, chủ dự án quyết trong phiên 2026-08-26:
+
+1. **Trang chủ `/` vẫn là Nha Trang.** Điểm đến khác là trang anh em `/‹slug›/` cùng khuôn. Các trang danh mục (`/tour/`, `/khach-san/`…) **vẫn gom chung toàn site**, chưa tách theo điểm đến.
+2. **Cardinality TouristDestination 1 → N**, và thêm một field `destination` (reference) vào **mười** entity: place, attraction, experience, hotel, resort, tour, article, restaurant, specialty, event. Chạy script nạp bù dữ liệu cũ về Nha Trang.
+3. **Lối vào là khối "Điểm đến khác" trên trang chủ cộng một mục menu** (loại đích `kind` thứ tám).
+4. **Không đặt `initialValue` mặc định** cho field mới. Mặc định im lặng sẽ gán nhãn Nha Trang cho nội dung điểm đến khác mà không có tín hiệu nào báo. Thiếu ô là **warn** (bất biến I20 mới), không **fail**; trỏ sai type vẫn là **fail** qua `references` trong `gate.config.ts`.
+5. **Hoãn sửa ~30 dòng meta description trong `src/lib/uiCopy.ts`** ("Khách sạn tại Nha Trang"…) — đó là mô tả của các trang danh mục toàn site đang xếp hạng trên Google, sửa là quyết định SEO riêng. Ghi nợ trong `DRIFT_LOG.md`, không im lặng bỏ qua.
+6. **Bản nháp ADR-0028 do Cowork soạn**, chủ dự án phê chuẩn cùng ngày.
+
+**Ai chốt.** Chủ dự án, trong phiên 2026-08-26. `ADR-0028` chuyển sang `accepted` cùng ngày.
+
+**Hệ quả đã lường và chấp nhận.**
+- Có **hai** đường mô tả vị trí trên cùng một document (`containedInPlace` có thứ bậc, `destination` phẳng), và **không có kiểm máy nào bắt hai đường mâu thuẫn**. Cố ý: chúng phục vụ hai vai khác nhau và không suy ra nhau.
+- Khoảng 57 document (số theo bản sao lưu 2026-08-14) bị script ghi vào. **Không lùi được bằng `git revert`** — phải sao lưu trước khi chạy.
+- Enum `siteSettings.sections` mở 19 → 20 khoá; `NavKind` 7 → 8 loại đích. Cả hai là enum đóng có kiểm, phải sửa đồng thời ở schema, đặc tả và mã.
+- Hai meta-validator `g1` và `g4` chép tay danh sách field nên **phải sửa cùng lúc**, nếu không cổng vẫn xanh nhưng nói sai về thực tế.
+
+**Ràng buộc thi hành.** Quota API Sanity đã chạm trần (xác minh 2026-08-26 bằng lỗi `plan_limit_reached`), reset **2026-09-01** theo `QĐ-2026-08-25-07`. Nạp bù dữ liệu và `npm run build` chưa chạy được tới lúc đó. **Thứ tự cứng:** nạp bù xong mới được dựng mã đổi truy vấn — ngược lại là trang chủ Nha Trang rỗng hai khối.
+
+**Tài liệu.** `docs/specs/SPEC-2026-08-26-da-diem-den.md`, `docs/adr/ADR-0028-da-diem-den.md`, kế hoạch thi công `docs/plans/2026-08-26-da-diem-den.md` (8 task).
+
+---
+
 ## QĐ-2026-08-26-02 — Google Sheet là bề mặt nhập giá; `data/prices.yaml` vẫn là nguồn sự thật, đồng bộ một chiều bằng `prices:pull`
 
 **Bối cảnh.** Sửa giá hiện là sửa tay `data/prices.yaml` — cú pháp YAML lồng nhau, khoá con enum đóng, ghi chú giới hạn 40 ký tự. Người nắm giá là người kinh doanh, không phải người viết mã. 21/28 tour đã xuất bản chưa có dòng giá, phần lớn vì rào cản này chứ không phải vì chưa có giá.
@@ -1615,8 +1846,536 @@ Tất cả dư AA. `npm --prefix scripts run check:token-parity` — **XANH, kh�
 
 **Chốt 4 — Sheet phải mở quyền đọc.** Đọc qua đường xuất công khai của Google (`gviz/tq?tqx=out:csv&sheet=<tên tab>`), không dùng khoá API, không dùng OAuth, **không thêm dependency**. Đổi lại: Sheet phải ở chế độ *bất kỳ ai có đường liên kết → người xem*. **Hệ quả phải biết: bảng giá bán là công khai với ai có link.** Giá bán vốn là thông tin công khai (đã hiện trên trang), nên chấp nhận được — nhưng **cấm để bất cứ gì không công khai vào Sheet này**: không giá vốn, không chiết khấu đại lý, không ghi chú nội bộ về khách. Có nhu cầu đó thì mở Sheet thứ hai không nối vào đây.
 
-**Chốt 5 — Xoá dòng phải ồn ào.** Khoá có trong yaml mà không có trong Sheet nghĩa là xoá một dòng giá, và xoá một dòng giá đang được trỏ tới là làm tour đó mất form. Script **không được tự xoá**: phải liệt kê và dừng, chỉ xoá khi người chạy thêm cờ tường minh. Cùng tinh thần "hỏng ồn ào, không hỏng câm" của `DR-064`.
+**Chốt 5 — Xoá dòng phải ồn ào.** Khoá có trong yaml mà không có trong Sheet nghĩa là xoá một dòng giá, và xoá một dòng giá đang được trỏ tới là làm tour đó mất form. Script **không được tự xoá**: phải liệt kê và dừng, chỉ xoá khi người chạy thêm cờ tường minh. Cùng tinh thần "hỏng ồn ào, không hỏng câm" của `DR-099`.
 
-**Chốt 6 — Khối chú thích đầu `prices.yaml` phải sống sót.** Nó ghi bài học `DR-062` (khoá là định danh ổn định, đừng đổi theo slug). Sinh lại file mà xoá mất khối đó là xoá mất chính lời cảnh báo đã phải trả giá mới có.
+**Chốt 6 — Khối chú thích đầu `prices.yaml` phải sống sót.** Nó ghi bài học `DR-097` (khoá là định danh ổn định, đừng đổi theo slug). Sinh lại file mà xoá mất khối đó là xoá mất chính lời cảnh báo đã phải trả giá mới có.
 
 **Ranh giới.** Mục này chỉ nói về giá. Không mở đường cho Sheet điều khiển bất cứ thứ gì khác. Muốn thêm một Sheet cho nội dung, lịch trình, hay tồn kho là quyết định mới — `00-PROJECT_BRIEF` §5 "không quản lý chỗ trống" còn nguyên.
+
+## QĐ-2026-08-27-01 — Bật lại deploy tự động sau khi Publish, kèm sửa ba chỗ lệch của webhook
+
+**Ngày:** 2026-08-27 · **Người quyết:** chủ dự án · **Loại:** cửa hai chiều (đặt `isDisabledByUser: true` là hoàn nguyên)
+
+**Bối cảnh.** Webhook `Cloudflare rebuild` (`UCT8eZl6s8SXBtKP`) bị tắt từ 2026-08-22 theo `QĐ-2026-08-22-03`, vì mỗi lần bắn là một lần dựng lại đọc toàn bộ nội dung qua Sanity Content API, và tháng 8 đã đốt sạch hạn mức 250k theo cách đó. `DR-042` ghi ba chỗ lệch `ADR-0009` và đặt điều kiện: **xử xong mới được bật lại**.
+
+**Điều kiện đã thay đổi từ lúc tắt.** Hai việc do đợt khác làm đã tháo phần lớn rủi ro:
+
+1. **`QĐ-2026-08-25-06` chuyển bản dựng sang đọc qua CDN** (`src/lib/sanity.ts` nay `useCdn: true`). Bản dựng không còn ăn vào xô `api` 250k mà vào xô **`apicdn` 1.000.000/tháng, hiện gần như chưa dùng**. Đây là thứ đổi bản chất bài toán chi phí, không phải một tối ưu nhỏ.
+2. **Gói đã lên Growth trả phí** (xác minh 2026-08-26). Vượt hạn mức không còn là HTTP 402 dừng hẳn mà là hoá đơn — nhưng vượt CDN rẻ hơn vượt `api` **bốn lần** ($1/250k so với $1/25k), và xô CDN lớn gấp bốn.
+
+**Chốt.** Bật lại webhook, đồng thời sửa đúng hai trong ba chỗ lệch của `DR-042`:
+
+| | Trước | Nay | `ADR-0009` |
+|---|---|---|---|
+| Sự kiện | `create` | `create`, `update`, `delete` | mục 3 |
+| Dataset | `*` | `production` | mục 3 |
+| Lọc type | không có | 15 type có render trang | mục 3 |
+| Lọc draft | có | giữ nguyên | — |
+| Debounce | không | **vẫn không** | mục 4 cho phép MVP bỏ qua |
+
+**Vì sao chỉ nghe `create` là lỗi nặng nhất.** Sửa một trang **đã publish** rồi bấm Publish lại là sự kiện `update`. Theo cấu hình cũ, thao tác thường gặp nhất của biên tập viên **không kích build**. Nghĩa là hook vừa bắn thừa cho việc không cần, vừa im lặng đúng lúc cần nhất.
+
+**Vì sao bộ lọc type đáng giá hơn tưởng.** Dataset có 18 `_type`, trong đó **5 là của hệ thống**: `sanity.imageAsset` (sinh mỗi lần tải một tấm ảnh), `system.schema` (sinh mỗi lần `sanity deploy` — riêng ngày 2026-08-27 đã ba lần), `system.group`, `system.retention`, `sanity.canvas.link`. Với `dataset: "*"` không lọc type, **mỗi document hệ thống đó kích một lần dựng toàn site**. Đây nhiều khả năng là phần lớn tiếng ồn mà `DR-042` đo được (25 lần bắn/ngày, 4 lần trong 6 giây) — không phải biên tập viên bấm Publish 25 lần.
+
+**Nợ còn mở, cố ý.** Debounce (`ADR-0009` mục 4: Worker gom sự kiện, bắn sau khoảng lặng 120 giây) **chưa làm**. Chính ADR ghi "MVP có thể bỏ qua Worker và bắn thẳng, chấp nhận build xếp hàng". Với xô CDN 1M và bộ lọc type vừa thêm, chấp nhận được. Phải xem lại nếu mức dùng CDN vượt ~50%.
+
+**Hệ quả phải biết.** Bản dựng tự động lấy mã từ **`origin/main`**, không phải từ nhánh đang làm. PR #11 chưa gộp, nên tới khi gộp, bấm Publish sẽ phát hành **hành vi của `main`**: có trang `/ninh-thuan/` (định tuyến đa điểm đến vốn đã có trên `main`), nhưng **chưa có** `/diem-den/` và hai khối trang chủ **chưa lọc** theo điểm đến.
+
+**Đã kiểm.** Đọc lại cấu hình từ server sau khi ghi, không tin phản hồi của chính lệnh ghi: `dataset: production`, `on: [create, update, delete]`, `isDisabledByUser: false`, `isDisabled: false`, `includeDrafts: false`, filter đúng như khai. **Chưa kiểm đầu Cloudflare** — deploy hook đó chạy được trước khi bị tắt, nhưng lần bắn thật đầu tiên mới xác nhận trọn chuỗi.
+
+---
+
+## QĐ-2026-08-27-02 — Đóng ba việc treo cuối đợt đa điểm đến
+
+**Ngày:** 2026-08-27 · **Người quyết:** chủ dự án (mục 1, 2 xác nhận lại quyết định đã có; mục 3 là đính chính sự kiện) · **Loại:** cửa hai chiều
+
+Cuối đợt `ADR-0028` còn ba việc treo. Rà lại thì **hai trong ba đã có câu trả lời từ trước** — chúng treo vì tôi ghi sai, không phải vì thiếu quyết định.
+
+### 1. Menu chính giữ đúng bảy mục — không thêm "Điểm đến"
+
+`src/site.config.ts` khai thành chữ: *"menu chính giữ đúng bảy mục bán hàng"*. Khi tôi nêu việc Ninh Thuận không có mặt trên menu, chủ dự án **chọn phương án khác** thay vì phá luật đó: đổi nút phụ ở hero từ "Xem trang điểm đến" thành **"Tất cả địa danh"** trỏ `/diem-den/`.
+
+Vậy `/diem-den/` có **ba** lối vào: nút hero, chân trang (tự sinh từ `ROUTE_MAP`), và khối "Điểm đến khác" trên trang chủ kèm link "Xem tất cả". Luật bảy mục giữ nguyên. Việc này **đóng**, không phải treo.
+
+### 2. Event cố ý không có trang — không phải câu hỏi mở
+
+`src/site.config.ts` đã ghi lý do ngay trên ba công tắc đang tắt: *"Ba mục dưới thuộc engine gốc (site du lịch Nha Trang), site này không dùng."* `restaurant`, `specialty`, `event` **không có dòng nào trong `ROUTE_TABLE`**, nên bật công tắc thôi cũng không sinh route.
+
+Nút "Xem trang live" không hiện trên Event **là hành vi đúng**. `DR-074` đã đính chính. Còn lại một nợ nhỏ: dataset có **1 document `event` đã duyệt** cho entity site không dùng — dữ liệu chết, xoá hay giữ là việc chủ dự án.
+
+### 3. `deferred-gate` — sửa hai chỗ khai sai trong `control-registry.yaml`
+
+**`I16` khai `gap` là sai sự thật.** I16 không phải nợ chưa làm; nó là quyết định kiến trúc về **nơi** thi hành. `04-CONSTRAINTS` §1 ghi rõ *"thi hành ở bảng PY (PY1, PY2, PY4)"*, và `validate-constraints` báo I16 là `defer`, không phải `fail`. Đổi thành `status: deferred` kèm `deferred_to: [PY1, PY2, PY4]` — đúng khuôn mà `deferred-gate` đòi.
+
+**`PY1`/`PY2`/`PY4` khai `gap` cũng sai.** Cả ba **chạy thật và xanh**: `validator-status.json` ghi `pass` cho từng cái. Lật sang `live`.
+
+⚠ **Đây KHÔNG phải lần lật 27 dòng `gap`** mà phần đầu `control-registry.yaml` đang treo chờ chủ dự án. Câu hỏi đó vẫn mở. Ở đây chỉ lật đúng **ba** control, và chỉ vì `I16` uỷ thác sang chúng — cả ba đều đang pass, nên không control nào chuyển đỏ. Lý do phải hỏi trước khi lật cả 27 (11 control đỏ vì dữ liệu) không áp cho ba cái này.
+
+**Kết quả đo được:**
+
+| | Trước | Sau |
+|---|---|---|
+| `npm run gate` | 2/11 đỏ | **1/11 đỏ** |
+| `audit:gate` | 40 đạt / 27 trượt | **46 đạt / 23 trượt** |
+| Mục trượt mới | — | **không có** |
+
+Bốn mục `GA6/I16`, `GA6/PY1`, `GA6/PY2`, `GA6/PY4` biến mất; `GA1`/`GA3` cho ba control vừa lật đều đạt.
+
+### Còn lại: `governance-post` (S24), và vì sao tôi KHÔNG tự đóng
+
+Sáu lỗi trên bốn trang, đều là **dữ liệu**:
+
+| Trang | Thiếu |
+|---|---|
+| `cam-nang/review-mini-beach-…` | `approvedBy`; và `officialSource` hoặc `author` |
+| `cam-nang/top-7-ngon-nui-…` | `approvedBy` (đã có tác giả Nguyễn Phạm Trường Duy) |
+| `dia-danh/ben-cang-da-chong` | `approvedBy`; và `officialSource` hoặc `author` |
+| `tac-gia/ho-dac-duy` | `contentProvenance` (đã có `approvedBy`) |
+
+**Tôi không tự điền.** `approvedBy` trong dataset này có **bốn giá trị khác nhau** — "Tour đảo Nha Trang", "Trường Duy", "Vũ Lưu", "Vũ Lưu (Gạo tẻ)" — tức nó ghi **tên người duyệt thật**, không phải một hằng máy suy được. `contentProvenance` và `author` cũng vậy: cả ba đều là lời khẳng định về **con người đã làm gì**. Máy điền vào đó là tạo ra một bản ghi thẩm quyền không có thật — đúng loại việc `04-CONSTRAINTS` sinh ra để chặn.
+
+Toàn dataset còn **7 document approved thiếu `approvedBy`** (4 cái ngoài danh sách trên chưa làm S24 đỏ vì chưa render ra trang chi tiết). Điền xong bảng trên là `governance-post` xanh, và `pre-push` (`DR-073`) thôi đòi `--no-verify`.
+
+---
+
+## QĐ-2026-08-27-03 — Loại điểm tham quan: mở rộng enum bản thể, thêm tầng nhãn, sửa tập rẽ nhánh I2
+
+**Ngày:** 2026-08-27 · **Người quyết:** chủ dự án · **Loại:** phần lớn **cửa hai chiều**; riêng việc sửa tập rẽ nhánh của **I2** là **gần một chiều** nên bắt buộc có bản ghi này (`01-CONTENT_MODEL` §5.3)
+
+**Spec:** `docs/specs/SPEC-2026-08-27-loai-diem-tham-quan.md` (duyệt cùng ngày)
+
+### Bối cảnh — đo trên bản dựng, không phải cảm nhận
+
+Trích `@type` thứ hai trong JSON-LD của cả 39 trang `/diem-tham-quan/`:
+
+| Tình trạng | Số trang |
+|---|---|
+| `attractionType` trống → phát `["TouristAttraction","TouristAttraction"]` | **17** (44%) |
+| Gán `theme-park` nhưng sai bản chất (vịnh Nha Trang, vịnh Nha Phú, Ba Hồ, Yang Bay, Bãi Dài, Bãi Tranh, Hòn Sỏi, đảo Hoa Lan–Hòn Heo) cộng Hòn Tằm gán `mud-spa` | **9** |
+| Đúng | **13** |
+
+Nguyên nhân gốc không phải người nhập liệu cẩu thả: enum 9 giá trị **không có ô nào** cho ba nhóm chiếm phần lớn tồn kho — biển/đảo (9 doc), thiên nhiên (11 doc), làng chài/làng nghề (3 doc). Gặp danh sách không có ô đúng thì người ta bỏ trống hoặc chọn ô gần nhất. Đây là lỗi thiết kế từ vựng, sửa ở tầng từ vựng.
+
+### Chốt 1 — hai cơ chế, không trộn
+
+Dự án đã có sẵn hai tầng phân loại và đợt này phát biểu rõ ranh giới giữa chúng:
+
+| | `attractionType` | `category` bộ `attraction-type` (mới) |
+|---|---|---|
+| Số trị | **một** | nhiều |
+| Nhiệm vụ | quyết `@type` JSON-LD | nhãn lọc cho người đọc |
+| Ra schema.org bằng | type thứ hai trong mảng `@type` | `additionalType` + trang term `DefinedTerm`/`CollectionPage` |
+| Vào gate publish | có | **không** |
+
+Ba mục **Trải nghiệm du lịch**, **Khu nghỉ dưỡng**, **Ẩm thực** trong danh sách chủ dự án đưa **thành nhãn, không thành loại**. Lý do: chúng đã là entity riêng (`§2.4` Experience, `§2.7` Resort, `§2.5` Restaurant / `§2.14` Specialty), và lằn ranh `§2.4` — *"Experience là việc để làm, Attraction là nơi để đến"* — giữ nguyên, không mở ADR. Hệ quả cụ thể: Hòn Tằm nằm loại **đảo**, mang nhãn tắm bùn + nghỉ dưỡng + ẩm thực, thay vì bị ép chọn một.
+
+### Chốt 2 — enum 9 → 14 giá trị
+
+Năm giá trị mới: `beach` → `Beach`; `island` → `Landform` + `additionalType` Q23442 (chép tiền lệ `§2.2`); `nature` → `Landform`; `craft-village` và `general` → `TouristAttraction` **đơn**.
+
+`general` mang nhãn **"Điểm thu hút khách"**, không phải "Khác" — nhãn nói đúng thứ nó phát ra, và không mời gọi dùng như sọt rác.
+
+**Không gộp** `temple`/`church` và `theme-park`/`park`: giữ `BuddhistTemple`, `Church`, `AmusementPark`, `Park`. Gộp lại sẽ phải hạ về type cha và mất độ mịn — đó là đi lùi.
+
+**Ngoại lệ có ý thức:** `nature` gộp thác, suối, rừng, vịnh, núi (11 doc). `Landform` là type cha trung thực của cả năm; tách ra cho các ô 1–3 doc. Độ mịn lấy lại ở tầng nhãn qua Wikidata. Tách sau là cửa hai chiều.
+
+### Chốt 3 — I2 nay có **ba** nhánh (phần gần một chiều)
+
+| Nhánh | Bắt buộc | Gồm |
+|---|---|---|
+| Bách khoa | `sameAs` | historic, temple, church, museum, **beach, island, nature** |
+| Venue | `officialSource` | theme-park, **aquarium**, mud-spa, market, park |
+| **Một trong hai** | `sameAs` **hoặc** `officialSource` | **craft-village, general** |
+
+Nhánh thứ ba có tiền lệ hình dạng trong `04-CONSTRAINTS` I12 (Article transport-guide cần ít nhất một trong `howTo`, `faq`).
+
+**Vì sao phải có nhánh thứ ba thay vì để ô mặc định trống gate.** Một giá trị không thuộc nhánh nào thì `checkI2` **im lặng bỏ qua** — không phải "cho phép", mà là "không kiểm". Đó đúng là cơ chế đang làm `aquarium` hỏng (xem dưới). Để `general` rơi ra ngoài cả ba nhánh là biến một tai nạn thành thiết kế, và trái nguyên tắc nền: **không đăng thứ không dẫn được nguồn**.
+
+**Bằng chứng nhánh thứ ba là đúng liều, không phải nới lỏng:** làng nghề Trường Sơn không có Wikipedia nhưng có trang Tổng cục Du lịch — biên tập viên đã tự dán link đó vào `sameAs`. Ép đúng Wikidata sẽ đẩy người ta đi bịa; miễn hẳn nguồn thì mất kiểm soát. "Một trong hai" khớp thực tế đang diễn ra.
+
+### Chốt 4 — `aquarium` về nhóm venue, đóng drift ba nơi
+
+Trước đợt này thuỷ cung bị ba nơi đòi ba thứ khác nhau:
+
+| Nơi | Xếp nhóm | Đòi |
+|---|---|---|
+| `01-CONTENT_MODEL` §2.3 | venue | `officialSource` |
+| `shared/gates/index.ts:57` (validator CI) | venue | `officialSource` |
+| `cms/schemas/attraction.ts:59` (Studio) | **bách khoa** | `sameAs` |
+| `scripts/synthesis/classify.ts:27` + `output-validator.ts:8` | **không nhóm nào** | không gì |
+
+Hậu quả thật: nhập xong Studio báo đạt, tới lúc phát hành máy kiểm báo trượt. Chốt theo `01` và validator CI — **venue** — vì thuỷ cung về bản chất là cơ sở có chủ, có vé, có giờ mở cửa, và vì sửa Studio là sửa một chỗ thay vì hai. Viện Hải dương học giữ nguyên link Wikipedia đang có, không mất gì.
+
+### Phạm vi và cái không làm
+
+Không chuyển doc nào giữa Attraction và Place — Hòn Mun, Dốc Lết, Bãi Dài **giữ là Attraction** theo quyết định của chủ dự án. Không đụng entity Experience, Resort, Restaurant, Specialty. Không tách `nature`. Không sửa drift `slug` localized của Category (chỉ ghi `DRIFT_LOG`).
+
+### Nợ mở, cố ý
+
+**ĐÍNH CHÍNH cùng ngày, sau khi đo trên dataset thật.** Đoạn dưới đây viết lúc soạn là **SAI**, giữ lại nguyên văn để thấy sai ở đâu:
+
+> ~~`lang-chai-bich-dam` và `ben-du-thuyen-nha-trang` hiện **không có cả `sameAs` lẫn `officialSource`**.~~
+
+Sai vì đo bằng cách quét HTML đã dựng, ở đó `url` của `ImageObject` bị đọc nhầm thành `url` của chính thực thể. **Cả hai doc đều CÓ `officialSource`**, nên chúng qua nhánh "một trong hai" bình thường, không phải nợ.
+
+**Nợ thật, đo trên dataset (không phải trên `dist/`):** bốn doc sẽ trượt I2 sau khi xếp lại loại, đều cùng một hình dạng — **có `officialSource`, không có `sameAs`, nhưng bị nhánh bách khoa đòi `sameAs`**:
+
+| Doc | Loại mới | Có |
+|---|---|---|
+| `rung-thong-khanh-son` | `nature` | officialSource |
+| `dao-ga-nha-trang` | `island` | officialSource |
+| `khu-du-lich-dao-hoa-lan-hon-heo` | `island` | officialSource |
+| `khu-du-lich-mini-beach` | `beach` | officialSource |
+
+Cả bốn là **điểm du lịch có quản lý dựng trên nền tự nhiên**: có website chính thức, không có mục bách khoa. Lằn ranh "tự nhiên" và "có quản lý" **cắt ngang** ba giá trị `beach`/`island`/`nature`, nên một phép gán nhóm cứng không mô tả được. Món này để mở, xem mục cần quyết ở spec.
+
+**Đếm lại tồn kho:** dataset có **53** document `attraction` (41 approved đã publish, còn lại draft), không phải 39. Con số 39 lấy từ `dist/` — một bản dựng cũ. Bảng §8 của spec vì thế thiếu 5 doc, trong đó `Núi Cô Tiên` **approved nhưng không có `slug.vi`**, tức không render ra trang nào.
+
+**Máy không tự điền nguồn** — giữ nguyên lý do đã ghi ở `QĐ-2026-08-27-02` mục 3: nguồn dẫn là lời khẳng định về sự thật ngoài đời, không phải hằng suy được.
+
+### Bổ sung 1 (cùng ngày 2026-08-27) — `beach`/`island`/`nature` chuyển sang nhánh một trong hai
+
+Chốt sau khi **chạy thử migration trên dataset thật rồi đo**, không phải suy từ bàn giấy.
+
+Bốn doc trượt I2, tất cả cùng một hình dạng: **có `officialSource`, không có `sameAs`** —
+`rung-thong-khanh-son`, `dao-ga-nha-trang`, `khu-du-lich-dao-hoa-lan-hon-heo`, `khu-du-lich-mini-beach`.
+
+Xếp `beach`/`island`/`nature` vào nhóm bách khoa đã giả định **"tự nhiên thì có danh tính bách khoa"**. Dữ liệu bác bỏ: 18/22 doc thuộc ba loại này tự nguyện có `sameAs` — đó là địa danh thật (Hòn Mun, thác Tà Gụ, Hòn Chồng, vịnh Nha Trang); bốn cái còn lại là **điểm du lịch có quản lý dựng trên nền tự nhiên**, có website nhưng không ai viết Wikipedia về chúng. Lằn ranh "tự nhiên" so với "có quản lý" **cắt ngang** ba giá trị, nên một phép gán nhóm cứng không mô tả được thực tế.
+
+Ba nhánh I2 sau bổ sung:
+
+| Nhánh | Bắt buộc | Gồm |
+|---|---|---|
+| Bách khoa | `sameAs` | `historic`, `temple`, `church`, `museum` |
+| Venue | `officialSource` | `theme-park`, `aquarium`, `mud-spa`, `market`, `park` |
+| Một trong hai | ít nhất một trong hai | `beach`, `island`, `nature`, `craft-village`, `general` |
+
+**Không phải nới cổng.** Hợp ba tập vẫn phủ đúng 14 giá trị, không ô nào được miễn nguồn, và ca kiểm cưỡng chế điều đó vẫn xanh. Bốn nhóm `historic`/`temple`/`church`/`museum` giữ bách khoa nghiêm ngặt vì với chúng giả định trên đúng.
+
+### Bổ sung 2 — thứ tự thi hành: dữ liệu PHẢI đứng sau khi mã lên `main`
+
+Lượt chạy migration đầu tiên (07:42) đã **làm hỏng production trong ít phút**. Mỗi lần patch một `attraction` đã publish là một lần webhook `Cloudflare rebuild` bắn (bật lại theo `QĐ-2026-08-27-01`), và webhook dựng từ **`origin/main`** — nơi chưa có v1.0.19. Kết quả đo được trên `tourdao.vn/diem-tham-quan/lang-chai-bich-dam/`: huy hiệu hero hiện **chuỗi mã máy `craft-village`** cho khách, vì `uiCopy` trên `main` không có nhãn cho giá trị mới nên `typeLabel` rơi về chính mã.
+
+Đã hoàn nguyên toàn bộ 29 bản ghi từ `backups/backup-2026-08-27-07-42.ndjson` bằng `cms/_revert-attraction-types.mjs`; xác minh dataset khớp 53/53 và production trở lại đúng trạng thái cũ.
+
+**Luật rút ra, áp cho mọi đợt sau:** khi một thay đổi có **cả** phần dữ liệu Sanity **lẫn** phần mã, và mã còn nằm trên nhánh chưa gộp, thì **cấm chạm dữ liệu production** cho tới khi mã đã ở trên `main`. Lý do gốc: dataset là tài nguyên **dùng chung** giữa nhánh đang làm và bản đang chạy, nên dữ liệu luôn tới production trước mã. "Mã xong" không đồng nghĩa "mã đang chạy".
+
+---
+
+## QĐ-2026-08-28-01 — Gỡ vùng "Trust bar" khỏi trang điểm đến; bốn điểm khác biệt chỉ còn ở trang chủ
+
+**Bối cảnh.** Chủ dự án hỏi khối bốn ô ngay trên "Tổng quan về Nha Trang" (*Xe đưa đón tận nơi*, *Hướng dẫn viên đi cùng*, *Giá tốt*, *Thanh toán linh hoạt*) là tham chiếu hay viết cứng. Rà soát cho thấy nó viết cứng ở `src/lib/homepage.ts:53-58`, lặp cho năm ngôn ngữ — nhưng viết cứng **không sai đặc tả**, vì cả hai hàng chi phối vùng này đều khai nguồn là `config (build)`.
+
+Cái sai nằm chỗ khác: **một component, một nguồn chữ, hai hàng đặc tả ngược nhau.** `06` §5.7 "Vì sao chọn" (trang chủ) đòi lập luận bán hàng — `SiteHome.astro:204` làm đúng. `06` §4.1 "Trust bar" (trang điểm đến) đòi *"cam kết hệ thống về nội dung duyệt, dữ liệu có nguồn, cập nhật rõ; **không phải CTA marketing**"* — nhưng `TouristDestinationHub.astro:146` lấp ô đó bằng chính khối bán hàng của trang chủ.
+
+**Số đo quyết định.** Bản dựng 2026-08-28, cả bốn trang điểm đến đang xuất bản: khối bán hàng hiện 1/1 trên cả bốn; "Xác minh dữ liệu: Wikidata" **0/4**; "Cập nhật lần cuối" **0/4**; `AuthorityMeta` **0/4** (chỉ chạy ở nhánh `kind === 'detail'`). Tức ba cam kết mà hàng §4.1 gọi tên **đạt con số không trên mọi trang điểm đến**, dù hàng đó khai "bắt buộc / luôn hiện".
+
+**Chốt.** Chủ dự án quyết trong phiên 2026-08-28, chọn phương án gỡ hẳn:
+
+1. **Gỡ `<HomeTrustBar>` khỏi `TouristDestinationHub.astro`.** Trang điểm đến đi thẳng từ đoạn mở sang "Tổng quan về {tên}".
+2. **Xoá hàng "Trust bar" khỏi `06` §4.1** và khỏi danh sách khối của §5.7. Nâng `06` lên **v2.7.0**.
+3. **GIỮ NGUYÊN TOÀN BỘ module "Vì sao chọn Tour Đảo" trên trang chủ** — yêu cầu minh thị của chủ dự án. Không đổi một chữ nào trong bốn mục; `HOME_COPY.trustItems`, `HomeTrustBar.astro`, `SiteHome.astro:204` và khoá `trustBar` trong `siteSettings.sections` đều giữ y nguyên.
+
+**Phương án bị loại.** *Giữ ô, thay ruột bằng ba cam kết thật* — loại vì cả ba là dữ liệu per-document (`reviewStatus`/`approvedBy`, `sameAs`, `updatedAt`), không phải `config (build)`, và chúng đã có vùng riêng là `HomeMetaBar` + `AuthorityMeta`; dựng thêm vùng thứ hai cho cùng field là đúng thứ **Luật 1** cấm. *Đưa bốn mục lên Sanity* — loại vì đi ngược cả hai hàng khai `config (build)`, và nội dung là định vị công ty, đổi theo chiến lược chứ không theo biên tập.
+
+**Hệ quả đã lường và chấp nhận.**
+- Ý "cam kết hệ thống" không còn hàng nào chở trong `06` §4.1. Chấp nhận vì số đo cho thấy ý đó hiện **đang bằng không** — gỡ hàng là ghi nhận sự thật, không phải đánh mất thứ đang có.
+- Trang điểm đến ngắn đi một dải, không có khối nào thế chỗ. Theo **R7**, vùng rỗng ẩn hẳn chứ không dựng khung thay thế.
+- `HomeTrustBar` từ nay có đúng một nơi dùng và đúng một hàng đặc tả.
+
+**Việc kéo theo, tách phiếu.** Nếu vẫn muốn tín hiệu tin cậy thật trên trang điểm đến thì **không thiếu chỗ mà thiếu dữ liệu**: (1) mở `AuthorityMeta` cho `kind === 'destination'` trong `RouteDispatch.astro`; (2) nạp `sameAs` wikidata cho bốn document `touristDestination` để `HomeMetaBar` render được. Cố ý không gộp — đó là thêm tính năng, còn quyết định này chỉ gỡ một vùng sai chỗ.
+
+**Tài liệu.** `docs/adr/ADR-0029-go-trust-bar-khoi-trang-diem-den.md`, `docs/core-specs/06-BINDING_MAP.md` (v2.7.0).
+
+---
+
+## QĐ-2026-08-28-02 — Chữ thân bài 17 → 19px toàn trang; hero cao thêm 50px CHỈ ở trang điểm đến
+
+**Bối cảnh.** Chủ dự án yêu cầu (2026-08-28) nâng chiều cao khung Hero thêm khoảng 50px và tăng cỡ chữ thân bài thêm 2px, áp cho toàn trang. Trước khi sửa, đã đo trên bản dựng thật (Chrome, tiêm CSS đè rồi đo lại). Đường nền tái lập **đúng** con số `06` §3 đã ghi — thanh dính 618→675 khi h1 một dòng, 674→731 khi hai dòng — nên số đo so được thẳng với mốc màn đầu **657px** mà đặc tả dùng.
+
+**Chốt.** Chủ dự án quyết theo khuyến nghị:
+
+1. **`--fs-base` 17 → 19px (`1.0625rem` → `1.1875rem`), áp toàn trang.**
+2. **Hero +50px, CHỈ trang điểm đến.** Thêm prop `tall` cho `Hero.astro`; `TouristDestinationHub` bật, `DetailLayout` không.
+3. Hai việc còn lại của lượt rà soát ghi **nợ**, không làm trong đợt này (xem cuối phiếu).
+
+**Vì sao chữ 19px an toàn — số đo, không phải phán đoán.**
+
+| | 17px | 19px |
+|---|---|---|
+| Thanh dính, h1 một dòng / hai dòng | 618 / 674 | **618 / 674 — không nhúc nhích** |
+| Ký tự mỗi dòng | 83 | **83 — không đổi** |
+| Tràn ngang ở 1366 và 386px | không | **không** |
+| Chiều dài trang desktop | 10.919 | 11.551 (**+5,8%**) |
+| Chiều dài trang di động | 15.520 | 16.969 (**+9,3%**) |
+
+**Luật 3 không bị đụng** vì dải breadcrumb, dải tiêu đề và hero đều không đọc `--fs-base`. Số ký tự mỗi dòng đứng yên vì cột chữ khai bằng `ch` — cột nở theo chữ.
+
+**19 là TRẦN của thang này.** Cột chữ 70ch ở 19px đo 764px; cột chính của lưới `1fr 340px` trong khung 1200 rộng 812px — hở 48px. Ở 20px cột chữ thành ~804px, tức chạm. Muốn lên nữa phải nới `--container` trước.
+
+**Vì sao hero +50px KHÔNG áp cho trang chi tiết.** Đo ở 1366 với +50px thật: thanh dính 618→**668** (h1 một dòng), 674→**724** (hai dòng). Mốc màn đầu là 657px. Nghĩa là hôm nay chỉ tiêu đề hai dòng rơi khỏi màn đầu; nâng 50px thì **mọi tiêu đề đều rơi**. Đó đúng là thứ `QĐ-2026-08-25-01` đã cắt 430→380 để tránh. Di động cũng vậy: 240→290 đưa hero từ 41% lên **47%** màn 800px, ăn vào chính lý do đã cắt 280→240. Trang điểm đến **không có thanh dính** nên Luật 3 không trói ở đó — được nâng miễn phí.
+
+**Một cái bẫy số học đã tránh.** Nâng riêng **trần** `clamp` 380→430 KHÔNG cho +50px ở mọi khổ, vì `30vw` mới là số đang trói: đo được +4px ở 1280, +30px ở 1366, và đủ +50px chỉ từ 1440 trở lên. Muốn +50 thật phải cộng vào **số giữa** — `clamp(330px, calc(30vw + 50px), 430px)`.
+
+**Cách thi hành.** Chiều cao hero gom về **một biến** `--hero-h` đặt trên `.hero-shell`, thay vì lặp cùng biểu thức ở sáu chỗ như trước. Biến thể `.hero-shell--tall` chỉ đặt lại biến. Nhờ vậy hai biến thể ảnh-đơn và mosaic không thể lệch nhau nữa — đúng lỗi mà chú thích cũ trong `Hero.astro` từng mô tả là "không thể xảy ra" trong khi nó đang xảy ra.
+
+**Tài liệu.** `06-BINDING_MAP` v2.7.0 → **v2.8.0** (§3 hàng Hero); `07-DESIGN_TOKENS` §2 (`font.size.base`, `font.size.scale`).
+
+**Nợ ghi lại, chủ dự án quyết hoãn.**
+1. `AuthorityMeta` cho `kind === 'destination'` + nạp `sameAs` wikidata cho bốn document `touristDestination` — điều kiện để trang điểm đến có tín hiệu tin cậy thật (xem `ADR-0029`).
+2. `RouteDispatch.astro` còn ép kiểu `entity as 'experience' | 'tour'` khi gọi `TermIndex`, trong khi runtime nay truyền cả `'attraction'`; hệ quả là card ở trang term attraction chưa hiện nhãn loại dù dữ liệu đã có (xem `DR-077`).
+
+---
+
+## QĐ-2026-08-28-03 — Một định dạng Hero duy nhất cho mọi trang chi tiết entity
+
+**Bối cảnh.** Chủ dự án yêu cầu (2026-08-28) áp cùng một định dạng Hero cho tất cả entity type ở trang chi tiết. Yêu cầu đọc được theo hai nghĩa — đồng bộ **chiều cao**, hay đồng bộ **bố cục** (mosaic hay ảnh đơn) — nên đã hỏi lại trước khi làm. Chủ dự án chọn **cả hai**. *(Cùng ngày, sau khi xem số đo, chủ dự án chốt lại phần bố cục: dùng cơ chế fallback đã có sẵn thay vì ép mọi trang thành mosaic. Xem mục "Phần bố cục" bên dưới — đó mới là nội dung có hiệu lực.)*
+
+**Hiện trạng đo được trước khi sửa.**
+- Chiều cao: `QĐ-2026-08-28-02` vừa dựng biến thể `tall` cho riêng trang điểm đến (430px), trang chi tiết giữ 380px. Hai loại trang, hai chiều cao.
+- Bố cục: **86 trang mosaic / 40 trang ảnh đơn** trên bản dựng. Lệch cả *trong* một loại (`khach-san` 4 mosaic / 6 ảnh đơn) lẫn *giữa* các loại.
+
+**Chốt phần chiều cao — ĐÃ LÀM.** Bỏ hẳn biến thể `tall`, nâng chính giá trị nền: `clamp(330px, calc(30vw + 50px), 430px)` desktop, **390px** ở 769–1023px, **290px** di động, áp cho mọi trang. Một biến thể mà mọi nơi gọi đều bật thì không còn là biến thể.
+
+**⚠ Ngoại lệ Luật 3, chấp nhận có chủ ý.** Chiều cao này đẩy thanh dính ở 1366 từ 618 xuống **668px**, vượt mốc màn đầu **657px** — với MỌI tiêu đề, chứ không riêng tiêu đề hai dòng như trước. Đây đúng là thứ `QĐ-2026-08-25-01` đã cắt 430→380 để tránh; nay đảo lại, đổi lấy một định dạng hero duy nhất. Đã nêu hệ quả này trong câu hỏi trước khi chủ dự án chọn.
+
+Chưa thành vi phạm sống vì `sticky-bar__price` render trên **0 trang** — thanh dính hiện chỉ mang CTA. **Điều kiện bắt buộc: phải xét lại TRƯỚC khi vùng giá render trên bất kỳ trang nào.** Không xét lại thì ngày bật giá là ngày vi phạm Luật 3 trên toàn bộ trang chi tiết.
+
+**Phần bố cục — CHỐT DÙNG CƠ CHẾ FALLBACK ĐÃ CÓ SẴN.** *(Sửa cùng ngày, sau khi chủ dự án xem số đo. Bản đầu của phiếu này ghi phần bố cục là "không làm được, chặn ở dữ liệu", kèm 17 + 30 document thành nợ phải nạp ảnh. Cách ghi đó SAI HƯỚNG: nó coi "luôn mosaic" là đích, trong khi đích thật là **khung hero đồng nhất**, còn ruột thì thích ứng theo dữ liệu.)*
+
+Chủ dự án chốt: **đủ ảnh thì dựng đúng cấu trúc hero; thiếu ảnh thì hiện một ảnh.** Đó chính là thứ `Hero.astro` đã làm từ trước, không phải việc phải xây. Ba tầng, rẽ tự động theo dữ liệu:
+
+| Điều kiện | Kết quả | Mã |
+|---|---|---|
+| ≥ 4 ảnh `gallery` sau khi loại trùng `mainImage` | mosaic: ảnh chính + lưới 2×2 | `Hero.astro:44` `hasGallery = galleryItems.length === 4` → `:49`, `:64` |
+| Có `mainImage`, < 4 ảnh gallery | **một ảnh**, trải hết khung | nhánh `else` của `:49` |
+| Không ảnh nào | khối `.hero-gradient` + huy hiệu loại | `:76` |
+
+Sau `QĐ-2026-08-28-03` cả **ba** tầng cùng cao `--hero-h`, nên **khung ngoài đồng nhất tuyệt đối** dù ruột khác nhau. Đó là nghĩa đã chốt của "cùng một định dạng Hero".
+
+**Hệ quả: không còn nợ dữ liệu.** Phân bố đo trên production 2026-08-28 (`reviewStatus == "approved"`) nay đọc là *phân bố tầng*, không phải *danh sách phải sửa*:
+
+| Nhóm | Số document | Tầng đang rơi vào |
+|---|---|---|
+| 9 loại có field `gallery` | 105 | **88 → mosaic**, **17 → một ảnh** |
+| `article`, `person`, `organization` | 30 | một ảnh, hoặc gradient nếu không có `mainImage` — ba loại này **không có field `gallery`** trong schema, và `06` §3 hàng Gallery khai rõ *"không áp dụng"*. Đúng thiết kế, không phải thiếu sót |
+
+Nạp thêm ảnh cho 17 document kia là **nâng cấp tuỳ chọn** — trang tự lên mosaic khi đủ 4 ảnh, không cần đụng mã. Không còn là điều kiện để trang đúng. Nặng nhất là `khach-san`: sáu khách sạn đều 0 ảnh gallery.
+
+Vẫn giữ nguyên: **không** lấp ô trống, **không** lặp lại ảnh chính. `R7` cấm khung trang trí rỗng, và ảnh lặp là nội dung giả. Fallback là hiện ít đi, không phải bịa thêm.
+
+**Một ca ở giữa, ghi để không ai tưởng là lỗi.** Ngưỡng là "đủ **4**", nên document có **3** ảnh cũng rơi về một ảnh và ba ảnh kia không hiện. Hiện đúng một trang như vậy: `trai-nghiem/di-bo-duoi-day-bien-sea-walker`. Đúng chữ đã chốt. Muốn có tầng giữa (2–3 ảnh xếp lưới hẹp hơn) thì đó là bố cục mới, cần phiếu riêng.
+
+**Phụ lục — 17 document đang ở tầng "một ảnh".** Không phải việc phải làm; nạp đủ 4 ảnh `gallery` thì trang tự lên mosaic, không cần đụng mã.
+
+| Loại | Slug | Đang có |
+|---|---|---|
+| event | *(chưa có slug vi)* | 0 |
+| experience | `di-bo-duoi-day-bien-sea-walker` | 3 |
+| experience | `phao-bay` | 0 |
+| hotel | `comodo-nha-trang` | 0 |
+| hotel | `la-vague-nha-trang` | 0 |
+| hotel | `nha-trang-palace` | 0 |
+| hotel | `vinpearl-beachfront-nha-trang` | 0 |
+| hotel | `vinpearl-empire-nha-trang` | 0 |
+| hotel | `xavia-nha-trang` | 0 |
+| place | `ben-cang-da-chong` | 0 |
+| place | `deo-vinh-hy` | 0 |
+| place | *(chưa có slug vi)* | 0 |
+| resort | *(ba document chưa có slug vi)* | 0 |
+| tour | `tour-dao-khi-suoi-hoa-lan` | 0 |
+| tour | `ve-hon-tam-tam-bien-tour-hon-tam-nua-ngay` | 0 |
+
+**Bổ sung sau khi phát hành (cùng ngày).** Lượt đầu bỏ sót **biến thể hero thứ ba**: khối `.hero-gradient` dựng khi trang không có ảnh giữ công thức riêng `clamp(280px, 36vw, 420px)` — hệ số `36vw` và trần `420px` đều khác hai biến thể có ảnh. Đo trên production tại `/dia-danh/deo-vinh-hy/` ở viewport 1710: hero ra **420px** trong khi mọi trang khác ra 430px. Biến thể này dễ sót vì nó **không có `.hero-main`**, nên mọi phép đo neo vào `.hero-main` đều bỏ qua nó. Đã cho dùng chung `--hero-h`. Ảnh hưởng 2 trang: `/dia-danh/deo-vinh-hy/` và `/cam-nang/kinh-nghiem-du-lich-vinh-hy/`.
+
+**Tài liệu.** `06-BINDING_MAP` v2.8.0 → **v2.9.0** (§3 hàng Hero).
+
+---
+
+## QĐ-2026-08-29-01 — Chiều cao hero về `tokens.css`: đổi một chỗ, mọi template đổi theo
+
+**Bối cảnh.** Chủ dự án yêu cầu áp cấu trúc Hero và khung template cho cả `article`, và nêu rõ mục đích: *"để sau này tôi có điều chỉnh thông số 1 nơi thì tất cả đều đổi theo, ví dụ: đổi chiều cao của Hero thì sẽ áp dụng với mọi templates chỉ với việc đổi 1 chỗ"*.
+
+**Rà soát cho thấy yêu cầu gồm hai phần, và một phần đã xong từ trước.**
+
+*Phần khung — ĐÃ ĐÚNG, không phải làm gì.* `ArticleDetail.astro:5` đã `import DetailLayout`, và cả kho chỉ có **hai** nơi render `<Hero>`: `DetailLayout.astro` và `TouristDestinationHub.astro`. Mọi entity detail — kể cả `article`, `person`, `organization` — đều đi qua đúng khung chung và đúng component Hero. Đo trên bản dựng: `/cam-nang/kinh-nghiem-du-lich-vinh-hy/` cao 430px, y hệt tour và điểm đến. Riêng `article` không có field `gallery` (đúng `06` §3 hàng Gallery) nên rơi tầng "một ảnh" hoặc "không ảnh" theo cơ chế fallback ở `QĐ-2026-08-28-03` — đó là thiết kế, không phải lệch.
+
+*Phần thông số — CHƯA ĐÚNG, và đây là việc thật.* Ba con số chiều cao hero (430 / 390 / 290) nằm trong khối `<style>` của `Hero.astro`, không nằm trong `tokens.css`. Mà `07-DESIGN_TOKENS` mở đầu khai: *"Nguồn token duy nhất của dự án: mọi giá trị giao diện trong code phải sinh từ đây, hardcode ngoài nguồn token là vi phạm P6/N7"*. Hero là chỗ vi phạm còn sót.
+
+**Chốt.**
+
+1. **Bốn token mới trong `src/styles/tokens.css`**: `--hero-entity-h-min` 330px, `--hero-entity-h-max` 430px, `--hero-entity-h-tablet` 390px, `--hero-entity-h-mobile` 290px, và biểu thức tổng hợp `--hero-entity-h`. **Cả hai điểm ngắt cũng chuyển về `tokens.css`**, không còn nằm trong component.
+2. **`Hero.astro` không giữ con số chiều cao nào nữa** — chỉ đọc `var(--hero-entity-h)` ở bốn điểm dùng, phủ cả ba biến thể hero (mosaic, ảnh đơn, không-ảnh).
+3. **Nối vào cổng đối chiếu token**: thêm bốn dòng vào `ANH_XA` của `scripts/check-token-parity.mjs` và bốn hàng vào `07` §3. Không khai ánh xạ thì vòng lặp `continue` qua và cổng im lặng — đúng kiểu `DR-050` đã nấp mười ngày.
+
+**Bằng chứng cổng biết đỏ.** Đổi `--hero-entity-h-max` 430 → 460 trong `tokens.css` mà giữ `07` khai 430: `ĐỎ — 1 lệch MỚI, chưa có phiếu: layout.hero.entity.max (--hero-entity-h-max): 07 khai "430px", mã chạy "460px"`, **mã thoát 1**. Khôi phục → xanh.
+
+**Bằng chứng đạt mục đích.** Đổi đúng **một** token `--hero-entity-h-max` 430px → 520px trên bản dựng, đo lại sáu loại trang: `article`, điểm đến, tour, điểm tham quan, khách sạn, địa danh — **cả sáu cùng đổi 430 → 460**, phủ cả ba biến thể hero.
+
+Ra 460 chứ không 520 vì ở 1366 số trói là `calc(30vw + 50px)` = 459,8 — chính cái bẫy `clamp` đã ghi ở `QĐ-2026-08-28-02`. Nâng **trần** chỉ nới chặn trên; muốn cao thêm ở mọi khổ thì phải sửa số giữa.
+
+**⚠ Bẫy tên gọi, ghi để không ai sửa nhầm.** `tokens.css` đã có sẵn `--hero-min-h` và `--hero-min-h-mobile` — **của `HomeHero.astro`, hero TRANG CHỦ**, một component khác và một chiều cao khác. Tên chỉ khác thứ tự từ so với `--hero-entity-h-min`. Đã chú thích cảnh báo ở cả hai cụm trong `tokens.css`. Đổi tên cho hết nhập nhằng là việc dọn dẹp riêng, chưa làm ở đây.
+
+**Phát hiện phụ, không xử ở đây.** `--card-img-h` trong `tokens.css` không có nơi nào dùng — token chết. Ghi lại, chưa gỡ vì ngoài phạm vi.
+
+**Tài liệu.** `07-DESIGN_TOKENS` §3 (bốn hàng `layout.hero.entity.*`).
+
+---
+
+## QĐ-2026-08-29-02 — Trang Bài viết vào đúng khung chung: `InfoCard` → `FactStrip`
+
+**Bối cảnh.** Chủ dự án yêu cầu áp template cho trang Bài viết dùng chung khung với mọi entity khác, trong đó có yêu cầu đã chốt trước về định dạng Hero.
+
+Lượt trả lời đầu của Cowork nói "đã đúng rồi" vì `ArticleDetail.astro:5` có `import DetailLayout`. **Đó là câu trả lời ở tầng import, chưa phải ở tầng trang thật.** Chủ dự án bác lại. Đo lại bằng cách so chuỗi vùng render của hai trang production:
+
+```
+Bài viết      crumb-band → title-band → hero-shell → summary-band → content-main
+              → author-box → updated-section → sidebar → info-card
+Điểm tham quan crumb-band → title-band → hero-shell → sticky-bar → summary-band
+              → fact-strip → content-main → updated-section → sidebar
+```
+
+**Kết quả đo — ba khác biệt, chỉ MỘT là lệch khung thật:**
+
+1. **`info-card` thay vì `fact-strip`** — lệch khung thật. Đây là `DR-046`: ba template `Article`/`Organization`/`Person` cố ý ở ngoài phạm vi đóng Luật 1, phiếu ghi rõ *"cần một quyết định riêng nếu muốn ba template này cũng chuyển"*. Chủ dự án nay ra quyết định đó cho Bài viết.
+2. **Thiếu `sticky-bar`** — **không** phải lệch khung. `jumpLinks` sinh từ `howTo`/`about`/`mentions`/`faq`; trang lấy mẫu đầu không có mục nào nên thanh không render. Kiểm ba trang cẩm nang khác: **3/3 đều có `sticky-bar`**.
+3. **`author-box`** — vùng riêng của Bài viết theo `06` §3 hàng "Hộp tác giả". Đúng đặc tả.
+
+**Về định dạng Hero — đã chung từ trước, có số đo.** Cả kho chỉ có **hai** nơi render `<Hero>`. `/cam-nang/kinh-nghiem-du-lich-vinh-hy/` cao **430px**, cùng biểu thức `--hero-entity-h`, y hệt tour, điểm tham quan, khách sạn, địa danh và trang điểm đến. Bài viết không có field `gallery` nên rơi tầng "một ảnh"/"không ảnh" — đó là **cơ chế fallback đã chốt ở `QĐ-2026-08-28-03`**, không phải lệch.
+
+**Chốt.**
+
+1. `ArticleDetail` truyền `facts` cho `DetailLayout`; gỡ `import InfoCard`, gỡ slot `info`, gỡ `infoBarItems={[]}`. Ba field `articleType`, `publishedAt`, `updatedAt` chuyển từ cột phụ ra dải **Thông tin nhanh** trải ngang.
+2. Chuyển đổi gần như cơ học: kiểu `Fact` của `FactStrip` đúng bằng `{field, icon, label, value, visible}` mà `sidebarRows` vốn có.
+3. `entity-layout-post.ts`: `ArticleDetail.astro` chuyển từ `ENTITIES_WITHOUT_FACTSTRIP` sang `ENTITIES_WITH_FACTSTRIP`. Để nguyên thì cổng vẫn xanh nhưng **nói sai về thực tế** — đúng loại lỗi `DR-050`.
+4. `06` §3.1 khai vùng ba field của Bài viết. `06` v2.9.0 → **v2.10.0**.
+
+**Không xoá `InfoCard.astro`, không xoá slot `info` của `DetailLayout`.** `OrganizationDetail` và `PersonDetail` vẫn dùng. `DR-046` chuyển sang **mở một phần**.
+
+**Hồi quy phát hiện và đóng ngay trong lượt.** Đưa Thông tin nhanh ra khỏi cột phụ làm 16/24 trang cẩm nang không còn gì ở cột phụ. `Sidebar` tự ẩn khi rỗng, nhưng `.two-col` vẫn giữ rãnh `340px` cộng `gap` — đo được **436px bỏ trống** trên khung 1200, cột chữ bị ép còn 764px dù không có gì bên cạnh. Đúng thứ **R7** cấm.
+
+Sửa ở `DetailLayout`: thêm `showSidebar` (soi cùng điều kiện `Sidebar.astro` dùng) và lớp `two-col--solo` thu lưới về một cột. Sửa ở đây nên đóng luôn **cả các trang không phải Bài viết**: tổng **18** trang có `.two-col` mà không có `.sidebar` — cẩm nang 16 (mới), địa danh 1 và tác giả 1 (**lỗi CÓ SẴN**, không phải hệ quả lượt này).
+
+Lần đếm đầu ra 31 vì gộp nhầm trang term — trang term dùng `TermIndex`, không có `.two-col`. Đếm đúng là *"có two-col mà không có sidebar"*.
+
+Kèm theo: neo containment của `entity-layout-post.ts` đổi từ `<div class="container two-col">` sang `["container", "two-col"` vì markup chuyển sang `class:list`.
+
+**Phạm vi cố ý dừng ở Bài viết.** Chủ dự án chỉ định Bài viết. Sau lượt này: **10 template dùng `FactStrip`, 2 còn `InfoCard`**. Muốn dọn nốt Organization và Person thì cần quyết định riêng — đề xuất làm, vì để hai template lẻ loi chính là thứ đã sinh ra `DR-046`.
+
+---
+
+## QĐ-2026-08-29-03 — Đóng hẳn DR-046: Tổ chức và Người chuyển nốt sang `FactStrip`, xoá `InfoCard.astro`
+
+**Bối cảnh.** Sau `QĐ-2026-08-29-02` còn **10 template dùng `FactStrip`, 2 còn `InfoCard`** (`OrganizationDetail`, `PersonDetail`). Để hai template lẻ loi chính là thứ đã sinh ra `DR-046`. Chủ dự án yêu cầu dọn nốt.
+
+**Chốt.**
+
+1. Cả hai template truyền `facts` cho `DetailLayout`, gỡ `import InfoCard`, gỡ slot `info`, gỡ `infoBarItems={[]}`.
+2. **`sameAs` KHÔNG chuyển vào Thông tin nhanh.** `06` §3.1 khai nó là dòng "Nguồn tham khảo" cạnh Cập nhật ở cuối nội dung, *"không nằm trong sidebar"*. Nay truyền qua prop `sameAs` sẵn có của `DetailLayout` — đúng vùng, thay vì làm ô thứ bảy trong dải. Chuyển nguyên si sang `facts` sẽ là một vi phạm Luật 1 mới, dù `Fact` có đỡ `href`.
+3. **Gỡ đường ống chết:** xoá `src/components/InfoCard.astro`; gỡ `<slot name="info">` và prop `infoBarItems` khỏi `DetailLayout`; gỡ `'InfoCard'` khỏi union và nhánh `s.name === 'info'` trong `Sidebar`; gỡ `InfoCard.astro` khỏi `SHARED_PRIMITIVES`.
+4. `ENTITIES_WITHOUT_FACTSTRIP` nay **rỗng** — giữ mảng rỗng thay vì xoá, để nó nói rõ "không còn ngoại lệ".
+5. `06` v2.10.0 → **v2.11.0**; `DR-046` **đóng**.
+
+**Xác minh bản dựng.** `class="info-card"` còn **0 trang** trên toàn site. `cong-ty` 3/3 có `fact-strip`; `tac-gia` 2/3 — trang thứ ba không có field nào hiển thị nên dải tự ẩn, đúng **R7**. Dòng "Nguồn tham khảo" vẫn render trên 3 trang, tức `sameAs` không mất khi đổi vùng. Số trang thu cột `two-col--solo` tăng 18 → **20** vì cột phụ của hai loại trang này nay cũng rỗng — cùng lối sửa đã dựng ở `QĐ-2026-08-29-02`, không phải lỗi mới.
+
+`gate:all` 11/11 xanh.
+
+---
+
+## QĐ-2026-08-29-04 — `PageHead`: một đầu trang dùng chung cho mọi loại trang trừ trang chủ; byline không nền cho Bài viết
+
+**Bối cảnh.** Chủ dự án yêu cầu gộp bảy loại trang còn lại vào frame chung, và nói thêm: mục "Chuyên mục" và tác giả phải đặt gọn gàng, **không nền**.
+
+**Hiện trạng đo được.** Sáu bản cho một thứ: `DetailLayout` có `.crumb-band`/`.title-band`/`.summary-band`; `TouristDestinationHub` **chép lại y hệt** (đo 2026-08-28: khai báo CSS trùng từng giá trị, chỉ khác chú thích); `EntityIndex`, `TourIndex`, `TermIndex` mỗi file một header riêng cùng hình dạng `h1 + gạch chân + mô tả`; `EventIndex` và `HubIndex` **không có `h1` nào**.
+
+**Chốt phạm vi: 6 trang, TRỪ `SiteHome`.** Chủ dự án chọn sau khi được nêu ba lựa chọn. Lý do loại trừ trang chủ: nó không có breadcrumb, và `h1` của nó là **câu định vị thương hiệu** chứ không phải tên trang — ép vào là làm hỏng đúng trang quan trọng nhất.
+
+**Chốt hình dạng.** `src/components/PageHead.astro`:
+
+```
+{breadcrumb?}  →  title-band ( h1 + gạch chân? + byline? )  →  <slot/>  →  summary-band?
+```
+
+`<slot/>` nhận thứ nằm giữa dải tiêu đề và đoạn mở. Trang chi tiết đưa **hero + thanh dính** vào đó — đúng thứ tự `06` §6, và giữ được ràng buộc đoạn mở phải đứng SAU thanh dính (`Luật 3`, spec vòng 5 §3.6). Trang điểm đến đưa hero + dòng ghi công ảnh. Trang danh sách không đưa gì.
+
+Hai biến thể khai rõ thay vì giả vờ giống nhau: `detail` (nền phẳng, tiêu đề co giãn) và `index` (nền `--c-surface-alt` + viền dưới, `--fs-h1`, có gạch chân). Giữ nguyên diện mạo ba trang danh sách đang có, để lượt gộp không đổi giao diện của chúng.
+
+**Chốt byline cho Bài viết.** `articleType`, `author` và `publishedAt` gộp thành **một dòng chữ nhỏ dưới `h1`, không nền không viền**, qua slot `meta`. Trước đó chuyên mục nằm trong ô có viền của `FactStrip`, còn tác giả nằm trong hộp nền `--c-surface-alt` ở cuối bài — hai dải riêng cho ba mẩu thông tin ngắn.
+
+- `author` **đổi vùng duy nhất** từ "Hộp tác giả" sang byline. Vẫn đúng một vùng theo **Luật 1**, chỉ đổi chỗ. Hộp cũ chỉ chứa tên + chức danh, không avatar không tiểu sử, nên gộp lên không mất nội dung.
+- Bù lại nay **có link `/tac-gia/{slug}`** — thứ `06` §3 hàng "Hộp tác giả" đã đòi mà bản cũ chưa làm.
+- `updatedAt` **cố ý không** lên byline: `DetailLayout` đã hiện "Cập nhật" ở cuối nội dung; đưa lên nữa là hai vùng cho một ý.
+- Bài viết do đó không còn ô Thông tin nhanh nào. `FactStrip` tự ẩn (**R7**). `ArticleDetail` quay lại `ENTITIES_WITHOUT_FACTSTRIP` — không phải lùi bước, mà là sổ hợp đồng khai đúng thực tế mới.
+
+**`EventIndex` và `HubIndex` nay có `h1`.** Trước đây không có tiêu đề cấp một nào. `RouteDispatch` đã sẵn `indexInfo` và `HUB[entity]`, chỉ chưa truyền xuống. Đây là **giao diện mới**, chủ dự án đã được nêu trước khi chọn.
+
+**Xác minh bản dựng.**
+
+| Trang | `h1` | biến thể | byline |
+|---|---|---|---|
+| `/cam-nang/…` (Bài viết) | 1 | `detail` | **có** — Cẩm nang · [Nguyễn Phú Hải](/tac-gia/nguyen-phu-hai/) · ngày |
+| `/nha-trang/` (điểm đến) | 1 | `detail` | — |
+| `/diem-tham-quan/`, `/tour/` (danh sách) | 1 | `index` | — |
+| `/kham-pha/` (hub) | 1 | `index` | **mới có `h1`** |
+| trang nhãn | 1 | `index` | có — số kết quả |
+
+`class="author-box"` còn **0 trang**; `fact-strip` trên `cam-nang` còn **0** (đúng thiết kế). `gate:all` **11/11 xanh**.
+
+**Tài liệu.** `06` v2.11.0 → **v2.12.0**; `KIEN-TRUC-TEMPLATE.md` cập nhật §1, §2.0 mới, §2, §5.
+
+**Còn lại đúng một trang ngoài frame: `SiteHome`.**
+
+---
+
+## QĐ-2026-08-29-05 — Bài viết có `gallery`: hero vào được mosaic như mọi entity khác
+
+**Bối cảnh.** Chủ dự án báo hero trang cẩm nang vẫn chỉ một ảnh, không phải lưới.
+
+**Nguyên nhân — không phải lỗi, là đặc tả cũ.** Bài viết **không có field `gallery` ở bất kỳ tầng nào**: `cms/schemas/article.ts` không khai, `src/lib/queries/article.ts` không lấy, `ArticleResult` không có, và `06` §3 hàng Gallery ghi thẳng *"không áp dụng: article, person, organization"*. `Hero` cần đủ 4 ảnh sau khi loại trùng `mainImage` mới vào mosaic, nên trang cẩm nang luôn rơi về tầng "một ảnh" của cơ chế fallback (`QĐ-2026-08-28-03`).
+
+**Chốt.** Mở `gallery` cho Bài viết ở cả bốn tầng:
+
+1. `cms/schemas/article.ts` — thêm field `gallery`, khuôn **chép nguyên** từ `attraction.ts` (mảng ảnh, `BulkGalleryInput`, trần 30, `alt` tự điền) để hai bên không lệch.
+2. `src/lib/queries/article.ts` — thêm `galleryFragment()` vào truy vấn theo slug. **Không** thêm vào các truy vấn danh sách: card không dùng gallery, thêm vào là kéo dữ liệu thừa mỗi lần dựng.
+3. `src/lib/types.ts` — `ArticleResult.gallery`.
+4. `ArticleDetail.astro` — truyền `gallery={data.gallery}` xuống `DetailLayout`.
+5. `06` §3 hàng Gallery — **gỡ `article`** khỏi danh sách loại trừ. `06` v2.12.0 → **v2.13.0**.
+
+**⚠ Đổi mã KHÔNG tự làm trang đổi hình.** Đo trên production ngay sau khi dựng lại: **24** bài viết approved, **23** có ảnh chính, **0** bài có bất kỳ ảnh gallery nào — vì field vừa mới sinh ra. Cả 24 trang vẫn hiển thị hero một ảnh, đúng cơ chế fallback.
+
+Muốn thấy lưới ảnh thì phải **nạp đủ 4 ảnh gallery cho từng bài** — khoảng **96 ảnh** cho 24 bài. Đó là việc nội dung, không phải việc mã. Nạp tới đâu, trang tự lên mosaic tới đó, không cần đụng mã lần nữa.
+
+**Việc còn lại của chủ dự án:** schema mới phải được **deploy lên Sanity Studio** thì biên tập viên mới thấy ô Gallery ở tài liệu Bài viết. Chưa deploy thì field tồn tại trong mã nhưng không ai nhập được.
+
+**Cổng bắt được một chỗ tôi quên, ghi lại vì nó lặp lại một cảnh báo cũ.** Lần push đầu bị `pre-push` chặn: `g1-content-model-vs-schema` báo *"Field gallery có trong schema article.ts nhưng KHÔNG có trong CONTENT_MODEL §2 — vi phạm P4"*. Phải sửa **ba** chỗ chứ không phải một:
+
+1. `01-CONTENT_MODEL` §2.11 — thêm hàng `gallery` (`01` v1.0.19 → **v1.0.20**).
+2. `scripts/meta-validators/g1-content-model-vs-schema.ts` — `g1` **không phân tích markdown**, nó giữ một danh sách field **chép tay**. Sửa đặc tả mà quên sửa đây thì cổng đỏ; sửa đây mà quên đặc tả thì cổng **xanh nhưng nói sai**.
+3. Schema.
+
+Đây đúng cảnh báo đã ghi ở `QĐ-2026-08-26-01`: *"Hai meta-validator g1 và g4 chép tay danh sách field nên phải sửa cùng lúc, nếu không cổng vẫn xanh nhưng nói sai về thực tế."* Nay gặp thật.
+
+**Không mở cho `person` và `organization`** — chủ dự án chỉ định Bài viết. Hai loại đó vẫn nằm trong danh sách loại trừ ở §3.
+
+---
+
+## QĐ-2026-08-29-06 — Chốt phạm vi và bốn câu hỏi cho đợt "chữa thị giác di động"
+
+**Bối cảnh.** Nhánh `feat/thi-giac-di-dong` sửa `docs/core-specs/07-DESIGN_TOKENS.md` (tài liệu **tầng 2**) và đảo ba điều khoản đã duyệt, và cả ba chỗ viện dẫn một mã quyết định **trần** `QĐ-2026-08-29`. Lượt review toàn nhánh (2026-08-29) kiểm sổ này và thấy chỉ có `QĐ-2026-08-29-01`…`-05`, cả năm thuộc việc khác (chiều cao hero, `InfoCard`→`FactStrip`, đóng `DR-046`, `PageHead`, gallery bài viết) — **mã trần không tồn tại**. `CLAUDE.md` §6: cổng mặc định không đạt nếu không có bằng chứng. Mục này mở mã đúng và tóm lại nội dung chủ dự án đã chốt cho đợt "chữa thị giác di động"; bản ghi đầy đủ nằm ở `docs/specs/SPEC-2026-08-29-thi-giac-di-dong.md` §0.1 và §9.
+
+**Chốt — năm điểm chủ dự án đã duyệt cho đợt này (`SPEC-2026-08-29-thi-giac-di-dong.md`):**
+
+1. **Phạm vi = chữa thị giác, giữ nguyên cấu trúc** (SPEC §0, §1). Ba cánh cửa đóng: không thêm dữ liệu/entity/hub, không thêm token hay giá trị ngoài thang `tokens.css`, không đụng `siteSettings` trong Studio.
+2. **Hình dạng thẻ di động = thẻ ngang, thumbnail 88px**, áp cho mọi chỗ dùng `Card` (SPEC §1, R1).
+3. **`07-DESIGN_TOKENS` §1 thắng `SPEC-2026-08-14` §3.3 về màu nút khối tour** (SPEC §0.1, R2). Hai tầng tài liệu chỏi nhau: `07` (tầng 2) cấm `color.sand` làm nền CTA; `SPEC-2026-08-14` §3.3 (tầng 6) từng đổi nút "Xem tất cả" của khối tour sang `--c-sand` để né luật đó. `CLAUDE.md` §5 gọi đây là hard stop; đã hỏi, chủ dự án chốt **`07` thắng** — nút khối tour và nhãn giá quay lại cùng `--c-accent`. Kéo theo **ba** phiếu drift (`DR-090`/`DR-091`/`DR-092`), không phải một.
+4. **Gộp hai khối "Tour nổi bật" làm một, không phải gỡ** (SPEC §0.1, R6). Hai khối cũ ăn hai nguồn dữ liệu khác nhau nên gỡ trùng đơn thuần là mất nội dung. Chốt phương án gộp thật: `HomeTourGrid` chọn tour theo `td.featuredTours` (giữ đúng thứ tự biên tập xếp), nhưng lấy dữ liệu hiển thị từ `allTours` đã fetch sẵn trong `index.astro` — **không chạm GROQ, không đổi prop nào** của `HomeTourGrid`.
+5. **Bốn câu Q1–Q4** do QA nội bộ nêu ở lượt review v2, chốt như bảng dưới (SPEC §9).
+
+| Câu | Chốt |
+|---|---|
+| **Q1** — biên tập chọn 1–2 tour thì lưới 3 cột để một thẻ lẻ loi | **Lưới co theo số thẻ.** Chép khuôn `:has()` đã có ở `HomeRollupSection.astro:76`/`:92`/`:96` sang `HomeTourGrid` (R7 mới) |
+| **Q2** — `ADR-0026` neo ngưỡng đảo bài vào số tour đã publish, R6 lại tách hiển thị khỏi publish | **Chỉ ghi phiếu drift, KHÔNG sửa ADR ở đây.** `CLAUDE.md` §1: ADR là tầng 3, spec task là tầng 6 — spec không có quyền sửa ADR (`DR-n`) |
+| **Q3** — nhánh dự phòng của R6a (rơi về ba tour đầu kho khi biên tập chưa chọn) không bao giờ chạy khi dựng, nên nhìn bản dựng rồi tích ô là pass giả | **Tách hàm thuần + test đơn vị.** Đưa phép chọn ra thành `chonTourTrangChu` (`src/lib/homepage.ts`), bốn ca test bắt buộc; bộ chạy đã có sẵn (`scripts/package.json`, `tsx --test`) (R6a-bis) |
+| **Q4** — `07` §1 cấm cát làm nền CTA bằng một lý do không với tới nút này (nút thật đo được **6,76:1**, đạt AA; lý do cũ "tương phản với chữ trắng không đạt AA" không với tới vì nút dùng chữ tối `--c-sand-text-strong`) | **Giữ luật, sửa lý do.** Cát không làm nền CTA vì **phân vai màu** — `07` §1 đã giao `--c-accent` cho CTA và nhãn giá, cát cho gạch chân và nút trên nền đậm; cho cát thêm vai CTA là một màu hai vai (R2c mới) |
+
+**Tài liệu.** `docs/core-specs/07-DESIGN_TOKENS.md` §1 (lý do cấm `color.sand` làm nền CTA, viết lại theo Q4). `docs/DRIFT_LOG.md` — `DR-090`/`DR-091`/`DR-092` (điểm 3), `DR-080` (điểm Q2, tiền thân của `DR-n`).

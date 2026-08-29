@@ -4,7 +4,7 @@
 // body và faq là field phẳng (document-level, không localized)
 
 import {
-  baseDocFieldsFragment, mainImageFragment,
+  baseDocFieldsFragment, mainImageFragment, galleryFragment,
   entityRefFragment, imageProvenanceFragment
 } from './fragments'
 import type { ArticleResult } from '../types'
@@ -18,6 +18,7 @@ export function articleBySlugQuery(): string {
     translationGroup,
     summary,
     ${mainImageFragment()},
+    ${galleryFragment()},
     seo { metaTitle, metaDescription },
     "category": category[]->{ _id, "name": coalesce(name[$lang], name.vi), termCode, _type },
     reviewStatus, approvedBy, contentProvenance,

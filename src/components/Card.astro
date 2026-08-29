@@ -206,4 +206,48 @@ const badgeClass = badgeVariant === 'author' ? 'badge-author'
     border-radius: var(--radius-sm);
     margin-left: auto;
   }
+
+  /* SPEC-2026-08-29 R1 — thẻ ngang ở khổ điện thoại.
+     Ảnh 4:3 trên thẻ full-width cho ô ảnh cao 267px, biến mỗi thẻ thành một tấm
+     poster; 16 thẻ ăn 6.560px, một phần ba trang chủ. Tỷ lệ 4:3 là tỷ lệ của lưới
+     NHIỀU cột — khi lưới sập còn một cột nó thành hệ quả phụ, không phải lựa chọn.
+     Vẫn hợp Luật 5 (06 §6): mỗi thẻ một hàng, chiếm trọn bề ngang. */
+  @media (max-width: 640px) {
+    .card {
+      display: grid;
+      /* Track 1 phải chứa CẢ lề trái của ảnh, không chỉ bề rộng ảnh: .card-img-wrap
+         bên dưới mang width:88px + margin-left:var(--s3), tức hộp thật rộng
+         88+12=100px. Track chỉ 88px thì hộp tràn 12px sang track 2 và ăn đúng
+         12px đệm trái của .card-body — rãnh giữa ảnh và tiêu đề còn 0px. Nới
+         track bằng calc() từ token thay vì đổi lề, để giữ đúng nhịp 12px quanh
+         ảnh mà không cần số trần mới. */
+      grid-template-columns: calc(var(--s3) + 88px) 1fr;
+      align-items: start;
+    }
+
+    .card-img-wrap {
+      width: 88px;
+      height: 88px;
+      aspect-ratio: 1 / 1;
+      border-radius: var(--radius-sm);
+      margin: var(--s3) 0 var(--s3) var(--s3);
+    }
+
+    /* min-height: var(--s9) (96px) ở luật gốc (:110) sống sót tới đây và thắng
+       height:88px bằng box model (min-height lớn hơn height thì min-height thắng),
+       không phải bằng đặc hiệu — CSS hợp lệ, không phải bug đặc hiệu như R1.
+       Reset về đúng 88px (ngoại lệ thumbnail đã duyệt) để ba ô ảnh chờ không cao
+       hơn ảnh thật 8px. */
+    .card-img-placeholder {
+      min-height: 88px;
+    }
+
+    .card-body {
+      padding: var(--s3);
+    }
+
+    .card-summary {
+      margin-bottom: var(--s2);
+    }
+  }
 </style>

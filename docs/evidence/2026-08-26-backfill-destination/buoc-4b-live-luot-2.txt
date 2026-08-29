@@ -1,0 +1,17 @@
+
+> backfill:destination
+> node --import ./node_modules/tsx/dist/esm/index.mjs migrate/backfill-destination.ts --live
+
+Nạp bù field destination (ADR-0028)
+Project: pgedy374  Dataset: production
+Mode: LIVE
+Điểm đến trụ (site.config): nha-trang
+
+Target: seed.nha-trang
+
+Thiếu destination: 2 document
+  tour           2
+  ✓ tour drafts.3f05baf2-9df0-4958-abd7-6a0dd1acbc68
+  ✓ tour drafts.c4ee5a81-d768-46e4-9425-baa103aafe42
+
+LIVE: đã nạp bù 2/2. Còn thiếu: 0 (phải là 0).

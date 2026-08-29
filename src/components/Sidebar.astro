@@ -8,7 +8,8 @@ export interface Slot {
   // nhanh nay luôn là dải riêng phía trên `.two-col`, không đi qua Sidebar dưới
   // bất kỳ hình thức nào.
   // 'BookingForm' (nhánh đặt tour): ô đặt trong slot 'booking' khi tour có giá.
-  component: 'BookingCTA' | 'BookingForm' | 'InfoCard' | 'Map' | 'Article'
+  // 'InfoCard' đã rời union theo main (InfoCard.astro đã xoá, DR-046 / QĐ-2026-08-29-03).
+  component: 'BookingCTA' | 'BookingForm' | 'Map' | 'Article'
   visible: boolean
   props: Record<string, any>
 }
@@ -28,7 +29,6 @@ const anyVisible = slots.some(s => s.visible)
     {slots.filter(s => s.visible).map((s) => (
       <div class="sidebar-card">
         {s.name === 'booking' && <slot name="booking" />}
-        {s.name === 'info' && <slot name="info" />}
         {s.name === 'map' && <slot name="map" />}
         {s.name === 'about' && <slot name="about" />}
       </div>

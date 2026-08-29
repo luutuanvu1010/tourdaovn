@@ -1,4 +1,5 @@
 ---
+import PageHead from './PageHead.astro'
 import type { Lang, PriceEntry } from '../lib/types'
 import { siteBaseUrl } from '../lib/siteUrl'
 import { uiCopy, TOUR_FORMAT_LABELS } from '../lib/uiCopy'
@@ -71,6 +72,14 @@ const parentHref = `${prefix}/${seg}/`
 ---
 
 {/* 06 §5.4 — Term listing */}
+{/* QĐ-2026-08-29-04: tiêu đề trang chuyển sang `PageHead` biến thể `index`.
+    `PageHead` tự bọc container nên nó đứng NGOÀI `.container` của khối này —
+    bọc hai lần thì `padding-inline` cộng dồn. Số kết quả đi vào slot `meta`,
+    tức dòng chữ nhỏ dưới tiêu đề, không nền. */}
+<PageHead title={term.name} lang={lang} variant="index" description={term.description}>
+  <Fragment slot="meta">{entities.length} {t('results')}</Fragment>
+</PageHead>
+
 <div class="term-index">
   <div class="container">
     <nav aria-label={t('breadcrumbAria')} class="term-breadcrumb">
@@ -81,11 +90,6 @@ const parentHref = `${prefix}/${seg}/`
       <strong>{term.name}</strong>
     </nav>
 
-    <header class="term-header">
-      <h1 class="term-heading">{term.name}</h1>
-      <p class="term-definition">{term.description}</p>
-      <p class="term-count">{entities.length} {t('results')}</p>
-    </header>
 
     {/* Vùng 3: Lưới card */}
     {hasEntities ? (
@@ -155,16 +159,6 @@ const parentHref = `${prefix}/${seg}/`
     font-weight: var(--fw-600);
   }
 
-  .term-header {
-    background: var(--c-primary);
-    color: var(--c-text-inverse);
-    border-radius: var(--radius-lg);
-    padding: var(--s6);
-    margin-top: var(--s4);
-    margin-bottom: var(--s7);
-    position: relative;
-    overflow: hidden;
-  }
 
   .term-header::after {
     content: '';
@@ -174,28 +168,8 @@ const parentHref = `${prefix}/${seg}/`
     background: var(--c-sand);
   }
 
-  .term-heading {
-    font-family: var(--font-display);
-    font-size: var(--fs-h3);
-    font-weight: var(--fw-800);
-    color: var(--c-text-inverse);
-    line-height: var(--lh-heading);
-    margin-bottom: var(--s2);
-  }
 
-  .term-definition {
-    font-size: var(--fs-base);
-    color: var(--c-text-inverse);
-    opacity: .86;
-    max-width: var(--measure, 70ch);
-  }
 
-  .term-count {
-    font-size: var(--fs-sm);
-    color: var(--c-text-inverse);
-    opacity: .65;
-    margin-top: var(--s3);
-  }
 
   .card-grid {
     display: grid;

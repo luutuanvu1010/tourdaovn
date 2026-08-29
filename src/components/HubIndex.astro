@@ -1,4 +1,5 @@
 ---
+import PageHead from './PageHead.astro'
 import type { Lang, PriceEntry } from '../lib/types'
 import { siteBaseUrl } from '../lib/siteUrl'
 import { ATTRACTION_TYPE_LABELS, SPECIALTY_TYPE_LABELS, ARTICLE_TYPE_LABELS, TOUR_FORMAT_LABELS } from '../lib/uiCopy'
@@ -35,12 +36,17 @@ interface HubSection {
 }
 
 export interface Props {
+  /** Tiêu đề trang — QĐ-2026-08-29-04. Trước bản này file không render `h1`
+   *  nào, nên trang không có tiêu đề cấp một. `RouteDispatch` đã có sẵn giá
+   *  trị, chỉ chưa truyền xuống. */
+  title?: string
+  description?: string
   sections: HubSection[]
   lang: Lang
   prices?: Map<string, PriceEntry>
 }
 
-const { sections, lang, prices } = Astro.props
+const { sections, lang, prices, title, description } = Astro.props
 
 // Segment lookup
 const SEGMENT_CACHE: Record<string, string> = {}
@@ -105,6 +111,10 @@ const hasAny = sections.some(s => s.entities.length > 0)
 ---
 
 {/* 06 §5.3 — 4 hub rollup */}
+{/* QĐ-2026-08-29-04: trang này trước đây KHÔNG có `h1` nào. Nay dùng chung
+    `PageHead` như mọi trang danh sách khác. */}
+{title && <PageHead title={title} lang={lang} variant="index" description={description} />}
+
 <div class="hub-index">
   {hasAny ? (
     <>

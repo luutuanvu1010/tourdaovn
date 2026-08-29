@@ -1,8 +1,18 @@
 import { defineType, defineField } from 'sanity'
 import { TagIcon } from '@sanity/icons'
-import { baseFieldsAfterGallery, baseFieldsBeforeGallery, baseGroups } from './baseFields'
+import { baseFieldsAfterGallery, baseFieldsBeforeGallery, baseGroups, destinationField } from './baseFields'
 import { BulkGalleryInput } from '../components/BulkGalleryInput'
 import { brand } from '../../src/site.config'
+
+/**
+ * Ba nhóm gate I2 (01-CONTENT_MODEL §2.3 v1.0.19, QĐ-2026-08-27-03).
+ * Hợp ba tập PHẢI phủ đúng enum attractionType: giá trị rơi ra ngoài cả ba
+ * không phải "được cho phép" mà là "không được kiểm" — đúng lỗi đã xảy ra với
+ * aquarium trước v1.0.19. Bản sao cơ học ở shared/gates/index.ts (validator CI).
+ */
+const ENCYCLOPEDIC_TYPES = ['historic', 'temple', 'church', 'museum']
+const VENUE_TYPES = ['theme-park', 'aquarium', 'mud-spa', 'market', 'park']
+const EITHER_SOURCE_TYPES = ['beach', 'island', 'nature', 'craft-village', 'general']
 
 export default defineType({
   name: 'attraction',
@@ -31,6 +41,7 @@ export default defineType({
       }]
     }),
     ...baseFieldsAfterGallery,
+    destinationField,
     defineField({
       name: 'attractionType', type: 'string',
       group: 'coBan',
@@ -40,11 +51,16 @@ export default defineType({
           { title: 'Chùa', value: 'temple' },
           { title: 'Nhà thờ', value: 'church' },
           { title: 'Bảo tàng', value: 'museum' },
+          { title: 'Bãi biển', value: 'beach' },
+          { title: 'Đảo', value: 'island' },
+          { title: 'Thiên nhiên, sinh thái', value: 'nature' },
           { title: 'Công viên giải trí', value: 'theme-park' },
           { title: 'Thủy cung', value: 'aquarium' },
           { title: 'Tắm bùn, suối khoáng', value: 'mud-spa' },
           { title: 'Chợ', value: 'market' },
-          { title: 'Công viên', value: 'park' }
+          { title: 'Công viên', value: 'park' },
+          { title: 'Làng chài, làng nghề', value: 'craft-village' },
+          { title: 'Điểm thu hút khách', value: 'general' }
         ]
       },
     }),
@@ -52,12 +68,18 @@ export default defineType({
       name: 'sameAs', type: 'array',
       group: 'viTri',
       of: [{ type: 'url' }],
-      description: 'Bắt buộc với nhóm bách khoa (historic, temple, church, museum) — gate I2',
+      description:
+        'Bắt buộc với nhóm bách khoa (historic, temple, church, museum) — gate I2. ' +
+        'Với beach, island, nature, craft-village, general: cần ít nhất một trong sameAs hoặc officialSource.',
       validation: Rule => Rule.custom((value, context) => {
         const doc = (context.document ?? {}) as Record<string, unknown>
-        const encyclopedia = ['historic', 'temple', 'church', 'museum', 'aquarium']
-        if (encyclopedia.includes(doc.attractionType as string) && (!value || (value as unknown[]).length === 0)) {
+        const atype = doc.attractionType as string
+        const hasValue = Array.isArray(value) && value.length > 0
+        if (ENCYCLOPEDIC_TYPES.includes(atype) && !hasValue) {
           return 'sameAs (Wikidata/Wikipedia) bắt buộc với nhóm bách khoa — gate I2'
+        }
+        if (EITHER_SOURCE_TYPES.includes(atype) && !hasValue && !doc.officialSource) {
+          return 'Cần ít nhất một trong sameAs hoặc officialSource — gate I2'
         }
         return true
       })
@@ -65,12 +87,18 @@ export default defineType({
     defineField({
       name: 'officialSource', type: 'url',
       group: 'viTri',
-      description: 'Bắt buộc với nhóm venue (theme-park, aquarium, mud-spa, market, park) — gate I2',
+      description:
+        'Bắt buộc với nhóm venue (theme-park, aquarium, mud-spa, market, park) — gate I2. ' +
+        'Với beach, island, nature, craft-village, general: cần ít nhất một trong sameAs hoặc officialSource.',
       validation: Rule => Rule.custom((value, context) => {
         const doc = (context.document ?? {}) as Record<string, unknown>
-        const venue = ['theme-park', 'mud-spa', 'market', 'park']
-        if (venue.includes(doc.attractionType as string) && !value) {
+        const atype = doc.attractionType as string
+        if (VENUE_TYPES.includes(atype) && !value) {
           return 'officialSource bắt buộc với nhóm venue thương mại — gate I2'
+        }
+        const hasSameAs = Array.isArray(doc.sameAs) && (doc.sameAs as unknown[]).length > 0
+        if (EITHER_SOURCE_TYPES.includes(atype) && !value && !hasSameAs) {
+          return 'Cần ít nhất một trong sameAs hoặc officialSource — gate I2'
         }
         return true
       })

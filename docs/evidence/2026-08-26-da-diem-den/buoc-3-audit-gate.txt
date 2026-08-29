@@ -1,0 +1,28 @@
+Bước 3 — npm --prefix scripts run audit:gate  (cổng kiểm chính bộ kiểm)
+
+Kết quả: 37 đạt, 27 trượt, 0 không kiểm được.
+Mốc 2026-08-24: 35 đạt, 28 trượt.
+
+Diff danh sách trượt (mốc 24/8  →  nay):
+    28d27
+    < GA2
+Nghĩa là: KHÔNG có mục trượt mới. Một mục cũ (GA2) đã chuyển sang đạt.
+
+Mọi dòng GA3:
+| GA3/I6  | đạt | I6 có mục trong scripts/reports/postbuild-status.json  | DR-022 |
+| GA3/I20 | đạt | I20 có mục trong scripts/reports/validator-status.json | DR-022 |
+| GA3/PY8 | đạt | PY8 có mục trong scripts/reports/postbuild-status.json | DR-022 |
+| GA3/R3  | đạt | R3 có mục trong scripts/reports/postbuild-status.json  | DR-022 |
+| GA3/R4  | đạt | R4 có mục trong scripts/reports/postbuild-status.json  | DR-022 |
+
+GA3/I20 ĐÃ ĐÓNG. Đường đi của nó trong đợt này:
+  1. Thêm control I20 khai `live`, stage `pre-build`  → GA3 trượt.
+  2. Truy nguyên: GA3 bản cũ đóng cứng postbuild-status.json, mà bộ kiểm pre-build
+     ghi vào validator-status.json → control pre-build khai live KHÔNG BAO GIỜ
+     qua được GA3. Đây là khiếm khuyết của cổng, không phải của I20 (DR-070).
+  3. Vá GA3 tra báo cáo theo `stage` (commit f862d3a) → GA3 vẫn trượt, nhưng giờ
+     trượt vì lý do THẬT: validator-status.json chưa có mục I20.
+  4. Bước 1 của Task 8 chạy validate → sinh mục I20 → GA3/I20 đạt.
+
+GA2 cũng chuyển sang đạt: postbuild-status.json nay mới hơn dist/index.html, vì
+Task 8 dựng trước rồi mới chạy cổng.

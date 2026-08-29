@@ -4,11 +4,11 @@
 // B8.5.1 — Nền móng
 export { categoryByTermCodeQuery, categoryBySlugQuery, categoriesBySetQuery } from './category'
 export { personBySlugQuery, allPersonsQuery, articlesByPersonQuery } from './person'
-export { touristDestinationBySlugQuery } from './touristDestination'
+export { touristDestinationBySlugQuery, otherDestinationsQuery, allDestinationsQuery } from './touristDestination'
 export { placeBySlugQuery, allPlacesQuery, placesContainedInQuery, nearbyForPlaceQuery } from './place'
 
 // B8.5.2 — Entity phức tạp
-export { attractionBySlugQuery, allAttractionsQuery, nearbyAttractionsQuery } from './attraction'
+export { attractionBySlugQuery, allAttractionsQuery, nearbyAttractionsQuery, attractionsByTermQuery } from './attraction'
 export { experienceBySlugQuery, experiencesByVenueQuery, allExperiencesQuery, experiencesByTypeQuery, nearbyExperiencesQuery } from './experience'
 export { restaurantBySlugQuery, allRestaurantsQuery, restaurantsBySpecialtyQuery, nearbyRestaurantsQuery } from './restaurant'
 export { specialtyBySlugQuery, allSpecialtiesQuery, nearbyForSpecialtyQuery } from './specialty'

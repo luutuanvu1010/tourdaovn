@@ -1,4 +1,5 @@
 ---
+import PageHead from './PageHead.astro'
 import type { Lang, PriceEntry } from '../lib/types'
 import { siteBaseUrl } from '../lib/siteUrl'
 import { uiCopy, EVENT_TYPE_LABELS } from '../lib/uiCopy'
@@ -22,13 +23,18 @@ interface EventEntity {
 }
 
 export interface Props {
+  /** Tiêu đề trang — QĐ-2026-08-29-04. Trước bản này file không render `h1`
+   *  nào, nên trang không có tiêu đề cấp một. `RouteDispatch` đã có sẵn giá
+   *  trị, chỉ chưa truyền xuống. */
+  title?: string
+  description?: string
   upcoming: EventEntity[]
   past: EventEntity[]
   lang: Lang
   prices?: Map<string, PriceEntry>
 }
 
-const { upcoming, past, lang, prices } = Astro.props
+const { upcoming, past, lang, prices, title, description } = Astro.props
 const t = uiCopy(lang)
 
 const eventTypeLabel = EVENT_TYPE_LABELS[lang] ?? EVENT_TYPE_LABELS.en
@@ -67,6 +73,10 @@ const sectionLabels = {
 ---
 
 {/* 06 §5.5 — Event index, hai khối riêng */}
+{/* QĐ-2026-08-29-04: trang này trước đây KHÔNG có `h1` nào. Nay dùng chung
+    `PageHead` như mọi trang danh sách khác. */}
+{title && <PageHead title={title} lang={lang} variant="index" description={description} />}
+
 <div class="event-index">
   {hasAny ? (
     <>

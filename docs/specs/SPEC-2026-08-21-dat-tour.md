@@ -219,7 +219,7 @@ Kiểm, theo thứ tự, dừng ở lỗi đầu tiên của mỗi trường (m�
 | `email` | tuỳ; nếu có: ≤ 120, khớp biểu thức email đơn giản |
 | `pickup` ≤ 200, `note` ≤ 1000 | cắt khoảng trắng hai đầu |
 | `website` (honeypot) | phải rỗng; **không rỗng → trả 200 `{ok:true, code:"TD-…"}` giả, không lưu, không báo** (không mách bot) |
-| `turnstileToken` | `POST https://challenges.cloudflare.com/turnstile/v0/siteverify` với `TURNSTILE_SECRET_KEY`; không đạt → 400 "Xác minh không thành công, thử lại"; **cổng cấu hình chạy TRƯỚC mọi tác dụng phụ** — thiếu `TURNSTILE_SECRET_KEY` mà không có `BOOKING_ALLOW_NO_TURNSTILE === '1'` → **503**, không đọc thân yêu cầu, không chạm D1, không gọi mạng; nhánh "bỏ qua kiểm, ghi `console.warn` một lần" chỉ còn tồn tại **khi có cờ dev đó** (xem `DR-064`, `docs/DRIFT_LOG.md`) |
+| `turnstileToken` | `POST https://challenges.cloudflare.com/turnstile/v0/siteverify` với `TURNSTILE_SECRET_KEY`; không đạt → 400 "Xác minh không thành công, thử lại"; **cổng cấu hình chạy TRƯỚC mọi tác dụng phụ** — thiếu `TURNSTILE_SECRET_KEY` mà không có `BOOKING_ALLOW_NO_TURNSTILE === '1'` → **503**, không đọc thân yêu cầu, không chạm D1, không gọi mạng; nhánh "bỏ qua kiểm, ghi `console.warn` một lần" chỉ còn tồn tại **khi có cờ dev đó** (xem `DR-099`, `docs/DRIFT_LOG.md`) |
 | tần suất | cùng `ip_hash` có ≥ 5 đơn trong 10 phút → 429 "Bạn vừa gửi nhiều yêu cầu, vui lòng thử lại sau ít phút" |
 | trùng | cùng `phone` + `tour_slug` + `depart_date` trong 24 giờ → **không tạo mới**, trả 200 `{ok:true, code:<mã cũ>, duplicate:true}`, không báo lại |
 
@@ -233,7 +233,7 @@ Trả về: `201 {ok:true, code, summary}`; `400 {ok:false, error:"validation", 
 phải phần mới), `429`,
 `500 {ok:false, message:"Chưa gửi được, vui lòng thử lại hoặc nhắn Zalo"}`,
 `503 {ok:false, message:"Chưa gửi được, vui lòng thử lại hoặc nhắn Zalo"}` (cổng cấu hình thiếu
-`TURNSTILE_SECRET_KEY`, chạy trước `readBody` — xem hàng `turnstileToken` ở trên và `DR-064`).
+`TURNSTILE_SECRET_KEY`, chạy trước `readBody` — xem hàng `turnstileToken` ở trên và `DR-099`).
 Nếu `Accept` không có `application/json` (form gửi không JS): trả **trang HTML tối giản**
 cùng nội dung (tên site, mã đơn hoặc thông điệp lỗi, nút Zalo, liên kết về tour) —
 không tạo trang tĩnh `/cam-on/` nào, không đụng sitemap.
@@ -323,7 +323,7 @@ kênh đó `skipped`, không ném lỗi.
 | `ZALO_BOT_TOKEN`, `ZALO_BOT_CHAT_IDS` | secret | `wrangler secret put` | Zalo Bot |
 | `TURNSTILE_SECRET_KEY` | secret | `wrangler secret put` | siteverify |
 | `IP_HASH_SALT` | secret | `wrangler secret put` | muối băm IP cho bộ đếm tần suất. **Không có trong spec gốc** — sinh từ phán xét F4 vòng review Task 8: dùng chung `TURNSTILE_SECRET_KEY` làm muối là tái dụng bí mật sai mục đích. Thiếu thì `ipHash = null` (mất đếm tần suất ở dev, không băm bằng muối đoán được) |
-| `PUBLIC_TURNSTILE_SITE_KEY` | biến build (công khai) | `.env` máy dev và biến build Cloudflare | widget; thiếu lúc build → `BookingForm` không render widget và `astro build` in một dòng cảnh báo; production **phải** có cả site key lẫn secret. Hai đường hỏng khác nhau, **cả hai đều ồn ào, không cái nào hỏng câm** (`DR-064`): thiếu **secret** → cổng cấu hình chặn ngay, mọi đơn bị **503**, không đọc thân, không chạm D1, không gọi mạng; thiếu **site key** mà vẫn có secret → widget không render nên client không gửi token, mọi đơn bị **400** `missing-token` |
+| `PUBLIC_TURNSTILE_SITE_KEY` | biến build (công khai) | `.env` máy dev và biến build Cloudflare | widget; thiếu lúc build → `BookingForm` không render widget và `astro build` in một dòng cảnh báo; production **phải** có cả site key lẫn secret. Hai đường hỏng khác nhau, **cả hai đều ồn ào, không cái nào hỏng câm** (`DR-099`): thiếu **secret** → cổng cấu hình chặn ngay, mọi đơn bị **503**, không đọc thân, không chạm D1, không gọi mạng; thiếu **site key** mà vẫn có secret → widget không render nên client không gửi token, mọi đơn bị **400** `missing-token` |
 | `BOOKING_DB` | binding D1 | `wrangler.toml` | bảng `booking` |
 
 Cục bộ: `.dev.vars` (thêm vào `.gitignore`) cho `astro dev` và vitest; `platformProxy` của
@@ -453,7 +453,7 @@ không cần build Astro; `fetch` ra SES/Zalo/Turnstile được **stub** trong 
 | `handler.ts` | hợp lệ → 201 + dòng D1; honeypot → 200 giả, không dòng; Turnstile hỏng → 400; 6 đơn/10 phút cùng IP → 429; trùng phone+tour+ngày → trả mã cũ, không INSERT; notifier ném lỗi → vẫn 201, cột `notify_*` = `failed:…`; `Accept: text/html` → HTML |
 | `sigv4.ts` | vector kiểm cố định của AWS (`aws-sig-v4-test-suite`, khoá `AKIDEXAMPLE`): cùng đầu vào → đúng chuỗi `Authorization` đã biết; đổi một byte thân → đổi chữ ký; `now` cố định nên tất định |
 | `ses.ts` | đủ ba khoá → `sent` khi 200, `failed:http 403` khi 403; thiếu `AWS_SECRET_ACCESS_KEY` → `skipped` và **không** gọi mạng; thân JSON đúng hình dạng `Content.Simple` |
-| `py1-py8` | `paxRates` hợp lệ → xanh; `paxRates.baby` → PY7 fail; `paxRates` cùng `tiers` → PY2 fail; `child.amount: -1` → PY7 fail; **`DR-061`:** tour có `bookingRef.key` trỏ đúng dòng giá → PY4 **không** báo mồ côi và PY5 **không** báo thiếu |
+| `py1-py8` | `paxRates` hợp lệ → xanh; `paxRates.baby` → PY7 fail; `paxRates` cùng `tiers` → PY2 fail; `child.amount: -1` → PY7 fail; **`DR-096`:** tour có `bookingRef.key` trỏ đúng dòng giá → PY4 **không** báo mồ côi và PY5 **không** báo thiếu |
 
 ## 6. Vận hành: việc một lần (chép vào `BUILD-NOTES.md` khi thi hành)
 
@@ -517,7 +517,7 @@ Kiểm được, đặt ra trước khi thi công. Im lặng là trượt.
    `QĐ-2026-08-22-07` đổi một khoá nhà cung cấp email thành ba biến `AWS_*` và trước khi F4 tách
    `IP_HASH_SALT` ra. **`BOOKING_ALLOW_NO_TURNSTILE` không được có mặt trong danh sách này** — nó
    là cửa thoát chỉ dành cho dev (`.dev.vars`), và nếu lọt vào `wrangler secret list` nghĩa là ai
-   đó đã đặt nó trên production, vô hiệu hoá cổng cấu hình 503 mà `DR-064` ghi lại. Đây là cổng
+   đó đã đặt nó trên production, vô hiệu hoá cổng cấu hình 503 mà `DR-099` ghi lại. Đây là cổng
    máy DUY NHẤT canh được rủi ro đó — ba lớp bảo vệ còn lại chỉ là chữ trong chú thích.
 8. Lighthouse mobile trang tour có form: performance ≥ 90, accessibility ≥ 95 (`04` §3).
 9. `npm --prefix scripts run validate` (hoặc gọi tay `py1-py8`) với `prices.yaml` có
@@ -562,7 +562,7 @@ Kiểm được, đặt ra trước khi thi công. Im lặng là trượt.
 
 Nghiệm thu trên bản `deploy:preview` (version `e4ab1e31-6c8d-4eed-9da9-a2b3782524c5`; hai version
 phụ `278a4d0d…`, `c6e61c8e…` cho các mục chạy trước bản vá 13c). Điều kiện hạ tầng: **builds tự
-động đang tạm dừng** theo quyết định chủ dự án — xem `DR-097` (build từ `main` xoá sạch secrets);
+động đang tạm dừng** theo quyết định chủ dự án — xem `DR-101` (build từ `main` xoá sạch secrets);
 sau merge phải đặt lại 8 secrets và thử Publish trước khi mở khách. Tour mẫu có giá:
 `ve-hon-tam-tron-goi-tour-hon-tam-1-ngay` (540.000/430.000); không giá: `du-thuyen`.
 
@@ -573,7 +573,7 @@ sau merge phải đặt lại 8 secrets và thử Publish trước khi mở khá
 | 3 | **đạt** | trình duyệt thật: 2 NL + 1 TE → "Tạm tính 1.510.000₫" (biến thiên từng cú bấm 540.000 → 1.080.000 → 1.510.000); NL không xuống dưới 1; hạng dừng ở 20; tổng dừng ở 30 (TE dừng 10 khi NL=20; NCT giữ 0 khi tổng=30) |
 | 4 | **đạt** | đơn thật `TD-260829-GQ7N` 19:57 VN: POST 201; D1 đúng 1 dòng, `notify_email=sent`, `notify_zalo=sent`; chủ dự án xác nhận cả email lẫn Zalo tới ngay sau cú gửi |
 | 5 | **đạt** | thiếu SĐT → 400 (preview); honeypot → 200 mã giả `TD-260829-H37Z`, D1 vẫn 0 dòng (preview); 6 đơn/10 phút cùng IP → đơn 6 nhận 429; gửi trùng SĐT/tour/ngày → 200 `duplicate:true` mã cũ `TD-260829-P5XE`, không thêm dòng (hai mục sau chạy dev cục bộ vì nằm sau verifyTurnstile; `.dev.vars` thêm `IP_HASH_SALT` dev — thiếu là khối đếm bị nhảy qua) |
-| 6 | **đạt, có ngoại lệ ghi `DR-096`** | `<noscript>` nguyên văn "Cần bật JavaScript để gửi yêu cầu. Hoặc nhắn Zalo / gọi hotline."; POST không JS → trang HTML "Chưa gửi được yêu cầu" (không JSON); `/khong-ton-tai/` → 404 trang riêng. Ngoại lệ: "nút Zalo" trên trang HTML tối giản = liên kết `/lien-he/` theo BK1 |
+| 6 | **đạt, có ngoại lệ ghi `DR-100`** | `<noscript>` nguyên văn "Cần bật JavaScript để gửi yêu cầu. Hoặc nhắn Zalo / gọi hotline."; POST không JS → trang HTML "Chưa gửi được yêu cầu" (không JSON); `/khong-ton-tai/` → 404 trang riêng. Ngoại lệ: "nút Zalo" trên trang HTML tối giản = liên kết `/lien-he/` theo BK1 |
 | 7 | **đạt** | BK1 grep rỗng; BK4 git grep rỗng; `wrangler secret list` đúng 8 tên sau `secret bulk`, không có `BOOKING_ALLOW_NO_TURNSTILE` |
 | 8 | **đạt** | Lighthouse mobile trang tour có form (preview): performance **94**, accessibility **99** |
 | 9 | **đạt** | PY1–PY3, PY6, PY7 pass (PY4 WARN = dòng mồ côi đã chốt để báo; PY5 WARN = nợ dữ liệu 21 tour chưa giá); thêm khoá lạ `student` → PY7 FAIL đúng thông điệp, đã hoàn tác |

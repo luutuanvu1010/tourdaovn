@@ -128,7 +128,23 @@ export function getClient(): SanityClient {
     dataset,
     apiVersion: '2026-06-01',
     token,
-    useCdn: false,
+    /* Đọc qua `apicdn.sanity.io` thay vì `api.sanity.io`. Hai endpoint có HẠN
+       MỨC RIÊNG, và bản dựng là hộ tiêu thụ lớn nhất: mỗi lần dựng đọc lại toàn
+       bộ dữ liệu cho ~140 trang cộng các endpoint máy đọc.
+
+       2026-08-25 hạn mức của `api` cạn — build của Cloudflare chết ở bước
+       prerender với `plan_limit_reached`, và mọi bản dựng ở máy cũng hỏng. Cùng
+       lúc đó `apicdn` vẫn trả 200. Xem `QĐ-2026-08-25-06`.
+
+       Đánh đổi: CDN có thể trả nội dung trễ tới ~60 giây. Ở dự án này việc đó
+       không thành vấn đề vì publish và deploy vốn đã tách rời — webhook Sanity
+       đang tắt theo `QĐ-2026-08-22-03`, nên nội dung chỉ lên trang khi có người
+       đẩy mã. Đo lúc chuyển: bản dựng qua CDN cho 141 URL so với 140 đang chạy,
+       thêm một bài mới, **không mất trang nào**.
+
+       Vẫn gửi kèm token: đã kiểm, `apicdn` nhận token và trả 200 bình thường
+       với `perspective: 'published'`. */
+    useCdn: true,
     perspective: 'published',
   })
 
@@ -207,7 +223,7 @@ export interface TermScan {
  */
 export async function scanTerms(): Promise<TermScan> {
   const c = getClient()
-  const query = `*[_type == "category" && inDefinedTermSet in ["experience-type", "tour-type"]]{
+  const query = `*[_type == "category" && inDefinedTermSet in ["experience-type", "tour-type", "attraction-type"]]{
     "termCode": termCode.current,
     "slug": slug.current,
     "name": coalesce(name.vi, termCode.current),
@@ -221,6 +237,24 @@ export async function scanTerms(): Promise<TermScan> {
       .filter(r => typeof r.slug !== 'string' || r.slug === '')
       .map(({ termCode, name, inDefinedTermSet }) => ({ termCode, name, inDefinedTermSet })),
   }
+}
+
+/**
+ * R2 (05-URL_MAP mục 9): trang term chỉ sinh khi có ít nhất một entity publish trỏ tới.
+ * Trả về slug của các term bộ `attraction-type` ĐÃ có Attraction approved trỏ vào.
+ *
+ * Chỉ áp cho bộ mới. Hai bộ `experience-type` và `tour-type` giữ nguyên hành vi cũ:
+ * siết R2 ngược lên chúng là xoá URL đang chạy và đang được lập chỉ mục — đó là việc
+ * của R3, phải có bản đồ chuyển hướng, không phải hệ quả phụ của đợt này.
+ */
+export async function fetchUsedAttractionTermSlugs(): Promise<Set<string>> {
+  const c = getClient()
+  const rows = await c.fetch<string[]>(
+    `*[_type == "category" && inDefinedTermSet == "attraction-type"
+       && count(*[_type == "attraction" && reviewStatus == "approved" && references(^._id)]) > 0
+     ].slug.current`
+  )
+  return new Set((rows ?? []).filter(Boolean))
 }
 
 export async function fetchAllTerms(_lang: string): Promise<TermEntry[]> {

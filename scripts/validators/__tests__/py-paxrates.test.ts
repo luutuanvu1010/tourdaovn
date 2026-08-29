@@ -48,7 +48,7 @@ test('PY7: khoá lạ bên trong một hạng, note quá 40 ký tự → fail', 
   assert.match(longNote.errors.join('\n'), /40/)
 })
 
-// ── DR-061: bookingRef là object { key }, không phải chuỗi — PY3/PY4/PY5 phải đọc bookingRef.key ──
+// ── DR-096: bookingRef là object { key }, không phải chuỗi — PY3/PY4/PY5 phải đọc bookingRef.key ──
 
 test('PY4: tour trỏ đúng bookingRef.key có dòng giá tương ứng → passed true, không báo mồ côi', () => {
   const prices = map({ 'tour-a': { unit: 'perPax', amount: 500000 } })
@@ -81,7 +81,7 @@ test('PY3: tour trỏ dòng giá unit=perRoomNight → passed false, thông đi�
   assert.match(r.errors.join('\n'), /perPax/)
 })
 
-test('DR-061: bookingRef object không có key (hoặc key rỗng) → coi như không có bookingRef, không nổ', () => {
+test('DR-096: bookingRef object không có key (hoặc key rỗng) → coi như không có bookingRef, không nổ', () => {
   const prices = map({ 'tour-a': { unit: 'perPax', amount: 500000 } })
   const docs = [
     { _id: 'd1', _type: 'tour', bookingRef: {} },

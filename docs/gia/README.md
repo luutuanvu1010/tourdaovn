@@ -72,7 +72,7 @@ một tiếng.
 chỉ vì lịch sử.
 
 **Đừng đổi `Khoá giá` khi biên tập đổi slug tour.** Đổi là làm dòng giá mồ côi và tour mất form
-đặt. Chuyện này đã xảy ra thật ngày 2026-08-22 — xem `DR-062` trong `docs/DRIFT_LOG.md`.
+đặt. Chuyện này đã xảy ra thật ngày 2026-08-22 — xem `DR-097` trong `docs/DRIFT_LOG.md`.
 
 Khoá này phải khớp với `bookingRef.key` của tour trong Sanity Studio. Lệch một bên là `PY4` báo.
 

@@ -81,7 +81,18 @@
   --fs-xs:   0.75rem;     /* 12px */
   --fs-label: 0.875rem;   /* 14px */
   --fs-sm:    0.9375rem;  /* 15px */
-  --fs-base:  1.0625rem;  /* 17px */
+  /* 19px — nâng từ 17px theo QĐ-2026-08-28-02.
+     ĐÃ ĐO trước khi đổi (Chrome, bản dựng, 2026-08-28), không phải ước lượng:
+     • Thanh dính KHÔNG nhúc nhích — 618→675 (h1 một dòng) và 674→731 (hai dòng)
+       y hệt ở 17 lẫn 19px. Dải breadcrumb, dải tiêu đề và hero đều không đọc
+       token này, nên Luật 3 "giá trước, chữ sau" không bị đụng.
+     • Số ký tự mỗi dòng KHÔNG đổi (83) vì cột chữ khai bằng `ch` — cột nở theo
+       chữ. Không tràn ngang ở 1366 lẫn 386px.
+     • Giá phải trả: trang dài thêm ~5,8% desktop, ~9,3% di động.
+     TRẦN CỦA THANG NÀY LÀ 19. Cột chữ 70ch ở 19px đo 764px, còn cột chính của
+     lưới `1fr 340px` trong khung 1200 rộng 812px — hở 48px. Ở 20px cột chữ
+     thành ~804px, tức chạm. Muốn lên nữa phải nới `--container` trước. */
+  --fs-base:  1.1875rem;  /* 19px */
   /* 21px — đẩy lên từ 18px. Thang cũ dồn cục ở khoảng giữa: nội dung 17, tiêu đề
      thẻ 18, chữ menu 18, tiêu đề nhỏ 20 — bốn bậc trong 3px nên mắt không phân
      biệt được cấp. Đây là gốc của "chữ đều đều, không phân cấp". */
@@ -96,7 +107,8 @@
   --card-lift: -3px;
   --fs-h4:    1.625rem;   /* 26px */
   --fs-section: 2rem;     /* 32px — đẩy lên từ 28px, để tiêu đề mục tách hẳn
-                             khỏi tiêu đề thẻ (21px) và nội dung (17px) */
+                             khỏi tiêu đề thẻ (21px) và nội dung (19px, nâng từ
+                             17 theo QĐ-2026-08-28-02) */
   --fs-h3:    2rem;       /* 32px */
   --fs-h2:    2.5rem;     /* 40px */
   --fs-h1:    2.625rem;   /* 42px */
@@ -155,8 +167,29 @@
                              Cao cố định để Sidebar tính được chỗ dính: trước đây thanh
                              cao theo nội dung (~62px) còn Sidebar dính ở top:16px nên
                              hai dòng đầu của thẻ thông tin khuất sau thanh — DR-033. */
-  --hero-min-h: 480px;
-  --hero-min-h-mobile: 360px;
+  /* ── Chiều cao hero dùng chung của TRANG CHI TIẾT ENTITY + trang điểm đến ──
+     NGUỒN DUY NHẤT. `Hero.astro` không còn giữ con số nào; đổi ở đây là MỌI
+     loại trang đổi theo — attraction, tour, place, hotel, resort, experience,
+     restaurant, specialty, event, article, person, organization, và trang
+     điểm đến. Cả ba biến thể hero (mosaic, ảnh đơn, không-ảnh) cùng đọc một
+     biến nên không nhánh nào lệch được nhánh nào.
+     QĐ-2026-08-29-01 đưa ba con số này từ <style> của `Hero.astro` về đây: 07
+     mở đầu khai tokens.css là nguồn token duy nhất, và giá trị giao diện nằm
+     ngoài nó là vi phạm P6/N7 — hero là chỗ vi phạm còn sót.
+     ⚠ ĐỪNG NHẦM với `--hero-min-h` / `--hero-min-h-mobile` ngay bên dưới. Hai
+     token đó là của `HomeHero.astro` — hero TRANG CHỦ, một component khác, một
+     chiều cao khác. Tên gần giống nhau là bẫy có thật; đọc kỹ trước khi sửa. */
+  --hero-entity-h-min:    330px;
+  --hero-entity-h-max:    430px;
+  --hero-entity-h-tablet: 390px;
+  --hero-entity-h-mobile: 290px;
+  /* Số giữa phải là `calc(30vw + 50px)`, KHÔNG phải `30vw`: nâng riêng trần
+     380→430 chỉ cho +4px ở 1280 và +30px ở 1366, vì 30vw mới là số đang trói.
+     Đã đo, xem QĐ-2026-08-28-02. */
+  --hero-entity-h: clamp(var(--hero-entity-h-min), calc(30vw + 50px), var(--hero-entity-h-max));
+
+  --hero-min-h: 480px;          /* HomeHero — hero TRANG CHỦ, không phải hero entity */
+  --hero-min-h-mobile: 360px;   /* HomeHero — nt */
   --card-img-h: 200px;
 }
 
@@ -266,6 +299,17 @@ h4 {
 
 p {
   margin: 0;
+}
+
+/* Chiều cao hero theo khổ màn. Đặt Ở ĐÂY chứ không trong `Hero.astro`, để mọi
+   thông số hero nằm chung một chỗ — đúng ý "đổi một chỗ thì mọi template đổi
+   theo". Hai khoảng loại trừ nhau nên thứ tự không quan trọng. */
+@media (min-width: 769px) and (max-width: 1023px) {
+  :root { --hero-entity-h: var(--hero-entity-h-tablet); }
+}
+
+@media (max-width: 768px) {
+  :root { --hero-entity-h: var(--hero-entity-h-mobile); }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -2,7 +2,7 @@
 import { HOME_COPY, indexHref } from '../lib/homepage'
 import { resolveNav } from '../lib/routes'
 import { imageUrl } from '../lib/sanity-image'
-import type { Lang, TouristDestinationResult, SiteSettingsResult } from '../lib/types'
+import type { Lang, TouristDestinationResult, SiteSettingsResult, DestinationCard } from '../lib/types'
 import { brand } from '../site.config'
 import Body from './Body.astro'
 import HomeTrustBar from './HomeTrustBar.astro'
@@ -17,6 +17,7 @@ import HomePartners from './HomePartners.astro'
 import HomeTestimonials from './HomeTestimonials.astro'
 import HomeGroupQuote from './HomeGroupQuote.astro'
 import HomeTourGrid from './HomeTourGrid.astro'
+import HomeDestinationGrid from './HomeDestinationGrid.astro'
 export interface Props {
   td: TouristDestinationResult | null
   lang: Lang
@@ -26,9 +27,11 @@ export interface Props {
   homeTours?: any[]
   /** Tổng số tour thật, cho nhãn "Xem tất cả N tour". */
   homeTourTotal?: number
+  /** Điểm đến khác cho khối "Điểm đến khác". Rỗng thì khối tự ẩn. */
+  otherDestinations?: DestinationCard[]
 }
 
-const { td, lang, destinationHref, config, homeTours = [], homeTourTotal = 0 } = Astro.props
+const { td, lang, destinationHref, config, homeTours = [], homeTourTotal = 0, otherDestinations = [] } = Astro.props
 const copy = HOME_COPY[lang]
 
 // Nút phụ ở hero lấy mục đầu tiên của menu (ADR-0023) thay vì hardcode hub-kham-pha.
@@ -55,7 +58,7 @@ const SITE_COPY: Record<Lang, {
     title: brand.headline,
     summary: brand.description,
     destinationLabel: 'Điểm đến chính',
-    destinationCta: 'Xem trang điểm đến',
+    destinationCta: 'Tất cả địa danh',
     hubHeading: 'Đi thẳng tới nhu cầu của bạn',
     hubSub: 'Chọn nhóm dịch vụ bạn cần — mỗi nhóm có danh sách đầy đủ kèm giá và lịch trình.',
   },
@@ -64,7 +67,7 @@ const SITE_COPY: Record<Lang, {
     title: brand.name,
     summary: 'A structured Nha Trang travel portal for destinations, experiences, stays, food and practical guides, built for travelers, local partners and AI search engines.',
     destinationLabel: 'Primary destination',
-    destinationCta: 'Open destination page',
+    destinationCta: 'All destinations',
     hubHeading: 'Jump to what you need',
     hubSub: 'These hubs are the main entry points into the travel database, separate from the Nha Trang destination page.',
   },
@@ -73,7 +76,7 @@ const SITE_COPY: Record<Lang, {
     title: brand.name,
     summary: '一个结构化的芽庄旅行入口，涵盖目的地、体验、住宿、美食和实用攻略，面向游客、本地伙伴和 AI 搜索引擎。',
     destinationLabel: '主要目的地',
-    destinationCta: '查看目的地页面',
+    destinationCta: '全部目的地',
     hubHeading: '直接进入所需内容',
     hubSub: '以下 hub 是旅行数据库的主要入口，与芽庄目的地页面分开。',
   },
@@ -82,7 +85,7 @@ const SITE_COPY: Record<Lang, {
     title: brand.name,
     summary: '나트랑의 목적지, 체험, 숙소, 음식과 실용 가이드를 정리한 여행 포털입니다. 여행자, 현지 파트너, AI 검색 엔진을 위해 구성했습니다.',
     destinationLabel: '대표 목적지',
-    destinationCta: '목적지 페이지 보기',
+    destinationCta: '전체 여행지',
     hubHeading: '필요한 정보로 바로 이동',
     hubSub: '아래 허브는 여행 데이터베이스의 주요 입구이며 나트랑 목적지 페이지와 분리되어 있습니다.',
   },
@@ -91,7 +94,7 @@ const SITE_COPY: Record<Lang, {
     title: brand.name,
     summary: 'Структурированный туристический портал о Нячанге: направления, впечатления, проживание, еда и практичные гиды для путешественников, местных партнеров и AI-поиска.',
     destinationLabel: 'Главное направление',
-    destinationCta: 'Открыть страницу направления',
+    destinationCta: 'Все направления',
     hubHeading: 'Перейдите к нужному разделу',
     hubSub: 'Эти хабы являются основными входами в туристическую базу и отделены от страницы направления Нячанг.',
   },
@@ -122,6 +125,8 @@ const heroImage = imageUrl(hero?.image, { width: 1800 }) || imageUrl(td?.mainIma
 const heroCredit = viOnly(hero?.imageCredit)
 const heroPrimaryLabel = viOnly(hero?.ctaPrimaryLabel) || copy.heroBookCta
 const heroSecondaryLabel = viOnly(hero?.ctaSecondaryLabel) || siteCopy.destinationCta
+// Đích của nút phụ: trang danh sách điểm đến. Tắt route đó thì rơi về trang điểm đến trụ.
+const destinationsHref = indexHref('touristDestination', lang) || destinationHref
 
 // Thứ tự mặc định theo bàn giao bước 7: SẢN PHẨM trước, nội dung sau. Trước đây
 // `tours` đứng thứ 12/14 — sau cả `specialties` là danh mục đã tắt — nên trang
@@ -134,13 +139,13 @@ const heroSecondaryLabel = viOnly(hero?.ctaSecondaryLabel) || siteCopy.destinati
 const DEFAULT_SECTIONS = [
   { key: 'hero', hidden: false },
   { key: 'stats', hidden: false },
-  { key: 'tours', hidden: false },
   { key: 'trustBar', hidden: false },
   { key: 'partners', hidden: false },
   { key: 'testimonials', hidden: false },
   { key: 'guides', hidden: false },
   { key: 'experiences', hidden: false },
   { key: 'hubGrid', hidden: false },
+  { key: 'destinations', hidden: false },
   { key: 'stays', hidden: false },
   { key: 'attractions', hidden: false },
   { key: 'areas', hidden: false },
@@ -164,14 +169,20 @@ const activeSections = rawSections.filter((s) => !s.hidden)
     <p class="site-home-summary">{heroSummary}</p>
     <div class="site-home-actions">
       {/* Nút chính là Zalo — kênh đặt chỗ duy nhất của site (00 §3). Chưa nhập
-          zaloUrl thì rơi về nút trỏ trang điểm đến, không để hero mất hành động.
-          Nút thay thế đó mang nhãn PHỤ, không phải nhãn chính: nó dẫn tới trang
-          điểm đến chứ không phải tới Zalo, gắn nhãn "Đặt vé qua Zalo" lên nó là
-          nói dối chỗ bấm sẽ tới. */}
+          zaloUrl thì rơi về nút phụ, không để hero mất hành động. Nút thay thế đó
+          mang nhãn PHỤ, không phải nhãn chính: nó dẫn tới danh sách điểm đến chứ
+          không phải tới Zalo, gắn nhãn "Đặt vé qua Zalo" lên nó là nói dối chỗ
+          bấm sẽ tới.
+
+          Nút phụ trỏ `/diem-den/` (danh sách MỌI điểm đến), không còn trỏ riêng
+          trang điểm đến trụ. Đổi theo yêu cầu chủ dự án 2026-08-27: khi site có
+          nhiều điểm đến, một nút ở hero dẫn thẳng vào Nha Trang là bỏ quên phần
+          còn lại. `destinationsHref` rơi về `destinationHref` nếu route danh sách
+          bị tắt trong site.config, nên hero không bao giờ mất nút. */}
       {zaloUrl
         ? <a href={zaloUrl} class="primary-action" target="_blank" rel="noopener">{heroPrimaryLabel}</a>
-        : <a href={destinationHref} class="primary-action">{heroSecondaryLabel}</a>}
-      {zaloUrl && <a href={destinationHref} class="secondary-action">{heroSecondaryLabel}</a>}
+        : <a href={destinationsHref} class="primary-action">{heroSecondaryLabel}</a>}
+      {zaloUrl && <a href={destinationsHref} class="secondary-action">{heroSecondaryLabel}</a>}
       {!zaloUrl && firstNavItem?.href && <a href={firstNavItem.href} class="secondary-action">{firstNavItem.label}</a>}
     </div>
   </div>
@@ -217,7 +228,7 @@ const activeSections = rawSections.filter((s) => !s.hidden)
            trái. Thu hẹp nốt là đụng luật measure — cần phiếu riêng. */
         return (
           <section class="container editorial-section">
-            <h2 class="editorial-section-heading">{copy.sections.overview}</h2>
+            <h2 class="editorial-section-heading">{copy.sections.overview(td.title)}</h2>
             <div class="editorial-grid">
               <div class="editorial-main">
                 {hasBody && td.body && <Body blocks={td.body} />}
@@ -240,6 +251,10 @@ const activeSections = rawSections.filter((s) => !s.hidden)
         return td?.homepageBanners?.length ? <HomeBannerGrid banners={td.homepageBanners} lang={lang} /> : null
       case 'hubGrid':
         return <HomeHubGrid lang={lang} />
+      case 'destinations':
+        return otherDestinations.length ? (
+          <HomeDestinationGrid destinations={otherDestinations} lang={lang} heading={copy.sections.destinations} viewAllLabel={copy.viewAll} viewAllHref={indexHref('touristDestination', lang)} />
+        ) : null
       case 'areas':
         return td?.homepagePlaces?.length ? (
           <HomeAreaGrid places={td.homepagePlaces} lang={lang} heading={copy.sections.areas} viewAllLabel={copy.viewAll} viewAllHref={indexHref('place', lang)} />
@@ -486,6 +501,7 @@ const activeSections = rawSections.filter((s) => !s.hidden)
     color: var(--c-text);
     font-weight: var(--fw-600);
     cursor: pointer;
+    padding-block: var(--s3);
   }
 
   .home-faq-section details p {
@@ -526,7 +542,22 @@ const activeSections = rawSections.filter((s) => !s.hidden)
     }
 
     .site-home-inner {
+      padding-top: var(--s7);
       padding-bottom: var(--s7);
+    }
+
+    /* SPEC-2026-08-29 R5. Hero chiếm 86% màn đầu (727/844) nên khách không thấy
+       hé gì phía dưới — không có tín hiệu nào bảo "còn nữa, cuộn đi".
+       42px cho ~13 ký tự/dòng nên tiêu đề ngắt 4 dòng; 32px cho ~17-18 ký tự nên
+       còn 3 dòng. Với --lh-display 1,22 thì 4×51 = 205px xuống 3×39 = 117px. */
+    .site-home-title {
+      font-size: var(--fs-h3);
+    }
+
+    .editorial-section,
+    .home-faq-section,
+    .home-safety-section {
+      padding-block: var(--s6);
     }
   }
 </style>

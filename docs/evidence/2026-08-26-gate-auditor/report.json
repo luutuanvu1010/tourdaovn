@@ -1,0 +1,523 @@
+{
+  "agent": "gate-auditor",
+  "ranAt": "2026-08-26T21:32:49.170Z",
+  "checks": [
+    {
+      "id": "GA1/I6",
+      "verdict": "pass",
+      "detail": "control I6 live, bằng chứng scripts/reports/postbuild-status.json tồn tại",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA1/I20",
+      "verdict": "pass",
+      "detail": "control I20 live, bằng chứng scripts/reports/validator-status.json tồn tại",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA1/PY8",
+      "verdict": "pass",
+      "detail": "control PY8 live, bằng chứng scripts/reports/postbuild-status.json tồn tại",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA1/R3",
+      "verdict": "pass",
+      "detail": "control R3 live, bằng chứng scripts/reports/postbuild-status.json tồn tại",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA1/R4",
+      "verdict": "pass",
+      "detail": "control R4 live, bằng chứng scripts/reports/postbuild-status.json tồn tại",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/I1",
+      "verdict": "fail",
+      "detail": "control I1 khai gap nhưng scripts/reports/validator-status.json đã có mục I1 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/I2",
+      "verdict": "fail",
+      "detail": "control I2 khai gap nhưng scripts/reports/validator-status.json đã có mục I2 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/I3",
+      "verdict": "fail",
+      "detail": "control I3 khai gap nhưng scripts/reports/validator-status.json đã có mục I3 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/I4",
+      "verdict": "fail",
+      "detail": "control I4 khai gap nhưng scripts/reports/validator-status.json đã có mục I4 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/I5",
+      "verdict": "fail",
+      "detail": "control I5 khai gap nhưng scripts/reports/validator-status.json đã có mục I5 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/I7",
+      "verdict": "fail",
+      "detail": "control I7 khai gap nhưng scripts/reports/validator-status.json đã có mục I7 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/I8",
+      "verdict": "fail",
+      "detail": "control I8 khai gap nhưng scripts/reports/validator-status.json đã có mục I8 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/I9",
+      "verdict": "fail",
+      "detail": "control I9 khai gap nhưng scripts/reports/validator-status.json đã có mục I9 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/I10",
+      "verdict": "fail",
+      "detail": "control I10 khai gap nhưng scripts/reports/validator-status.json đã có mục I10 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/I11",
+      "verdict": "fail",
+      "detail": "control I11 khai gap nhưng scripts/reports/validator-status.json đã có mục I11 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/I12",
+      "verdict": "fail",
+      "detail": "control I12 khai gap nhưng scripts/reports/validator-status.json đã có mục I12 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/I13",
+      "verdict": "fail",
+      "detail": "control I13 khai gap nhưng scripts/reports/validator-status.json đã có mục I13 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/I14",
+      "verdict": "fail",
+      "detail": "control I14 khai gap nhưng scripts/reports/validator-status.json đã có mục I14 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/I15",
+      "verdict": "fail",
+      "detail": "control I15 khai gap nhưng scripts/reports/validator-status.json đã có mục I15 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/I16",
+      "verdict": "fail",
+      "detail": "control I16 khai gap nhưng scripts/reports/validator-status.json đã có mục I16 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/I17",
+      "verdict": "fail",
+      "detail": "control I17 khai gap nhưng scripts/reports/validator-status.json đã có mục I17 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/I18",
+      "verdict": "fail",
+      "detail": "control I18 khai gap nhưng scripts/reports/validator-status.json đã có mục I18 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/I19",
+      "verdict": "fail",
+      "detail": "control I19 khai gap nhưng scripts/reports/validator-status.json đã có mục I19 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/PY1",
+      "verdict": "fail",
+      "detail": "control PY1 khai gap nhưng scripts/reports/validator-status.json đã có mục PY1 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/PY2",
+      "verdict": "fail",
+      "detail": "control PY2 khai gap nhưng scripts/reports/validator-status.json đã có mục PY2 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/PY3",
+      "verdict": "fail",
+      "detail": "control PY3 khai gap nhưng scripts/reports/validator-status.json đã có mục PY3 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/PY4",
+      "verdict": "fail",
+      "detail": "control PY4 khai gap nhưng scripts/reports/validator-status.json đã có mục PY4 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/PY5",
+      "verdict": "fail",
+      "detail": "control PY5 khai gap nhưng scripts/reports/validator-status.json đã có mục PY5 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/PY6",
+      "verdict": "fail",
+      "detail": "control PY6 khai gap nhưng scripts/reports/validator-status.json đã có mục PY6 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/PY7",
+      "verdict": "fail",
+      "detail": "control PY7 khai gap nhưng scripts/reports/validator-status.json đã có mục PY7 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/R1",
+      "verdict": "fail",
+      "detail": "control R1 khai gap nhưng scripts/reports/validator-status.json đã có mục R1 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA6/R2",
+      "verdict": "fail",
+      "detail": "control R2 khai gap nhưng scripts/reports/validator-status.json đã có mục R2 — control này thực ra đang chạy, sổ control-registry.yaml chưa cập nhật",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA2",
+      "verdict": "fail",
+      "detail": "postbuild-status.json CŨ HƠN dist/index.html — báo cáo đang nói về một bản dựng khác với bản đang nằm trên đĩa. Chạy lại npm run gate.",
+      "drift": [
+        "DR-001"
+      ]
+    },
+    {
+      "id": "GA3/I6",
+      "verdict": "pass",
+      "detail": "I6 có mục trong scripts/reports/postbuild-status.json",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA3/I20",
+      "verdict": "pass",
+      "detail": "I20 có mục trong scripts/reports/validator-status.json",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA3/PY8",
+      "verdict": "pass",
+      "detail": "PY8 có mục trong scripts/reports/postbuild-status.json",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA3/R3",
+      "verdict": "pass",
+      "detail": "R3 có mục trong scripts/reports/postbuild-status.json",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA3/R4",
+      "verdict": "pass",
+      "detail": "R4 có mục trong scripts/reports/postbuild-status.json",
+      "drift": [
+        "DR-022"
+      ]
+    },
+    {
+      "id": "GA4/scripts/validators/control-registry-gate.ts",
+      "verdict": "pass",
+      "detail": "mọi import tương đối trong scripts/validators/control-registry-gate.ts giải được",
+      "drift": [
+        "DR-015"
+      ]
+    },
+    {
+      "id": "GA4/scripts/validators/deferred-gate.ts",
+      "verdict": "pass",
+      "detail": "mọi import tương đối trong scripts/validators/deferred-gate.ts giải được",
+      "drift": [
+        "DR-015"
+      ]
+    },
+    {
+      "id": "GA4/scripts/validators/entity-layout-post.ts",
+      "verdict": "pass",
+      "detail": "mọi import tương đối trong scripts/validators/entity-layout-post.ts giải được",
+      "drift": [
+        "DR-015"
+      ]
+    },
+    {
+      "id": "GA4/scripts/validators/geo-knowledge-post.ts",
+      "verdict": "pass",
+      "detail": "mọi import tương đối trong scripts/validators/geo-knowledge-post.ts giải được",
+      "drift": [
+        "DR-015"
+      ]
+    },
+    {
+      "id": "GA4/scripts/validators/git-governance.ts",
+      "verdict": "pass",
+      "detail": "mọi import tương đối trong scripts/validators/git-governance.ts giải được",
+      "drift": [
+        "DR-015"
+      ]
+    },
+    {
+      "id": "GA4/scripts/validators/governance-post.ts",
+      "verdict": "pass",
+      "detail": "mọi import tương đối trong scripts/validators/governance-post.ts giải được",
+      "drift": [
+        "DR-015"
+      ]
+    },
+    {
+      "id": "GA4/scripts/validators/i1-i19.ts",
+      "verdict": "pass",
+      "detail": "mọi import tương đối trong scripts/validators/i1-i19.ts giải được",
+      "drift": [
+        "DR-015"
+      ]
+    },
+    {
+      "id": "GA4/scripts/validators/jsonld-post.ts",
+      "verdict": "pass",
+      "detail": "mọi import tương đối trong scripts/validators/jsonld-post.ts giải được",
+      "drift": [
+        "DR-015"
+      ]
+    },
+    {
+      "id": "GA4/scripts/validators/py1-py8.ts",
+      "verdict": "pass",
+      "detail": "mọi import tương đối trong scripts/validators/py1-py8.ts giải được",
+      "drift": [
+        "DR-015"
+      ]
+    },
+    {
+      "id": "GA4/scripts/validators/r1-r4.ts",
+      "verdict": "pass",
+      "detail": "mọi import tương đối trong scripts/validators/r1-r4.ts giải được",
+      "drift": [
+        "DR-015"
+      ]
+    },
+    {
+      "id": "GA4/scripts/validators/r3-r4-post.ts",
+      "verdict": "pass",
+      "detail": "mọi import tương đối trong scripts/validators/r3-r4-post.ts giải được",
+      "drift": [
+        "DR-015"
+      ]
+    },
+    {
+      "id": "GA4/scripts/meta-validators/g1-content-model-vs-schema.ts",
+      "verdict": "pass",
+      "detail": "mọi import tương đối trong scripts/meta-validators/g1-content-model-vs-schema.ts giải được",
+      "drift": [
+        "DR-015"
+      ]
+    },
+    {
+      "id": "GA4/scripts/meta-validators/g2-content-model-vs-gatefields.ts",
+      "verdict": "pass",
+      "detail": "mọi import tương đối trong scripts/meta-validators/g2-content-model-vs-gatefields.ts giải được",
+      "drift": [
+        "DR-015"
+      ]
+    },
+    {
+      "id": "GA4/scripts/meta-validators/g3-binding-map-vs-template.ts",
+      "verdict": "pass",
+      "detail": "mọi import tương đối trong scripts/meta-validators/g3-binding-map-vs-template.ts giải được",
+      "drift": [
+        "DR-015"
+      ]
+    },
+    {
+      "id": "GA4/scripts/meta-validators/g4-groq-field-validity.ts",
+      "verdict": "pass",
+      "detail": "mọi import tương đối trong scripts/meta-validators/g4-groq-field-validity.ts giải được",
+      "drift": [
+        "DR-015"
+      ]
+    },
+    {
+      "id": "GA5/scripts/validate-constraints.ts",
+      "verdict": "pass",
+      "detail": "pipeline prebuild-validate khai scripts/validate-constraints.ts, file tồn tại",
+      "drift": [
+        "DR-026"
+      ]
+    },
+    {
+      "id": "GA5/scripts/validators/i1-i19.ts",
+      "verdict": "pass",
+      "detail": "pipeline prebuild-validate khai scripts/validators/i1-i19.ts, file tồn tại",
+      "drift": [
+        "DR-026"
+      ]
+    },
+    {
+      "id": "GA5/scripts/validators/py1-py8.ts",
+      "verdict": "pass",
+      "detail": "pipeline prebuild-validate khai scripts/validators/py1-py8.ts, file tồn tại",
+      "drift": [
+        "DR-026"
+      ]
+    },
+    {
+      "id": "GA5/scripts/validators/r1-r4.ts",
+      "verdict": "pass",
+      "detail": "pipeline prebuild-validate khai scripts/validators/r1-r4.ts, file tồn tại",
+      "drift": [
+        "DR-026"
+      ]
+    },
+    {
+      "id": "GA5/scripts/validators/jsonld-post.ts",
+      "verdict": "pass",
+      "detail": "pipeline postbuild-validate khai scripts/validators/jsonld-post.ts, file tồn tại",
+      "drift": [
+        "DR-026"
+      ]
+    },
+    {
+      "id": "GA5/scripts/validators/r3-r4-post.ts",
+      "verdict": "pass",
+      "detail": "pipeline postbuild-validate khai scripts/validators/r3-r4-post.ts, file tồn tại",
+      "drift": [
+        "DR-026"
+      ]
+    },
+    {
+      "id": "GA5/scripts/validators/governance-post.ts",
+      "verdict": "pass",
+      "detail": "pipeline postbuild-validate khai scripts/validators/governance-post.ts, file tồn tại",
+      "drift": [
+        "DR-026"
+      ]
+    },
+    {
+      "id": "GA5/scripts/validators/geo-knowledge-post.ts",
+      "verdict": "pass",
+      "detail": "pipeline postbuild-validate khai scripts/validators/geo-knowledge-post.ts, file tồn tại",
+      "drift": [
+        "DR-026"
+      ]
+    },
+    {
+      "id": "GA5/scripts/validators/entity-layout-post.ts",
+      "verdict": "pass",
+      "detail": "pipeline postbuild-validate khai scripts/validators/entity-layout-post.ts, file tồn tại",
+      "drift": [
+        "DR-026"
+      ]
+    },
+    {
+      "id": "GA5/scripts/validators/control-registry-gate.ts",
+      "verdict": "pass",
+      "detail": "pipeline postbuild-validate khai scripts/validators/control-registry-gate.ts, file tồn tại",
+      "drift": [
+        "DR-026"
+      ]
+    },
+    {
+      "id": "GA5/scripts/validators/deferred-gate.ts",
+      "verdict": "pass",
+      "detail": "pipeline postbuild-validate khai scripts/validators/deferred-gate.ts, file tồn tại",
+      "drift": [
+        "DR-026"
+      ]
+    }
+  ],
+  "summary": {
+    "pass": 36,
+    "fail": 28,
+    "skip": 0
+  }
+}

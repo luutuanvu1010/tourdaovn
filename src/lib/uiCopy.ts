@@ -913,11 +913,11 @@ export function typeLabel(dict: LabelDict, lang: Lang, code: string | undefined)
 }
 
 export const ATTRACTION_TYPE_LABELS: LabelDict = {
-  vi: { historic: 'Di tích', temple: 'Chùa', church: 'Nhà thờ', museum: 'Bảo tàng', 'theme-park': 'Công viên giải trí', aquarium: 'Thủy cung', 'mud-spa': 'Tắm bùn', market: 'Chợ', park: 'Công viên' },
-  en: { historic: 'Historic site', temple: 'Temple', church: 'Church', museum: 'Museum', 'theme-park': 'Theme park', aquarium: 'Aquarium', 'mud-spa': 'Mud spa', market: 'Market', park: 'Park' },
-  zh: { historic: '古迹', temple: '寺庙', church: '教堂', museum: '博物馆', 'theme-park': '主题公园', aquarium: '水族馆', 'mud-spa': '泥浆浴', market: '市场', park: '公园' },
-  ko: { historic: '유적지', temple: '사원', church: '교회', museum: '박물관', 'theme-park': '테마파크', aquarium: '아쿠아리움', 'mud-spa': '머드 스파', market: '시장', park: '공원' },
-  ru: { historic: 'Памятник истории', temple: 'Храм', church: 'Церковь', museum: 'Музей', 'theme-park': 'Парк развлечений', aquarium: 'Океанариум', 'mud-spa': 'Грязевой спа', market: 'Рынок', park: 'Парк' },
+  vi: { historic: 'Di tích', temple: 'Chùa', church: 'Nhà thờ', museum: 'Bảo tàng', beach: 'Bãi biển', island: 'Đảo', nature: 'Thiên nhiên', 'theme-park': 'Công viên giải trí', aquarium: 'Thủy cung', 'mud-spa': 'Tắm bùn', market: 'Chợ', park: 'Công viên', 'craft-village': 'Làng nghề', general: 'Điểm thu hút khách' },
+  en: { historic: 'Historic site', temple: 'Temple', church: 'Church', museum: 'Museum', beach: 'Beach', island: 'Island', nature: 'Nature', 'theme-park': 'Theme park', aquarium: 'Aquarium', 'mud-spa': 'Mud spa', market: 'Market', park: 'Park', 'craft-village': 'Craft village', general: 'Tourist attraction' },
+  zh: { historic: '古迹', temple: '寺庙', church: '教堂', museum: '博物馆', beach: '海滩', island: '岛屿', nature: '自然生态', 'theme-park': '主题公园', aquarium: '水族馆', 'mud-spa': '泥浆浴', market: '市场', park: '公园', 'craft-village': '手工艺村', general: '旅游景点' },
+  ko: { historic: '유적지', temple: '사원', church: '교회', museum: '박물관', beach: '해변', island: '섬', nature: '자연', 'theme-park': '테마파크', aquarium: '아쿠아리움', 'mud-spa': '머드 스파', market: '시장', park: '공원', 'craft-village': '공예 마을', general: '관광 명소' },
+  ru: { historic: 'Памятник истории', temple: 'Храм', church: 'Церковь', museum: 'Музей', beach: 'Пляж', island: 'Остров', nature: 'Природа', 'theme-park': 'Парк развлечений', aquarium: 'Океанариум', 'mud-spa': 'Грязевой спа', market: 'Рынок', park: 'Парк', 'craft-village': 'Ремесленная деревня', general: 'Достопримечательность' },
 }
 
 export const PLACE_TYPE_LABELS: LabelDict = {
@@ -1048,6 +1048,7 @@ export interface PageCopy { title: string; desc: string }
 export const INDEX_COPY: Record<Lang, Record<string, PageCopy>> = {
   vi: {
     place:        { title: 'Địa danh', desc: 'Các địa danh tại Nha Trang và Khánh Hòa.' },
+    touristDestination: { title: 'Điểm đến', desc: 'Các điểm đến du lịch có trên site.' },
     attraction:   { title: 'Điểm tham quan', desc: 'Điểm tham quan nổi bật ở Nha Trang.' },
     experience:   { title: 'Trải nghiệm', desc: 'Hoạt động và trải nghiệm tại Nha Trang.' },
     restaurant:   { title: 'Nhà hàng', desc: 'Nhà hàng và quán ăn ở Nha Trang.' },
@@ -1062,6 +1063,7 @@ export const INDEX_COPY: Record<Lang, Record<string, PageCopy>> = {
   },
   en: {
     place:        { title: 'Places', desc: 'Places across Nha Trang and Khanh Hoa.' },
+    touristDestination: { title: 'Destinations', desc: 'Travel destinations covered on this site.' },
     attraction:   { title: 'Attractions', desc: 'Notable attractions in Nha Trang.' },
     experience:   { title: 'Experiences', desc: 'Activities and experiences in Nha Trang.' },
     restaurant:   { title: 'Restaurants', desc: 'Restaurants and eateries in Nha Trang.' },
@@ -1076,6 +1078,7 @@ export const INDEX_COPY: Record<Lang, Record<string, PageCopy>> = {
   },
   zh: {
     place:        { title: '地点', desc: '芽庄与庆和的各处地点。' },
+    touristDestination: { title: '目的地', desc: '本站收录的旅游目的地。' },
     attraction:   { title: '景点', desc: '芽庄的著名景点。' },
     experience:   { title: '体验', desc: '芽庄的活动与体验。' },
     restaurant:   { title: '餐厅', desc: '芽庄的餐厅与小吃店。' },
@@ -1090,6 +1093,7 @@ export const INDEX_COPY: Record<Lang, Record<string, PageCopy>> = {
   },
   ko: {
     place:        { title: '장소', desc: '나트랑과 카인호아의 장소들.' },
+    touristDestination: { title: '여행지', desc: '이 사이트에서 다루는 여행지.' },
     attraction:   { title: '명소', desc: '나트랑의 주요 명소.' },
     experience:   { title: '체험', desc: '나트랑의 액티비티와 체험.' },
     restaurant:   { title: '맛집', desc: '나트랑의 레스토랑과 식당.' },
@@ -1104,6 +1108,7 @@ export const INDEX_COPY: Record<Lang, Record<string, PageCopy>> = {
   },
   ru: {
     place:        { title: 'Места', desc: 'Места Нячанга и Кханьхоа.' },
+    touristDestination: { title: 'Направления', desc: 'Туристические направления на этом сайте.' },
     attraction:   { title: 'Достопримечательности', desc: 'Известные достопримечательности Нячанга.' },
     experience:   { title: 'Впечатления', desc: 'Активности и впечатления в Нячанге.' },
     restaurant:   { title: 'Рестораны', desc: 'Рестораны и закусочные Нячанга.' },

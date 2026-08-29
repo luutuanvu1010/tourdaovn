@@ -60,6 +60,8 @@ flowchart LR
 
 Ranh giới cứng giữa hai container nguồn: Sanity và nguồn giá không bao giờ ghi chéo nhau. Giá không phải entity, không có trong content model như field số (I1). `bookingRef` là cây cầu duy nhất, và nó chỉ trỏ một chiều từ Sanity sang nguồn giá.
 
+> **Tầng giao diện — bản đồ file:** xem `KIEN-TRUC-TEMPLATE.md`. Nó trả lời "muốn đổi X thì mở file nào" trong một lần đọc: thông số ở `src/styles/tokens.css`, bố cục trang chi tiết ở `src/components/DetailLayout.astro`, vỏ trang ở `src/layouts/BaseLayout.astro`, dữ liệu riêng từng entity ở `src/components/{Entity}Detail.astro`. SAD này mô tả kiến trúc hệ thống; file kia mô tả kiến trúc template.
+
 ## 3. Thành phần chính (C3) — seam giá
 
 Phần này phóng to khối được phiên này quyết: cách nguồn giá và build nối nhau.

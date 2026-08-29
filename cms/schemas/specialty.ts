@@ -1,6 +1,6 @@
 import { defineType, defineField } from 'sanity'
 import { StarIcon } from '@sanity/icons'
-import { baseFieldsAfterGallery, baseFieldsBeforeGallery, baseGroups } from './baseFields'
+import { baseFieldsAfterGallery, baseFieldsBeforeGallery, baseGroups, destinationField } from './baseFields'
 import { BulkGalleryInput } from '../components/BulkGalleryInput'
 import { brand } from '../../src/site.config'
 
@@ -31,6 +31,7 @@ export default defineType({
       }]
     }),
     ...baseFieldsAfterGallery,
+    destinationField,
     defineField({
       name: 'specialtyType', type: 'string',
       group: 'coBan',

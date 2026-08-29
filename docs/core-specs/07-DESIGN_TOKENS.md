@@ -39,7 +39,7 @@ Mọi cặp màu chữ trên nền dưới đây đã kiểm WCAG AA (≥ 4,5:1 
 | color.surface | #FFFFFF | nền trang mặc định — **chủ dự án chốt 2026-08-06, giải DR-003**; `08-QA_CHECKLIST` B4 phải sửa theo |
 | color.surface.alt | **#EAF2F8** | nền xen kẽ khối, nền card trên nền trắng. **v2026-08-25 (`QĐ-2026-08-25-04`): từ #F8FAFC.** Giá trị cũ chỉ cách nền trắng **1,046** nên khối xen kẽ đọc thành một mảng trắng liền — đúng bệnh "thiếu diện tích màu" mà §1 mô tả. Nay **1,132** |
 | color.sea | #0E7490 | ngọc lam vịnh nông — nhãn tự nhiên, tiện ích, trạng thái thành công; chữ trắng đạt 5.36 (AA) |
-| color.sand | #F5A623 | cát biển — nhãn ấm, gạch chân trang trí. **Không dùng làm nền CTA**: tương phản với chữ trắng không đạt AA |
+| color.sand | #F5A623 | cát biển — nhãn ấm, gạch chân trang trí. **Không dùng làm nền CTA**: phân vai màu — `color.accent` đã giữ vai CTA và nhãn giá, cát giữ vai gạch chân và nút trên nền đậm; cho cát thêm vai CTA là một màu hai vai (`QĐ-2026-08-29-06`, sửa lý do — điều khoản giữ nguyên; số đo được: `--c-text-inverse` trên `--c-sand` chỉ **3,28:1**, dưới AA — xem `HomeStatsBand.astro:38-39`) |
 | color.text | #0F172A | chữ chính trên surface và surface.alt |
 | color.text.muted | #475569 | mô tả ngắn trên card, ngày cập nhật, nhãn phụ, breadcrumb |
 | color.text.inverse | #F8FAFC | chữ trên primary, primary.strong, accent |
@@ -101,8 +101,8 @@ Thêm bộ mới: thêm một dòng ở đây, một khối `:root[data-theme=".
 | font.family.heading | "Nunito", "Be Vietnam Pro", system-ui, sans-serif | heading mọi cấp |
 | font.family.body | "Nunito", "Be Vietnam Pro", system-ui, sans-serif | body, card, nhãn, breadcrumb, meta, nav |
 | font.weight | 500, 600, 700, 800, 900 | body 500; nhãn, nút, nhãn phụ card 600; heading 700; chữ hiển thị 800. **900 không có tác dụng**: Nunito dừng ở 800, trình duyệt kẹp xuống — xem DR-031 |
-| font.size.base | 17px (1.0625rem) | body; không nhỏ hơn 17px trên nội dung chính |
-| font.size.scale | 1,2-1,25 | bậc thang runtime: 17 / 22 / 26 / 32 / 40 / 42 / 46 / 60 |
+| font.size.base | **19px (1.1875rem)** | body; không nhỏ hơn 19px trên nội dung chính. Nâng từ 17px theo `QĐ-2026-08-28-02`. **ĐÃ ĐO trước khi đổi** (Chrome, bản dựng, 2026-08-28): thanh dính không nhúc nhích (618→675 và 674→731 y hệt ở 17 lẫn 19px, vì dải breadcrumb/tiêu đề/hero đều không đọc token này, nên **Luật 3** không bị đụng); số ký tự mỗi dòng không đổi (83) vì cột chữ khai bằng `ch`; không tràn ngang ở 1366 lẫn 386px. Giá phải trả: trang dài thêm ~5,8% desktop, ~9,3% di động. **19 là TRẦN của thang này** — cột chữ 70ch ở 19px đo 764px so với cột chính 812px của lưới `1fr 340px` trong khung 1200; ở 20px thành ~804px, tức chạm. Muốn lên nữa phải nới `--container` trước |
+| font.size.scale | 1,2-1,25 | bậc thang runtime: **19** / 22 / 26 / 32 / 40 / 42 / 46 / 60 (bậc đầu nâng từ 17, `QĐ-2026-08-28-02`) |
 | font.size.display | 60px (3,75rem) | **chỉ** câu định vị ở hero trang chủ. Trên khung 1200px, 46px là cỡ của một tiêu đề mục chứ không phải cỡ của câu định vị. Cấm dùng cho heading khác |
 | font.size.sm | 15px (0.9375rem) | nhãn phụ card, breadcrumb, ngày cập nhật; không nhỏ hơn cỡ này trong UI chính |
 | font.size.label | 14px (0.875rem) | nhãn, chip, meta ngắn |
@@ -136,6 +136,10 @@ Nợ có chủ ý: chưa đo LCP sau hai lần đổi chữ.
 | space.scale | 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 / 96 px | mọi margin, padding, gap sinh từ thang này |
 | space.section | 48 mobile / 96 desktop | nhịp dọc giữa các vùng trang chi tiết |
 | container.max | 1200px | khung nội dung; thân bài Article hẹp hơn theo measure 70ch |
+| layout.hero.entity.max | 430px | **trần** chiều cao hero của trang chi tiết entity và trang điểm đến. Nguồn duy nhất là `--hero-entity-h-max` trong `tokens.css`; `Hero.astro` không giữ con số nào. Đổi ở đây là mọi loại trang đổi theo, cả ba biến thể hero (mosaic, ảnh đơn, không-ảnh). ⚠ Khác `--hero-min-h` — token đó của `HomeHero`, hero **trang chủ** |
+| layout.hero.entity.min | 330px | **sàn** của cùng biểu thức. Số giữa là `calc(30vw + 50px)`, không phải `30vw` — nâng riêng trần chỉ cho +4px ở 1280 và +30px ở 1366 (`QĐ-2026-08-28-02`) |
+| layout.hero.entity.tablet | 390px | khoảng 769–1023px, giá trị phẳng |
+| layout.hero.entity.mobile | 290px | ≤768px, giá trị phẳng |
 
 | Token | Giá trị | Dùng cho |
 |---|---|---|

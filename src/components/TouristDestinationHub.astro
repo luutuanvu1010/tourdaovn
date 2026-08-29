@@ -1,30 +1,53 @@
 ---
+/**
+ * Trang điểm đến `/{destinationSlug}/`.
+ *
+ * Ghép từ chính bộ khối mà `SiteHome` dùng, không dựng lại markup riêng.
+ * Căn cứ: `06-BINDING_MAP` §4.1 khai trang điểm đến là *"khung chung áp dụng,
+ * cộng"* các khối riêng, và §5.7 khai khối nội dung trang chủ là *"như §4.1"* —
+ * tức đặc tả đã bắt hai trang dùng chung một bộ khối. Trước bản này mã có hai
+ * bản cho một đặc tả: `SiteHome` ghép component, còn file này tự vẽ 1086 dòng.
+ * Xem DR-061.
+ *
+ * Khác `SiteHome` đúng bốn chỗ, đều là thứ §4.1 khai thêm cho trang điểm đến:
+ * hero điểm đến (không phải hero site), điểm đến liên quan, ghi chú an toàn,
+ * và dải meta cuối trang.
+ */
 import Body from './Body.astro'
-import Card from './Card.astro'
+import PageHead from './PageHead.astro'
 import FAQ from './FAQ.astro'
-import HomeHero from './HomeHero.astro'
+import Hero from './Hero.astro'
+import HomeAreaGrid from './HomeAreaGrid.astro'
+import HomeBannerGrid from './HomeBannerGrid.astro'
+import HomeFacts from './HomeFacts.astro'
+import HomeGuideGrid from './HomeGuideGrid.astro'
+import HomeHubGrid from './HomeHubGrid.astro'
 import HomeMetaBar from './HomeMetaBar.astro'
-import { HOME_COPY, entityHref, indexHref, routeForEntity } from '../lib/homepage'
-import { imageUrl } from '../lib/sanity-image'
-import { navHubs } from '../site.config'
-import type {
-  EntityRef,
-  HomepageArticleCard,
-  HomepagePlaceCard,
-  Lang,
-  TouristDestinationHubProps,
-} from '../lib/types'
+import HomeRollupSection from './HomeRollupSection.astro'
+import Section from './Section.astro'
+import { HOME_COPY, indexHref } from '../lib/homepage'
+import type { Lang, TouristDestinationHubProps } from '../lib/types'
 
 export interface Props extends TouristDestinationHubProps {}
 
-const { td, lang, stampText } = Astro.props
+const { td, lang } = Astro.props
+
+// Hai prop này cho phép nơi gọi truyền sẵn danh sách đã gom; không truyền thì
+// lấy từ chính document. Giữ nguyên hợp đồng cũ, RouteDispatch đang dùng.
 const areaPlaces = Array.isArray(Astro.props.areaPlaces) ? Astro.props.areaPlaces : (td?.homepagePlaces || [])
 const guideArticles = Array.isArray(Astro.props.guideArticles) ? Astro.props.guideArticles : (td?.homepageArticles || [])
 
 const copy = HOME_COPY[lang]
 const title = td?.title || ''
 const summary = td?.summary
-const currentYear = new Date().getFullYear().toString()
+
+/* Sanity trả về object ảnh RỖNG NHƯNG TRUTHY khi field chưa nhập, nên
+   `Boolean(image)` luôn đúng và hero dựng ra một khung gradient trống — đúng ca
+   mà cổng BM-EMPTY-REGION bắt được hồi vòng 5. Phải soi tới `asset.url`. */
+const heroImage = td?.mainImage
+const hasHeroImage = typeof heroImage === 'string'
+  ? Boolean(heroImage)
+  : Boolean((heroImage as any)?.asset?.url)
 
 const localeMap: Record<Lang, string> = {
   vi: 'vi-VN',
@@ -47,434 +70,128 @@ function formatDate(value?: string) {
 
 const updatedLabel = formatDate(td?.updatedAt || td?._updatedAt)
 
-function featuredCards(items: EntityRef[] | undefined | null, fallbackEntity: string, limit: number) {
-  if (!Array.isArray(items)) return []
-  return items
-    .map(item => {
-      const entityType = item._type || fallbackEntity
-      const href = entityHref(entityType, item.slug, lang)
-      const image = imageUrl(item.mainImage, { width: 640 })
-      if (!href || !item.title || !item.summary) return null
-      return { ...item, href, image }
-    })
-    .filter(Boolean)
-    .slice(0, limit) as Array<EntityRef & { href: string; image?: string }>
-}
-
-const attractionCards = featuredCards(td?.featuredAttractions, 'attraction', 3)
-const experienceCards = featuredCards(td?.featuredExperiences, 'experience', 3)
-const stayCards = featuredCards(td?.featuredStays, 'hotel', 4)
-const specialtyCards = featuredCards(td?.featuredSpecialties, 'specialty', 4)
-const tourCards = featuredCards(td?.featuredTours, 'tour', 3)
-
 const safePrefixes = ['/', 'https://', 'http://', 'tel:', 'mailto:']
-function safeUrl(url?: string) {
-  return url && safePrefixes.some(prefix => url.startsWith(prefix)) ? url : undefined
-}
-
-const banners = (td?.homepageBanners || [])
-  .filter(banner => banner.title)
-  .map(banner => ({
-    ...banner,
-    href: safeUrl(banner.linkUrl),
-    image: imageUrl(banner.image, { width: 560 }),
-    imageAlt: banner.image?.alt || banner.title,
-  }))
-  .slice(0, 3)
-
-// Hub nào hiện ở đây do src/site.config.ts quyết định, không khai lại tại chỗ.
-const hubEntities = navHubs
-const hubIcons: Record<string, string> = {
-  'hub-kham-pha': '🏛️',
-  'hub-luu-tru': '🛏️',
-  'hub-di-lai': '🚌',
-}
-
-const hubIconBg: Record<string, string> = {
-  'hub-kham-pha': 'var(--c-primary-soft)',
-  'hub-luu-tru': 'var(--c-green-soft)',
-  'hub-di-lai': 'var(--c-sand-soft)',
-}
-
-const hubs = hubEntities
-  .map(entity => {
-    const route = routeForEntity(entity)
-    const href = indexHref(entity, lang)
-    if (!route || !href) return null
-    return {
-      entity,
-      href,
-      label: route.labels[lang],
-      description: copy.hubDescriptions[entity] || '',
-      icon: hubIcons[entity],
-      iconBg: hubIconBg[entity],
-    }
-  })
-  .filter(Boolean) as Array<{
-    entity: string
-    href: string
-    label: string
-    description: string
-    icon: string
-    iconBg: string
-  }>
-
-const areaCards = areaPlaces
-  .map((place: HomepagePlaceCard) => ({
-    ...place,
-    href: entityHref('place', place.slug, lang),
-    image: imageUrl(place.mainImage, { width: 520 }),
-  }))
-  .filter(card => card.href && card.title && card.summary)
-  .slice(0, 4)
-
-const articleCards = guideArticles
-  .map((article: HomepageArticleCard) => ({
-    ...article,
-    href: entityHref('article', article.slug, lang),
-    image: imageUrl(article.mainImage, { width: 520 }),
-  }))
-  .filter(card => card.href && card.title && card.summary)
-  .slice(0, 4)
-
 const relatedDestinations = (td?.relatedDestinations || [])
   .map(destination => ({
     name: destination.name,
-    href: safeUrl(destination.url),
+    href: destination.url && safePrefixes.some(p => destination.url!.startsWith(p)) ? destination.url : undefined,
   }))
   .filter(destination => destination.name && destination.href)
 
-const hasOverview = Boolean(td?.body?.length || td?.highlights?.length || td?.keyFacts?.length)
+// Ba guard giữ nguyên từ bản cũ. R7: vùng rỗng thì ẩn hẳn, không để lại tiêu đề trơ.
+const hasBody = Boolean(td?.body?.length)
+const hasHighlights = Boolean(td?.highlights?.length)
+const hasFacts = Boolean(td?.keyFacts?.length)
+const hasOverview = hasBody || hasHighlights || hasFacts
 const hasReference = Boolean(td?.faq?.length || td?.safetyNote || td?.sameAs?.length)
 ---
 
-<HomeHero
-  title={title}
-  summary={summary}
-  image={td?.mainImage}
-  eyebrow={copy.heroEyebrow}
-  imageCredit={td?.imageProvenance}
-  stampText={stampText}
-  stampYear={currentYear}
-/>
+{/* Đầu trang đi qua `PageHead` — QĐ-2026-08-29-04. Trước bản này file tự dựng
+    lại ba dải breadcrumb / tiêu đề / đoạn mở và CHÉP nguyên CSS của
+    `DetailLayout`: đo 2026-08-28, khai báo trùng từng giá trị, chỉ khác chú
+    thích. Hai bản cho một thứ, nay còn một.
 
-<section class="hub-section hub-section--editorial hub-section--trust">
-  <div class="container container--editorial">
-    <div class="trust-grid">
-      {copy.trustItems.map(item => (
-        <article class="trust-item">
-          <div class="trust-icon" aria-hidden="true">{item.icon}</div>
-          <div>
-            <h2 class="trust-title">{item.title}</h2>
-            <p class="trust-desc">{item.description}</p>
-          </div>
-        </article>
-      ))}
+    §3.1 hàng Nhãn loại entity khai "không áp dụng: touristDestination" nên hero
+    KHÔNG có lớp phủ. Hàng đó chi phối LỚP PHỦ, không chi phối thành phần ảnh —
+    `gallery` vẫn phải truyền, nếu không mọi trang điểm đến rơi về hero ảnh đơn
+    (DR-076). Trang này không có thanh dính, nên slot chỉ có hero và dòng ghi
+    công ảnh. */}
+<PageHead
+  title={title}
+  lang={lang}
+  breadcrumb={{ entityType: 'touristDestination', currentTitle: title }}
+  description={summary}
+  speakable
+  tagRegion
+>
+  {hasHeroImage && (
+    <Hero image={heroImage} gallery={td?.gallery} imageAlt={(heroImage as any)?.alt || title} fullBleed hasOverlay={false} />
+  )}
+
+  {/* Ghi công ảnh đứng DƯỚI ảnh, không đè lên góc như bản cũ. `Hero` dùng chung
+      không có chỗ cho dòng này vì trang chi tiết không hiện ghi công. */}
+  {td?.imageProvenance && (
+    <div class="hero-credit-band">
+      <div class="container"><p class="hero-credit">{td.imageProvenance}</p></div>
     </div>
-  </div>
-</section>
+  )}
+</PageHead>
 
 {hasOverview && (
-  <section class="hub-section hub-section--editorial">
-    <div class="container container--editorial">
-      <div class="overview-stack">
-        {td?.body && td.body.length > 0 && (
-          <div class="overview-block">
-            <h2 class="section-title">{copy.sections.overview}</h2>
-            <span class="section-underline" aria-hidden="true"></span>
-            <div class="body-text">
-              <Body blocks={td.body} />
-            </div>
-            {td?.keyFacts && td.keyFacts.length > 0 && (
-              <div class="facts-grid">
-                {td.keyFacts.map(fact => (
-                  <article class="fact-card">
-                    <p class="fact-label">{fact.label}</p>
-                    <p class="fact-value">{fact.value}</p>
-                  </article>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {td?.highlights && td.highlights.length > 0 && (
-          <div class="overview-block">
-            <h2 class="section-title">{copy.sections.highlights}</h2>
-            <span class="section-underline" aria-hidden="true"></span>
+  /* Hai cột — cùng bố cục `SiteHome` đang dùng theo QĐ-2026-08-25-01: thân bài
+     và điểm nổi bật ở cột chính, Thông tin nhanh về cột phụ 340px thay vì thành
+     dải riêng chạy hết bề ngang. Dưới 1024px xếp chồng. */
+  <Section heading={copy.sections.overview(title)}>
+    <div class="editorial-grid">
+      <div class="editorial-main">
+        {hasBody && td?.body && <Body blocks={td.body} />}
+        {hasHighlights && td?.highlights && (
+          <>
+            <h3 class="highlights-heading">{copy.sections.highlights}</h3>
             <ul class="highlights-list">
-              {td.highlights.map(highlight => (
-                <li class="highlight-item">
-                  <span class="highlight-marker" aria-hidden="true">✦</span>
-                  <span>{highlight}</span>
-                </li>
-              ))}
+              {td.highlights.map(h => <li>{h}</li>)}
             </ul>
-          </div>
+          </>
         )}
       </div>
+      {hasFacts && td?.keyFacts && (
+        <aside class="editorial-aside">
+          <HomeFacts facts={td.keyFacts} aside />
+        </aside>
+      )}
     </div>
-  </section>
+  </Section>
 )}
 
-{hubs.length > 0 && (
-  <section class="hub-section hub-section--navigation hub-section--hubs">
-    <div class="container">
-      <div class="section-header section-header--center">
-        <h2 class="section-title section-title--inverse">{copy.hubsHeading}</h2>
-        <p class="section-subtitle section-subtitle--inverse">{copy.hubsSub}</p>
-      </div>
-      <div class="hubs-grid">
-        {hubs.map(hub => (
-            <a href={hub.href} class="hub-card">
-            <div class="hub-icon" style={`background:${hub.iconBg}`} aria-hidden="true">{hub.icon}</div>
-            <div>
-              <h3 class="hub-name">{hub.label}</h3>
-              <p class="hub-desc">{hub.description}</p>
-            </div>
-            <div class="hub-footer">
-              <span class="hub-arrow" aria-hidden="true">›</span>
-            </div>
-          </a>
-        ))}
-      </div>
-    </div>
-  </section>
+<HomeHubGrid lang={lang} />
+
+{td?.homepageBanners?.length ? <HomeBannerGrid banners={td.homepageBanners} lang={lang} /> : null}
+
+{td?.featuredAttractions?.length ? (
+  <HomeRollupSection heading={copy.sections.attractions} items={td.featuredAttractions} lang={lang} viewAllLabel={copy.viewAll} viewAllHref={indexHref('attraction', lang)} />
+) : null}
+
+{td?.featuredExperiences?.length ? (
+  <HomeRollupSection heading={copy.sections.experiences} items={td.featuredExperiences} lang={lang} viewAllLabel={copy.viewAll} viewAllHref={indexHref('experience', lang)} />
+) : null}
+
+{td?.featuredStays?.length ? (
+  <HomeRollupSection heading={copy.sections.stays} items={td.featuredStays} lang={lang} viewAllLabel={copy.viewAll} viewAllHref={indexHref('hotel', lang)} />
+) : null}
+
+{td?.featuredSpecialties?.length ? (
+  <HomeRollupSection heading={copy.sections.specialties} items={td.featuredSpecialties} lang={lang} viewAllLabel={copy.viewAll} viewAllHref={indexHref('specialty', lang)} />
+) : null}
+
+{td?.featuredTours?.length ? (
+  <HomeRollupSection heading={copy.sections.tours} items={td.featuredTours} lang={lang} viewAllLabel={copy.viewAll} viewAllHref={indexHref('tour', lang)} />
+) : null}
+
+{areaPlaces.length > 0 && (
+  <HomeAreaGrid places={areaPlaces} lang={lang} heading={copy.sections.areas} viewAllLabel={copy.viewAll} viewAllHref={indexHref('place', lang)} />
 )}
 
-{banners.length > 0 && (
-  <section class="hub-section hub-section--navigation hub-section--banners">
-    <div class="container">
-      <div class="banner-list">
-        {banners.map(banner => (
-          banner.href ? (
-            <a href={banner.href} class:list={{ 'banner-card': true, 'banner-card--text': !banner.image }}>
-              {banner.image && (
-                <div class="banner-media">
-                  <img src={banner.image} alt={banner.imageAlt} loading="lazy" />
-                </div>
-              )}
-              <div class="banner-body">
-                {banner.linkLabel && <p class="banner-kicker">{banner.linkLabel}</p>}
-                <h2 class="banner-title">{banner.title}</h2>
-                {banner.description && <p class="banner-desc">{banner.description}</p>}
-              </div>
-            </a>
-          ) : (
-            <article class:list={{ 'banner-card': true, 'banner-card--text': !banner.image }}>
-              {banner.image && (
-                <div class="banner-media">
-                  <img src={banner.image} alt={banner.imageAlt} loading="lazy" />
-                </div>
-              )}
-              <div class="banner-body">
-                {banner.linkLabel && <p class="banner-kicker">{banner.linkLabel}</p>}
-                <h2 class="banner-title">{banner.title}</h2>
-                {banner.description && <p class="banner-desc">{banner.description}</p>}
-              </div>
-            </article>
-          )
-        ))}
-      </div>
-    </div>
-  </section>
-)}
-
-{attractionCards.length > 0 && (
-  <section class="hub-section hub-section--navigation">
-    <div class="container">
-      <div class="section-header">
-        <div>
-          <h2 class="section-title">{copy.sections.attractions}</h2>
-          <span class="section-underline" aria-hidden="true"></span>
-        </div>
-        {indexHref('attraction', lang) && <a href={indexHref('attraction', lang)} class="see-all">{copy.viewAll} ›</a>}
-      </div>
-      <div class="feature-grid feature-grid--attractions">
-        {attractionCards.map(card => (
-          <div class="feature-card-wrap">
-            <Card title={card.title} summary={card.summary || ''} href={card.href} image={card.image} imageAlt={card.mainImage?.alt || card.title} />
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-)}
-
-{experienceCards.length > 0 && (
-  <section class="hub-section hub-section--navigation hub-section--alt">
-    <div class="container">
-      <div class="section-header">
-        <div>
-          <h2 class="section-title">{copy.sections.experiences}</h2>
-          <span class="section-underline" aria-hidden="true"></span>
-        </div>
-        {indexHref('experience', lang) && <a href={indexHref('experience', lang)} class="see-all">{copy.viewAll} ›</a>}
-      </div>
-      <div class="feature-grid feature-grid--experiences">
-        {experienceCards.map((card, index) => (
-          <div class:list={{ 'feature-card-wrap': true, 'feature-card-wrap--large': index === 0 }}>
-            <Card title={card.title} summary={card.summary || ''} href={card.href} image={card.image} imageAlt={card.mainImage?.alt || card.title} />
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-)}
-
-{stayCards.length > 0 && (
-  <section class="hub-section hub-section--navigation">
-    <div class="container">
-      <div class="section-header">
-        <div>
-          <h2 class="section-title">{copy.sections.stays}</h2>
-          <span class="section-underline" aria-hidden="true"></span>
-        </div>
-        {indexHref('hub-luu-tru', lang) && <a href={indexHref('hub-luu-tru', lang)} class="see-all">{copy.viewAll} ›</a>}
-      </div>
-      <div class="feature-grid feature-grid--stays">
-        {stayCards.map(card => (
-          <div class="feature-card-wrap">
-            <Card title={card.title} summary={card.summary || ''} href={card.href} image={card.image} imageAlt={card.mainImage?.alt || card.title} />
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-)}
-
-{specialtyCards.length > 0 && (
-  <section class="hub-section hub-section--navigation hub-section--alt">
-    <div class="container">
-      <div class="section-header">
-        <div>
-          <h2 class="section-title">{copy.sections.specialties}</h2>
-          <span class="section-underline" aria-hidden="true"></span>
-        </div>
-        {indexHref('specialty', lang) && <a href={indexHref('specialty', lang)} class="see-all">{copy.viewAll} ›</a>}
-      </div>
-      <div class="specialty-grid">
-        {specialtyCards.map(card => (
-          <a href={card.href} class:list={{ 'art-card': true, 'art-card--text': !card.image }}>
-            {card.image && (
-              <div class="art-card-media">
-                <img src={card.image} alt={card.mainImage?.alt || card.title} loading="lazy" />
-              </div>
-            )}
-            <div class="art-card-body">
-              <h3 class="art-card-title">{card.title}</h3>
-              <p class="art-card-desc">{card.summary}</p>
-            </div>
-          </a>
-        ))}
-      </div>
-    </div>
-  </section>
-)}
-
-{tourCards.length > 0 && (
-  <section class="hub-section hub-section--navigation hub-section--soft">
-    <div class="container">
-      <div class="section-header">
-        <div>
-          <h2 class="section-title">{copy.sections.tours}</h2>
-          <span class="section-underline" aria-hidden="true"></span>
-        </div>
-        {indexHref('tour', lang) && <a href={indexHref('tour', lang)} class="see-all">{copy.viewAll} ›</a>}
-      </div>
-      <div class="feature-grid feature-grid--tours">
-        {tourCards.map(card => (
-          <div class="feature-card-wrap">
-            <Card title={card.title} summary={card.summary || ''} href={card.href} image={card.image} imageAlt={card.mainImage?.alt || card.title} />
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-)}
-
-{areaCards.length > 0 && (
-  <section class="hub-section hub-section--navigation">
-    <div class="container">
-      <div class="section-header">
-        <div>
-          <h2 class="section-title">{copy.sections.areas}</h2>
-          <span class="section-underline" aria-hidden="true"></span>
-        </div>
-        {indexHref('place', lang) && <a href={indexHref('place', lang)} class="see-all">{copy.viewAll} ›</a>}
-      </div>
-      <div class="rollup-grid">
-        {areaCards.map(card => (
-          <a href={card.href!} class="rollup-card">
-            {card.image && (
-              <div class="rollup-media">
-                <img src={card.image} alt={card.mainImage?.alt || card.title} loading="lazy" />
-              </div>
-            )}
-            <div class="rollup-body">
-              <h3 class="rollup-title">{card.title}</h3>
-              <p class="rollup-desc">{card.summary}</p>
-            </div>
-          </a>
-        ))}
-      </div>
-    </div>
-  </section>
-)}
-
-{articleCards.length > 0 && (
-  <section class="hub-section hub-section--navigation hub-section--alt">
-    <div class="container">
-      <div class="section-header">
-        <div>
-          <h2 class="section-title">{copy.sections.articles}</h2>
-          <span class="section-underline" aria-hidden="true"></span>
-        </div>
-        {indexHref('article', lang) && <a href={indexHref('article', lang)} class="see-all">{copy.viewAll} ›</a>}
-      </div>
-      <div class="article-grid">
-        {articleCards.map(card => (
-          <a href={card.href!} class:list={{ 'art-card': true, 'art-card--text': !card.image }}>
-            {card.image && (
-              <div class="art-card-media">
-                <img src={card.image} alt={card.mainImage?.alt || card.title} loading="lazy" />
-              </div>
-            )}
-            <div class="art-card-body">
-              <h3 class="art-card-title">{card.title}</h3>
-              {card.author?.title && <p class="art-card-meta">{card.author.title}</p>}
-              <p class="art-card-desc">{card.summary}</p>
-            </div>
-          </a>
-        ))}
-      </div>
-    </div>
-  </section>
+{guideArticles.length > 0 && (
+  <HomeGuideGrid articles={guideArticles} lang={lang} heading={copy.sections.articles} viewAllLabel={copy.viewAll} viewAllHref={indexHref('article', lang)} />
 )}
 
 {relatedDestinations.length > 0 && (
-  <section class="hub-section hub-section--navigation">
-    <div class="container">
-      <div class="section-header">
-        <div>
-          <h2 class="section-title">{copy.sections.relatedDestinations}</h2>
-          <span class="section-underline" aria-hidden="true"></span>
-        </div>
-      </div>
-      <div class="related-grid">
-        {relatedDestinations.map(destination => (
-          <a href={destination.href!} class="related-card">
-            <span>{destination.name}</span>
-            <span aria-hidden="true">›</span>
-          </a>
-        ))}
-      </div>
+  /* Không có component dùng chung cho khối này: trang chủ không render điểm đến
+     liên quan. `06` §4.1 khai nó là khối riêng của trang điểm đến. */
+  <Section heading={copy.sections.relatedDestinations}>
+    <div class="related-grid">
+      {relatedDestinations.map(destination => (
+        <a href={destination.href!} class="related-card">
+          <span>{destination.name}</span>
+          <span aria-hidden="true">›</span>
+        </a>
+      ))}
     </div>
-  </section>
+  </Section>
 )}
 
 {hasReference && (
-  <section class="hub-section hub-section--reference">
+  <section class="reference-section">
     <div class="container container--editorial">
       {td?.faq && td.faq.length > 0 && (
         <FAQ faq={td.faq} heading={copy.sections.faq} contained={false} />
@@ -493,454 +210,59 @@ const hasReference = Boolean(td?.faq?.length || td?.safetyNote || td?.sameAs?.le
 )}
 
 <style>
-  .container--editorial {
-    max-width: var(--container-editorial);
-  }
+  /* Chỉ còn CSS cho ba thứ không có component dùng chung: lưới hai cột của mục
+     tổng quan, khối điểm đến liên quan, và cụm tham chiếu cuối trang. Mọi mục
+     khác lấy khung, tiêu đề, gạch chân và điểm ngắt từ `Section.astro`.
+     Điểm ngắt viết bằng px thật — `var()` KHÔNG dùng được trong điều kiện media
+     query, trình duyệt bỏ nguyên khối mà không báo lỗi (DR-060). */
 
-  .hub-section {
+
+
+
+  .hero-credit-band {
     background: var(--c-surface);
+    padding: var(--s2) 0 0;
   }
 
-  .hub-section--editorial {
-    padding: var(--s9) 0;
-  }
-
-  .hub-section--trust {
-    padding: var(--s7) 0 var(--s6);
-  }
-
-  .hub-section--navigation {
-    padding: var(--s7) 0;
-  }
-
-  .hub-section--reference {
-    background: var(--c-primary-soft);
-    border-top: 1px solid var(--c-border);
-    padding: var(--s6) 0;
-  }
-
-  .hub-section--alt {
-    background: var(--c-surface-alt);
-  }
-
-  .hub-section--soft {
-    background: var(--c-primary-soft);
-  }
-
-  .hub-section--hubs {
-    background: var(--c-primary);
-  }
-
-  .hub-section--banners {
-    padding-top: var(--s6);
-  }
-
-  .section-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: var(--s4);
-    margin-bottom: var(--s5);
-  }
-
-  .section-header--center {
-    display: block;
-    text-align: center;
-    max-width: var(--container-editorial);
-    margin-inline: auto;
-    margin-bottom: var(--s6);
-  }
-
-  .section-title {
-    font-family: var(--font-display);
-    font-weight: var(--fw-800);
-    font-size: var(--fs-section);
-    letter-spacing: -0.015em;
-    color: var(--c-primary);
-    line-height: var(--lh-heading);
-    margin-bottom: var(--s2);
-  }
-
-  .section-title--inverse {
-    color: var(--c-text-inverse);
-  }
-
-  .section-subtitle {
-    font-size: var(--fs-sm);
+  .hero-credit {
+    margin: 0;
+    font-size: var(--fs-xs);
     color: var(--c-text-muted);
-    line-height: var(--lh-body);
   }
 
-  .section-subtitle--inverse {
-    color: var(--c-text-inverse);
-    opacity: .72;
-  }
 
-  .section-underline {
-    display: block;
-    width: var(--underline-width);
-    height: var(--underline-height);
-    background: var(--c-sand);
-    border-radius: var(--radius-pill);
-  }
 
-  .see-all {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--s1);
-    color: var(--c-primary);
-    font-size: var(--fs-label);
-    font-weight: var(--fw-700);
-    transition: opacity var(--m-fast) var(--m-ease);
-  }
-
-  .see-all:hover {
-    opacity: .72;
-  }
-
-  .trust-grid {
+  .editorial-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--s4);
-  }
-
-  .trust-item {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--s3);
-    background: var(--c-card);
-    border: 1px solid var(--c-border);
-    border-radius: var(--radius-md);
-    padding: var(--s4);
-    box-shadow: var(--shadow-card);
-  }
-
-  .trust-icon {
-    width: var(--s7);
-    height: var(--s7);
-    border-radius: var(--radius-sm);
-    background: var(--c-primary-soft);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 auto;
-    font-size: var(--fs-card-title);
-  }
-
-  .trust-title {
-    font-family: var(--font-ui);
-    font-size: var(--fs-sm);
-    font-weight: var(--fw-700);
-    color: var(--c-text);
-    margin-bottom: var(--s1);
-  }
-
-  .trust-desc {
-    font-size: var(--fs-label);
-    color: var(--c-text-muted);
-    line-height: var(--lh-body);
-  }
-
-  .overview-stack {
-    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
     gap: var(--s7);
+    align-items: start;
   }
 
-  .body-text {
-    color: var(--c-text);
-    font-size: var(--fs-base);
-    line-height: var(--lh-body);
+  /* Bắt buộc, không phải trang trí. Ở ≤1024px rãnh thành `1fr`, mà `1fr` là
+     `minmax(auto, 1fr)` — nội dung không ngắt được (URL dài, bảng rộng) sẽ đẩy
+     rãnh vượt container và làm cả trang cuộn ngang. `SiteHome.astro:424` khai
+     đúng dòng này cho cùng lưới. */
+  .editorial-main {
+    min-width: 0;
   }
 
-  .body-text :global(p + p) {
-    margin-top: var(--s4);
-  }
-
-  .facts-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--s4);
-  }
-
-  .fact-card {
-    background: var(--c-card);
-    border: 1px solid var(--c-border);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-card);
-    padding: var(--s5);
-  }
-
-  .fact-label {
-    color: var(--c-text-muted);
-    font-size: var(--fs-label);
+  .highlights-heading {
+    font-family: var(--font-display);
+    font-size: var(--fs-h4);
     font-weight: var(--fw-700);
-    line-height: var(--lh-heading);
-    margin-bottom: var(--s2);
-  }
-
-  .fact-value {
     color: var(--c-text);
-    font-size: var(--fs-base);
-    line-height: var(--lh-body);
+    margin: var(--s6) 0 var(--s3);
   }
 
   .highlights-list {
-    list-style: none;
-    display: grid;
-    gap: var(--s3);
-  }
-
-  .highlight-item {
-    display: flex;
-    gap: var(--s3);
-    color: var(--c-text);
-    font-size: var(--fs-base);
-    line-height: var(--lh-body);
-  }
-
-  .highlight-marker {
-    color: var(--c-sand);
-    flex: 0 0 auto;
-    font-weight: var(--fw-700);
-  }
-
-  .hubs-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--s4);
-  }
-
-  .hub-card {
-    background: var(--c-card);
-    border-radius: var(--radius-md);
-    padding: var(--s5);
+    margin: 0;
+    padding-left: var(--s5);
     display: flex;
     flex-direction: column;
-    gap: var(--s4);
-    min-height: 100%;
-    transition: transform var(--m-fast) var(--m-ease), box-shadow var(--m-fast) var(--m-ease);
-  }
-
-  .hub-card:hover {
-    transform: translateY(var(--card-lift));
-    box-shadow: var(--shadow-lg);
-  }
-
-  .hub-icon {
-    width: var(--s7);
-    height: var(--s7);
-    border-radius: var(--radius-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: var(--fs-card-title);
-  }
-
-  .hub-name {
-    font-size: var(--fs-h5);
-    font-weight: var(--fw-800);
-    color: var(--c-text);
-    margin-bottom: var(--s1);
-  }
-
-  .hub-desc {
-    color: var(--c-text-muted);
-    font-size: var(--fs-label);
-    line-height: var(--lh-body);
-  }
-
-  .hub-footer {
-    margin-top: auto;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: var(--s3);
-  }
-
-  .hub-arrow {
-    color: var(--c-text-muted);
-    font-size: var(--fs-card-title);
-  }
-
-  .banner-list {
-    display: grid;
-    gap: var(--s4);
-  }
-
-  .banner-card {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-    background: var(--c-card);
-    border: 1px solid var(--c-border);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    box-shadow: var(--shadow-card);
-    transition: box-shadow var(--m-fast) var(--m-ease);
-  }
-
-  .banner-card--text {
-    grid-template-columns: 1fr;
-  }
-
-  .banner-card:hover {
-    box-shadow: var(--shadow-raised);
-  }
-
-  .banner-media {
-    min-height: calc(var(--s9) * 2);
-    overflow: hidden;
-  }
-
-  .banner-media img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .banner-body {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
     gap: var(--s2);
-    padding: var(--s5);
-  }
-
-  .banner-kicker,
-  .art-card-meta {
-    color: var(--c-primary);
-    font-size: var(--fs-label);
-    font-weight: var(--fw-700);
-  }
-
-  .banner-title {
     color: var(--c-text);
-    font-size: var(--fs-h5);
-    font-weight: var(--fw-800);
-    line-height: var(--lh-heading);
-  }
-
-  .banner-desc {
-    color: var(--c-text-muted);
-    font-size: var(--fs-sm);
     line-height: var(--lh-body);
-  }
-
-  .feature-grid {
-    display: grid;
-    gap: var(--s5);
-  }
-
-  .feature-grid--attractions,
-  .feature-grid--tours {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .feature-grid--experiences {
-    grid-template-columns: 2fr 1fr 1fr;
-  }
-
-  .feature-grid--stays {
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--s4);
-  }
-
-  .feature-card-wrap :global(.card) {
-    height: 100%;
-  }
-
-  .feature-card-wrap--large {
-    grid-column: span 1;
-  }
-
-  .specialty-grid,
-  .article-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--s4);
-  }
-
-  .art-card {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-    background: var(--c-card);
-    border: 1px solid var(--c-border);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    box-shadow: var(--shadow-card);
-    transition: box-shadow var(--m-fast) var(--m-ease), border-color var(--m-fast) var(--m-ease);
-  }
-
-  .art-card--text {
-    grid-template-columns: 1fr;
-  }
-
-  .art-card:hover {
-    border-color: var(--c-primary);
-    box-shadow: var(--shadow-raised);
-  }
-
-  .art-card-media {
-    min-height: calc(var(--s9) + var(--s7));
-    overflow: hidden;
-  }
-
-  .art-card-media img,
-  .rollup-media img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .art-card-body,
-  .rollup-body {
-    padding: var(--s4);
-  }
-
-  .art-card-title,
-  .rollup-title {
-    color: var(--c-text);
-    font-size: var(--fs-card-title);
-    font-weight: var(--fw-800);
-    line-height: var(--lh-heading);
-    margin-bottom: var(--s2);
-  }
-
-  .art-card-desc,
-  .rollup-desc {
-    color: var(--c-text-muted);
-    font-size: var(--fs-sm);
-    line-height: var(--lh-body);
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .rollup-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--s4);
-  }
-
-  .rollup-card {
-    display: flex;
-    flex-direction: column;
-    background: var(--c-card);
-    border: 1px solid var(--c-border);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    box-shadow: var(--shadow-card);
-    transition: box-shadow var(--m-fast) var(--m-ease), border-color var(--m-fast) var(--m-ease);
-  }
-
-  .rollup-card:hover {
-    border-color: var(--c-primary);
-    box-shadow: var(--shadow-raised);
-  }
-
-  .rollup-media {
-    aspect-ratio: 3 / 2;
-    overflow: hidden;
   }
 
   .related-grid {
@@ -953,139 +275,71 @@ const hasReference = Boolean(td?.faq?.length || td?.safetyNote || td?.sameAs?.le
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--s4);
+    gap: var(--s3);
+    padding: var(--s4) var(--s5);
     background: var(--c-card);
     border: 1px solid var(--c-border);
     border-radius: var(--radius-md);
     color: var(--c-text);
-    font-size: var(--fs-card-title);
-    font-weight: var(--fw-800);
-    padding: var(--s5);
-    transition: border-color var(--m-fast) var(--m-ease), box-shadow var(--m-fast) var(--m-ease);
+    text-decoration: none;
+    font-weight: var(--fw-600);
   }
 
   .related-card:hover {
     border-color: var(--c-primary);
-    box-shadow: var(--shadow-raised);
+    color: var(--c-primary);
+  }
+
+  .reference-section {
+    padding: var(--s7) 0;
+    background: var(--c-surface-alt);
+    border-top: 1px solid var(--c-border);
+  }
+
+  .container--editorial {
+    max-width: var(--container-editorial);
   }
 
   .safety-note {
-    background: var(--c-sand-soft);
-    border: 1px solid var(--c-sand-border);
-    border-left: var(--s1) solid var(--c-sand);
-    border-radius: var(--radius-md);
-    margin-top: var(--s5);
+    margin-top: var(--s6);
     padding: var(--s5);
+    background: var(--c-card);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
   }
 
   .safety-title {
-    color: var(--c-sand-text-strong);
-    font-family: var(--font-ui);
-    font-size: var(--fs-base);
+    font-family: var(--font-display);
+    font-size: var(--fs-h4);
     font-weight: var(--fw-700);
+    color: var(--c-text);
     margin-bottom: var(--s2);
   }
 
   .safety-body {
-    color: var(--c-sand-text);
-    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
     line-height: var(--lh-body);
   }
 
-  .safety-note + :global(.meta-bar),
-  :global(.faq-section) + .safety-note,
-  :global(.faq-section) + :global(.meta-bar) {
-    margin-top: var(--s5);
-  }
-
-  /* Giá trị px thật, KHÔNG phải var(--bp-lg). Custom property không dùng được
-     trong điều kiện media query — trình duyệt coi cả at-rule là không hợp lệ và
-     bỏ nguyên khối, âm thầm, không báo lỗi. Ba khối dưới đây từng viết bằng
-     var() nên chết suốt; /nha-trang/ giữ nguyên số cột máy tính trên điện thoại.
-     Xem DR-060. Giữ khớp --bp-lg/md/sm trong tokens.css: 1024 / 768 / 640. */
   @media (max-width: 1024px) {
-    .hubs-grid,
-    .rollup-grid {
-      grid-template-columns: repeat(2, 1fr);
+    .editorial-grid {
+      grid-template-columns: 1fr;
+      gap: var(--s6);
     }
 
-    .feature-grid--attractions,
-    .feature-grid--tours,
-    .feature-grid--experiences {
+    .related-grid {
       grid-template-columns: repeat(2, 1fr);
-    }
-
-    .feature-grid--stays {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    .feature-card-wrap--large {
-      grid-column: span 2;
     }
   }
 
-  @media (max-width: 768px) {
-    .trust-grid,
-    .facts-grid,
-    .specialty-grid,
-    .article-grid,
+  /* Luật 5 (06 §6): cột trên máy tính thành hàng trải hết bề ngang ở ≤640px. */
+  @media (max-width: 640px) {
     .related-grid {
       grid-template-columns: 1fr;
     }
 
-    .banner-card,
-    .art-card {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .trust-grid,
-    .facts-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .hub-section--editorial {
-      padding: var(--s7) 0;
-    }
-
-    .hub-section--navigation {
-      padding: var(--s7) 0;
-    }
-
-    .section-header {
-      align-items: flex-start;
-      flex-direction: column;
-      gap: var(--s3);
-    }
-
-    .section-title {
-      font-size: var(--fs-h4);
-    }
-
-    .hubs-grid,
-    .feature-grid--attractions,
-    .feature-grid--tours,
-    .feature-grid--experiences,
-    .rollup-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .feature-grid--stays {
-      grid-template-columns: repeat(2, 1fr);
-      gap: var(--s3);
-    }
-
-    .feature-card-wrap--large {
-      grid-column: span 1;
-    }
-
-    .hub-card,
-    .banner-body,
-    .safety-note {
-      padding: var(--s4);
+    .reference-section {
+      padding: var(--s5) 0;
     }
   }
 </style>

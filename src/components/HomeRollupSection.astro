@@ -59,6 +59,12 @@ const cards = items
   .home-card-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
+    /* Lưới này chạy KHÔNG CÓ RÃNH cho tới 2026-08-25. Dòng `gap` duy nhất của
+       file nằm TRẦN trong `@media (max-width: 767px)` — không thuộc bộ chọn nào
+       — nên trình duyệt vứt nguyên khai báo. Kiểm trên CSS đã dựng: 11 luật của
+       `.home-card-grid`, không luật nào có `gap`. Thẻ có viền 1px và đổ bóng nên
+       chúng dán sát vào nhau thành một mảng liền. Xem DR-062. */
+    gap: var(--s5);
   }
 
   /* ── Lưới thích ứng theo SỐ MỤC THẬT (bàn giao bước 7) ──
@@ -98,11 +104,18 @@ const cards = items
     .home-card-grid:has(> :last-child:nth-child(1)) :global(.card-img-wrap) {
       min-height: 0;
     }
-    gap: var(--s4);
+
+    /* Rãnh hẹp lại ở khổ nhỏ. Trước đây khai báo này đứng TRẦN ngay đây, ngoài
+       mọi bộ chọn, nên bị vứt — đó là lý do lưới chạy không rãnh suốt. */
+    .home-card-grid {
+      gap: var(--s4);
+    }
   }
 
   .home-view-all {
     display: inline-flex;
+    align-items: center;
+    min-height: 44px;
     margin-top: var(--s5);
     font-size: var(--fs-sm);
     font-weight: var(--fw-600);
@@ -114,24 +127,55 @@ const cards = items
     color: var(--c-primary-strong);
   }
 
+  /* ── Thu hẹp theo bề ngang ──
+     Ba khối dưới phải nhắc LẠI các bộ chọn `:has()` ở trên, không được để
+     `.home-card-grid` trần. Lý do là độ đặc hiệu, không phải thứ tự:
+     `.home-card-grid:has(> :last-child:nth-child(3))` là (0,3,0) vì `:has()`
+     lấy độ đặc hiệu của đối số bên trong, còn `.home-card-grid` trần chỉ (0,1,0).
+     Đặc hiệu cao thắng bất kể đứng trước hay sau, nên bản cũ để khối **đúng 2
+     hoặc 3 mục** giữ nguyên số cột xuống tới màn hình nhỏ nhất — đo được trên
+     trang chủ production ngày 2026-08-25: 3 cột, mỗi ô 119px ở khung 390px.
+     Khối 4 mục thì không luật `:has()` nào khớp nên vẫn thu đúng — đó là vì sao
+     hai lưới cạnh nhau cho hai kết quả khác hẳn, và vì sao lỗi sống lâu.
+     Số cột thật = nhỏ hơn giữa (số mục) và (mức bề ngang cho phép). Xem DR-062. */
+
   @media (max-width: 1024px) {
-    /* --bp-lg */
+    /* --bp-lg · trần 3 cột. Khối 1-2-3 mục đã ≤ 3 nên không cần nhắc lại. */
     .home-card-grid {
       grid-template-columns: repeat(3, 1fr);
     }
   }
 
   @media (max-width: 768px) {
-    /* --bp-md */
-    .home-card-grid {
+    /* --bp-md · trần 2 cột. Phải hạ khối 3 mục xuống theo. */
+    .home-card-grid,
+    .home-card-grid:has(> :last-child:nth-child(3)) {
       grid-template-columns: repeat(2, 1fr);
     }
   }
 
   @media (max-width: 640px) {
-    /* --bp-sm */
-    .home-card-grid {
+    /* --bp-sm · Luật 5 (06 §6): mọi lưới thành hàng trải hết bề ngang. */
+    .home-card-grid,
+    .home-card-grid:has(> :last-child:nth-child(2)),
+    .home-card-grid:has(> :last-child:nth-child(3)) {
       grid-template-columns: 1fr;
+    }
+
+    /* R1 chỉ thắng ở đây nếu nhắc lại NGUYÊN bộ chọn :has(). Để `.card` trần là
+       thua đặc hiệu — (0,2,0) so với (0,5,0) — đúng lỗi DR-062.
+       height PHẢI là 88px tường minh, KHÔNG dùng `auto`: align-items:stretch nằm ở
+       luật gốc ngoài mọi media query (:83) nên vẫn sống ở đây, và một grid item
+       đang stretch mà height:auto thì giãn hết chiều cao hàng, aspect-ratio bị bỏ
+       qua — ra đúng cột ảnh 88px cao hết thẻ, y hệt lỗi height:100%. */
+    .home-card-grid:has(> :last-child:nth-child(1)) :global(.card) {
+      grid-template-columns: 88px 1fr;
+      align-items: start;
+    }
+
+    .home-card-grid:has(> :last-child:nth-child(1)) :global(.card-img-wrap) {
+      height: 88px;
+      min-height: 0;
     }
   }
 </style>
