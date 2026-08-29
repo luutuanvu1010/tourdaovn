@@ -573,7 +573,13 @@ await __do('/tour/vinh-san-ho/')
 await __do('/')
 ```
 
-Kỳ vọng `K2_theCaoNhat ≤ 200` trên cả bốn. **Nếu một trang cho ~400px thì hàng rào đè chưa gỡ đúng** — quay lại Bước 3/4, kiểm thứ tự khối media query.
+Kỳ vọng `K2_theCaoNhat ≤ 220` trên cả bốn (**R-08** nới từ 200; xem dưới). **Nếu một trang cho ~400px thì hàng rào đè chưa gỡ đúng** — quay lại Bước 3/4, kiểm thứ tự khối media query.
+
+⚠️ **R-08 — ngưỡng thật là 220, và phép bắt sắc bén là K2b chứ không phải K2.** Đo thật sau R1: 114 / 165 / **216** / 139px. Trang `/tour/vinh-san-ho/` ra 216px. Đã truy: **không phải** bẫy DR-062 tái phát — `getComputedStyle` cho `.card-img-wrap` cao **88px**, lưới `88px 252px`, `align-items: start`. Phần dôi ra là `.card-title` **không có** `-webkit-line-clamp` nên một tên tour dài xuống 4 dòng (100,78px).
+
+**Không clamp tiêu đề.** `.card-summary` đã clamp 2 dòng, tiêu đề thì không — đó là lựa chọn có sẵn trong repo, và cắt tên sản phẩm trên trang danh sách là **quyết định nội dung**, ngoài thẩm quyền đợt chữa thị giác này. Ghi thành câu hỏi cho chủ dự án.
+
+**Phép bắt R1b thật sự là K2b:** `.card-img-wrap` phải computed đúng `88px`. Nếu K2b sai thì mới là hỏng; K2 chỉ bắt hồi quy thô, và 200 vốn là số tôi ước lượng chứ không phải yêu cầu đặc tả (§8 ghi "~155px" là ước tính).
 
 ⚠ Ba trang trên đều là `.card-grid`. **`home-card-grid` không có lưới 1 mục nào** nên nửa Bước 3 **không có trang nào quan sát được**. Ghi thẳng điều này vào `sau.md` ở Task 9 thay vì tính là đã kiểm.
 
@@ -945,7 +951,8 @@ Cùng khuôn `truoc.md`, cộng bảng đối chiếu:
 | # | Đo | Trước | Sau | Ngưỡng | Đạt? |
 |---|---|---|---|---|---|
 | K1 | cao trang chủ @390 | 19.977 | | ≤16.000 | |
-| K2 | thẻ cao nhất (3 trang 1-mục) | 447 | | ≤200 | |
+| K2 | thẻ cao nhất (3 trang 1-mục) | 462 | | **≤220** (R-08) | |
+| K2b | `.card-img-wrap` computed height | — | | **đúng 88px** — phép bắt R1b sắc bén | |
 | K3 | đích chạm <44 đang hiển thị | 32 | | 0 | |
 | K4 | giá trị đệm phân biệt | 5 | | 1 | |
 | K5 | tràn ngang | 0 | | 0 | |
