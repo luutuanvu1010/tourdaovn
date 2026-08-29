@@ -300,3 +300,27 @@ const COUNT_LABELS: Record<Lang, (n: number) => string> = {
 export function hubCountLabel(count: number, lang: Lang): string {
   return COUNT_LABELS[lang]?.(count) ?? `${count} places`
 }
+
+/**
+ * Chọn tour cho khối "Tour nổi bật" trang chủ (SPEC-2026-08-29 R6a).
+ *
+ * Biên tập chọn trong Studio qua `touristDestination.featuredTours`; dữ liệu thì
+ * lấy từ `allTours` — nơi DUY NHẤT có `duration` và đã lọc `reviewStatus`.
+ * Lấy giao hai danh sách theo `_id` nên được cả hai: quyền chọn của biên tập, và
+ * đủ field cho thẻ. KHÔNG sửa GROQ.
+ *
+ * Ba toán tử phòng thủ dưới đây là bắt buộc, không phải cho đẹp:
+ *  - `?? []`      — `index.astro` CỐ Ý cho `td = null` đi tiếp, chỉ console.warn
+ *  - `f?._id`     — GROQ `[]->` trả null cho reference chết
+ *  - `.filter()`  — tour biên tập chọn có thể chưa duyệt, nên không có trong kho
+ *
+ * Rơi về ba tour đầu kho khi biên tập chưa chọn gì. Nhánh đó KHÔNG chạy khi dựng
+ * (dữ liệu thật không rỗng) nên nó được canh bằng test đơn vị, không bằng phép đo.
+ */
+export function chonTourTrangChu(allTours: any[], featuredTours?: any[] | null): any[] {
+  const kho = (allTours ?? []).filter(t => t?.slug && t?.title)
+  const chon = (featuredTours ?? [])
+    .map(f => kho.find(t => t._id === f?._id))
+    .filter(Boolean) as any[]
+  return chon.length ? chon.slice(0, 3) : kho.slice(0, 3)
+}
