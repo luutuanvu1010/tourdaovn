@@ -86,8 +86,11 @@ const ctaLabel = groupQuote?.ctaLabel?.trim() || fallbackCtaLabel
 
   .gq-cta:hover { background: var(--c-accent-strong); color: var(--c-text-inverse); }
 
+  @media (max-width: 767px) {
+    .gq-inner { flex-direction: column; align-items: flex-start; gap: var(--s5); }
+  }
+
   @media (max-width: 640px) {
     .gq-section { padding: var(--s6) 0; }
-    .gq-inner { flex-direction: column; align-items: flex-start; gap: var(--s5); }
   }
 </style>
