@@ -891,6 +891,14 @@ stat -f '%Sm' -t '%Y-%m-%d %H:%M:%S' dist/index.html
 
 - [ ] **Bước 2: Chạy `do.js` — ĐÚNG file của Task 1, không sửa gì**
 
+Nếu muốn chứng minh `do.js` chưa bị sửa từ Task 1, so bằng `git`, đừng trích lại từ brief:
+
+```bash
+git diff 605f5bb -- docs/evidence/2026-08-29-thi-giac-di-dong/do.js && echo "do.js y nguyên từ Task 1"
+```
+
+⚠ **Đừng trích khối code từ brief bằng `sed -n '/^```js$/,/^```$/p'`** — brief Task 1 có **hai** khối ```js```, `sed` nối cả hai rồi báo lệch giả. Reviewer Task 1 đã vấp đúng bẫy này. Muốn trích thì dùng `awk` dừng ở fence đóng đầu tiên.
+
 ```bash
 cd dist && python3 -m http.server 4321 &    # KHÔNG dùng `npm run preview`, xem Task 1
 ```
