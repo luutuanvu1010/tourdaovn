@@ -299,7 +299,11 @@ const termPrefix = lang === 'vi' ? '' : `/${lang}`
   }
 
   @media (max-width: 640px) {
-    .card-grid {
+    /* Phải nhắc lại NGUYÊN bộ chọn :has(> :last-child:nth-child(2)) (:276) ở đây —
+       để `.card-grid` trần là thua đặc hiệu: (0,2,0) so với (0,4,0) — đúng lỗi
+       DR-062. Khuôn chép từ HomeRollupSection.astro:157-163. */
+    .card-grid,
+    .card-grid:has(> :last-child:nth-child(2)) {
       grid-template-columns: 1fr;
     }
 

@@ -190,6 +190,16 @@ const COPY = {
     .tours-grid { grid-template-columns: repeat(2, 1fr); }
   }
 
+  /* Thứ tự giảm dần bắt buộc: 900 → 640 → 600. Khối ≤640 phải đứng TRƯỚC khối
+     ≤600 dù hôm nay chúng chạm bộ chọn rời nhau (padding vs grid-template-columns)
+     — nếu không, một luật .tours-grid nào rơi vào khối ≤640 sau này sẽ thắng
+     im lặng luật tương ứng ở ≤600, vì cùng đặc hiệu thì luật đứng sau thắng. */
+  @media (max-width: 640px) {
+    .home-tours {
+      padding: var(--s6) 0;
+    }
+  }
+
   @media (max-width: 600px) {
     /* Nhắc lại nguyên bộ chọn :has() — để `.tours-grid` trần là thua đặc hiệu.
        Cùng khuôn HomeRollupSection dùng ở khối ≤640 của nó. */
@@ -197,12 +207,6 @@ const COPY = {
     .tours-grid:has(> :last-child:nth-child(1)),
     .tours-grid:has(> :last-child:nth-child(2)) {
       grid-template-columns: 1fr;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .home-tours {
-      padding: var(--s6) 0;
     }
   }
 </style>
