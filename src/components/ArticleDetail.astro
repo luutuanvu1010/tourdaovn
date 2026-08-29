@@ -54,23 +54,22 @@ const jumpLinks = [
   { id: 'faq', label: t('faqHeading'), on: !!data.faq?.length },
 ].filter(x => x.on).map(x => ({ href: `#${x.id}`, label: x.label }))
 
-// Thông tin nhanh — QĐ-2026-08-29-02 chuyển Bài viết từ `InfoCard` ở cột phụ
-// sang `FactStrip` trải dải, tức CÙNG vùng mà chín entity kia đã dùng từ Task 7.
-// Đây là chỗ lệch khung CUỐI CÙNG của trang Bài viết. Đo trên trang thật
-// 2026-08-29: Bài viết ra `info-card`, Điểm tham quan ra `fact-strip`; còn
-// hero, breadcrumb, dải tiêu đề, đoạn mở, thanh dính và hộp tác giả thì đã
-// chung từ trước. Shape không phải đổi — `Fact` của FactStrip đúng bằng
-// `{field, icon, label, value, visible}` mà mảng này vốn có.
-// Đóng PHẦN BÀI VIẾT của DR-046; Organization và Person vẫn còn `InfoCard`,
-// chưa có quyết định, nên `InfoCard.astro` và slot `info` của DetailLayout
-// KHÔNG được xoá.
-const facts = [
-  // `author` đã gỡ khỏi đây — QĐ-2026-08-25-02. Vùng duy nhất của nó là Hộp tác
-  // giả (`06` §3, dòng "Hộp tác giả"), dựng ở phần thân bên dưới.
-  { field: 'articleType', icon: '📂', label: t('category'), value: typeLabel, visible: true },
-  { field: 'publishedAt', icon: '📅', label: t('published'), value: formatDate(data.publishedAt, lang), visible: !!data.publishedAt },
-  { field: 'updatedAt', icon: '🔄', label: t('articleUpdated'), value: formatDate(data.updatedAt, lang), visible: !!data.updatedAt },
-]
+// Byline — QĐ-2026-08-29-04. Chuyên mục, tác giả và ngày đăng gộp thành MỘT
+// dòng chữ nhỏ ngay dưới tiêu đề: không nền, không viền, không hộp. Chủ dự án
+// chốt 2026-08-29 sau khi thấy bản trước đẩy chuyên mục vào ô có viền của
+// `FactStrip` còn tác giả vào hộp nền `--c-surface-alt` ở cuối bài — hai dải
+// riêng cho ba mẩu thông tin ngắn.
+//
+// `updatedAt` CỐ Ý không lên byline: `DetailLayout` đã hiện "Cập nhật" ở cuối
+// nội dung. Đưa lên đây nữa là hai vùng cho một ý, đúng thứ Luật 1 cấm.
+//
+// Bài viết vì vậy không còn ô Thông tin nhanh nào. Không sao — `FactStrip` tự
+// ẩn khi rỗng (R7), và khung chung vẫn là khung chung; có ô hay không là chuyện
+// dữ liệu, không phải chuyện khung.
+const bylineAuthorHref = data.author?.slug
+  ? `/${ROUTE_MAP.find(r => r.entity === 'person')?.segments[lang] ?? 'tac-gia'}/${data.author.slug}/`
+  : null
+const bylinePublished = data.publishedAt ? formatDate(data.publishedAt, lang) : null
 ---
 
 <DetailLayout
@@ -82,7 +81,6 @@ const facts = [
   summary={data.summary}
   speakable
   jumpLinks={jumpLinks}
-  facts={facts}
   sidebarSlots={[
     { name: 'about', component: 'Article', visible: !!(data.about && data.about.length > 0), props: {} },
   ]}
@@ -90,24 +88,25 @@ const facts = [
   nearby={nearby}
   updatedAt={data._updatedAt}
 >
-  <Fragment slot="content">
-    {/* Vùng DUY NHẤT của `author` — `06` §3 hàng "Hộp tác giả". Gắn thẻ để
-        `luat1-post` canh được, và để lần sau ai thêm tác giả ở chỗ thứ hai thì
-        cổng đỏ thay vì lọt như ba tháng vừa rồi.
-
-        THẲNG THẮN VỀ GIỚI HẠN: thẻ này CHƯA làm cổng canh được hôm nay. Header
-        của `luat1-post` khai tầng B "xét theo cột entity của §3.1 (bốn cột)" và
-        Article "nằm hoàn toàn ngoài từ vựng ALIAS/§3.1". Muốn cổng thật sự bắt
-        thì phải thêm cột Cẩm nang vào ma trận §3.1 — việc riêng, cần phiếu. */}
+  <Fragment slot="head-meta">
+    {typeLabel && <span class="byline-item" data-field="articleType">{typeLabel}</span>}
     {data.author && (
-      <div class="author-box" data-region="author-box">
-        <div class="author-info">
-          <strong data-field="author">{data.author.title}</strong>
-          {data.author.jobTitle && <span>{data.author.jobTitle}</span>}
-        </div>
-      </div>
+      <span class="byline-item" data-region="byline" data-field="author">
+        {bylineAuthorHref
+          ? <a href={bylineAuthorHref}>{data.author.title}</a>
+          : data.author.title}
+        {data.author.jobTitle && <span class="byline-role">{data.author.jobTitle}</span>}
+      </span>
     )}
+    {bylinePublished && <span class="byline-item" data-field="publishedAt">{bylinePublished}</span>}
+  </Fragment>
 
+  <Fragment slot="content">
+    {/* Hộp tác giả ĐÃ GỠ — QĐ-2026-08-29-04. Tác giả nay ở byline dưới tiêu đề,
+        vẫn đúng MỘT vùng theo Luật 1, chỉ đổi chỗ và bỏ nền. Hộp cũ chỉ chứa
+        tên + chức danh, không avatar không tiểu sử, nên gộp lên byline không
+        mất nội dung nào. Bù lại nay CÓ link `/tac-gia/{slug}` — thứ 06 §3 hàng
+        "Hộp tác giả" đã đòi mà bản cũ chưa làm. */}
     {/* Chuyên mục, tác giả và tóm tắt đã lên hero qua DetailLayout. `data-speakable`
         đi theo tóm tắt lên đó — cssSelector trong JSON-LD vẫn là `[data-speakable]`. */}
     {hasBlocksContent(data.body) && (
@@ -169,15 +168,22 @@ const facts = [
 <script type="application/ld+json" set:html={jsonLdScriptContent(articleToJsonLd(data, siteBaseUrl(Astro.site)))}></script>
 
 <style>
-  .author-box {
-    display: flex;
-    align-items: center;
-    gap: var(--s4);
-    padding: var(--s4);
-    background: var(--c-surface-alt);
-    border-radius: var(--radius-md);
-    margin-bottom: var(--s4);
+  /* Byline: các mẩu ngăn nhau bằng dấu chấm giữa, KHÔNG nền không viền. */
+  .byline-item + .byline-item::before {
+    content: '·';
+    margin-right: var(--s3);
+    color: var(--c-border);
   }
+
+  .byline-item a {
+    color: var(--c-primary);
+    font-weight: var(--fw-600);
+  }
+
+  .byline-item a:hover { text-decoration: underline; }
+
+  .byline-role::before { content: ', '; }
+
 
   .author-info strong { display: block; font-size: var(--fs-base); font-weight: var(--fw-700); color: var(--c-text); }
   .author-info span { font-size: var(--fs-sm); color: var(--c-text-muted); }

@@ -1,0 +1,185 @@
+---
+/**
+ * PageHead — đầu trang dùng chung cho MỌI loại trang trừ trang chủ.
+ *
+ * Vì sao có file này (QĐ-2026-08-29-04). Trước bản này mỗi loại trang tự vẽ đầu
+ * trang của mình: `DetailLayout` có `.crumb-band`/`.title-band`/`.summary-band`;
+ * `TouristDestinationHub` chép lại y hệt ba dải đó (đo 2026-08-28: khai báo CSS
+ * trùng từng giá trị, chỉ khác chú thích); `EntityIndex`, `TourIndex`,
+ * `TermIndex` mỗi file một header riêng cùng hình dạng `h1 + gạch chân + mô tả`;
+ * `EventIndex` và `HubIndex` thì không có `h1` nào. Sáu bản cho một thứ.
+ *
+ * Nay một bản. Đổi nhịp dọc, cỡ tiêu đề hay cách bọc container thì sửa ở đây,
+ * mọi trang theo.
+ *
+ * KHÔNG áp cho `SiteHome`. Trang chủ không có breadcrumb, và `h1` của nó là câu
+ * định vị thương hiệu chứ không phải tên trang — ép vào đây là làm hỏng đúng
+ * trang quan trọng nhất. Chủ dự án chốt loại trừ này 2026-08-29.
+ *
+ * Hai biến thể, khai rõ thay vì giả vờ giống nhau:
+ *   detail — nền phẳng `--c-surface`, tiêu đề co giãn theo khổ màn.
+ *   index  — nền trang trí + viền dưới, tiêu đề `--fs-h1`, có gạch chân, mô tả
+ *            cỡ `--fs-h5`. Đây là hình dạng ba trang danh sách đang dùng.
+ */
+import type { Lang, EntityRef } from '../lib/types'
+import Breadcrumb from './Breadcrumb.astro'
+
+export interface Props {
+  title: string
+  lang: Lang
+  /** Không truyền = không có dải breadcrumb (trang danh sách, trang nhãn). */
+  breadcrumb?: {
+    entityType: string
+    containedInPlace?: EntityRef
+    currentTitle?: string
+  } | null
+  variant?: 'detail' | 'index'
+  /** Đoạn mở (detail) hoặc mô tả trang (index). Rỗng thì ẩn cả dải — R7. */
+  description?: string | null
+  /** Gắn `data-speakable` lên mô tả. Chỉ trang cẩm nang bật, vì chỉ Article
+   *  khai `speakable` với cssSelector `[data-speakable]` trong JSON-LD. */
+  speakable?: boolean
+  /** Có gắn thẻ vùng cho `luat1-post` hay không. Trang danh sách không ăn field
+   *  entity nào nên không gắn — gắn bừa là làm cổng đếm nhầm. */
+  tagRegion?: boolean
+}
+
+const {
+  title, lang, breadcrumb = null, variant = 'detail',
+  description = null, speakable = false, tagRegion = false,
+} = Astro.props
+
+// `Astro.slots.has` cho phép ẩn hẳn vùng khi nơi gọi không đưa gì vào — R7,
+// thay vì render một div rỗng có padding.
+const hasMeta = Astro.slots.has('meta')
+---
+
+{breadcrumb && (
+  <div class="crumb-band">
+    <Breadcrumb
+      containedInPlace={breadcrumb.containedInPlace}
+      entityType={breadcrumb.entityType}
+      lang={lang}
+      currentTitle={breadcrumb.currentTitle ?? title}
+    />
+  </div>
+)}
+
+<div class:list={["title-band", `title-band--${variant}`]}>
+  <div class="container">
+    <h1 class="page-title">{title}</h1>
+    {variant === 'index' && <span class="page-underline" aria-hidden="true"></span>}
+    {hasMeta && (
+      <div class="page-meta"><slot name="meta" /></div>
+    )}
+    {variant === 'index' && description && (
+      <p class="page-desc">{description}</p>
+    )}
+  </div>
+</div>
+
+{/* Hero đi vào đây. Trang danh sách không truyền gì nên không có gì render. */}
+<slot />
+
+{variant === 'detail' && description && (
+  <div class="summary-band" {...(tagRegion ? { 'data-region': 'summary-band' } : {})}>
+    <div class="container">
+      <p
+        class="page-summary"
+        {...(tagRegion ? { 'data-field': 'summary' } : {})}
+        {...(speakable ? { 'data-speakable': true } : {})}
+      >{description}</p>
+    </div>
+  </div>
+)}
+
+<style>
+  /* Ba dải chữ quanh hero. Cả ba đứng trên nền trang, không đè ảnh, nên chữ
+     dùng token màu chữ thường chứ không phải --c-text-inverse. */
+  .crumb-band {
+    background: var(--c-surface);
+    padding: var(--s3) 0 0;
+  }
+
+  /* KHÔNG bọc thêm `.container` quanh Breadcrumb: nó tự bọc container làm gốc
+     của nó. Bọc hai lần thì `padding-inline` cộng dồn, đẩy breadcrumb thụt vào
+     24px so với h1 ngay bên dưới. 06 §3: component hoặc tự bọc container, hoặc
+     được primitive bọc — không phải cả hai. */
+
+  .title-band--detail {
+    background: var(--c-surface);
+    padding: var(--s3) 0 var(--s5);
+  }
+
+  /* Nền trang trí + viền dưới, giữ nguyên hình dạng ba trang danh sách đang có
+     để lượt gộp này không đổi diện mạo của chúng. */
+  .title-band--index {
+    padding: var(--s7) 0 var(--s5);
+    background: var(--c-surface-alt);
+    border-bottom: 1px solid color-mix(in srgb, var(--c-border) 70%, transparent);
+  }
+
+  .page-title {
+    font-family: var(--font-display);
+    font-weight: var(--fw-800);
+    color: var(--c-text);
+    /* --lh-display là bậc riêng cho chữ hiển thị lớn: ở cỡ hero, 1,16 làm dấu
+       ngã dòng dưới chạm dấu nặng dòng trên. */
+    line-height: var(--lh-display);
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  .title-band--detail .page-title {
+    font-size: clamp(var(--fs-h3), 4.2vw, var(--fs-hero));
+    padding-bottom: var(--s2);
+  }
+
+  .title-band--index .page-title {
+    font-size: var(--fs-h1);
+    margin-bottom: var(--s3);
+  }
+
+  .page-underline {
+    display: block;
+    width: 36px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--c-sand), color-mix(in srgb, var(--c-green) 42%, var(--c-sand)));
+    border-radius: 2px;
+    margin-bottom: var(--s4);
+  }
+
+  /* Dòng byline: chuyên mục · tác giả · ngày. KHÔNG nền, không viền, không hộp —
+     chủ dự án chốt 2026-08-29: ba thông tin này phải gọn, đứng ngay dưới tiêu
+     đề, không chiếm một dải riêng. Trước đó chuyên mục nằm trong ô có viền của
+     `FactStrip` còn tác giả nằm trong hộp nền `--c-surface-alt` ở cuối bài. */
+  .page-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s2) var(--s3);
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+    line-height: var(--lh-body);
+  }
+
+  .page-desc {
+    font-size: var(--fs-h5);
+    color: var(--c-text-muted);
+    max-width: var(--measure, 70ch);
+    margin: var(--s2) 0 0;
+  }
+
+  .summary-band {
+    background: var(--c-surface);
+    padding: var(--s5) 0 0;
+  }
+
+  .page-summary {
+    max-width: 62ch;
+    color: var(--c-text-muted);
+    font-size: var(--fs-base);
+    line-height: var(--lh-body);
+    margin: 0;
+  }
+</style>

@@ -2261,3 +2261,48 @@ Kèm theo: neo containment của `entity-layout-post.ts` đổi từ `<div class
 **Xác minh bản dựng.** `class="info-card"` còn **0 trang** trên toàn site. `cong-ty` 3/3 có `fact-strip`; `tac-gia` 2/3 — trang thứ ba không có field nào hiển thị nên dải tự ẩn, đúng **R7**. Dòng "Nguồn tham khảo" vẫn render trên 3 trang, tức `sameAs` không mất khi đổi vùng. Số trang thu cột `two-col--solo` tăng 18 → **20** vì cột phụ của hai loại trang này nay cũng rỗng — cùng lối sửa đã dựng ở `QĐ-2026-08-29-02`, không phải lỗi mới.
 
 `gate:all` 11/11 xanh.
+
+---
+
+## QĐ-2026-08-29-04 — `PageHead`: một đầu trang dùng chung cho mọi loại trang trừ trang chủ; byline không nền cho Bài viết
+
+**Bối cảnh.** Chủ dự án yêu cầu gộp bảy loại trang còn lại vào frame chung, và nói thêm: mục "Chuyên mục" và tác giả phải đặt gọn gàng, **không nền**.
+
+**Hiện trạng đo được.** Sáu bản cho một thứ: `DetailLayout` có `.crumb-band`/`.title-band`/`.summary-band`; `TouristDestinationHub` **chép lại y hệt** (đo 2026-08-28: khai báo CSS trùng từng giá trị, chỉ khác chú thích); `EntityIndex`, `TourIndex`, `TermIndex` mỗi file một header riêng cùng hình dạng `h1 + gạch chân + mô tả`; `EventIndex` và `HubIndex` **không có `h1` nào**.
+
+**Chốt phạm vi: 6 trang, TRỪ `SiteHome`.** Chủ dự án chọn sau khi được nêu ba lựa chọn. Lý do loại trừ trang chủ: nó không có breadcrumb, và `h1` của nó là **câu định vị thương hiệu** chứ không phải tên trang — ép vào là làm hỏng đúng trang quan trọng nhất.
+
+**Chốt hình dạng.** `src/components/PageHead.astro`:
+
+```
+{breadcrumb?}  →  title-band ( h1 + gạch chân? + byline? )  →  <slot/>  →  summary-band?
+```
+
+`<slot/>` nhận thứ nằm giữa dải tiêu đề và đoạn mở. Trang chi tiết đưa **hero + thanh dính** vào đó — đúng thứ tự `06` §6, và giữ được ràng buộc đoạn mở phải đứng SAU thanh dính (`Luật 3`, spec vòng 5 §3.6). Trang điểm đến đưa hero + dòng ghi công ảnh. Trang danh sách không đưa gì.
+
+Hai biến thể khai rõ thay vì giả vờ giống nhau: `detail` (nền phẳng, tiêu đề co giãn) và `index` (nền `--c-surface-alt` + viền dưới, `--fs-h1`, có gạch chân). Giữ nguyên diện mạo ba trang danh sách đang có, để lượt gộp không đổi giao diện của chúng.
+
+**Chốt byline cho Bài viết.** `articleType`, `author` và `publishedAt` gộp thành **một dòng chữ nhỏ dưới `h1`, không nền không viền**, qua slot `meta`. Trước đó chuyên mục nằm trong ô có viền của `FactStrip`, còn tác giả nằm trong hộp nền `--c-surface-alt` ở cuối bài — hai dải riêng cho ba mẩu thông tin ngắn.
+
+- `author` **đổi vùng duy nhất** từ "Hộp tác giả" sang byline. Vẫn đúng một vùng theo **Luật 1**, chỉ đổi chỗ. Hộp cũ chỉ chứa tên + chức danh, không avatar không tiểu sử, nên gộp lên không mất nội dung.
+- Bù lại nay **có link `/tac-gia/{slug}`** — thứ `06` §3 hàng "Hộp tác giả" đã đòi mà bản cũ chưa làm.
+- `updatedAt` **cố ý không** lên byline: `DetailLayout` đã hiện "Cập nhật" ở cuối nội dung; đưa lên nữa là hai vùng cho một ý.
+- Bài viết do đó không còn ô Thông tin nhanh nào. `FactStrip` tự ẩn (**R7**). `ArticleDetail` quay lại `ENTITIES_WITHOUT_FACTSTRIP` — không phải lùi bước, mà là sổ hợp đồng khai đúng thực tế mới.
+
+**`EventIndex` và `HubIndex` nay có `h1`.** Trước đây không có tiêu đề cấp một nào. `RouteDispatch` đã sẵn `indexInfo` và `HUB[entity]`, chỉ chưa truyền xuống. Đây là **giao diện mới**, chủ dự án đã được nêu trước khi chọn.
+
+**Xác minh bản dựng.**
+
+| Trang | `h1` | biến thể | byline |
+|---|---|---|---|
+| `/cam-nang/…` (Bài viết) | 1 | `detail` | **có** — Cẩm nang · [Nguyễn Phú Hải](/tac-gia/nguyen-phu-hai/) · ngày |
+| `/nha-trang/` (điểm đến) | 1 | `detail` | — |
+| `/diem-tham-quan/`, `/tour/` (danh sách) | 1 | `index` | — |
+| `/kham-pha/` (hub) | 1 | `index` | **mới có `h1`** |
+| trang nhãn | 1 | `index` | có — số kết quả |
+
+`class="author-box"` còn **0 trang**; `fact-strip` trên `cam-nang` còn **0** (đúng thiết kế). `gate:all` **11/11 xanh**.
+
+**Tài liệu.** `06` v2.11.0 → **v2.12.0**; `KIEN-TRUC-TEMPLATE.md` cập nhật §1, §2.0 mới, §2, §5.
+
+**Còn lại đúng một trang ngoài frame: `SiteHome`.**

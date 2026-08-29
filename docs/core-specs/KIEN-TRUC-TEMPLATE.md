@@ -19,7 +19,8 @@
 | Muốn đổi gì | Mở file nào | Ghi chú |
 |---|---|---|
 | **Thông số**: chiều cao hero, cỡ chữ, màu, khoảng cách, bo góc, bề rộng khung, chiều cao header/thanh dính | `src/styles/tokens.css` | **Nguồn token DUY NHẤT.** Giá trị giao diện viết cứng ngoài file này là vi phạm P6/N7 (`07` mở đầu) |
-| **Bố cục trang chi tiết**: thứ tự dải, lưới hai cột, thanh dính, hàng Cập nhật | `src/components/DetailLayout.astro` | Frame chung, xem §2 |
+| **Đầu trang** (breadcrumb, tiêu đề, byline, hero, đoạn mở) của MỌI trang trừ trang chủ | `src/components/PageHead.astro` | Frame chung tầng 1, xem §2.0 |
+| **Bố cục trang chi tiết**: lưới hai cột, thanh dính, hàng Cập nhật | `src/components/DetailLayout.astro` | Frame chung tầng 2, xem §2 |
 | **Vỏ trang**: `<head>`, header, footer, font, meta/SEO, hreflang | `src/layouts/BaseLayout.astro` | Áp cho **mọi** trang, kể cả trang danh sách |
 | **Dữ liệu riêng của một loại entity**: facts nào, jump link nào, sidebar có gì, JSON-LD | `src/components/{Entity}Detail.astro` | Xem §3 |
 | **Một khối dùng lại**: hero, dải thông tin nhanh, thẻ, mục có tiêu đề | primitive ở §2.2 | Sửa một chỗ, mọi trang theo |
@@ -28,12 +29,33 @@
 
 ---
 
-## 2. Frame chung: `src/components/DetailLayout.astro`
+## 2.0 Frame chung tầng 1: `src/components/PageHead.astro`
+
+Đầu trang của **mọi loại trang trừ trang chủ** — 6 loại, thêm `DetailLayout`:
+
+```
+{breadcrumb?}  →  title-band ( h1 + gạch chân? + byline? )  →  <slot/>  →  summary-band?
+```
+
+`<slot/>` nhận thứ nằm giữa dải tiêu đề và đoạn mở: trang chi tiết đưa **hero + thanh dính** vào đó; trang điểm đến đưa **hero + dòng ghi công ảnh**; trang danh sách không đưa gì.
+
+Hai biến thể khai rõ, không giả vờ giống nhau:
+
+| `variant` | Dùng cho | Hình dạng |
+|---|---|---|
+| `detail` | `DetailLayout`, `TouristDestinationHub` | nền phẳng `--c-surface`, tiêu đề co giãn `clamp(--fs-h3, 4.2vw, --fs-hero)` |
+| `index` | `EntityIndex`, `TourIndex`, `TermIndex`, `EventIndex`, `HubIndex` | nền `--c-surface-alt` + viền dưới, tiêu đề `--fs-h1`, có gạch chân, mô tả `--fs-h5` |
+
+**Slot `meta` — dòng byline, KHÔNG nền.** Chữ nhỏ ngay dưới `h1`. Trang cẩm nang dùng cho *chuyên mục · tác giả · ngày đăng*; trang nhãn dùng cho *số kết quả*. Không viền, không hộp, không chiếm dải riêng — chủ dự án chốt 2026-08-29.
+
+**Không áp cho `SiteHome`.** Trang chủ không có breadcrumb, và `h1` của nó là câu định vị thương hiệu chứ không phải tên trang.
+
+## 2. Frame chung tầng 2: `src/components/DetailLayout.astro`
 
 ### 2.1 Thứ tự khối nó quyết định
 
 ```
-crumb-band  →  title-band  →  Hero  →  sticky-bar  →  summary-band
+PageHead ( crumb-band → title-band → [ Hero → sticky-bar ] → summary-band )
 →  FactStrip  →  two-col ( content-main + Sidebar )  →  NearbySection
 ```
 
@@ -51,7 +73,8 @@ Hai hành vi tự động đã cài sẵn, đừng dựng lại ở template con
 | `Hero.astro` | Ảnh đầu trang. **Ba biến thể tự chọn theo dữ liệu**: đủ 4 ảnh gallery → mosaic 2 cột; có ảnh chính nhưng thiếu → một ảnh; không ảnh nào → khối gradient. Cả ba cùng chiều cao. Xem §4 |
 | `FactStrip.astro` | Dải "Thông tin nhanh". **Cả 13 entity đều dùng** — không còn ngoại lệ từ `QĐ-2026-08-29-03` |
 | `Sidebar.astro` | Cột phụ 340px: khối đặt chỗ, bản đồ, liên quan |
-| `Breadcrumb.astro` | Dải điều hướng, sinh từ cây URL chứ không từ field entity |
+| `PageHead.astro` | Đầu trang dùng chung — xem §2.0 |
+| `Breadcrumb.astro` | Dải điều hướng, sinh từ cây URL chứ không từ field entity. Gọi qua `PageHead`, không gọi thẳng |
 | `NearbySection.astro` | Dải "Gần đây" cuối trang |
 | `Section.astro` · `Card.astro` · `FAQ.astro` · `Body.astro` | Mục có tiêu đề, thẻ, câu hỏi thường gặp, thân bài |
 
@@ -104,17 +127,15 @@ Mỗi file chỉ khai bốn thứ: **facts** (ô Thông tin nhanh), **jumpLinks*
 
 ---
 
-## 5. Trang KHÔNG đi qua `DetailLayout`
+## 5. Trang không đi qua `DetailLayout`
 
-Bảy loại trang có khung riêng:
+Sáu loại trang dưới đây **không** dùng `DetailLayout` (chúng không có hai cột, thanh dính hay Thông tin nhanh) nhưng **đều dùng `PageHead`** từ `QĐ-2026-08-29-04`:
 
-`SiteHome` (trang chủ) · `TouristDestinationHub` (điểm đến) · `EntityIndex` · `TourIndex` · `EventIndex` · `HubIndex` · `TermIndex`
+`TouristDestinationHub` · `EntityIndex` · `TourIndex` · `EventIndex` · `HubIndex` · `TermIndex`
 
-Chúng **vẫn dùng chung `tokens.css` và primitive** — đổi `--hero-entity-h` thì trang điểm đến cũng đổi theo. Nhưng **thứ tự dải và lưới thì mỗi loại tự khai**.
+`EventIndex` và `HubIndex` trước đó **không có `h1` nào**; nay có, nhận `title`/`description` từ `RouteDispatch`.
 
-Nói thẳng: hiện có **một** frame chung cho trang chi tiết, **chưa** có một frame chung cho mọi loại trang. Gộp bảy loại kia vào một frame là việc lớn, cần phiếu riêng.
-
----
+**Đúng một trang đứng ngoài tất cả: `SiteHome`.** Trang chủ không có breadcrumb, và `h1` của nó là câu định vị thương hiệu. Nó vẫn dùng chung `tokens.css` và các primitive.
 
 ## 6. Cổng canh tầng này
 

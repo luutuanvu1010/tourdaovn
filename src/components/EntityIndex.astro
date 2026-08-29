@@ -1,4 +1,5 @@
 ---
+import PageHead from './PageHead.astro'
 import type { Lang, PriceEntry } from '../lib/types'
 import { siteBaseUrl } from '../lib/siteUrl'
 import { uiCopy, ATTRACTION_TYPE_LABELS, SPECIALTY_TYPE_LABELS, ARTICLE_TYPE_LABELS, TOUR_FORMAT_LABELS } from '../lib/uiCopy'
@@ -123,13 +124,10 @@ const termPrefix = lang === 'vi' ? '' : `/${lang}`
 {/* 06 §5.2 — Index nhánh entity */}
 <div class="entity-index">
   {/* Vùng 2: Tiêu đề nhánh — h1 vì là heading chính của trang */}
-  <div class="entity-header">
-    <div class="container">
-      <h1 class="entity-title">{title}</h1>
-      <span class="entity-underline" aria-hidden="true"></span>
-      <p class="entity-desc">{description}</p>
-    </div>
-  </div>
+  {/* QĐ-2026-08-29-04: header riêng của file này thay bằng `PageHead` biến thể
+      `index`. Ba trang danh sách từng có ba bản cùng hình dạng `h1 + gạch chân
+      + mô tả`. Không breadcrumb: trang danh sách là mắt gốc của nhánh. */}
+  <PageHead title={title} lang={lang} variant="index" description={description} />
 
   {/* Vùng 3: Lối lọc term */}
   {
@@ -194,15 +192,6 @@ const termPrefix = lang === 'vi' ? '' : `/${lang}`
 </div>
 
 <style>
-  .entity-header {
-    position: relative;
-    overflow: hidden;
-    padding: var(--s7) 0 var(--s5);
-    background:
-      radial-gradient(620px 260px at 8% 0%, color-mix(in srgb, var(--c-primary-soft) 70%, transparent), transparent 66%),
-      linear-gradient(135deg, var(--c-primary-soft), var(--c-sand-soft));
-    border-bottom: 1px solid color-mix(in srgb, var(--c-border) 70%, transparent);
-  }
 
   .entity-header::after {
     content: "";
@@ -214,31 +203,8 @@ const termPrefix = lang === 'vi' ? '' : `/${lang}`
     opacity: .52;
   }
 
-  .entity-title {
-    font-family: var(--font-display);
-    font-size: var(--fs-h1);
-    font-weight: var(--fw-800);
-    color: var(--c-text);
-    line-height: var(--lh-heading);
-    letter-spacing: 0;
-    margin-bottom: var(--s3);
-  }
 
-  .entity-underline {
-    display: block;
-    width: 36px;
-    height: 3px;
-    background: linear-gradient(90deg, var(--c-sand), color-mix(in srgb, var(--c-green) 42%, var(--c-sand)));
-    border-radius: 2px;
-    margin-bottom: var(--s4);
-  }
 
-  .entity-desc {
-    font-size: var(--fs-h5);
-    color: var(--c-text-muted);
-    max-width: var(--measure, 70ch);
-    margin-top: var(--s2);
-  }
 
   .term-filter {
     padding: var(--s5) 0 0;

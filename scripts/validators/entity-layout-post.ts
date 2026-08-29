@@ -32,6 +32,7 @@ type DetailRule = {
 
 const SHARED_PRIMITIVES = [
   'src/components/DetailLayout.astro',
+  'src/components/PageHead.astro',
   'src/components/Hero.astro',
   'src/components/Section.astro',
   'src/components/Gallery.astro',
@@ -309,11 +310,6 @@ function main() {
     'src/components/LodgingDetail.astro',
     'src/components/TourDetail.astro',
     'src/components/EventDetail.astro',
-    // QĐ-2026-08-29-02: Bài viết chuyển từ InfoCard sang FactStrip, tức vào
-    // đúng khung chung mà chín entity kia đã dùng. Chuyển hàng ở đây để sổ hợp
-    // đồng khai đúng thực tế — để nguyên ở danh sách "không có FactStrip" thì
-    // cổng vẫn xanh nhưng nói sai, đúng loại lỗi DR-050.
-    'src/components/ArticleDetail.astro',
     // QĐ-2026-08-29-03: hai template cuối cùng chuyển nốt. ENTITIES_WITHOUT_
     // FACTSTRIP nay RỖNG — mọi entity detail đều đi qua FactStrip. Giữ mảng
     // rỗng thay vì xoá: vòng lặp bên dưới vẫn chạy, và mảng rỗng nói rõ "không
@@ -321,7 +317,13 @@ function main() {
     'src/components/PersonDetail.astro',
     'src/components/OrganizationDetail.astro',
   ]
-  const ENTITIES_WITHOUT_FACTSTRIP: string[] = []
+  // QĐ-2026-08-29-04: Bài viết quay lại danh sách này. Không phải lùi bước —
+  // ba field của nó (chuyên mục, tác giả, ngày đăng) chuyển lên BYLINE dưới
+  // tiêu đề theo yêu cầu "gọn gàng, không nền", nên nó không còn ô Thông tin
+  // nhanh nào. Khung vẫn là khung chung; có ô hay không là chuyện dữ liệu.
+  const ENTITIES_WITHOUT_FACTSTRIP: string[] = [
+    'src/components/ArticleDetail.astro',
+  ]
 
   for (const file of ENTITIES_WITH_FACTSTRIP) {
     if (!existsSync(resolve(REPO_ROOT, file))) continue

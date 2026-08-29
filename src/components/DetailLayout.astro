@@ -3,7 +3,7 @@ import type { Lang, EntityRef, ImageAsset, NearbyEntity } from '../lib/types'
 import { uiCopy } from '../lib/uiCopy'
 import { formatDate } from '../lib/dates'
 import { hostLabel } from '../lib/siteUrl'
-import Breadcrumb from './Breadcrumb.astro'
+import PageHead from './PageHead.astro'
 import Hero from './Hero.astro'
 import FactStrip from './FactStrip.astro'
 import type { Fact } from './FactStrip.astro'
@@ -114,79 +114,54 @@ const t = uiCopy(lang)
 const hasHeroImage = typeof image === 'string' ? Boolean(image) : Boolean(image?.asset?.url)
 ---
 
-{/* Dải breadcrumb và dải tiêu đề — 06 v2.5 (QĐ-2026-08-25-01), cả hai nay đứng
-    TRÊN hero, không còn phần tử chữ nào đè lên ảnh.
+{/* Đầu trang đi qua `PageHead` — QĐ-2026-08-29-04. Ba dải breadcrumb / tiêu đề /
+    đoạn mở trước đây dựng thẳng ở đây và bị `TouristDestinationHub` chép lại y
+    hệt; nay một bản dùng chung, thêm `EntityIndex`/`TourIndex`/`TermIndex`/
+    `EventIndex`/`HubIndex` cùng dùng.
 
-    Breadcrumb: đây là về ĐÚNG chỗ 06 §3 đã khai từ v2.2 (N3) — "dải sáng phía
-    trên hero, không đè lên ảnh". Mã trước đó đặt nó trong slot="overlay" nên
-    lệch đặc tả; lệch đó nay đóng. Bỏ prop `inverse` vì nền đã là nền sáng.
+    Hero VÀ thanh dính đi vào slot mặc định của `PageHead`, đúng thứ tự 06 §6:
+    breadcrumb → tiêu đề → hero → thanh dính → đoạn mở. Đoạn mở phải đứng SAU
+    thanh dính, không phải trước: spec vòng 5 §3.6 bác cách chen giữa hero và
+    thanh dính vì nó đẩy thanh giá xuống sâu thêm ~152px, tức giá rơi khỏi màn
+    đầu trên laptop 1366×768 — Luật 3 "giá trước, chữ sau". */}
+<PageHead
+  title={title}
+  lang={lang}
+  breadcrumb={{ entityType, containedInPlace, currentTitle: title }}
+  description={summary}
+  speakable={speakable}
+  tagRegion
+>
+  <slot name="head-meta" slot="meta" />
 
-    Tiêu đề: v2.4 đặt h1 ở dải dưới hero, v2.5 đưa lên trên. Đổi lại phải rút
-    hero desktop 430→380px để giữ Luật 3 "giá trước, chữ sau". Con số 380 lấy từ
-    mockup Design chặng 2, không phải tự đặt. Chi tiết phép tính và mức độ tin
-    cậy: xem hàng "Hero" ở 06 §3 — con số hiện là ƯỚC LƯỢNG, chưa đo trình duyệt. */}
-{/* KHÔNG bọc thêm `.container` ở đây: Breadcrumb tự bọc container làm gốc của
-    nó (Breadcrumb.astro:78). Bọc hai lần thì `padding-inline: var(--s5)` cộng
-    dồn, đẩy breadcrumb thụt vào 24px so với h1 ngay bên dưới. 06 §3 khai
-    component hoặc tự bọc container, hoặc được primitive bọc — không phải cả hai. */}
-<div class="crumb-band">
-  <Breadcrumb containedInPlace={containedInPlace} entityType={entityType} lang={lang} currentTitle={title} />
-</div>
+  {/* Không ảnh VÀ không huy hiệu thì bỏ hẳn hero, không dựng khung rỗng — R7.
+      Cổng BM-EMPTY-REGION bắt được ca này trên hai trang tác giả. */}
+  {(hasHeroImage || badgeList.length > 0) && (
+    <Hero image={image} gallery={gallery} fullBleed hasOverlay={badgeList.length > 0}>
+      {badgeList.length > 0 && (
+        <div slot="overlay" class="detail-badges">
+          {badgeList.map(b => <span class="detail-badge">{b}</span>)}
+        </div>
+      )}
+    </Hero>
+  )}
 
-<div class="title-band">
-  <div class="container">
-    <h1 class="detail-title">{title}</h1>
-  </div>
-</div>
-
-{/* Không ảnh VÀ không huy hiệu thì bỏ hẳn hero, không dựng khung rỗng — R7
-    "vùng rỗng ẩn hẳn". Trước v2.5 điều này không xảy ra vì lớp phủ luôn có
-    breadcrumb, h1 và đoạn mở; ba thứ đó nay đã ra ngoài, nên biến thể "không
-    ảnh" của Hero còn lại đúng một khối gradient trống. Cổng BM-EMPTY-REGION
-    bắt được ca này trên hai trang tác giả — Person không có mainImage và
-    không có huy hiệu loại (06 §4.11). */}
-{(hasHeroImage || badgeList.length > 0) && (
-  <Hero image={image} gallery={gallery} fullBleed hasOverlay={badgeList.length > 0}>
-    {badgeList.length > 0 && (
-      <div slot="overlay" class="detail-badges">
-        {badgeList.map(b => <span class="detail-badge">{b}</span>)}
-      </div>
-    )}
-  </Hero>
-)}
-
-{showStickyBar && (
-  <div class="sticky-bar">
-    <div class="container sticky-bar__inner">
-      <nav class="sticky-bar__jump" aria-label={title}>
-        {jumps.map(j => <a href={j.href}>{j.label}</a>)}
-      </nav>
-      <div class="sticky-bar__action">
-        {priceLabel && <span class="sticky-bar__price" data-region="sticky-bar" data-field="gia">{priceLabel}</span>}
-        {ctaHref && ctaLabel && (
-          <a class="sticky-bar__cta" href={ctaHref} target="_blank" rel="noopener">{ctaLabel}</a>
-        )}
+  {showStickyBar && (
+    <div class="sticky-bar">
+      <div class="container sticky-bar__inner">
+        <nav class="sticky-bar__jump" aria-label={title}>
+          {jumps.map(j => <a href={j.href}>{j.label}</a>)}
+        </nav>
+        <div class="sticky-bar__action">
+          {priceLabel && <span class="sticky-bar__price" data-region="sticky-bar" data-field="gia">{priceLabel}</span>}
+          {ctaHref && ctaLabel && (
+            <a class="sticky-bar__cta" href={ctaHref} target="_blank" rel="noopener">{ctaLabel}</a>
+          )}
+        </div>
       </div>
     </div>
-  </div>
-)}
-
-{/* Dải đoạn mở — 06 v2.3 §3 hàng "Đoạn mở" (QĐ-2026-08-23-02), dựng 2026-08-24,
-    đóng DR-049. Vị trí là dải sáng dưới hero, SAU thanh dính, TRÊN Thông tin
-    nhanh — đúng chữ của 06, không phải chỗ khác.
-    Vì sao sau thanh dính chứ không trước: spec vòng 5 §3.6 bác cách chen giữa
-    hero và thanh dính vì nó đẩy thanh giá xuống sâu thêm ~152px trên desktop,
-    tức giá rơi khỏi màn đầu trên laptop 1366×768 — vi phạm Luật 3 "giá trước,
-    chữ sau".
-    data-region/data-field là điều kiện để tầng B của luat1-post canh được vùng
-    này; trước đây summary chưa bao giờ được gắn thẻ nên cổng mù với nó (DR-048). */}
-{summary && (
-  <div class="summary-band" data-region="summary-band">
-    <div class="container">
-      <p class="detail-summary" data-field="summary" {...(speakable ? { 'data-speakable': true } : {})}>{summary}</p>
-    </div>
-  </div>
-)}
+  )}
+</PageHead>
 
 {factsVisible.length > 0 && <FactStrip facts={facts!} max={factsMax} />}
 
@@ -241,31 +216,9 @@ const hasHeroImage = typeof image === 'string' ? Boolean(image) : Boolean(image?
     backdrop-filter: blur(4px);
   }
 
-  /* Ba dải chữ quanh hero — 06 v2.5 (`.crumb-band` và `.title-band` TRÊN hero,
-     `.summary-band` dưới thanh dính). Cả ba đứng trên nền trang, không đè
-     ảnh, nên chữ dùng token màu chữ thường chứ không phải --c-text-inverse. */
-  .crumb-band {
-    background: var(--c-surface);
-    padding: var(--s3) 0 0;
-  }
 
-  .title-band {
-    background: var(--c-surface);
-    padding: var(--s3) 0 var(--s5);
-  }
 
-  .summary-band {
-    background: var(--c-surface);
-    padding: var(--s5) 0 0;
-  }
 
-  .detail-summary {
-    max-width: 62ch;
-    color: var(--c-text-muted);
-    font-size: var(--fs-base);
-    line-height: var(--lh-body);
-    margin: 0;
-  }
 
   /* Thanh dính: neo mục + giá + CTA. Bám dưới header nên dùng --header-h. */
   .sticky-bar {
@@ -350,23 +303,6 @@ const hasHeroImage = typeof image === 'string' ? Boolean(image) : Boolean(image?
     .sticky-bar__inner { justify-content: flex-end; }
   }
 
-  .detail-title {
-    font-family: var(--font-display);
-    font-size: clamp(var(--fs-h3), 4.2vw, var(--fs-hero));
-    font-weight: var(--fw-800);
-    /* 06 v2.4 đưa h1 xuống nền sáng (v2.5 đưa tiếp lên TRÊN hero) nên đổi từ
-       --c-text-inverse sang --c-text.
-       Cặp --c-text / --c-surface đo 17,85:1 ở bien-sau và 16,80 ở cat-bien —
-       cao hơn hẳn 6,6:1 mà QA1 4B đo được khi chữ còn đè lên ảnh. */
-    color: var(--c-text);
-    /* 1.06 là giá trị cứng ngoài token và ở cỡ hero nó làm dấu ngã dòng dưới
-       chạm dấu nặng dòng trên — đúng lỗi Design nêu. --lh-display là bậc riêng
-       cho chữ hiển thị lớn, duyệt 2026-08-06. */
-    line-height: var(--lh-display);
-    text-wrap: balance;
-    padding-bottom: var(--s2);
-    margin: 0;
-  }
 
   .two-col {
     display: grid;

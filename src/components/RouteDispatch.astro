@@ -438,7 +438,7 @@ const destinationJsonLd = kind === 'destination' && detailData && !notFound
   {kind === 'detail' && detailData && <AuthorityMeta data={detailData} lang={lang} />}
 
   {kind === 'index' && !notFound && entity === 'event' && (
-    <EventIndex upcoming={eventUpcoming} past={eventPast} lang={lang} />
+    <EventIndex upcoming={eventUpcoming} past={eventPast} lang={lang} title={indexInfo.title} description={indexInfo.desc} />
   )}
   {kind === 'index' && !notFound && entity === 'tour' && (
     <TourIndex tours={tourList} terms={indexTerms} lang={lang} />
@@ -447,7 +447,7 @@ const destinationJsonLd = kind === 'destination' && detailData && !notFound
     <EntityIndex entities={indexEntities} entityType={entity} lang={lang} title={indexInfo.title} description={indexInfo.desc} terms={indexTerms} />
   )}
 
-  {kind === 'hub' && !notFound && <HubIndex sections={hubSections} lang={lang} />}
+  {kind === 'hub' && !notFound && <HubIndex sections={hubSections} lang={lang} title={HUB[entity]?.title} description={HUB[entity]?.desc} />}
 
   {kind === 'term' && !notFound && termData && (
     <TermIndex term={termData} entities={termEntities} entityType={entity as 'experience' | 'tour'} lang={lang} />
