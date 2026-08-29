@@ -464,4 +464,16 @@ if (!turnstileSiteKey) {
   .bf__done-code strong { font-family: var(--font-display); color: var(--c-accent-strong); }
   .bf__done-dup { font-size: var(--fs-sm); color: var(--c-text-muted); margin: 0; }
   .bf__hotline a { color: var(--c-primary); font-weight: var(--fw-600); }
+
+  /* Thuộc tính `hidden` phải thắng mọi khai báo `display` của chính component này.
+     Vì sao cần một luật riêng: Astro gắn thuộc tính scoped vào selector, nên `.bf__step`
+     thành `.bf__step[data-astro-cid-…]` (đặc hiệu 0,2,0) và đè luôn `[hidden]{display:none}`
+     mặc định của trình duyệt (0,1,0). Hậu quả đo được trên production 2026-08-29: bước 2
+     không bao giờ gấp lại dù JS đặt `hidden = true` — bấm "Đặt tour ngay" nhìn như không có
+     gì xảy ra; nút mở cũng không ẩn đi; và khối "đã nhận yêu cầu" hiện thường trực với mã
+     đơn rỗng. Liệt kê theo class thay vì `[hidden]` trần: selector có class thì Astro mới gắn
+     thuộc tính scoped (thành 0,3,0 — thắng 0,2,0 mà không cần `!important`), còn `[hidden]`
+     trần sẽ bị để nguyên và rò thành luật toàn site. */
+  .bf__step[hidden], .bf__primary[hidden], .bf__done[hidden],
+  .bf__hint[hidden], .bf__done-dup[hidden] { display: none; }
 </style>
