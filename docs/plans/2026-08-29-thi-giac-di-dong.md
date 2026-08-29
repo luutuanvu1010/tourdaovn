@@ -42,7 +42,7 @@
 | `src/components/SiteHome.astro` | 3, 6, 7, 8 | **Sửa.** Gỡ khoá `tours`; nhịp dọc; đích chạm `summary`; hero |
 | `src/components/HomeTourGrid.astro` | 3, 4, 5, 6 | **Sửa.** Nhãn về một nguồn; lưới co; đảo vai dải màu; nhịp dọc |
 | `src/components/Card.astro` | 4 | **Sửa.** Thẻ ngang ở `≤640px` |
-| `src/components/HomeRollupSection.astro` | 4, 6, 7 | **Sửa.** Gỡ hàng rào đè; nhịp dọc; đích chạm |
+| `src/components/HomeRollupSection.astro` | 4, 7 | **Sửa.** Gỡ hàng rào đè; đích chạm. (KHÔNG thuộc Task 6 — file này bọc `<Section>`, đệm đến từ `Section.astro`) |
 | `src/components/EntityIndex.astro` | 4 | **Sửa.** Gỡ hàng rào đè |
 | `docs/core-specs/07-DESIGN_TOKENS.md` | 5 | **Sửa.** Chỉ phần *lý do* của điều khoản cấm cát làm nền CTA |
 | 9 component `Home*` + `Section.astro` + `HomeHubGrid` + `HomeBannerGrid` | 6 | **Sửa.** Một nhịp `--s6` ở `≤640px` |
@@ -149,8 +149,14 @@ window.__do = async function (url) {
 - [ ] **Bước 3: Chạy đoạn đo trên bốn trang**
 
 ```bash
-npm run preview    # phục vụ dist/ ở http://localhost:4321
+# ⚠ KHÔNG dùng `npm run preview` — adapter @astrojs/cloudflare không hỗ trợ lệnh đó
+# (đã kiểm: "[preview] The @astrojs/cloudflare adapter does not support the preview command").
+# Và KHÔNG dùng `wrangler dev` — nó tự chạy [build] trong wrangler.toml, dựng lại dist/
+# và làm sai lệch mtime vừa ghi. Phục vụ tĩnh bằng công cụ hệ thống, không thêm dependency:
+cd dist && python3 -m http.server 4321 &
 ```
+
+Trang phục vụ ở `http://localhost:4321/`. Nhớ dừng server khi xong (`kill %1`).
 
 Mở `http://localhost:4321/` trong Chrome, dán `do.js` vào console, rồi chạy:
 
@@ -536,7 +542,8 @@ Cùng nội dung, đổi `.home-card-grid` thành `.card-grid`, đặt trong kh�
 - [ ] **Bước 5: Dựng và đo K2 trên ba trang có lưới 1 thẻ**
 
 ```bash
-npm run build && npm run preview
+npm run build
+cd dist && python3 -m http.server 4321 &    # KHÔNG dùng `npm run preview`, xem Task 1
 ```
 
 Trong Chrome, dán `do.js` rồi chạy:
@@ -653,7 +660,8 @@ Ghi DR-b1, DR-b2, DR-b3, DR-k."
 - [ ] **Bước 1: Ghi lại nhịp hiện tại để so**
 
 ```bash
-npm run build && npm run preview
+npm run build
+cd dist && python3 -m http.server 4321 &    # KHÔNG dùng `npm run preview`, xem Task 1
 ```
 
 Chạy `await __do('/')`, ghi `K4_giaTriDem`. Kỳ vọng nhiều hơn một giá trị.
@@ -707,7 +715,8 @@ File này hiện có một khối `≤768` chứa **cả** đệm lẫn cỡ ch�
 - [ ] **Bước 4: Dựng và đo K4**
 
 ```bash
-npm run build && npm run preview
+npm run build
+cd dist && python3 -m http.server 4321 &    # KHÔNG dùng `npm run preview`, xem Task 1
 ```
 
 Chạy `await __do('/')`. Kỳ vọng `K4_giaTriDem` chỉ còn **`["32px"]`**.
@@ -777,7 +786,8 @@ Cho `summary` dùng đệm dọc thay vì `inline-flex` (đổi `display` của 
 - [ ] **Bước 3: Dựng và đo K3 về 0**
 
 ```bash
-npm run build && npm run preview
+npm run build
+cd dist && python3 -m http.server 4321 &    # KHÔNG dùng `npm run preview`, xem Task 1
 ```
 
 Chạy `await __do('/')`, kỳ vọng `K3_soDichChamNho: 0`.
@@ -827,7 +837,8 @@ chữ ở những chỗ đó đúng vai, sai là vùng bấm."
 - [ ] **Bước 2: Dựng và đo K7**
 
 ```bash
-npm run build && npm run preview
+npm run build
+cd dist && python3 -m http.server 4321 &    # KHÔNG dùng `npm run preview`, xem Task 1
 ```
 
 Chạy `await __do('/')`, kỳ vọng `K7_heroPhanTram` trong khoảng **70–76**.
@@ -881,7 +892,7 @@ stat -f '%Sm' -t '%Y-%m-%d %H:%M:%S' dist/index.html
 - [ ] **Bước 2: Chạy `do.js` — ĐÚNG file của Task 1, không sửa gì**
 
 ```bash
-npm run preview
+cd dist && python3 -m http.server 4321 &    # KHÔNG dùng `npm run preview`, xem Task 1
 ```
 
 ```js
