@@ -2441,3 +2441,47 @@ form, `POST /api/dat-tour` trả 400 (kiểm dữ liệu, không phải 503), 5/
 Cũng khớp tài liệu Cloudflare: một lần deploy **không bao giờ** xoá secrets, chỉ `wrangler secret
 delete` mới xoá (`workers/configuration/secrets/`). Cái đã xảy ra không phải "deploy xoá secrets"
 mà là deploy một cấu hình **không có `main`** — Worker mất phần code kèm toàn bộ binding.
+
+## DR-102 — CSS scoped của Astro đè `hidden` và không với tới node do JS dựng: ba khối của form đặt tour không ẩn được, bảng tính tiền mất định dạng
+
+**Trạng thái:** đã sửa 2026-08-29 tối (`f8733da`, `40e306d`), sau khi chủ dự án báo lỗi trên
+production. Ghi phiếu vì đây là **hai bẫy chung của Astro**, không riêng form này — mọi component
+scoped nào vừa dùng thuộc tính `hidden` vừa khai `display`, hoặc dựng DOM bằng JS, đều dính.
+
+**Bẫy 1 — `hidden` thua `display`.** Astro gắn thuộc tính scoped vào selector, nên
+`.bf__step { display: flex }` biên dịch thành `.bf__step[data-astro-cid-…]` — đặc hiệu **0,2,0**,
+đè luật `[hidden] { display: none }` mặc định của trình duyệt (**0,1,0**). Toàn trang không có
+luật `[hidden]` nào khác (đã kiểm cả ba file CSS). Hậu quả đo được trên production:
+
+- `[data-step="2"]` (thông tin khách + Turnstile) **hiện thường trực** dù JS đặt `hidden = true`
+  ngay khi khởi động — cao 702px, `display: flex`. Bấm "Đặt tour ngay" nhìn như **không có gì
+  xảy ra**, vì thứ nó định mở vốn đã mở sẵn. Đây là triệu chứng chủ dự án báo.
+- `.bf__primary` (chính nút đó) không ẩn đi khi mở bước 2.
+- `.bf__done` — khối "Đã nhận yêu cầu đặt tour" — hiện thường trực **với mã đơn rỗng**.
+
+Cách sửa: liệt kê theo class (`.bf__step[hidden]`, `.bf__primary[hidden]`, …) để Astro gắn được
+thuộc tính scoped, thành **0,3,0** — thắng mà không cần `!important`. Thử `[hidden]` trần trước
+đó **không dùng được**: Astro để nguyên selector không class, biến nó thành luật **toàn site**.
+
+**Bẫy 2 — CSS scoped không với tới node do JS dựng.** `.bf__line` (một dòng của bảng tính tiền)
+được JS dựng lại bằng `document.createElement` mỗi lần đổi số người, và node mới **không** mang
+`data-astro-cid-*`. Dòng do máy chủ dựng thì `display: flex; justify-content: space-between` đúng;
+dòng do JS dựng mất cả hai, hai `<span>` dán liền nhau — chủ dự án đọc được
+**"Người lớn × 1019.550.000₫"** (là "× 10" dính "19.550.000₫") trong khi dòng "Tạm tính" ngay dưới
+vẫn đúng vì nó do máy chủ dựng. Đo được: span trái kết thúc và span phải bắt đầu **cùng x=1346**.
+
+Cách sửa: `[data-quote-lines] :global(.bf__line)` và `[data-done-summary] :global(.bf__line)` —
+phần tử cha vẫn scoped, chỉ mở `:global` cho lớp con.
+
+**Vì sao nghiệm thu 14/14 không bắt được.** SPEC §7 mục 13a/13b kiểm "bấm +/− đổi số và tạm tính
+đổi theo" và "bấm Đặt tour thì phần thông tin khách hiện ra, tiêu điểm vào ô Họ và tên" — cả hai
+**vẫn đúng** khi bước 2 hiện sẵn: số liệu đổi thật, tiêu điểm nhảy thật. Tiêu chí hỏi "có xuất
+hiện không", không hỏi "trước đó có ẩn không", nên một khối không bao giờ ẩn vẫn qua cổng. Bài học
+cho tiêu chí nghiệm thu về giao diện: **kiểm cả trạng thái trước, không chỉ trạng thái sau.**
+
+**Sửa kèm, cùng lượt:** câu báo lỗi khi chưa chọn ngày ưu tiên `dateEl.validationMessage` — chuỗi
+theo ngôn ngữ **trình duyệt**, nên khách Việt nhận "Please fill out this field." giữa một form
+tiếng Việt, trong khi `data-date-required="Chọn ngày khởi hành."` đã có sẵn mà không được dùng.
+Đảo thứ tự, và đổi `focus()` trần thành `focus({preventScroll:true})` + `scrollIntoView({block:
+'center'})` vì `focus()` cuộn tối thiểu, để ô ngày dừng sát mép trên nơi header và thanh dính che
+mất nó lẫn dòng báo lỗi — người bấm chỉ thấy trang nhảy.
