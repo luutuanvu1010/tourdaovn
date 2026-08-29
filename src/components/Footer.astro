@@ -185,6 +185,7 @@ const footerBg = imageUrl(footerConfig?.backgroundImage, { width: 1800 })
   .foot-brand .logo {
     display: flex;
     align-items: center;
+    min-height: 44px;
     gap: var(--s3);
     font-family: var(--font-display);
     font-weight: var(--fw-800);
@@ -223,6 +224,9 @@ const footerBg = imageUrl(footerConfig?.backgroundImage, { width: 1800 })
   }
 
   .foot-col a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
     color: var(--c-footer-text);
     transition: color var(--m-fast) var(--m-ease);
   }
