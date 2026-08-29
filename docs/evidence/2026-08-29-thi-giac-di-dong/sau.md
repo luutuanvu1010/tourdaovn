@@ -80,4 +80,4 @@ Task này **giữ nguyên** `DR-b1`, `DR-b2`, `DR-b3`, `DR-k` với nhãn chữ 
 |---|---|---|
 | `npm run gate` | 11/11 xanh + 1 `[gap]` (g2) | **11/11 `[pass]` + 1 `[gap]` (g2, QĐ-2026-08-05-03, nợ ND-001)** ✅ |
 | `npm --prefix scripts test` | `# fail 0`, 211 ca | **`# tests 211`, `# pass 211`, `# fail 0`** ✅ |
-| `npm --prefix scripts run audit:gate` | 46 đạt / 23 trượt, cả 23 là GA6 | **46 đạt, 23 trượt, 0 không kiểm được — toàn bộ 23 trượt đều thuộc nhóm `GA6/*`** (bằng chứng: `docs/evidence/2026-08-29-gate-auditor/report.json`) ✅ |
+| `npm --prefix scripts run audit:gate` | 46 đạt / 23 trượt, cả 23 là GA6 | **46 đạt, 23 trượt, 0 không kiểm được — toàn bộ 23 trượt đều thuộc nhóm `GA6/*`** ✅ (lệnh trên tự ghi `docs/evidence/2026-08-29-gate-auditor/report.json` mỗi lần chạy — file này **không nằm trong phạm vi commit** của Task 9 theo brief Bước 7, nên không dẫn nó làm bằng chứng cố định; số liệu tái lập được bằng cách chạy lại đúng lệnh trên `dist/` tại HEAD `b2a88e5`) |
