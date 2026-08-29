@@ -462,13 +462,15 @@ không cần build Astro; `fetch` ra SES/Zalo/Turnstile được **stub** trong 
    `wrangler secret put AWS_SECRET_ACCESS_KEY`, `wrangler secret put AWS_SES_REGION` (vùng đã
    verify tên miền, ví dụ `ap-southeast-1`); `wrangler secret put BOOKING_NOTIFY_EMAIL`.
 4. Zalo: trong ứng dụng Zalo tìm OA **Zalo Bot Manager** → "Create bot" → nhận token qua
-   tin nhắn → `wrangler secret put ZALO_BOT_TOKEN`. Mỗi nhân viên trực mở bot, nhắn một
-   tin; chạy `POST https://bot-api.zaloplatforms.com/bot<TOKEN>/getUpdates` đọc `chat_id` →
-   `wrangler secret put ZALO_BOT_CHAT_IDS` (phân tách dấu phẩy). **`getUpdates` là `POST`, không
-   phải `GET`** — kiểm lại tài liệu chính thức 2026-08-29 (`bot.zapps.me/docs/apis/getUpdates/`);
-   bản trước của mục này ghi `GET`, chạy không lấy được gì. Đây là **long polling**: mặc định chờ
-   tới 30 giây mới trả, và không dùng chung được với Webhook. Mã sản phẩm (`notify/zalo.ts`) vốn
-   đã đúng — sai chỉ nằm ở runbook.
+   tin nhắn → `wrangler secret put ZALO_BOT_TOKEN`. Lấy `chat_id` theo **đúng thứ tự: chạy
+   `POST https://bot-api.zaloplatforms.com/bot<TOKEN>/getUpdates` (vòng lặp, lệnh cụ thể ở kế
+   hoạch Task 13 bước 3) TRƯỚC, rồi nhân viên nhắn cho bot TRONG LÚC lệnh đang nghe** — đọc
+   `chat.id` trong kết quả → `wrangler secret put ZALO_BOT_CHAT_IDS` (phân tách dấu phẩy).
+   Hai lỗi liên tiếp của runbook, kiểm bằng tài liệu chính thức và bằng chạy thật 2026-08-29:
+   bản một ghi `GET` (đúng là `POST`); bản hai bảo nhắn trước rồi chạy lệnh — ngược, vì
+   `getUpdates` là **long polling**: tin gửi trước khi bắt đầu nghe không được trả về, và
+   `{"ok":false,…,"error_code":408}` chỉ nghĩa là "chờ hết 30 giây không có tin" chứ không phải
+   cấu hình sai. Không dùng chung được với Webhook. Mã sản phẩm (`notify/zalo.ts`) vốn đã đúng.
 5. Turnstile: dashboard Cloudflare → Turnstile → thêm site `tourdao.vn` (managed) → site key
    `PUBLIC_TURNSTILE_SITE_KEY` khai vào **cả hai chỗ** — `.env` ở gốc repo **và** Workers →
    Settings → Build → Variables; secret → `wrangler secret put TURNSTILE_SECRET_KEY`.
