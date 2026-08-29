@@ -2403,9 +2403,19 @@ cần chủ dự án duyệt.
 
 ## DR-101 — Build tự động từ `main` xoá sạch toàn bộ `wrangler secret` của Worker
 
-**Trạng thái:** mở 2026-08-29 — đã có đường tránh (tạm dừng builds); gốc rễ chỉ khép được sau
-khi merge module về `main`. **Sau merge bắt buộc:** đặt lại 8 secrets, bấm Publish thử, đếm lại
-đủ 8 rồi mới mở khách.
+**Trạng thái:** ĐÃ KHÉP 2026-08-29 tối — bằng chứng ở cuối mục này. Gốc rễ đúng như chẩn đoán:
+build từ `main` khi `main` còn là bản assets-only. Sau khi module gộp vào `main`, build **giữ
+nguyên** 8 secrets. Không cần thao tác định kỳ nào nữa.
+
+⚠ **Đính chính một sai sót trong chính phiên ghi phiếu này:** đường tránh ghi ban đầu là "tạm dừng
+Workers Builds" — **Workers Builds KHÔNG có Pause/Resume**, chỉ có `Disconnect` (kiểm tài liệu
+Cloudflare `workers/ci-cd/builds/`; các tuỳ chọn thật: Git branch, Build command, Deploy command,
+Non-production branch deploy command). Tác nhân đã hướng dẫn một đường dẫn dashboard không tồn tại
+**và** sau đó tự cho là chủ dự án đã tạm dừng, rồi lặp lại giả định đó nhiều lượt. Hệ quả thật: sau
+lần push module, build chạy từ `main` cũ xoá secrets, production hiện form mà **mọi đơn trả 503**
+trong khoảng 22:0x–22:5x ngày 29/08. Không đơn nào thất lạc (cổng fail-closed, khách nhận "Chưa gửi
+được"). Bài học: đường dẫn giao diện của bên thứ ba phải tra tài liệu trước khi đọc cho người dùng
+làm theo, và trạng thái do người thực hiện thì phải hỏi lại, không được suy đoán.
 
 Bằng chứng 2026-08-29: ba đợt đặt secret đều bị mất đúng phần đặt trước bản build gần nhất; thí
 nghiệm sạch chốt hạ — 8 secrets nằm yên từ 11:38:36Z, không lệnh nào chạy xen, chủ dự án bấm
@@ -2420,3 +2430,14 @@ Xử lý trong phiên: chủ dự án tạm dừng Workers Builds; secrets đặ
 `versions upload` từ nhánh — version này kế thừa đủ 8 secrets, chứng tỏ upload từ cấu hình có
 `main` giữ secrets. Nghi vấn gốc (upload assets-only không kế thừa secret bindings) chưa xác
 nhận chính thức với Cloudflare.
+
+**Bằng chứng khép phiếu (2026-08-29, 22:47–22:59 giờ VN).** Đặt lại 8 secrets lúc 22:52 (endpoint
+từ 503 về 400 — sống). Push `db3d0e8` lên `main` lúc 22:54 kích một build từ `main` **đã có module**.
+Vòng canh 45 giây/lần trong suốt build: `secret list` giữ **8/8** ở mọi lượt đo (22:55:45, 22:56:34,
+22:57:24, 22:58:13, 22:59:03) — không lượt nào tụt. Build xong 22:59: trang tour mới gắn khoá đã có
+form, `POST /api/dat-tour` trả 400 (kiểm dữ liệu, không phải 503), 5/5 tour có giá hiện form và
+`du-thuyen` (không giá) không hiện — đúng SPEC §7 mục 2.
+
+Cũng khớp tài liệu Cloudflare: một lần deploy **không bao giờ** xoá secrets, chỉ `wrangler secret
+delete` mới xoá (`workers/configuration/secrets/`). Cái đã xảy ra không phải "deploy xoá secrets"
+mà là deploy một cấu hình **không có `main`** — Worker mất phần code kèm toàn bộ binding.
