@@ -463,11 +463,20 @@ không cần build Astro; `fetch` ra SES/Zalo/Turnstile được **stub** trong 
    verify tên miền, ví dụ `ap-southeast-1`); `wrangler secret put BOOKING_NOTIFY_EMAIL`.
 4. Zalo: trong ứng dụng Zalo tìm OA **Zalo Bot Manager** → "Create bot" → nhận token qua
    tin nhắn → `wrangler secret put ZALO_BOT_TOKEN`. Mỗi nhân viên trực mở bot, nhắn một
-   tin; chạy `GET https://bot-api.zaloplatforms.com/bot<TOKEN>/getUpdates` đọc `chat_id` →
-   `wrangler secret put ZALO_BOT_CHAT_IDS` (phân tách dấu phẩy).
+   tin; chạy `POST https://bot-api.zaloplatforms.com/bot<TOKEN>/getUpdates` đọc `chat_id` →
+   `wrangler secret put ZALO_BOT_CHAT_IDS` (phân tách dấu phẩy). **`getUpdates` là `POST`, không
+   phải `GET`** — kiểm lại tài liệu chính thức 2026-08-29 (`bot.zapps.me/docs/apis/getUpdates/`);
+   bản trước của mục này ghi `GET`, chạy không lấy được gì. Đây là **long polling**: mặc định chờ
+   tới 30 giây mới trả, và không dùng chung được với Webhook. Mã sản phẩm (`notify/zalo.ts`) vốn
+   đã đúng — sai chỉ nằm ở runbook.
 5. Turnstile: dashboard Cloudflare → Turnstile → thêm site `tourdao.vn` (managed) → site key
-   vào `.env` và biến build Cloudflare (`PUBLIC_TURNSTILE_SITE_KEY`), secret →
-   `wrangler secret put TURNSTILE_SECRET_KEY`.
+   `PUBLIC_TURNSTILE_SITE_KEY` khai vào **cả hai chỗ** — `.env` ở gốc repo **và** Workers →
+   Settings → Build → Variables; secret → `wrangler secret put TURNSTILE_SECRET_KEY`.
+   **Cần cả hai, không phải chọn một:** lệnh phát hành dựng site **trên máy dev**
+   (`npm run build` rồi `wrangler deploy`), và Astro nướng biến này vào HTML lúc build, đọc từ
+   `.env`. Thiếu ở `.env` thì widget không render dù Cloudflare đã khai biến, và mọi đơn bị
+   **400 `missing-token`**. Biến ở Workers chỉ dùng khi Cloudflare tự dựng từ git (`ADR-0009`).
+   Site key là **công khai** (nằm trong HTML), không phải bí mật.
 5b. `wrangler secret put IP_HASH_SALT` — một chuỗi ngẫu nhiên đủ dài, sinh tại chỗ
    (`openssl rand -hex 32`), không dùng lại bí mật nào khác.
 6. WAF: Security → Rate limiting rules → `/api/dat-tour`, 10 yêu cầu / 10 giây / IP, chặn.
