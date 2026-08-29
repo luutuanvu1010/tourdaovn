@@ -1940,13 +1940,13 @@ Phát hiện 2026-08-28 khi chạy lại bộ cổng sau dựng: 4/8 cổng đ�
 
 **Nhãn nội bộ trong SPEC-2026-08-29: DR-b1**
 
-**Trạng thái:** đã xử 2026-08-29, có chủ ý. Chủ dự án chốt `07-DESIGN_TOKENS` §1 thắng (`QĐ-2026-08-29`).
+**Trạng thái:** đã xử 2026-08-29, có chủ ý. Chủ dự án chốt `07-DESIGN_TOKENS` §1 thắng (`QĐ-2026-08-29-06`).
 
 **Lệch gì.** `SPEC-2026-08-14-be-mat-vong-3.md` §3.3 khai: *"Nút chính đổi từ `--c-accent` (`#C0392B`) sang `--c-sand` (`#F5A623`) với chữ `--c-sand-text-strong` (`#3d2a05`), để nút thôi đụng màu với giá."* Đây là quyết định **có chủ ý** ở thời điểm spec được duyệt — né luật *"Không dùng làm nền CTA"* của `07-DESIGN_TOKENS` §1 bằng cách đổi chữ nút sang tối màu thay vì trắng, vì lý do gốc của `07` viện dẫn khi đó là *"tương phản với chữ trắng không đạt AA"* — và nút thật không dùng chữ trắng nên đọc như thoát được luật.
 
 `HomeTourGrid.astro` `.tours-all` (Task này, Bước 1) đổi ngược lại: `background: var(--c-accent)`, `color: var(--c-text-inverse)` — đúng như trước khi `SPEC-2026-08-14` can thiệp.
 
-**Vì sao đảo.** Task 5 sửa lại **lý do** trong `07-DESIGN_TOKENS` §1 (xem diff dòng khai `color.sand`): lý do thật không phải tương phản (nút `--c-sand` + `--c-sand-text-strong` đo **6,76:1**, đạt AA) mà là **phân vai màu** — `07` §1 đã giao `--c-accent` cho CTA và nhãn giá, cát cho gạch chân và nút trên nền đậm. Điều khoản *"Không dùng làm nền CTA"* giữ nguyên, không nới; SPEC §3.3 đổi màu nút để né luật đó mới là thứ lệch, không phải luật. Chủ dự án chốt trực tiếp `07` thắng qua `QĐ-2026-08-29` — đây là quyết định ở đúng tầng (chủ dự án), không phải suy ra từ thứ tự thẩm quyền mặc định của `CLAUDE.md` §1 (danh sách đó không liệt tên `07-DESIGN_TOKENS.md`).
+**Vì sao đảo.** Task 5 sửa lại **lý do** trong `07-DESIGN_TOKENS` §1 (xem diff dòng khai `color.sand`): lý do thật không phải tương phản (nút `--c-sand` + `--c-sand-text-strong` đo **6,76:1**, đạt AA) mà là **phân vai màu** — `07` §1 đã giao `--c-accent` cho CTA và nhãn giá, cát cho gạch chân và nút trên nền đậm. Điều khoản *"Không dùng làm nền CTA"* giữ nguyên, không nới; SPEC §3.3 đổi màu nút để né luật đó mới là thứ lệch, không phải luật. Chủ dự án chốt trực tiếp `07` thắng qua `QĐ-2026-08-29-06` — đây là quyết định ở đúng tầng (chủ dự án), không phải suy ra từ thứ tự thẩm quyền mặc định của `CLAUDE.md` §1 (danh sách đó không liệt tên `07-DESIGN_TOKENS.md`).
 
 **Đã xử.** Rồi — code khớp `07` §1 (điều khoản, không phải bản SPEC §3.3 cũ). `SPEC-2026-08-14` §3.3 **không được sửa** theo ràng buộc toàn cục của Task này; phiếu này là bản ghi chính thức của việc đảo, không phải một khoản nợ chờ xử thêm.
 
@@ -1954,7 +1954,7 @@ Phát hiện 2026-08-28 khi chạy lại bộ cổng sau dựng: 4/8 cổng đ�
 
 **Nhãn nội bộ trong SPEC-2026-08-29: DR-b2**
 
-**Trạng thái:** đã xử 2026-08-29, có chủ ý. `QĐ-2026-08-29`.
+**Trạng thái:** đã xử 2026-08-29, có chủ ý. `QĐ-2026-08-29-06`.
 
 **Lệch gì.** `SPEC-2026-08-14-be-mat-vong-3.md` §3.4 khai: *"Khối này dùng nền `--c-band-bg` của §3.3 — nó vừa là khối tour vừa là dải màu đầu tiên."* Đây là tiền đề thiết kế gốc: `HomeTourGrid` được giao hai vai cùng lúc — khối bán tour VÀ dải màu đậm mở đầu nhịp trang.
 
@@ -1970,17 +1970,17 @@ Task 5 (Bước 1) đổi `.home-tours { background: var(--c-band-bg) }` thành 
 
 **Nhãn nội bộ trong SPEC-2026-08-29: DR-b3**
 
-**Trạng thái:** mở — Task này không có thẩm quyền đóng. Phát hiện và đảo tại code 2026-08-29, `QĐ-2026-08-29`.
+**Trạng thái:** mở — Task này không có thẩm quyền đóng. Phát hiện và đảo tại code 2026-08-29, `QĐ-2026-08-29-06`.
 
 **Lệch gì.** `ADR-0026-trang-chu-ganh-ca-san-pham.md` (**Trạng thái: accepted**), mục Hệ quả › Được, gạch đầu dòng thứ hai: *"Khối tour cũng là dải màu đậm đầu tiên của trang, cắt mạch trắng liền — xem `SPEC-2026-08-14-be-mat-vong-3` §3.3."* ADR ghi đây là một **lợi ích đã đạt được** của quyết định thêm `HomeTourGrid`.
 
 Sau Task 5, khối tour không còn nền đậm (xem `DR-091`, nhãn nội bộ `DR-b2`) — lợi ích này không còn đúng với code đang chạy. ADR vẫn đứng nguyên văn, không sửa, theo ràng buộc toàn cục của Task này (không chạm `ADR-0026*`).
 
-**Hệ quả đo được.** `ADR-0026` là ADR **tầng 3** theo thứ tự thẩm quyền `CLAUDE.md` §1 — cao hơn spec bề mặt (tầng 6) mà Task 5 thực thi. Task 5 không có quyền sửa ADR để khớp lại; nó chỉ có quyền ghi phiếu drift. Nghĩa là tài liệu tầng 3 nay mô tả sai một hệ quả thị giác đã bị chính một Task tầng thấp hơn đảo — hợp lệ về thẩm quyền (chủ dự án đã ký `QĐ-2026-08-29` cho phép đảo ở tầng bề mặt) nhưng để lại một câu sai sự thật trong một tài liệu `accepted`.
+**Hệ quả đo được.** `ADR-0026` là ADR **tầng 3** theo thứ tự thẩm quyền `CLAUDE.md` §1 — cao hơn spec bề mặt (tầng 6) mà Task 5 thực thi. Task 5 không có quyền sửa ADR để khớp lại; nó chỉ có quyền ghi phiếu drift. Nghĩa là tài liệu tầng 3 nay mô tả sai một hệ quả thị giác đã bị chính một Task tầng thấp hơn đảo — hợp lệ về thẩm quyền (chủ dự án đã ký `QĐ-2026-08-29-06` cho phép đảo ở tầng bề mặt) nhưng để lại một câu sai sự thật trong một tài liệu `accepted`.
 
 **Vì sao không sửa cùng lượt.** Ràng buộc toàn cục của Task 5: *"KHÔNG sửa … `docs/adr/ADR-0026*`. … việc của bạn là ghi phiếu drift, không phải sửa chúng."* Sửa nội dung ADR là quyết định ở tầng ADR (đổi mô tả một hệ quả đã ghi trong hồ sơ accepted), không phải việc của một Task thực thi bề mặt.
 
-**Đã xử.** Chưa, và Task này không đóng được. Cần chủ dự án chốt ở tầng ADR: sửa gạch đầu dòng 2 của mục Hệ quả › Được (gỡ câu "dải màu đậm đầu tiên", hoặc ghi chú nó đã hết hiệu lực từ `QĐ-2026-08-29` và trỏ sang `stats-band`), hoặc xác nhận giữ nguyên làm bản ghi lịch sử tại thời điểm ADR được chấp thuận.
+**Đã xử.** Chưa, và Task này không đóng được. Cần chủ dự án chốt ở tầng ADR: sửa gạch đầu dòng 2 của mục Hệ quả › Được (gỡ câu "dải màu đậm đầu tiên", hoặc ghi chú nó đã hết hiệu lực từ `QĐ-2026-08-29-06` và trỏ sang `stats-band`), hoặc xác nhận giữ nguyên làm bản ghi lịch sử tại thời điểm ADR được chấp thuận.
 
 ## DR-093 — Task 5 làm ba token `--c-band-bg`/`-text`/`-muted` thành mồ côi, còn 0 người đọc, nhưng không được gỡ khỏi `tokens.css` trong đợt này
 
@@ -2176,8 +2176,51 @@ Khớp đúng mẫu xác minh đã ghi trong `SPEC-2026-08-29 §7` mục 7 — l
 
 Giảm từ 24/27/24 (đo nền `truoc.md`) xuống 2/5/2 — phần lớn nhờ hiệu ứng phụ của các sửa khác trong đợt này, không phải một sửa nhắm trực tiếp vào hai component này. **Chưa về 0.**
 
+**Bổ sung 2026-08-29 (đợt sửa sau review toàn nhánh) — thêm một lớp nữa.** `a.term-pill` (`EntityIndex.astro`, lối lọc theo term trên trang danh sách; định nghĩa `.term-pill` không khai `min-height`) cũng dưới 44px. Đo trên `/tour/`: **41px**, **9** đích chạm dưới ngưỡng. Khác hai lớp đã ghi ở trên (`breadcrumb-item a`, `.map-card-link`) ở chỗ nó nằm trên trang **danh sách** (`EntityIndex.astro`), không phải trang **chi tiết** — tức vùng "chưa từng được đặc tả nhắm tới" ở phiếu này rộng hơn tiêu đề ban đầu ghi, không chỉ trang chi tiết entity.
+
 **Dữ liệu lịch sử liên quan.** Task 7 (R4, cùng đợt) đã tình cờ phát hiện đúng lớp vấn đề này khi đo thêm để xác minh `FAQ.astro`: báo cáo Task 7 (`task-7-report.md`, mục "Điểm nghi ngại còn lại") ghi nhận **11 đích chạm nhỏ khác trên một trang chi tiết `/diem-tham-quan/...`** (`a. h=25/26`, `a.astro-nmbp33ka h=24`, `a.map-card-link h=25`), nêu rõ "không thuộc 8 file trong phạm vi Task 7", không sửa, và đề nghị "Task khác (nếu R4 mở rộng sang trang chi tiết) biết chỗ cần nhắm". Task 9 nay xác nhận lại phát hiện đó bằng phép đo độc lập trên bản dựng cuối, khoanh đúng danh tính hai component gây ra.
 
 **Vì sao lọt — và vì sao đây KHÔNG PHẢI drift theo nghĩa thông thường của sổ này.** `DRIFT_LOG.md` dòng 3 định nghĩa drift là "đặc tả và sản phẩm không khớp nhau". Không `docs/core-specs/` hay `docs/adr/` nào khai một hợp đồng "mọi đích chạm trên mọi trang phải ≥44px" (`grep -rln "44px" docs/core-specs/ docs/adr/` → 0 kết quả). R4 của `SPEC-2026-08-29-thi-giac-di-dong.md` (§2.5, "32 đích chạm dưới 44px") tự giới hạn phạm vi vào các thành phần trang chủ — toàn bộ danh sách 32 đích chạm liệt kê đều là `.home-view-all`/`.see-all`/link chân trang/`summary` FAQ/`.logo`/`.skip-link`, và Task 7 (thi hành R4) chỉ đụng 8 file trang chủ/layout dùng chung, xác nhận qua `Chạy await __do('/')` ở Bước 1. `Breadcrumb.astro` và `AttractionDetail.astro`/`PlaceDetail.astro` **không có mặt** trong danh sách file của bất kỳ Task nào trong toàn kế hoạch `docs/plans/2026-08-29-thi-giac-di-dong.md`. Nói cách khác: đây không phải chỗ đặc tả hứa một điều rồi mã không làm đúng — đây là **một vùng mà không đặc tả nào của đợt này từng nhắm tới**, nên không có "hứa" nào để lệch. Ghi phiếu vì hệ quả thị giác/khả năng bấm là thật và đo được, và vì hai component này dùng chung site-wide nên nhiều khả năng lặp trên mọi trang chi tiết entity khác, không chỉ ba trang đo ở đây.
 
 **Chưa xử.** Cần một quyết định **ở tầng đặc tả trước khi có Task sửa**: 44px là chuẩn chỉ áp cho trang chủ (như R4 đã làm), hay là chuẩn toàn site (áp cả breadcrumb, map-card-link, và mọi đích chạm khác trên trang chi tiết/index)? Nếu chọn toàn site: cần một lượt quét đích chạm <44px trên đại diện đủ các loại trang (không chỉ ba trang lưới 1 thẻ), không chỉ hai component đã nêu ở đây.
+
+---
+
+## DR-095 — ⚠ LỖI ĐANG SỐNG, ngoài phạm vi mọi Task: `NearbySection.astro` dính đúng cơ chế `DR-062`, đang chạy trên ít nhất 4 trang production
+
+**Trạng thái:** mở. Phát hiện 2026-08-29, lượt review toàn nhánh `feat/thi-giac-di-dong`, khi đối chiếu khuôn `:has()` mà `Card.astro`/`EntityIndex.astro`/`HomeRollupSection.astro` dùng với các component lưới khác trong repo dùng cùng khuôn. **Ngoài phạm vi mọi Task của đợt "chữa thị giác di động"** — chỉ ghi phiếu, không sửa (xem "Vì sao không sửa ở đây" dưới).
+
+**Lệch gì.** `NearbySection.astro:95-96` (ngoài mọi media query) khai:
+
+```css
+.nearby-grid:has(> :last-child:nth-child(2)) { grid-template-columns: repeat(2, 1fr); }
+.nearby-grid:has(> :last-child:nth-child(3)) { grid-template-columns: repeat(3, 1fr); }
+```
+
+— `:has()` lấy độ đặc hiệu của đối số bên trong nên hai luật này đặc hiệu cao. `:171-175` thu hẹp ở khổ điện thoại bằng bộ chọn trần:
+
+```css
+@media (max-width: 640px) {
+  .nearby-grid { grid-template-columns: 1fr; }
+}
+```
+
+— đặc hiệu thấp hơn, thua. **Đúng cơ chế `DR-062`:** khối có đúng 2 hoặc 3 mục không bao giờ đổ về một cột ở `≤640px`; khối 1 mục hoặc ≥4 mục không khớp luật `:has()` nào (chỉ có nhánh cho 2 và 3) nên vẫn rơi xuống media query và thu bình thường — đó là lý do lưới bên cạnh trông đúng còn lưới 2-3 mục thì không, và vì sao lỗi khó bị nhận ra bằng mắt khi lướt qua nhiều trang.
+
+**Đo được**, khung 390px, trên bản dựng hiện tại:
+
+| Trang | số mục | `.nearby-grid` computed |
+|---|---|---|
+| `/diem-tham-quan/khu-du-lich-bai-tranh/` | 2 | `167px 167px` |
+| `/diem-tham-quan/khu-du-lich-mini-beach/` | 2 | 2 cột |
+| `/diem-tham-quan/lang-chai-hon-mieu/` | 2 | 2 cột |
+| `/khach-san/sunkiss-hotel/` | 3 | **`103.3px × 3`** |
+| `/diem-tham-quan/vinh-nha-trang/` | 1 | `358px` ✓ (đối chứng — 1 mục không khớp luật `:has()` nào nên thu đúng) |
+
+Ba thẻ 103px cạnh nhau trên màn 390px, mỗi thẻ mang ảnh 4:3 và tiêu đề cắt 2 dòng — vi phạm **Luật 5** (`06` §6: mỗi thẻ một hàng, chiếm trọn bề ngang ở khổ điện thoại). Hôm nay có vẻ hiếm gặp (lưới phổ biến nhất là ≥4 mục lân cận), nhưng **đây không phải trường hợp dựng riêng để minh hoạ** — bốn trang trên là ví dụ thật đo được trên bản dựng hiện tại; bất kỳ entity nào có đúng 2 hoặc 3 lân cận cùng loại thì trang chi tiết của nó dính lỗi.
+
+**`DR-062` tự đóng bằng một câu nay không còn đúng.** `DR-062` (dòng 1571 sổ này) viết: *"Chỉ **trang chủ** mới dính lỗi này trên production, và **từ trước đợt refactor** — không phải hồi quy."* Câu đó đúng tại thời điểm `DR-062` được ghi và đóng (2026-08-25) — lượt vá khi đó chỉ sửa `HomeRollupSection.astro`. `NearbySection.astro` dùng đúng khuôn `:has()` lỗi, chưa từng được vá theo khuôn ba media query nhắc lại đầy đủ bộ chọn (như `HomeRollupSection.astro:157-163` hay `EntityIndex.astro` sau đợt sửa này) — cơ chế y hệt, tệp khác, chưa ai đụng tới. "Đã xử" của `DR-062` chỉ đóng đúng một tệp, không đóng cơ chế; câu tổng kết phạm vi của nó cần đọc lại là "đã đúng tại thời điểm đó", không phải "còn đúng hôm nay".
+
+**Vì sao không sửa ở đây.** `NearbySection.astro` không nằm trong danh sách file của bất kỳ Task nào trong kế hoạch `docs/plans/2026-08-29-thi-giac-di-dong.md`, và đợt sửa sau review này (mục A–J) chỉ được giao đúng phạm vi lượt review đã nêu — mục I của lượt review nói rõ "KHÔNG sửa `NearbySection.astro`". Sửa ở đây là mở rộng phạm vi ngoài spec đã duyệt (`CLAUDE.md` §5).
+
+**Đã xử.** Chưa. Việc cần làm ở một Task riêng có phạm vi bao gồm `NearbySection.astro`: nhắc lại nguyên bộ chọn `:has(> :last-child:nth-child(2))` và `:has(> :last-child:nth-child(3))` bên trong khối `@media (max-width: 640px)` (`:171-175`), đúng khuôn đã dùng ở `HomeRollupSection.astro:157-163` và `EntityIndex.astro`.
