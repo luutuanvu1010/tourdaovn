@@ -1930,3 +1930,69 @@ Phát hiện 2026-08-28 khi chạy lại bộ cổng sau dựng: 4/8 cổng đ�
 
 **Đã xử.** Chưa. Cần chủ dự án chốt ở tầng ADR: viết lại `ADR-0026` §Quyết định 4 để ngưỡng neo vào `featuredTours.length` thay vì tổng số tour đã publish, hoặc xác nhận đây là hai cơ chế cố ý độc lập (ngưỡng ADR nói về việc CÓ nên duy trì khối tour hay không khi kho cạn; R7 nói về cách khối đó tự thích ứng hình ảnh khi đang hiển thị) và không cần hoà giải.
 
+## DR-b1 — Task 5 đảo lại `SPEC-2026-08-14` §3.3: nút "Xem tất cả" quay về `--c-accent`, không còn `--c-sand`
+
+**Trạng thái:** đã xử 2026-08-29, có chủ ý. Chủ dự án chốt `07-DESIGN_TOKENS` §1 thắng (`QĐ-2026-08-29`).
+
+**Lệch gì.** `SPEC-2026-08-14-be-mat-vong-3.md` §3.3 khai: *"Nút chính đổi từ `--c-accent` (`#C0392B`) sang `--c-sand` (`#F5A623`) với chữ `--c-sand-text-strong` (`#3d2a05`), để nút thôi đụng màu với giá."* Đây là quyết định **có chủ ý** ở thời điểm spec được duyệt — né luật *"Không dùng làm nền CTA"* của `07-DESIGN_TOKENS` §1 bằng cách đổi chữ nút sang tối màu thay vì trắng, vì lý do gốc của `07` viện dẫn khi đó là *"tương phản với chữ trắng không đạt AA"* — và nút thật không dùng chữ trắng nên đọc như thoát được luật.
+
+`HomeTourGrid.astro` `.tours-all` (Task này, Bước 1) đổi ngược lại: `background: var(--c-accent)`, `color: var(--c-text-inverse)` — đúng như trước khi `SPEC-2026-08-14` can thiệp.
+
+**Vì sao đảo.** Task 5 sửa lại **lý do** trong `07-DESIGN_TOKENS` §1 (xem diff dòng khai `color.sand`): lý do thật không phải tương phản (nút `--c-sand` + `--c-sand-text-strong` đo **6,76:1**, đạt AA) mà là **phân vai màu** — `07` §1 đã giao `--c-accent` cho CTA và nhãn giá, cát cho gạch chân và nút trên nền đậm. Điều khoản *"Không dùng làm nền CTA"* giữ nguyên, không nới; SPEC §3.3 đổi màu nút để né luật đó mới là thứ lệch, không phải luật. Chủ dự án chốt trực tiếp `07` thắng qua `QĐ-2026-08-29` — đây là quyết định ở đúng tầng (chủ dự án), không phải suy ra từ thứ tự thẩm quyền mặc định của `CLAUDE.md` §1 (danh sách đó không liệt tên `07-DESIGN_TOKENS.md`).
+
+**Đã xử.** Rồi — code khớp `07` §1 (điều khoản, không phải bản SPEC §3.3 cũ). `SPEC-2026-08-14` §3.3 **không được sửa** theo ràng buộc toàn cục của Task này; phiếu này là bản ghi chính thức của việc đảo, không phải một khoản nợ chờ xử thêm.
+
+## DR-b2 — Task 5 đảo lại `SPEC-2026-08-14` §3.4: khối tour thôi là "dải màu đầu tiên"
+
+**Trạng thái:** đã xử 2026-08-29, có chủ ý. `QĐ-2026-08-29`.
+
+**Lệch gì.** `SPEC-2026-08-14-be-mat-vong-3.md` §3.4 khai: *"Khối này dùng nền `--c-band-bg` của §3.3 — nó vừa là khối tour vừa là dải màu đầu tiên."* Đây là tiền đề thiết kế gốc: `HomeTourGrid` được giao hai vai cùng lúc — khối bán tour VÀ dải màu đậm mở đầu nhịp trang.
+
+Task 5 (Bước 1) đổi `.home-tours { background: var(--c-band-bg) }` thành `background: var(--c-surface-alt)`. Khối tour thôi mang vai "dải màu đầu tiên".
+
+**Hệ quả đo được.** Trước Task này, ba khối đầu trang chủ (hero, `HomeTourGrid`, `stats-band`) đều nền `--c-primary`/tổ hợp trỏ về nó, đọc thành một dải xanh liền ~2.000px ở khổ điện thoại (xem chú thích đầu `HomeTourGrid.astro`, viết lại ở Task này). Sau Task này, nhịp trang là đậm (hero) / sáng (`HomeTourGrid`) / đậm (`stats-band`) / sáng — vai "dải đậm đầu tiên" chuyển hẳn cho `stats-band`, không còn ai giữ chung hai vai.
+
+**Vì sao đảo.** Tiền đề của `SPEC-2026-08-14` §3.4 đúng ở thời điểm chỉ có hai khối đậm liền kề; nó không tính tới việc `stats-band` (khối số liệu) cũng dùng cùng token `--c-primary`, biến ba khối liên tiếp thành một mảng. Task 5 sửa hệ quả thị giác này bằng cách tách vai — không đổi mã màu nào, chỉ đổi khối nào giữ vai nào (đúng khuôn ràng buộc toàn cục: không sửa `tokens.css`). Một Task khác cùng đợt ("thị giác di động") sẽ đo lại dải xanh trên trạng thái mới này bằng số.
+
+**Đã xử.** Rồi — code không còn khớp câu "vừa là khối tour vừa là dải màu đầu tiên" của `SPEC-2026-08-14` §3.4. Spec đó **không được sửa** theo ràng buộc toàn cục của Task này; phiếu này là bản ghi chính thức của việc đảo.
+
+## DR-b3 — Task 5 đảo lại `ADR-0026` Hệ quả › Được, gạch đầu dòng 2
+
+**Trạng thái:** mở — Task này không có thẩm quyền đóng. Phát hiện và đảo tại code 2026-08-29, `QĐ-2026-08-29`.
+
+**Lệch gì.** `ADR-0026-trang-chu-ganh-ca-san-pham.md` (**Trạng thái: accepted**), mục Hệ quả › Được, gạch đầu dòng thứ hai: *"Khối tour cũng là dải màu đậm đầu tiên của trang, cắt mạch trắng liền — xem `SPEC-2026-08-14-be-mat-vong-3` §3.3."* ADR ghi đây là một **lợi ích đã đạt được** của quyết định thêm `HomeTourGrid`.
+
+Sau Task 5, khối tour không còn nền đậm (xem `DR-b2`) — lợi ích này không còn đúng với code đang chạy. ADR vẫn đứng nguyên văn, không sửa, theo ràng buộc toàn cục của Task này (không chạm `ADR-0026*`).
+
+**Hệ quả đo được.** `ADR-0026` là ADR **tầng 3** theo thứ tự thẩm quyền `CLAUDE.md` §1 — cao hơn spec bề mặt (tầng 6) mà Task 5 thực thi. Task 5 không có quyền sửa ADR để khớp lại; nó chỉ có quyền ghi phiếu drift. Nghĩa là tài liệu tầng 3 nay mô tả sai một hệ quả thị giác đã bị chính một Task tầng thấp hơn đảo — hợp lệ về thẩm quyền (chủ dự án đã ký `QĐ-2026-08-29` cho phép đảo ở tầng bề mặt) nhưng để lại một câu sai sự thật trong một tài liệu `accepted`.
+
+**Vì sao không sửa cùng lượt.** Ràng buộc toàn cục của Task 5: *"KHÔNG sửa … `docs/adr/ADR-0026*`. … việc của bạn là ghi phiếu drift, không phải sửa chúng."* Sửa nội dung ADR là quyết định ở tầng ADR (đổi mô tả một hệ quả đã ghi trong hồ sơ accepted), không phải việc của một Task thực thi bề mặt.
+
+**Đã xử.** Chưa, và Task này không đóng được. Cần chủ dự án chốt ở tầng ADR: sửa gạch đầu dòng 2 của mục Hệ quả › Được (gỡ câu "dải màu đậm đầu tiên", hoặc ghi chú nó đã hết hiệu lực từ `QĐ-2026-08-29` và trỏ sang `stats-band`), hoặc xác nhận giữ nguyên làm bản ghi lịch sử tại thời điểm ADR được chấp thuận.
+
+## DR-k — Task 5 làm ba token `--c-band-bg`/`-text`/`-muted` thành mồ côi, còn 0 người đọc, nhưng không được gỡ khỏi `tokens.css` trong đợt này
+
+**Trạng thái:** mở. Phát hiện 2026-08-29, cùng lượt Task 5.
+
+**Lệch gì.** `tokens.css` khai ba token tổ hợp `--c-band-bg: var(--c-primary)`, `--c-band-text: #FFFFFF`, `--c-band-muted: #c5dcea` (thêm theo `SPEC-2026-08-14` §3.3, phục vụ đúng `HomeTourGrid.astro`). Trước Task 5, cả ba có đúng **ba người đọc**, cả ba đều trong `HomeTourGrid.astro`:
+
+```
+src/components/HomeTourGrid.astro:73:    background: var(--c-band-bg);
+src/components/HomeTourGrid.astro:92:    color: var(--c-band-text);
+src/components/HomeTourGrid.astro:99:    color: var(--c-band-muted);
+```
+
+Task 5 (Bước 1) thay cả ba dòng này bằng `--c-surface-alt` / `--c-primary` / `--c-text-muted`. Đo lại sau khi sửa:
+
+```
+grep -rn "c-band-" src/ | grep -v tokens.css
+```
+
+→ **0 kết quả.** Ba token vẫn khai trong `tokens.css:43-45`, nhưng không còn nơi nào trong `src/` đọc chúng.
+
+**Hệ quả đo được.** `tokens.css` nay có ba token sống nhưng vô dụng — không phá gì (chúng không được ai gọi nên không ảnh hưởng render), nhưng là rác kiến trúc: người đọc `07-DESIGN_TOKENS` hoặc `tokens.css` sau này sẽ thấy `--c-band-*` và tưởng có nơi dùng, phải tự tra mới biết là mồ côi.
+
+**Vì sao không gỡ luôn.** Ràng buộc toàn cục của Task 5 điểm 1: *"KHÔNG sửa `src/styles/tokens.css`, không thêm token, không đổi giá trị token."* Gỡ ba dòng khai báo là sửa `tokens.css`, ngoài phạm vi Task này dù có lý do chính đáng.
+
+**Đã xử.** Chưa. Việc cần làm ở lượt sau: xác nhận lại `grep -rn "c-band-" src/ | grep -v tokens.css` vẫn ra 0 kết quả (đề phòng một Task khác trong cùng đợt lỡ thêm người đọc mới), rồi gỡ ba dòng `--c-band-bg`/`-text`/`-muted` khỏi `tokens.css` và khỏi bảng token tương ứng trong `07-DESIGN_TOKENS.md` (nếu có liệt kê) qua một Task riêng có quyền chạm `tokens.css`.
+

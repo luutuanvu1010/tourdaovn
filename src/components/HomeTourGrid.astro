@@ -6,8 +6,10 @@
 // thấy sản phẩm. Đó là hệ quả có chủ ý của ADR-0024, quyết khi kho chỉ có 1 tour;
 // nay đã 7 nên tiền đề ấy hết hiệu lực (xem ADR-0026).
 //
-// Đây cũng là dải màu đậm đầu tiên của trang (--c-band-bg): thẻ trắng nổi lên trên
-// nền xanh, cắt mạch trắng liền vốn làm cả trang trôi thành một mảng.
+// Nền sáng (--c-surface-alt), KHÔNG còn là dải màu đậm — QĐ-2026-08-29. Ba khối đầu
+// trang chủ (hero, khối này, stats-band) từng cùng --c-primary nên đọc thành một dải
+// xanh liền ~2.000px ở khổ điện thoại. Vai "dải đậm đầu tiên" nay chuyển hẳn cho
+// stats-band; khối này lùi về nền xen kẽ để nhịp trang thành đậm/sáng/đậm/sáng.
 import { imageUrl } from '../lib/sanity-image'
 import { HOME_COPY } from '../lib/homepage'
 import type { Lang } from '../lib/types'
@@ -70,7 +72,7 @@ const COPY = {
 
 <style>
   .home-tours {
-    background: var(--c-band-bg);
+    background: var(--c-surface-alt);
     padding: var(--s7) 0;
   }
 
@@ -79,7 +81,7 @@ const COPY = {
     font-size: var(--fs-xs);
     font-weight: var(--fw-800);
     letter-spacing: 0.12em;
-    color: var(--c-sand);
+    color: var(--c-primary);
     margin: 0;
   }
 
@@ -89,14 +91,14 @@ const COPY = {
     font-weight: var(--fw-800);
     letter-spacing: -0.015em;
     line-height: var(--lh-heading);
-    color: var(--c-band-text);
+    color: var(--c-primary);
     margin: var(--s1) 0 var(--s1);
   }
 
   .tours-sub {
     font-size: var(--fs-base);
     line-height: var(--lh-body);
-    color: var(--c-band-muted);
+    color: var(--c-text-muted);
     margin: 0 0 var(--s4);
     max-width: 56ch;
   }
@@ -167,13 +169,15 @@ const COPY = {
     margin: var(--s1) 0 0;
   }
 
-  /* Nút vàng cát, KHÔNG dùng --c-accent: trên nền xanh đậm thì đỏ gạch chìm, và
-     --c-accent còn là màu của giá — hai vai khác nhau không nên cùng màu. */
+  /* Nút dùng --c-accent (san hô), KHÔNG dùng --c-sand — QĐ-2026-08-29. Nền khối đã
+     chuyển sang sáng nên lý do gạch chìm hết hiệu lực; lý do đúng là phân vai màu:
+     07-DESIGN_TOKENS §1 giao --c-accent cho CTA và nhãn giá, cát cho gạch chân/nút
+     trên nền đậm — cho cát thêm vai CTA là một màu hai vai. */
   .tours-all {
     display: inline-block;
     margin-top: var(--s4);
-    background: var(--c-sand);
-    color: var(--c-sand-text-strong);
+    background: var(--c-accent);
+    color: var(--c-text-inverse);
     font-family: var(--font-display);
     font-weight: var(--fw-700);
     font-size: var(--fs-base);
