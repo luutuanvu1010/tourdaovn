@@ -308,7 +308,11 @@ kênh đó `skipped`, không ném lỗi.
   nhóm không, giới hạn tần suất. Nếu không gửi nhóm được thì gửi từng người — thiết kế đã
   là danh sách `chat_id` nên không đổi mã.
 - **Cố ý chưa có:** gửi lại khi hỏng, ZNS xác nhận cho khách, email bản sao cho khách.
-  Ghi ở §8. Đơn "chưa báo được" vẫn truy vấn được: `SELECT code FROM booking WHERE notify_email NOT IN ('sent') AND notify_zalo NOT IN ('sent')`.
+  Ghi ở §8. Đơn "chưa báo được" vẫn truy vấn được: `SELECT code FROM booking WHERE COALESCE(notify_email,'') <> 'sent' AND COALESCE(notify_zalo,'') <> 'sent'`.
+  **Phải có `COALESCE`** (rà soát 2026-08-29, chứng minh bằng SQLite thật): hai cột này là `NULL`
+  cho tới khi tác vụ nền ghi xong trạng thái — nếu tác vụ đó chết (worker bị thu hồi, D1 lỗi
+  thoáng qua) thì chúng ở lại `NULL` mãi, và `NULL <> 'sent'` trong SQL cho ra `NULL` chứ không
+  phải đúng, tức **đơn tệ nhất — chưa báo được ai — tàng hình trước truy vấn không có `COALESCE`**.
 
 ### 4.7 Bí mật và cấu hình
 

@@ -135,7 +135,12 @@ env -u CLOUDFLARE_API_TOKEN -u CF_API_TOKEN npx wrangler d1 execute tourdao-book
   --command "SELECT code, created_at, tour_title, depart_date, customer_name, phone, status, notify_email, notify_zalo FROM booking ORDER BY id DESC LIMIT 50"
 ```
 
-Đơn chưa báo được: thêm `WHERE notify_email <> 'sent' AND notify_zalo <> 'sent'`.
+Đơn chưa báo được: thêm `WHERE COALESCE(notify_email,'') <> 'sent' AND COALESCE(notify_zalo,'') <> 'sent'`.
+**Phải có `COALESCE`, không bỏ được:** hai cột này là `NULL` cho tới khi tác vụ nền ghi xong
+trạng thái. Tác vụ đó chết giữa chừng (worker bị thu hồi, D1 lỗi thoáng qua) thì cột ở lại
+`NULL` mãi — và `NULL <> 'sent'` trong SQL không phải đúng, nên **đơn tệ nhất — chưa một kênh
+nào báo được — sẽ tàng hình** trước bản truy vấn không có `COALESCE`. Đã chứng minh bằng SQLite
+thật ngày 2026-08-29 (rà soát toàn module).
 Sao lưu: `… wrangler d1 export tourdao-booking --remote --output backups/booking-$(date +%F).sql`.
 Đổi trạng thái: `UPDATE booking SET status='contacted' WHERE code='TD-…'`.
 
