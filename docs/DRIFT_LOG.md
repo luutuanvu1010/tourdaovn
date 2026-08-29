@@ -2514,3 +2514,57 @@ validator hiện không có khái niệm để bắt.
 2. Hoặc đổi ngữ nghĩa: `sections` chỉ dùng để **sắp thứ tự và ẩn** (`hidden`), khối nào không
    được nhắc thì vẫn hiện theo mặc định. An toàn hơn nhưng là đổi hợp đồng dữ liệu — cần
    quyết định riêng vì chạm `06-BINDING_MAP`.
+
+## DR-104 — Form đặt tour cao hơn vùng nhìn: nút "Đặt tour ngay" khuất suốt 8.450px cuộn
+
+**Trạng thái:** đang sửa 2026-08-30 (chủ dự án báo, đã duyệt hướng "ghim cụm quyết định").
+
+**Đo thật trên production, cửa sổ 1710×985.** `aside.sidebar` cao **1244px**; chỗ khả dụng
+sau khi trừ đầu trang (69px) và thanh dính (57px) và khoảng đệm là **845px** → **vượt 399px**.
+Cột phải dùng `position: sticky` — nhưng cơ chế đó chỉ giữ được khối **thấp hơn** vùng nhìn;
+khối cao hơn thì phần dưới đơn giản là nằm ngoài màn hình mãi mãi.
+
+Hệ quả đo được: `button.bf__primary[data-open]` nằm **dưới mép đúng 156px** trong toàn bộ dải
+cuộn từ scrollY ≈ 878 đến ≈ 9329 — tức khoảng **8.450px**, gần hết chiều dài trang. Nút chỉ lộ
+ra ở scrollY = 9485/10871 (**87,3%** chiều dài trang) rồi khuất trở lại. Vùng "Tạm tính" cũng
+bị cắt, nên khách không nhìn thấy trọn số tiền trước khi bấm.
+
+**Phân rã chiều cao** (form 1093px): khối bốn hàng bộ đếm **458px = 42%**. Hàng không ghi chú
+75px, hàng có ghi chú độ tuổi 128px — ghi chú cộng ~53px mỗi hàng, ~159px tổng. Hàng "Em bé"
+thêm 128px nữa. Cả hai đều là thay đổi **dữ liệu** ngày 29–30/08 (điền ghi chú tuổi và mở hạng
+em bé qua Google Sheet), không phải thay đổi mã.
+
+**Điểm đáng ghi nhất: vấn đề có từ trước, dữ liệu chỉ làm nó lộ ra.** Gỡ hết ghi chú độ tuổi
+vẫn còn 1085px, tức **vẫn vượt 240px**. Nghĩa là form đã cao hơn vùng nhìn ngay từ khi lên
+production, chỉ chưa ai đo. Đây là loại lệch mà **dữ liệu biên tập làm thay đổi bố cục** —
+không cổng nào của dự án có khái niệm để bắt: validator kiểm hợp đồng dữ liệu, `astro check`
+kiểm kiểu, Lighthouse kiểm hiệu năng và trợ năng, không cái nào hỏi "khối này có cao hơn màn
+hình không sau khi biên tập điền thêm chữ".
+
+**Vì sao nghiệm thu SPEC §7 không bắt được.** Mục 13c kiểm khổ ≤ 640px (điện thoại) — ở đó cột
+phải KHÔNG dính (`position: static` dưới 1024px) nên form cuộn bình thường và không có triệu
+chứng. Ca hỏng chỉ xuất hiện ở khổ **desktop**, đúng khổ mà tiêu chí không nhắc tới.
+
+**Cách chữa ĐÃ LÀM: cho cột phải thôi dính trên trang có form** (`Sidebar` nhận prop `flow`,
+`TourDetail` bật khi `showBookingForm`). Form cuộn theo trang như mọi nội dung khác. Cơ chế dính
+giữ nguyên cho các trang khác, nơi cột phải thật sự thấp hơn màn hình.
+
+**Một hướng đã thử và BỎ, ghi lại để không ai làm lại.** Lần đầu chọn hướng "ghim cụm Tạm tính +
+nút vào chân dính đáy". Nó chữa đúng triệu chứng trên máy tính (nút vào tầm nhìn ở cả 5 điểm
+cuộn, trước đó khuất 156px ở mọi điểm) nhưng hỏng ở hai chỗ, cả hai đo được:
+
+1. **Điện thoại 390×844: chân nuốt ô nhập.** Chân cao 255px (37,6% màn hình khi bước 2 mở) tạo
+   một vùng chết 317px ở đáy. Trình duyệt **không cuộn bù** khi đặt tiêu điểm (đo được **0px** ở
+   cả 5 ô) vì theo bố cục ô vẫn "trong tầm nhìn" — nó không biết có lớp dính đè lên. Ô Số điện
+   thoại nằm **trọn** sau chân (che 115px), Email 120px, Đón khách 125px, Ghi chú 195px. Bốn
+   trên năm ô của bước 2 dính lỗi. Cộng thêm: giá hiện **hai lần cùng lúc** (thanh dính trên +
+   chân dưới) trên một màn 390px.
+2. **Máy tính: chữa nhầm bệnh.** Đo tiếp mới lộ cơ chế thật — khi bước 2 mở, cột phải cao
+   **2016px** trong màn hình 900px và dính suốt scrollY 900→8550 (**70% chiều dài trang**).
+   Trong dải đó toạ độ các ô nhập **đứng yên tuyệt đối**: ô Họ và tên dưới mép 160px, Turnstile
+   dưới 715px; cuộn không nhích một pixel, `focus()` cũng không cuộn được vì không có chỗ nào
+   để cuộn cho hữu ích. Chân dính khiến nghịch lý lộ rõ: **nút gửi hiện suốt cả trang trong khi
+   những ô bắt buộc phải điền thì không thấy đâu.**
+
+Bài học: cái nút bị khuất chỉ là triệu chứng dễ thấy nhất. Bệnh là `position: sticky` áp cho khối
+**cao hơn vùng nhìn** — thêm một lớp dính nữa chỉ chồng thêm vùng chết.

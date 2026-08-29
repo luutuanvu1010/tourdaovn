@@ -30,6 +30,8 @@ export interface Props {
    *  cao hơn qua đây. Task 7 fix round, 2026-08-23. */
   factsMax?: number
   sidebarSlots: Slot[]
+  /** Cột phụ cuộn theo trang thay vì dính — dùng khi nội dung cột cao hơn vùng nhìn (DR-104). */
+  sidebarFlow?: boolean
   nearbyTitle: string
   nearby: NearbyEntity[]
   updatedAt: string
@@ -51,7 +53,7 @@ export interface Props {
 
 const {
   title, lang, entityType, image, gallery, containedInPlace, sameAs, facts, factsMax,
-  sidebarSlots, nearbyTitle, nearby, updatedAt,
+  sidebarSlots, sidebarFlow = false, nearbyTitle, nearby, updatedAt,
   badges, summary, speakable = false, jumpLinks, priceLabel, ctaHref, ctaLabel,
 } = Astro.props
 
@@ -189,7 +191,7 @@ const hasHeroImage = typeof image === 'string' ? Boolean(image) : Boolean(image?
   </div>
 
   {/* stickyBar: Sidebar cộng chiều cao thanh dính vào chỗ dính của nó (DR-033). */}
-  <Sidebar slots={sidebarSlots} stickyBar={showStickyBar}>
+  <Sidebar slots={sidebarSlots} stickyBar={showStickyBar} flow={sidebarFlow}>
     <slot name="booking" slot="booking" />
     {/* Slot `info` ĐÃ GỠ — QĐ-2026-08-29-03. Đường forward này tồn tại chỉ để
        ba template ArticleDetail/OrganizationDetail/PersonDetail truyền

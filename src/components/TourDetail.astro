@@ -40,6 +40,9 @@ const priceView = resolvePrice(data.bookingRef?.key, 'tour', undefined, prices, 
 // Không giá → giữ nguyên như trước: ContactChannels, không form, không CTA giả.
 const bookingKey = data.bookingRef?.key ?? ''
 const priceTable = priceView && !priceView.isFree && bookingKey ? priceTableFromEntry(prices.get(bookingKey)) : null
+// Cũng là cờ cho cột phụ thôi dính: form đặt tour cao hơn vùng nhìn ở khổ máy tính, mà
+// `position: sticky` chỉ giữ được khối thấp hơn màn hình. Dính lại thì các ô nhập của bước 2
+// đứng yên ngoài mép suốt 70% chiều dài trang, không cách nào cuộn tới (DR-104).
 const showBookingForm = !!priceView?.label && !!priceTable
 const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? ''
 
@@ -122,6 +125,7 @@ const hasActionMeta = !!(data.operator?.title || data.operator?.licenseInfo || d
   ctaHref={stickyHref}
   ctaLabel={stickyLabel}
   facts={facts}
+  sidebarFlow={showBookingForm}
   sidebarSlots={[
     { name: 'booking', component: showBookingForm ? 'BookingForm' : 'BookingCTA', visible: showBookingForm || !!priceView?.label || showFallbackCta || hasContactChannel || hasActionMeta, props: {} },
   ]}

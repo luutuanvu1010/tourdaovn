@@ -18,14 +18,22 @@ export interface Props {
   slots: Slot[]
   /** Trang có thanh dính dưới header (DetailLayout) → chỗ dính cộng thêm --sticky-bar-h. */
   stickyBar?: boolean
+  /**
+   * Cho cột phải cuộn theo trang thay vì dính. Bật khi nội dung cột CAO HƠN vùng nhìn —
+   * `position: sticky` chỉ giữ được khối thấp hơn màn hình; khối cao hơn thì phần dưới đứng
+   * yên ngoài mép và không cách nào cuộn tới. Đo được trên trang tour có form đặt tour
+   * (`DR-104`): cột cao 2016px trong màn hình 900px, dính suốt 70% chiều dài trang, và trong
+   * dải đó không một ô nhập nào của bước 2 lộ ra — kể cả khi đưa tiêu điểm vào ô.
+   */
+  flow?: boolean
 }
 
-const { slots, stickyBar = false } = Astro.props
+const { slots, stickyBar = false, flow = false } = Astro.props
 const anyVisible = slots.some(s => s.visible)
 ---
 
 {anyVisible && (
-  <aside class="sidebar" style={`--sidebar-offset:${stickyBar ? 'var(--sticky-bar-h)' : '0px'}`}>
+  <aside class:list={["sidebar", { "sidebar--flow": flow }]} style={`--sidebar-offset:${stickyBar ? 'var(--sticky-bar-h)' : '0px'}`}>
     {slots.filter(s => s.visible).map((s) => (
       <div class="sidebar-card">
         {s.name === 'booking' && <slot name="booking" />}
@@ -60,6 +68,11 @@ const anyVisible = slots.some(s => s.visible)
     border: 1px solid var(--c-border);
     border-radius: var(--radius-md);
     padding: var(--s4);
+  }
+
+  /* Cột cao hơn màn hình thì thôi dính — xem chú thích của prop `flow`. */
+  .sidebar--flow {
+    position: static;
   }
 
   @media (max-width: 1023px) {
