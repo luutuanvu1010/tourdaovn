@@ -542,7 +542,16 @@ const activeSections = rawSections.filter((s) => !s.hidden)
     }
 
     .site-home-inner {
+      padding-top: var(--s7);
       padding-bottom: var(--s7);
+    }
+
+    /* SPEC-2026-08-29 R5. Hero chiếm 86% màn đầu (727/844) nên khách không thấy
+       hé gì phía dưới — không có tín hiệu nào bảo "còn nữa, cuộn đi".
+       42px cho ~13 ký tự/dòng nên tiêu đề ngắt 4 dòng; 32px cho ~17-18 ký tự nên
+       còn 3 dòng. Với --lh-display 1,22 thì 4×51 = 205px xuống 3×39 = 117px. */
+    .site-home-title {
+      font-size: var(--fs-h3);
     }
 
     .editorial-section,
