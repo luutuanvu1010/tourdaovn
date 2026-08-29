@@ -332,7 +332,18 @@ if (!turnstileSiteKey) {
 
     openBtn.addEventListener('click', () => {
       clearErrs()
-      if (!dateEl.value) { showErr('departDate', dateEl.validationMessage || form.dataset.dateRequired || ''); dateEl.focus(); return }
+      if (!dateEl.value) {
+        // Câu của mình TRƯỚC `validationMessage`. Thứ tự cũ (validationMessage trước) đưa chuỗi
+        // của trình duyệt lên — theo ngôn ngữ trình duyệt, không theo ngôn ngữ trang, nên khách
+        // Việt nhận "Please fill out this field." giữa một form tiếng Việt.
+        showErr('departDate', form.dataset.dateRequired || dateEl.validationMessage || '')
+        // `focus()` trần cuộn tối thiểu: ô ngày dừng sát mép trên, nơi header và thanh dính che
+        // mất nó cùng dòng báo lỗi ngay dưới — người bấm chỉ thấy trang nhảy, tưởng nút hỏng
+        // (chủ dự án báo đúng triệu chứng này 2026-08-29). Đưa ô vào giữa màn hình rồi mới focus.
+        dateEl.focus({ preventScroll: true })
+        dateEl.scrollIntoView({ block: 'center' })
+        return
+      }
       step2.hidden = false
       openBtn.hidden = true
       q<HTMLInputElement>('[name="name"]')?.focus()
@@ -425,7 +436,14 @@ if (!turnstileSiteKey) {
   .bf__count { width: 2.75rem; text-align: center; font: inherit; font-size: var(--fs-base); font-weight: var(--fw-700); border: 0; background: transparent; color: var(--c-text); -moz-appearance: textfield; }
   .bf__count::-webkit-outer-spin-button, .bf__count::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .bf__quote { background: var(--c-surface-alt); border-radius: var(--radius-md); padding: var(--s4); display: flex; flex-direction: column; gap: var(--s2); }
-  .bf__line { display: flex; justify-content: space-between; gap: var(--s3); font-size: var(--fs-sm); color: var(--c-text-muted); }
+  /* `:global()` là bắt buộc ở đây, không phải tuỳ chọn. Hai vùng này được JS dựng lại bằng
+     `document.createElement` mỗi lần đổi số người (và khi hiện tóm tắt lúc gửi xong), nên node
+     mới KHÔNG mang thuộc tính `data-astro-cid-*` mà CSS scoped của Astro nhắm tới. Viết
+     `.bf__line { … }` trần thì dòng server dựng đẹp còn dòng JS dựng mất `flex` — số lượng dán
+     liền thành tiền, kiểu "Người lớn × 1019.550.000₫" (lỗi thật, chủ dự án báo 2026-08-29).
+     Phạm vi vẫn được giữ: phần tử cha còn scoped, `:global` chỉ mở cho lớp con. */
+  [data-quote-lines] :global(.bf__line),
+  [data-done-summary] :global(.bf__line) { display: flex; justify-content: space-between; gap: var(--s3); font-size: var(--fs-sm); color: var(--c-text-muted); }
   .bf__total { display: flex; justify-content: space-between; gap: var(--s3); padding-top: var(--s2); border-top: 1px solid var(--c-border); font-size: var(--fs-base); font-weight: var(--fw-700); color: var(--c-text); }
   .bf__total strong { color: var(--c-accent-strong); }
   .bf__note, .bf__hint, .bf__noscript, .bf__hotline { font-size: var(--fs-sm); color: var(--c-text-muted); margin: 0; }
