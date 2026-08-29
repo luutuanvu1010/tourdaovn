@@ -958,7 +958,35 @@ Cùng khuôn `truoc.md`, cộng bảng đối chiếu:
 2. **Bốn khối của R3 không xác nhận được:** `.tm-section`, `.gq-section`, `.banner-section`, `.home-safety-section` render 0 lần trên trang chủ hôm nay.
 3. **Nhánh dự phòng của R6a không chạy khi dựng.** Nó được canh bằng 6 ca test đơn vị của Task 2, không bằng phép đo.
 
-- [ ] **Bước 5: Ghi tám phiếu drift còn lại**
+- [ ] **Bước 5a: ĐỔI SỐ ba phiếu Task 3 đã ghi sai quy ước**
+
+`docs/DRIFT_LOG.md` dòng 7 tự khai **`Quy ước mã: DR-<số>`**, và phiếu cao nhất đang dùng là **DR-077**. Nhưng Task 3 ghi ba phiếu bằng chữ cái (`DR-a`, `DR-e`, `DR-n`) vì kế hoạch tôi viết dictate như vậy — lỗi của kế hoạch, không phải của người thi hành Task 3.
+
+Đổi tên tại chỗ, giữ nguyên nội dung:
+
+| Đang là | Đổi thành |
+|---|---|
+| `DR-a` | **`DR-078`** |
+| `DR-e` | **`DR-079`** |
+| `DR-n` | **`DR-080`** |
+
+Trong thân mỗi phiếu, thêm một dòng `Nhãn nội bộ trong SPEC-2026-08-29: DR-a` (tương ứng `DR-e`, `DR-n`) để tra ngược được về đặc tả — đặc tả vẫn dùng nhãn chữ cái và **không sửa đặc tả**.
+
+- [ ] **Bước 5: Ghi tám phiếu drift còn lại — đánh số DR-081 … DR-088**
+
+Cũng thêm dòng `Nhãn nội bộ trong SPEC-2026-08-29: DR-<chữ>` vào mỗi phiếu. Ánh xạ:
+
+| Nhãn trong đặc tả | Mã phiếu |
+|---|---|
+| DR-c | DR-081 |
+| DR-f | DR-082 |
+| DR-g | DR-083 |
+| DR-h | DR-084 |
+| DR-i | DR-085 |
+| DR-j | DR-086 |
+| DR-l | DR-087 |
+| DR-m | DR-088 |
+
 
 DR-c (`HomeHero.astro` là mã chết ôm hai token sống) · DR-f (`NearbySection` tự dựng thẻ riêng, sau R1 là thẻ duy nhất còn hình dọc ở di động) · DR-g (bản dựng FAQ thứ hai) · DR-h (số cứng ngoài thang: `HomeHubGrid.astro:93` `72px`, `:174` `10px`) · DR-i (tracking trái `07` §2) · DR-j (cả họ `featured*` không lọc `reviewStatus` — 5 field × 2 trang = 10 ô, R6 đóng 1) · DR-l (trang chủ đa ngôn ngữ mất khối tour sau Task 3 — `[lang]/index.astro:98` không truyền `homeTours`; ngủ yên vì `langs = ['vi']` nhưng bẫy đã lên cò) · DR-m (bất biến "reference deref lên bề mặt sống phải trỏ entity đã duyệt" không cổng nào kiểm, và `ADR-0008` Quyết định 4 làm nó vô hình theo thiết kế).
 
