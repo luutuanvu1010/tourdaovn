@@ -1,3 +1,4 @@
+# File này nay SINH RA từ Google Sheet tab "gia" bằng `npm --prefix scripts run prices:pull` — sửa tay ở đây sẽ bị ghi đè ở lần chạy sau.
 # prices.yaml — nguồn giá một chiều (ADR-0003, ADR-0007, ADR-0027). Giá bán công khai, VND,
 # số nguyên. KHÔNG nhập con số giá vào Sanity: entity chỉ giữ bookingRef.key = khoá ở đây.
 #
@@ -17,50 +18,201 @@ tour-3-dao-hon-mun-mini-beach-lang-chai:
   unit: perPax
   amount: 800000
   paxRates:
-    child: { amount: 560000 }
+    child: { amount: 560000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 800000, note: "Người cao tuổi >= 60 tuổi" }
 
 tour-hon-tam-tron-goi:
   unit: perPax
-  amount: 540000
+  amount: 740000
   paxRates:
-    child: { amount: 430000 }
-    senior: { amount: 430000 }
+    child: { amount: 430000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 560000, note: "Người cao tuổi >= 60 tuổi" }
 
 tour-3-dao-nha-trang-hon-mun-hon-tam:
   unit: perPax
   amount: 850000
   paxRates:
-    child: { amount: 600000 }
+    child: { amount: 595000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 850000, note: "Người cao tuổi >= 60 tuổi" }
 
 ve-hon-tam-seaday-tour-03:
   unit: perPax
   amount: 430000
   paxRates:
-    child: { amount: 340000 }
-    senior: { amount: 340000 }
+    child: { amount: 340000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 340000, note: "Người cao tuổi >= 60 tuổi" }
 
 ve-hon-tam-tam-tron-goi:
   unit: perPax
   amount: 540000
   paxRates:
-    child: { amount: 430000 }
-    senior: { amount: 430000 }
+    child: { amount: 430000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 430000, note: "Người cao tuổi >= 60 tuổi" }
 
 tour-3-dao-nha-trang-mini-beach-hon-tam:
   unit: perPax
   amount: 850000
   paxRates:
-    child: { amount: 600000 }
+    child: { amount: 600000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 850000, note: "Người cao tuổi >= 60 tuổi" }
 
 tour-dao-khi-suoi-hoa-lan:
   unit: perPax
   amount: 730000
   paxRates:
-    child: { amount: 510000 }
+    child: { amount: 510000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 730000, note: "Người cao tuổi >= 60 tuổi" }
 
 ve-hon-tam-tam-bun-tam-bien:
   unit: perPax
   amount: 540000
   paxRates:
-    child: { amount: 430000 }
-    senior: { amount: 430000 }
+    child: { amount: 430000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 430000, note: "Người cao tuổi >= 60 tuổi" }
+
+tour-1-dao-hon-tam-lan-bien:
+  unit: perPax
+  amount: 1955000
+  paxRates:
+    child: { amount: 1685000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 1685000, note: "Người cao tuổi >= 60 tuổi" }
+
+tour-2-dao-hon-mun-hon-tam-buffet:
+  unit: perPax
+  amount: 1350000
+  paxRates:
+    child: { amount: 1200000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 1350000, note: "Người cao tuổi >= 60 tuổi" }
+
+tour-3-dao-bai-tranh-lang-chai-hon-tam:
+  unit: perPax
+  amount: 750000
+  paxRates:
+    child: { amount: 525000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 750000, note: "Người cao tuổi >= 60 tuổi" }
+
+tour-3-dao-deluxe-bai-tranh-vinh-san-ho:
+  unit: perPax
+  amount: 550000
+  paxRates:
+    child: { amount: 385000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 550000, note: "Người cao tuổi >= 60 tuổi" }
+
+tour-hon-tam-tron-goi-cano-buffet:
+  unit: perPax
+  amount: 855000
+  paxRates:
+    child: { amount: 585000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 585000, note: "Người cao tuổi >= 60 tuổi" }
+
+tour-snorkeling-nha-trang:
+  unit: perPax
+  amount: 550000
+  paxRates:
+    child: { amount: 385000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 550000, note: "Người cao tuổi >= 60 tuổi" }
+
+ve-vin-harbour:
+  unit: perPax
+  amount: 200000
+  paxRates:
+    child: { amount: 200000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 200000, note: "Người cao tuổi >= 60 tuổi" }
+
+ve-vin-harbour-tata-show:
+  unit: perPax
+  amount: 400000
+  paxRates:
+    child: { amount: 400000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 400000, note: "Người cao tuổi >= 60 tuổi" }
+
+ve-vinwonders-2-ngay:
+  unit: perPax
+  amount: 1350000
+  paxRates:
+    child: { amount: 1050000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 1050000, note: "Người cao tuổi >= 60 tuổi" }
+
+ve-vinwonders-3-ngay:
+  unit: perPax
+  amount: 1600000
+  paxRates:
+    child: { amount: 1200000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 1200000, note: "Người cao tuổi >= 60 tuổi" }
+
+ve-vinwonders-sau-16h:
+  unit: perPax
+  amount: 700000
+  paxRates:
+    child: { amount: 550000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 550000, note: "Người cao tuổi >= 60 tuổi" }
+
+ve-vinwonders-sau-16h-buffet-toi:
+  unit: perPax
+  amount: 1000000
+  paxRates:
+    child: { amount: 710000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 860000, note: "Người cao tuổi >= 60 tuổi" }
+
+ve-vinwonders-tieu-chuan:
+  unit: perPax
+  amount: 1050000
+  paxRates:
+    child: { amount: 800000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 800000, note: "Người cao tuổi >= 60 tuổi" }
+
+ve-vinwonders-tieu-chuan-buffet-350:
+  unit: perPax
+  amount: 1330000
+  paxRates:
+    child: { amount: 950000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 1090000, note: "Người cao tuổi >= 60 tuổi" }
+
+ve-vinwonders-tieu-chuan-buffet-500:
+  unit: perPax
+  amount: 1450000
+  paxRates:
+    child: { amount: 1000000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 1250000, note: "Người cao tuổi >= 60 tuổi" }
+
+du-thuyen-emperor-kham-pha-vinh:
+  unit: perPax
+  amount: 2300000
+  paxRates:
+    child: { amount: 1750000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 2300000, note: "Người cao tuổi >= 60 tuổi" }
+
+du-thuyen-emperor-hoang-hon:
+  unit: perPax
+  amount: 2300000
+  paxRates:
+    child: { amount: 1750000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 2300000, note: "Người cao tuổi >= 60 tuổi" }
+
+du-thuyen-marmoris-sunset-chilling:
+  unit: perPax
+  amount: 1990000
+  paxRates:
+    child: { amount: 995000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 1990000, note: "Người cao tuổi >= 60 tuổi" }
+
+du-thuyen-marmoris-tropical-yachting:
+  unit: perPax
+  amount: 1900000
+  paxRates:
+    child: { amount: 995000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 1900000, note: "Người cao tuổi >= 60 tuổi" }
+
+du-thuyen-vega-day-tour:
+  unit: perPax
+  amount: 2330000
+  paxRates:
+    child: { amount: 2330000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 2330000, note: "Người cao tuổi >= 60 tuổi" }
+
+du-thuyen-vega-sunset-tour:
+  unit: perPax
+  amount: 2330000
+  paxRates:
+    child: { amount: 2330000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 2330000, note: "Người cao tuổi >= 60 tuổi" }
