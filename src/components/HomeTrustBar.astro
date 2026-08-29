@@ -114,7 +114,8 @@ const { items, heading } = Astro.props
     line-height: var(--lh-body);
   }
 
-  @media (max-width: 767px) {
+  @media (max-width: 640px) {
+    .why-section { padding: var(--s6) 0; }
     .why-grid { grid-template-columns: 1fr; }
   }
 </style>

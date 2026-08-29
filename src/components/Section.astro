@@ -69,13 +69,19 @@ const sectionId = id ?? (heading ? slugify(heading) : undefined)
     border-radius: 2px;
   }
 
+  /* Cỡ chữ tiêu đề mục giữ ở ≤768 — đây là luật về CHỮ, không phải về nhịp. */
   @media (max-width: 768px) {
-    .section {
-      padding: var(--s5) 0;
-    }
-
     .section-title {
       font-size: var(--fs-h4);
+    }
+  }
+
+  /* Nhịp dọc về một mốc duy nhất ≤640 (SPEC-2026-08-29 R3). Trước đây ba mốc lẫn
+     nhau (768/767/640) nên ở viewport 700px .section đã rút còn 24px trong khi
+     .why-section vẫn 96px — lệch nhịp ở đúng khổ máy tính bảng nhỏ. */
+  @media (max-width: 640px) {
+    .section {
+      padding: var(--s6) 0;
     }
   }
 </style>
