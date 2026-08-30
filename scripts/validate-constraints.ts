@@ -2,19 +2,20 @@ import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { writeFileSync, mkdirSync } from 'node:fs'
 import { config as dotenvConfig } from 'dotenv'
-import { fetchAllDocs } from './lib/sanity-client.js'
+import { fetchAllDocs, fetchSeasonRules } from './lib/sanity-client.js'
 import { loadNodeDotEnv } from './synthesis/config.js'
 import { loadPrices } from './lib/price-loader.js'
 import { VALIDATORS, VALIDATOR_LEVELS, type ValidatorResult } from './validators/i1-i19.js'
 import { PY_VALIDATORS, PY_VALIDATOR_LEVELS } from './validators/py1-py8.js'
 import { R_VALIDATORS, R_VALIDATOR_LEVELS } from './validators/r1-r4.js'
+import { validateMuaVu } from './validators/mua-vu.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 dotenvConfig({ path: resolve(__dirname, '..', '.env'), quiet: true })
 
 async function main() {
   await loadNodeDotEnv()
-  console.log('=== B8.3 CI Validator — I1–I19 + PY1–PY8 + R1–R4 ===\n')
+  console.log('=== B8.3 CI Validator — I1–I19 + PY1–PY8 + R1–R4 + MUA1 ===\n')
 
   // ── Load data ──
   console.log('[load] Đọc dữ liệu từ Sanity...')
@@ -68,16 +69,37 @@ async function main() {
   }
   console.log(`[load] ${prices.size} dòng giá\n`)
 
+  // bangGiaMuaVu không thuộc ALL_TYPES của fetchAllDocs (nhóm entity nội dung) nên phải
+  // fetch riêng cho MUA1 — cùng cách docs/prices ở trên đều tự fail-closed khi đọc hỏng
+  // (CLAUDE.md §6: lỗi phải làm bộ kiểm đỏ, không được xanh giả vì thiếu dữ liệu để kiểm).
+  console.log('[load] Đọc bảng mùa vụ (bangGiaMuaVu)...')
+  let seasonRules: Awaited<ReturnType<typeof fetchSeasonRules>>
+  try {
+    seasonRules = await fetchSeasonRules()
+  } catch (err: any) {
+    console.error(`[error] Không đọc được bangGiaMuaVu: ${err.message}`)
+    process.exit(1)
+  }
+  console.log(`[load] ${seasonRules.length} mùa\n`)
+
   // ── Merge validators ──
   const allValidators: Record<string, (docs: any[], prices: Map<string, any>) => ValidatorResult> = {
     ...VALIDATORS,
     ...PY_VALIDATORS,
     ...R_VALIDATORS,
+    // MUA1: ba luật canh dữ liệu mùa (Task 7, docs/plans/2026-08-30-gia-mua-vu.md) — phần
+    // trăm ngoài khoảng, ngày kết thúc trước ngày bắt đầu, khoá giá viện dẫn không tồn tại
+    // trong prices.yaml. KHÔNG kiểm chồng lấn — hai mùa phủ nhau là hợp lệ (ADR-0030 §3).
+    MUA1: (_docs, prices) => {
+      const { errors } = validateMuaVu(seasonRules, new Set(prices.keys()))
+      return { passed: errors.length === 0, errors }
+    },
   }
   const allLevels: Record<string, 'fail' | 'warn'> = {
     ...VALIDATOR_LEVELS,
     ...PY_VALIDATOR_LEVELS,
     ...R_VALIDATOR_LEVELS,
+    MUA1: 'fail',
   }
 
   // ── Run validators ──
