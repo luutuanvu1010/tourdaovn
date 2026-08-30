@@ -8,9 +8,10 @@ có cách biết; (3) đơn ghi lại cả con số đã giảm lẫn con số n
 kênh chuyển khoản, và câu chữ là của site này.
 ═══════════════════════════════════════════════════════════════════ -->
 
-- **Trạng thái:** **đề xuất** — năm điểm thiết kế đã chốt trong phiên brainstorm 2026-08-30;
-  chờ chủ dự án phê chuẩn toàn văn
-- **Ngày:** 2026-08-30   **Người soạn:** Claude (qua Cowork)   **Người phê chuẩn:** Lưu Tuấn Vũ
+- **Trạng thái:** **ĐÃ PHÊ CHUẨN 2026-08-30** — năm điểm thiết kế chốt trong phiên brainstorm
+  cùng ngày, toàn văn được chủ dự án duyệt sau khi đọc lại ADR và spec (`QĐ-2026-08-30-01`)
+- **Ngày:** soạn và phê chuẩn 2026-08-30   **Người soạn:** Claude (qua Cowork)
+  **Người phê chuẩn:** Lưu Tuấn Vũ (chủ dự án)
 - **Loại quyết định:** cửa **hai chiều** ở mọi điểm — tắt công tắc trong Studio là tính năng
   biến mất sạch khỏi mọi trang; cột D1 thêm vào có giá trị mặc định nên đơn cũ không đổi nghĩa
 - **Bổ sung:** `ADR-0030` §3 (cùng lớp quy tắc giá) — **không** đảo, **không** nới

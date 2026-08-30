@@ -2379,3 +2379,30 @@ Muốn thấy lưới ảnh thì phải **nạp đủ 4 ảnh gallery cho từng
 | **Q4** — `07` §1 cấm cát làm nền CTA bằng một lý do không với tới nút này (nút thật đo được **6,76:1**, đạt AA; lý do cũ "tương phản với chữ trắng không đạt AA" không với tới vì nút dùng chữ tối `--c-sand-text-strong`) | **Giữ luật, sửa lý do.** Cát không làm nền CTA vì **phân vai màu** — `07` §1 đã giao `--c-accent` cho CTA và nhãn giá, cát cho gạch chân và nút trên nền đậm; cho cát thêm vai CTA là một màu hai vai (R2c mới) |
 
 **Tài liệu.** `docs/core-specs/07-DESIGN_TOKENS.md` §1 (lý do cấm `color.sand` làm nền CTA, viết lại theo Q4). `docs/DRIFT_LOG.md` — `DR-090`/`DR-091`/`DR-092` (điểm 3), `DR-080` (điểm Q2, tiền thân của `DR-n`).
+
+---
+
+## QĐ-2026-08-30-01 — Phê chuẩn ADR-0031: ưu đãi thanh toán trước neo vào lựa chọn, không neo vào tiền đã về
+
+**Bối cảnh.** Chủ dự án yêu cầu (2026-08-30) một khoản khuyến mại: khách đặt và thanh toán trước bằng chuyển khoản thì được giảm `x%` trên mỗi khách, `x` khai trong CMS. Câu chữ đó đọc thẳng ra là điều kiện neo vào **tiền đã về** — tức đúng cái `ADR-0030` §5 (phê chuẩn cùng ngày) gọi tên là "ADR khác", vì nó kéo theo trạng thái đơn mới, quy tắc hết hạn, và người đối soát tiền. `CLAUDE.md` §5 gọi đây là hard stop: task đòi một quyết định kiến trúc chưa có phê chuẩn. Đã hỏi trước khi thiết kế.
+
+**Chốt — năm điểm chủ dự án duyệt trong phiên brainstorm 2026-08-30:**
+
+| # | Điểm | Chốt |
+|---|---|---|
+| 1 | Điều kiện của ưu đãi | **Lựa chọn của khách** trên form, giảm ngay. Site **không** biết tiền đã về, không có trạng thái "đã cọc". Vì vậy **không** bước qua `ADR-0030` §5 |
+| 2 | Quan hệ với giá mùa vụ | **Luôn áp, chồng lên giá mùa.** Hai trục khác nhau (mùa neo vào ngày khởi hành, ưu đãi neo vào lựa chọn thanh toán) nên không tranh nhau |
+| 3 | Nơi khai `x` | **Một con số toàn site** + công tắc bật/tắt, trong tài liệu `bangGiaMuaVu` (đổi tiêu đề thành *"Quy tắc giá"*). Không theo tour, không có khung thời gian chạy |
+| 4 | Bề mặt | **Chỉ trong form đặt tour.** Nhãn "Giá từ…" và JSON-LD giữ giá đầy đủ — không khai giá có điều kiện ra ngoài |
+| 5 | Hình thức trên form | **Hai nút chọn, bắt buộc chọn một**, không nút nào chọn sẵn. Không dùng ô tick mặc định bật |
+
+**Hai phán quyết kỹ thuật kèm theo, cũng đã duyệt:**
+
+- **Phép giảm gộp vào `computeQuote()`**, cùng tầng với mùa vụ: một phép nhân hai phần trăm, **làm tròn lên nghìn đúng một lần**. Áp hai bước rồi làm tròn hai lần khiến khách thiệt tới 1.000₫/người vì một chi tiết cài đặt, và sinh hai chỗ cùng dựng `perPax` — đúng loại lệch mà Task 6 của mùa vụ vừa vấp.
+- **"Bắt buộc chọn" là luật của FORM, không phải của máy chủ.** `BK1` cấm endpoint đọc Sanity nên máy chủ không biết công tắc đang bật hay tắt, không thể phân biệt "khách bỏ qua ô bắt buộc" với "site tắt ưu đãi". Máy chủ chỉ canh một luật chéo: có `quoted.prepay` thì `paymentMethod` phải là `transfer`.
+
+**Đã tra, không đoán:** `00-PROJECT_BRIEF` §5 cấm nguyên văn *"Thanh toán trực tuyến, giỏ hàng, quản lý chỗ trống"*, §3 chốt *"không thanh toán trên site"*. Cả hai cấm một **cơ chế** — site nhận tiền. Ưu đãi này không thêm cổng thanh toán, ô nhập thẻ, hay webhook báo tiền; nó là một **điều khoản giá**. Brief §3 cần một dòng *"Bổ sung"* đúng khuôn `QĐ-2026-08-21-01`, không cần đảo điều cấm nào.
+
+**Nợ mở, DRI chủ dự án.** Hệ **không đo được** chuyện khách chọn chuyển khoản rồi không chuyển. Điểm mù cho tới khi bảng điều khiển `ADR-0030` §2 có bộ lọc theo `payment_method`. Nếu tỷ lệ đó cao thì tính năng này đang cho không `x%`.
+
+**Tài liệu.** `docs/adr/ADR-0031-uu-dai-thanh-toan-truoc.md` (toàn văn), `docs/specs/SPEC-2026-08-30-uu-dai-thanh-toan-truoc.md` (hợp đồng thi công).
