@@ -765,8 +765,11 @@ Kỳ vọng: toàn bộ PASS, 0 errors (mọi lỗi kiểu do Task 2 để lại
 Thêm vào mục runbook phát hành:
 
 ```markdown
-- **Trước** lần deploy đầu tiên có ưu đãi thanh toán trước: `npx wrangler d1 migrations apply tourdao-booking --remote`.
-  Không chạy thì mọi đơn mới đều 500 — cột `payment_method` chưa tồn tại nhưng câu `INSERT` đã kê tên nó.
+- **Trước khi merge/push nhánh này vào `main`** (Workers Builds tự dựng theo `main`, merge
+  chính là deploy — không có một lần "deploy tay đầu tiên" nào đứng trước để làm mốc): chạy
+  `npx wrangler d1 migrations apply tourdao-booking --remote`. Bỏ qua thì nhánh lên `main` là
+  Cloudflare tự dựng ngay, còn câu `INSERT` đã kê tên cột `payment_method` chưa tồn tại trong
+  D1 production — **mọi đơn đặt tour trả về 500**, không riêng đơn chọn chuyển khoản.
 ```
 
 - [ ] **Bước 7: Commit**
@@ -1045,8 +1048,12 @@ git commit -m "feat(dat-tour): dong Thanh toan trong thu bao don va tin Zalo"
 - [ ] **Cổng toàn nhánh:** `npx astro check` 0 errors · `npx vitest run` toàn bộ pass ·
       `npx tsx scripts/meta-validators/g1-content-model-vs-schema.ts` không báo lệch ·
       `grep -rn "prices\|sanity\|resolver" src/lib/booking/ --include=*.ts | grep import` rỗng (`BK1`).
-- [ ] **Migration trước deploy:** `npx wrangler d1 migrations apply tourdao-booking --remote`.
-      Không chạy thì mọi đơn mới 500.
+- [ ] **Migration trước khi merge/push vào `main`:**
+      `npx wrangler d1 migrations apply tourdao-booking --remote`. Merge vào `main` chính là
+      deploy (Workers Builds tự dựng theo `main`) — không chạy trước thì mọi đơn mới trả về
+      500, không riêng đơn chọn chuyển khoản.
+- [ ] **Deploy Studio:** `cd cms && npm run deploy`. Chưa deploy thì Studio vẫn hiện tài liệu
+      cũ "Giá theo mùa", không có ô ưu đãi thanh toán trước.
 - [ ] **Bật trong Studio:** mở *Quy tắc giá* → bật ưu đãi → đặt phần trăm → Publish.
 - [ ] **Nghiệm thu trên production:** một tour **có** mùa và một tour **không** mùa; đổi qua lại
       hai nút và đối chiếu con số bằng tay; gửi một đơn thật và kiểm dòng "Thanh toán:" trong
