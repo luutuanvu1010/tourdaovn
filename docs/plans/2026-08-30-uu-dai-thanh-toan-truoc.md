@@ -534,10 +534,18 @@ Trong `scripts/meta-validators/g1-content-model-vs-schema.ts`:
 - [ ] **Bước 4: Chạy cổng**
 
 ```bash
-npx tsx scripts/meta-validators/g1-content-model-vs-schema.ts 2>&1 | tail -5
+cd scripts && node --import ./node_modules/tsx/dist/esm/index.mjs meta-validators/g1-content-model-vs-schema.ts 2>&1 | tail -8
 ```
 
-Kỳ vọng: không có dòng nào nhắc `batUuDai` hay `phanTramUuDai` là thiếu ở một bên.
+(Chạy **từ trong `scripts/`** với tsx của chính gói đó — `npx tsx` ở gốc repo không tìm ra module.)
+
+Kỳ vọng: dòng cuối vẫn là `[exit] Không có drift mức fail.` — đó là **baseline đã đo trước khi
+làm Task 3**, không phải "sạch tuyệt đối": bộ này vốn có sẵn một nhúm `[WARN]` cho `siteSettings`
+và `touristDestination`. Điều phải đúng là **không có dòng nào nhắc `batUuDai` hay
+`phanTramUuDai`**.
+
+Lệnh này ghi đè `scripts/reports/g1-content-model-vs-schema.json`. **Đừng commit file đó** —
+commit ở bước sau chỉ liệt kê ba file của task.
 
 - [ ] **Bước 5: Commit**
 
