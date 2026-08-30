@@ -22,9 +22,10 @@ export interface Props {
   seasons?: Season[]
   contact?: SiteContact | null
   turnstileSiteKey?: string
+  prepayPercent?: number
 }
 
-const { lang, tourSlug, tourTitle, bookingRef, priceLabel, priceTable, seasons, contact = null, turnstileSiteKey = '' } = Astro.props
+const { lang, tourSlug, tourTitle, bookingRef, priceLabel, priceTable, seasons, contact = null, turnstileSiteKey = '', prepayPercent = 0 } = Astro.props
 const t = uiCopy(lang)
 
 const PAX_KEY: Record<PaxCode, 'paxAdult' | 'paxChild' | 'paxSenior' | 'paxInfant'> = {
@@ -78,6 +79,7 @@ if (!turnstileSiteKey) {
   novalidate
   data-price-table={JSON.stringify(priceTable)}
   data-seasons={JSON.stringify(seasons ?? [])}
+  data-prepay-percent={String(prepayPercent)}
   data-quoted-at={quotedAt}
   data-site-key={turnstileSiteKey}
   data-zalo={zaloUrl}
