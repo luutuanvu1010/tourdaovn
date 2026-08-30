@@ -289,12 +289,21 @@ trong `handler.ts`. Ba chỗ, không hơn — đã đếm.
    lần bật đầu tiên (31/08): tài liệu đã `batUuDai: true`, `phanTramUuDai: 5`, mà trang vẫn
    nướng `data-prepay-percent="0"`.
 
-   Hai nguyên nhân, cùng một triệu chứng, và cả hai đều đến từ `src/lib/sanity.ts:147`
-   (`useCdn: true`, `perspective: 'published'`):
-   - **Chưa có lần dựng nào chạy sau khi Publish** (hook không kích, hoặc đang xếp hàng).
-   - **Đã dựng nhưng đọc trúng bản CDN cũ.** CDN của Sanity nhất quán *trễ*; một lần dựng chạy
-     ngay sau Publish có thể đọc về giá trị trước đó rồi nướng nó vào trang tĩnh — build xanh,
-     số sai, không cổng nào đỏ.
+   **Nguyên nhân đã truy ra (31/08), không phải suy đoán:** webhook `Cloudflare rebuild` của
+   Sanity lọc theo loại tài liệu, và danh sách đó — cấu hình 2026-07-27 — có đúng **15 loại có
+   render trang**: `touristDestination, place, attraction, experience, hotel, resort, tour,
+   article, person, organization, category, siteSettings, specialty, restaurant, event`.
+   **`bangGiaMuaVu` KHÔNG nằm trong danh sách**, vì loại này mới sinh ra 2026-08-30.
+
+   Hệ quả, và nó áp cho **cả giá mùa vụ lẫn ưu đãi**: bấm Publish trong *Quy tắc giá*
+   **không kích một lần dựng nào**. Câu "Publish → trang dựng lại → giá mới lên" ở `ADR-0030`
+   §3 **không đúng với loại tài liệu này**. Muốn giá mới lên thì phải có một lần dựng đến từ
+   nguồn khác: một lần push lên `main`, hoặc Publish một tài liệu thuộc 15 loại kia.
+
+   Một nguyên nhân thứ hai vẫn có thật và vẫn phải đề phòng dù đã vá hook: bản dựng đọc Sanity
+   qua **CDN** (`useCdn: true`, `perspective: 'published'`, `src/lib/sanity.ts:147`, chọn vì chi
+   phí ở `QĐ-2026-08-25-06`). CDN nhất quán *trễ*, nên một lần dựng chạy **ngay** sau Publish có
+   thể đọc về giá trị cũ rồi nướng vào trang tĩnh — build xanh, số sai, không cổng nào đỏ.
 
    Cách kiểm, không đoán:
    ```bash
