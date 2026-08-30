@@ -1052,8 +1052,11 @@ git commit -m "feat(dat-tour): dong Thanh toan trong thu bao don va tin Zalo"
       `npx wrangler d1 migrations apply tourdao-booking --remote`. Merge vào `main` chính là
       deploy (Workers Builds tự dựng theo `main`) — không chạy trước thì mọi đơn mới trả về
       500, không riêng đơn chọn chuyển khoản.
-- [ ] **Deploy Studio:** `cd cms && npm run deploy`. Chưa deploy thì Studio vẫn hiện tài liệu
+- [ ] **Deploy Studio:** `cd cms && npx sanity deploy`. Chưa chạy thì Studio vẫn hiện tài liệu
       cũ "Giá theo mùa", không có ô ưu đãi thanh toán trước.
+      **Đừng rút gọn thành `npm run deploy`:** ở gốc repo, script cùng tên là
+      `build && wrangler deploy` — phát hành Worker, việc hoàn toàn khác, và chạy nhầm nó ở đây
+      là phát hành đúng lúc chưa áp migration.
 - [ ] **Bật trong Studio:** mở *Quy tắc giá* → bật ưu đãi → đặt phần trăm → Publish.
 - [ ] **Nghiệm thu trên production:** một tour **có** mùa và một tour **không** mùa; đổi qua lại
       hai nút và đối chiếu con số bằng tay; gửi một đơn thật và kiểm dòng "Thanh toán:" trong
