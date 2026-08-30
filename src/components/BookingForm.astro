@@ -8,6 +8,7 @@ import type { Lang, SiteContact } from '../lib/types'
 import { uiCopy } from '../lib/uiCopy'
 import { formatPrice } from '../lib/renderer'
 import { availablePaxCodes, computeQuote, emptyPax, type PaxCode, type PriceTable } from '../lib/booking/quote'
+import type { Season } from '../lib/booking/season'
 import { addDaysISO, formatDateVN, todayVN } from '../lib/booking/vn-date'
 import { LIMITS, MSG } from '../lib/booking/schema'
 
@@ -18,11 +19,12 @@ export interface Props {
   bookingRef: string
   priceLabel: string
   priceTable: PriceTable
+  seasons?: Season[]
   contact?: SiteContact | null
   turnstileSiteKey?: string
 }
 
-const { lang, tourSlug, tourTitle, bookingRef, priceLabel, priceTable, contact = null, turnstileSiteKey = '' } = Astro.props
+const { lang, tourSlug, tourTitle, bookingRef, priceLabel, priceTable, seasons, contact = null, turnstileSiteKey = '' } = Astro.props
 const t = uiCopy(lang)
 
 const PAX_KEY: Record<PaxCode, 'paxAdult' | 'paxChild' | 'paxSenior' | 'paxInfant'> = {
@@ -75,6 +77,7 @@ if (!turnstileSiteKey) {
   action="/api/dat-tour"
   novalidate
   data-price-table={JSON.stringify(priceTable)}
+  data-seasons={JSON.stringify(seasons ?? [])}
   data-quoted-at={quotedAt}
   data-site-key={turnstileSiteKey}
   data-zalo={zaloUrl}
@@ -145,6 +148,7 @@ if (!turnstileSiteKey) {
       </div>
       <div class="bf__total"><span>{t('bookingSubtotal')}</span><strong data-total>{initialQuote ? formatPrice(initialQuote.total, lang) : '—'}</strong></div>
     </div>
+    <p class="bf__season" data-season hidden></p>
     <p class="bf__note">{t('bookingSubtotalNote')}</p>
 
     <button type="button" class="bf__primary" data-open>{t('bookingBookNow')}</button>
@@ -202,10 +206,11 @@ if (!turnstileSiteKey) {
 </form>
 
 <script>
-  import { PAX_ORDER, computeQuote, type PaxCode, type PaxCounts, type PriceTable, type Quote } from '../lib/booking/quote'
+  import { PAX_ORDER, apDieuChinh, computeQuote, type PaxCode, type PaxCounts, type PriceTable, type Quote } from '../lib/booking/quote'
+  import type { Season } from '../lib/booking/season'
   import { formatPrice } from '../lib/renderer'
   import { addDaysISO, formatDateVN, todayVN } from '../lib/booking/vn-date'
-  import { LIMITS, MSG } from '../lib/booking/schema'
+  import { LIMITS, MSG, buildQuotedPayload } from '../lib/booking/schema'
 
   declare global {
     interface Window {
@@ -223,6 +228,7 @@ if (!turnstileSiteKey) {
     const q = <T extends Element>(sel: string) => form.querySelector<T>(sel)
     const table = JSON.parse(form.dataset.priceTable || 'null') as PriceTable | null
     if (!table) return
+    const seasons = JSON.parse(form.dataset.seasons || '[]') as Season[]
     const siteKey = form.dataset.siteKey || ''
     const quotedAt = form.dataset.quotedAt || ''
     const totalMax = Number(form.dataset.totalMax) || LIMITS.TOTAL_MAX
@@ -237,6 +243,7 @@ if (!turnstileSiteKey) {
     const dateEl = q<HTMLInputElement>('[name="departDate"]')!
     const linesEl = q<HTMLElement>('[data-quote-lines]')!
     const totalEl = q<HTMLElement>('[data-total]')!
+    const seasonEl = q<HTMLElement>('[data-season]')!
     const hintEl = q<HTMLElement>('[data-large-group]')!
     const paxErrEl = q<HTMLElement>('[data-err="pax"]')!
     const totalInput = q<HTMLInputElement>('[data-quoted-total]')!
@@ -258,15 +265,20 @@ if (!turnstileSiteKey) {
       : ''
     const rangeTextEl = q<HTMLElement>('[data-date-range-text]')
     if (rangeTextEl) rangeTextEl.textContent = dateRangeMsg()
+    // Đổi ngày khởi hành có thể đổi mùa áp dụng, nên phải tính lại tạm tính ngay (Task 5).
+    dateEl.addEventListener('change', update)
 
     // Bộ đếm
-    const rows = new Map<PaxCode, { input: HTMLInputElement; label: string; inc: HTMLButtonElement; dec: HTMLButtonElement }>()
+    const rows = new Map<PaxCode, { input: HTMLInputElement; label: string; inc: HTMLButtonElement; dec: HTMLButtonElement; priceEl: HTMLElement | null }>()
     form.querySelectorAll<HTMLElement>('.bf__pax').forEach(row => {
       const code = row.dataset.code as PaxCode
       const input = row.querySelector<HTMLInputElement>('input')!
       const inc = row.querySelector<HTMLButtonElement>('[data-inc]')!
       const dec = row.querySelector<HTMLButtonElement>('[data-dec]')!
-      rows.set(code, { input, label: row.dataset.label || code, inc, dec })
+      // Bảng giá kiểu 'tiers' không dựng span này (paxAmountLabel trả về rỗng) — null-check
+      // khi dùng, đừng giả định nó luôn có mặt.
+      const priceEl = row.querySelector<HTMLElement>('.bf__pax-price')
+      rows.set(code, { input, label: row.dataset.label || code, inc, dec, priceEl })
       dec.addEventListener('click', () => { input.value = String(Math.max(Number(input.min) || 0, (parseInt(input.value, 10) || 0) - 1)); update() })
       inc.addEventListener('click', () => { input.value = String(Math.min(perTypeMax, (parseInt(input.value, 10) || 0) + 1)); update() })
       input.addEventListener('change', update)
@@ -300,7 +312,30 @@ if (!turnstileSiteKey) {
     function update() {
       const pax = readPax()
       const total = PAX_ORDER.reduce((n, c) => n + pax[c], 0)
-      quote = computeQuote(table!, pax)
+      quote = computeQuote(table!, pax, { seasons, departDate: dateEl.value })
+
+      // Đơn giá trong ô chọn số khách phải khớp mùa với dòng tính tiền ngay bên dưới —
+      // cùng hạng khách không được hiện hai giá khác nhau trên một màn hình (chủ dự án
+      // chốt 2026-08-30). `quote.perPax[code]` đã áp mùa và làm tròn sẵn, không tính lại.
+      // Hạng chưa có khách (count 0) không nằm trong quote.perPax — nhưng đơn giá của nó
+      // vẫn phải đổi theo mùa y như hạng có khách, nếu không khách thấy giá cũ rồi giá
+      // nhảy ngay khi bấm "+" (đúng thứ bản vá này sinh ra để dẹp). Lấy giá gốc từ bảng
+      // giá nướng lúc build rồi áp CÙNG hàm apDieuChinh mà computeQuote dùng — không tính
+      // lại bằng công thức riêng. Giá gốc 0đ ("Miễn phí") luôn ra 0 dù áp mùa, nên không
+      // cần — và không được — đổi nhãn đó thành "0 ₫": bỏ qua, giữ nguyên nhãn đang hiện.
+      rows.forEach((r, code) => {
+        if (!r.priceEl) return
+        const amount = quote?.perPax[code]
+        if (typeof amount === 'number') {
+          if (amount > 0) r.priceEl.textContent = formatPrice(amount, 'vi')
+          return
+        }
+        if (table!.kind !== 'flat') return
+        const goc = table!.perPax[code]
+        if (typeof goc !== 'number') return
+        const adjusted = apDieuChinh(goc, quote?.season?.percent ?? 0)
+        if (adjusted > 0) r.priceEl.textContent = formatPrice(adjusted, 'vi')
+      })
 
       linesEl.replaceChildren()
       if (quote) {
@@ -313,6 +348,14 @@ if (!turnstileSiteKey) {
         }
       }
       totalEl.textContent = quote ? formatPrice(quote.total, 'vi') : '—'
+      if (quote?.season) {
+        const dau = quote.season.percent > 0 ? '+' : ''
+        seasonEl.textContent = `${quote.season.name} · ${dau}${quote.season.percent}%`
+        seasonEl.hidden = false
+      } else {
+        seasonEl.textContent = ''
+        seasonEl.hidden = true
+      }
       totalInput.value = String(quote?.total ?? 0)
       form.querySelectorAll<HTMLInputElement>('[data-quoted-per-pax]').forEach(el => {
         const code = el.dataset.quotedPerPax as PaxCode
@@ -423,7 +466,7 @@ if (!turnstileSiteKey) {
       const payload = {
         tourSlug: val('tourSlug'), tourTitle: val('tourTitle'), bookingRef: val('bookingRef'),
         departDate: val('departDate'), pax: readPax(),
-        quoted: { perPax: quote.perPax, total: quote.total, quotedAt },
+        quoted: buildQuotedPayload(quote, quotedAt),
         name: val('name'), phone: val('phone'), email: val('email'), pickup: val('pickup'), note: val('note'),
         turnstileToken: tokenInput.value, website: val('website'),
       }
@@ -521,6 +564,7 @@ if (!turnstileSiteKey) {
   [data-done-summary] :global(.bf__line) { display: flex; justify-content: space-between; gap: var(--s3); font-size: var(--fs-sm); color: var(--c-text-muted); }
   .bf__total { display: flex; justify-content: space-between; gap: var(--s3); padding-top: var(--s2); border-top: 1px solid var(--c-border); font-size: var(--fs-base); font-weight: var(--fw-700); color: var(--c-text); }
   .bf__total strong { color: var(--c-accent-strong); }
+  .bf__season { font-size: var(--fs-sm); color: var(--c-accent-strong); margin: 0; }
   .bf__note, .bf__hint, .bf__noscript, .bf__hotline { font-size: var(--fs-sm); color: var(--c-text-muted); margin: 0; }
   .bf__hint { color: var(--c-accent-strong); }
   .bf__err { font-size: var(--fs-sm); color: var(--c-accent-strong); margin: 0; min-height: 0; }
@@ -550,5 +594,5 @@ if (!turnstileSiteKey) {
      thuộc tính scoped (thành 0,3,0 — thắng 0,2,0 mà không cần `!important`), còn `[hidden]`
      trần sẽ bị để nguyên và rò thành luật toàn site. */
   .bf__step[hidden], .bf__primary[hidden], .bf__done[hidden],
-  .bf__hint[hidden], .bf__done-dup[hidden] { display: none; }
+  .bf__hint[hidden], .bf__done-dup[hidden], .bf__season[hidden] { display: none; }
 </style>

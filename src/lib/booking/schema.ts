@@ -1,7 +1,7 @@
 // schema.ts — hợp đồng payload của POST /api/dat-tour và luật kiểm (SPEC §4.4).
 // Thuần TypeScript, không Astro, không D1. Thông điệp tiếng Việt ở đây là nguồn duy nhất
 // cho lỗi API; nhãn giao diện thì ở uiCopy.ts.
-import { PAX_ORDER, computeQuote, type PaxCode, type PaxCounts } from './quote'
+import { PAX_ORDER, computeQuote, type PaxCode, type PaxCounts, type Quote } from './quote'
 import { addDaysISO, isISODate } from './vn-date'
 
 export const LIMITS = {
@@ -40,7 +40,21 @@ export const MSG = {
   noScript: 'Cần bật JavaScript để gửi yêu cầu. Hoặc liên hệ theo trang Liên hệ.',
 } as const
 
-export type Quoted = { perPax: Partial<Record<PaxCode, number>>; total: number; quotedAt: string }
+// `season` chỉ để ĐƠN GHI LẠI vì sao ra con số tạm tính này (ADR-0030 §3, Task 2). Server
+// không tin và không tính lại theo mùa (BK1: server không đọc giá) — xem `parseBookingPayload`.
+export type Quoted = { perPax: Partial<Record<PaxCode, number>>; total: number; quotedAt: string; season?: { name: string; percent: number } }
+
+/**
+ * Dựng `quoted` gửi lên máy chủ từ `Quote` mà `computeQuote()` vừa tính ở trình duyệt
+ * (BookingForm.astro script) — tách khỏi script trình duyệt để kiểm bằng test đi qua đúng ranh
+ * giới "trình duyệt dựng payload", chứ không phải test tự dựng sẵn `quoted` đã có `season`.
+ * Task 6 (lỗi đã sửa): script cũ dựng `quoted` trực tiếp, bỏ sót `quote.season`, nên mùa không
+ * bao giờ tới máy chủ dù `computeQuote` đã tính đúng. Chỉ thêm khoá `season` khi `quote.season`
+ * có mặt, để đơn không mùa giữ nguyên hình dạng payload cũ.
+ */
+export function buildQuotedPayload(quote: Pick<Quote, 'perPax' | 'total' | 'season'>, quotedAt: string): Quoted {
+  return { perPax: quote.perPax, total: quote.total, quotedAt, ...(quote.season ? { season: quote.season } : {}) }
+}
 
 export type BookingInput = {
   tourSlug: string; tourTitle: string; bookingRef: string; departDate: string
@@ -100,6 +114,16 @@ export function parseBookingPayload(raw: unknown): BookingInput {
     const v = pick(r, `quoted.perPax.${c}`)
     if (v !== undefined && v !== null && v !== '') perPax[c] = int(v)
   }
+  // Mùa chỉ để ĐƠN GHI LẠI vì sao ra con số tạm tính này — server không tin và không tính lại
+  // theo mùa (BK1: server không đọc giá; `validateBooking` chỉ đối chiếu `perPax`/`total` với
+  // `computeQuote` KHÔNG truyền `seasons`). Nhận vào thì làm sạch, sai hình dạng thì bỏ, tuyệt
+  // đối không ném lỗi.
+  const rawSeason = pick(r, 'quoted.season')
+  const season = rawSeason && typeof rawSeason === 'object' && !Array.isArray(rawSeason)
+    && typeof (rawSeason as Record<string, unknown>).name === 'string'
+    && typeof (rawSeason as Record<string, unknown>).percent === 'number'
+    ? { name: clean(String((rawSeason as Record<string, unknown>).name)).slice(0, 60), percent: (rawSeason as Record<string, unknown>).percent as number }
+    : undefined
   return {
     tourSlug: str(r.tourSlug).trim(),
     tourTitle: clean(str(r.tourTitle)),
@@ -109,7 +133,7 @@ export function parseBookingPayload(raw: unknown): BookingInput {
     // `quotedAt` là trường DUY NHẤT trong toàn payload trước đây không có chặn trên: chỉ qua
     // `str()`, không kiểm định dạng, không giới hạn độ dài — một chuỗi ~15 KB ghi thẳng vào cột
     // `quoted_json`. Cắt 40 ký tự (dư cho một dấu thời gian ISO 8601 đầy đủ).
-    quoted: { perPax, total: int(pick(r, 'quoted.total')), quotedAt: str(pick(r, 'quoted.quotedAt')).slice(0, 40) },
+    quoted: { perPax, total: int(pick(r, 'quoted.total')), quotedAt: str(pick(r, 'quoted.quotedAt')).slice(0, 40), ...(season ? { season } : {}) },
     name: clean(str(r.name)),
     phone: str(r.phone).trim(),
     email: str(r.email).trim(),

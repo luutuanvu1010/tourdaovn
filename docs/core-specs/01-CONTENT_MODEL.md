@@ -17,7 +17,8 @@ Phần KHÔNG nhãn (cơ chế field 2.0, ba họ gate, quy tắc giá, khối q
 > 🔧 **SITE-SPECIFIC:** danh mục 14 entity và mọi ví dụ (Specialty, TouristDestination, 5 ngôn ngữ) là của nhatrangtravel. Giữ *cơ chế* (field 2.0, ba họ gate, quy tắc bookingRef, khối quản trị); thay *danh mục entity* theo site.
 
 - **Trạng thái:** đã duyệt. Founder soát toàn văn theo cụm 2026-06-11 (rà phản biện độc lập, 7 vết chốt qua trắc nghiệm), bước 1 đóng.
-- **Phiên bản:** v1.0.19   **Ngày:** 2026-08-22   **Người soạn:** Cowork (tác nhân điều phối).
+- **Phiên bản:** v1.0.20   **Ngày:** 2026-08-30   **Người soạn:** Cowork (tác nhân điều phối).
+- **Đổi ở v1.0.20:** thêm document type `bangGiaMuaVu` singleton (§1, §2.16) — bảng quy tắc điều chỉnh giá theo thời gian, không chứa con số tiền nào (`ADR-0030` §3). Backfill: schema `cms/schemas/bangGiaMuaVu.ts` đã tồn tại trước khi mục này được khai, vi phạm P4 mức FAIL của meta-validator G1 (`content-model-vs-schema`); mục này đóng drift đó.
 - **Đổi ở v1.0.19:** chỉ một ô — kiểu của `durationAtStop` trong 2.8 (QĐ-2026-08-22-05 Chốt 7). Không thêm, bớt hay đổi tên field nào.
 - **Nguồn quyết định:** brief mục 5-6 cộng các lựa chọn founder 2026-06-10 và 2026-06-11 (xem `DECISIONS.md` và `project/adr/` từ ADR-0002 đến ADR-0006).
 - **Kế thừa ràng buộc:** CONSTITUTION v2.2.0, PROJECT_OVERLAY v1.0.2 (S2.2 bất biến dữ liệu, S2.3 ngưỡng, S2.4 SEO/GEO, S2.5 đa ngôn ngữ).
@@ -54,6 +55,7 @@ Phần KHÔNG nhãn (cơ chế field 2.0, ba họ gate, quy tắc giá, khối q
 | Person | Person | Tác giả của Article | 1 đến 3 | Sanity |
 | Category | DefinedTerm | Từ vựng đóng do founder tuyển, gồm cả bộ experienceType | 15 đến 30 term | Sanity |
 | siteSettings | — | Cấu hình toàn site: section order, hero text | 1 | Sanity |
+| bangGiaMuaVu | — | Bảng quy tắc điều chỉnh giá theo thời gian (mùa cao/thấp điểm), không chứa số tiền | 1 | Sanity |
 
 Vận tải và đưa đón (sân bay Cam Ranh, xe liên tỉnh) không phải entity phase 1. schema.org không có type thông tin sạch cho nó (BusTrip là chuyến cụ thể gắn đặt vé), nên xử bằng Article articleType=transport-guide với howTo hoặc faq (gate ở 2.11). Hoãn là có chủ ý và đảo được; kích hoạt entity Transfer về sau là cửa một chiều theo 5.3 (founder chốt 2026-06-11), điều kiện kích hoạt — có booking cộng dữ liệu tuyến thật — ghi ở ADR-0006, ADR này đồng thời đính chính mệnh đề "cửa hai chiều" của ADR-0002.
 
@@ -679,6 +681,27 @@ Gate publish: không có gate publish — đây là config, không phải conten
 
 Thêm document type này là cửa một chiều (§5.3): sửa CONTENT_MODEL trước, ghi DECISIONS, founder duyệt, rồi code.
 
+### 2.16 bangGiaMuaVu (singleton)
+
+Bảng quy tắc điều chỉnh giá theo thời gian. Toàn bộ dataset chỉ có đúng 1 document, cùng vai singleton config với `siteSettings` (§2.15). **Không chứa con số tiền nào** — trang tính Google Sheet (`data/prices.yaml`, nhập qua Google Sheet, `QĐ-2026-08-26-02`) vẫn là nguồn giá DUY NHẤT (I1). Document này chỉ giữ *quy tắc*: khung thời gian nào, điều chỉnh bao nhiêu phần trăm, áp cho tour nào — không giữ giá gốc. Xoá sạch document này thì giá gốc vẫn nguyên vẹn.
+
+| Field | Kiểu | Bắt buộc? | Dịch? | Bất biến / quy tắc | Ai cung cấp |
+|---|---|---|---|---|---|
+| muaVu | array object | tùy | không | danh sách mùa **CÓ THỨ TỰ** — thứ tự trong mảng LÀ độ ưu tiên, mục đứng trên thắng mục đứng dưới khi hai mùa phủ cùng một ngày; **không có luật "chồng lấn là lỗi"**, chồng là hợp lệ và thứ tự quyết định. Mảng rỗng hoặc thiếu → không mùa nào được áp, giá gốc giữ nguyên (guard rỗng) | founder |
+
+Field `muaVu[]` (mỗi phần tử một mùa):
+- `tenMua`: string, bắt buộc — tên mùa; hiện trong thư báo đơn để nhân viên biết vì sao ra con số đó
+- `tuNgay` / `denNgay`: date, bắt buộc — khung ngày mùa áp dụng, tính cả hai đầu mút; ngày lễ rời rạc là một mùa có `tuNgay` = `denNgay`; `denNgay` không được sớm hơn `tuNgay`
+- `phanTram`: number, bắt buộc — điều chỉnh phần trăm, **dương là tăng giá, âm là giảm giá** (mùa thấp điểm là một mùa có `phanTram` âm); nhân vào giá từng hạng khách rồi làm tròn lên nghìn; hạng em bé giá 0 nhân bao nhiêu vẫn 0
+- `apCho`: array string, tùy — chỉ áp mùa này cho các khoá giá liệt kê ở đây (khớp cột "Khoá giá" của `data/prices.yaml`); **để trống = áp cho mọi tour**
+- `truRa`: array string, tùy — các khoá giá KHÔNG áp mùa này, kể cả khi `apCho` bỏ trống
+
+**Cách tính (ADR-0030 §3):** theo ngày khởi hành khách chọn, duyệt `muaVu[]` từ trên xuống, gặp mùa đầu tiên vừa phủ ngày đó vừa áp được cho khoá giá đó thì dùng luôn mùa ấy rồi dừng — không cộng dồn nhiều mùa, không lấy mức phần trăm cao nhất. Sắp lại độ ưu tiên là kéo thả một dòng trong Studio, không phải sửa mã. Validator phải chặn: phần trăm ngoài khoảng hợp lý, `denNgay` sớm hơn `tuNgay`, và khoá giá viện dẫn trong `apCho`/`truRa` không tồn tại trong bảng giá.
+
+Gate publish: không có gate publish — đây là config, không phải content entity. reviewStatus/approvedBy/contentProvenance không áp dụng, cùng nếp `siteSettings` (§2.15).
+
+Thêm document type này là cửa một chiều (§5.3): quyết định ở `ADR-0030` §3. Mục này backfill khai báo còn thiếu so với schema `cms/schemas/bangGiaMuaVu.ts` đã tồn tại từ trước — vi phạm P4 mức FAIL của meta-validator G1 (`content-model-vs-schema`), nay khớp lại.
+
 ## 3. Quan hệ giữa entity
 
 Mọi reference một chiều trong Sanity. Chiều ngược suy ở build bằng GROQ (`*[references(^._id)]`), không lưu hai đầu (P6).
@@ -913,6 +936,7 @@ Lý do chi tiết và phương án đã loại của từng thay đổi nằm �
 
 - v1.0.17 (2026-08-14): thêm field `branding` vào siteSettings (§2.15) — bốn ô ảnh nhận diện: `logo`, `hideWordmark`, `favicon`, `ogImage`. Trước đó logo là SVG viết cứng **chép hai bản** ở `Header.astro` và `Footer.astro`, biên tập viên không đổi được nếu không có lập trình viên; `BaseLayout` lại trỏ `/favicon.svg` mà file đó không tồn tại, favicon 404 trên mọi trang. Đợt này gom dấu hiệu thương hiệu về một component `SiteLogo.astro` và thêm `public/favicon.svg` thật làm lớp dự phòng. Ranh giới với ADR-0021 QĐ8 được vẽ rõ: **chữ** thương hiệu ở `src/site.config.ts` (vào JSON-LD và meta mọi trang, phải cố định lúc build), **ảnh** ở Sanity (chỉ tham chiếu bằng URL). Kèm theo: `Organization.logo` nay được phát trong JSON-LD trang chủ khi đã tải logo. Không thêm document type mới nên là cửa hai chiều theo §5.3. Bản ghi `QĐ-2026-08-14-01`, spec `SPEC-2026-08-14-logo-tuy-bien.md`.
 - v1.0.18 (2026-08-14): thêm hai field `hero` và `footer` vào siteSettings (§2.15), và **gỡ `heroText`** — nó thành `hero.eyebrow` một tầng, nên document này không còn field localized nào. Trước đợt này bảy chỗ trên Hero và chân trang biên tập viên không sửa được: H1 trang chủ (`brand.headline`), mô tả Hero (`brand.description`), chữ hai nút Hero, tagline và disclaimer chân trang, dòng bản quyền, và không có chỗ nào treo giấy phép lữ hành. Ranh giới với `QĐ-2026-08-14-01` được vẽ thêm một đường, **không nới**: chữ **máy đọc** (`brand.name`, `brand.legalName`, và `brand.description` khi làm thẻ meta) ở lại `src/site.config.ts` cố định lúc build; chữ **người đọc** vào Sanity. Hệ quả có chủ ý: mô tả trên trang chủ có thể lệch meta description. Sáu ô chữ là tiếng Việt một tầng vì `site.config.ts` khai `langs = ['vi']`; tầng render bỏ qua chúng khi `lang !== 'vi'`. `badges[]` là **một mảng gộp** phân nhóm bằng `kind`, không ba mảng riêng. Hai chỗ cưỡng chế ở tầng render: lớp phủ 88% giữ tương phản chữ chân trang ≥ 4.5:1 trên ảnh nền, và badge thiếu `alt` mà có link thì lấy nhãn `kind` thay vì im lặng bỏ ảnh. Phần chuyển dữ liệu `heroText` → `hero.eyebrow` ở `cms/_migrate-hero-footer.mjs`, phải sao lưu trước. Không thêm document type mới nên là cửa hai chiều theo §5.3. Bản ghi `QĐ-2026-08-14-03`, spec `SPEC-2026-08-14-hero-footer-tuy-bien.md`.
+- v1.0.20 (2026-08-30): thêm document type `bangGiaMuaVu` singleton (§1, §2.16) — bảng quy tắc điều chỉnh giá theo thời gian: mảng `muaVu[]` CÓ THỨ TỰ (thứ tự là độ ưu tiên), mỗi mục có `tenMua`, `tuNgay`, `denNgay`, `phanTram` (dương tăng, âm giảm), `apCho` (trống = mọi tour), `truRa`. **Không chứa con số tiền nào** — `data/prices.yaml` vẫn là nguồn giá duy nhất (I1). Bản ghi `ADR-0030` §3. Backfill: schema `cms/schemas/bangGiaMuaVu.ts` đã tồn tại trước khi mục này được khai — thiếu khai báo vi phạm P4 mức FAIL của meta-validator G1 (`content-model-vs-schema`); mục này đóng drift đó, không mở lại bước 1.
 - v1.0.19 (2026-08-27): **loại điểm tham quan** — enum `attractionType` (§2.3) từ 9 lên **14 giá trị**, thêm `beach`, `island`, `nature`, `craft-village`, `general`; bảng map @type thêm cột `additionalType` và năm hàng tương ứng. **I2 nay ba nhánh** thay vì hai: bách khoa (`sameAs`), venue (`officialSource`), và **một trong hai** cho `beach`/`island`/`nature`/`craft-village`/`general` — nhánh thứ ba tồn tại vì một giá trị không thuộc nhánh nào thì validator **im lặng bỏ qua**, đúng lỗi đã xảy ra với `aquarium`. `aquarium` chốt về **venue**, đóng drift ba nơi (spec và validator CI xếp venue, Studio xếp bách khoa, synthesis không xếp đâu cả). Thêm bộ term **`attraction-type`** vào §2.13 làm **tầng nhãn** đa trị, không quyết @type và không vào gate; ba nhãn Trải nghiệm du lịch, Khu nghỉ dưỡng, Ẩm thực sống ở đây thay vì thành giá trị enum, giữ nguyên lằn ranh entity §2.4/§2.5/§2.7/§2.14. Hòn Mun, Dốc Lết, Bãi Dài **giữ là Attraction**, không chuyển sang Place. Bối cảnh đo được: 17/39 trang đang phát `["TouristAttraction","TouristAttraction"]` và 9 trang gán loại trái bản chất. Phần enum và bộ term là cửa hai chiều; phần sửa tập rẽ nhánh I2 là **gần một chiều** nên có bản ghi bắt buộc. Bản ghi `QĐ-2026-08-27-03`, spec `SPEC-2026-08-27-loai-diem-tham-quan.md`.
 
 Mỗi bảng field có cột "dịch được" để quyết i18n field-level, field bất biến không nhân bản (ADR-0004). Khi dựng một trang, tách rõ ba tầng: field của entity, rollup suy ở build từ entity liên quan, và trình bày của template. Đừng biến layout thành field (N1).

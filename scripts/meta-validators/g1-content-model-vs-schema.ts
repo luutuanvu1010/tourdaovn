@@ -96,6 +96,9 @@ const SUB_FIELD_IGNORE = new Set([
   'eyebrow', 'imageCredit', 'ctaPrimaryLabel', 'ctaSecondaryLabel',
   // siteSettings.footer sub-fields (CONTENT_MODEL §2.15 v1.0.18)
   'tagline', 'disclaimer', 'backgroundImage', 'badges', 'kind',
+  // bangGiaMuaVu.muaVu[] sub-fields (CONTENT_MODEL §2.16 v1.0.20, ADR-0030 §3) —
+  // object 'mua' lồng trong mảng, regex quét toàn file nên bắt cả field lồng sâu.
+  'tenMua', 'tuNgay', 'denNgay', 'phanTram', 'apCho', 'truRa',
 ])
 
 // Fields that exist as both top-level and sub-field in different entities
@@ -332,6 +335,13 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
     partners: { required: false },
     testimonials: { required: false },
     groupQuote: { required: false },
+  },
+  // §2.16 (v1.0.20): singleton config, không phải content entity — không gate publish.
+  // Bảng quy tắc điều chỉnh giá theo thời gian, KHÔNG chứa con số tiền (ADR-0030 §3).
+  // Sub-field của muaVu[] (tenMua/tuNgay/denNgay/phanTram/apCho/truRa) xử ở
+  // SUB_FIELD_IGNORE bên trên — cùng cơ chế với pickupPoints[]/stats[] của siteSettings.
+  bangGiaMuaVu: {
+    muaVu: { required: false },
   },
 }
 

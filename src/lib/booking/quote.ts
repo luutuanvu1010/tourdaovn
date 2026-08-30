@@ -2,6 +2,8 @@
 // BookingForm.astro) lẫn server (handler kiểm nhất quán) — BK5 của 04-CONSTRAINTS §1d.
 // Thuần: không import prices.ts / sanity.ts / resolver.ts (BK1).
 
+import { pickSeason, type Season } from './season'
+
 export type PaxCode = 'adult' | 'child' | 'senior' | 'infant'
 /** Thứ tự hiện trên form, cố định bất kể thứ tự trong prices.yaml (SPEC §4.2 luật 5). */
 export const PAX_ORDER: readonly PaxCode[] = ['adult', 'child', 'senior', 'infant']
@@ -12,7 +14,14 @@ export type PriceTable =
   | { kind: 'tiers'; tiers: { maxPax: number; amount: number }[] }
 
 export type QuoteLine = { code: PaxCode; count: number; amount: number; subtotal: number }
-export type Quote = { lines: QuoteLine[]; total: number; perPax: Partial<Record<PaxCode, number>> }
+export type QuoteOptions = { seasons?: Season[]; departDate?: string }
+export type Quote = {
+  lines: QuoteLine[]
+  total: number
+  perPax: Partial<Record<PaxCode, number>>
+  /** Mùa đã áp, để đơn ghi lại vì sao ra con số này (ADR-0030 §3). */
+  season?: { name: string; percent: number }
+}
 
 export function emptyPax(): PaxCounts {
   return { adult: 1, child: 0, senior: 0, infant: 0 }
@@ -22,19 +31,33 @@ export function totalPax(pax: PaxCounts): number {
   return PAX_ORDER.reduce((n, c) => n + (pax[c] || 0), 0)
 }
 
+/** Làm tròn LÊN nghìn sau khi áp phần trăm (ADR-0030 §3). */
+export function apDieuChinh(amount: number, percent: number): number {
+  // Giữ tương thích ngược, đừng xoá dù trông dư: bỏ dòng này, Math.ceil bên dưới sẽ
+  // làm tròn lên cả khi không có mùa, âm thầm đổi mọi giá gốc không phải bội số nghìn.
+  if (!percent) return amount
+  return Math.ceil((amount * (100 + percent)) / 100 / 1000) * 1000
+}
+
 /** null = không tính được (hạng có người nhưng không có giá, vượt bậc, hoặc 0 khách). */
-export function computeQuote(table: PriceTable, pax: PaxCounts): Quote | null {
+export function computeQuote(table: PriceTable, pax: PaxCounts, opts: QuoteOptions = {}): Quote | null {
   const n = totalPax(pax)
   if (n <= 0) return null
+
+  const mua = opts.seasons && opts.departDate ? pickSeason(opts.seasons, opts.departDate) : null
+  const pct = mua?.percent ?? 0
+  const nhan = (x: number) => apDieuChinh(x, pct)
+  const kem = (q: Omit<Quote, 'season'>): Quote => (mua ? { ...q, season: { name: mua.name, percent: mua.percent } } : q)
 
   if (table.kind === 'tiers') {
     const tier = [...table.tiers].sort((a, b) => a.maxPax - b.maxPax).find(t => t.maxPax >= n)
     if (!tier) return null
-    return {
-      lines: [{ code: 'adult', count: n, amount: tier.amount, subtotal: tier.amount * n }],
-      total: tier.amount * n,
-      perPax: { adult: tier.amount },
-    }
+    const amount = nhan(tier.amount)
+    return kem({
+      lines: [{ code: 'adult', count: n, amount, subtotal: amount * n }],
+      total: amount * n,
+      perPax: { adult: amount },
+    })
   }
 
   const lines: QuoteLine[] = []
@@ -42,12 +65,13 @@ export function computeQuote(table: PriceTable, pax: PaxCounts): Quote | null {
   for (const code of PAX_ORDER) {
     const count = pax[code] || 0
     if (count <= 0) continue
-    const amount = table.perPax[code]
-    if (typeof amount !== 'number') return null
+    const goc = table.perPax[code]
+    if (typeof goc !== 'number') return null
+    const amount = nhan(goc)
     lines.push({ code, count, amount, subtotal: amount * count })
     perPax[code] = amount
   }
-  return { lines, total: lines.reduce((s, l) => s + l.subtotal, 0), perPax }
+  return kem({ lines, total: lines.reduce((s, l) => s + l.subtotal, 0), perPax })
 }
 
 /** Hạng nào được hiện bộ đếm: flat → adult + mọi khoá có giá; tiers → chỉ "số khách" (adult). */
