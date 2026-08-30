@@ -89,8 +89,24 @@ site** trong trạng thái hỏng, mỗi thứ hỏng một kiểu:
 | luật WAF | không có gì chặn **lượt yêu cầu** (xem mục dưới) |
 | `AWS_*` / `BOOKING_NOTIFY_EMAIL` / `ZALO_*` | đơn vẫn vào D1, nhưng **không ai được báo** — cột `notify_email`/`notify_zalo` ghi `skipped`, và không ai gọi lại cho khách |
 
-- **Trước** lần deploy đầu tiên có ưu đãi thanh toán trước: `npx wrangler d1 migrations apply tourdao-booking --remote`.
-  Không chạy thì mọi đơn mới đều 500 — cột `payment_method` chưa tồn tại nhưng câu `INSERT` đã kê tên nó.
+### Ưu đãi thanh toán trước (ADR-0031) — hai việc bắt buộc, đúng thứ tự, trước khi bật
+
+1. **Chạy migration trước khi merge/push nhánh này vào `main`**:
+   `npx wrangler d1 migrations apply tourdao-booking --remote`. Site này nối Workers Builds
+   với `main` (mục "Có đường thứ hai: Cloudflare tự dựng từ GitHub" dưới `## Deploy`) —
+   **không có một lần "deploy tay đầu tiên" nào để đứng trước cả; merge vào `main` chính là
+   deploy.** Nhánh lên `main` mà migration chưa chạy thì Cloudflare tự dựng và thay Worker
+   **ngay khi build xong**, còn câu `INSERT` của nó đã kê tên cột `payment_method` chưa tồn
+   tại trong D1 production: **mọi đơn đặt tour trả về 500** — không riêng đơn chọn chuyển
+   khoản, không riêng trang có bật ưu đãi — cho tới khi có người nhận ra.
+2. **Deploy Studio trước khi vào Studio bật công tắc**: `cd cms && npx sanity deploy`.
+   `cms/sanity.cli.ts` khai `studioHost: 'tourdaovn'` — Studio này là bản **đã dựng, host
+   sẵn**, merge code không tự cập nhật nó. Chưa deploy thì biên tập mở tài liệu vẫn thấy tiêu
+   đề cũ "Giá theo mùa", không có nhóm ô "Ưu đãi thanh toán trước", và phần trăm mãi là 0 —
+   tính năng coi như chưa tồn tại dù Worker đã chạy bản mới.
+
+Xong hai việc trên mới vào Studio mở *Quy tắc giá*, bật công tắc, đặt phần trăm, Publish
+(`docs/specs/SPEC-2026-08-30-uu-dai-thanh-toan-truoc.md` §7).
 
 ### Bộ đếm tần suất trong endpoint KHÔNG phải là chặn lượt yêu cầu
 

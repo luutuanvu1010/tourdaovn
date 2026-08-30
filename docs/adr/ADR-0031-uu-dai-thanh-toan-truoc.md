@@ -188,5 +188,17 @@ nơi ảnh hưởng tới **mọi** loại trang chứ không riêng tour.
   chuyển. Đó là điểm mù cho tới khi bảng điều khiển `ADR-0030` §2 có mặt và thêm bộ lọc để đếm.
   Nếu tỷ lệ đó cao thì tính năng này đang cho không x%. Đếm được nó nên là **điều kiện của vòng
   sau**, không phải việc làm nếu rảnh.
+- **Nợ mở, DRI chủ dự án (ghi thêm 2026-08-30, sau rà soát cuối nhánh):** đường de-duplicate
+  của endpoint (trùng tour + ngày + số điện thoại trong 24h) trả về **mã đơn đã lưu** nhưng
+  dựng tóm tắt xác nhận trên màn hình từ **payload vừa nộp**. Khách nộp lần đầu chọn *"Thanh
+  toán khi khởi hành"* — nhân viên đã nhận báo với dòng "Thanh toán: Khi khởi hành" — rồi trong
+  24h nộp lại đổi sang *"Chuyển khoản trước"*: màn hình khách hiện tổng **đã giảm**, nhưng dòng
+  lưu trong D1 vẫn là đơn cũ, `payment_method = onboard`, giá gốc, và **không có thông báo thứ
+  hai** đi ra. Nhân viên gọi lại theo báo cũ sẽ nói ngược với điều khách vừa thấy trên form.
+  Hành vi de-duplicate **có từ trước tính năng này** (đổi số khách rồi nộp lại trong 24h đã
+  từng lệch tổng so với đơn lưu theo đúng cách này); ưu đãi chỉ thêm một trục lệch vào một điểm
+  mù đã có sẵn, và sửa đường de-duplicate là đổi hành vi chưa ai duyệt — ngoài phạm vi ADR này,
+  **chưa sửa**. Giảm nhẹ hiện có: `x` là một con số **toàn site** (§1), nên nhân viên biết mức
+  ưu đãi đang áp và có thể tự áp đúng khi gọi lại, bất kể dòng lưu ghi gì.
 - **Ranh giới không nới:** `00-PROJECT_BRIEF` §5 "không thanh toán, không giỏ hàng, không quản lý
   chỗ trống" còn nguyên. Ai muốn ưu đãi này mang nghĩa giữ chỗ là quyết định mới.

@@ -273,9 +273,19 @@ trong `handler.ts`. Ba chỗ, không hơn — đã đếm.
 
 ## 7. Vận hành
 
-1. `wrangler d1 migrations apply tourdao-booking --remote` **trước** khi deploy bản có cột mới.
-2. Trong Studio: mở *Quy tắc giá*, bật ưu đãi, đặt phần trăm, Publish → trang dựng lại.
-3. Nghiệm thu trên production: một tour có mùa, một tour không mùa; chọn từng nút và đối chiếu
+1. Chạy `npx wrangler d1 migrations apply tourdao-booking --remote` **trước khi merge/push
+   nhánh này vào `main`**. Site này nối Workers Builds với `main` (`BUILD-NOTES.md` mục "Có
+   đường thứ hai: Cloudflare tự dựng từ GitHub") — không có một lần "deploy tay đầu tiên" nào
+   để đứng trước làm mốc; **merge vào `main` chính là deploy**. Bỏ bước này rồi mới push thì
+   Worker mới lên ngay khi CI dựng xong, còn câu `INSERT` của nó đã kê tên cột
+   `payment_method` chưa tồn tại trong D1 production: **mọi đơn đặt tour trả về 500** — không
+   riêng đơn chọn chuyển khoản.
+2. Deploy Studio: `cd cms && npx sanity deploy`. `cms/sanity.cli.ts` khai
+   `studioHost: 'tourdaovn'` nên Studio là bản đã dựng, host sẵn — merge code không tự cập
+   nhật nó. Chưa deploy thì biên tập mở tài liệu vẫn thấy tiêu đề cũ "Giá theo mùa", không có
+   nhóm ô "Ưu đãi thanh toán trước", và phần trăm mãi là 0.
+3. Trong Studio: mở *Quy tắc giá*, bật ưu đãi, đặt phần trăm, Publish → trang dựng lại.
+4. Nghiệm thu trên production: một tour có mùa, một tour không mùa; chọn từng nút và đối chiếu
    con số; gửi thử một đơn và kiểm dòng "Thanh toán:" trong thư báo.
 
 ## 8. Còn nợ
@@ -283,3 +293,16 @@ trong `handler.ts`. Ba chỗ, không hơn — đã đếm.
 - **Không đo được** chuyện khách chọn chuyển khoản rồi không chuyển. Điểm mù cho tới khi bảng
   điều khiển `ADR-0030` §2 có bộ lọc theo `payment_method`. Ghi vào ADR-0031 mục nợ mở.
 - QR chuyển khoản (`ADR-0030` §5) chưa làm; khi làm thì dòng "Thanh toán:" là chỗ nó cắm vào.
+- **De-duplicate có thể echo một hình thức thanh toán khác với đơn đã lưu.** Endpoint chặn
+  trùng theo tour + ngày + số điện thoại trong 24h bằng cách trả **mã đơn đã lưu**, nhưng dựng
+  tóm tắt xác nhận trên màn hình từ **payload vừa nộp**. Khách nộp lần đầu chọn *"Thanh toán
+  khi khởi hành"* (nhân viên đã nhận báo với dòng "Thanh toán: Khi khởi hành"), rồi trong 24h
+  nộp lại đổi sang *"Chuyển khoản trước"*: màn hình khách hiện tổng **đã giảm**, nhưng dòng lưu
+  trong D1 vẫn là đơn cũ (`payment_method = onboard`, giá gốc), và **không có thông báo thứ
+  hai** đi ra — nhân viên gọi lại theo báo cũ sẽ nói ngược với điều khách vừa thấy trên form.
+  Hành vi de-duplicate **có từ trước tính năng này** (đổi số khách rồi nộp lại trong 24h đã
+  từng lệch tổng so với đơn lưu theo cách y hệt); ưu đãi chỉ thêm một trục lệch vào một điểm mù
+  đã có sẵn, và sửa đường de-duplicate là đổi hành vi chưa ai duyệt — ngoài phạm vi ADR này.
+  **Chưa sửa.** Giảm nhẹ hiện có: `x` là một con số **toàn site** (§2 điểm 3), nên nhân viên
+  biết mức ưu đãi đang áp và có thể tự áp đúng khi gọi lại, bất kể dòng lưu ghi gì. Ghi vào
+  ADR-0031 mục nợ mở.
