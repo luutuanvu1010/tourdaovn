@@ -109,13 +109,29 @@ trong bảng điều khiển"**. Chúng khớp nhau nếu mùa **không phải f
 và Publish vốn đã kích một lần dựng — cơ chế có sẵn, không phát minh gì. `ADR-0007` nguyên vẹn,
 `BK1` nguyên vẹn (endpoint vẫn không đọc Sanity, chỉ build đọc).
 
-**Mỗi mùa gồm:** tên mùa · từ ngày · đến ngày · phụ thu phần trăm · áp cho tour nào (bỏ trống =
-mọi tour) · trừ ra tour nào. Ngày lễ rời rạc là một mùa có *từ ngày* = *đến ngày*. Cần trường
-*trừ ra* vì luật "lấy mức cao nhất" tự nó không diễn tả được ý miễn trừ.
+**Trang tính vẫn là nguồn giá DUY NHẤT.** Studio không giữ một con số tiền nào — nó giữ *quy
+tắc nghiệp vụ*: khung thời gian nào, điều chỉnh bao nhiêu phần trăm, áp cho tour nào. Sheet trả
+lời "tour này bao nhiêu tiền", Studio trả lời "đi vào dịp này thì cộng trừ thế nào". Xoá sạch dữ
+liệu mùa thì giá gốc vẫn nguyên vẹn.
 
-**Cách tính, đúng bốn quyết định của chủ dự án:** theo **ngày khởi hành** khách chọn, gom mọi
-mùa phủ ngày đó và áp được cho tour đó, **lấy mức phần trăm cao nhất** (không cộng dồn), nhân
-vào giá từng hạng khách, **làm tròn lên nghìn**. Hạng em bé giá 0 nhân bao nhiêu vẫn 0.
+**Mỗi mùa gồm:** tên mùa · từ ngày · đến ngày · **điều chỉnh phần trăm (dương là tăng, âm là
+giảm)** · áp cho tour nào (bỏ trống = mọi tour) · trừ ra tour nào. Ngày lễ rời rạc là một mùa có
+*từ ngày* = *đến ngày*. Mùa thấp điểm là một mùa có phần trăm âm.
+
+**Cách tính: danh sách CÓ THỨ TỰ, cái trên thắng cái dưới.** Theo **ngày khởi hành** khách chọn,
+duyệt danh sách mùa **từ trên xuống**, gặp mùa đầu tiên vừa phủ ngày đó vừa áp được cho tour đó
+thì **dùng luôn mùa ấy rồi dừng**. Nhân vào giá từng hạng khách, **làm tròn lên nghìn**. Hạng em
+bé giá 0 nhân bao nhiêu vẫn 0.
+
+Mô hình này **thay thế** luật "lấy mức phần trăm cao nhất" của bản đề xuất đầu. Luật cũ sinh ra
+từ giả định chỉ có tăng giá; khi có cả giảm thì so số học trở nên mơ hồ — hai khuyến mãi −10% và
+−20% thì "cao nhất" là −10%, tức khách được giảm ít hơn, gần như chắc chắn không phải ý ai. Thứ
+tự do người biên tập sắp thì luôn xác định, và **sắp lại độ ưu tiên là kéo một dòng trong Studio,
+không phải sửa mã**.
+
+Hệ quả: **hai mùa phủ nhau thôi là lỗi, nó thành tính năng.** Khai *Lễ 30/4* nằm trong *Cao điểm
+hè* là chuyện bình thường — chỉ cần lễ đứng trên hè. Muốn một đợt khuyến mãi thắng cả dịp lễ thì
+kéo nó lên trên cùng.
 
 **Trang nướng sẵn danh sách mùa áp được cho chính tour đó** — vài dòng, rất nhẹ. Khách đổi ngày
 thì trình duyệt tự tính lại, không lời gọi mạng nào. Máy chủ vẫn chỉ kiểm nhất quán số học,
@@ -124,10 +140,10 @@ không tin giá, vì nhân viên mới là người chốt.
 **Đơn ghi lại mùa đã áp và mức bao nhiêu.** Thiếu nó thì ba tháng sau nhìn một đơn 2.483.000₫
 sẽ không ai biết vì sao không phải 1.910.000₫ — nhất là khi mùa lúc đó đã sửa.
 
-**Bốn điều validator phải chặn:** phần trăm ngoài khoảng hợp lý; ngày kết thúc trước ngày bắt
-đầu; tour được viện dẫn trong *áp cho* / *trừ ra* không tồn tại trong bảng giá; hai mùa phủ
-nhau cho cùng một tour (chỉ cảnh báo — luật "lấy cao nhất" vẫn cho kết quả xác định, nhưng
-người nhập nên biết mình đang khai trùng).
+**Ba điều validator phải chặn:** phần trăm ngoài khoảng hợp lý (một mùa −100% cho tour miễn phí,
+hay +500% do gõ nhầm, đều phải đỏ); ngày kết thúc trước ngày bắt đầu; tour được viện dẫn trong
+*áp cho* / *trừ ra* không tồn tại trong bảng giá. **Không còn luật nào về chồng lấn** — chồng là
+hợp lệ và thứ tự quyết định.
 
 ### 4. Bề mặt: một nguồn token, sinh tự động ra dạng dùng được cho thư
 
