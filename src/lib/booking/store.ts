@@ -3,13 +3,14 @@
 // nhất của cả site lúc runtime (BK2).
 import type { D1Database } from '@cloudflare/workers-types'
 import type { PaxCounts } from './quote'
-import type { Quoted } from './schema'
+import type { PaymentMethod, Quoted } from './schema'
 
 export type NewBooking = {
   code: string; createdAt: string; tourSlug: string; tourTitle: string; bookingRef: string
   departDate: string; pax: PaxCounts; quoted: Quoted
   customerName: string; phone: string; email: string | null; pickup: string | null; note: string | null
-  lang: string; source: string; ipHash: string | null; userAgent: string | null
+  lang: string; source: string; paymentMethod: PaymentMethod
+  ipHash: string | null; userAgent: string | null
 }
 
 export type BookingRow = {
@@ -17,7 +18,7 @@ export type BookingRow = {
   booking_ref: string | null; depart_date: string; pax_json: string; quoted_json: string
   customer_name: string; phone: string; email: string | null; pickup: string | null; note: string | null
   lang: string; source: string; status: string; notify_email: string | null; notify_zalo: string | null
-  ip_hash: string | null; user_agent: string | null
+  ip_hash: string | null; user_agent: string | null; payment_method: string
 }
 
 export function isUniqueViolation(err: unknown): boolean {
@@ -28,12 +29,13 @@ export function isUniqueViolation(err: unknown): boolean {
 export async function insertBooking(db: D1Database, b: NewBooking): Promise<void> {
   await db.prepare(
     `INSERT INTO booking (code, created_at, tour_slug, tour_title, booking_ref, depart_date, pax_json, quoted_json,
-       customer_name, phone, email, pickup, note, lang, source, ip_hash, user_agent)
-     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17)`,
+       customer_name, phone, email, pickup, note, lang, source, ip_hash, user_agent, payment_method)
+     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18)`,
   ).bind(
     b.code, b.createdAt, b.tourSlug, b.tourTitle, b.bookingRef, b.departDate,
     JSON.stringify(b.pax), JSON.stringify(b.quoted),
     b.customerName, b.phone, b.email, b.pickup, b.note, b.lang, b.source, b.ipHash, b.userAgent,
+    b.paymentMethod,
   ).run()
 }
 

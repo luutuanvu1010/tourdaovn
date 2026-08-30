@@ -10,7 +10,7 @@ const b: NewBooking = {
   bookingRef: 'tour-3-dao', departDate: '2026-09-05', pax: { adult: 2, child: 1, senior: 0, infant: 0 },
   quoted: { perPax: { adult: 550000, child: 350000 }, total: 1450000, quotedAt: '2026-08-21T02:00:00Z' },
   customerName: 'Nguyễn Văn A', phone: '0905123456', email: 'a@example.com', pickup: 'KS Mường Thanh', note: 'Đón 7h',
-  lang: 'vi', source: 'web', ipHash: 'h', userAgent: 'ua',
+  lang: 'vi', source: 'web', paymentMethod: 'onboard', ipHash: 'h', userAgent: 'ua',
 }
 
 function okFetch(status = 200, body: unknown = { ok: true, id: 'x' }) {
@@ -44,6 +44,27 @@ describe('format', () => {
   it('không mùa thì không có dòng đó', () => {
     const t = formatText(b)
     expect(t).not.toContain('Mùa áp dụng')
+  })
+
+  // Task 7 — paymentMethod (Task 5) là Ý ĐỊNH khách chọn, không phải xác nhận đã trả tiền.
+  // Khi khách chọn chuyển khoản trước, in kèm totalGoc để nhân viên đọc thẳng giá thay thế nếu
+  // khách đổi ý, không tính nhẩm ngược qua phép làm tròn lên (apDieuChinh, Task 2).
+  it('đơn chuyển khoản: dòng Thanh toán có mức giảm và giá nếu không', () => {
+    const t = formatText({
+      ...b,
+      paymentMethod: 'transfer',
+      quoted: { ...b.quoted, total: 470000, prepay: { percent: 5, totalGoc: 495000 } },
+    })
+    expect(t).toContain('Thanh toán: Chuyển khoản trước — đã giảm 5% (nếu không: 495.000₫)')
+  })
+
+  it('đơn thường: dòng Thanh toán ngắn gọn', () => {
+    expect(formatText(b)).toContain('Thanh toán: Khi khởi hành')
+  })
+
+  it('dòng Thanh toán cũng vào thư HTML (formatHtml dựng từ formatText)', () => {
+    const h = formatHtml({ ...b, paymentMethod: 'transfer', quoted: { ...b.quoted, prepay: { percent: 5, totalGoc: 495000 } } })
+    expect(h).toContain('đã giảm 5%')
   })
 })
 

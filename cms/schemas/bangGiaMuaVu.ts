@@ -6,9 +6,12 @@ import { CalendarIcon } from '@sanity/icons'
 // mục dưới. Kéo thả để sắp lại — không cần sửa mã.
 export default defineType({
   name: 'bangGiaMuaVu',
-  title: 'Giá theo mùa',
+  title: 'Quy tắc giá',
   type: 'document',
   icon: CalendarIcon,
+  fieldsets: [
+    { name: 'uuDai', title: 'Ưu đãi thanh toán trước', options: { collapsible: true, collapsed: false } },
+  ],
   fields: [
     defineField({
       name: 'muaVu',
@@ -64,6 +67,22 @@ export default defineType({
         }),
       ],
     }),
+    defineField({
+      name: 'batUuDai',
+      title: 'Bật ưu đãi thanh toán trước',
+      type: 'boolean',
+      fieldset: 'uuDai',
+      initialValue: false,
+      description: 'Tắt là ô chọn hình thức thanh toán biến mất khỏi mọi trang tour.',
+    }),
+    defineField({
+      name: 'phanTramUuDai',
+      title: 'Mức giảm (%)',
+      type: 'number',
+      fieldset: 'uuDai',
+      description: 'Ví dụ 5 là giảm 5% mỗi khách khi khách chọn chuyển khoản trước. Số DƯƠNG là GIẢM (ngược với ô phần trăm của mùa). Giá sau giảm làm tròn lên nghìn.',
+      validation: Rule => Rule.min(0).max(50),
+    }),
   ],
-  preview: { prepare: () => ({ title: 'Giá theo mùa' }) },
+  preview: { prepare: () => ({ title: 'Quy tắc giá' }) },
 })

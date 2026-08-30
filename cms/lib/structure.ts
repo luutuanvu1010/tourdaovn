@@ -37,7 +37,7 @@ export const structure: StructureResolver = (S) => {
     // nếu thiếu mục này. `documentId` cố định để chỉ có đúng MỘT bảng mùa, không sinh
     // nhiều bản rồi không biết bản nào đang áp.
     S.listItem()
-      .title('Giá theo mùa')
+      .title('Quy tắc giá')
       .icon(CalendarIcon)
       .child(
         S.document()

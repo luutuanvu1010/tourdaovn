@@ -14,13 +14,22 @@ export type PriceTable =
   | { kind: 'tiers'; tiers: { maxPax: number; amount: number }[] }
 
 export type QuoteLine = { code: PaxCode; count: number; amount: number; subtotal: number }
-export type QuoteOptions = { seasons?: Season[]; departDate?: string }
+export type QuoteOptions = {
+  seasons?: Season[]
+  departDate?: string
+  /** % ưu đãi thanh toán trước — số DƯƠNG nghĩa là GIẢM (ADR-0031 §3). 0 = không có ưu đãi. */
+  prepayPercent?: number
+  /** khách đã chọn "chuyển khoản trước" hay chưa */
+  prepay?: boolean
+}
 export type Quote = {
   lines: QuoteLine[]
   total: number
   perPax: Partial<Record<PaxCode, number>>
   /** Mùa đã áp, để đơn ghi lại vì sao ra con số này (ADR-0030 §3). */
   season?: { name: string; percent: number }
+  /** Ưu đãi đã áp + tổng NẾU KHÔNG chọn ưu đãi (đã gồm mùa) — ADR-0031 §4. */
+  prepay?: { percent: number; totalGoc: number }
 }
 
 export function emptyPax(): PaxCounts {
@@ -31,12 +40,13 @@ export function totalPax(pax: PaxCounts): number {
   return PAX_ORDER.reduce((n, c) => n + (pax[c] || 0), 0)
 }
 
-/** Làm tròn LÊN nghìn sau khi áp phần trăm (ADR-0030 §3). */
-export function apDieuChinh(amount: number, percent: number): number {
-  // Giữ tương thích ngược, đừng xoá dù trông dư: bỏ dòng này, Math.ceil bên dưới sẽ
-  // làm tròn lên cả khi không có mùa, âm thầm đổi mọi giá gốc không phải bội số nghìn.
-  if (!percent) return amount
-  return Math.ceil((amount * (100 + percent)) / 100 / 1000) * 1000
+/** Làm tròn LÊN nghìn sau khi áp CẢ HAI phần trăm (ADR-0030 §3, ADR-0031 §3). */
+export function apDieuChinh(amount: number, seasonPct: number, prepayPct = 0): number {
+  // Giữ tương thích ngược, đừng xoá dù trông dư: bỏ dòng này, Math.ceil bên dưới sẽ làm tròn
+  // lên cả khi không có mùa lẫn ưu đãi, âm thầm đổi mọi giá gốc không phải bội số nghìn.
+  // NAY PHẢI CANH HAI BIẾN, không phải một — bỏ sót `prepayPct` là mở lại đúng lỗi đó.
+  if (!seasonPct && !prepayPct) return amount
+  return Math.ceil((amount * (100 + seasonPct) * (100 - prepayPct)) / 10_000 / 1000) * 1000
 }
 
 /** null = không tính được (hạng có người nhưng không có giá, vượt bậc, hoặc 0 khách). */
@@ -46,8 +56,21 @@ export function computeQuote(table: PriceTable, pax: PaxCounts, opts: QuoteOptio
 
   const mua = opts.seasons && opts.departDate ? pickSeason(opts.seasons, opts.departDate) : null
   const pct = mua?.percent ?? 0
-  const nhan = (x: number) => apDieuChinh(x, pct)
-  const kem = (q: Omit<Quote, 'season'>): Quote => (mua ? { ...q, season: { name: mua.name, percent: mua.percent } } : q)
+  // Ưu đãi chỉ sống khi khách CHỌN và công tắc đang bật. Hai điều kiện, không phải một.
+  const uuDai = opts.prepay && typeof opts.prepayPercent === 'number' && opts.prepayPercent > 0
+    ? opts.prepayPercent
+    : 0
+  const nhan = (x: number) => apDieuChinh(x, pct, uuDai)
+  // `totalGoc` cộng dồn TRONG vòng lặp bên dưới bằng hàm này — KHÔNG gọi lại computeQuote():
+  // lời gọi thứ hai có thể trả null và chọn mùa lại từ đầu, thành hai nguồn sự thật cho cùng
+  // một phép. Cũng không nhân ngược từ `total`: làm tròn lên không có phép nghịch đảo.
+  const khongUuDai = (x: number) => apDieuChinh(x, pct, 0)
+  const kem = (q: Omit<Quote, 'season' | 'prepay'>, totalGoc: number): Quote => {
+    const out: Quote = { ...q }
+    if (mua) out.season = { name: mua.name, percent: mua.percent }
+    if (uuDai) out.prepay = { percent: uuDai, totalGoc }
+    return out
+  }
 
   if (table.kind === 'tiers') {
     const tier = [...table.tiers].sort((a, b) => a.maxPax - b.maxPax).find(t => t.maxPax >= n)
@@ -57,11 +80,12 @@ export function computeQuote(table: PriceTable, pax: PaxCounts, opts: QuoteOptio
       lines: [{ code: 'adult', count: n, amount, subtotal: amount * n }],
       total: amount * n,
       perPax: { adult: amount },
-    })
+    }, khongUuDai(tier.amount) * n)
   }
 
   const lines: QuoteLine[] = []
   const perPax: Partial<Record<PaxCode, number>> = {}
+  let totalGoc = 0
   for (const code of PAX_ORDER) {
     const count = pax[code] || 0
     if (count <= 0) continue
@@ -70,8 +94,9 @@ export function computeQuote(table: PriceTable, pax: PaxCounts, opts: QuoteOptio
     const amount = nhan(goc)
     lines.push({ code, count, amount, subtotal: amount * count })
     perPax[code] = amount
+    totalGoc += khongUuDai(goc) * count
   }
-  return kem({ lines, total: lines.reduce((s, l) => s + l.subtotal, 0), perPax })
+  return kem({ lines, total: lines.reduce((s, l) => s + l.subtotal, 0), perPax }, totalGoc)
 }
 
 /** Hạng nào được hiện bộ đếm: flat → adult + mọi khoá có giá; tiers → chỉ "số khách" (adult). */

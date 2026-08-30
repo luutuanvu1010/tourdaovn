@@ -246,3 +246,74 @@ describe('lọc ký tự điều khiển, chặn trên cho quotedAt, email có <
     expect(validateBooking(good({ email: 'khach.hang+dat@gmail.com' }), TODAY).ok).toBe(true)
   })
 })
+
+describe('paymentMethod và luật chéo với quoted.prepay', () => {
+  const HOM_NAY = '2026-09-01'
+  function payload(over: Record<string, unknown> = {}) {
+    return {
+      tourSlug: 'tour-3-dao', tourTitle: 'Tour 3 đảo', bookingRef: 'tour-3-dao',
+      departDate: '2026-09-05', pax: { adult: 1, child: 0, senior: 0, infant: 0 },
+      quoted: { perPax: { adult: 409000 }, total: 409000, quotedAt: '2026-08-30T02:00:00Z' },
+      name: 'Nguyễn Văn A', phone: '0905123456', email: '', pickup: '', note: '',
+      turnstileToken: 't', website: '', ...over,
+    }
+  }
+
+  it('vắng paymentMethod → onboard, đơn vẫn hợp lệ (công tắc đang tắt)', () => {
+    const r = validateBooking(parseBookingPayload(payload()), HOM_NAY)
+    expect(r.ok).toBe(true)
+    if (r.ok) expect(r.value.paymentMethod).toBe('onboard')
+  })
+
+  it('giá trị lạ → onboard, không ném', () => {
+    const p = parseBookingPayload(payload({ paymentMethod: 'bitcoin' }))
+    expect(p.paymentMethod).toBe('onboard')
+  })
+
+  it('transfer + prepay hợp lệ → nhận', () => {
+    const r = validateBooking(parseBookingPayload(payload({
+      paymentMethod: 'transfer',
+      quoted: { perPax: { adult: 409000 }, total: 409000, quotedAt: 'x', prepay: { percent: 5, totalGoc: 430000 } },
+    })), HOM_NAY)
+    expect(r.ok).toBe(true)
+    if (r.ok) expect(r.value.quoted.prepay).toEqual({ percent: 5, totalGoc: 430000 })
+  })
+
+  it('onboard mà vẫn mang giá đã giảm → 400', () => {
+    const r = validateBooking(parseBookingPayload(payload({
+      paymentMethod: 'onboard',
+      quoted: { perPax: { adult: 409000 }, total: 409000, quotedAt: 'x', prepay: { percent: 5, totalGoc: 430000 } },
+    })), HOM_NAY)
+    expect(r.ok).toBe(false)
+    if (!r.ok) expect(r.fields.quoted).toBe(MSG.quotedMismatch)
+  })
+
+  it('transfer mà không có prepay → 400', () => {
+    const r = validateBooking(parseBookingPayload(payload({ paymentMethod: 'transfer' })), HOM_NAY)
+    expect(r.ok).toBe(false)
+    if (!r.ok) expect(r.fields.quoted).toBe(MSG.quotedMismatch)
+  })
+
+  it('totalGoc nhỏ hơn total → 400 (ưu đãi không thể làm giá TĂNG)', () => {
+    const r = validateBooking(parseBookingPayload(payload({
+      paymentMethod: 'transfer',
+      quoted: { perPax: { adult: 409000 }, total: 409000, quotedAt: 'x', prepay: { percent: 5, totalGoc: 400000 } },
+    })), HOM_NAY)
+    expect(r.ok).toBe(false)
+  })
+
+  it('prepay sai hình dạng thì BỎ khoá — rồi luật chéo bắt được vì paymentMethod là transfer', () => {
+    const p = parseBookingPayload(payload({
+      paymentMethod: 'transfer',
+      quoted: { perPax: { adult: 409000 }, total: 409000, quotedAt: 'x', prepay: { percent: 'năm phần trăm' } },
+    }))
+    expect(p.quoted.prepay).toBeUndefined()
+    expect(validateBooking(p, HOM_NAY).ok).toBe(false)
+  })
+
+  it('buildQuotedPayload mang theo prepay', () => {
+    const q = { perPax: { adult: 409000 }, total: 409000, prepay: { percent: 5, totalGoc: 430000 } }
+    expect(buildQuotedPayload(q, 'x').prepay).toEqual({ percent: 5, totalGoc: 430000 })
+    expect(buildQuotedPayload({ perPax: { adult: 1 }, total: 1 }, 'x')).not.toHaveProperty('prepay')
+  })
+})

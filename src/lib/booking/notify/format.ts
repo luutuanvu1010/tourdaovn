@@ -43,6 +43,15 @@ export function formatText(b: NewBooking): string {
     const dau = s.percent > 0 ? '+' : ''
     lines.push(`Mùa áp dụng: ${s.name} (${dau}${s.percent}%)`)
   }
+  // Hình thức thanh toán khách CHỌN — không phải xác nhận đã trả tiền (ADR-0031 §2). Nhân viên
+  // vẫn phải đối soát. `totalGoc` in kèm để khi khách đổi ý, người gọi đọc được ngay con số
+  // thay thế, không tính nhẩm ngược qua một phép làm tròn lên.
+  if (b.paymentMethod === 'transfer' && b.quoted.prepay) {
+    const p = b.quoted.prepay
+    lines.push(`Thanh toán: Chuyển khoản trước — đã giảm ${p.percent}% (nếu không: ${formatPrice(p.totalGoc, 'vi')})`)
+  } else {
+    lines.push('Thanh toán: Khi khởi hành')
+  }
   lines.push(
     ``,
     `Khách: ${b.customerName}`,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { apDieuChinh, availablePaxCodes, computeQuote, emptyPax, priceTableFromEntry, totalPax, type PriceTable } from '../../src/lib/booking/quote'
+import { apDieuChinh, availablePaxCodes, computeQuote, emptyPax, priceTableFromEntry, totalPax, type PaxCounts, type PriceTable } from '../../src/lib/booking/quote'
 import { pickSeason, type Season } from '../../src/lib/booking/season'
 
 const flat: PriceTable = { kind: 'flat', perPax: { adult: 550000, child: 350000 }, notes: { child: '5–11 tuổi' } }
@@ -145,5 +145,73 @@ describe('apDieuChinh', () => {
   it('giá gốc 0đ ("Miễn phí") luôn ra 0 dù áp mùa', () => {
     expect(apDieuChinh(0, 15)).toBe(0)
     expect(apDieuChinh(0, -15)).toBe(0)
+  })
+})
+
+describe('ưu đãi thanh toán trước', () => {
+  const FLAT: PriceTable = { kind: 'flat', perPax: { adult: 430000, child: 340000 } }
+  const HE: Season = { name: 'Cao điểm hè', from: '2027-06-01', to: '2027-08-31', percent: 15 }
+  const MOT: PaxCounts = { adult: 1, child: 0, senior: 0, infant: 0 }
+
+  it('không mùa, không ưu đãi → NGUYÊN giá gốc, không làm tròn', () => {
+    const T: PriceTable = { kind: 'flat', perPax: { adult: 730500 } }
+    expect(computeQuote(T, MOT)?.total).toBe(730500)
+    expect(computeQuote(T, MOT, { prepayPercent: 5, prepay: false })?.total).toBe(730500)
+  })
+
+  it('khách KHÔNG chọn → không giảm, không có khoá prepay', () => {
+    const q = computeQuote(FLAT, MOT, { prepayPercent: 5, prepay: false })
+    expect(q?.total).toBe(430000)
+    expect(q?.prepay).toBeUndefined()
+  })
+
+  it('công tắc tắt (0%) dù khách chọn → không giảm', () => {
+    const q = computeQuote(FLAT, MOT, { prepayPercent: 0, prepay: true })
+    expect(q?.total).toBe(430000)
+    expect(q?.prepay).toBeUndefined()
+  })
+
+  it('chỉ ưu đãi, không mùa: 430.000 −5% → 409.000', () => {
+    const q = computeQuote(FLAT, MOT, { prepayPercent: 5, prepay: true })
+    expect(q?.total).toBe(409000)
+    expect(q?.prepay).toEqual({ percent: 5, totalGoc: 430000 })
+  })
+
+  // CA CHỨNG MINH LUẬT — đừng đổi bộ số này cho "tròn hơn": phần lớn bộ số cho kết quả GIỐNG
+  // nhau ở cả hai cách làm tròn nên không phân biệt được gì. Bộ này lệch đúng 1.000₫.
+  it('mùa + ưu đãi làm tròn MỘT lần: 430.000 +15% −5% → 470.000 (hai lần ra 471.000)', () => {
+    const q = computeQuote(FLAT, MOT, { seasons: [HE], departDate: '2027-07-01', prepayPercent: 5, prepay: true })
+    expect(q?.total).toBe(470000)
+    expect(q?.season).toEqual({ name: 'Cao điểm hè', percent: 15 })
+    expect(q?.prepay).toEqual({ percent: 5, totalGoc: 495000 })
+  })
+
+  it('nhiều hạng khách: totalGoc cộng dồn đúng theo từng hạng', () => {
+    const pax: PaxCounts = { adult: 2, child: 1, senior: 0, infant: 0 }
+    const q = computeQuote(FLAT, pax, { prepayPercent: 5, prepay: true })
+    // 430.000 → 409.000 ; 340.000 → 323.000 (ceil 323.000)
+    expect(q?.total).toBe(409000 * 2 + 323000)
+    expect(q?.prepay?.totalGoc).toBe(430000 * 2 + 340000)
+  })
+
+  it('bảng tiers cũng được giảm', () => {
+    const T: PriceTable = { kind: 'tiers', tiers: [{ maxPax: 4, amount: 1200000 }] }
+    const pax: PaxCounts = { adult: 2, child: 0, senior: 0, infant: 0 }
+    const q = computeQuote(T, pax, { prepayPercent: 5, prepay: true })
+    expect(q?.total).toBe(1140000 * 2)
+    expect(q?.prepay).toEqual({ percent: 5, totalGoc: 2400000 })
+  })
+
+  it('hạng giá 0 vẫn 0', () => {
+    const T: PriceTable = { kind: 'flat', perPax: { adult: 430000, infant: 0 } }
+    const pax: PaxCounts = { adult: 1, child: 0, senior: 0, infant: 1 }
+    const q = computeQuote(T, pax, { prepayPercent: 5, prepay: true })
+    expect(q?.perPax.infant).toBe(0)
+  })
+
+  it('apDieuChinh: tham số thứ ba tuỳ chọn, chữ ký cũ không đổi', () => {
+    expect(apDieuChinh(430000, 15)).toBe(495000)
+    expect(apDieuChinh(430000, 15, 5)).toBe(470000)
+    expect(apDieuChinh(730500, 0, 0)).toBe(730500)
   })
 })

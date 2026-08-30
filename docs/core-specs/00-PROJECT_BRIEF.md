@@ -50,6 +50,8 @@ Và **cách khách đặt**: nút "Đặt vé trực tuyến" dẫn thẳng sang
 
 > **Bổ sung 2026-08-21 (`QĐ-2026-08-21-01`, ADR-0027):** trang chi tiết Tour có thêm **form đặt tour** — chọn ngày, số người theo hạng (người lớn / trẻ em / người cao tuổi), tạm tính, tên và số điện thoại — gửi về email và Zalo của công ty, lưu bản ghi ở Cloudflare D1 kèm mã đơn. Đơn là *yêu cầu đặt*, nhân viên gọi lại xác nhận. Vẫn không giỏ hàng, không thanh toán; Zalo vẫn là kênh tư vấn và là đích của menu "Đặt vé trực tuyến". Spec: `docs/specs/SPEC-2026-08-21-dat-tour.md`.
 
+> **Bổ sung 2026-08-30 (`QĐ-2026-08-30-01`, ADR-0031):** form đặt tour có thêm ô chọn **hình thức thanh toán** — *chuyển khoản trước* (giảm một mức phần trăm khai trong Studio) hoặc *thanh toán khi khởi hành*. Đây là một **điều khoản giá**, không phải cơ chế thanh toán: site không có cổng thanh toán, không nhận tiền, không biết khách đã chuyển hay chưa; nhân viên vẫn gọi lại xác nhận và tự đối soát. §5 "không thanh toán trực tuyến, không giỏ hàng, không quản lý chỗ trống" còn nguyên. Spec: `docs/specs/SPEC-2026-08-30-uu-dai-thanh-toan-truoc.md`.
+
 **Bốn điểm khác biệt** chủ dự án chốt 2026-08-06:
 
 - **Xe đưa đón tận nơi** — không bắt khách tự ra bến.

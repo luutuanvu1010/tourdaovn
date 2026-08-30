@@ -87,6 +87,29 @@ describe('handleBooking', () => {
     expect(ses.body.FromEmailAddress).toContain('@tourdao.vn')
   })
 
+  // Fix round 1 (Finding 1): trước ca này, không test nào trong repo đi hết đường
+  // v.paymentMethod (BookingValid, Task 2) → record.paymentMethod (handler.ts:216) → cột
+  // payment_method (D1). store.test.ts gọi thẳng insertBooking, không qua handler; notify.test.ts
+  // không gọi handleBooking; các ca payload() sẵn có ở đây không khai paymentMethod. Hạ cứng
+  // handler.ts:216 thành 'onboard' vẫn xanh hết — đúng lỗ hổng task này phải bịt.
+  // paymentMethod: 'transfer' PHẢI đi kèm quoted.prepay hợp lệ — luật chéo ADR-0031 §5
+  // (validateBooking, schema.ts) từ chối 'transfer' không có prepay bằng 400 quotedMismatch;
+  // thiếu prepay thì ca này sẽ 400 chứ không phải 201, và chứng minh điều ngược lại ý định.
+  it('paymentMethod=transfer (kèm prepay hợp lệ) đi hết đường tới D1', async () => {
+    const { f } = fakeFetch(); const { ctx, flush } = mkCtx()
+    const body = payload({
+      paymentMethod: 'transfer',
+      quoted: { perPax: { adult: 550000, child: 350000 }, total: 1450000, quotedAt: '2026-08-21T02:00:00Z', prepay: { percent: 10, totalGoc: 1450000 } },
+    })
+    const res = await handleBooking(req(body), mkEnv(), ctx, { fetchImpl: f, now: () => NOW })
+    expect(res.status).toBe(201)
+    const j = await res.json() as any
+    expect(j.ok).toBe(true)
+    await flush()
+    const row = await getBookingByCode(env.BOOKING_DB, j.code)
+    expect(row?.payment_method).toBe('transfer')
+  })
+
   it('honeypot có chữ → 200 mã giả, KHÔNG lưu, KHÔNG báo', async () => {
     const { f, calls } = fakeFetch(); const { ctx, flush } = mkCtx()
     const res = await handleBooking(req(payload({ website: 'http://spam' })), mkEnv(), ctx, { fetchImpl: f, now: () => NOW })

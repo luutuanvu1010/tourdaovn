@@ -217,7 +217,7 @@ export async function handleBooking(request: Request, env: BookingEnv, ctx: Wait
       code: '', createdAt: t.toISOString(), tourSlug: v.tourSlug, tourTitle: v.tourTitle, bookingRef: v.bookingRef,
       departDate: v.departDate, pax: v.pax, quoted: v.quoted,
       customerName: v.name, phone: v.phone, email: v.email, pickup: v.pickup || null, note: v.note || null,
-      lang: 'vi', source: 'web', ipHash, userAgent: (request.headers.get('user-agent') ?? '').slice(0, 200) || null,
+      lang: 'vi', source: 'web', paymentMethod: v.paymentMethod, ipHash, userAgent: (request.headers.get('user-agent') ?? '').slice(0, 200) || null,
     }
     let inserted = false
     for (let i = 0; i < CODE_RETRIES && !inserted; i++) {
