@@ -4,8 +4,8 @@
 Quyết định RIÊNG của tourdaovn về việc chia hệ thành ba lớp có ranh giới được máy canh.
 Cơ chế tái dùng được cho mọi site: (1) nghiệp vụ thuần, không biết mình chạy ở đâu;
 (2) một nguồn token sinh ra nhiều dạng bề mặt, kể cả dạng không dùng được biến CSS;
-(3) quản trị không đi tắt xuống hạ tầng. Nội dung nghiệp vụ cụ thể (mùa vụ, trạng thái
-đơn, QR chuyển khoản) là của site này.
+(3) quản trị dựng trên CMS đã có thay vì mở một mặt phẳng điều khiển thứ hai.
+Nội dung nghiệp vụ cụ thể (mùa vụ, trạng thái đơn, QR chuyển khoản) là của site này.
 ═══════════════════════════════════════════════════════════════════ -->
 
 - **Trạng thái:** đề xuất, chờ chủ dự án phê chuẩn
@@ -31,8 +31,7 @@ tin qua email và Zalo. Ngay tuần đầu đã lộ ra rằng hệ **không có
   ai, không cơ chế nào phát hiện.
 
 Ba khoảng trống này không độc lập. Giá mùa vụ (nghiệp vụ) phải hiện ra trong thư báo đơn
-(bề mặt) và phải đối chiếu được khi nhân viên gọi khách (quản trị). Làm rời từng cái sẽ phải
-sửa xuyên tầng ba lần.
+(bề mặt) và phải đối chiếu được khi nhân viên gọi khách (quản trị).
 
 ## Quyết định
 
@@ -44,8 +43,8 @@ email, hay trong máy chủ. Đầu vào và đầu ra là dữ liệu thuần. 
 mạng, không cơ sở dữ liệu.** Phần lớn đã có sẵn và đang thuần: `quote.ts`, `schema.ts`,
 `code.ts`, `vn-date.ts`.
 
-**Lớp bề mặt** giữ mọi thứ con người nhìn thấy: trang web, thư báo đơn, tin Zalo, bảng điều
-khiển. Một nguồn token sinh ra **hai dạng đầu ra** (§3).
+**Lớp bề mặt** giữ mọi thứ con người nhìn thấy: trang web, thư báo đơn, tin Zalo, và bảng điều
+khiển trong Studio. Một nguồn token sinh ra **hai dạng đầu ra** (§3).
 
 **Lớp quản trị** là nơi người vận hành nhìn và tác động, và **không được đi tắt xuống D1** —
 mọi thao tác qua lớp nghiệp vụ, để một quy tắc chỉ tồn tại ở một chỗ.
@@ -59,28 +58,78 @@ mọi thao tác qua lớp nghiệp vụ, để một quy tắc chỉ tồn tại
 | Quản trị không viết SQL rải rác | validator: chỉ tầng lưu trữ được chứa câu SQL |
 
 Ranh giới không có máy canh sẽ trôi. `notify/format.ts` viết cứng màu **từ ngày đầu** mà không
-ai chặn, chính vì chưa có luật nào để chặn. Đây là lý do chọn phân thư mục có cổng, thay vì
-chỉ định nghĩa hợp đồng trên giấy.
+ai chặn, chính vì chưa có luật nào để chặn.
 
-### 2. Giá mùa vụ: bảng riêng, phụ thu phần trăm, lấy mức cao nhất
+### 2. Bảng điều khiển là một tab trong Sanity Studio, không phải mặt phẳng thứ hai
 
-- **Nguồn:** tab `mua` trong Google Sheet → `data/mua-vu.yaml`. **Tách khỏi `prices.yaml`** vì
-  file giá có luật "mỗi khoá cấp cao nhất là một `bookingRef`"; chen bảng mùa vào là phá luật
-  đó. Hai file, hai vai: `prices.yaml` là **giá gốc theo tour**, `mua-vu.yaml` là **quy tắc
-  điều chỉnh theo thời gian**. Không phải hai nguồn cho cùng một thứ.
-- **Sáu cột:** Tên mùa · Từ ngày · Đến ngày · Phụ thu % · Áp cho · Trừ ra. Ngày lễ rời rạc là
-  một dòng có *Từ ngày* = *Đến ngày*. *Áp cho* trống = mọi tour. *Trừ ra* liệt kê tour được
-  miễn — cần cột này vì luật "lấy mức cao nhất" tự nó không diễn tả được ý miễn trừ.
-- **Cách tính:** theo **ngày khởi hành** khách chọn, gom mọi dòng mùa phủ ngày đó và áp được
-  cho tour đó, **lấy mức phần trăm cao nhất** (không cộng dồn), nhân vào giá từng hạng khách,
-  **làm tròn lên nghìn**. Hạng em bé giá 0 nhân bao nhiêu vẫn 0.
-- **Không phá `BK1`.** Trang nướng sẵn danh sách mùa áp được cho chính tour đó — vài dòng, rất
-  nhẹ. Khách đổi ngày thì trình duyệt tự tính lại, không lời gọi mạng nào. Máy chủ vẫn chỉ
-  kiểm nhất quán số học, không tin giá, vì nhân viên mới là người chốt.
-- **Đơn ghi lại mùa đã áp và mức bao nhiêu.** Thiếu nó thì ba tháng sau nhìn một đơn 888.000₫
-  sẽ không ai biết vì sao không phải 740.000₫ — nhất là khi bảng mùa lúc đó đã sửa.
+Chủ dự án chốt: **ai vào được Sanity CMS thì vào được bảng điều khiển**. Câu đó không phải một
+yêu cầu phải đi dựng — nó **tự đúng** nếu bảng điều khiển sống trong chính Studio đã có
+(`tourdaovn.sanity.studio`, cấu hình ở `cms/sanity.config.ts`, hiện dùng `structureTool` +
+`languageFilter`). Sanity cho phép gắn thêm tab công cụ riêng vào Studio.
 
-### 3. Bề mặt: một nguồn token, sinh tự động ra dạng dùng được cho thư
+Ba thứ được gỡ cùng lúc:
+
+- **Không có cửa một chiều nào phải bước qua.** Bản trước của ADR này cảnh báo rằng thêm trang
+  quản trị sẽ khiến site thôi là "trang tĩnh cộng đúng một đường chạy động", và mỗi lần phát
+  hành phải tính thêm phần động. **Cảnh báo đó không còn áp dụng** — site giữ nguyên hình dạng.
+- **Không dựng hệ xác thực thứ hai.** Không Cloudflare Access, không danh sách email đồng bộ
+  tay, không phân quyền song song. Thêm người vào Sanity là họ vào được; bớt đi là mất quyền.
+- **Không có trang quản trị nào để lọt lên máy tìm kiếm.** Rủi ro đó biến mất cùng với trang.
+
+**Chỗ duy nhất phải bắc cầu:** đơn nằm trong D1, không nằm trong Sanity. Studio chạy trong
+trình duyệt nên phải gọi qua một đường API để lấy đơn. Đường đó nhận danh tính Sanity của
+người đang đăng nhập và **hỏi ngược lại Sanity để xác nhận** trước khi trả dữ liệu — vẫn là
+"ai vào được Sanity thì vào được", không sinh thêm mật khẩu nào. Đây là đường **đọc D1 duy
+nhất** ngoài endpoint nhận đơn; nó thuộc lớp quản trị và tuân luật "không viết SQL rải rác".
+
+**Vòng đầu làm bốn việc:** danh sách đơn · xem chi tiết đủ để gọi khách · đổi trạng thái ·
+**danh sách đơn chưa báo tin được**. Việc thứ tư quan trọng hơn vẻ ngoài: đó là đơn của khách
+thật đang nằm im mà không ai biết.
+
+**Thiết kế cho nhiều loại dịch vụ ngay từ đầu, nhưng vòng đầu chỉ đổ đơn tour vào.** Chủ dự án
+chốt "tour trước, mở dần sau". Nghĩa là bảng đơn và giao diện bảng điều khiển phải mang sẵn
+khái niệm *loại dịch vụ*, để sau này thêm vé công viên hay xe đưa đón không phải đập đi làm
+lại. Nhưng không dựng trước form cho các loại chưa có.
+
+**Trạng thái đơn là quy tắc nghiệp vụ**, không phải chuyện của bảng điều khiển. Bộ trạng thái
+và luật chuyển đổi nằm ở lớp nghiệp vụ; bảng điều khiển chỉ là cái nút bấm. Đây cũng là chỗ
+đón nghiệp vụ sau này: huỷ đơn, đổi ngày, ghép đoàn — đều là chuyển trạng thái.
+
+### 3. Giá mùa vụ: một file giá giữ nguyên, mùa thành nội dung biên tập trong Studio
+
+Chủ dự án chốt hai điều tưởng như xung khắc — **"chỉ 01 file giá"** và **"mùa cao điểm quản lý
+trong bảng điều khiển"**. Chúng khớp nhau nếu mùa **không phải file nào cả**:
+
+- `data/prices.yaml` **giữ nguyên**: một file, giá gốc theo tour, nhập qua Google Sheet
+  (`QĐ-2026-08-26-02`). Không thêm file dữ liệu thứ hai.
+- **Mùa là một loại tài liệu trong Sanity**, biên tập ngay trong Studio cùng chỗ với bảng điều
+  khiển. Sửa mức phụ thu như sửa một bài viết, bấm Publish, trang dựng lại, giá mới lên.
+
+**Cách này không phá ràng buộc "giá chỉ đọc lúc dựng trang".** Sanity vốn đã được đọc lúc dựng
+và Publish vốn đã kích một lần dựng — cơ chế có sẵn, không phát minh gì. `ADR-0007` nguyên vẹn,
+`BK1` nguyên vẹn (endpoint vẫn không đọc Sanity, chỉ build đọc).
+
+**Mỗi mùa gồm:** tên mùa · từ ngày · đến ngày · phụ thu phần trăm · áp cho tour nào (bỏ trống =
+mọi tour) · trừ ra tour nào. Ngày lễ rời rạc là một mùa có *từ ngày* = *đến ngày*. Cần trường
+*trừ ra* vì luật "lấy mức cao nhất" tự nó không diễn tả được ý miễn trừ.
+
+**Cách tính, đúng bốn quyết định của chủ dự án:** theo **ngày khởi hành** khách chọn, gom mọi
+mùa phủ ngày đó và áp được cho tour đó, **lấy mức phần trăm cao nhất** (không cộng dồn), nhân
+vào giá từng hạng khách, **làm tròn lên nghìn**. Hạng em bé giá 0 nhân bao nhiêu vẫn 0.
+
+**Trang nướng sẵn danh sách mùa áp được cho chính tour đó** — vài dòng, rất nhẹ. Khách đổi ngày
+thì trình duyệt tự tính lại, không lời gọi mạng nào. Máy chủ vẫn chỉ kiểm nhất quán số học,
+không tin giá, vì nhân viên mới là người chốt.
+
+**Đơn ghi lại mùa đã áp và mức bao nhiêu.** Thiếu nó thì ba tháng sau nhìn một đơn 2.483.000₫
+sẽ không ai biết vì sao không phải 1.910.000₫ — nhất là khi mùa lúc đó đã sửa.
+
+**Bốn điều validator phải chặn:** phần trăm ngoài khoảng hợp lý; ngày kết thúc trước ngày bắt
+đầu; tour được viện dẫn trong *áp cho* / *trừ ra* không tồn tại trong bảng giá; hai mùa phủ
+nhau cho cùng một tour (chỉ cảnh báo — luật "lấy cao nhất" vẫn cho kết quả xác định, nhưng
+người nhập nên biết mình đang khai trùng).
+
+### 4. Bề mặt: một nguồn token, sinh tự động ra dạng dùng được cho thư
 
 `tokens.css` **vẫn là nguồn duy nhất** (`07-DESIGN_TOKENS`). Thêm một bước lúc dựng: đọc
 `tokens.css`, lấy tập con token dùng cho thư từ (màu chữ, nền, nhấn, cảnh báo, cỡ chữ cơ bản,
@@ -98,23 +147,12 @@ việc thiếu nhóm này.
 
 **Tách nội dung khỏi trình bày.** *Nói gì* (mã đơn, tour, ngày, số người, tạm tính, mùa đã áp)
 thuộc nghiệp vụ và giống nhau ở mọi kênh. *Trông thế nào* thuộc bề mặt và khác nhau theo kênh:
-email cần HTML nội tuyến, Zalo chỉ nhận chữ thuần, bảng điều khiển dùng giao diện web. Tách ra
-thì thêm kênh mới chỉ là viết một khuôn trình bày.
+email cần HTML nội tuyến, Zalo chỉ nhận chữ thuần, bảng điều khiển dùng giao diện Studio. Tách
+ra thì thêm kênh mới chỉ là viết một khuôn trình bày.
 
-### 4. Quản trị: bốn việc, sau Cloudflare Access
-
-Vòng đầu đúng bốn việc: danh sách đơn · xem chi tiết đủ để gọi khách · đổi trạng thái · **danh
-sách đơn chưa báo tin được**. Việc thứ tư quan trọng hơn vẻ ngoài: đó là đơn của khách thật
-đang nằm im mà không ai biết.
-
-**Trạng thái đơn là quy tắc nghiệp vụ**, không phải chuyện của trang quản trị. Bộ trạng thái và
-luật chuyển đổi nằm ở lớp nghiệp vụ; bảng điều khiển chỉ là cái nút bấm. Đây cũng là chỗ đón
-nghiệp vụ sau này: huỷ đơn, đổi ngày, ghép đoàn — đều là chuyển trạng thái.
-
-**Cửa một chiều phải nói rõ:** site hiện là trang tĩnh cộng **đúng một** đường chạy động. Bảng
-điều khiển thêm vài đường nữa. Từ lúc đó, mỗi lần phát hành phải tính cả phần động, và khu vực
-quản trị **không được lập chỉ mục, không vào sitemap** — một trang quản trị lọt lên máy tìm
-kiếm là sự cố thật. Hai lớp bảo vệ: Cloudflare Access ở tầng mạng, `noindex` ở tầng trang.
+**Luật máy canh:** cấm mã màu và cỡ chữ viết cứng trong mọi file bề mặt, trừ file sinh tự động.
+Dự án đã có `check:theme` và `check:token-parity`; đây là mở rộng phạm vi chúng sang thư mục
+thư từ — nơi hiện chưa có luật nào ngó tới.
 
 ### 5. QR chuyển khoản: tiện ích, không ràng buộc
 
@@ -137,21 +175,31 @@ xác thực và mẫu ZNS duyệt trước — chừa sẵn chỗ cắm, nhưng 
 ## Hệ quả
 
 - **Được:** mỗi việc mới có chỗ để đặt; đổi màu thương hiệu một chỗ là đổi cả web lẫn thư; đơn
-  không còn nằm im vô hình; giá mùa vụ khai một bảng thay vì sửa 29 dòng.
-- **Mất:** thêm ba validator phải nuôi; thêm một file dữ liệu (`mua-vu.yaml`) và một tab Sheet;
-  site có thêm đường chạy động, nên phát hành phức tạp hơn.
-- **Cửa một chiều:** khu vực quản trị. Từ lúc có nó, không quay lại được kiểu "site thuần tĩnh".
+  không còn nằm im vô hình; mùa vụ sửa được ngay trong Studio không cần đụng kho mã; quyền vào
+  bảng điều khiển quản một nơi.
+- **Mất:** thêm ba validator phải nuôi; Studio nay có phần đọc dữ liệu ngoài Sanity, nên nâng
+  cấp Studio phải kiểm cả tab đó; thêm một đường API đọc D1 phải giữ an toàn.
+- **Không còn cửa một chiều nào** trong ADR này — khác với bản đề xuất đầu, vì bảng điều khiển
+  chuyển vào Studio.
 - **Không đụng:** `ADR-0007` (nguồn giá đọc lúc dựng), `BK1`–`BK5`, đường nhập giá qua Google
-  Sheet (`QĐ-2026-08-26-02`), và tiền đề "đơn là yêu cầu đặt" của `ADR-0027`.
+  Sheet (`QĐ-2026-08-26-02`), hình dạng "tĩnh + một route động" của site, và tiền đề "đơn là
+  yêu cầu đặt" của `ADR-0027`.
 
 ## Thứ tự thi công
 
 Ba lớp không làm cùng lúc. Thứ tự theo phụ thuộc dữ liệu:
 
-1. **Nghiệp vụ — giá mùa vụ.** Đổi lược đồ, nên làm trước; mọi thứ khác dựng trên nó.
+1. **Nghiệp vụ — giá mùa vụ.** Loại tài liệu mùa trong Sanity, đọc lúc dựng, phép tính, hiện
+   trên form và trong thư. Làm trước vì mọi thứ khác dựng trên nó.
 2. **Bề mặt — token cho thư, tách nội dung khỏi trình bày.** Cần xong trước khi thư mang thêm
    dòng "mùa đã áp" và mã QR.
-3. **Quản trị — bốn việc tối thiểu.** Tiêu thụ cả hai lớp trên.
+3. **Quản trị — tab bảng điều khiển trong Studio, bốn việc.** Tiêu thụ cả hai lớp trên.
 4. **QR nhịp gần**, rồi **kênh gửi khách** khi thủ tục OA xong.
 
 Mỗi bước có spec và kế hoạch riêng.
+
+## Câu còn mở
+
+- **Mùa vụ vào Studio thì giá gốc có nên vào theo không?** Hiện giá gốc nhập ở Google Sheet, mùa
+  nhập ở Studio — hai nơi cho hai thứ khác nhau, nhưng người nhập phải nhớ cái nào ở đâu. Chưa
+  quyết; để dùng thật một thời gian rồi xét, vì gộp về Studio là đảo `QĐ-2026-08-26-02`.

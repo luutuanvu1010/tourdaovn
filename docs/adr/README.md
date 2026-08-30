@@ -78,9 +78,11 @@ Nhóm cần tổng quát hóa (có GHI CHÚ CORE — nguyên tắc engine, hằn
   ở `/` là cấu hình (`primaryDestinationSlug`), không phải luật engine.
 - [ADR-0030](ADR-0030-ba-lop-nghiep-vu-be-mat-quan-tri.md) — chia hệ thành **ba lớp**: nghiệp
   vụ (quy tắc kinh doanh thuần, kiểm được không cần trình duyệt/mạng/CSDL), bề mặt (một nguồn
-  token sinh cả CSS lẫn dạng dùng được cho email), quản trị (không đi tắt xuống hạ tầng). Mỗi
-  ranh giới có một validator canh. Đề xuất 2026-08-30. Khuôn tái dùng: ranh giới không có máy
-  canh sẽ trôi — `notify/format.ts` viết cứng màu từ ngày đầu vì chưa có luật nào chặn.
+  token sinh cả CSS lẫn dạng dùng được cho email), quản trị (**một tab trong Sanity Studio**,
+  không mở mặt phẳng điều khiển thứ hai). Mỗi ranh giới có một validator canh. Đề xuất
+  2026-08-30. Khuôn tái dùng: (a) ranh giới không có máy canh sẽ trôi — `notify/format.ts` viết
+  cứng màu từ ngày đầu vì chưa có luật nào chặn; (b) dựng quản trị trên CMS đã có thì thừa
+  hưởng luôn hệ người dùng của nó và tránh được cửa một chiều "site thôi thuần tĩnh".
 
 ## ADR gốc KHÔNG mang vào Core (và vì sao)
 
