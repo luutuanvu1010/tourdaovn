@@ -41,4 +41,12 @@ describe('pickSeason', () => {
     const ds: Season[] = [{ name: 'Sai', from: '2027-08-31', to: '2027-06-01', percent: 50 }, HE]
     expect(pickSeason(ds, '2027-07-01')?.name).toBe('Cao điểm hè')
   })
+  it('ngày khởi hành sai hình dạng ISO thì trả null, không ném', () => {
+    expect(pickSeason(DS, '')).toBeNull()
+    expect(pickSeason(DS, '2027/07/01')).toBeNull()
+  })
+  it('mùa khai sai hình dạng ngày thì bị bỏ qua, mùa hợp lệ đứng sau vẫn được chọn', () => {
+    const ds: Season[] = [{ name: 'Sai hình dạng', from: '2027/06/01', to: '2027-08-31', percent: 99 }, HE]
+    expect(pickSeason(ds, '2027-07-01')?.name).toBe('Cao điểm hè')
+  })
 })
