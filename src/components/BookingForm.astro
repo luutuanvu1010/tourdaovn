@@ -486,6 +486,19 @@ if (!turnstileSiteKey) {
   .bf__input { width: 100%; font: inherit; font-size: var(--fs-base); padding: var(--s3) var(--s4); border: 1px solid var(--c-border); border-radius: var(--radius-md); background: var(--c-card); color: var(--c-text); }
   .bf__input:focus { outline: 2px solid var(--c-primary); outline-offset: 1px; }
   .bf__input[aria-invalid="true"] { border-color: var(--c-accent); }
+  /* iOS Safari đo `input[type=date]` như control gốc: phần shadow (ô ngày + nút picker) đặt một
+     sàn bề rộng nội tại, và `min-width: auto` mặc định không cho hộp co xuống dưới sàn đó —
+     `width: 100%` thua. Với --fs-base 19px cộng đệm var(--s3) var(--s4), sàn ấy vượt lòng
+     .sidebar-card trên iPhone: hộp ngày thò ra ngoài thẻ trắng trong khi ba ô nhập bước 2 vẫn
+     vừa khung (chủ dự án báo 2026-08-30, Safari iOS). Blink KHÔNG áp sàn này — đo ở Chrome
+     320/360/390/414px đều vừa đúng khung, nên đừng nghiệm thu bản vá này bằng Chrome.
+     `min-width: 0` gỡ sàn, `appearance: none` bỏ luôn lối tự đo của control gốc.
+     Dòng thứ hai là phần bắt buộc đi kèm, không phải trang trí: appearance:none làm iOS canh
+     GIỮA phần giá trị, trả về canh trái để ô ngày còn cùng bộ với ô Họ tên, Số điện thoại.
+     Giữ class trong bộ chọn (không viết `input[type=date]` trần) để Astro còn gắn được thuộc tính
+     scoped — cùng lý do đã ghi ở luật `[hidden]` cuối khối này. */
+  .bf__input[type="date"] { min-width: 0; appearance: none; -webkit-appearance: none; }
+  .bf__input[type="date"]::-webkit-date-and-time-value { text-align: left; }
   .bf__pax { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); padding: var(--s2) 0; }
   .bf__pax-info { display: flex; flex-direction: column; gap: 2px; }
   .bf__pax-name { font-size: var(--fs-base); font-weight: var(--fw-600); color: var(--c-text); }
