@@ -340,8 +340,11 @@ const CONTENT_MODEL_ENTITY_FIELDS: Record<string, Record<string, { required: boo
   // Bảng quy tắc điều chỉnh giá theo thời gian, KHÔNG chứa con số tiền (ADR-0030 §3).
   // Sub-field của muaVu[] (tenMua/tuNgay/denNgay/phanTram/apCho/truRa) xử ở
   // SUB_FIELD_IGNORE bên trên — cùng cơ chế với pickupPoints[]/stats[] của siteSettings.
+  // batUuDai + phanTramUuDai thêm v1.0.21 — ưu đãi thanh toán trước (ADR-0031 §1).
   bangGiaMuaVu: {
     muaVu: { required: false },
+    batUuDai: { required: false },
+    phanTramUuDai: { required: false },
   },
 }
 
