@@ -35,10 +35,19 @@ export function formatText(b: NewBooking): string {
     `Ngày khởi hành: ${formatDateVN(b.departDate)}`,
     ...paxLines(b),
     `Tạm tính: ${formatPrice(b.quoted.total, 'vi')}`,
+  ]
+  // Mùa đã áp (nếu có) — ghi lại vì sao ra con số tạm tính ở trên. Đây là nội dung thư/tin gửi
+  // nhân viên (BK3 chỉ cấm log PII, không cấm nội dung thư như dòng này).
+  if (b.quoted.season) {
+    const s = b.quoted.season
+    const dau = s.percent > 0 ? '+' : ''
+    lines.push(`Mùa áp dụng: ${s.name} (${dau}${s.percent}%)`)
+  }
+  lines.push(
     ``,
     `Khách: ${b.customerName}`,
     `SĐT: ${b.phone}`,
-  ]
+  )
   if (b.email) lines.push(`Email: ${b.email}`)
   if (b.pickup) lines.push(`Điểm đón: ${b.pickup}`)
   if (b.note) lines.push(`Ghi chú: ${b.note}`)

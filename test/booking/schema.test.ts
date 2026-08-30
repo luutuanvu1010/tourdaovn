@@ -132,6 +132,40 @@ describe('parseBookingPayload', () => {
     expect(p.name).toBe('5')
     expect((p as any).extra).toBeUndefined()
   })
+
+  // Task 6 — mùa đã áp (Task 2: computeQuote trả Quote.season) đi theo `quoted` để đơn ghi lại
+  // vì sao ra con số này. Server không tin và không tính lại theo mùa (BK1) — chỉ làm sạch.
+  it('nhận quoted.season và giữ nguyên khi hợp lệ', () => {
+    const p = parseBookingPayload({
+      tourSlug: 'x', tourTitle: 'X', bookingRef: 'x', departDate: '2027-04-30',
+      pax: { adult: 1 },
+      quoted: { perPax: { adult: 962000 }, total: 962000, quotedAt: '2027-01-01T00:00:00.000Z', season: { name: 'Lễ 30/4', percent: 30 } },
+      name: 'A', phone: '0905123456',
+    })
+    expect(p.quoted.season).toEqual({ name: 'Lễ 30/4', percent: 30 })
+  })
+
+  it('season rác (không phải object) thì bỏ, không ném', () => {
+    const p = parseBookingPayload({
+      tourSlug: 'x', tourTitle: 'X', bookingRef: 'x', departDate: '2027-04-30',
+      pax: { adult: 1 },
+      quoted: { perPax: { adult: 1 }, total: 1, quotedAt: '2027-01-01T00:00:00.000Z', season: 'không phải object' },
+      name: 'A', phone: '0905123456',
+    })
+    expect(p.quoted.season).toBeUndefined()
+  })
+
+  it('season thiếu percent hoặc name sai kiểu thì bỏ', () => {
+    expect(parseBookingPayload({ quoted: { season: { name: 'X' } } }).quoted.season).toBeUndefined()
+    expect(parseBookingPayload({ quoted: { season: { name: 1, percent: 10 } } }).quoted.season).toBeUndefined()
+    expect(parseBookingPayload({ quoted: {} }).quoted.season).toBeUndefined()
+  })
+
+  it('tên mùa lọc ký tự điều khiển và cắt còn 60 ký tự', () => {
+    const p = parseBookingPayload({ quoted: { season: { name: 'A\n'.repeat(40), percent: 10 } } })
+    expect(p.quoted.season?.name.length).toBeLessThanOrEqual(60)
+    expect(p.quoted.season?.name).not.toMatch(/[\u0000-\u001F\u007F]/)
+  })
 })
 
 // Vòng review toàn nhánh 2026-08-23 — mục 6 và 7.

@@ -33,6 +33,18 @@ describe('format', () => {
     expect(h).toContain('Tour 3 đảo &lt;Nha Trang&gt;')
     expect(h).not.toContain('<Nha Trang>')
   })
+
+  // Task 6 — mùa đã áp (Task 2: computeQuote trả Quote.season) đi vào thư nội bộ để nhân viên
+  // thấy vì sao ra con số tạm tính này. Không phải log (BK3 chỉ cấm log PII, đây là nội dung thư).
+  it('có mùa thì thư ghi thêm một dòng', () => {
+    const withSeason: typeof b = { ...b, quoted: { ...b.quoted, season: { name: 'Lễ 30/4', percent: 30 } } }
+    const t = formatText(withSeason)
+    expect(t).toContain('Mùa áp dụng: Lễ 30/4 (+30%)')
+  })
+  it('không mùa thì không có dòng đó', () => {
+    const t = formatText(b)
+    expect(t).not.toContain('Mùa áp dụng')
+  })
 })
 
 describe('ses', () => {
