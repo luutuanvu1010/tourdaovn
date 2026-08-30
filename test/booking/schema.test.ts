@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { LIMITS, MSG, normalizePhone, parseBookingPayload, validateBooking, type BookingInput } from '../../src/lib/booking/schema'
+import { LIMITS, MSG, buildQuotedPayload, normalizePhone, parseBookingPayload, validateBooking, type BookingInput } from '../../src/lib/booking/schema'
+import { computeQuote } from '../../src/lib/booking/quote'
 
 const TODAY = '2026-09-01'
 function good(over: Partial<BookingInput> = {}): BookingInput {
@@ -165,6 +166,37 @@ describe('parseBookingPayload', () => {
     const p = parseBookingPayload({ quoted: { season: { name: 'A\n'.repeat(40), percent: 10 } } })
     expect(p.quoted.season?.name.length).toBeLessThanOrEqual(60)
     expect(p.quoted.season?.name).not.toMatch(/[\u0000-\u001F\u007F]/)
+  })
+})
+
+// Lỗi chặn gộp đã sửa: BookingForm.astro dựng `quoted` gửi lên bằng object literal tay —
+// `{ perPax: quote.perPax, total: quote.total, quotedAt }` — bỏ sót `quote.season`. Sáu ca ở
+// trên (và ở notify.test.ts) đều TỰ DỰNG SẴN một `quoted` đã có `season` rồi mới đưa vào hàm,
+// nên chúng xanh dù trình duyệt không hề gửi mùa lên máy chủ. Ca dưới đây đi qua đúng ranh giới
+// đó: gọi `computeQuote()` THẬT (không tự bịa season) rồi đưa kết quả qua `buildQuotedPayload` —
+// đúng và DUY NHẤT hàm mà script trong BookingForm.astro gọi để dựng `quoted` trước khi
+// `JSON.stringify` và `fetch`. Vì script không còn logic nào khác quyết định hình dạng `quoted`,
+// phá `buildQuotedPayload` (bỏ nhánh spread `season`) tương đương phá đúng dòng đã gây lỗi —
+// ca này sẽ đỏ ngay, khác với sáu ca cũ.
+describe('buildQuotedPayload — dữ liệu do trình duyệt dựng có mang mùa', () => {
+  it('computeQuote → buildQuotedPayload → parseBookingPayload (qua JSON như fetch thật) giữ được season', () => {
+    const seasons = [{ name: 'Lễ 30/4', from: '2027-04-28', to: '2027-05-03', percent: 30 }]
+    const quote = computeQuote({ kind: 'flat', perPax: { adult: 740000 } }, { adult: 1, child: 0, senior: 0, infant: 0 }, { seasons, departDate: '2027-04-30' })
+    expect(quote?.season).toEqual({ name: 'Lễ 30/4', percent: 30 }) // computeQuote thật, không tự bịa
+
+    const quoted = buildQuotedPayload(quote!, '2027-01-01T00:00:00.000Z')
+    expect(quoted.season).toEqual({ name: 'Lễ 30/4', percent: 30 })
+
+    // JSON.parse(JSON.stringify(...)) mô phỏng đúng vòng fetch() của form: client stringify,
+    // handler parse rồi đưa qua parseBookingPayload — chỗ server đọc quoted.season từ payload thô.
+    const wire = JSON.parse(JSON.stringify({ quoted }))
+    expect(parseBookingPayload(wire).quoted.season).toEqual({ name: 'Lễ 30/4', percent: 30 })
+  })
+
+  it('không rơi vào mùa nào thì quoted không có khoá season — giữ nguyên hình dạng payload cũ', () => {
+    const quote = computeQuote({ kind: 'flat', perPax: { adult: 740000 } }, { adult: 1, child: 0, senior: 0, infant: 0 })
+    const quoted = buildQuotedPayload(quote!, '2027-01-01T00:00:00.000Z')
+    expect('season' in quoted).toBe(false)
   })
 })
 

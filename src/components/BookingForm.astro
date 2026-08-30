@@ -210,7 +210,7 @@ if (!turnstileSiteKey) {
   import type { Season } from '../lib/booking/season'
   import { formatPrice } from '../lib/renderer'
   import { addDaysISO, formatDateVN, todayVN } from '../lib/booking/vn-date'
-  import { LIMITS, MSG } from '../lib/booking/schema'
+  import { LIMITS, MSG, buildQuotedPayload } from '../lib/booking/schema'
 
   declare global {
     interface Window {
@@ -466,7 +466,7 @@ if (!turnstileSiteKey) {
       const payload = {
         tourSlug: val('tourSlug'), tourTitle: val('tourTitle'), bookingRef: val('bookingRef'),
         departDate: val('departDate'), pax: readPax(),
-        quoted: { perPax: quote.perPax, total: quote.total, quotedAt },
+        quoted: buildQuotedPayload(quote, quotedAt),
         name: val('name'), phone: val('phone'), email: val('email'), pickup: val('pickup'), note: val('note'),
         turnstileToken: tokenInput.value, website: val('website'),
       }

@@ -1,7 +1,7 @@
 // schema.ts — hợp đồng payload của POST /api/dat-tour và luật kiểm (SPEC §4.4).
 // Thuần TypeScript, không Astro, không D1. Thông điệp tiếng Việt ở đây là nguồn duy nhất
 // cho lỗi API; nhãn giao diện thì ở uiCopy.ts.
-import { PAX_ORDER, computeQuote, type PaxCode, type PaxCounts } from './quote'
+import { PAX_ORDER, computeQuote, type PaxCode, type PaxCounts, type Quote } from './quote'
 import { addDaysISO, isISODate } from './vn-date'
 
 export const LIMITS = {
@@ -43,6 +43,18 @@ export const MSG = {
 // `season` chỉ để ĐƠN GHI LẠI vì sao ra con số tạm tính này (ADR-0030 §3, Task 2). Server
 // không tin và không tính lại theo mùa (BK1: server không đọc giá) — xem `parseBookingPayload`.
 export type Quoted = { perPax: Partial<Record<PaxCode, number>>; total: number; quotedAt: string; season?: { name: string; percent: number } }
+
+/**
+ * Dựng `quoted` gửi lên máy chủ từ `Quote` mà `computeQuote()` vừa tính ở trình duyệt
+ * (BookingForm.astro script) — tách khỏi script trình duyệt để kiểm bằng test đi qua đúng ranh
+ * giới "trình duyệt dựng payload", chứ không phải test tự dựng sẵn `quoted` đã có `season`.
+ * Task 6 (lỗi đã sửa): script cũ dựng `quoted` trực tiếp, bỏ sót `quote.season`, nên mùa không
+ * bao giờ tới máy chủ dù `computeQuote` đã tính đúng. Chỉ thêm khoá `season` khi `quote.season`
+ * có mặt, để đơn không mùa giữ nguyên hình dạng payload cũ.
+ */
+export function buildQuotedPayload(quote: Pick<Quote, 'perPax' | 'total' | 'season'>, quotedAt: string): Quoted {
+  return { perPax: quote.perPax, total: quote.total, quotedAt, ...(quote.season ? { season: quote.season } : {}) }
+}
 
 export type BookingInput = {
   tourSlug: string; tourTitle: string; bookingRef: string; departDate: string
