@@ -76,6 +76,11 @@ Nhóm cần tổng quát hóa (có GHI CHÚ CORE — nguyên tắc engine, hằn
   của entity trụ là tham số chứ không phải hằng; quan hệ `* → touristDestination` là cạnh
   phẳng, độc lập với chuỗi `containedInPlace` và không suy ra nhau. Việc site này giữ Nha Trang
   ở `/` là cấu hình (`primaryDestinationSlug`), không phải luật engine.
+- [ADR-0030](ADR-0030-ba-lop-nghiep-vu-be-mat-quan-tri.md) — chia hệ thành **ba lớp**: nghiệp
+  vụ (quy tắc kinh doanh thuần, kiểm được không cần trình duyệt/mạng/CSDL), bề mặt (một nguồn
+  token sinh cả CSS lẫn dạng dùng được cho email), quản trị (không đi tắt xuống hạ tầng). Mỗi
+  ranh giới có một validator canh. Đề xuất 2026-08-30. Khuôn tái dùng: ranh giới không có máy
+  canh sẽ trôi — `notify/format.ts` viết cứng màu từ ngày đầu vì chưa có luật nào chặn.
 
 ## ADR gốc KHÔNG mang vào Core (và vì sao)
 
