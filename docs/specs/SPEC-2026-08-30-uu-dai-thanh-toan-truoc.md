@@ -112,9 +112,19 @@ export function apDieuChinh(amount: number, seasonPct: number, prepayPct = 0): n
    mùa vụ khỏi tự làm tròn mọi giá gốc không phải bội số nghìn; nay nó phải canh **hai** biến,
    không phải một. Bỏ sót là âm thầm đổi giá của 29 tour.
 3. **Một lần làm tròn**, ở cuối, sau khi đã nhân cả hai phần trăm.
-4. `totalGoc` tính bằng cách chạy lại đúng vòng gấp với `prepayPct = 0` — không nhân ngược, vì
-   làm tròn lên không có phép nghịch đảo.
-5. Hạng giá 0 vẫn 0.
+4. `totalGoc` cộng dồn **trong chính vòng lặp đang có**, bằng một biến chạy song song:
+
+   ```ts
+   totalGoc += apDieuChinh(goc, pct, 0) * count       // nhánh flat
+   totalGoc  = apDieuChinh(tier.amount, pct, 0) * n    // nhánh tiers
+   ```
+
+   **Không gọi lại `computeQuote()`** để lấy con số này. Lời gọi thứ hai có thể trả `null`, và
+   nó chọn mùa lại từ đầu — hai nguồn sự thật cho cùng một phép, đúng thứ `BK5` sinh ra để cấm.
+   Không nhân ngược từ `total`: làm tròn lên không có phép nghịch đảo.
+5. **Cả hai nhánh `flat` và `tiers`** đều áp ưu đãi. Bỏ sót nhánh `tiers` thì tour bán theo bậc
+   số khách âm thầm không được giảm, mà không cổng nào đỏ.
+6. Hạng giá 0 vẫn 0.
 
 ### 4.4 Hợp đồng payload và luật kiểm: `schema.ts`
 
@@ -172,8 +182,18 @@ con số**, không phải thứ để lọc.
   nhật cả đơn giá từng hạng lẫn tổng. **Không lời gọi mạng nào.**
 - Chưa chọn mà bấm gửi → chặn tại client, hiện lỗi trường bằng cơ chế `fields` đang có.
 - Payload gửi lên dựng qua `buildQuotedPayload()` — hàm đã tách sẵn ở lượt mùa vụ chính vì lỗi
-  Task 6 (script tự dựng `quoted` rồi bỏ sót khoá `season`). Thêm `prepay` **vào hàm đó**, không
-  dựng tay trong script.
+  Task 6 (script tự dựng `quoted` rồi bỏ sót khoá `season`). Chữ ký **phải nới**, nếu không lỗi
+  cũ lặp lại nguyên xi với khoá mới:
+
+  ```ts
+  buildQuotedPayload(
+    quote: Pick<Quote, 'perPax' | 'total' | 'season' | 'prepay'>,
+    quotedAt: string,
+  ): Quoted
+  ```
+
+  Chỉ thêm khoá `prepay` khi `quote.prepay` có mặt, để đơn không ưu đãi giữ nguyên hình dạng
+  payload cũ — đúng cách khoá `season` đang làm.
 - Không JS: hiện giá đầy đủ, không chọn sẵn gì — theo đánh đổi đã chấp nhận ở `ADR-0027`.
 - Màu, cỡ chữ, khoảng cách lấy từ `tokens.css`. Không viết cứng (luật cứng 1, `CLAUDE.md` §8).
 
@@ -205,6 +225,7 @@ Thanh toán: Khi khởi hành
 | `src/components/BookingForm.astro` | nhóm hai nút chọn, tính lại khi đổi |
 | `src/lib/uiCopy.ts` | nhãn vi + en |
 | `migrations/0002_payment_method.sql` | cột mới |
+| `docs/core-specs/00-PROJECT_BRIEF.md` §3 | một dòng *"Bổ sung"*, đúng khuôn `QĐ-2026-08-21-01` |
 | `docs/DECISIONS.md` | một mục `QĐ-2026-08-30-xx` chốt năm điểm §2 |
 | `BUILD-NOTES.md` | bước `d1 migrations apply` trong runbook phát hành |
 
@@ -218,6 +239,7 @@ Thanh toán: Khi khởi hành
 - `prepay: false` với `prepayPercent > 0` → không giảm, không có khoá `prepay`
 - `prepayPercent = 0` với `prepay: true` → không giảm, không có khoá `prepay`
 - `totalGoc` bằng đúng tổng khi không chọn ưu đãi, mùa vẫn áp
+- **bảng `tiers` + ưu đãi**: bậc giá cũng giảm, cũng làm tròn một lần
 - hạng giá 0 vẫn 0
 
 **Luật kiểm** (`test/booking/schema.test.ts`): năm hàng của bảng §4.4, cộng ca payload không có
@@ -230,6 +252,12 @@ Thanh toán: Khi khởi hành
 ghi và đọc lại đúng `transfer`.
 
 **Báo tin** (`test/booking/notify.test.ts`): hai dạng dòng "Thanh toán:".
+
+**Fixture cũ phải sửa cùng lượt.** `paymentMethod` là trường **bắt buộc** của `NewBooking` —
+không để tuỳ chọn, vì một đơn luôn có một hình thức thanh toán và `'onboard'` là giá trị thật,
+không phải giá trị vắng mặt. Ba chỗ dựng `NewBooking` phải thêm khoá, nếu không `astro check`
+đỏ: `test/booking/notify.test.ts:8`, hàm `nb()` ở `test/booking/store.test.ts:5`, và `record`
+trong `handler.ts`. Ba chỗ, không hơn — đã đếm.
 
 ## 6. Cổng phải xanh trước khi gộp
 

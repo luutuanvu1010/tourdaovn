@@ -80,6 +80,16 @@ không phải sự thật thanh toán — ai đọc tên cột rồi hiểu ngư
 Không chọn nút bắt buộc **mặc định bật**: bỏ tick thì giá tăng lên trước mắt khách — cảm giác bị
 đội giá — và sinh ra một đống đơn khai "sẽ chuyển khoản" mà khách không hề định thế.
 
+**Vì sao đây không phải điều `00-PROJECT_BRIEF` cấm.** Brief §5 cấm nguyên văn *"Thanh toán trực
+tuyến, giỏ hàng, quản lý chỗ trống"*, và §3 chốt *"Không có giỏ hàng, không thanh toán trên
+site"*. Cả hai câu cấm một **cơ chế**: site nhận tiền. Ưu đãi này không thêm cơ chế nào — khách
+chuyển khoản qua ngân hàng của chính họ, không có cổng thanh toán, không có ô nhập thẻ, không có
+webhook báo tiền về, và site không lưu một dữ kiện tài chính nào ngoài số tiền tạm tính vốn đã
+hiện trên form từ 2026-08-29. Thứ ADR này thêm là một **điều khoản giá**, cùng loại với giá mùa
+vụ: một con số đổi theo một điều kiện quan sát được. Brief §3 vì vậy cần một dòng *"Bổ sung"*
+ghi nhận ô chọn mới, đúng như `QĐ-2026-08-21-01` đã làm khi form đặt tour ra đời — không cần đảo
+điều cấm nào.
+
 ### 3. Ưu đãi luôn áp, chồng lên giá mùa, một phép nhân và một lần làm tròn
 
 Mùa neo vào **ngày khởi hành**; ưu đãi neo vào **lựa chọn thanh toán**. Hai trục khác nhau nên
