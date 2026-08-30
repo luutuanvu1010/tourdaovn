@@ -6,7 +6,11 @@ import type { Season } from '../booking/season'
 
 export type SeasonRule = Season & { apCho: string[]; truRa: string[] }
 
-const QUERY = `*[_type == "bangGiaMuaVu"][0].muaVu[]{
+// Lấy theo mã cố định (_id), không theo loại tài liệu (_type): loại thì hai bảng cùng
+// loại cho kết quả không đoán trước theo thứ tự nội bộ của kho dữ liệu. Mã này khớp
+// `documentId('bangGiaMuaVu')` mà cms/lib/structure.ts khai cho mục menu — đổi một chỗ
+// phải đổi cả hai.
+const QUERY = `*[_id == "bangGiaMuaVu"][0].muaVu[]{
   "name": tenMua, "from": tuNgay, "to": denNgay, "percent": phanTram,
   "apCho": coalesce(apCho, []), "truRa": coalesce(truRa, [])
 }`
