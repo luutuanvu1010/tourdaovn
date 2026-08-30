@@ -8,6 +8,7 @@ import type { Lang, SiteContact } from '../lib/types'
 import { uiCopy } from '../lib/uiCopy'
 import { formatPrice } from '../lib/renderer'
 import { availablePaxCodes, computeQuote, emptyPax, type PaxCode, type PriceTable } from '../lib/booking/quote'
+import type { Season } from '../lib/booking/season'
 import { addDaysISO, formatDateVN, todayVN } from '../lib/booking/vn-date'
 import { LIMITS, MSG } from '../lib/booking/schema'
 
@@ -18,11 +19,12 @@ export interface Props {
   bookingRef: string
   priceLabel: string
   priceTable: PriceTable
+  seasons?: Season[]
   contact?: SiteContact | null
   turnstileSiteKey?: string
 }
 
-const { lang, tourSlug, tourTitle, bookingRef, priceLabel, priceTable, contact = null, turnstileSiteKey = '' } = Astro.props
+const { lang, tourSlug, tourTitle, bookingRef, priceLabel, priceTable, seasons, contact = null, turnstileSiteKey = '' } = Astro.props
 const t = uiCopy(lang)
 
 const PAX_KEY: Record<PaxCode, 'paxAdult' | 'paxChild' | 'paxSenior' | 'paxInfant'> = {
@@ -75,6 +77,7 @@ if (!turnstileSiteKey) {
   action="/api/dat-tour"
   novalidate
   data-price-table={JSON.stringify(priceTable)}
+  data-seasons={JSON.stringify(seasons ?? [])}
   data-quoted-at={quotedAt}
   data-site-key={turnstileSiteKey}
   data-zalo={zaloUrl}
