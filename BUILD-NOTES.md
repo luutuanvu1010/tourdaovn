@@ -89,6 +89,9 @@ site** trong trạng thái hỏng, mỗi thứ hỏng một kiểu:
 | luật WAF | không có gì chặn **lượt yêu cầu** (xem mục dưới) |
 | `AWS_*` / `BOOKING_NOTIFY_EMAIL` / `ZALO_*` | đơn vẫn vào D1, nhưng **không ai được báo** — cột `notify_email`/`notify_zalo` ghi `skipped`, và không ai gọi lại cho khách |
 
+- **Trước** lần deploy đầu tiên có ưu đãi thanh toán trước: `npx wrangler d1 migrations apply tourdao-booking --remote`.
+  Không chạy thì mọi đơn mới đều 500 — cột `payment_method` chưa tồn tại nhưng câu `INSERT` đã kê tên nó.
+
 ### Bộ đếm tần suất trong endpoint KHÔNG phải là chặn lượt yêu cầu
 
 Bộ đếm trong `handler.ts` đếm **số đơn đã tạo** (đã qua Turnstile, đã INSERT) trong 10 phút cho

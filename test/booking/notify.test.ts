@@ -10,7 +10,7 @@ const b: NewBooking = {
   bookingRef: 'tour-3-dao', departDate: '2026-09-05', pax: { adult: 2, child: 1, senior: 0, infant: 0 },
   quoted: { perPax: { adult: 550000, child: 350000 }, total: 1450000, quotedAt: '2026-08-21T02:00:00Z' },
   customerName: 'Nguyễn Văn A', phone: '0905123456', email: 'a@example.com', pickup: 'KS Mường Thanh', note: 'Đón 7h',
-  lang: 'vi', source: 'web', ipHash: 'h', userAgent: 'ua',
+  lang: 'vi', source: 'web', paymentMethod: 'onboard', ipHash: 'h', userAgent: 'ua',
 }
 
 function okFetch(status = 200, body: unknown = { ok: true, id: 'x' }) {

@@ -8,7 +8,7 @@ function nb(over: Partial<NewBooking> = {}): NewBooking {
     bookingRef: 'tour-3-dao', departDate: '2026-09-05', pax: { adult: 2, child: 1, senior: 0, infant: 0 },
     quoted: { perPax: { adult: 550000, child: 350000 }, total: 1450000, quotedAt: '2026-08-21T02:00:00Z' },
     customerName: 'Nguyễn Văn A', phone: '0905123456', email: null, pickup: 'KS Mường Thanh', note: null,
-    lang: 'vi', source: 'web', ipHash: 'h1', userAgent: 'vitest', ...over,
+    lang: 'vi', source: 'web', paymentMethod: 'onboard', ipHash: 'h1', userAgent: 'vitest', ...over,
   }
 }
 
@@ -58,5 +58,15 @@ describe('store', () => {
     const row = await getBookingByCode(env.BOOKING_DB, 'TD-260905-C5AA')
     expect(row?.notify_email).toBe('sent')
     expect(row?.notify_zalo).toBe('failed:http 500')
+  })
+  it('ghi và đọc lại paymentMethod', async () => {
+    await insertBooking(env.BOOKING_DB, nb({ code: 'TD-260905-PAY1', phone: '0905000111', paymentMethod: 'transfer' }))
+    const row = await getBookingByCode(env.BOOKING_DB, 'TD-260905-PAY1')
+    expect(row?.payment_method).toBe('transfer')
+  })
+  it('đơn không khai hình thức → onboard', async () => {
+    await insertBooking(env.BOOKING_DB, nb({ code: 'TD-260905-PAY2', phone: '0905000222' }))
+    const row = await getBookingByCode(env.BOOKING_DB, 'TD-260905-PAY2')
+    expect(row?.payment_method).toBe('onboard')
   })
 })
