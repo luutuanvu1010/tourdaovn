@@ -148,6 +148,7 @@ if (!turnstileSiteKey) {
       </div>
       <div class="bf__total"><span>{t('bookingSubtotal')}</span><strong data-total>{initialQuote ? formatPrice(initialQuote.total, lang) : '—'}</strong></div>
     </div>
+    <p class="bf__season" data-season hidden></p>
     <p class="bf__note">{t('bookingSubtotalNote')}</p>
 
     <button type="button" class="bf__primary" data-open>{t('bookingBookNow')}</button>
@@ -206,6 +207,7 @@ if (!turnstileSiteKey) {
 
 <script>
   import { PAX_ORDER, computeQuote, type PaxCode, type PaxCounts, type PriceTable, type Quote } from '../lib/booking/quote'
+  import type { Season } from '../lib/booking/season'
   import { formatPrice } from '../lib/renderer'
   import { addDaysISO, formatDateVN, todayVN } from '../lib/booking/vn-date'
   import { LIMITS, MSG } from '../lib/booking/schema'
@@ -226,6 +228,7 @@ if (!turnstileSiteKey) {
     const q = <T extends Element>(sel: string) => form.querySelector<T>(sel)
     const table = JSON.parse(form.dataset.priceTable || 'null') as PriceTable | null
     if (!table) return
+    const seasons = JSON.parse(form.dataset.seasons || '[]') as Season[]
     const siteKey = form.dataset.siteKey || ''
     const quotedAt = form.dataset.quotedAt || ''
     const totalMax = Number(form.dataset.totalMax) || LIMITS.TOTAL_MAX
@@ -240,6 +243,7 @@ if (!turnstileSiteKey) {
     const dateEl = q<HTMLInputElement>('[name="departDate"]')!
     const linesEl = q<HTMLElement>('[data-quote-lines]')!
     const totalEl = q<HTMLElement>('[data-total]')!
+    const seasonEl = q<HTMLElement>('[data-season]')!
     const hintEl = q<HTMLElement>('[data-large-group]')!
     const paxErrEl = q<HTMLElement>('[data-err="pax"]')!
     const totalInput = q<HTMLInputElement>('[data-quoted-total]')!
@@ -261,6 +265,8 @@ if (!turnstileSiteKey) {
       : ''
     const rangeTextEl = q<HTMLElement>('[data-date-range-text]')
     if (rangeTextEl) rangeTextEl.textContent = dateRangeMsg()
+    // Đổi ngày khởi hành có thể đổi mùa áp dụng, nên phải tính lại tạm tính ngay (Task 5).
+    dateEl.addEventListener('change', update)
 
     // Bộ đếm
     const rows = new Map<PaxCode, { input: HTMLInputElement; label: string; inc: HTMLButtonElement; dec: HTMLButtonElement }>()
@@ -303,7 +309,7 @@ if (!turnstileSiteKey) {
     function update() {
       const pax = readPax()
       const total = PAX_ORDER.reduce((n, c) => n + pax[c], 0)
-      quote = computeQuote(table!, pax)
+      quote = computeQuote(table!, pax, { seasons, departDate: dateEl.value })
 
       linesEl.replaceChildren()
       if (quote) {
@@ -316,6 +322,14 @@ if (!turnstileSiteKey) {
         }
       }
       totalEl.textContent = quote ? formatPrice(quote.total, 'vi') : '—'
+      if (quote?.season) {
+        const dau = quote.season.percent > 0 ? '+' : ''
+        seasonEl.textContent = `${quote.season.name} · ${dau}${quote.season.percent}%`
+        seasonEl.hidden = false
+      } else {
+        seasonEl.textContent = ''
+        seasonEl.hidden = true
+      }
       totalInput.value = String(quote?.total ?? 0)
       form.querySelectorAll<HTMLInputElement>('[data-quoted-per-pax]').forEach(el => {
         const code = el.dataset.quotedPerPax as PaxCode
@@ -511,6 +525,7 @@ if (!turnstileSiteKey) {
   [data-done-summary] :global(.bf__line) { display: flex; justify-content: space-between; gap: var(--s3); font-size: var(--fs-sm); color: var(--c-text-muted); }
   .bf__total { display: flex; justify-content: space-between; gap: var(--s3); padding-top: var(--s2); border-top: 1px solid var(--c-border); font-size: var(--fs-base); font-weight: var(--fw-700); color: var(--c-text); }
   .bf__total strong { color: var(--c-accent-strong); }
+  .bf__season { font-size: var(--fs-sm); color: var(--c-accent-strong); margin: 0; }
   .bf__note, .bf__hint, .bf__noscript, .bf__hotline { font-size: var(--fs-sm); color: var(--c-text-muted); margin: 0; }
   .bf__hint { color: var(--c-accent-strong); }
   .bf__err { font-size: var(--fs-sm); color: var(--c-accent-strong); margin: 0; min-height: 0; }
@@ -540,5 +555,5 @@ if (!turnstileSiteKey) {
      thuộc tính scoped (thành 0,3,0 — thắng 0,2,0 mà không cần `!important`), còn `[hidden]`
      trần sẽ bị để nguyên và rò thành luật toàn site. */
   .bf__step[hidden], .bf__primary[hidden], .bf__done[hidden],
-  .bf__hint[hidden], .bf__done-dup[hidden] { display: none; }
+  .bf__hint[hidden], .bf__done-dup[hidden], .bf__season[hidden] { display: none; }
 </style>
