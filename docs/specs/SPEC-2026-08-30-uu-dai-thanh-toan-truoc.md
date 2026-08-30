@@ -176,7 +176,9 @@ con số**, không phải thứ để lọc.
 ### 4.6 Form: `BookingForm.astro`
 
 - Một nhóm hai nút chọn (`radiogroup`), **không nút nào `checked`**, đặt ngay trên khối tạm tính.
-- Nhãn lấy từ `uiCopy.ts` (vi **và** en), phần trăm chèn từ `data-prepay-percent` nướng lúc dựng.
+- Nhãn lấy từ `uiCopy.ts` — **cả năm ngôn ngữ** (`vi`, `en`, `zh`, `ko`, `ru`; `Lang` ở
+  `src/lib/types.ts:59`). `UIKey` suy ra từ khoá của bản `vi`, nên thiếu một ngôn ngữ là
+  `astro check` đỏ. Phần trăm chèn từ `data-prepay-percent` nướng lúc dựng.
 - `prepayPercent === 0` → **không render nhóm này**, form trở về đúng hình dạng hôm nay.
 - Đổi lựa chọn → gọi lại `computeQuote()` qua đúng đường đã có cho đổi ngày và đổi số người; cập
   nhật cả đơn giá từng hạng lẫn tổng. **Không lời gọi mạng nào.**
@@ -223,7 +225,7 @@ Thanh toán: Khi khởi hành
 | `src/lib/booking/handler.ts` | chuyển `paymentMethod` vào `NewBooking` |
 | `src/lib/booking/notify/format.ts` | dòng "Thanh toán:" |
 | `src/components/BookingForm.astro` | nhóm hai nút chọn, tính lại khi đổi |
-| `src/lib/uiCopy.ts` | nhãn vi + en |
+| `src/lib/uiCopy.ts` | nhãn cho **cả 5** bản ngôn ngữ (vi, en, zh, ko, ru) |
 | `migrations/0002_payment_method.sql` | cột mới |
 | `docs/core-specs/00-PROJECT_BRIEF.md` §3 | một dòng *"Bổ sung"*, đúng khuôn `QĐ-2026-08-21-01` |
 | `docs/DECISIONS.md` | một mục `QĐ-2026-08-30-xx` chốt năm điểm §2 |
