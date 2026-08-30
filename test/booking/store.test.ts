@@ -64,9 +64,25 @@ describe('store', () => {
     const row = await getBookingByCode(env.BOOKING_DB, 'TD-260905-PAY1')
     expect(row?.payment_method).toBe('transfer')
   })
-  it('đơn không khai hình thức → onboard', async () => {
-    await insertBooking(env.BOOKING_DB, nb({ code: 'TD-260905-PAY2', phone: '0905000222' }))
-    const row = await getBookingByCode(env.BOOKING_DB, 'TD-260905-PAY2')
+  // Fix round 1 (Finding 2): ca cũ "đơn không khai hình thức → onboard" insert qua nb(), mà
+  // nb() hard-code paymentMethod: 'onboard' — trùng luôn với DEFAULT của cột SQL, nên ca đó
+  // pass ngay cả khi bỏ hết wiring INSERT/bind (đã thấy trong log RED của báo cáo gốc). Tên
+  // cũng sai: paymentMethod là trường bắt buộc trên NewBooking, không có "đơn không khai".
+  // Thay bằng test thật của migration 0002: INSERT thẳng bằng câu lệnh CŨ (17 cột, không có
+  // payment_method) — đúng hình dạng một dòng ĐÃ TỒN TẠI TRƯỚC migration này — rồi đọc lại qua
+  // getBookingByCode và kỳ vọng DEFAULT 'onboard' của cột tự điền vào.
+  it('đơn hình dạng TRƯỚC migration (INSERT không có payment_method) → đọc lại onboard qua DEFAULT', async () => {
+    await env.BOOKING_DB.prepare(
+      `INSERT INTO booking (code, created_at, tour_slug, tour_title, booking_ref, depart_date, pax_json, quoted_json,
+         customer_name, phone, email, pickup, note, lang, source, ip_hash, user_agent)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17)`,
+    ).bind(
+      'TD-260905-PRE1', '2026-09-01T03:00:00.000Z', 'tour-3-dao', 'Tour 3 đảo', 'tour-3-dao', '2026-09-05',
+      JSON.stringify({ adult: 2, child: 1, senior: 0, infant: 0 }),
+      JSON.stringify({ perPax: { adult: 550000, child: 350000 }, total: 1450000, quotedAt: '2026-08-21T02:00:00Z' }),
+      'Nguyễn Văn A', '0905000333', null, 'KS Mường Thanh', null, 'vi', 'web', 'h-pre1', 'vitest',
+    ).run()
+    const row = await getBookingByCode(env.BOOKING_DB, 'TD-260905-PRE1')
     expect(row?.payment_method).toBe('onboard')
   })
 })
