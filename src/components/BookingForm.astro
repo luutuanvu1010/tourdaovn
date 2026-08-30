@@ -281,7 +281,8 @@ if (!turnstileSiteKey) {
     // Tăng cường dần: không JS thì bước 2 hiện sẵn; có JS thì gấp lại.
     step2.hidden = true
 
-    // Ngày: từ ngày mai tới +365 theo giờ Việt Nam, tính lại ở client để không lệ thuộc giờ build.
+    // Ngày: từ ngày mai tới +MAX_DAYS_AHEAD theo giờ Việt Nam, tính lại ở client để không lệ
+    // thuộc giờ build. Không viết con số vào đây — hằng ở schema.ts là nguồn duy nhất.
     const today = todayVN()
     dateEl.min = addDaysISO(today, 1)
     dateEl.max = addDaysISO(today, LIMITS.MAX_DAYS_AHEAD)

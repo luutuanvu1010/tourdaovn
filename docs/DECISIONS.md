@@ -2406,3 +2406,23 @@ Muốn thấy lưới ảnh thì phải **nạp đủ 4 ảnh gallery cho từng
 **Nợ mở, DRI chủ dự án.** Hệ **không đo được** chuyện khách chọn chuyển khoản rồi không chuyển. Điểm mù cho tới khi bảng điều khiển `ADR-0030` §2 có bộ lọc theo `payment_method`. Nếu tỷ lệ đó cao thì tính năng này đang cho không `x%`.
 
 **Tài liệu.** `docs/adr/ADR-0031-uu-dai-thanh-toan-truoc.md` (toàn văn), `docs/specs/SPEC-2026-08-30-uu-dai-thanh-toan-truoc.md` (hợp đồng thi công).
+
+---
+
+## QĐ-2026-08-31-01 — Cửa sổ đặt trước rút từ 365 xuống 90 ngày; và hook Sanity nay lọc cả `bangGiaMuaVu`
+
+**Bối cảnh.** Hai việc trong cùng một phiên, cùng chạm đường phát hành.
+
+**1. Cửa sổ đặt trước: 365 → 90 ngày.** `SPEC-2026-08-21-dat-tour` §4.3/§4.4 chốt `max` = +365 ngày từ ngày đặt. Chủ dự án yêu cầu rút xuống, chốt **90** sau khi cân nhắc một hệ quả được nêu trước khi sửa: cửa sổ ngắn khiến **mọi mùa vụ khai xa hơn 90 ngày không với tới được qua form**. Hôm chốt là 31/08/2026, nên ngày xa nhất khách chọn được là 29/11/2026 — Tết 2027 và hè 2027 nằm ngoài tầm, sẽ tự mở khi tới gần. Mùa vụ vẫn đúng và vẫn tự áp khi ngày lọt vào cửa sổ; chỉ là không đặt sớm được.
+
+Thi hành: `LIMITS.MAX_DAYS_AHEAD` trong `src/lib/booking/schema.ts` là **nguồn duy nhất** — `max` của ô chọn ngày lúc dựng trang, phép tính lại ở trình duyệt (`BookingForm.astro`), và luật kiểm ở máy chủ đều đọc hằng này, nên đổi một chỗ là đổi cả ba. Thông điệp `MSG.dateTooFar` sửa theo. Thêm một ca test bám thẳng vào hằng (`addDaysISO(TODAY, LIMITS.MAX_DAYS_AHEAD)`) thay vì chép tay con số, để lần đổi sau không lặng lẽ trôi.
+
+**2. Hook Sanity `Cloudflare rebuild` nay lọc thêm `bangGiaMuaVu`.** Truy ra trong cùng phiên: bộ lọc webhook liệt kê **15 loại có render trang**, cấu hình 2026-07-27 — `bangGiaMuaVu` sinh 2026-08-30 nên **không có trong danh sách**. Hệ quả: bấm Publish trong *Quy tắc giá* **không kích một lần dựng nào**, áp cho **cả giá mùa vụ lẫn ưu đãi thanh toán trước**. Câu *"Publish → trang dựng lại → giá mới lên"* ở `ADR-0030` §3 vì vậy **không đúng** với loại tài liệu này kể từ ngày nó ra đời cho tới hôm nay.
+
+Triệu chứng là **im lặng**: Studio báo Publish thành công, tài liệu lưu đúng, trang giữ số cũ, không lỗi nào. Lộ ra chỉ vì có người đi kiểm HTML thay vì tin dòng "Published". Rủi ro tiền thật ở cả hai chiều — đặt phụ thu Tết mà trang vẫn bán giá thường; tắt khuyến mại mà trang vẫn giảm giá.
+
+Đã vá: `PATCH` bộ lọc thành 16 loại, xác minh bằng cách đọc lại cấu hình từ server (16 loại, có `bangGiaMuaVu`, hook đang bật). Ba cái bẫy khi sửa hook này đã ghi ở ghi nhớ dự án: dùng **PATCH** chứ không PUT; đường dẫn `hooks/projects/pgedy374/<hookId>`; **không** gửi lại nguyên object đọc từ GET.
+
+**Nợ mở kèm theo.** Bản dựng đọc Sanity qua **CDN** (`useCdn: true`, `src/lib/sanity.ts:147`, chọn vì chi phí ở `QĐ-2026-08-25-06`). CDN nhất quán *trễ*, nên một lần dựng chạy **ngay** sau Publish vẫn có thể đọc giá trị cũ rồi nướng vào trang tĩnh — build xanh, số sai, không cổng nào đỏ. Vá hook không dẹp được rủi ro này. Cách kiểm ghi ở `SPEC-2026-08-30-uu-dai-thanh-toan-truoc` §7 bước 4: đối chiếu số trang đang nướng với số CDN đang trả.
+
+**Tài liệu.** `docs/specs/SPEC-2026-08-21-dat-tour.md` §4.3 §4.4 (con số +90, viện dẫn mục này), `docs/specs/SPEC-2026-08-30-uu-dai-thanh-toan-truoc.md` §7.

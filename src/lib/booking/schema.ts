@@ -5,7 +5,11 @@ import { PAX_ORDER, computeQuote, type PaxCode, type PaxCounts, type Quote } fro
 import { addDaysISO, isISODate } from './vn-date'
 
 export const LIMITS = {
-  ADULT_MIN: 1, PER_TYPE_MAX: 20, TOTAL_MAX: 30, MAX_DAYS_AHEAD: 365,
+  // MAX_DAYS_AHEAD là nguồn DUY NHẤT của cửa sổ đặt trước: `max` của ô chọn ngày lúc dựng
+  // trang, phép tính lại ở trình duyệt, và luật kiểm ở máy chủ đều đọc hằng này. Đổi ở đây là
+  // đổi cả ba. 365 → 90 theo `QĐ-2026-08-31-01` (chủ dự án chốt sau khi cân nhắc rằng cửa sổ
+  // ngắn khiến mùa vụ khai xa hơn 90 ngày chưa với tới được qua form).
+  ADULT_MIN: 1, PER_TYPE_MAX: 20, TOTAL_MAX: 30, MAX_DAYS_AHEAD: 90,
   NAME_MIN: 2, NAME_MAX: 80, EMAIL_MAX: 120, PICKUP_MAX: 200, NOTE_MAX: 1000,
   TITLE_MAX: 200, SLUG_MAX: 120, TOTAL_MAX_VND: 1_000_000_000, BODY_MAX_BYTES: 16 * 1024,
 } as const
@@ -16,7 +20,7 @@ export const MSG = {
   dateRequired: 'Chọn ngày khởi hành.',
   dateInvalid: 'Ngày khởi hành không hợp lệ.',
   dateTooEarly: 'Ngày khởi hành phải từ ngày mai trở đi.',
-  dateTooFar: 'Chỉ nhận đặt trước tối đa 365 ngày.',
+  dateTooFar: 'Chỉ nhận đặt trước tối đa 90 ngày.',
   paxInvalid: 'Số người không hợp lệ.',
   adultMin: 'Cần ít nhất 1 người lớn.',
   perTypeMax: 'Tối đa 20 người mỗi hạng. Đoàn lớn hơn, nhắn Zalo để báo giá riêng.',

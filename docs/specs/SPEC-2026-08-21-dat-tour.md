@@ -149,7 +149,7 @@ và hotline đã nằm trong thẻ; WhatsApp còn ở chân trang (`06` §2).
 | Vùng | Dữ liệu nuôi | Ứng xử |
 |---|---|---|
 | Đầu thẻ "Giá từ **X**/người" | `priceView.label` | như `BookingCTA` hôm nay |
-| Ngày khởi hành | `<input type="date" name="departDate">` | `min` = ngày mai (giờ Việt Nam), `max` = +365 ngày; bắt buộc |
+| Ngày khởi hành | `<input type="date" name="departDate">` | `min` = ngày mai (giờ Việt Nam), `max` = **+90 ngày** (`QĐ-2026-08-31-01`, trước là +365); bắt buộc |
 | Số người | một hàng bộ đếm cho **mỗi hạng có giá**: người lớn (luôn có, `amount`), rồi hạng trong `paxRates` | người lớn 1–20, hạng khác 0–20, tổng ≤ 30; vượt → chữ gợi ý "Đoàn lớn? Nhắn Zalo để báo giá riêng" và khoá nút "+" |
 | Tour `tiers` (tour riêng theo cỡ nhóm) | một bộ đếm "Số khách" | tạm tính = `amount` của bậc có `maxPax` nhỏ nhất ≥ tổng khách, nhân tổng khách; vượt bậc cao nhất → gợi ý Zalo. Gửi lên dưới `pax.adult` = tổng khách (các hạng khác 0), `quoted.perPax.adult` = `amount` của bậc đã chọn |
 | Tạm tính | tính bằng JS từ `data-*` nướng lúc build | dòng theo hạng "Người lớn × 2 — 1.100.000₫" + dòng **"Tạm tính"** (không dùng chữ "Tổng cộng"); dưới là chú thích "Giá tạm tính theo bảng giá công bố; nhân viên xác nhận trước khi thanh toán." |
@@ -211,7 +211,7 @@ Kiểm, theo thứ tự, dừng ở lỗi đầu tiên của mỗi trường (m�
 |---|---|
 | phương thức / nguồn | chỉ `POST`; `Origin` (nếu có) phải trùng `Host` của chính request (same-origin, nên bản `deploy:preview` trên host khác vẫn chạy), khác → 403; không CORS |
 | `tourSlug`, `bookingRef` | `/^[a-z0-9-]{1,120}$/`; `tourTitle` ≤ 200 ký tự |
-| `departDate` | `YYYY-MM-DD`; ≥ ngày mai và ≤ +365 ngày theo `Asia/Ho_Chi_Minh` |
+| `departDate` | `YYYY-MM-DD`; ≥ ngày mai và ≤ **+90 ngày** theo `Asia/Ho_Chi_Minh` (`QĐ-2026-08-31-01`, trước là +365; nguồn duy nhất là `LIMITS.MAX_DAYS_AHEAD`) |
 | `pax` | số nguyên; `adult` 1–20; `child`/`senior`/`infant` 0–20; tổng ≤ 30 |
 | `quoted` | số nguyên ≥ 0; `total` ≤ 1.000.000.000; server tính lại `Σ count × perPax` bằng đúng `quote.ts`, lệch `total` → 400 (kiểm nhất quán, **không** phải tin giá) |
 | `name` | 2–80 ký tự sau khi cắt khoảng trắng |

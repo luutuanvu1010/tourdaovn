@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { LIMITS, MSG, buildQuotedPayload, normalizePhone, parseBookingPayload, validateBooking, type BookingInput } from '../../src/lib/booking/schema'
 import { computeQuote } from '../../src/lib/booking/quote'
+import { addDaysISO } from '../../src/lib/booking/vn-date'
 
 const TODAY = '2026-09-01'
 function good(over: Partial<BookingInput> = {}): BookingInput {
@@ -59,14 +60,27 @@ describe('validateBooking', () => {
       expect(r.value.name).toBe('Nguyễn Văn A')
     }
   })
-  it('ngày hôm nay → lỗi departDate; +366 → lỗi; ngày ảo → lỗi', () => {
-    for (const d of ['2026-09-01', '2027-09-02', '2026-02-30']) {
+  // Biên của cửa sổ đặt trước, TODAY = '2026-09-01': +90 = 2026-11-30 (hợp lệ),
+  // +91 = 2026-12-01 (lỗi). Hai mốc này phải đi cùng `LIMITS.MAX_DAYS_AHEAD` — đổi hằng đó
+  // mà quên ca này thì cửa sổ đổi trong im lặng, không cổng nào đỏ (QĐ-2026-08-31-01).
+  it('ngày hôm nay → lỗi departDate; +91 → lỗi; ngày ảo → lỗi', () => {
+    for (const d of ['2026-09-01', '2026-12-01', '2026-02-30']) {
       const r = validateBooking(good({ departDate: d }), TODAY)
       expect(r.ok).toBe(false)
       if (!r.ok) expect(r.fields.departDate).toBeTruthy()
     }
     expect(validateBooking(good({ departDate: '2026-09-02' }), TODAY).ok).toBe(true)
-    expect(validateBooking(good({ departDate: '2027-09-01', quoted: { perPax: { adult: 550000, child: 350000 }, total: 1450000, quotedAt: 'x' } }), TODAY).ok).toBe(true)
+    expect(validateBooking(good({ departDate: '2026-11-30', quoted: { perPax: { adult: 550000, child: 350000 }, total: 1450000, quotedAt: 'x' } }), TODAY).ok).toBe(true)
+  })
+
+  it('biên cửa sổ bám đúng LIMITS.MAX_DAYS_AHEAD, không phải một con số chép tay', () => {
+    const bien = addDaysISO(TODAY, LIMITS.MAX_DAYS_AHEAD)
+    const quaBien = addDaysISO(TODAY, LIMITS.MAX_DAYS_AHEAD + 1)
+    const q = { perPax: { adult: 550000, child: 350000 }, total: 1450000, quotedAt: 'x' }
+    expect(validateBooking(good({ departDate: bien, quoted: q }), TODAY).ok).toBe(true)
+    const r = validateBooking(good({ departDate: quaBien, quoted: q }), TODAY)
+    expect(r.ok).toBe(false)
+    if (!r.ok) expect(r.fields.departDate).toBe(MSG.dateTooFar)
   })
   it('adult 0 → lỗi; tổng 31 → lỗi; 21 một hạng → lỗi', () => {
     const r1 = validateBooking(good({ pax: { adult: 0, child: 1, senior: 0, infant: 0 }, quoted: { perPax: { child: 350000 }, total: 350000, quotedAt: 'x' } }), TODAY)
