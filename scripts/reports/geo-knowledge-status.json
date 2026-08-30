@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-08-30T13:17:06.975Z",
+  "generatedAt": "2026-08-29T00:25:12.724Z",
   "status": "pass",
   "summary": {
     "files": {
@@ -11,42 +11,42 @@
       "/ai/graph.json": "present",
       "/ai/reading-guide.json": "present"
     },
-    "totalEntities": 90,
+    "totalEntities": 134,
     "entityTypes": {
-      "article": 6,
-      "attraction": 25,
+      "article": 24,
+      "attraction": 46,
       "experience": 8,
       "hotel": 10,
       "organization": 3,
       "person": 3,
-      "place": 5,
+      "place": 8,
       "tour": 28,
-      "touristDestination": 2
+      "touristDestination": 4
     },
     "urlsByLanguage": {
-      "vi": 90
+      "vi": 134
     },
     "aiCoverageRatio": 1,
     "sitemapCoverageRatio": 1,
     "graph": {
-      "nodes": 90,
-      "edges": 171,
+      "nodes": 134,
+      "edges": 206,
       "danglingEdges": 0,
-      "orphanNodes": 10,
+      "orphanNodes": 15,
       "relations": {
-        "author": 6,
-        "about": 11,
-        "mentions": 34,
-        "containedInPlace": 30,
+        "author": 24,
+        "about": 16,
+        "mentions": 27,
+        "containedInPlace": 48,
         "venue": 8,
-        "operator": 24,
-        "itineraryStop": 58
+        "itineraryStop": 60,
+        "operator": 23
       }
     },
     "readiness": {
-      "missingSource": 63,
-      "missingSameAs": 55,
-      "commercialMissingBookingOrFreeFlag": 39,
+      "missingSource": 83,
+      "missingSameAs": 82,
+      "commercialMissingBookingOrFreeFlag": 69,
       "missingLanguages": 0,
       "staleFiles": []
     },
@@ -62,6 +62,22 @@
   "issues": [],
   "entities": [
     {
+      "id": "f82e13ae-d8e0-42b6-86a5-a9a56edf9122",
+      "type": "article",
+      "title": "Bí Kíp Mua Vé Hòn Tằm Nha Trang 2026: Bảng Giá Báo Rẻ, Uy Tín & Nhận Vé Trong 2 Phút",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/cam-nang-mua-ve-hon-tam-nha-trang-2026-bang-gia-bao-re-uy-tin-and-nhan-ve-trong-2-phut/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;f82e13ae-d8e0-42b6-86a5-a9a56edf9122"
+    },
+    {
       "id": "d0036276-0843-4f4d-9110-6b6037751dc9",
       "type": "article",
       "title": "Cano riêng hay tour ghép: Lựa chọn nào phù hợp hơn?",
@@ -76,6 +92,86 @@
       "hasSameAs": false,
       "hasBookingOrFreeFlag": true,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/article;d0036276-0843-4f4d-9110-6b6037751dc9"
+    },
+    {
+      "id": "609586c0-b74e-4b49-8f2a-3c7168eb6189",
+      "type": "article",
+      "title": "Chợ Đầm Nha Trang khám phá khu chợ nổi tiếng lâu đời",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/cho-dam-nha-trang-kham-pha-khu-cho-noi-tieng-lau-doi/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;609586c0-b74e-4b49-8f2a-3c7168eb6189"
+    },
+    {
+      "id": "9de85e07-b5a8-42e8-af8f-77590535bdff",
+      "type": "article",
+      "title": "Đi Tour Đảo Nha Trang: Điểm Mặt Những Trải Nghiệm Miễn Phí Đáng Giá Nhất",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/nhung-trai-nghiem-mien-phi-khi-di-tour-dao/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;9de85e07-b5a8-42e8-af8f-77590535bdff"
+    },
+    {
+      "id": "61e32bc7-20db-4dd5-aa4a-0068fb62aae6",
+      "type": "article",
+      "title": "Đưa Con Đi Biển: Điểm Danh Những Bãi Tắm An Toàn Nhất Cho Gia Đình Có Trẻ Nhỏ",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/cac-bai-tam-phu-hop-voi-gia-dinh-co-tre-nho/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;61e32bc7-20db-4dd5-aa4a-0068fb62aae6"
+    },
+    {
+      "id": "d8987581-596a-49fe-905b-5bcf2efa76c8",
+      "type": "article",
+      "title": "Hải Sản Nha Trang: Điểm Danh Các Quán Chất Lượng Nhất",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/hai-san-nha-trang-ngon-chat-luong/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;d8987581-596a-49fe-905b-5bcf2efa76c8"
+    },
+    {
+      "id": "1a90060e-2908-4523-a336-079347783c9f",
+      "type": "article",
+      "title": "Hang Heo Nha Trang: Tọa Độ Check-in Sống Ảo Hoang Sơ Đẹp Mê Mẩn",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/hang-heo-nha-trang-toa-do-check-in-song-ao-hoang-so-dep-me-man/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;1a90060e-2908-4523-a336-079347783c9f"
     },
     {
       "id": "09eef765-f1d7-4622-ac3d-3f1fbac50e31",
@@ -126,10 +222,58 @@
       "studioUrl": "https://tourdaovn.sanity.studio/desk/article;8bf3c6ec-65c8-4d83-90dd-139ab373b4c5"
     },
     {
+      "id": "e2db7438-cabb-46da-95f6-4d5230a22060",
+      "type": "article",
+      "title": "Kinh nghiệm du lịch Vĩnh Hy",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/kinh-nghiem-du-lich-vinh-hy/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;e2db7438-cabb-46da-95f6-4d5230a22060"
+    },
+    {
+      "id": "78267fc0-825f-454c-96ea-2838482ac36c",
+      "type": "article",
+      "title": "Kinh nghiệm đi Tour 3 đảo Nha Trang",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/kinh-nghiem-di-tour-3-dao-nha-trang/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;78267fc0-825f-454c-96ea-2838482ac36c"
+    },
+    {
+      "id": "461970e3-4ab3-407a-a5b9-6ecc7c2189b5",
+      "type": "article",
+      "title": "Kinh Nghiệm Khám Phá Làng Chài Ninh Thủy 2026: Săn Rêu Xanh, Xem Đóng Tàu & Ăn Hải Sản",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/kinh-nghiem-kham-pha-lang-chai-ninh-thuy-2026-san-reu-xanh-xem-dong-tau-and-an-hai-san/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;461970e3-4ab3-407a-a5b9-6ecc7c2189b5"
+    },
+    {
       "id": "67566f90-10c0-461a-b88d-15ad10f65070",
       "type": "article",
-      "title": "Kinh Nghiệm Tắm Bùn Hòn Tằm: Ngâm Khoáng Giữa Biển, Đáng Từng Đồng Hay Không?",
-      "canonicalUrl": "https://tourdao.vn/cam-nang/kinh-nghiem-tam-bun-hon-tam-ngam-khoang-giua-bien-dang-tung-dong-hay-khong/",
+      "title": "Kinh Nghiệm Tắm Bùn Hòn Tằm 2026: Ngâm Khoáng Giữa Biển, Đáng Từng Đồng Hay Không?",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/kinh-nghiem-tam-bun-hon-tam-2026-ngam-khoang-giua-bien-dang-tung-dong-hay-khong/",
       "languages": [
         "vi"
       ],
@@ -142,10 +286,10 @@
       "studioUrl": "https://tourdaovn.sanity.studio/desk/article;67566f90-10c0-461a-b88d-15ad10f65070"
     },
     {
-      "id": "7c483d51-7f52-4dec-8eb3-3a179382e357",
+      "id": "cf784a8a-0f6b-466f-9df3-017948ea4ba0",
       "type": "article",
-      "title": "Mua vé Hòn Tằm Nha Trang ở đâu?",
-      "canonicalUrl": "https://tourdao.vn/cam-nang/mua-ve-hon-tam-nha-trang-o-dau/",
+      "title": "Ngắm Hoàng Hôn Nha Trang Ở Đâu Đẹp? Top Địa Điểm Không Thể Bỏ Lỡ",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/ngam-hoang-hon-nha-trang-o-dau-dep-top-dia-diem-khong-the-bo-lo/",
       "languages": [
         "vi"
       ],
@@ -155,13 +299,173 @@
       "hasOfficialSource": false,
       "hasSameAs": false,
       "hasBookingOrFreeFlag": true,
-      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;7c483d51-7f52-4dec-8eb3-3a179382e357"
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;cf784a8a-0f6b-466f-9df3-017948ea4ba0"
+    },
+    {
+      "id": "eb8ea858-e746-4ebc-a0fc-7efc013166f2",
+      "type": "article",
+      "title": "Ngẩn Ngơ Trước Vẻ Đẹp Hoang Sơ Đẹp Quên Lối Về Của Đảo Bình Ba Cam Ranh",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/ngan-ngo-truoc-ve-dep-hoang-so-dep-quen-loi-ve-cua-dao-binh-ba-cam-ranh/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;eb8ea858-e746-4ebc-a0fc-7efc013166f2"
+    },
+    {
+      "id": "8a236bb6-3abd-46b3-84c7-e51319d9a16f",
+      "type": "article",
+      "title": "Review Mini Beach Nha Trang 2026: Trọn Bộ Giá Vé, Thuê Cano & Thực Đơn Ăn Trưa",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/review-mini-beach-nha-trang-2026-tron-bo-gia-ve-thue-cano-and-thuc-don-an-trua/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;8a236bb6-3abd-46b3-84c7-e51319d9a16f"
+    },
+    {
+      "id": "0d6133cb-2fa0-415e-bf96-fa26cc3ee1f7",
+      "type": "article",
+      "title": "Thiên đường biển đảo Khánh Hoà : Những điều chưa biết",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/thien-duong-bien-dao-khanh-hoa-nhung-dieu-chua-biet/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;0d6133cb-2fa0-415e-bf96-fa26cc3ee1f7"
+    },
+    {
+      "id": "fcdc03de-2161-4d2d-af99-820d0ae5c347",
+      "type": "article",
+      "title": "Top 5 địa điểm tắm bùn ở Nha Trang",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/top-5-dia-diem-tam-bun-o-nha-trang/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;fcdc03de-2161-4d2d-af99-820d0ae5c347"
+    },
+    {
+      "id": "31296182-2a50-43fe-bea9-cf471b4c6c01",
+      "type": "article",
+      "title": "Top 7 Ngọn Núi Ở Nha Trang Tuyệt Đẹp Dành Cho Hội Đam Mê Trekking (Update 2026)",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/top-7-ngon-nui-o-nha-trang-tuyet-dep-danh-cho-hoi-dam-me-trekking-update-2026/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;31296182-2a50-43fe-bea9-cf471b4c6c01"
+    },
+    {
+      "id": "63554352-9d73-466d-995c-01110a670098",
+      "type": "article",
+      "title": "Tour 3 Đảo Nha Trang: Lịch Trình Chi Tiết, Giá Vé & Kinh Nghiệm Đi Mới Nhất",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/tour-3-dao-nha-trang-lich-trinh-chi-tiet/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;63554352-9d73-466d-995c-01110a670098"
+    },
+    {
+      "id": "0ab6d35f-30c6-4d50-8a60-814333d354b8",
+      "type": "article",
+      "title": "Trọn Bộ Cẩm Nang Bến Tàu Du Lịch Nha Trang: Giá Vé, Lịch Trình & Dịch Vụ",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/tron-bo-cam-nang-ben-tau-du-lich-nha-trang-gia-ve-lich-trinh-and-dich-vu/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;0ab6d35f-30c6-4d50-8a60-814333d354b8"
+    },
+    {
+      "id": "34ea4dce-7165-4dd4-b8c8-e216a587c10e",
+      "type": "article",
+      "title": "Trọn Bộ Kinh Nghiệm Du Lịch Làng Chài Vạn Giã - Viên Ngọc Của Khánh Hòa: Đường Đi, Ăn Uống & Trải Nghiệm",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/tron-bo-kinh-nghiem-du-lich-lang-chai-van-gia-vien-ngoc-cua-khanh-hoa-duong-di-an-uong-and-trai-nghiem/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;34ea4dce-7165-4dd4-b8c8-e216a587c10e"
+    },
+    {
+      "id": "6169f3d2-1108-40bd-b8c8-da9101946d1d",
+      "type": "article",
+      "title": "Tuyệt Chiêu Vi Vu Nha Trang Mùa Cao Điểm \"Không Lo Cháy Ví\"",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/nhung-bi-quyet-de-du-lich-nha-trang/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;6169f3d2-1108-40bd-b8c8-da9101946d1d"
+    },
+    {
+      "id": "207db618-98cc-45a0-a0dd-d7152a1eb465",
+      "type": "attraction",
+      "title": "Bãi biển Dốc Lết",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/bai-bien-doc-let/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;207db618-98cc-45a0-a0dd-d7152a1eb465"
     },
     {
       "id": "3185b11e-6470-4eef-be9f-1d8789a43cf7",
       "type": "attraction",
       "title": "Bến du thuyền Ana Marina Nha Trang",
-      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/ben-du-thuyen-ana-marina-nha-trang/",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/ben-du-thuyen-nha-trang/",
       "languages": [
         "vi"
       ],
@@ -172,6 +476,22 @@
       "hasSameAs": false,
       "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;3185b11e-6470-4eef-be9f-1d8789a43cf7"
+    },
+    {
+      "id": "0a246960-c75a-46ad-8575-fde630048ea1",
+      "type": "attraction",
+      "title": "Biển Ninh Chữ",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/bien-ninh-chu/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;0a246960-c75a-46ad-8575-fde630048ea1"
     },
     {
       "id": "3321a1d1-2309-4392-8869-9fd69bd0c5a3",
@@ -206,6 +526,38 @@
       "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;452ed971-d1ff-45eb-8037-99630634909d"
     },
     {
+      "id": "4c66c156-2395-44d8-a53e-f1c8c716dfe1",
+      "type": "attraction",
+      "title": "Chùa Suối Đổ",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/chua-suoi-do/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;4c66c156-2395-44d8-a53e-f1c8c716dfe1"
+    },
+    {
+      "id": "599ba70f-ed24-424a-9750-91fc44fe2400",
+      "type": "attraction",
+      "title": "Chùa Từ Vân (Chùa Ốc)",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/chua-tu-van-chua-oc/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;599ba70f-ed24-424a-9750-91fc44fe2400"
+    },
+    {
       "id": "ecd003fa-a88d-48c1-841a-7bab79918257",
       "type": "attraction",
       "title": "Công viên giải trí VinWonders",
@@ -220,6 +572,38 @@
       "hasSameAs": true,
       "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;ecd003fa-a88d-48c1-841a-7bab79918257"
+    },
+    {
+      "id": "5c42c449-edba-4188-b587-4118ed4c96f2",
+      "type": "attraction",
+      "title": "Đảo Gà Nha Trang",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/dao-ga-nha-trang/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": false,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;5c42c449-edba-4188-b587-4118ed4c96f2"
+    },
+    {
+      "id": "489e5297-f36f-4108-883e-787e756c067a",
+      "type": "attraction",
+      "title": "Ga Đà Lạt",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/ga-da-lat/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": false,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;489e5297-f36f-4108-883e-787e756c067a"
     },
     {
       "id": "056ef86e-ceea-43f6-8f54-418fa05509b5",
@@ -254,6 +638,22 @@
       "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;f163c7f8-d244-4075-a26e-21cf5d044083"
     },
     {
+      "id": "aee4ce9e-d5b1-4137-8129-e718c3c0ad32",
+      "type": "attraction",
+      "title": "Khu bảo tồn thiên nhiên Hòn Bà",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/khu-du-lich-tam-linh-hon-ba/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;aee4ce9e-d5b1-4137-8129-e718c3c0ad32"
+    },
+    {
       "id": "2520aa89-fe56-40fc-ba9d-25ee50177804",
       "type": "attraction",
       "title": "Khu du lịch Ba Hồ",
@@ -270,6 +670,22 @@
       "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;2520aa89-fe56-40fc-ba9d-25ee50177804"
     },
     {
+      "id": "d1fc875e-20c1-47f5-8bf7-6f58a25ebfdb",
+      "type": "attraction",
+      "title": "Khu du lịch Bãi Dài",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/bai-dai-cam-lam/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;d1fc875e-20c1-47f5-8bf7-6f58a25ebfdb"
+    },
+    {
       "id": "53568e6b-67d9-4fc3-94fe-342deff5c07d",
       "type": "attraction",
       "title": "Khu du lịch Bãi Tranh",
@@ -284,6 +700,38 @@
       "hasSameAs": true,
       "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;53568e6b-67d9-4fc3-94fe-342deff5c07d"
+    },
+    {
+      "id": "afaa4da6-df76-4f09-9bc0-2508909eb0d5",
+      "type": "attraction",
+      "title": "Khu du lịch Bình Tiên",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/khu-du-lich-binh-tien/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;afaa4da6-df76-4f09-9bc0-2508909eb0d5"
+    },
+    {
+      "id": "cb556884-0c9b-4781-bc8c-6430704a467f",
+      "type": "attraction",
+      "title": "Khu du lịch Diamond Bay",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/khu-du-lich-diamond-bay/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": false,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;cb556884-0c9b-4781-bc8c-6430704a467f"
     },
     {
       "id": "92ea5327-cdfe-456c-98a6-0b4618ad721e",
@@ -414,6 +862,54 @@
       "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;ca6e67a6-bc66-4df8-8ba7-30846eee9e5e"
     },
     {
+      "id": "33cb5d38-3ce9-4237-9bfb-8b1e9585f3ea",
+      "type": "attraction",
+      "title": "Khu du lịch Suối Tiên",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/khu-du-lich-suoi-tien/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": false,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;33cb5d38-3ce9-4237-9bfb-8b1e9585f3ea"
+    },
+    {
+      "id": "b2792817-eb56-4c2f-a98e-83899c340fa1",
+      "type": "attraction",
+      "title": "Khu du lịch tắm bùn Tháp Bà",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/khu-du-lich-tam-bun-thap-ba/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": false,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;b2792817-eb56-4c2f-a98e-83899c340fa1"
+    },
+    {
+      "id": "18fd1e29-032d-43ab-b08a-5d3909c48eae",
+      "type": "attraction",
+      "title": "Khu du lịch Vịnh San Hô",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/khu-du-lich-vinh-san-ho/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": false,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;18fd1e29-032d-43ab-b08a-5d3909c48eae"
+    },
+    {
       "id": "83283fcd-b46b-4015-84b1-bd348b5c251d",
       "type": "attraction",
       "title": "Khu du lịch Yang Bay",
@@ -430,10 +926,26 @@
       "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;83283fcd-b46b-4015-84b1-bd348b5c251d"
     },
     {
+      "id": "a707a7cc-43fe-45a6-ab2b-15ea0c45b62e",
+      "type": "attraction",
+      "title": "Làng Chài Bích Đầm",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/lang-chai-bich-dam/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;a707a7cc-43fe-45a6-ab2b-15ea0c45b62e"
+    },
+    {
       "id": "ec992d43-4332-41fa-98f2-d933e0af34f0",
       "type": "attraction",
-      "title": "Làng Chài Nha Trang",
-      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/lang-chai-nha-trang/",
+      "title": "Làng Chài Hòn Miễu",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/lang-chai-hon-mieu/",
       "languages": [
         "vi"
       ],
@@ -446,6 +958,22 @@
       "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;ec992d43-4332-41fa-98f2-d933e0af34f0"
     },
     {
+      "id": "d0c3af33-e19f-4909-8a98-965156e0ac1d",
+      "type": "attraction",
+      "title": "Làng nghề Trường Sơn",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/lang-nghe-truong-son/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": false,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;d0c3af33-e19f-4909-8a98-965156e0ac1d"
+    },
+    {
       "id": "0ed0c632-14fc-481e-90ca-7433b898cdec",
       "type": "attraction",
       "title": "Nhà Thờ Núi",
@@ -456,10 +984,74 @@
       "inAiLayer": true,
       "inSitemap": true,
       "inGraph": true,
-      "hasOfficialSource": false,
+      "hasOfficialSource": true,
       "hasSameAs": true,
       "hasBookingOrFreeFlag": true,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;0ed0c632-14fc-481e-90ca-7433b898cdec"
+    },
+    {
+      "id": "d67f230e-1d45-490a-ba5f-8dd906671d06",
+      "type": "attraction",
+      "title": "Núi Cô Tiên",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/nui-co-tien/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;d67f230e-1d45-490a-ba5f-8dd906671d06"
+    },
+    {
+      "id": "017c7164-9fe9-4f1e-881f-bb746996c20d",
+      "type": "attraction",
+      "title": "Rừng thông Khánh Sơn",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/rung-thong-khanh-son/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;017c7164-9fe9-4f1e-881f-bb746996c20d"
+    },
+    {
+      "id": "8961f4a4-9a03-4e40-85fd-62688e6c6b79",
+      "type": "attraction",
+      "title": "Thác Tà Gụ",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/thac-ta-gu/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;8961f4a4-9a03-4e40-85fd-62688e6c6b79"
+    },
+    {
+      "id": "bd6578a1-768a-46fa-9b94-5669a0d3dd53",
+      "type": "attraction",
+      "title": "Thành cổ Diên Khánh",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/thanh-co-dien-khanh/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;bd6578a1-768a-46fa-9b94-5669a0d3dd53"
     },
     {
       "id": "fb09c35b-5197-4ff7-8686-3f644289e71d",
@@ -472,10 +1064,26 @@
       "inAiLayer": true,
       "inSitemap": true,
       "inGraph": true,
-      "hasOfficialSource": false,
+      "hasOfficialSource": true,
       "hasSameAs": true,
       "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;fb09c35b-5197-4ff7-8686-3f644289e71d"
+    },
+    {
+      "id": "d0a0a705-6c33-41b7-b1ac-68c486689dd7",
+      "type": "attraction",
+      "title": "Viện Hải Dương Học",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/vien-hai-duong-hoc/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": false,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;d0a0a705-6c33-41b7-b1ac-68c486689dd7"
     },
     {
       "id": "ee51a7f7-914e-4ada-b8fd-ad5687042db0",
@@ -489,7 +1097,7 @@
       "inSitemap": true,
       "inGraph": true,
       "hasOfficialSource": true,
-      "hasSameAs": true,
+      "hasSameAs": false,
       "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;ee51a7f7-914e-4ada-b8fd-ad5687042db0"
     },
@@ -542,6 +1150,22 @@
       "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;94851d92-87f9-4a29-bfe2-65d78e8b7414"
     },
     {
+      "id": "b082a0d1-09f5-4c62-a71d-e3185ffc6f1c",
+      "type": "attraction",
+      "title": "Vịnh Vĩnh Hy",
+      "canonicalUrl": "https://tourdao.vn/diem-tham-quan/vinh-vinh-hy/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": true,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": false,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/attraction;b082a0d1-09f5-4c62-a71d-e3185ffc6f1c"
+    },
+    {
       "id": "418badc7-8cad-4bb9-bc08-7d09bfc60556",
       "type": "attraction",
       "title": "Vườn quốc gia Núi Chúa",
@@ -560,8 +1184,8 @@
     {
       "id": "13d4759b-d435-48d2-8663-ce0edfcd35ef",
       "type": "experience",
-      "title": "Dù bay (parasailing kéo bằng cano)",
-      "canonicalUrl": "https://tourdao.vn/trai-nghiem/du-bay-parasailing-keo-bang-cano/",
+      "title": "Dù bay",
+      "canonicalUrl": "https://tourdao.vn/trai-nghiem/cano-keo-du-bay/",
       "languages": [
         "vi"
       ],
@@ -640,8 +1264,8 @@
     {
       "id": "f1b31533-7e48-42c9-bc35-629c21c1fb7c",
       "type": "experience",
-      "title": "Phao bay (Flying Banana Boat)",
-      "canonicalUrl": "https://tourdao.vn/trai-nghiem/phao-bay-flying-banana-boat/",
+      "title": "Phao bay (Flying Fish)",
+      "canonicalUrl": "https://tourdao.vn/trai-nghiem/phao-bay/",
       "languages": [
         "vi"
       ],
@@ -856,7 +1480,7 @@
       "inAiLayer": true,
       "inSitemap": true,
       "inGraph": true,
-      "hasOfficialSource": false,
+      "hasOfficialSource": true,
       "hasSameAs": true,
       "hasBookingOrFreeFlag": true,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/organization;1fdf275a-dea8-4e45-b5b0-501cec1823c8"
@@ -942,6 +1566,22 @@
       "studioUrl": "https://tourdaovn.sanity.studio/desk/person;e9c166c0-7b99-4e71-bcf5-06be50f0e711"
     },
     {
+      "id": "5b82bbad-a2c5-48bc-a3e0-4b3b5f987d22",
+      "type": "place",
+      "title": "Bến cảng Đá Chồng",
+      "canonicalUrl": "https://tourdao.vn/dia-danh/ben-cang-da-chong/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/place;5b82bbad-a2c5-48bc-a3e0-4b3b5f987d22"
+    },
+    {
       "id": "cad2be12-74e8-4626-b56a-e8e7906b98ba",
       "type": "place",
       "title": "Cảng cáp treo Vinpearl",
@@ -990,6 +1630,22 @@
       "studioUrl": "https://tourdaovn.sanity.studio/desk/place;e6ef4b4a-3b08-45cd-9558-b1f34785cf7c"
     },
     {
+      "id": "e6fa6edd-ec90-4d9f-8f23-e529dbbccdd9",
+      "type": "place",
+      "title": "Đảo Hòn Mun",
+      "canonicalUrl": "https://tourdao.vn/dia-danh/dao-hon-mun/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/place;e6fa6edd-ec90-4d9f-8f23-e529dbbccdd9"
+    },
+    {
       "id": "e4d873ef-47c8-4230-84f3-e982f943c1a1",
       "type": "place",
       "title": "Đảo Hòn Tằm",
@@ -1004,6 +1660,22 @@
       "hasSameAs": true,
       "hasBookingOrFreeFlag": true,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/place;e4d873ef-47c8-4230-84f3-e982f943c1a1"
+    },
+    {
+      "id": "897ba990-a16b-4452-8333-ac8b88e00a3f",
+      "type": "place",
+      "title": "Đèo Vĩnh Hy",
+      "canonicalUrl": "https://tourdao.vn/dia-danh/deo-vinh-hy/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/place;897ba990-a16b-4452-8333-ac8b88e00a3f"
     },
     {
       "id": "91e9aff6-54df-40e9-80d4-16ea8ddddf89",
@@ -1034,7 +1706,7 @@
       "inGraph": true,
       "hasOfficialSource": false,
       "hasSameAs": false,
-      "hasBookingOrFreeFlag": true,
+      "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/tour;919dfbf7-67a2-431e-89aa-1fca52e8d434"
     },
     {
@@ -1050,7 +1722,7 @@
       "inGraph": true,
       "hasOfficialSource": false,
       "hasSameAs": false,
-      "hasBookingOrFreeFlag": true,
+      "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/tour;ade46b6d-6851-4bac-8e2a-359ca8f3c3d9"
     },
     {
@@ -1098,7 +1770,7 @@
       "inGraph": true,
       "hasOfficialSource": false,
       "hasSameAs": false,
-      "hasBookingOrFreeFlag": true,
+      "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/tour;a633b61f-c53e-4095-8a8f-1fd08b35457a"
     },
     {
@@ -1114,7 +1786,7 @@
       "inGraph": true,
       "hasOfficialSource": false,
       "hasSameAs": false,
-      "hasBookingOrFreeFlag": true,
+      "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/tour;48f95c5e-c580-4376-a6a7-6bd9f5afba74"
     },
     {
@@ -1146,7 +1818,7 @@
       "inGraph": true,
       "hasOfficialSource": false,
       "hasSameAs": false,
-      "hasBookingOrFreeFlag": true,
+      "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/tour;1060deef-5f2d-4e22-9a62-477370ad4ef2"
     },
     {
@@ -1162,7 +1834,7 @@
       "inGraph": true,
       "hasOfficialSource": false,
       "hasSameAs": false,
-      "hasBookingOrFreeFlag": true,
+      "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/tour;ff4070b0-4c6f-456d-ae30-2a88be35a5ce"
     },
     {
@@ -1178,7 +1850,7 @@
       "inGraph": true,
       "hasOfficialSource": false,
       "hasSameAs": false,
-      "hasBookingOrFreeFlag": true,
+      "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/tour;ed1c2038-810a-45fd-8e45-c16d8ebdb075"
     },
     {
@@ -1194,7 +1866,7 @@
       "inGraph": true,
       "hasOfficialSource": false,
       "hasSameAs": false,
-      "hasBookingOrFreeFlag": true,
+      "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/tour;53d1a951-c909-49ea-94f7-d6b8e0e6627e"
     },
     {
@@ -1210,7 +1882,7 @@
       "inGraph": true,
       "hasOfficialSource": false,
       "hasSameAs": false,
-      "hasBookingOrFreeFlag": true,
+      "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/tour;8f737070-c519-4be1-9288-9b54b35fdfcb"
     },
     {
@@ -1226,7 +1898,7 @@
       "inGraph": true,
       "hasOfficialSource": false,
       "hasSameAs": false,
-      "hasBookingOrFreeFlag": true,
+      "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/tour;c4a45b4c-b4cb-4e18-8667-bbd886ac5e3e"
     },
     {
@@ -1274,7 +1946,7 @@
       "inGraph": true,
       "hasOfficialSource": false,
       "hasSameAs": false,
-      "hasBookingOrFreeFlag": true,
+      "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/tour;8dda44cb-5786-4a6e-916c-85c6cd55e5b2"
     },
     {
@@ -1290,7 +1962,7 @@
       "inGraph": true,
       "hasOfficialSource": false,
       "hasSameAs": false,
-      "hasBookingOrFreeFlag": true,
+      "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/tour;0740af9c-2683-4246-aa18-da833d8db223"
     },
     {
@@ -1338,7 +2010,7 @@
       "inGraph": true,
       "hasOfficialSource": false,
       "hasSameAs": false,
-      "hasBookingOrFreeFlag": true,
+      "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/tour;d03eeb82-a76c-4535-aaac-1ba2f6b376e7"
     },
     {
@@ -1354,7 +2026,7 @@
       "inGraph": true,
       "hasOfficialSource": false,
       "hasSameAs": false,
-      "hasBookingOrFreeFlag": true,
+      "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/tour;3e712b6c-303f-453e-bab6-d2f657c35387"
     },
     {
@@ -1370,7 +2042,7 @@
       "inGraph": true,
       "hasOfficialSource": false,
       "hasSameAs": false,
-      "hasBookingOrFreeFlag": true,
+      "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/tour;19855b1f-1ef5-4969-8139-375012988542"
     },
     {
@@ -1386,7 +2058,7 @@
       "inGraph": true,
       "hasOfficialSource": false,
       "hasSameAs": false,
-      "hasBookingOrFreeFlag": true,
+      "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/tour;0cac723f-cfa3-45cc-b0f5-94ed0654d2cc"
     },
     {
@@ -1402,7 +2074,7 @@
       "inGraph": true,
       "hasOfficialSource": false,
       "hasSameAs": false,
-      "hasBookingOrFreeFlag": true,
+      "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/tour;3f05baf2-9df0-4958-abd7-6a0dd1acbc68"
     },
     {
@@ -1418,7 +2090,7 @@
       "inGraph": true,
       "hasOfficialSource": false,
       "hasSameAs": false,
-      "hasBookingOrFreeFlag": true,
+      "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/tour;43f4ff80-16c7-4e37-af0d-ba1fcf229c97"
     },
     {
@@ -1434,7 +2106,7 @@
       "inGraph": true,
       "hasOfficialSource": false,
       "hasSameAs": false,
-      "hasBookingOrFreeFlag": true,
+      "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/tour;bc16f951-fb6e-4ddf-9d36-691d54c7c174"
     },
     {
@@ -1450,7 +2122,7 @@
       "inGraph": true,
       "hasOfficialSource": false,
       "hasSameAs": false,
-      "hasBookingOrFreeFlag": true,
+      "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/tour;c4ee5a81-d768-46e4-9425-baa103aafe42"
     },
     {
@@ -1466,8 +2138,24 @@
       "inGraph": true,
       "hasOfficialSource": false,
       "hasSameAs": false,
-      "hasBookingOrFreeFlag": true,
+      "hasBookingOrFreeFlag": false,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/tour;ef5f08d2-bd40-4259-b6a5-b97a428dcb23"
+    },
+    {
+      "id": "464a416b-bfec-4b7b-b00d-f5f5f52fa9e4",
+      "type": "touristDestination",
+      "title": "Đà Lạt",
+      "canonicalUrl": "https://tourdao.vn/da-lat/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/touristDestination;464a416b-bfec-4b7b-b00d-f5f5f52fa9e4"
     },
     {
       "id": "seed.nha-trang",
@@ -1481,9 +2169,25 @@
       "inSitemap": true,
       "inGraph": true,
       "hasOfficialSource": false,
-      "hasSameAs": true,
+      "hasSameAs": false,
       "hasBookingOrFreeFlag": true,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/touristDestination;seed.nha-trang"
+    },
+    {
+      "id": "83a38820-1a6d-4c93-ac0f-e2865b4a2933",
+      "type": "touristDestination",
+      "title": "Ninh Thuận",
+      "canonicalUrl": "https://tourdao.vn/ninh-thuan/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": true,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/touristDestination;83a38820-1a6d-4c93-ac0f-e2865b4a2933"
     },
     {
       "id": "d5b267a3-a771-4cb2-8a50-8733da6372b5",
@@ -1497,7 +2201,7 @@
       "inSitemap": true,
       "inGraph": true,
       "hasOfficialSource": false,
-      "hasSameAs": true,
+      "hasSameAs": false,
       "hasBookingOrFreeFlag": true,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/touristDestination;d5b267a3-a771-4cb2-8a50-8733da6372b5"
     }
