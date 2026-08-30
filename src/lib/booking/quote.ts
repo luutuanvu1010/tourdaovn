@@ -32,7 +32,7 @@ export function totalPax(pax: PaxCounts): number {
 }
 
 /** Làm tròn LÊN nghìn sau khi áp phần trăm (ADR-0030 §3). */
-function apDieuChinh(amount: number, percent: number): number {
+export function apDieuChinh(amount: number, percent: number): number {
   // Giữ tương thích ngược, đừng xoá dù trông dư: bỏ dòng này, Math.ceil bên dưới sẽ
   // làm tròn lên cả khi không có mùa, âm thầm đổi mọi giá gốc không phải bội số nghìn.
   if (!percent) return amount

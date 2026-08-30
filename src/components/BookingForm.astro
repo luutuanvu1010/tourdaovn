@@ -206,7 +206,7 @@ if (!turnstileSiteKey) {
 </form>
 
 <script>
-  import { PAX_ORDER, computeQuote, type PaxCode, type PaxCounts, type PriceTable, type Quote } from '../lib/booking/quote'
+  import { PAX_ORDER, apDieuChinh, computeQuote, type PaxCode, type PaxCounts, type PriceTable, type Quote } from '../lib/booking/quote'
   import type { Season } from '../lib/booking/season'
   import { formatPrice } from '../lib/renderer'
   import { addDaysISO, formatDateVN, todayVN } from '../lib/booking/vn-date'
@@ -317,13 +317,24 @@ if (!turnstileSiteKey) {
       // Đơn giá trong ô chọn số khách phải khớp mùa với dòng tính tiền ngay bên dưới —
       // cùng hạng khách không được hiện hai giá khác nhau trên một màn hình (chủ dự án
       // chốt 2026-08-30). `quote.perPax[code]` đã áp mùa và làm tròn sẵn, không tính lại.
-      // Hai trường hợp bỏ qua, GIỮ NGUYÊN giá đang hiển thị thay vì xoá trắng: (1) hạng
-      // chưa có khách (count 0) không nằm trong quote.perPax; (2) giá gốc 0đ ("Miễn phí")
-      // luôn ra 0 dù áp mùa, nên không cần — và không được — đổi nhãn đó thành "0 ₫".
+      // Hạng chưa có khách (count 0) không nằm trong quote.perPax — nhưng đơn giá của nó
+      // vẫn phải đổi theo mùa y như hạng có khách, nếu không khách thấy giá cũ rồi giá
+      // nhảy ngay khi bấm "+" (đúng thứ bản vá này sinh ra để dẹp). Lấy giá gốc từ bảng
+      // giá nướng lúc build rồi áp CÙNG hàm apDieuChinh mà computeQuote dùng — không tính
+      // lại bằng công thức riêng. Giá gốc 0đ ("Miễn phí") luôn ra 0 dù áp mùa, nên không
+      // cần — và không được — đổi nhãn đó thành "0 ₫": bỏ qua, giữ nguyên nhãn đang hiện.
       rows.forEach((r, code) => {
         if (!r.priceEl) return
         const amount = quote?.perPax[code]
-        if (typeof amount === 'number' && amount > 0) r.priceEl.textContent = formatPrice(amount, 'vi')
+        if (typeof amount === 'number') {
+          if (amount > 0) r.priceEl.textContent = formatPrice(amount, 'vi')
+          return
+        }
+        if (table!.kind !== 'flat') return
+        const goc = table!.perPax[code]
+        if (typeof goc !== 'number') return
+        const adjusted = apDieuChinh(goc, quote?.season?.percent ?? 0)
+        if (adjusted > 0) r.priceEl.textContent = formatPrice(adjusted, 'vi')
       })
 
       linesEl.replaceChildren()

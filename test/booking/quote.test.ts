@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { availablePaxCodes, computeQuote, emptyPax, priceTableFromEntry, totalPax, type PriceTable } from '../../src/lib/booking/quote'
+import { apDieuChinh, availablePaxCodes, computeQuote, emptyPax, priceTableFromEntry, totalPax, type PriceTable } from '../../src/lib/booking/quote'
 import { pickSeason, type Season } from '../../src/lib/booking/season'
 
 const flat: PriceTable = { kind: 'flat', perPax: { adult: 550000, child: 350000 }, notes: { child: '5–11 tuổi' } }
@@ -124,5 +124,26 @@ describe('computeQuote với mùa', () => {
     // 900.000 × 1,2 = 1.080.000
     expect(q?.total).toBe(1080000 * 3)
     expect(q?.season?.name).toBe('Cao điểm hè')
+  })
+})
+
+// apDieuChinh xuất ra để BookingForm.astro dùng CHUNG một phép tính cho ô đơn giá của
+// hạng đang 0 khách (không nằm trong quote.perPax) — không tính lại bằng công thức riêng
+// (fix(gia) 2026-08-30). Các ca dưới đối chiếu đúng ba con số đo được trên trình duyệt.
+describe('apDieuChinh', () => {
+  it('không phần trăm → giữ nguyên giá gốc dù không phải bội số nghìn (tương thích ngược)', () => {
+    expect(apDieuChinh(762200, 0)).toBe(762200)
+  })
+  it('mùa +15%: người lớn 740.000 → 851.000, trẻ em 430.000 → 495.000, cao tuổi 560.000 → 644.000', () => {
+    expect(apDieuChinh(740000, 15)).toBe(851000)
+    expect(apDieuChinh(430000, 15)).toBe(495000)
+    expect(apDieuChinh(560000, 15)).toBe(644000)
+  })
+  it('phần trăm âm cũng làm tròn LÊN nghìn', () => {
+    expect(apDieuChinh(430000, -15)).toBe(366000)
+  })
+  it('giá gốc 0đ ("Miễn phí") luôn ra 0 dù áp mùa', () => {
+    expect(apDieuChinh(0, 15)).toBe(0)
+    expect(apDieuChinh(0, -15)).toBe(0)
   })
 })
