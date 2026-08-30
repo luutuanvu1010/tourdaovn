@@ -1,5 +1,5 @@
 import type { StructureResolver } from 'sanity/structure'
-import { CogIcon } from '@sanity/icons'
+import { CogIcon, CalendarIcon } from '@sanity/icons'
 import {
   ENTITY_TYPE_REGISTRY,
   getEntityMeta,
@@ -31,6 +31,18 @@ export const structure: StructureResolver = (S) => {
         S.document()
           .schemaType('siteSettings')
           .documentId('siteSettings')
+      ),
+    // Singleton: Giá theo mùa (ADR-0030 §3). Phải khai TAY ở đây — menu này liệt kê thủ
+    // công, nên một loại tài liệu dù đã đăng ký trong `schemas/index.ts` vẫn không hiện
+    // nếu thiếu mục này. `documentId` cố định để chỉ có đúng MỘT bảng mùa, không sinh
+    // nhiều bản rồi không biết bản nào đang áp.
+    S.listItem()
+      .title('Giá theo mùa')
+      .icon(CalendarIcon)
+      .child(
+        S.document()
+          .schemaType('bangGiaMuaVu')
+          .documentId('bangGiaMuaVu')
       ),
     S.divider()
   )
