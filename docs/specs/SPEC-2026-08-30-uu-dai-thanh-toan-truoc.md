@@ -284,8 +284,28 @@ trong `handler.ts`. Ba chỗ, không hơn — đã đếm.
    `studioHost: 'tourdaovn'` nên Studio là bản đã dựng, host sẵn — merge code không tự cập
    nhật nó. Chưa deploy thì biên tập mở tài liệu vẫn thấy tiêu đề cũ "Giá theo mùa", không có
    nhóm ô "Ưu đãi thanh toán trước", và phần trăm mãi là 0.
-3. Trong Studio: mở *Quy tắc giá*, bật ưu đãi, đặt phần trăm, Publish → trang dựng lại.
-4. Nghiệm thu trên production: một tour có mùa, một tour không mùa; chọn từng nút và đối chiếu
+3. Trong Studio: mở *Quy tắc giá*, bật ưu đãi, đặt phần trăm, Publish.
+4. **Kiểm bản dựng có nhận số mới không — Publish KHÔNG đủ để tin.** Đây là bẫy thật, gặp ngay
+   lần bật đầu tiên (31/08): tài liệu đã `batUuDai: true`, `phanTramUuDai: 5`, mà trang vẫn
+   nướng `data-prepay-percent="0"`.
+
+   Hai nguyên nhân, cùng một triệu chứng, và cả hai đều đến từ `src/lib/sanity.ts:147`
+   (`useCdn: true`, `perspective: 'published'`):
+   - **Chưa có lần dựng nào chạy sau khi Publish** (hook không kích, hoặc đang xếp hàng).
+   - **Đã dựng nhưng đọc trúng bản CDN cũ.** CDN của Sanity nhất quán *trễ*; một lần dựng chạy
+     ngay sau Publish có thể đọc về giá trị trước đó rồi nướng nó vào trang tĩnh — build xanh,
+     số sai, không cổng nào đỏ.
+
+   Cách kiểm, không đoán:
+   ```bash
+   # số trang đang nướng
+   curl -s "https://tourdao.vn/tour/<slug>/?cb=$(date +%s)" | grep -o 'data-prepay-percent="[0-9]*"'
+   # số CDN đang trả — đúng đường mà lần dựng đọc
+   curl -s 'https://pgedy374.apicdn.sanity.io/v2026-06-01/data/query/production?query=*%5B_id%20%3D%3D%20%22bangGiaMuaVu%22%5D%5B0%5D%7BbatUuDai%2CphanTramUuDai%7D&perspective=published'
+   ```
+   Hai số khác nhau → **dựng lại**, đừng sửa gì trong Studio. CDN khớp rồi mà trang vẫn cũ thì
+   một lần dựng nữa là đủ.
+5. Nghiệm thu trên production: một tour có mùa, một tour không mùa; chọn từng nút và đối chiếu
    con số; gửi thử một đơn và kiểm dòng "Thanh toán:" trong thư báo.
 
 ## 8. Còn nợ
