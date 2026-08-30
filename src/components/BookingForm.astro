@@ -92,6 +92,7 @@ if (!turnstileSiteKey) {
   data-date-range={dateRangeTpl}
   data-date-label={t('bookingDepartDate')}
   data-subtotal-label={t('bookingSubtotal')}
+  data-pay-required-text={t('bookingPayRequired')}
 >
   <input type="hidden" name="tourSlug" value={tourSlug} />
   <input type="hidden" name="tourTitle" value={tourTitle} />
@@ -142,6 +143,23 @@ if (!turnstileSiteKey) {
     <p class="bf__err" data-err="pax" aria-live="polite"></p>
     <p class="bf__hint" data-large-group hidden>{t('bookingLargeGroupHint')}</p>
 
+    {prepayPercent > 0 && (
+      <>
+        <p class="bf__label" id="bf-pay-label">{t('bookingPayLabel')}</p>
+        <div class="bf__pay" role="radiogroup" aria-labelledby="bf-pay-label">
+          <label class="bf__pay-opt">
+            <input type="radio" name="paymentMethod" value="transfer" />
+            <span>{t('bookingPayTransfer').replace('{x}', String(prepayPercent))}</span>
+          </label>
+          <label class="bf__pay-opt">
+            <input type="radio" name="paymentMethod" value="onboard" />
+            <span>{t('bookingPayOnboard')}</span>
+          </label>
+        </div>
+        <p class="bf__err" data-err="paymentMethod" aria-live="polite"></p>
+      </>
+    )}
+
     <div class="bf__quote" aria-live="polite">
       <div data-quote-lines>
         {initialQuote?.lines.map(l => (
@@ -151,6 +169,7 @@ if (!turnstileSiteKey) {
       <div class="bf__total"><span>{t('bookingSubtotal')}</span><strong data-total>{initialQuote ? formatPrice(initialQuote.total, lang) : '—'}</strong></div>
     </div>
     <p class="bf__season" data-season hidden></p>
+    <p class="bf__prepay" data-prepay hidden></p>
     <p class="bf__note">{t('bookingSubtotalNote')}</p>
 
     <button type="button" class="bf__primary" data-open>{t('bookingBookNow')}</button>
@@ -231,6 +250,11 @@ if (!turnstileSiteKey) {
     const table = JSON.parse(form.dataset.priceTable || 'null') as PriceTable | null
     if (!table) return
     const seasons = JSON.parse(form.dataset.seasons || '[]') as Season[]
+    const prepayPercent = Number(form.dataset.prepayPercent) || 0
+    const payRequiredText = form.dataset.payRequiredText || ''
+    const payEls = Array.from(form.querySelectorAll<HTMLInputElement>('input[name="paymentMethod"]'))
+    const chonChuyenKhoan = () => payEls.some(el => el.checked && el.value === 'transfer')
+    payEls.forEach(el => el.addEventListener('change', update))
     const siteKey = form.dataset.siteKey || ''
     const quotedAt = form.dataset.quotedAt || ''
     const totalMax = Number(form.dataset.totalMax) || LIMITS.TOTAL_MAX
@@ -314,7 +338,9 @@ if (!turnstileSiteKey) {
     function update() {
       const pax = readPax()
       const total = PAX_ORDER.reduce((n, c) => n + pax[c], 0)
-      quote = computeQuote(table!, pax, { seasons, departDate: dateEl.value })
+      const chon = chonChuyenKhoan()
+      const uuDai = chon ? prepayPercent : 0
+      quote = computeQuote(table!, pax, { seasons, departDate: dateEl.value, prepayPercent, prepay: chon })
 
       // Đơn giá trong ô chọn số khách phải khớp mùa với dòng tính tiền ngay bên dưới —
       // cùng hạng khách không được hiện hai giá khác nhau trên một màn hình (chủ dự án
@@ -335,7 +361,7 @@ if (!turnstileSiteKey) {
         if (table!.kind !== 'flat') return
         const goc = table!.perPax[code]
         if (typeof goc !== 'number') return
-        const adjusted = apDieuChinh(goc, quote?.season?.percent ?? 0)
+        const adjusted = apDieuChinh(goc, quote?.season?.percent ?? 0, uuDai)
         if (adjusted > 0) r.priceEl.textContent = formatPrice(adjusted, 'vi')
       })
 
@@ -382,6 +408,15 @@ if (!turnstileSiteKey) {
       // MSG.totalMax đã chứa sẵn lời mời nhắn Zalo y như hintEl, nên chỉ hiện một trong hai.
       hintEl.hidden = !!paxMsg || !!quote
       openBtn.disabled = !quote
+
+      const prepayEl = q<HTMLElement>('[data-prepay]')!
+      if (quote?.prepay) {
+        prepayEl.textContent = `− ${quote.prepay.percent}% · ${formatPrice(quote.prepay.totalGoc, 'vi')} nếu thanh toán khi khởi hành`
+        prepayEl.hidden = false
+      } else {
+        prepayEl.textContent = ''
+        prepayEl.hidden = true
+      }
     }
     update()
 
@@ -442,6 +477,11 @@ if (!turnstileSiteKey) {
         dateEl.scrollIntoView({ block: 'center' })
         return
       }
+      if (payEls.length && !payEls.some(el => el.checked)) {
+        showErr('paymentMethod', payRequiredText)
+        payEls[0]?.focus()
+        return
+      }
       step2.hidden = false
       openBtn.hidden = true
       q<HTMLInputElement>('[name="name"]')?.focus()
@@ -471,6 +511,7 @@ if (!turnstileSiteKey) {
         quoted: buildQuotedPayload(quote, quotedAt),
         name: val('name'), phone: val('phone'), email: val('email'), pickup: val('pickup'), note: val('note'),
         turnstileToken: tokenInput.value, website: val('website'),
+        paymentMethod: chonChuyenKhoan() ? 'transfer' : 'onboard',
       }
       submitBtn.disabled = true
       const submitText = form.dataset.submitText || submitBtn.textContent || ''
@@ -567,6 +608,9 @@ if (!turnstileSiteKey) {
   .bf__total { display: flex; justify-content: space-between; gap: var(--s3); padding-top: var(--s2); border-top: 1px solid var(--c-border); font-size: var(--fs-base); font-weight: var(--fw-700); color: var(--c-text); }
   .bf__total strong { color: var(--c-accent-strong); }
   .bf__season { font-size: var(--fs-sm); color: var(--c-accent-strong); margin: 0; }
+  .bf__pay { display: flex; flex-direction: column; gap: var(--s2); }
+  .bf__pay-opt { display: flex; align-items: center; gap: var(--s2); min-height: 2.75rem; font-size: var(--fs-sm); }
+  .bf__prepay { font-size: var(--fs-sm); color: var(--c-accent-strong); margin: 0; }
   .bf__note, .bf__hint, .bf__noscript, .bf__hotline { font-size: var(--fs-sm); color: var(--c-text-muted); margin: 0; }
   .bf__hint { color: var(--c-accent-strong); }
   .bf__err { font-size: var(--fs-sm); color: var(--c-accent-strong); margin: 0; min-height: 0; }
@@ -596,5 +640,5 @@ if (!turnstileSiteKey) {
      thuộc tính scoped (thành 0,3,0 — thắng 0,2,0 mà không cần `!important`), còn `[hidden]`
      trần sẽ bị để nguyên và rò thành luật toàn site. */
   .bf__step[hidden], .bf__primary[hidden], .bf__done[hidden],
-  .bf__hint[hidden], .bf__done-dup[hidden], .bf__season[hidden] { display: none; }
+  .bf__hint[hidden], .bf__done-dup[hidden], .bf__season[hidden], .bf__prepay[hidden] { display: none; }
 </style>
