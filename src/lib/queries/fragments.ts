@@ -129,6 +129,31 @@ export function bodyFragment(lang: string): string {
 }
 
 /**
+ * Fragment thân bài cho entity i18n **document-level** — hôm nay chỉ có Article
+ * (ADR-0004). Ở đó `body` là mảng PHẲNG, không phải object `{vi, en}`, nên
+ * `bodyFragment()` ở trên KHÔNG dùng được: `coalesce(body.vi, body.vi)` trên một
+ * mảng trả về `null` và cả thân bài biến mất.
+ *
+ * QĐ-2026-08-25-03 vá `asset->` cho 11 truy vấn i18n field-level nhưng bỏ sót
+ * đúng nhánh này; `queries/article.ts` vì thế còn lấy `body,` THÔ suốt từ đó.
+ * Hệ quả đo được trên bản dựng 2026-08-30: 23 trang cẩm nang, 0 thẻ `<figure>`
+ * trong thân bài, trong khi dữ liệu Sanity có 2–14 khối ảnh mỗi bài. Không cổng
+ * nào đỏ vì HTML vẫn hợp lệ — chỉ thiếu ảnh.
+ *
+ * Hai hàm CỐ Ý tách đôi, đừng gộp: khác nhau ở chiều ngôn ngữ của `body`, không
+ * phải ở hình dạng ảnh. Phần `asset->` dưới đây phải chép đúng `bodyFragment` và
+ * `mainImageFragment` để `imageUrl()` và `isSvg()` dùng chung một hợp đồng.
+ */
+export function bodyDocFragment(): string {
+  return `body[] {
+    ...,
+    _type == "image" => {
+      asset->{ _id, url, mimeType, metadata { dimensions { width, height } } }
+    }
+  }`
+}
+
+/**
  * Fragment imageProvenance.
  */
 export function imageProvenanceFragment(): string {

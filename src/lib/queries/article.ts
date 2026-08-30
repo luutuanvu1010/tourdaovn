@@ -5,10 +5,23 @@
 
 import {
   baseDocFieldsFragment, mainImageFragment, galleryFragment,
-  entityRefFragment, imageProvenanceFragment
+  entityRefFragment, imageProvenanceFragment, bodyDocFragment
 } from './fragments'
 import type { ArticleResult } from '../types'
 
+/**
+ * QĐ-2026-08-25-03 áp MUỘN cho Article.
+ *
+ * Hàng thân bài trong truy vấn này từng là `body,` thô, nên khối ảnh chỉ mang
+ * `asset: { _ref }` — không có `url`. `Body.astro` gọi `imageUrl()`, nhận
+ * `undefined`, rồi `return null`. Ảnh thân bài vì thế biến mất im lặng trên
+ * TOÀN BỘ trang cẩm nang: đo trên bản dựng 2026-08-30 được 23 trang, 0 thẻ
+ * `<figure>`, trong khi dữ liệu Sanity có 2–14 khối ảnh mỗi bài.
+ *
+ * Không dùng `bodyFragment(lang)` được: Article là i18n document-level
+ * (ADR-0004), `body` của nó là mảng PHẲNG chứ không phải object theo ngôn ngữ.
+ * Xem `bodyDocFragment()` trong `fragments.ts` để biết vì sao có hai hàm.
+ */
 export function articleBySlugQuery(): string {
   return `*[_type == "article" && slug.current == $slug && language == $lang && reviewStatus == "approved"][0]{
     _id, _type, _createdAt, _updatedAt,
@@ -40,7 +53,9 @@ export function articleBySlugQuery(): string {
       "jobTitle": jobTitle.vi,
       imageProvenance
     },
-    body,
+    // Than bai deref asset-> qua bodyDocFragment; xem docblock tren ham.
+    // (Chu thich trong template literal: khong backtick, backtick se dong chuoi.)
+    ${bodyDocFragment()},
     "about": about[]->{
       _id, _type,
       "title": coalesce(title[$lang], title.vi, title.en),

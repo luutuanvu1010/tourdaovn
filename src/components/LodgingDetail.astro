@@ -5,6 +5,7 @@ import { uiCopy } from '../lib/uiCopy'
 import DetailLayout from './DetailLayout.astro'
 import FAQ from './FAQ.astro'
 import Section from './Section.astro'
+import Body from './Body.astro'
 import BookingCTA from './BookingCTA.astro'
 import ContactChannels from './ContactChannels.astro'
 import { resolvePrice } from '../lib/resolver'
@@ -137,14 +138,18 @@ if (isResort) {
       </Section>
     )}
 
+    {/* Thân bài đi qua primitive chung `Body`, KHÔNG tự dựng lại ở đây.
+        Bản cũ map tay và chỉ phát `<p>` cho `style === 'normal'`, nên mọi khối
+        khác bị `return null` nuốt im lặng: ảnh, danh sách, tiêu đề, trích dẫn,
+        và cả link trong đoạn thường. Đo trên bản dựng 2026-08-30: 10 trang
+        khách sạn, 0 thẻ `<figure>` trong thân bài — trong khi Sanity có tới 12
+        khối ảnh một trang. Đây là bản vá QĐ-2026-08-25-03 chưa từng với tới,
+        vì nó sửa `Body.astro` còn file này không dùng `Body.astro`.
+        `headingOffset={1}` theo `06` §3 hàng Thân bài (N15b): khối nằm trong
+        `Section` có `h2`, nên h2 của biên tập phải hạ xuống h3. */}
     {hasPtContent(data.body) && (
       <Section heading={t('overview')} contained={false}>
-        {data.body!.map((block: any) => {
-          if (block._type === 'block' && block.style === 'normal') {
-            return <p>{block.children?.map((c: any) => c.text).join('')}</p>
-          }
-          return null
-        })}
+        <Body blocks={data.body} headingOffset={1} />
       </Section>
     )}
 
