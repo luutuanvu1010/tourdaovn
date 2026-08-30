@@ -40,26 +40,45 @@ export const MSG = {
   noScript: 'Cần bật JavaScript để gửi yêu cầu. Hoặc liên hệ theo trang Liên hệ.',
 } as const
 
+export type PaymentMethod = 'transfer' | 'onboard'
+
 // `season` chỉ để ĐƠN GHI LẠI vì sao ra con số tạm tính này (ADR-0030 §3, Task 2). Server
 // không tin và không tính lại theo mùa (BK1: server không đọc giá) — xem `parseBookingPayload`.
-export type Quoted = { perPax: Partial<Record<PaxCode, number>>; total: number; quotedAt: string; season?: { name: string; percent: number } }
+export type Quoted = {
+  perPax: Partial<Record<PaxCode, number>>
+  total: number
+  quotedAt: string
+  season?: { name: string; percent: number }
+  /** Ưu đãi đã áp + tổng nếu KHÔNG chọn. Ghi lại, server không tính lại (BK1) — ADR-0031 §4. */
+  prepay?: { percent: number; totalGoc: number }
+}
 
 /**
  * Dựng `quoted` gửi lên máy chủ từ `Quote` mà `computeQuote()` vừa tính ở trình duyệt
  * (BookingForm.astro script) — tách khỏi script trình duyệt để kiểm bằng test đi qua đúng ranh
  * giới "trình duyệt dựng payload", chứ không phải test tự dựng sẵn `quoted` đã có `season`.
  * Task 6 (lỗi đã sửa): script cũ dựng `quoted` trực tiếp, bỏ sót `quote.season`, nên mùa không
- * bao giờ tới máy chủ dù `computeQuote` đã tính đúng. Chỉ thêm khoá `season` khi `quote.season`
- * có mặt, để đơn không mùa giữ nguyên hình dạng payload cũ.
+ * bao giờ tới máy chủ dù `computeQuote` đã tính đúng. Chỉ thêm khoá `season`/`prepay` khi có mặt
+ * trên `quote`, để đơn không mùa / không ưu đãi giữ nguyên hình dạng payload cũ.
  */
-export function buildQuotedPayload(quote: Pick<Quote, 'perPax' | 'total' | 'season'>, quotedAt: string): Quoted {
-  return { perPax: quote.perPax, total: quote.total, quotedAt, ...(quote.season ? { season: quote.season } : {}) }
+export function buildQuotedPayload(
+  quote: Pick<Quote, 'perPax' | 'total' | 'season' | 'prepay'>,
+  quotedAt: string,
+): Quoted {
+  return {
+    perPax: quote.perPax,
+    total: quote.total,
+    quotedAt,
+    ...(quote.season ? { season: quote.season } : {}),
+    ...(quote.prepay ? { prepay: quote.prepay } : {}),
+  }
 }
 
 export type BookingInput = {
   tourSlug: string; tourTitle: string; bookingRef: string; departDate: string
   pax: PaxCounts
   quoted: Quoted
+  paymentMethod: PaymentMethod
   name: string; phone: string; email: string; pickup: string; note: string
   turnstileToken: string; website: string
 }
@@ -124,6 +143,19 @@ export function parseBookingPayload(raw: unknown): BookingInput {
     && typeof (rawSeason as Record<string, unknown>).percent === 'number'
     ? { name: clean(String((rawSeason as Record<string, unknown>).name)).slice(0, 60), percent: (rawSeason as Record<string, unknown>).percent as number }
     : undefined
+  // Ưu đãi chỉ để ĐƠN GHI LẠI vì sao ra con số này — server không tin và không tính lại (BK1).
+  // Sai hình dạng thì BỎ khoá, tuyệt đối không ném; luật chéo trong validateBooking mới là nơi
+  // biến một payload mâu thuẫn thành 400.
+  const rawPrepay = pick(r, 'quoted.prepay')
+  let prepay: { percent: number; totalGoc: number } | undefined
+  if (rawPrepay && typeof rawPrepay === 'object' && !Array.isArray(rawPrepay)) {
+    const o = rawPrepay as Record<string, unknown>
+    const percent = int(o.percent)
+    const totalGoc = int(o.totalGoc)
+    if (percent > 0 && percent <= 50 && totalGoc >= 0 && totalGoc <= LIMITS.TOTAL_MAX_VND) {
+      prepay = { percent, totalGoc }
+    }
+  }
   return {
     tourSlug: str(r.tourSlug).trim(),
     tourTitle: clean(str(r.tourTitle)),
@@ -133,7 +165,8 @@ export function parseBookingPayload(raw: unknown): BookingInput {
     // `quotedAt` là trường DUY NHẤT trong toàn payload trước đây không có chặn trên: chỉ qua
     // `str()`, không kiểm định dạng, không giới hạn độ dài — một chuỗi ~15 KB ghi thẳng vào cột
     // `quoted_json`. Cắt 40 ký tự (dư cho một dấu thời gian ISO 8601 đầy đủ).
-    quoted: { perPax, total: int(pick(r, 'quoted.total')), quotedAt: str(pick(r, 'quoted.quotedAt')).slice(0, 40), ...(season ? { season } : {}) },
+    quoted: { perPax, total: int(pick(r, 'quoted.total')), quotedAt: str(pick(r, 'quoted.quotedAt')).slice(0, 40), ...(season ? { season } : {}), ...(prepay ? { prepay } : {}) },
+    paymentMethod: str(r.paymentMethod).trim() === 'transfer' ? 'transfer' : 'onboard',
     name: clean(str(r.name)),
     phone: str(r.phone).trim(),
     email: str(r.email).trim(),
@@ -192,6 +225,15 @@ export function validateBooking(input: BookingInput, today: string): ValidationR
     && Object.values(input.quoted.perPax).every(v => Number.isInteger(v) && (v as number) >= 0)
     && Number.isInteger(input.quoted.total) && input.quoted.total >= 0 && input.quoted.total <= LIMITS.TOTAL_MAX_VND
   if (!quotedOk || !q || q.total !== input.quoted.total) fields.quoted = MSG.quotedMismatch
+
+  // Luật chéo (ADR-0031 §5). Máy chủ KHÔNG đòi `paymentMethod` — BK1 khiến nó không biết công
+  // tắc ưu đãi đang bật hay tắt, nên không phân biệt được "khách bỏ qua ô bắt buộc" với "site
+  // tắt ưu đãi". Nó chỉ canh sự MÂU THUẪN TỰ THÂN: một đơn không được phép mang giá đã giảm mà
+  // không khai chuyển khoản, và không được khai chuyển khoản mà không có dòng giải thích.
+  const pre = input.quoted.prepay
+  if (pre && input.paymentMethod !== 'transfer') fields.quoted = MSG.quotedMismatch
+  if (!pre && input.paymentMethod === 'transfer') fields.quoted = MSG.quotedMismatch
+  if (pre && pre.totalGoc < input.quoted.total) fields.quoted = MSG.quotedMismatch
 
   if (!input.name) fields.name = MSG.nameRequired
   else if (input.name.length < LIMITS.NAME_MIN) fields.name = MSG.nameShort
