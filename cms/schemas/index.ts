@@ -1,4 +1,5 @@
 import siteSettings from './siteSettings'
+import bangGiaMuaVu from './bangGiaMuaVu'
 import category from './category'
 import person from './person'
 import touristDestination from './touristDestination'
@@ -41,6 +42,7 @@ const ENTITY_SCHEMAS: Record<string, unknown> = {
 // những type thật sự đăng ký. Trường nào đã có `title` riêng trong schema thì giữ nguyên.
 export const schemaTypes = applyFieldLabelsAll([
   siteSettings,
+  bangGiaMuaVu,
   faqItem,
   category,
   touristDestination,
