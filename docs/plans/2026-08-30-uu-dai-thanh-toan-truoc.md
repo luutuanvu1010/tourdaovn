@@ -36,12 +36,18 @@ Mọi task đều phải giữ, không có ngoại lệ:
 - **Không thêm phụ thuộc lúc chạy** (`ADR-0027` quyết định 7).
 - **Không đụng** `data/prices.yaml`, `resolver.ts`, khuôn nhãn giá, JSON-LD.
 - Cổng phải xanh trước mỗi commit: `npx astro check` 0 errors · `npx vitest run` toàn bộ pass.
-  **Ngoại lệ duy nhất, đã lường trước:** giữa Task 2 và Task 5, `astro check` đỏ ở `store.ts`
-  và `handler.ts` vì `BookingValid` đã có `paymentMethod` mà đường ghi chưa nhận. Đó là **nợ
-  một task**, không phải hỏng. Hai đường đi hợp lệ: (a) làm Task 2 và Task 5 liền nhau rồi
-  commit chung, hoặc (b) commit Task 2 riêng và ghi rõ trong commit message là đang nợ Task 5.
-  **Không** được vá tạm bằng cách cho `paymentMethod` giá trị mặc định trong `store.ts` — làm
-  vậy là mở một chỗ thứ hai quyết định hình thức thanh toán.
+  **Không có ngoại lệ.** Bản đầu của mục này dự đoán `astro check` sẽ đỏ giữa Task 2 và Task 5.
+  **Dự đoán đó sai** (kiểm thực tế 2026-08-30 sau khi Task 2 chạy xong): `handler.ts` dựng
+  `NewBooking` **từng trường một**, không `spread` `BookingValid`, nên thêm một trường vào
+  `BookingValid` không phá gì. Cổng xanh suốt.
+
+  Hệ quả phải nhớ: **không có dây cột trình biên dịch nào nhắc Task 5 nối đường ghi.** Task 5
+  phải tự thêm `paymentMethod` **bắt buộc** vào `NewBooking` — chính lúc đó ba chỗ dựng
+  `NewBooking` mới đỏ lên. Quên bước đó thì cổng vẫn xanh và cột `payment_method` luôn ghi
+  `'onboard'`, im lặng. Ca test của Task 5 là lớp bắt duy nhất.
+
+  Dù thế nào cũng **không** được cho `paymentMethod` một giá trị mặc định trong `store.ts` —
+  đó là mở một chỗ thứ hai quyết định hình thức thanh toán.
 
 ---
 
