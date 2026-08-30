@@ -93,6 +93,7 @@ if (!turnstileSiteKey) {
   data-date-label={t('bookingDepartDate')}
   data-subtotal-label={t('bookingSubtotal')}
   data-pay-required-text={t('bookingPayRequired')}
+  data-pay-note-text={t('bookingPayNote')}
 >
   <input type="hidden" name="tourSlug" value={tourSlug} />
   <input type="hidden" name="tourTitle" value={tourTitle} />
@@ -252,6 +253,7 @@ if (!turnstileSiteKey) {
     const seasons = JSON.parse(form.dataset.seasons || '[]') as Season[]
     const prepayPercent = Number(form.dataset.prepayPercent) || 0
     const payRequiredText = form.dataset.payRequiredText || ''
+    const payNoteText = form.dataset.payNoteText || ''
     const payEls = Array.from(form.querySelectorAll<HTMLInputElement>('input[name="paymentMethod"]'))
     const chonChuyenKhoan = () => payEls.some(el => el.checked && el.value === 'transfer')
     payEls.forEach(el => el.addEventListener('change', update))
@@ -411,7 +413,9 @@ if (!turnstileSiteKey) {
 
       const prepayEl = q<HTMLElement>('[data-prepay]')!
       if (quote?.prepay) {
-        prepayEl.textContent = `− ${quote.prepay.percent}% · ${formatPrice(quote.prepay.totalGoc, 'vi')} nếu thanh toán khi khởi hành`
+        prepayEl.textContent = payNoteText
+          .replace('{p}', String(quote.prepay.percent))
+          .replace('{price}', formatPrice(quote.prepay.totalGoc, 'vi'))
         prepayEl.hidden = false
       } else {
         prepayEl.textContent = ''
