@@ -104,9 +104,18 @@ giá = ceil( gốc × (100 + %mùa) × (100 − %ưu đãi) / 10000 / 1000 ) × 
 ```
 
 **Làm tròn lên nghìn đúng một lần**, ở cuối. Áp hai bước rồi làm tròn hai lần thì khách chịu
-thiệt tới 1.000₫/người vì một chi tiết cài đặt: 730.000 × 1,2 → 876.000, rồi × 0,95 → 833.000,
-trong khi gộp một lần ra 832.000. Không phần trăm nào khác 0 thì trả lại **nguyên giá gốc**,
-không làm tròn — dòng bảo vệ này đã có sẵn cho mùa vụ và nay phải canh cả hai phần trăm.
+thiệt 1.000₫/người vì một chi tiết cài đặt: `430.000 × 1,15` → 494.500, làm tròn thành 495.000,
+rồi `× 0,95` → 470.250, làm tròn thành **471.000**; trong khi gộp một lần ra 469.775 → **470.000**.
+Quét 63 cặp (9 mức giá đang có trong `data/prices.yaml` × 7 mức mùa thực tế, ưu đãi 5%) thì
+**6 cặp lệch**, và lệch **luôn về phía bất lợi cho khách** — làm tròn lên hai lần thì không bao
+giờ ra số nhỏ hơn. Không phần trăm nào khác 0 thì trả lại **nguyên giá gốc**, không làm tròn —
+dòng bảo vệ này đã có sẵn cho mùa vụ và nay phải canh cả hai phần trăm.
+
+> **Đính chính 2026-08-30** (cùng ngày phê chuẩn, trước khi thi công): bản đầu của mục này lấy
+> ví dụ `730.000 · +20% · −5%` và ghi 832.000 so với 833.000. Bộ số đó **sai** — cả hai cách đều
+> ra 833.000, nên nó không chứng minh được điều đang cần chứng minh. Quyết định không đổi; ví dụ
+> thay bằng bộ số đã kiểm bằng máy ở trên. Ghi lại thay vì sửa lặng để người đọc sau biết con số
+> nào đã được kiểm và kiểm bằng cách nào.
 
 Hạng em bé giá 0 nhân bao nhiêu vẫn 0.
 

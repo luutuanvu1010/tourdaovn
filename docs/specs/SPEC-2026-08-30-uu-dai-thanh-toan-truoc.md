@@ -202,7 +202,7 @@ con số**, không phải thứ để lọc.
 Thêm một dòng ngay dưới `Mùa áp dụng`, dùng chung cho email và Zalo:
 
 ```
-Thanh toán: Chuyển khoản trước — đã giảm 5% (nếu không: 876.000₫)
+Thanh toán: Chuyển khoản trước — đã giảm 5% (nếu không: 495.000₫)
 Thanh toán: Khi khởi hành
 ```
 
@@ -235,7 +235,9 @@ Thanh toán: Khi khởi hành
 
 - không mùa, không ưu đãi → **nguyên giá gốc**, không làm tròn (ca chống hồi quy quan trọng nhất)
 - chỉ ưu đãi: 800.000, −5% → 760.000
-- mùa + ưu đãi, làm tròn **một lần**: 730.000, +20%, −5% → **832.000** (không phải 833.000)
+- mùa + ưu đãi, làm tròn **một lần**: 430.000, +15%, −5% → **470.000** (làm tròn hai lần ra
+  471.000 — đây là ca chứng minh luật, chọn đúng bộ số này, đừng đổi sang bộ khác cho "tròn hơn":
+  phần lớn bộ số cho kết quả **giống nhau** ở cả hai cách nên không phân biệt được gì)
 - `prepay: false` với `prepayPercent > 0` → không giảm, không có khoá `prepay`
 - `prepayPercent = 0` với `prepay: true` → không giảm, không có khoá `prepay`
 - `totalGoc` bằng đúng tổng khi không chọn ưu đãi, mùa vẫn áp
