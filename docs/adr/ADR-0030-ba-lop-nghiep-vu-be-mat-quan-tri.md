@@ -8,7 +8,8 @@ Cơ chế tái dùng được cho mọi site: (1) nghiệp vụ thuần, không 
 Nội dung nghiệp vụ cụ thể (mùa vụ, trạng thái đơn, QR chuyển khoản) là của site này.
 ═══════════════════════════════════════════════════════════════════ -->
 
-- **Trạng thái:** đề xuất, chờ chủ dự án phê chuẩn
+- **Trạng thái:** ĐÃ PHÊ CHUẨN 2026-08-30 (chủ dự án duyệt sau ba vòng sửa: bảng điều khiển
+  chuyển vào Studio, trang tính giữ vai nguồn giá duy nhất, mùa vụ là danh sách có thứ tự)
 - **Ngày:** 2026-08-30
 - **Người soạn:** Claude (qua Cowork) · **Người phê chuẩn:** Lưu Tuấn Vũ
 - **Thay thế / bổ sung:** bổ sung `ADR-0027` (module đặt tour); mở một mục mà
