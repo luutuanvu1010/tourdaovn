@@ -975,7 +975,7 @@ git commit -m "feat(dat-tour): hai nut chon hinh thuc thanh toan, tinh lai ngay 
       paymentMethod: 'transfer',
       quoted: { ...b.quoted, total: 470000, prepay: { percent: 5, totalGoc: 495000 } },
     })
-    expect(t).toContain('Thanh toán: Chuyển khoản trước — đã giảm 5% (nếu không: 495.000 ₫)')
+    expect(t).toContain('Thanh toán: Chuyển khoản trước — đã giảm 5% (nếu không: 495.000₫)')
   })
 
   it('đơn thường: dòng Thanh toán ngắn gọn', () => {
@@ -988,8 +988,8 @@ git commit -m "feat(dat-tour): hai nut chon hinh thuc thanh toan, tinh lai ngay 
   })
 ```
 
-Chuỗi tiền lấy đúng theo `formatPrice(…, 'vi')` — nếu ca test đỏ vì khoảng trắng trước `₫`, sửa
-**test** cho khớp `formatPrice`, đừng sửa `formatPrice`.
+Chuỗi tiền theo `formatPrice(…, 'vi')` = `toLocaleString('vi-VN') + '₫'` — **không có khoảng
+trắng** trước `₫` (`src/lib/renderer.ts`). Đã kiểm; dùng đúng chuỗi trên, đừng sửa `formatPrice`.
 
 - [ ] **Bước 2: Chạy test cho thất bại**
 
