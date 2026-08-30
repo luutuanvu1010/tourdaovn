@@ -93,6 +93,17 @@ describe('computeQuote với mùa', () => {
     expect(q?.season).toEqual({ name: 'Thấp điểm', percent: -15 })
   })
 
+  it('làm tròn LÊN chứ không phải gần nhất — 762.200 thành 763.000', () => {
+    // 740.000 × 1,03 = 762.200 → chia nghìn được 762,2: phần thập phân 0,2 nhỏ hơn 0,5,
+    // vùng DUY NHẤT Math.ceil và Math.round cho kết quả khác nhau (mọi số khác trong file
+    // này rơi đúng nghìn hoặc đúng .5, nơi hai phép trùng kết quả). Đừng đổi 762.200 thành
+    // một số tròn "đẹp" hơn — làm vậy sẽ âm thầm vô hiệu hoá chính ca kiểm này.
+    const nhe: Season[] = [{ name: 'Phụ thu nhẹ', from: '2027-09-01', to: '2027-09-10', percent: 3 }]
+    const q = computeQuote(bang, { adult: 1, child: 0, senior: 0, infant: 0 }, { seasons: nhe, departDate: '2027-09-05' })
+    expect(q?.perPax.adult).toBe(763000)
+    expect(q?.total).toBe(763000)
+  })
+
   it('em bé miễn phí vẫn miễn phí ở mọi mùa', () => {
     const q = computeQuote(bang, { adult: 1, child: 0, senior: 0, infant: 2 }, { seasons: mua, departDate: '2027-07-01' })
     expect(q?.perPax.infant).toBe(0)
