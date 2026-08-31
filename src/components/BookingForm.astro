@@ -88,7 +88,10 @@ if (!turnstileSiteKey) {
   data-date-label={t('bookingDepartDate')}
   data-subtotal-label={t('bookingSubtotal')}
   data-pay-required-text={t('bookingPayRequired')}
-  data-pay-note-text={t('bookingPayNote')}
+  data-before-discount-text={t('bookingBeforeDiscount')}
+  data-discount-line-text={t('bookingDiscountLine')}
+  data-grand-total-text={t('bookingGrandTotal')}
+  data-season-note-tpl={t('bookingSeasonNote')}
   data-qr-alt-text={t('bookingQrAlt')}
   data-qr-copied-text={t('bookingQrCopied')}
 >
@@ -203,8 +206,17 @@ if (!turnstileSiteKey) {
         <strong data-total>{initialQuote ? formatPrice(initialQuote.total, lang) : '—'}</strong>
       </div>
     </div>
-    <p class="bf__season" data-season hidden></p>
-    <p class="bf__prepay" data-prepay hidden></p>
+    {/* Task 8 (SPEC-2026-08-31-form-dat-tour-gon-va-chi-tiet-gia.md §4.5): bảng chi tiết giá.
+        Gộp nội dung của .bf__season/.bf__prepay cũ (đã xoá — §4.5.3, hai node đó in TRÙNG
+        con số với bảng này). Đặt NGOÀI .bf__quote (đóng ở trên) vì .bf__quote mang
+        aria-live="polite" và bị replaceChildren() mỗi lần bấm +/− — lồng bảng chi tiết vào
+        trong đó là mỗi lần đổi số khách trình đọc màn hình đọc lại toàn bộ bảng (§4.5.4 luật 3).
+        Mặc định ĐÓNG (không hidden — <details> tự quản trạng thái của nó); script chỉ ẩn/hiện
+        cả khối này qua .hidden khi quote null (luật render 2), không phải qua CSS display. */}
+    <details class="bf__detail" data-quote-detail>
+      <summary class="bf__detail-sum">{t('bookingPriceDetail')}</summary>
+      <div class="bf__detail-body" data-detail-lines></div>
+    </details>
 
     <button type="button" class="bf__primary" data-open>{t('bookingBookNow')}</button>
     {zaloUrl && <a class="bf__secondary" href={zaloUrl} target="_blank" rel="noopener">{t('bookingFreeConsult')}</a>}
@@ -349,7 +361,12 @@ if (!turnstileSiteKey) {
     const seasons = JSON.parse(form.dataset.seasons || '[]') as Season[]
     const prepayPercent = Number(form.dataset.prepayPercent) || 0
     const payRequiredText = form.dataset.payRequiredText || ''
-    const payNoteText = form.dataset.payNoteText || ''
+    // Task 8 — bảng chi tiết giá. Script KHÔNG gọi được t() (module riêng, không thấy frontmatter),
+    // nên bốn chuỗi này phải đi qua data-* nướng sẵn ở markup (xem data-*-text trên <form>).
+    const beforeDiscountText = form.dataset.beforeDiscountText || ''
+    const discountLineText = form.dataset.discountLineText || ''
+    const grandTotalText = form.dataset.grandTotalText || ''
+    const seasonNoteTpl = form.dataset.seasonNoteTpl || ''
     const payEls = Array.from(form.querySelectorAll<HTMLInputElement>('input[name="paymentMethod"]'))
     const chonChuyenKhoan = () => payEls.some(el => el.checked && el.value === 'transfer')
     payEls.forEach(el => el.addEventListener('change', update))
@@ -367,7 +384,8 @@ if (!turnstileSiteKey) {
     const dateEl = q<HTMLInputElement>('[name="departDate"]')!
     const linesEl = q<HTMLElement>('[data-quote-lines]')!
     const totalEl = q<HTMLElement>('[data-total]')!
-    const seasonEl = q<HTMLElement>('[data-season]')!
+    const detailBox = q<HTMLElement>('[data-detail-lines]')!
+    const detailWrap = q<HTMLDetailsElement>('[data-quote-detail]')!
     const hintEl = q<HTMLElement>('[data-large-group]')!
     const paxErrEl = q<HTMLElement>('[data-err="pax"]')!
     const totalInput = q<HTMLInputElement>('[data-quoted-total]')!
@@ -461,14 +479,54 @@ if (!turnstileSiteKey) {
         }
       }
       totalEl.textContent = quote ? formatPrice(quote.total, 'vi') : '—'
-      if (quote?.season) {
-        const dau = quote.season.percent > 0 ? '+' : ''
-        seasonEl.textContent = `${quote.season.name} · ${dau}${quote.season.percent}%`
-        seasonEl.hidden = false
+
+      // Bảng chi tiết giá (Task 8). Dòng do JS dựng qua createElement KHÔNG mang
+      // data-astro-cid-*, nên CSS phải nhắm qua :global() (xem [data-detail-lines] trong
+      // <style>) — bỏ qua là tái hiện lỗi "Người lớn × 1019.550.000₫" (DR-102, 2026-08-29).
+      detailBox.replaceChildren()
+      if (quote) {
+        // Luật render 2: quote null (vượt bậc / hạng không có giá) → KHÔNG dựng bảng rỗng —
+        // ẩn cả khối kể cả dòng tóm tắt "Xem chi tiết giá".
+        detailWrap.hidden = false
+
+        // Bốn mốc chính xác (SPEC §4.5.1): mọi số tiền lấy NGUYÊN từ quote, không tự nhân —
+        // apDieuChinh() áp cả hai phần trăm rồi mới làm tròn lên nghìn, nên totalGoc − total
+        // đúng nhưng KHÔNG bằng percent% của totalGoc.
+        const detailRows: [string, string][] = quote.lines.map(l =>
+          [`${rows.get(l.code)?.label ?? l.code} × ${l.count}`, formatPrice(l.subtotal, 'vi')])
+        // Luật render 3: KHÔNG ưu đãi → quote.prepay VẮNG → không có totalGoc. Hai dòng giữa
+        // biến mất — đây là luật render, TUYỆT ĐỐI không tính bù bằng nhân ngược (làm tròn
+        // lên nghìn không có phép nghịch đảo).
+        if (quote.prepay) {
+          detailRows.push([beforeDiscountText, formatPrice(quote.prepay.totalGoc, 'vi')])
+          detailRows.push([
+            `${discountLineText} (−${quote.prepay.percent}%)`,
+            `−${formatPrice(quote.prepay.totalGoc - quote.total, 'vi')}`,
+          ])
+        }
+        detailRows.push([grandTotalText, formatPrice(quote.total, 'vi')])
+
+        detailRows.forEach(([label, amount], i) => {
+          const div = document.createElement('div')
+          div.className = i === detailRows.length - 1 ? 'bf__line bf__line--total' : 'bf__line'
+          const a = document.createElement('span'); a.textContent = label
+          const b = document.createElement('span'); b.textContent = amount
+          div.append(a, b); detailBox.append(div)
+        })
+
+        // Luật render 1: không có mùa → không render ghi chú, không in "+0%".
+        if (quote.season) {
+          const note = document.createElement('p')
+          note.className = 'bf__tip-body'
+          note.textContent = seasonNoteTpl
+            .replace('{name}', quote.season.name)
+            .replace('{p}', String(quote.season.percent))
+          detailBox.append(note)
+        }
       } else {
-        seasonEl.textContent = ''
-        seasonEl.hidden = true
+        detailWrap.hidden = true
       }
+
       totalInput.value = String(quote?.total ?? 0)
       form.querySelectorAll<HTMLInputElement>('[data-quoted-per-pax]').forEach(el => {
         const code = el.dataset.quotedPerPax as PaxCode
@@ -493,17 +551,6 @@ if (!turnstileSiteKey) {
       // MSG.totalMax đã chứa sẵn lời mời nhắn Zalo y như hintEl, nên chỉ hiện một trong hai.
       hintEl.hidden = !!paxMsg || !!quote
       openBtn.disabled = !quote
-
-      const prepayEl = q<HTMLElement>('[data-prepay]')!
-      if (quote?.prepay) {
-        prepayEl.textContent = payNoteText
-          .replace('{p}', String(quote.prepay.percent))
-          .replace('{price}', formatPrice(quote.prepay.totalGoc, 'vi'))
-        prepayEl.hidden = false
-      } else {
-        prepayEl.textContent = ''
-        prepayEl.hidden = true
-      }
     }
     update()
 
@@ -832,10 +879,22 @@ if (!turnstileSiteKey) {
      liền thành tiền, kiểu "Người lớn × 1019.550.000₫" (lỗi thật, chủ dự án báo 2026-08-29).
      Phạm vi vẫn được giữ: phần tử cha còn scoped, `:global` chỉ mở cho lớp con. */
   [data-quote-lines] :global(.bf__line),
-  [data-done-summary] :global(.bf__line) { display: flex; justify-content: space-between; gap: var(--s3); font-size: var(--fs-sm); color: var(--c-text-muted); }
+  [data-done-summary] :global(.bf__line),
+  [data-detail-lines] :global(.bf__line) { display: flex; justify-content: space-between; gap: var(--s3); font-size: var(--fs-sm); color: var(--c-text-muted); }
   .bf__total { display: flex; justify-content: space-between; gap: var(--s3); padding-top: var(--s2); border-top: 1px solid var(--c-border); font-size: var(--fs-base); font-weight: var(--fw-700); color: var(--c-text); }
   .bf__total strong { color: var(--c-accent-strong); }
-  .bf__season { font-size: var(--fs-sm); color: var(--c-accent-strong); margin: 0; }
+  /* Task 8 — bảng chi tiết giá (SPEC §4.5). `.bf__detail` là <details> gốc, giữ marker mặc
+     định của trình duyệt (▸/▾ theo SPEC mockup) — KHÔNG ẩn như `.bf__tip-mark` (đó là dấu ⓘ
+     riêng, mục đích khác). `.bf__detail-body` là vùng do JS dựng lại mỗi lần đổi số khách. */
+  .bf__detail-sum { font-size: var(--fs-sm); color: var(--c-primary); cursor: pointer; }
+  .bf__detail-body { display: flex; flex-direction: column; gap: var(--s2); margin-top: var(--s2); }
+  /* Dòng cuối (Tổng cộng) và ghi chú mùa cũng do JS `createElement` dựng (cùng lý do :global
+     ở trên) — DR-102 áp cho MỌI lớp gắn vào node JS dựng, không riêng `.bf__line`. */
+  [data-detail-lines] :global(.bf__line--total) {
+    padding-top: var(--s2); border-top: 1px solid var(--c-border);
+    font-weight: var(--fw-700); color: var(--c-text);
+  }
+  [data-detail-lines] :global(.bf__tip-body) { margin: var(--s2) 0 0; font-size: var(--fs-sm); color: var(--c-text-muted); }
   /* Task 6: hai lựa chọn thanh toán. `<input type="radio">` thật vẫn còn — chỉ tạo dáng
      `<label>`, không thay bằng `<button>`. KHÔNG đoạn nào mang `checked` sẵn (chủ dự án
      chốt) nên cả hai phải nhìn "nghỉ" như nhau lúc tải trang — border 1px đều nhau ở
@@ -867,7 +926,6 @@ if (!turnstileSiteKey) {
     background: var(--c-primary-soft);
   }
   .bf__pay-opt:has(:focus-visible) { outline: 2px solid var(--c-primary); outline-offset: 2px; }
-  .bf__prepay { font-size: var(--fs-sm); color: var(--c-accent-strong); margin: 0; }
   .bf__note, .bf__hint, .bf__noscript, .bf__hotline { font-size: var(--fs-sm); color: var(--c-text-muted); margin: 0; }
   .bf__hint { color: var(--c-accent-strong); }
   .bf__err { font-size: var(--fs-sm); color: var(--c-accent-strong); margin: 0; min-height: 0; }
@@ -922,6 +980,6 @@ if (!turnstileSiteKey) {
      thuộc tính scoped (thành 0,3,0 — thắng 0,2,0 mà không cần `!important`), còn `[hidden]`
      trần sẽ bị để nguyên và rò thành luật toàn site. */
   .bf__step[hidden], .bf__primary[hidden], .bf__done[hidden],
-  .bf__hint[hidden], .bf__done-dup[hidden], .bf__season[hidden], .bf__prepay[hidden],
+  .bf__hint[hidden], .bf__done-dup[hidden], .bf__detail[hidden],
   .bf__qr[hidden] { display: none; }
 </style>
