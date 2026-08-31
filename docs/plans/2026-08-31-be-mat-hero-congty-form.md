@@ -1172,3 +1172,115 @@ Chạy sau Task 9, trước khi báo với chủ dự án rằng đợt này xon
       thanh dính ở 1366 (≈718).
 - [ ] **KHÔNG `git push`.** Phát hành là quyết định riêng của chủ dự án — push lên `main` kích
       hoạt Workers Builds dựng và đè bản deploy đang chạy.
+
+---
+
+# PHỤ LỤC A — Sửa đổi phạm vi giữa chừng (chủ dự án, 2026-08-31, sau Task 4)
+
+> **Phụ lục này ĐÈ LÊN các bước tương ứng ở trên.** Chỗ nào mâu thuẫn thì theo phụ lục.
+> Task 1–4 đã thi hành xong theo bản gốc và **không bị ảnh hưởng**.
+
+## A.1 Task 5 — thêm việc: ẩn HẾT đơn giá từng hạng khách
+
+Ngoài việc bỏ `.bf__head` (bản gốc §4.2), Task 5 nay **ẩn luôn `.bf__pax-price`** ở mọi hạng
+khách. Sau Task 5, trong form **không còn con số đơn giá nào**; khách thấy giá qua **Tạm tính**
+và bảng **Chi tiết giá** (Task 8).
+
+Ước giảm thêm: 25px × 4 hàng = **−100px**.
+
+### ⚠ Việc bắt buộc đi kèm: bổ sung phiếu `QĐ-2026-08-31-03`
+
+Phiếu đó **đã commit**, và nó viện chính đơn giá làm lý do nới Luật 3 được:
+
+> *"Cái gì đỡ cho quyết định này. Giá vẫn có mặt hai chỗ: thanh dính (dính lại sau khi cuộn tới)
+> và `.bf__pax-price` — đơn giá từng hạng khách trong form đặt tour. Không trang nào mất giá."*
+
+Câu đó **thành sai** khi Task 5 xong. Task 5 phải ghi một đoạn bổ sung vào phiếu (không sửa
+đoạn cũ — ghi thêm, để còn thấy lý lẽ đã đổi ra sao):
+
+- Ngày 2026-08-31, sau khi phiếu được chốt, chủ dự án yêu cầu **ẩn luôn đơn giá từng hạng khách**.
+- Nên "cái gì đỡ" nay còn **hai** thứ, không phải hai thứ cũ: **thanh dính** (vẫn mang giá), và
+  **Tạm tính + bảng Chi tiết giá** trong form (cập nhật theo số khách khách chọn).
+- Nhận rõ hệ quả: ở viewport 1366, **màn đầu không còn con số giá nào** — thanh dính đã ở dưới
+  mốc 657px theo chính phiếu này, và trong form giá chỉ xuất hiện sau khi khách chọn số người.
+  Đây là đánh đổi được chấp nhận có chủ ý, không phải sơ suất.
+
+### Tiêu chí nghiệm thu thay đổi
+
+- **Bỏ** tiêu chí 9 cũ ("`.bf__pax-price` có mặt trên mọi tour có form") — nó nay **ngược** với
+  yêu cầu. Thay bằng: `grep -c 'class="bf__pax-price"'` trên trang tour đã dựng phải ra **0**.
+- **Bỏ** tiêu chí 9b về bảng giá dạng bậc: rủi ro đó (tour `tiers` không có `.bf__pax-price`)
+  **tan biến** vì nay không hạng nào có đơn giá hiển thị. Ghi một dòng vào `docs/BACKLOG.md`
+  **B-020** rằng khoản nợ này đã khép trước khi mở, kèm lý do.
+- **Giữ** tiêu chí 10: chuỗi giá xuất hiện đúng một lần trên trang tour (chỉ còn ở thanh dính).
+
+### Số hiệu BACKLOG đổi
+
+`B-022` **đã bị một mạch làm việc khác lấy** (tự động đối soát chuyển khoản, commit `1360503`).
+Khoản nợ `priceLabel` của Task 5 dùng **`B-023`**.
+
+## A.2 Task 6 — ẩn dòng tiêu đề, giữ hai lựa chọn, đổi nhãn
+
+**Ẩn dòng tiêu đề "Hình thức thanh toán"** (`#bf-pay-label`) khỏi phần nhìn thấy. **Hai lựa chọn
+vẫn hiện và vẫn chọn được** — chủ dự án xác nhận 2026-08-31.
+
+⚠ **Không được xoá tên cho trợ năng.** `role="radiogroup"` đang lấy tên từ `#bf-pay-label` qua
+`aria-labelledby`. Hai cách hợp lệ, chọn một:
+- giữ phần tử nhưng ẩn bằng lớp chỉ-đọc-màn-hình (không dùng `display:none`, vì thế là ẩn cả với
+  trình đọc màn hình); hoặc
+- xoá phần tử và thay bằng `aria-label={t('bookingPayLabel')}` trên chính nhóm radio.
+
+**Đổi nhãn** trong `src/lib/uiCopy.ts`, khoá `bookingPayTransfer`:
+- `vi`: `'Chuyển khoản trước — giảm {x}%'` → **`'Chuyển khoản - ưu đãi {x}%'`**
+- `en`/`zh`/`ko`/`ru`: đổi tương ứng theo lệ file (các khoá `booking*` ở `zh`/`ko`/`ru` hiện dùng
+  bản tiếng Anh — theo đúng lệ đó, đừng tự dịch sang tiếng Trung/Hàn/Nga).
+
+Giữ nguyên `bookingPayOnboard`. Giữ nguyên giá trị dữ liệu `transfer` / `onboard`.
+
+Ước giảm: tiêu đề **−24px**, cộng phần gộp một hàng của bản gốc.
+
+## A.3 Task 7 — nền form dùng đúng công thức module Bao gồm/Chưa bao gồm
+
+Chủ dự án yêu cầu nền form **giống module Bao gồm/Chưa bao gồm**. Đó là `.inc-ex-card`
+(`src/components/TourDetail.astro:259-264`):
+
+```css
+background: var(--c-surface-alt);
+border: 1px solid var(--c-border);
+border-radius: var(--radius-md);
+padding: var(--s5);
+```
+
+Khác bản gốc §4.4 ở **hai điểm**: có **viền**, và đệm **`--s5` (24px)** chứ không phải `--s4`.
+Nên chi phí chiều cao là **+48px**, không phải +32px. Bốn khối màu phải sửa kèm (`.bf__quote`,
+`.bf__qr` → `--c-card`; `.bf__btn:hover` → token hover thật; `.bf__count`) giữ nguyên như bản gốc.
+
+## A.4 Sửa một tiêu chí sai trong bản gốc — `<details>` đóng
+
+Bản gốc bảo đo `offsetHeight === 0` để chứng minh `<details>` đóng. **Sai trên Chrome hiện nay:**
+Chrome ẩn nội dung `<details>` đóng bằng `::details-content` / `content-visibility`, không phải
+`display: none`, nên `offsetHeight` vẫn khác 0 dù đóng thật. Phát hiện khi thi hành Task 4.
+
+Thay bằng **`el.checkVisibility()` phải ra `false`**, cộng một phép thử sống: mở ra thì form cao
+lên, đóng lại thì thấp xuống đúng bằng chừng ấy. Vẫn **không** dùng `details.open === false` làm
+bằng chứng — lý do DR-102 giữ nguyên: thuộc tính đúng không chứng minh được render đúng.
+
+## A.5 Ngân sách chiều cao — tính lại
+
+| | px |
+|---|---|
+| Hiện trạng ban đầu | 1237 |
+| Task 4 (ghi chú → ⓘ) — **đã đo thật** | −225 → **1012** |
+| Task 5: bỏ `.bf__head` | −88 |
+| Task 5: ẩn đơn giá 4 hàng (**mới**) | −100 |
+| Task 6: ẩn dòng tiêu đề (**mới**) | −24 |
+| Task 6: gộp một hàng | −40 |
+| Task 7: đệm `--s5` hai đầu (**đổi**) | +48 |
+| Task 8: dòng tóm tắt `<details>` | +24 |
+| Task 8: xoá `.bf__season` + `.bf__prepay` | −50 |
+| **Dự kiến** | **≈ 782** |
+
+**Đây là thay đổi có ý nghĩa: 782px LỌT vùng nhìn 859px.** Bản gốc dự kiến 940px và spec đã nói
+thẳng là không hứa lọt. Với bốn mục mới của chủ dự án thì mục tiêu đó **thành khả thi** — nên
+tiêu chí 1 nâng từ "≤1000px" lên **"≤850px"**, và tiêu chí 2 (cụm quyết định lọt 859px) gần như
+đương nhiên đạt. Vẫn phải **đo**, không suy.
