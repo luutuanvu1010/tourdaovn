@@ -93,6 +93,7 @@ Cột mẫu dùng cây vi làm ví dụ; ngôn ngữ khác thay prefix ngôn ng�
 | `/su-kien/{slug-kỳ}` | chi tiết một kỳ | Event | slug kèm năm, URL bất biến, quá hạn không redirect (I5) |
 | `/cam-nang/`, `/cam-nang/{slug}` | index và chi tiết | Article | document-level: mỗi ngôn ngữ một document, nhóm qua translationGroup (I7) |
 | `/tac-gia/{slug}` | hồ sơ tác giả | Person | url đích cho author trong JSON-LD (E-E-A-T, 2.11) |
+| `/cong-ty/` | index nhánh | Organization | CollectionPage |
 | `/cong-ty/{slug}` | hồ sơ đơn vị vận hành | Organization | url đích cho provider và organizer; I18 chặn org mồ côi |
 | `/404` | trang lỗi | | không vào sitemap |
 

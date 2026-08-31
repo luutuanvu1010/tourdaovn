@@ -261,3 +261,11 @@ form hợp lệ, chuỗi mùa+ưu đãi khớp từ client tới máy chủ.
   `DRIFT_LOG` nếu khác giả định. `grep` trong `DRIFT_LOG.md` → 0 kết quả. Chưa ai làm.
 - Tải và đồng thời: chưa đo hành vi khi hai đơn cùng SĐT tới cùng lúc (đường `findRecentDuplicate`
   không có khoá).
+
+### B-021 — `/tac-gia/` trỏ breadcrumb vào 404 · `mở`
+
+`Breadcrumb.astro:43-52` đẩy crumb nhánh **không kiểm `hasIndex`**, nên mọi trang
+`/tac-gia/{slug}/` mang liên kết tới `/tac-gia/` (404) và đẩy URL đó vào JSON-LD
+`BreadcrumbList`. Y hệt ca `organization` đã chữa ngày 31/08 bằng
+`SPEC-2026-08-31-trang-danh-sach-cong-ty.md`. Chữa bằng cách mở `/tac-gia/` (bật `hasIndex`)
+hoặc cho `Breadcrumb` kiểm `hasIndex`. Cố ý KHÔNG gộp vào đợt 31/08 để giữ phạm vi.
