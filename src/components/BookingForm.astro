@@ -42,14 +42,6 @@ function paxLabel(code: PaxCode): string {
 function paxNote(code: PaxCode): string {
   return priceTable.kind === 'flat' ? (priceTable.notes?.[code] ?? '') : ''
 }
-function paxAmountLabel(code: PaxCode): string {
-  if (priceTable.kind === 'flat') {
-    const a = priceTable.perPax[code]
-    if (typeof a !== 'number') return ''
-    return a === 0 ? t('free') : formatPrice(a, lang)
-  }
-  return ''
-}
 
 // Tạm tính ban đầu (1 người lớn) render sẵn ở server để không JS vẫn thấy số.
 const initialPax = emptyPax()
@@ -109,11 +101,6 @@ if (!turnstileSiteKey) {
     <input type="hidden" name={`quoted.perPax.${code}`} value={String(initialQuote?.perPax[code] ?? '')} data-quoted-per-pax={code} />
   ))}
 
-  <div class="bf__head">
-    <span class="bf__eyebrow">{t('priceFrom')}</span>
-    <strong class="bf__price">{priceLabel}</strong>
-  </div>
-
   <section class="bf__step" data-step="1">
     <div class="bf__label-row">
       <label class="bf__label" for="bf-date">{t('bookingDepartDate')}</label>
@@ -153,7 +140,6 @@ if (!turnstileSiteKey) {
                 </details>
               )}
             </div>
-            {paxAmountLabel(code) && <span class="bf__pax-price">{paxAmountLabel(code)}</span>}
           </div>
           <div class="bf__stepper">
             <button type="button" class="bf__btn" data-dec aria-label={`${t('paxDecrease')} ${paxLabel(code)}`}>−</button>
@@ -422,8 +408,10 @@ if (!turnstileSiteKey) {
       const input = row.querySelector<HTMLInputElement>('input')!
       const inc = row.querySelector<HTMLButtonElement>('[data-inc]')!
       const dec = row.querySelector<HTMLButtonElement>('[data-dec]')!
-      // Bảng giá kiểu 'tiers' không dựng span này (paxAmountLabel trả về rỗng) — null-check
-      // khi dùng, đừng giả định nó luôn có mặt.
+      // Task 5 (2026-08-31) bỏ hẳn `.bf__pax-price` khỏi markup — mọi hạng khách, không riêng
+      // 'tiers'. querySelector này giờ LUÔN ra null; giữ nguyên nhánh null-check bên dưới (biến
+      // `priceEl` luôn falsy) cố ý — logic tính `apDieuChinh` theo mùa/ưu đãi ở đây vẫn là tham
+      // chiếu đúng cho bảng "Chi tiết giá" (Task 8, xem SPEC-2026-08-31-form-dat-tour-gon-va-chi-tiet-gia.md §4.5).
       const priceEl = row.querySelector<HTMLElement>('.bf__pax-price')
       rows.set(code, { input, label: row.dataset.label || code, inc, dec, priceEl })
       dec.addEventListener('click', () => { input.value = String(Math.max(Number(input.min) || 0, (parseInt(input.value, 10) || 0) - 1)); update() })
@@ -759,9 +747,6 @@ if (!turnstileSiteKey) {
 
 <style>
   .bf { display: flex; flex-direction: column; gap: var(--s4); }
-  .bf__head { display: flex; flex-direction: column; gap: var(--s1); padding-bottom: var(--s4); border-bottom: 1px solid var(--c-border); }
-  .bf__eyebrow { font-family: var(--font-ui); font-size: var(--fs-label); font-weight: var(--fw-600); color: var(--c-text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
-  .bf__price { font-family: var(--font-display); font-size: var(--fs-h4); font-weight: var(--fw-700); color: var(--c-accent-strong); }
   .bf__step { display: flex; flex-direction: column; gap: var(--s3); }
   .bf__label { font-family: var(--font-ui); font-size: var(--fs-label); font-weight: var(--fw-600); color: var(--c-text); margin: 0; }
   /* `<details>` là phần tử KHỐI. Để dấu ⓘ nằm cùng dòng với nhãn mà không đẩy
@@ -837,7 +822,6 @@ if (!turnstileSiteKey) {
   .bf__pax { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); padding: var(--s2) 0; }
   .bf__pax-info { display: flex; flex-direction: column; gap: 2px; }
   .bf__pax-name { font-size: var(--fs-base); font-weight: var(--fw-600); color: var(--c-text); }
-  .bf__pax-price { font-size: var(--fs-sm); font-weight: var(--fw-600); color: var(--c-primary); }
   .bf__stepper { display: inline-flex; align-items: center; gap: var(--s2); }
   .bf__btn { width: 2.75rem; height: 2.75rem; border-radius: var(--radius-pill); border: 1px solid var(--c-border); background: var(--c-card); color: var(--c-primary); font-size: var(--fs-h5); font-weight: var(--fw-600); cursor: pointer; transition: background var(--m-fast) var(--m-ease), border-color var(--m-fast) var(--m-ease); }
   .bf__btn:hover:not(:disabled) { background: var(--c-surface-alt); border-color: var(--c-primary); }

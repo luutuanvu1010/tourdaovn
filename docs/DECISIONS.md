@@ -2580,3 +2580,40 @@ với bảng giá dạng bậc (`kind: 'tiers'`) thì `.bf__pax-price` không re
 chỉ còn thanh dính. Hôm nay `data/prices.yaml` có **0/29** khoá dùng `tiers` (kiểm lại 2026-08-31:
 29 khoá cấp cao nhất trong file, không khoá nào có trường `tiers`). Vào `docs/BACKLOG.md` là
 **B-020** (chưa ghi trong đợt này — `BACKLOG.md` ngoài phạm vi hai file Task 1 được phép chạm).
+
+---
+
+## Bổ sung cho `QĐ-2026-08-31-03` — ẩn nốt `.bf__pax-price`, đoạn "cái gì đỡ" ở trên đã cũ
+
+**Ngày:** 2026-08-31, **sau** khi phiếu gốc ở trên được chốt. Phần này viết thêm, không sửa đoạn
+gốc — người đọc sau cần thấy lý lẽ đã đổi ra sao, không chỉ thấy kết luận mới.
+
+**Việc đổi.** Chủ dự án yêu cầu ẩn luôn `.bf__pax-price` — đơn giá từng hạng khách (Người lớn,
+Trẻ em, Người cao tuổi, Em bé) — trong form đặt tour, ở **mọi** bảng giá, không riêng `kind:
+'tiers'`. Thi hành ở Task 5 (`SPEC-2026-08-31-form-dat-tour-gon-va-chi-tiet-gia.md`).
+
+**Câu bị đè.** Đoạn *"Cái gì đỡ cho quyết định này"* ở trên viết: *"Giá vẫn có mặt hai chỗ: thanh
+dính (dính lại sau khi cuộn tới) và `.bf__pax-price` — đơn giá từng hạng khách trong form đặt
+tour. Không trang nào mất giá."* Vế `.bf__pax-price` trong câu đó **nay sai** — sau Task 5,
+`.bf__pax-price` không còn render ở bất kỳ hạng khách nào, trên bất kỳ tour nào.
+
+**"Cái gì đỡ" nay là gì.** Hai chỗ, không phải một: (1) **thanh dính** — vẫn mang giá, không đổi
+so với phiếu gốc; (2) **Tạm tính** (đã có, render ngay khi mở form) và **bảng "Chi tiết giá"**
+(Task 8 dựng, `<details>` đóng mặc định, mở ra thì thấy đơn giá từng hạng) trong chính form đặt
+tour — cả hai cập nhật theo số khách khách vừa chọn. Giá không mất khỏi form; nó chỉ không còn
+hiện **thường trực** ở mỗi hạng khách trước khi khách bấm chọn số người.
+
+**Hệ quả nhận rõ, không giấu.** Ở viewport **1366**, màn đầu (trên mốc 657px) **không còn con số
+giá nào**: thanh dính đã ở **≈718px** (số suy ra, xem đoạn gốc ở trên) — dưới mốc màn đầu, đúng
+như phiếu gốc đã chấp nhận; và trong form, giá chỉ hiện sau khi khách chọn số người (Tạm tính)
+hoặc chủ động mở "Chi tiết giá". Đây là **đánh đổi được chấp nhận có chủ ý**, chồng thêm lên
+đánh đổi mà phiếu gốc đã chấp nhận cho thanh dính — không phải một vi phạm mới phát sinh ngoài ý
+muốn.
+
+**Số phận rủi ro `.bf__pax-price`/`tiers` nêu ở "Nợ kèm theo".** Rủi ro đó giả định `flat` còn
+đơn giá còn `tiers` thì mất, nên hai loại bảng giá lệch nhau. Giả định không còn đúng: sau Task 5
+**không loại bảng giá nào** hiển thị đơn giá trong form nữa, nên không còn gì để lệch. `B-020`
+ghi lại đúng việc khoản nợ này đóng ngay lúc mở — xem `docs/BACKLOG.md`.
+
+**Tài liệu.** `docs/specs/SPEC-2026-08-31-form-dat-tour-gon-va-chi-tiet-gia.md` (hợp đồng thi
+công Task 5–8), `docs/BACKLOG.md` `B-020` và `B-023`.

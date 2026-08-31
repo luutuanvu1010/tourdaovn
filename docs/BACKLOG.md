@@ -295,6 +295,29 @@ form hợp lệ, chuỗi mùa+ưu đãi khớp từ client tới máy chủ.
 - Tải và đồng thời: chưa đo hành vi khi hai đơn cùng SĐT tới cùng lúc (đường `findRecentDuplicate`
   không có khoá).
 
+### B-020 — Rủi ro `.bf__pax-price` mất ở bảng giá dạng bậc: đóng ngay lúc mở · `đã đóng`
+
+Số hiệu đặt trước bởi `QĐ-2026-08-31-03` (`docs/DECISIONS.md`, đoạn "Nợ kèm theo"): với bảng
+giá `kind: 'tiers'`, `.bf__pax-price` không render, nên tour dùng bảng giá bậc sẽ chỉ còn giá ở
+thanh dính, không còn đơn giá trong form — trong khi tour `kind: 'flat'` vẫn còn. Lúc đặt số,
+`data/prices.yaml` có **0/29** khoá dùng `tiers` nên rủi ro còn ngủ, chưa ai chạm.
+
+Task 5 (cùng ngày 2026-08-31, xem "Bổ sung cho `QĐ-2026-08-31-03`" trong `DECISIONS.md`) bỏ
+`.bf__pax-price` khỏi **mọi** hạng khách — không riêng `tiers` — vì chủ dự án chốt ẩn hết đơn
+giá từng hạng trong form, bất kể loại bảng giá. Giả định làm nền cho rủi ro này ("`flat` còn
+đơn giá, `tiers` thì không, nên hai loại lệch nhau") không còn đúng: sau Task 5 **không loại
+bảng giá nào** hiển thị đơn giá trong form nữa, nên không còn gì để lệch. Đóng lại đúng lúc mở,
+không phải bỏ quên — kiểm bằng `grep -c 'class="bf__pax-price"' dist/tour/*/index.html` (mọi
+tour, không riêng tour giá bậc) ra 0.
+
+### B-023 — prop `priceLabel` của `BookingForm` thành thừa · `mở`
+
+Task 5 bỏ khối `.bf__head` — nơi duy nhất `priceLabel` được render trong `BookingForm.astro`.
+Prop vẫn khai ở `Props` (`:23`) và vẫn được destructure (`:31`), nhưng từ đây không còn nơi
+dùng trong file. `TourDetail.astro:213` vẫn truyền `priceLabel={priceView!.label}` xuống. Cố ý
+giữ nguyên prop và lời gọi — xoá là chạm thêm một file ngoài phạm vi Task 5. Dọn khi có dịp chạm
+`TourDetail.astro`.
+
 ### B-021 — `/tac-gia/` trỏ breadcrumb vào 404 · `mở`
 
 `Breadcrumb.astro:43-52` đẩy crumb nhánh **không kiểm `hasIndex`**, nên mọi trang
