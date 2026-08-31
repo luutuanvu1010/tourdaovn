@@ -115,9 +115,14 @@ if (!turnstileSiteKey) {
   </div>
 
   <section class="bf__step" data-step="1">
-    <label class="bf__label" for="bf-date">{t('bookingDepartDate')}</label>
+    <label class="bf__label" for="bf-date">
+      {t('bookingDepartDate')}
+      <details class="bf__tip">
+        <summary class="bf__tip-mark" aria-label={t('info')}>i</summary>
+        <p class="bf__tip-body" id="bf-date-range" data-date-range-text>{dateRangeText}</p>
+      </details>
+    </label>
     <input id="bf-date" class="bf__input" type="date" name="departDate" required min={minDate} max={maxDate} aria-describedby="bf-date-range" />
-    <p class="bf__note" id="bf-date-range" data-date-range-text>{dateRangeText}</p>
     <p class="bf__err" data-err="departDate" aria-live="polite"></p>
 
     <p class="bf__label" id="bf-pax-label">{t('bookingPax')}</p>
@@ -125,8 +130,15 @@ if (!turnstileSiteKey) {
       {codes.map(code => (
         <div class="bf__pax" data-code={code} data-label={paxLabel(code)}>
           <div class="bf__pax-info">
-            <span class="bf__pax-name">{paxLabel(code)}</span>
-            {paxNote(code) && <span class="bf__pax-note">{paxNote(code)}</span>}
+            <span class="bf__pax-name">
+              {paxLabel(code)}
+              {paxNote(code) && (
+                <details class="bf__tip">
+                  <summary class="bf__tip-mark" aria-label={t('info')}>i</summary>
+                  <p class="bf__tip-body">{paxNote(code)}</p>
+                </details>
+              )}
+            </span>
             {paxAmountLabel(code) && <span class="bf__pax-price">{paxAmountLabel(code)}</span>}
           </div>
           <div class="bf__stepper">
@@ -172,11 +184,19 @@ if (!turnstileSiteKey) {
           <div class="bf__line"><span>{paxLabel(l.code)} × {l.count}</span><span>{formatPrice(l.subtotal, lang)}</span></div>
         ))}
       </div>
-      <div class="bf__total"><span>{t('bookingSubtotal')}</span><strong data-total>{initialQuote ? formatPrice(initialQuote.total, lang) : '—'}</strong></div>
+      <div class="bf__total">
+        <span class="bf__total-label">
+          {t('bookingSubtotal')}
+          <details class="bf__tip">
+            <summary class="bf__tip-mark" aria-label={t('info')}>i</summary>
+            <p class="bf__tip-body">{t('bookingSubtotalNote')}</p>
+          </details>
+        </span>
+        <strong data-total>{initialQuote ? formatPrice(initialQuote.total, lang) : '—'}</strong>
+      </div>
     </div>
     <p class="bf__season" data-season hidden></p>
     <p class="bf__prepay" data-prepay hidden></p>
-    <p class="bf__note">{t('bookingSubtotalNote')}</p>
 
     <button type="button" class="bf__primary" data-open>{t('bookingBookNow')}</button>
     {zaloUrl && <a class="bf__secondary" href={zaloUrl} target="_blank" rel="noopener">{t('bookingFreeConsult')}</a>}
@@ -299,6 +319,20 @@ if (!turnstileSiteKey) {
 
   const form = document.getElementById('dat-tour') as HTMLFormElement | null
   if (form) init(form)
+
+  // Nhãn kèm dấu ⓘ (`.bf__tip`) lồng một `<details>` con ngay trong node nhãn (Task 4), nên
+  // `.textContent` trần của node đó giờ dính cả chữ "i" lẫn nội dung ghi chú phía trong —
+  // KỂ CẢ khi `<details>` đang đóng, vì đóng chỉ ẩn hiển thị chứ không rút node khỏi DOM.
+  // Hàm này chỉ lấy các text node con TRỰC TIẾP (bỏ qua phần tử con như `<details>`), để hai
+  // chỗ dưới đây tiếp tục lấy đúng nhãn gốc, không dính chữ ghi chú.
+  function directText(el: Element | null | undefined): string {
+    if (!el) return ''
+    return Array.from(el.childNodes)
+      .filter(n => n.nodeType === Node.TEXT_NODE)
+      .map(n => n.textContent || '')
+      .join(' ')
+      .trim()
+  }
 
   function init(form: HTMLFormElement) {
     const q = <T extends Element>(sel: string) => form.querySelector<T>(sel)
@@ -631,10 +665,11 @@ if (!turnstileSiteKey) {
       if (!duplicate) {
         // dateEl.labels không dùng được ổn định trong kiểu lib.dom qua astro check — lấy
         // trực tiếp nhãn <label for="bf-date"> theo id, giữ đúng ngữ nghĩa mà không đụng kiểu.
-        const dateLabel = form.querySelector('label[for="bf-date"]')?.textContent || form.dataset.dateLabel || ''
+        // `directText` (Task 4): nhãn này giờ lồng `.bf__tip`, textContent trần dính cả chữ ghi chú.
+        const dateLabel = directText(form.querySelector('label[for="bf-date"]')) || form.dataset.dateLabel || ''
         const lines: [string, string][] = [[form.querySelector<HTMLInputElement>('[name="tourTitle"]')!.value, ''], [dateLabel, dateEl.value.split('-').reverse().join('/')]]
         if (quote) for (const l of quote.lines) lines.push([`${rows.get(l.code)?.label ?? l.code} × ${l.count}`, formatPrice(l.subtotal, 'vi')])
-        lines.push([totalEl.closest('.bf__total')?.querySelector('span')?.textContent || form.dataset.subtotalLabel || '', formatPrice(total, 'vi')])
+        lines.push([directText(totalEl.closest('.bf__total')?.querySelector('.bf__total-label')) || form.dataset.subtotalLabel || '', formatPrice(total, 'vi')])
         for (const [a, b] of lines) {
           const div = document.createElement('div'); div.className = 'bf__line'
           const s1 = document.createElement('span'); s1.textContent = a
@@ -709,6 +744,46 @@ if (!turnstileSiteKey) {
   .bf__price { font-family: var(--font-display); font-size: var(--fs-h4); font-weight: var(--fw-700); color: var(--c-accent-strong); }
   .bf__step { display: flex; flex-direction: column; gap: var(--s3); }
   .bf__label { font-family: var(--font-ui); font-size: var(--fs-label); font-weight: var(--fw-600); color: var(--c-text); margin: 0; }
+  /* `<details>` là phần tử KHỐI. Để dấu ⓘ nằm cùng dòng với nhãn mà không đẩy
+     chiều cao hàng, cả `<details>` lẫn `<summary>` phải khai inline-* rõ ràng
+     (Task 4 — thu ba khối ghi chú của form thành dấu ⓘ mở được). */
+  .bf__tip { display: inline; }
+  .bf__tip-mark {
+    /* MỘT khai báo duy nhất — đừng tách `position` ra rule thứ hai, ::before
+       cần khối chứa được lập ngay tại đây */
+    position: relative;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 1.25rem; height: 1.25rem; margin-inline-start: var(--s1);
+    border: 1px solid var(--c-border); border-radius: var(--radius-pill);
+    font-size: var(--fs-sm); font-weight: var(--fw-600);
+    color: var(--c-text-muted); cursor: pointer; vertical-align: middle;
+    list-style: none;
+  }
+  .bf__tip-mark::-webkit-details-marker { display: none; }
+  .bf__tip-mark::before {
+    /* vùng chạm 44px KHÔNG ăn vào chiều cao dòng — nếu không, −150px của
+       ghi chú tuổi bị chính nút ⓘ ăn lại */
+    content: ''; position: absolute; width: 2.75rem; height: 2.75rem;
+    left: 50%; top: 50%; transform: translate(-50%, -50%);
+  }
+  .bf__tip-mark:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 2px; }
+  /* KHÔNG khai `display` ở đây — phòng ngừa, không phải sửa lỗi đã đo được trên Chrome.
+     Astro gắn thuộc tính scoped vào rule này (thành `.bf__tip-body[data-astro-cid-…]`,
+     đặc hiệu 0,2,0). Ở engine nào còn ẩn nội dung đóng của `<details>` bằng luật UA
+     `details:not([open]) > *:not(summary) { display: none }` (0,1,2) — cùng dạng lỗi
+     DR-102, khác rule cho thuộc tính hidden — thì một khai báo `display: block` ở đây SẼ thắng và
+     ghim ghi chú hiện thường trực. `<p>` vốn đã block theo mặc định UA nên bỏ khai báo là
+     đủ, không mất gì. ĐO THẬT trên Chrome (31/08, dev server, xem task-4-report.md §6c):
+     Chrome bản đang chạy máy này ẩn nội dung đóng qua giả phần tử `::details-content` với
+     content-visibility, KHÔNG qua `display:none` — nên có khai `display: block` hay không
+     đều KHÔNG đổi số đo `offsetHeight`/`formH` ở đây (đã thử cả hai, số giống hệt nhau);
+     một `<details>` trần không style cũng cho `offsetHeight` khác 0 dù đóng. Giữ luật này
+     lại vì lý do phòng ngừa cho engine khác (kể cả Chrome tương lai), không phải vì đã bắt
+     được lỗi hiện hình ở đây — `checkVisibility()` mới là bằng chứng đóng đúng trên Chrome. */
+  .bf__tip-body {
+    margin: var(--s2) 0 0;
+    font-size: var(--fs-sm); color: var(--c-text-muted);
+  }
   .bf__input { width: 100%; font: inherit; font-size: var(--fs-base); padding: var(--s3) var(--s4); border: 1px solid var(--c-border); border-radius: var(--radius-md); background: var(--c-card); color: var(--c-text); }
   .bf__input:focus { outline: 2px solid var(--c-primary); outline-offset: 1px; }
   .bf__input[aria-invalid="true"] { border-color: var(--c-accent); }
@@ -728,7 +803,6 @@ if (!turnstileSiteKey) {
   .bf__pax { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); padding: var(--s2) 0; }
   .bf__pax-info { display: flex; flex-direction: column; gap: 2px; }
   .bf__pax-name { font-size: var(--fs-base); font-weight: var(--fw-600); color: var(--c-text); }
-  .bf__pax-note { font-size: var(--fs-sm); color: var(--c-text-muted); }
   .bf__pax-price { font-size: var(--fs-sm); font-weight: var(--fw-600); color: var(--c-primary); }
   .bf__stepper { display: inline-flex; align-items: center; gap: var(--s2); }
   .bf__btn { width: 2.75rem; height: 2.75rem; border-radius: var(--radius-pill); border: 1px solid var(--c-border); background: var(--c-card); color: var(--c-primary); font-size: var(--fs-h5); font-weight: var(--fw-600); cursor: pointer; transition: background var(--m-fast) var(--m-ease), border-color var(--m-fast) var(--m-ease); }
