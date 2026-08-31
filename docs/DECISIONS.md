@@ -2472,13 +2472,19 @@ cũ) xác nhận độc lập rằng trần đang trói đúng như lập luận
 trên màn đầu ở viewport 1366.
 
 **Hệ quả nhận rõ, không giấu.** Ở **1710×985**: thanh dính từ **724px** (TRƯỚC, đo 2026-08-31)
-lên **<SỐ ĐO SAU>px** — *số SAU điền sau khi thi hành, xem Task 9; không suy ra từ lập luận
-clamp, phải đo lại bằng trình duyệt thật*. Ở **1366**, con số TRƯỚC còn lưu trong tài liệu là
-**668px**, nhưng đó là số **kế thừa, đã cũ** (xem đoạn trên) — không phải bằng chứng đo mới của
-phiếu này; mốc màn đầu ở khổ này là **657px** (chiều cao viewport thật của trình duyệt trên màn
-768, sau khi trừ chrome). Lập luận clamp ở trên đảm bảo cùng +50px áp cho 1366 như ở 1710. Áp cho
-**mọi** tiêu đề, không riêng tiêu đề hai dòng. Đây là **vi phạm Luật 3 được chấp nhận có chủ ý**,
-không còn là "chưa thành vi phạm".
+lên **<SỐ ĐO SAU @1710>px** — *số của khổ 1710×985, điền sau khi thi hành, xem Task 9; không suy
+ra từ lập luận clamp, phải đo lại bằng trình duyệt thật*. Ở **1366**, con số TRƯỚC còn lưu trong
+tài liệu là **668px**, nhưng đó là số **kế thừa, đã cũ** (xem đoạn trên) — không phải bằng chứng
+đo mới của phiếu này; mốc màn đầu ở khổ này là **657px** (chiều cao viewport thật của trình duyệt
+trên màn 768, sau khi trừ chrome). Vì 1366 **không đo lại được** trong đợt này — công cụ resize
+vô hiệu trong môi trường này, và Task 9 nhiều khả năng cũng chỉ đo được ở 1710 — số SAU của 1366
+**không để trống chờ đo**: nó chốt là số **suy ra**, **≈718px** (668px kế thừa + 50px theo lập
+luận clamp ở trên), ghi thẳng ở `06-BINDING_MAP:74` chứ không phải một placeholder. Đây là số
+**dẫn xuất**, không phải phép đo; nếu sau này ai đo lại được 1366 bằng trình duyệt thật thì số đo
+thật thắng số suy ra này, và phải sửa lại `06-BINDING_MAP:74` khi đó. **Task 9 vì vậy chỉ điền
+đúng một chỗ** — placeholder `<SỐ ĐO SAU @1710>` ở đoạn này; chỗ 1366 ở `06-BINDING_MAP:74` đã
+chốt số suy ra, không còn gì để Task 9 điền ở đó. Áp cho **mọi** tiêu đề, không riêng tiêu đề hai
+dòng. Đây là **vi phạm Luật 3 được chấp nhận có chủ ý**, không còn là "chưa thành vi phạm".
 
 **Điều kiện "0 trang" của `QĐ-2026-08-28-03` XOÁ HẲN.** Nó đã hết hiệu lực; giữ lại trong `06` là
 bẫy cho người đọc sau.
