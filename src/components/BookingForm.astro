@@ -836,14 +836,23 @@ if (!turnstileSiteKey) {
   .bf__total { display: flex; justify-content: space-between; gap: var(--s3); padding-top: var(--s2); border-top: 1px solid var(--c-border); font-size: var(--fs-base); font-weight: var(--fw-700); color: var(--c-text); }
   .bf__total strong { color: var(--c-accent-strong); }
   .bf__season { font-size: var(--fs-sm); color: var(--c-accent-strong); margin: 0; }
-  /* Task 6: gộp hai lựa chọn thành một hàng segmented control. `<input type="radio">`
-     thật vẫn còn — chỉ tạo dáng `<label>`, không thay bằng `<button>`. KHÔNG đoạn nào
-     mang `checked` sẵn (chủ dự án chốt) nên cả hai phải nhìn "nghỉ" như nhau lúc tải
-     trang — border 1px đều nhau ở trạng thái chưa chọn là bằng chứng đó. */
-  .bf__pay { display: flex; flex-direction: row; gap: var(--s2); }
+  /* Task 6: hai lựa chọn thanh toán. `<input type="radio">` thật vẫn còn — chỉ tạo dáng
+     `<label>`, không thay bằng `<button>`. KHÔNG đoạn nào mang `checked` sẵn (chủ dự án
+     chốt) nên cả hai phải nhìn "nghỉ" như nhau lúc tải trang — border 1px đều nhau ở
+     trạng thái chưa chọn là bằng chứng đó.
+     Vòng sửa 2/5 (Task 7, chạm đúng vùng này vì chính đệm mới của .bf gây hồi quy — xem
+     ghi chú ở `.bf` phía trên): đổi từ hàng ngang hai cột sang xếp DỌC full-width. Số đo
+     cho thấy khoản tiết kiệm chiều cao của bố cục hai cột trong cột 306px chỉ ~2,4px so
+     với xếp dọc — đổi lại ba dòng chữ chen chúc thành một món hời tệ. `flex-direction:
+     column` đủ để full-width: `.bf__pay` là flex item của `.bf` (flex column), và
+     `align-items` mặc định `stretch` đã kéo `.bf__pay-opt` full-width mà không cần khai
+     thêm. Bỏ `flex: 1` (chỉ có tác dụng khi container có dư chiều cao để chia — ở đây
+     `.bf__pay` cao theo nội dung, không dư) để tránh đọc nhầm là còn chia đều theo trục
+     ngang. */
+  .bf__pay { display: flex; flex-direction: column; gap: var(--s2); }
   .bf__pay-opt {
     display: flex; align-items: center; justify-content: center; gap: var(--s2);
-    flex: 1; min-height: 2.75rem; font-size: var(--fs-sm);
+    min-height: 2.75rem; font-size: var(--fs-sm);
     border: 1px solid var(--c-border); border-radius: var(--radius-md);
     padding: var(--s2) var(--s3); cursor: pointer;
   }
