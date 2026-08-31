@@ -112,10 +112,17 @@ ranh giới thật của file, và số tài khoản thuộc về nó dù không
 
 ### 4.3 Lớp nghiệp vụ — `src/lib/booking/payment-qr.ts`
 
-Một hàm thuần. Nhận mã đơn, tổng tiền, hình thức thanh toán. Trả
+Một hàm thuần: `buildPaymentQr(banking, code, total, paymentMethod)`. Trả
 `{ imageUrl, addInfo, amount, bin, accountNumber, accountName }` — hoặc **`null` khi
 `paymentMethod !== 'transfer'`**. Không mạng, không D1, không Astro; test chạy dưới một giây.
 Đúng tiêu chí lớp nghiệp vụ của `ADR-0030` §1.
+
+> **Cấu hình đi vào bằng THAM SỐ, hàm không tự `import` `site.config.ts`.** Đây đúng hình dạng
+> của `quote.ts` mà `BK5` đã đặt: hàm nhận bảng giá làm đối số, người gọi cấp. Giữ hàm thuần
+> tuyệt đối (test không cần dựng cấu hình site), và tránh việc `src/lib/booking/*` mọc thêm một
+> quan hệ import mà `BK1` phải xét. `BK1` hiện **chưa có validator máy** — nó là `grep` cộng
+> review trên đúng ba file được nêu tên (`prices.ts`, `sanity.ts`, `resolver.ts`), nên
+> `site.config.ts` không bị cấm theo chữ; đây là chọn hình dạng sạch hơn, không phải né cổng.
 
 URL sinh ra:
 
@@ -201,6 +208,14 @@ tiền**. Đây đúng là khoản nợ `ADR-0031` đã ghi sẵn.
 
 > **Luật:** đơn trùng thì **KHÔNG dựng QR** trong khối thành công. Thay vào đó hiện liên kết tới
 > `/dat-tour/{mã}` — trang đó đọc số tiền **thật đã lưu trong D1**, nên không bao giờ in sai.
+
+**Và khối tóm tắt cũng phải im theo.** Nếu chỉ giấu QR mà vẫn in `summary` như hiện nay, khách
+đơn trùng sẽ thấy **hai con số khác nhau cho cùng một đơn**: dòng tạm tính trong khối thành công
+(số lần nộp mới) và số tiền trên `/dat-tour/{mã}` (số đã lưu). Đó là mâu thuẫn khách nhìn thấy
+được, không phải nợ ngầm.
+
+> **Luật:** đơn trùng → khối thành công **không in dòng tiền nào**. Chỉ mã đơn, câu "yêu cầu này
+> đã được ghi nhận trước đó", và liên kết *"Xem số tiền đã lưu"* tới `/dat-tour/{mã}`.
 
 **Đường không-JavaScript** (`html.ts`, `renderBookingPage`): thêm khối chữ tương tự, **không**
 nhúng ảnh QR. Trang đó cố ý tối giản và đang là bề mặt viết cứng màu mà `ADR-0030` §3 muốn dọn —
@@ -340,7 +355,14 @@ song song với mọi việc khác. Rồi: cấu hình + hàm QR (§4.2, §4.3) 
 công (§4.5) → kênh báo tin (§4.6, §4.7). Trang phải xong trước khi ZNS bật, vì nút CTA trỏ vào
 nó.
 
-**Nghiệm thu tay — bốn bước, theo thứ tự:**
+**Nghiệm thu tay — bốn bước, theo thứ tự.**
+
+> **Đơn nghiệm thu là đơn THẬT trong D1 production và sẽ bắn cả bốn kênh** — tốn tiền ZNS và
+> nhắn vào một máy thật. `handler.ts` **không có** chế độ thử. Nên: dùng **SĐT và email của nhân
+> viên**, làm trong giờ đã báo trước cho người trực, và **xoá đơn ngay sau khi nghiệm thu** bằng
+> `wrangler d1 execute --remote --command "DELETE FROM booking WHERE code='TD-…'"`. Không xoá thì
+> bảng điều khiển `ADR-0030` §2 sẽ đếm nó như đơn thật. Bước 1 và 2 chạy được trên `astro dev`
+> với D1 cục bộ; bước 3 thì không, vì Zalo phải gọi vào domain thật.
 
 1. Đặt một đơn thật chọn *chuyển khoản trước* → quét QR bằng app ngân hàng → **số tiền và nội
    dung hiện đúng trên màn hình app**, chưa chuyển tiền.
