@@ -894,7 +894,11 @@ if (!turnstileSiteKey) {
     padding-top: var(--s2); border-top: 1px solid var(--c-border);
     font-weight: var(--fw-700); color: var(--c-text);
   }
-  [data-detail-lines] :global(.bf__tip-body) { margin: var(--s2) 0 0; font-size: var(--fs-sm); color: var(--c-text-muted); }
+  /* margin: 0, KHÔNG phải var(--s2) 0 0 như .bf__tip-body gốc: .bf__detail-body đã là flex
+     column với gap: var(--s2) riêng, nên margin-top ở đây CỘNG THÊM vào gap (flexbox không
+     gộp margin dọc như block layout) — đo được 16px giữa dòng Tổng cộng và ghi chú mùa, gấp
+     đôi 8px giữa các dòng khác. Để container `.bf__detail-body` một mình lo khoảng cách. */
+  [data-detail-lines] :global(.bf__tip-body) { margin: 0; font-size: var(--fs-sm); color: var(--c-text-muted); }
   /* Task 6: hai lựa chọn thanh toán. `<input type="radio">` thật vẫn còn — chỉ tạo dáng
      `<label>`, không thay bằng `<button>`. KHÔNG đoạn nào mang `checked` sẵn (chủ dự án
      chốt) nên cả hai phải nhìn "nghỉ" như nhau lúc tải trang — border 1px đều nhau ở
