@@ -722,7 +722,13 @@ if (!turnstileSiteKey) {
 </script>
 
 <style>
-  .bf { display: flex; flex-direction: column; gap: var(--s4); }
+  /* Nen xam cho form dat tour, dung cong thuc .inc-ex-card (TourDetail.astro:259-264) —
+     giong module "Bao gom / Chua bao gom", KHONG phai cong thuc cu trong brief. Co vien
+     (--c-border) va dem --s5 (24px, khong phai --s4 16px) nen chieu cao +48px, khong
+     phai +32px. .bf nam long trong .sidebar-card (da co nen trang --c-card, vien, dem
+     --s4 rieng — xem Sidebar.astro) nen day la the trong the co chu dinh, khong sua
+     Sidebar.astro vi no dung chung cho 12 loai trang chi tiet. */
+  .bf { display: flex; flex-direction: column; gap: var(--s4); background: var(--c-surface-alt); border: 1px solid var(--c-border); border-radius: var(--radius-md); padding: var(--s5); }
   .bf__step { display: flex; flex-direction: column; gap: var(--s3); }
   .bf__label { font-family: var(--font-ui); font-size: var(--fs-label); font-weight: var(--fw-600); color: var(--c-text); margin: 0; }
   /* `<details>` là phần tử KHỐI. Để dấu ⓘ nằm cùng dòng với nhãn mà không đẩy
@@ -800,11 +806,21 @@ if (!turnstileSiteKey) {
   .bf__pax-name { font-size: var(--fs-base); font-weight: var(--fw-600); color: var(--c-text); }
   .bf__stepper { display: inline-flex; align-items: center; gap: var(--s2); }
   .bf__btn { width: 2.75rem; height: 2.75rem; border-radius: var(--radius-pill); border: 1px solid var(--c-border); background: var(--c-card); color: var(--c-primary); font-size: var(--fs-h5); font-weight: var(--fw-600); cursor: pointer; transition: background var(--m-fast) var(--m-ease), border-color var(--m-fast) var(--m-ease); }
-  .bf__btn:hover:not(:disabled) { background: var(--c-surface-alt); border-color: var(--c-primary); }
+  /* --c-card la nen THUONG cua .bf__btn (dong tren), nen --c-surface-alt tung dung cho
+     hover se trung voi nen moi cua .bf sau khi form chuyen xam — xoa mat phan hoi hover
+     thay vi sua. Dung token hover that, cung mau voi .bf__secondary:hover ben duoi. */
+  .bf__btn:hover:not(:disabled) { background: var(--c-primary-soft); border-color: var(--c-primary); }
   .bf__btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .bf__count { width: 2.75rem; text-align: center; font: inherit; font-size: var(--fs-base); font-weight: var(--fw-700); border: 0; background: transparent; color: var(--c-text); -moz-appearance: textfield; }
+  /* Truoc la transparent: an theo nen cha. Tren form xam moi, transparent lo ra thanh
+     mot o xam kep giua hai nut tron trang (.bf__btn) — quyet ro sang --c-card de dong
+     bo voi hai nut hai ben; border-radius theo de khong con goc vuong lac giua hai nut
+     bo tron pill. */
+  .bf__count { width: 2.75rem; text-align: center; font: inherit; font-size: var(--fs-base); font-weight: var(--fw-700); border: 0; border-radius: var(--radius-md); background: var(--c-card); color: var(--c-text); -moz-appearance: textfield; }
   .bf__count::-webkit-outer-spin-button, .bf__count::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  .bf__quote { background: var(--c-surface-alt); border-radius: var(--radius-md); padding: var(--s4); display: flex; flex-direction: column; gap: var(--s2); }
+  /* Lat nguoc: --c-surface-alt tung dung khi .bf trong suot, nay trung mau voi nen
+     xam moi cua .bf, bang tam tinh tan vao form. Lat sang --c-card de bang gia noi
+     trang tren form xam. */
+  .bf__quote { background: var(--c-card); border-radius: var(--radius-md); padding: var(--s4); display: flex; flex-direction: column; gap: var(--s2); }
   /* `:global()` là bắt buộc ở đây, không phải tuỳ chọn. Hai vùng này được JS dựng lại bằng
      `document.createElement` mỗi lần đổi số người (và khi hiện tóm tắt lúc gửi xong), nên node
      mới KHÔNG mang thuộc tính `data-astro-cid-*` mà CSS scoped của Astro nhắm tới. Viết
@@ -859,8 +875,10 @@ if (!turnstileSiteKey) {
   .bf__hotline a { color: var(--c-primary); font-weight: var(--fw-600); }
 
   /* Khối QR chuyển khoản. Mọi giá trị lấy từ tokens.css — không mã màu, không cỡ chữ viết
-     cứng (luật cứng 1 của CLAUDE.md, ADR-0030 §4). */
-  .bf__qr { display: flex; flex-direction: column; gap: var(--s3); padding: var(--s4); background: var(--c-surface-alt); border: 1px solid var(--c-border); border-radius: var(--radius-md); }
+     cứng (luật cứng 1 của CLAUDE.md, ADR-0030 §4).
+     Lật ngược: --c-surface-alt tung trung mau voi nen xam moi cua .bf, tan bien mat dung
+     bo mat khach quet de TRA TIEN. Lat sang --c-card de khoi QR noi trang tren form xam. */
+  .bf__qr { display: flex; flex-direction: column; gap: var(--s3); padding: var(--s4); background: var(--c-card); border: 1px solid var(--c-border); border-radius: var(--radius-md); }
   .bf__qr-title { font-family: var(--font-display); font-size: var(--fs-h5); font-weight: var(--fw-700); color: var(--c-primary-strong); margin: 0; }
   .bf__qr-body { display: flex; flex-direction: column; gap: var(--s4); }
   .bf__qr-visual { display: flex; flex-direction: column; align-items: center; gap: var(--s2); }
