@@ -45,7 +45,7 @@ const badgeClass = badgeVariant === 'author' ? 'badge-author'
 
   <div class="card-body">
     <h5 class="card-title">{title}</h5>
-    <p class="card-summary">{summary}</p>
+    {summary && <p class="card-summary">{summary}</p>}
 
     <div class="card-meta">
       {badge && <span class={`card-badge ${badgeClass}`}>{badge}</span>}

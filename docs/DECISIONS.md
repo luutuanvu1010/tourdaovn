@@ -2568,9 +2568,10 @@ vô hiệu trong môi trường này, và Task 9 nhiều khả năng cũng chỉ
 luận clamp ở trên), ghi thẳng ở `06-BINDING_MAP:74` chứ không phải một placeholder. Đây là số
 **dẫn xuất**, không phải phép đo; nếu sau này ai đo lại được 1366 bằng trình duyệt thật thì số đo
 thật thắng số suy ra này, và phải sửa lại `06-BINDING_MAP:74` khi đó. **Task 9 vì vậy chỉ điền
-đúng một chỗ** — placeholder `<SỐ ĐO SAU @1710>` ở đoạn này; chỗ 1366 ở `06-BINDING_MAP:74` đã
-chốt số suy ra, không còn gì để Task 9 điền ở đó. Áp cho **mọi** tiêu đề, không riêng tiêu đề hai
-dòng. Đây là **vi phạm Luật 3 được chấp nhận có chủ ý**, không còn là "chưa thành vi phạm".
+đúng một chỗ** — số đo SAU ở đoạn "Hệ quả nhận rõ" trên (đã điền: 774px); chỗ 1366 ở
+`06-BINDING_MAP:74` đã chốt số suy ra, không còn gì để Task 9 điền ở đó. Áp cho **mọi** tiêu đề,
+không riêng tiêu đề hai dòng. Đây là **vi phạm Luật 3 được chấp nhận có chủ ý**, không còn là
+"chưa thành vi phạm".
 
 **Điều kiện "0 trang" của `QĐ-2026-08-28-03` XOÁ HẲN.** Nó đã hết hiệu lực; giữ lại trong `06` là
 bẫy cho người đọc sau.
@@ -2602,9 +2603,11 @@ tour. Không trang nào mất giá."* Vế `.bf__pax-price` trong câu đó **na
 
 **"Cái gì đỡ" nay là gì.** Hai chỗ, không phải một: (1) **thanh dính** — vẫn mang giá, không đổi
 so với phiếu gốc; (2) **Tạm tính** (đã có, render ngay khi mở form) và **bảng "Chi tiết giá"**
-(Task 8 dựng, `<details>` đóng mặc định, mở ra thì thấy đơn giá từng hạng) trong chính form đặt
-tour — cả hai cập nhật theo số khách vừa chọn. Giá không mất khỏi form; nó chỉ không còn
-hiện **thường trực** ở mỗi hạng khách trước khi khách bấm chọn số người.
+(Task 8 dựng, `<details>` đóng mặc định, mở ra thì thấy **thành tiền từng hạng khách**, mốc tạm
+tính trước ưu đãi, số tiền giảm, và tổng cộng — theo yêu cầu ẩn hết đơn giá, bảng chi tiết **cũng
+không in đơn giá**) trong chính form đặt tour — cả hai cập nhật theo số khách vừa chọn. Giá không
+mất khỏi form; nó chỉ không còn hiện **thường trực** ở mỗi hạng khách trước khi khách bấm chọn số
+người.
 
 **Hệ quả nhận rõ, không giấu.** Ở viewport **1366**, màn đầu (trên mốc 657px) **không còn con số
 giá nào**: thanh dính đã ở **≈718px** (số suy ra, xem đoạn gốc ở trên) — dưới mốc màn đầu, đúng

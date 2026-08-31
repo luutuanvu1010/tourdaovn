@@ -281,8 +281,8 @@ nhờ cái viền cũ**, tức tiêu chí không bắt được lỗi. Chỉ đ�
 Tạm tính                          1.140.000 ₫
 ▸ Xem chi tiết giá                        ← <details>, mặc định ĐÓNG
   ┌────────────────────────────────────────────
-  │ Người lớn × 2   523.000 ₫/khách  1.046.000 ₫
-  │ Trẻ em    × 1   380.000 ₫/khách    380.000 ₫
+  │ Người lớn × 2                    1.046.000 ₫
+  │ Trẻ em    × 1                      380.000 ₫
   │ ───────────────────────────────────────────
   │ Tạm tính trước ưu đãi            1.426.000 ₫
   │ Ưu đãi trả trước (−5%)            −286.000 ₫
@@ -316,11 +316,14 @@ Chỉ bốn mốc sau là chính xác tuyệt đối, và bảng trên **chỉ �
 
 | Dòng hiển thị | Nguồn |
 |---|---|
-| Đơn giá mỗi hạng khách | `quote.lines[].amount` (`= apDieuChinh(gốc, mùa, ưu đãi)`) |
 | Thành tiền mỗi hàng | `quote.lines[].subtotal` |
 | Tạm tính trước ưu đãi | **`quote.prepay.totalGoc`** |
 | Số tiền giảm | **`totalGoc − total`** |
 | Tổng cộng | **`quote.total`** |
+
+> `quote.lines[].amount` (đơn giá mỗi hạng khách, `= apDieuChinh(gốc, mùa, ưu đãi)`) **không
+> được hiển thị** ở bề mặt hiện tại — bảng chi tiết giá chỉ dựng từ `subtotal` (thành tiền), theo
+> yêu cầu ẩn hết đơn giá.
 
 **Ba luật, viết ra để người sửa sau không phá:**
 
