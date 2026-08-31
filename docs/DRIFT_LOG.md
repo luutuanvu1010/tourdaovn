@@ -2612,6 +2612,32 @@ không đủ.
 **Chưa sửa ở đợt này:** câu §7 của spec giữ nguyên để còn đối chiếu được với phiếu này. Ai mở
 §4.4/§4.7 thì sửa luôn.
 
+### Lần thứ hai trong cùng ngày — và lần này nó CHẶN được một cú push
+
+Tối 31/08, sau khi merge `main`, hook `pre-push` đỏ **3/12**: `r3-r4-post`,
+`geo-knowledge-post`, `control-registry-gate`. Commit đang push chỉ sửa **hai file markdown**.
+
+Một gốc cho cả ba:
+
+- **R3**: `/cam-nang/du-lich-hon-tam-tu-tuc/` có trong sitemap production và trả **HTTP 200**,
+  nhưng **không có trong `dist/` tại máy** → R3 báo "URL cũ biến mất, không có redirect".
+- **geo-knowledge**: `AI_ENTITY_MISSING` — cùng tài liệu đó, `approved`, có trang thật, thiếu
+  trong `dist/ai/entities.json`.
+- **control-registry-gate**: đỏ **phái sinh** thuần tuý — nó chỉ đọc báo cáo của R3 và thấy
+  *"post-build report tồn tại nhưng chưa pass"*. Sửa R3 là nó tự xanh. Đừng truy nó riêng.
+
+**Cơ chế mới, chưa ai ghi: sau MỖI lần deploy, `dist/` tại máy cũ đi theo cấu trúc.** Workers
+Builds **tự dựng lại trên Cloudflare** từ `main`, và lần dựng đó lấy Sanity ở **thời điểm của
+nó** — muộn hơn lần dựng tại máy. Biên tập viên duyệt thêm một bài vào giữa hai thời điểm là
+production có bài đó còn `dist/` tại máy thì không. Mà `r3-r4-post` so với **sitemap production
+đang sống**, nên khoảng lệch này thành đỏ ngay.
+
+Nói cách khác: **đỏ kiểu này không phải hồi quy, mà là cái giá của việc dựng ở hai nơi.** Cách
+xử lý vẫn đúng một câu: `npm run build` rồi mới push. Đã làm, và 12/12 xanh trở lại.
+
+**Hook đã làm đúng việc của nó** — nó không cho đẩy một bản mà người đẩy chưa nhìn. Đừng vượt
+bằng `--no-verify`; ba đỏ này mất 4 phút để hiểu và một lần dựng để hết.
+
 ---
 
 ## DR-106 — Khối chữ tài khoản vào `handler.ts` chứ không vào `html.ts` như bản đồ file của SPEC

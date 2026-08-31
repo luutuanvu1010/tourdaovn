@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-08-31T02:41:25.317Z",
+  "generatedAt": "2026-08-31T07:08:30.280Z",
   "status": "pass",
   "summary": {
     "files": {
@@ -11,9 +11,9 @@
       "/ai/graph.json": "present",
       "/ai/reading-guide.json": "present"
     },
-    "totalEntities": 91,
+    "totalEntities": 92,
     "entityTypes": {
-      "article": 7,
+      "article": 8,
       "attraction": 25,
       "experience": 8,
       "hotel": 10,
@@ -24,19 +24,19 @@
       "touristDestination": 2
     },
     "urlsByLanguage": {
-      "vi": 91
+      "vi": 92
     },
     "aiCoverageRatio": 1,
     "sitemapCoverageRatio": 1,
     "graph": {
-      "nodes": 91,
-      "edges": 180,
+      "nodes": 92,
+      "edges": 189,
       "danglingEdges": 0,
       "orphanNodes": 9,
       "relations": {
-        "author": 7,
-        "about": 13,
-        "mentions": 40,
+        "author": 8,
+        "about": 15,
+        "mentions": 46,
         "containedInPlace": 30,
         "venue": 8,
         "operator": 24,
@@ -44,8 +44,8 @@
       }
     },
     "readiness": {
-      "missingSource": 64,
-      "missingSameAs": 56,
+      "missingSource": 65,
+      "missingSameAs": 57,
       "commercialMissingBookingOrFreeFlag": 39,
       "missingLanguages": 0,
       "staleFiles": []
@@ -76,6 +76,22 @@
       "hasSameAs": false,
       "hasBookingOrFreeFlag": true,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/article;d0036276-0843-4f4d-9110-6b6037751dc9"
+    },
+    {
+      "id": "108895ac-b7e8-4543-b42f-cc30463d8016",
+      "type": "article",
+      "title": "Du lịch Hòn Tằm tự túc",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/du-lich-hon-tam-tu-tuc/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;108895ac-b7e8-4543-b42f-cc30463d8016"
     },
     {
       "id": "09eef765-f1d7-4622-ac3d-3f1fbac50e31",
