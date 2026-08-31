@@ -163,7 +163,12 @@ if (!turnstileSiteKey) {
 
     {prepayPercent > 0 && (
       <>
-        <p class="bf__label" id="bf-pay-label">{t('bookingPayLabel')}</p>
+        {/* Task 6: nhãn ẩn thị giác nhưng còn tên cho trợ năng — đổi lớp sang
+            `.bf__sr-only` (đã dựng ở Task 4, dùng lại, không dựng lớp thứ hai),
+            giữ nguyên id + `aria-labelledby` bên dưới nên nhóm radio không mất
+            tên trong cây trợ năng. KHÔNG dùng display:none/visibility:hidden —
+            hai cái đó ẩn luôn với trình đọc màn hình. */}
+        <p class="bf__sr-only" id="bf-pay-label">{t('bookingPayLabel')}</p>
         <div class="bf__pay" role="radiogroup" aria-labelledby="bf-pay-label">
           <label class="bf__pay-opt">
             <input type="radio" name="paymentMethod" value="transfer" />
@@ -811,8 +816,28 @@ if (!turnstileSiteKey) {
   .bf__total { display: flex; justify-content: space-between; gap: var(--s3); padding-top: var(--s2); border-top: 1px solid var(--c-border); font-size: var(--fs-base); font-weight: var(--fw-700); color: var(--c-text); }
   .bf__total strong { color: var(--c-accent-strong); }
   .bf__season { font-size: var(--fs-sm); color: var(--c-accent-strong); margin: 0; }
-  .bf__pay { display: flex; flex-direction: column; gap: var(--s2); }
-  .bf__pay-opt { display: flex; align-items: center; gap: var(--s2); min-height: 2.75rem; font-size: var(--fs-sm); }
+  /* Task 6: gộp hai lựa chọn thành một hàng segmented control. `<input type="radio">`
+     thật vẫn còn — chỉ tạo dáng `<label>`, không thay bằng `<button>`. KHÔNG đoạn nào
+     mang `checked` sẵn (chủ dự án chốt) nên cả hai phải nhìn "nghỉ" như nhau lúc tải
+     trang — border 1px đều nhau ở trạng thái chưa chọn là bằng chứng đó. */
+  .bf__pay { display: flex; flex-direction: row; gap: var(--s2); }
+  .bf__pay-opt {
+    display: flex; align-items: center; justify-content: center; gap: var(--s2);
+    flex: 1; min-height: 2.75rem; font-size: var(--fs-sm);
+    border: 1px solid var(--c-border); border-radius: var(--radius-md);
+    padding: var(--s2) var(--s3); cursor: pointer;
+  }
+  /* Dấu hiệu NGOÀI màu cho trạng thái chọn (người mù màu vẫn phân biệt được): thêm
+     `box-shadow` viền trong 1px chồng lên border 1px sẵn có — đọc như viền dày 2px
+     nhưng KHÔNG đổi kích thước hộp (border-width giữ nguyên 1px), nên hai đoạn không
+     lệch cao khi một đoạn được chọn. Nút radio thật bên trong cũng tự có chấm đặc khi
+     checked — một lớp dấu hiệu ngoài màu thứ hai, độc lập với CSS này. */
+  .bf__pay-opt:has(:checked) {
+    border-color: var(--c-primary);
+    box-shadow: inset 0 0 0 1px var(--c-primary);
+    background: var(--c-primary-soft);
+  }
+  .bf__pay-opt:has(:focus-visible) { outline: 2px solid var(--c-primary); outline-offset: 2px; }
   .bf__prepay { font-size: var(--fs-sm); color: var(--c-accent-strong); margin: 0; }
   .bf__note, .bf__hint, .bf__noscript, .bf__hotline { font-size: var(--fs-sm); color: var(--c-text-muted); margin: 0; }
   .bf__hint { color: var(--c-accent-strong); }
