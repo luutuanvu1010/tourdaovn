@@ -723,12 +723,16 @@ if (!turnstileSiteKey) {
 
 <style>
   /* Nen xam cho form dat tour, dung cong thuc .inc-ex-card (TourDetail.astro:259-264) —
-     giong module "Bao gom / Chua bao gom", KHONG phai cong thuc cu trong brief. Co vien
-     (--c-border) va dem --s5 (24px, khong phai --s4 16px) nen chieu cao +48px, khong
-     phai +32px. .bf nam long trong .sidebar-card (da co nen trang --c-card, vien, dem
-     --s4 rieng — xem Sidebar.astro) nen day la the trong the co chu dinh, khong sua
-     Sidebar.astro vi no dung chung cho 12 loai trang chi tiet. */
-  .bf { display: flex; flex-direction: column; gap: var(--s4); background: var(--c-surface-alt); border: 1px solid var(--c-border); border-radius: var(--radius-md); padding: var(--s5); }
+     giong module "Bao gom / Chua bao gom". Vong sua 1/5 (chu du an, sau khi do +75px o
+     --s5): .inc-ex-card song trong vung noi dung chinh ~800px, con .bf song trong cot
+     phai 340px (DetailLayout.astro:314) — dem 24px moi ben hop o the rong 800px nhung
+     KHONG tu dong hop o cot 306px long, ep nhan nut ".bf__pay-opt" (Task 6) xuong 3 dong.
+     Cai lam mat nhan ra "giong module Bao gom/Chua bao gom" la nen + vien + bo goc,
+     khong phai con so dem — nen giu ca ba, chi ha dem ve --s4 (16px, dung nhu brief cu,
+     nhung KHONG bo vien/bo goc nhu brief cu). .bf nam long trong .sidebar-card (da co
+     nen trang --c-card, vien, dem --s4 rieng — xem Sidebar.astro) nen day la the trong
+     the co chu dinh, khong sua Sidebar.astro vi no dung chung cho 12 loai trang chi tiet. */
+  .bf { display: flex; flex-direction: column; gap: var(--s4); background: var(--c-surface-alt); border: 1px solid var(--c-border); border-radius: var(--radius-md); padding: var(--s4); }
   .bf__step { display: flex; flex-direction: column; gap: var(--s3); }
   .bf__label { font-family: var(--font-ui); font-size: var(--fs-label); font-weight: var(--fw-600); color: var(--c-text); margin: 0; }
   /* `<details>` là phần tử KHỐI. Để dấu ⓘ nằm cùng dòng với nhãn mà không đẩy
