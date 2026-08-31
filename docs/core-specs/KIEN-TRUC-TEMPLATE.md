@@ -111,11 +111,11 @@ Mỗi file chỉ khai bốn thứ: **facts** (ô Thông tin nhanh), **jumpLinks*
 **Chiều cao khai ở `tokens.css`, KHÔNG khai trong `Hero.astro`.** File component không giữ con số nào; nó chỉ đọc biến.
 
 ```css
---hero-entity-h-min:    330px   /* sàn */
---hero-entity-h-max:    430px   /* trần — đổi ở đây */
---hero-entity-h-tablet: 390px   /* 769–1023px */
---hero-entity-h-mobile: 290px   /* ≤768px */
---hero-entity-h: clamp(min, calc(30vw + 50px), max)
+--hero-entity-h-min:    380px   /* sàn */
+--hero-entity-h-max:    480px   /* trần — đổi ở đây */
+--hero-entity-h-tablet: 440px   /* 769–1023px */
+--hero-entity-h-mobile: 340px   /* ≤768px */
+--hero-entity-h: clamp(min, calc(30vw + 100px), max)
 ```
 
 Đổi một dòng là **13 loại trang chi tiết cộng trang điểm đến** đổi theo, phủ cả ba biến thể hero. Đã đo, xem `QĐ-2026-08-29-01`.
@@ -123,7 +123,7 @@ Mỗi file chỉ khai bốn thứ: **facts** (ô Thông tin nhanh), **jumpLinks*
 **⚠ Hai bẫy có thật:**
 
 1. **`--hero-min-h` và `--hero-min-h-mobile` KHÔNG phải hero này.** Chúng của `HomeHero.astro` — hero **trang chủ**, component khác, chiều cao khác. Tên chỉ khác thứ tự từ.
-2. **Nâng riêng trần không cho thêm đúng ngần ấy px.** Ở phần lớn khổ màn, số đang trói là `calc(30vw + 50px)` chứ không phải trần. Nâng trần 380→430 chỉ cho **+4px ở 1280** và **+30px ở 1366**. Muốn cao thêm ở mọi khổ thì sửa **số giữa**.
+2. **Nâng riêng trần không cho thêm đúng ngần ấy px.** Ở phần lớn khổ màn, số đang trói là `calc(30vw + 100px)` chứ không phải trần, vì `30vw` mới là số đang trói ở dải đó. Nâng riêng trần **480 lên cao hơn** (giữ nguyên số giữa) chỉ cho **+4px ở 1280** và **+30px ở 1366** — hai khổ đó vẫn do số giữa quyết định, trần chỉ chặn phần vượt. Muốn cao thêm ở **mọi** khổ thì phải dịch **cả số giữa lẫn trần** cùng lúc — đúng như `QĐ-2026-08-31-03` đã làm (330→380/430→480, +50 cả hai).
 
 ---
 

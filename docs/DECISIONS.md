@@ -2555,8 +2555,11 @@ cũ) xác nhận độc lập rằng trần đang trói đúng như lập luận
 trên màn đầu ở viewport 1366.
 
 **Hệ quả nhận rõ, không giấu.** Ở **1710×985**: thanh dính từ **724px** (TRƯỚC, đo 2026-08-31)
-lên **<SỐ ĐO SAU @1710>px** — *số của khổ 1710×985, điền sau khi thi hành, xem Task 9; không suy
-ra từ lập luận clamp, phải đo lại bằng trình duyệt thật*. Ở **1366**, con số TRƯỚC còn lưu trong
+lên **774px** (SAU) — *Task 9, đo 2026-08-31, `npm run dev` cổng 4321 + Chrome, đúng trang
+`tour-3-dao-hon-mun-hon-mun-lang-chai-hon-tam` (trang đã dùng làm mốc TRƯỚC, xác nhận qua
+`h1`/`[data-region="sticky-bar"][data-field="gia"]` trùng khớp), `.sticky-bar`
+`getBoundingClientRect().top + scrollY`. Đúng +50px so với TRƯỚC, khớp lập luận clamp; không phải
+số suy ra*. Ở **1366**, con số TRƯỚC còn lưu trong
 tài liệu là **668px**, nhưng đó là số **kế thừa, đã cũ** (xem đoạn trên) — không phải bằng chứng
 đo mới của phiếu này; mốc màn đầu ở khổ này là **657px** (chiều cao viewport thật của trình duyệt
 trên màn 768, sau khi trừ chrome). Vì 1366 **không đo lại được** trong đợt này — công cụ resize
