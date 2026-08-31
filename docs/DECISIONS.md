@@ -2600,7 +2600,7 @@ tour. Không trang nào mất giá."* Vế `.bf__pax-price` trong câu đó **na
 **"Cái gì đỡ" nay là gì.** Hai chỗ, không phải một: (1) **thanh dính** — vẫn mang giá, không đổi
 so với phiếu gốc; (2) **Tạm tính** (đã có, render ngay khi mở form) và **bảng "Chi tiết giá"**
 (Task 8 dựng, `<details>` đóng mặc định, mở ra thì thấy đơn giá từng hạng) trong chính form đặt
-tour — cả hai cập nhật theo số khách khách vừa chọn. Giá không mất khỏi form; nó chỉ không còn
+tour — cả hai cập nhật theo số khách vừa chọn. Giá không mất khỏi form; nó chỉ không còn
 hiện **thường trực** ở mỗi hạng khách trước khi khách bấm chọn số người.
 
 **Hệ quả nhận rõ, không giấu.** Ở viewport **1366**, màn đầu (trên mốc 657px) **không còn con số

@@ -318,6 +318,11 @@ dùng trong file. `TourDetail.astro:213` vẫn truyền `priceLabel={priceView!.
 giữ nguyên prop và lời gọi — xoá là chạm thêm một file ngoài phạm vi Task 5. Dọn khi có dịp chạm
 `TourDetail.astro`.
 
+Cùng gốc: khoá `priceFrom` trong `src/lib/uiCopy.ts` (5 ngôn ngữ) chỉ được `t('priceFrom')` gọi
+ở đúng chỗ `.bf__head` vừa xoá, nay cũng mồ côi. Dọn cùng lúc với prop `priceLabel` — cả hai đều
+cần chạm `TourDetail.astro` (hoặc chỗ gọi `BookingForm` với `priceLabel`) để xác nhận không còn
+nơi nào khác cần nhãn "Giá từ" trước khi xoá khoá dịch.
+
 ### B-021 — `/tac-gia/` trỏ breadcrumb vào 404 · `mở`
 
 `Breadcrumb.astro:43-52` đẩy crumb nhánh **không kiểm `hasIndex`**, nên mọi trang

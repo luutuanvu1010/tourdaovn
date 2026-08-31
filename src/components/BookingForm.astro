@@ -303,7 +303,7 @@ if (!turnstileSiteKey) {
 </form>
 
 <script>
-  import { PAX_ORDER, apDieuChinh, computeQuote, type PaxCode, type PaxCounts, type PriceTable, type Quote } from '../lib/booking/quote'
+  import { PAX_ORDER, computeQuote, type PaxCode, type PaxCounts, type PriceTable, type Quote } from '../lib/booking/quote'
   import type { Season } from '../lib/booking/season'
   import { formatPrice } from '../lib/renderer'
   import { addDaysISO, formatDateVN, todayVN } from '../lib/booking/vn-date'
@@ -402,18 +402,13 @@ if (!turnstileSiteKey) {
     dateEl.addEventListener('change', update)
 
     // Bộ đếm
-    const rows = new Map<PaxCode, { input: HTMLInputElement; label: string; inc: HTMLButtonElement; dec: HTMLButtonElement; priceEl: HTMLElement | null }>()
+    const rows = new Map<PaxCode, { input: HTMLInputElement; label: string; inc: HTMLButtonElement; dec: HTMLButtonElement }>()
     form.querySelectorAll<HTMLElement>('.bf__pax').forEach(row => {
       const code = row.dataset.code as PaxCode
       const input = row.querySelector<HTMLInputElement>('input')!
       const inc = row.querySelector<HTMLButtonElement>('[data-inc]')!
       const dec = row.querySelector<HTMLButtonElement>('[data-dec]')!
-      // Task 5 (2026-08-31) bỏ hẳn `.bf__pax-price` khỏi markup — mọi hạng khách, không riêng
-      // 'tiers'. querySelector này giờ LUÔN ra null; giữ nguyên nhánh null-check bên dưới (biến
-      // `priceEl` luôn falsy) cố ý — logic tính `apDieuChinh` theo mùa/ưu đãi ở đây vẫn là tham
-      // chiếu đúng cho bảng "Chi tiết giá" (Task 8, xem SPEC-2026-08-31-form-dat-tour-gon-va-chi-tiet-gia.md §4.5).
-      const priceEl = row.querySelector<HTMLElement>('.bf__pax-price')
-      rows.set(code, { input, label: row.dataset.label || code, inc, dec, priceEl })
+      rows.set(code, { input, label: row.dataset.label || code, inc, dec })
       dec.addEventListener('click', () => { input.value = String(Math.max(Number(input.min) || 0, (parseInt(input.value, 10) || 0) - 1)); update() })
       inc.addEventListener('click', () => { input.value = String(Math.min(perTypeMax, (parseInt(input.value, 10) || 0) + 1)); update() })
       input.addEventListener('change', update)
@@ -448,31 +443,7 @@ if (!turnstileSiteKey) {
       const pax = readPax()
       const total = PAX_ORDER.reduce((n, c) => n + pax[c], 0)
       const chon = chonChuyenKhoan()
-      const uuDai = chon ? prepayPercent : 0
       quote = computeQuote(table!, pax, { seasons, departDate: dateEl.value, prepayPercent, prepay: chon })
-
-      // Đơn giá trong ô chọn số khách phải khớp mùa với dòng tính tiền ngay bên dưới —
-      // cùng hạng khách không được hiện hai giá khác nhau trên một màn hình (chủ dự án
-      // chốt 2026-08-30). `quote.perPax[code]` đã áp mùa và làm tròn sẵn, không tính lại.
-      // Hạng chưa có khách (count 0) không nằm trong quote.perPax — nhưng đơn giá của nó
-      // vẫn phải đổi theo mùa y như hạng có khách, nếu không khách thấy giá cũ rồi giá
-      // nhảy ngay khi bấm "+" (đúng thứ bản vá này sinh ra để dẹp). Lấy giá gốc từ bảng
-      // giá nướng lúc build rồi áp CÙNG hàm apDieuChinh mà computeQuote dùng — không tính
-      // lại bằng công thức riêng. Giá gốc 0đ ("Miễn phí") luôn ra 0 dù áp mùa, nên không
-      // cần — và không được — đổi nhãn đó thành "0 ₫": bỏ qua, giữ nguyên nhãn đang hiện.
-      rows.forEach((r, code) => {
-        if (!r.priceEl) return
-        const amount = quote?.perPax[code]
-        if (typeof amount === 'number') {
-          if (amount > 0) r.priceEl.textContent = formatPrice(amount, 'vi')
-          return
-        }
-        if (table!.kind !== 'flat') return
-        const goc = table!.perPax[code]
-        if (typeof goc !== 'number') return
-        const adjusted = apDieuChinh(goc, quote?.season?.percent ?? 0, uuDai)
-        if (adjusted > 0) r.priceEl.textContent = formatPrice(adjusted, 'vi')
-      })
 
       linesEl.replaceChildren()
       if (quote) {
