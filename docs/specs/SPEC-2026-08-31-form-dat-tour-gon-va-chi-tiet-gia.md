@@ -288,7 +288,7 @@ Tạm tính                          1.140.000 ₫
   │ Ưu đãi trả trước (−5%)            −286.000 ₫
   │ ═══════════════════════════════════════════
   │ Tổng cộng                        1.140.000 ₫
-  │ (i) Đơn giá đã gồm phụ thu mùa cao điểm +10%,
+  │ (i) Đơn giá đã gồm điều chỉnh mùa cao điểm +10%,
   │     làm tròn lên nghìn.
   └────────────────────────────────────────────
 ```
@@ -297,6 +297,18 @@ Tạm tính                          1.140.000 ₫
 chiều cao.
 
 #### 4.5.1 Luật chuẩn tắc — bốn mốc chính xác
+
+> **Thuật ngữ: dùng "điều chỉnh mùa", KHÔNG dùng "phụ thu mùa".** Bản đầu của spec này viết
+> "phụ thu". Sai: `cms/schemas/bangGiaMuaVu.ts:47` cho `phanTram` nhận giá trị **âm**
+> (`Rule.min(-90).max(200)`), và mô tả field nói rõ *"Ví dụ 30 là tăng 30%, -15 là giảm 15%"* —
+> mùa thấp điểm giảm giá là **tính năng đã thiết kế**. "Phụ thu −15%" đọc ngược. Từ đúng là
+> **"điều chỉnh"**, khớp chính tên field trong CMS (`:44`, title `'Điều chỉnh (%)'`) — thứ biên
+> tập viên đang nhìn thấy trong Studio.
+>
+> Kèm theo: dấu `+` phải do **script chèn có điều kiện**, không nướng cứng trong khuôn chuỗi —
+> nếu không, mùa `-15` in ra `"+-15%"`. Chính Studio đã làm đúng ở `bangGiaMuaVu.ts:63`
+> (`const dau = pct > 0 ? '+' : ''`), và mã cũ của form cũng có guard đó; nó bị rơi khi nội dung
+> chuyển vào khuôn chuỗi. Phát hiện khi thi hành Task 8, sửa ở commit `b75e4be`.
 
 `apDieuChinh()` áp **cả hai** phần trăm trong một biểu thức rồi mới `Math.ceil` lên nghìn
 (ADR-0030 §3, ADR-0031 §3). Nên thang `giá gốc → +mùa → −ưu đãi → tổng` **không tự cộng khớp**.
@@ -352,7 +364,7 @@ Nên:
   đoạn có trạng thái mặc định sai sẽ làm đơn thật bị từ chối. Xem tiêu chí 8b.
 - `handler.ts`, `notify/`, `html.ts`, D1 — **không sửa**.
 
-**Nếu sau này ai muốn phụ thu mùa hiện thành SỐ TIỀN cho từng hạng khách** thì mới cần thêm một
+**Nếu sau này ai muốn điều chỉnh mùa hiện thành SỐ TIỀN cho từng hạng khách** thì mới cần thêm một
 field `base` (đơn giá trước mùa) vào `QuoteLine`. Đó là sửa module dùng chung client/server
 (BK5), kéo theo bộ test của `quote.ts`. **Ngoài phạm vi spec này**, và không được lặng lẽ gộp
 vào — mùa ở đợt này hiện dưới dạng **ghi chú (i)** trên đơn giá.
