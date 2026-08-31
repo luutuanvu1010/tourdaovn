@@ -83,6 +83,13 @@ Nhóm cần tổng quát hóa (có GHI CHÚ CORE — nguyên tắc engine, hằn
   2026-08-30. Khuôn tái dùng: (a) ranh giới không có máy canh sẽ trôi — `notify/format.ts` viết
   cứng màu từ ngày đầu vì chưa có luật nào chặn; (b) dựng quản trị trên CMS đã có thì thừa
   hưởng luôn hệ người dùng của nó và tránh được cửa một chiều "site thôi thuần tĩnh".
+- [ADR-0032](ADR-0032-tu-khang-dinh-tien-ve.md) — **Site tự khẳng định tiền đã về**: sổ cái
+  ngân hàng chỉ-thêm, khớp theo mã đơn trong nội dung chuyển khoản, cửa sổ giữ chỗ 24 giờ.
+  **Đề xuất 2026-08-31, chờ phê chuẩn.** Đây là "ADR khác" mà ADR-0030 §5 gọi tên trước; nó
+  ĐẢO tiền đề "site không biết tiền đã về" của ADR-0027 / ADR-0030 §5 / brief §5, và KHÔNG
+  đảo ADR-0031 §2. Khuôn tái dùng: (a) sự thật tiền sống trong sổ cái chỉ-thêm, không phải một
+  cột boolean; (b) nhà cung cấp dữ liệu ngân hàng là chi tiết thay được sau một hợp đồng dữ
+  liệu của riêng mình; (c) trạng thái và hết hạn là thứ suy ra lúc đọc, không phải thứ lưu.
 
 ## ADR gốc KHÔNG mang vào Core (và vì sao)
 

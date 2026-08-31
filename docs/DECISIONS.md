@@ -2426,6 +2426,89 @@ Triệu chứng là **im lặng**: Studio báo Publish thành công, tài liệu
 **Nợ mở kèm theo.** Bản dựng đọc Sanity qua **CDN** (`useCdn: true`, `src/lib/sanity.ts:147`, chọn vì chi phí ở `QĐ-2026-08-25-06`). CDN nhất quán *trễ*, nên một lần dựng chạy **ngay** sau Publish vẫn có thể đọc giá trị cũ rồi nướng vào trang tĩnh — build xanh, số sai, không cổng nào đỏ. Vá hook không dẹp được rủi ro này. Cách kiểm ghi ở `SPEC-2026-08-30-uu-dai-thanh-toan-truoc` §7 bước 4: đối chiếu số trang đang nướng với số CDN đang trả.
 
 **Tài liệu.** `docs/specs/SPEC-2026-08-21-dat-tour.md` §4.3 §4.4 (con số +90, viện dẫn mục này), `docs/specs/SPEC-2026-08-30-uu-dai-thanh-toan-truoc.md` §7.
+
+---
+
+## QĐ-2026-08-31-02 — Site tự khẳng định tiền đã về: đảo `ADR-0030` §5, giữ nguyên `ADR-0031` §2
+
+> **Trạng thái: ĐÃ PHÊ CHUẨN 2026-08-31.** Sáu câu dưới đây chủ dự án chốt lần lượt trong phiên
+> brainstorm cùng ngày; ba mục thiết kế duyệt lần lượt; `ADR-0032` toàn văn được duyệt sau khi
+> chủ dự án đọc lại. Chủ dự án đồng thời **cho phép dựng phần lõi trước** khi chốt nhà cung cấp.
+
+**Bối cảnh.** Chủ dự án yêu cầu: *khách tạo đơn và chuyển khoản thì hệ tự ghi nhận và biết giao
+dịch nào đã hoàn tất*. Yêu cầu này rơi đúng vào chỗ `ADR-0030` §5 (phê chuẩn hôm trước) đã gọi
+tên trước: *"Nếu sau này muốn QR mang nghĩa giữ chỗ thì đó là **ADR khác**, vì nó kéo theo
+trạng thái đơn mới, quy tắc hết hạn, và người đối soát tiền."* Ba thứ đó không bị lờ đi — quyết
+định 4, 5, 6 của `ADR-0032` là ba câu trả lời cho đúng ba thứ ấy.
+
+**Năm câu chốt trong phiên:**
+
+| # | Câu hỏi | Chốt |
+|---|---|---|
+| 1 | Mức tự động | **Hệ tự khẳng định đã thanh toán** — không phải chỉ giảm công đối soát cho nhân viên |
+| 2 | Số tiền | **Đủ 100% `quote.total`.** Không cọc một phần → mã QR đang chạy **không phải đổi một dòng** |
+| 3 | Tài khoản | **Giữ Techcombank `2502503979`.** Phạm vi thu hẹp đúng vào *"nhận webhook bắn tin có biến động số dư"* |
+| 4 | Hết hạn giữ chỗ | **24 giờ, hoặc trước giờ khởi hành** — cái nào đến trước |
+| 5 | Báo khách | **Làm luôn trang tra đơn `/dat-tour/<mã>/`** (đang nợ ở spec QR §4.4) + thư SES nếu có email |
+| 6 | Độc lập ngân hàng | **Lõi phải chạy được khi thêm hoặc đổi ngân hàng.** Chủ dự án thêm câu này *sau khi đọc bản đề xuất*: *"phần lõi nên độc lập với việc chọn ngân hàng gì, vì có thể chúng ta sẽ thêm / đổi ngân hàng"* |
+
+**Đã tra ngày 31/08, không lấy từ trí nhớ — và đây là phát hiện quan trọng nhất của phiên.**
+Tài liệu **lập trình** của SePay (`developer.sepay.vn`, tải nguyên trang về đọc) liệt kê mười
+ngân hàng hỗ trợ webhook và kết bằng *"Ngân hàng không có trong bảng thì chưa hỗ trợ webhook"* —
+**Techcombank không có trong bảng**. Trang blog "API Techcombank" của cùng site là bài SEO,
+không phải danh sách hỗ trợ; phân biệt hai thứ đó là toàn bộ giá trị của lần tra này. payOS
+không hỗ trợ tài khoản **doanh nghiệp** Techcombank (MB, KienlongBank, OCB, BIDV, Shinhan).
+Casso và Pay2S có liệt kê TCB nhưng không công bố điều kiện; Casso liên kết bằng **thông tin
+đăng nhập internet banking có quyền ra lệnh**. Techcombank không có sản phẩm API công khai —
+đường chính thức là gói **BusinessOne Connect**, phải qua ngân hàng.
+
+**Phán quyết kiến trúc kèm theo, để câu hỏi nhà cung cấp không chặn thi công.** Ba nhà cung cấp
+bắn về ba hình dạng JSON khác nhau nhưng cùng **sáu dữ kiện**. Nên hợp đồng bên trong hệ là
+`BankTxn` **của riêng mình**, mỗi nhà cung cấp chỉ là một hàm chuyển đổi thuần khoảng 30 dòng.
+Đổi nhà cung cấp là thêm một file. Nếu để nhà cung cấp quyết định hình dạng dữ liệu bên trong
+hệ thì đổi nhà cung cấp thành viết lại.
+
+**Ba luật cứng của thiết kế:**
+
+- **Sự thật tiền ở sổ cái chỉ-thêm**, `UNIQUE (provider, provider_txn_id)` — chống ghi trùng
+  phải là **cấu trúc**, không phải một câu `if`; mọi webhook đều bắn lại khi không nhận `200`.
+  Trạng thái thanh toán **không lưu ở đâu cả**, nó là `SUM` tính lúc đọc. Nhờ vậy không tồn tại
+  đường nào để một đơn nói "đã trả" trong khi sổ không có đồng nào.
+- **Khớp theo mã đơn, không bao giờ theo số tiền.** Ưu đãi 5% kéo rất nhiều đơn về cùng một
+  tổng; một lần đoán đúng chín lần sẽ dạy người vận hành tin vào lần thứ mười. Và đối chiếu với
+  `quoted_json` **trong D1**, không phải con số form vừa hiện — vì luật đơn trùng khiến một mã
+  có thể ứng với hai tổng (điểm mù đã ghi ở `ADR-0031`; spec này **tránh** chứ không vá).
+- **Hết hạn suy ra lúc đọc, không thêm Cron Trigger.** `min(created_at + 24h, ngày khởi hành
+  00:00 giờ VN)` là hàm thuần của dữ liệu đã có, nên không phải đảo thêm câu *"không thêm Cron
+  Trigger trong đợt này"* của spec QR §3.
+
+**Câu 6 không phải dự phòng cho tương lai xa — nó là điều kiện để đổi ngân hàng an toàn.** Đơn
+đã tạo mang mã QR trỏ **tài khoản cũ**; khách quét sau ngày công ty chuyển sang tài khoản mới
+thì tiền vẫn về tài khoản cũ. Hệ chỉ nhận đúng một số tài khoản là mất dấu cả một lứa tiền đang
+trên đường về, đúng vào ngày chuyển đổi. Thi hành: `banking.alsoAccept` (tài khoản vẫn nhận
+tiền nhưng không còn in lên QR); đường vào là `/api/bank-webhook/<nhà cung cấp>` với **một bí
+mật cho mỗi nhà cung cấp**; và sổ cái vốn đã khoá theo cặp `(provider, provider_txn_id)` nên
+**không phải migration lần hai** — quyết định đó ra trước câu 6 và hoá ra đã đủ.
+
+**Ranh giới giữ nguyên.** `payment_method` vẫn là **ý định** (`ADR-0031` §2 không nới một chữ);
+site vẫn **không nhận tiền** (brief §5 phần "thanh toán trực tuyến" còn nguyên); và **hệ không
+bao giờ tự huỷ đơn, không bao giờ tự hoàn tiền** — tự động hoá dừng ở *ghi nhận và khẳng định*.
+
+**Nợ mở, DRI chủ dự án — chặn bước xác minh:** chưa chốt nhà cung cấp, và **chưa ai xác nhận**
+có nhà cung cấp nào đọc được tài khoản doanh nghiệp Techcombank. Năm câu phải hỏi họ ghi ở spec
+§10. Nếu đường khả thi duy nhất là **giao thông tin đăng nhập internet banking của tài khoản
+công ty** cho bên thứ ba thì đó là quyết định về rủi ro tài chính, không phải quyết định kỹ
+thuật — đọc điều khoản của Techcombank trước khi làm.
+
+**Thi công: HOÃN, cùng ngày.** Chủ dự án ghi nợ toàn bộ kế hoạch ngay sau khi duyệt
+(2026-08-31). Quyết định vẫn đứng, spec vẫn đúng, **nhưng không ai được mở việc cho Code** cho
+tới khi có người mở lại. Theo dõi ở `docs/BACKLOG.md` `B-022`, kèm điều kiện mở lại.
+
+**Tài liệu.** `docs/adr/ADR-0032-tu-khang-dinh-tien-ve.md` (toàn văn),
+`docs/specs/SPEC-2026-08-31-tu-dong-doi-soat-chuyen-khoan.md` (hợp đồng thi công, gắn bảng HOÃN).
+
+---
+
 ## QĐ-2026-08-31-03 — Nới Luật 3: chấp nhận thanh dính mang giá rơi khỏi màn đầu ở 1366
 
 > **Ghi chú đánh số.** Việc này ban đầu được gọi mã `QĐ-2026-08-31-01`. Khi soạn phiếu, mã đó đã
