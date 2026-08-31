@@ -123,7 +123,7 @@ Mỗi file chỉ khai bốn thứ: **facts** (ô Thông tin nhanh), **jumpLinks*
 **⚠ Hai bẫy có thật:**
 
 1. **`--hero-min-h` và `--hero-min-h-mobile` KHÔNG phải hero này.** Chúng của `HomeHero.astro` — hero **trang chủ**, component khác, chiều cao khác. Tên chỉ khác thứ tự từ.
-2. **Nâng riêng trần không cho thêm đúng ngần ấy px.** Ở phần lớn khổ màn, số đang trói là `calc(30vw + 100px)` chứ không phải trần, vì `30vw` mới là số đang trói ở dải đó. Nâng riêng trần **480 lên cao hơn** (giữ nguyên số giữa) chỉ cho **+4px ở 1280** và **+30px ở 1366** — hai khổ đó vẫn do số giữa quyết định, trần chỉ chặn phần vượt. Muốn cao thêm ở **mọi** khổ thì phải dịch **cả số giữa lẫn trần** cùng lúc — đúng như `QĐ-2026-08-31-03` đã làm (330→380/430→480, +50 cả hai).
+2. **Nâng riêng một số không cho thêm đều ở mọi khổ.** Điểm giao ở `30vw + 100 = 480` ⇒ vw = 1266,67: dải **1024–1266px** thì **số giữa** trói (số giữa < trần, `--hero-entity-h` bằng đúng số giữa); dải **≥1267px** thì **trần** trói (số giữa vượt trần, bị cắt về trần) — **1280 và 1366 đều nằm trong dải trần-trói này**, không phải dải số-giữa-trói. Nâng riêng **trần** (giữ nguyên số giữa) chỉ cho **+4px ở 1280** và **+30px ở 1366**, vì số giữa ở hai khổ đó (484px và 509,8px) đã vượt trần sẵn — nới trần chỉ thả `--hero-entity-h` lên tới đúng mức số giữa cho phép, không lên hết mức trần mới. Ngược lại, nâng riêng **số giữa** (giữ nguyên trần) thì dải ≥1267px **đứng yên**, vì trần vẫn cắt y nguyên. Muốn cao thêm ở **mọi** khổ thì phải dịch **cả năm giá trị** cùng lúc — đúng như `QĐ-2026-08-31-03` đã làm.
 
 ---
 
