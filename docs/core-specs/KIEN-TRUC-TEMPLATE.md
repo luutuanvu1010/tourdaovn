@@ -118,7 +118,7 @@ Mỗi file chỉ khai bốn thứ: **facts** (ô Thông tin nhanh), **jumpLinks*
 --hero-entity-h: clamp(min, calc(30vw + 100px), max)
 ```
 
-Đổi một dòng là **13 loại trang chi tiết cộng trang điểm đến** đổi theo, phủ cả ba biến thể hero. Đã đo, xem `QĐ-2026-08-29-01`.
+Đổi một dòng là **13 loại trang chi tiết cộng trang điểm đến** đổi theo, phủ cả ba biến thể hero. Đã đo, xem `QĐ-2026-08-31-03`.
 
 **⚠ Hai bẫy có thật:**
 
