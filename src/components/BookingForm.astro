@@ -518,9 +518,14 @@ if (!turnstileSiteKey) {
         if (quote.season) {
           const note = document.createElement('p')
           note.className = 'bf__tip-body'
+          // Vòng sửa 1/5: Studio cho phanTram ÂM (bangGiaMuaVu.ts:47, min(-90)) — mùa thấp
+          // điểm GIẢM giá là tính năng đã thiết kế, không phải dữ liệu sai. Dấu + chỉ chèn
+          // khi dương, đúng khuôn đã có ở bangGiaMuaVu.ts:63 (Studio preview.prepare) và ở
+          // .bf__season cũ (đã xoá ở Task 8) — thiếu guard này in ra "+-15%" cho mùa giảm giá.
+          const dau = quote.season.percent > 0 ? '+' : ''
           note.textContent = seasonNoteTpl
             .replace('{name}', quote.season.name)
-            .replace('{p}', String(quote.season.percent))
+            .replace('{p}', dau + String(quote.season.percent))
           detailBox.append(note)
         }
       } else {
