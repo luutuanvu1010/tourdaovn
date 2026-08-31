@@ -60,6 +60,7 @@ export function allResortsQuery(lang: string): string {
     _id, _type,
     "title": title.${lang},
     "slug": slug.${lang}.current,
+    "summary": summary.${lang},
     ${mainImageFragment()},
     starRating,
     beachfront,
