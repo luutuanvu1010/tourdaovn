@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-08-30T23:45:35.467Z",
+  "generatedAt": "2026-08-31T02:41:25.317Z",
   "status": "pass",
   "summary": {
     "files": {
@@ -11,9 +11,9 @@
       "/ai/graph.json": "present",
       "/ai/reading-guide.json": "present"
     },
-    "totalEntities": 90,
+    "totalEntities": 91,
     "entityTypes": {
-      "article": 6,
+      "article": 7,
       "attraction": 25,
       "experience": 8,
       "hotel": 10,
@@ -24,19 +24,19 @@
       "touristDestination": 2
     },
     "urlsByLanguage": {
-      "vi": 90
+      "vi": 91
     },
     "aiCoverageRatio": 1,
     "sitemapCoverageRatio": 1,
     "graph": {
-      "nodes": 90,
-      "edges": 171,
+      "nodes": 91,
+      "edges": 180,
       "danglingEdges": 0,
-      "orphanNodes": 10,
+      "orphanNodes": 9,
       "relations": {
-        "author": 6,
-        "about": 11,
-        "mentions": 34,
+        "author": 7,
+        "about": 13,
+        "mentions": 40,
         "containedInPlace": 30,
         "venue": 8,
         "operator": 24,
@@ -44,8 +44,8 @@
       }
     },
     "readiness": {
-      "missingSource": 63,
-      "missingSameAs": 55,
+      "missingSource": 64,
+      "missingSameAs": 56,
       "commercialMissingBookingOrFreeFlag": 39,
       "missingLanguages": 0,
       "staleFiles": []
@@ -140,6 +140,22 @@
       "hasSameAs": false,
       "hasBookingOrFreeFlag": true,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/article;67566f90-10c0-461a-b88d-15ad10f65070"
+    },
+    {
+      "id": "f88dffad-79e6-4790-b959-226dfb138889",
+      "type": "article",
+      "title": "Kinh nghiệm thuê cano Nha Trang",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/kinh-nghiem-thue-cano-nha-trang/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;f88dffad-79e6-4790-b959-226dfb138889"
     },
     {
       "id": "7c483d51-7f52-4dec-8eb3-3a179382e357",
