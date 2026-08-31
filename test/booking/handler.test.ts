@@ -247,4 +247,79 @@ describe('handleBooking', () => {
     const bad = new Request('https://tourdao.vn/api/dat-tour', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: '{not json' })
     expect((await handleBooking(bad, mkEnv(), ctx, { fetchImpl: f })).status).toBe(400)
   })
+
+  // ── Khối chữ tài khoản trên đường KHÔNG-JavaScript (SPEC §4.5 + §11) ────────────────────
+  // Đường này quan trọng hơn vẻ ngoài của nó: khách tắt JS, hoặc script lỗi, vẫn phải chuyển
+  // khoản được. Và nó là bề mặt DUY NHẤT của luật đơn trùng mà test tự động với tới —
+  // khối thành công trong BookingForm.astro không import được vào vitest (không có plugin Astro).
+
+  const CK = (over: Record<string, unknown> = {}) => payload({
+    paymentMethod: 'transfer',
+    quoted: { perPax: { adult: 550000, child: 350000 }, total: 1450000, quotedAt: '2026-08-21T02:00:00Z', prepay: { percent: 10, totalGoc: 1610000 } },
+    ...over,
+  })
+
+  it('chuyển khoản + HTML → có đủ khối chữ tài khoản, nội dung CK bỏ gạch nối', async () => {
+    const { f } = fakeFetch(); const { ctx, flush } = mkCtx()
+    const res = await handleBooking(req(CK(), { Accept: 'text/html' }), mkEnv(), ctx, { fetchImpl: f, now: () => NOW })
+    expect(res.status).toBe(201)
+    const html = await res.text()
+    const code = html.match(/TD-260901-[A-Z2-9]{4}/)![0]
+
+    expect(html).toContain('Techcombank')
+    expect(html).toContain('2502503979')
+    expect(html).toContain('CONG TY TNHH TOUR DAO')
+    expect(html).toContain('1.450.000')
+    // Khách THẤY mã có gạch, GÕ mã không gạch — cả hai phải có mặt, đúng vai.
+    expect(html).toContain(code)
+    expect(html).toContain(code.replace(/-/g, ''))
+    // Đường này CỐ Ý không nhúng ảnh: html.ts đang mang nợ màu, thêm ảnh là bồi nợ (SPEC §4.5).
+    expect(html).not.toContain('img.vietqr.io')
+    await flush()
+  })
+
+  it('thanh toán khi khởi hành + HTML → KHÔNG có khối tài khoản', async () => {
+    const { f } = fakeFetch(); const { ctx, flush } = mkCtx()
+    const res = await handleBooking(req(payload({ paymentMethod: 'onboard', phone: '0905 999 111' }), { Accept: 'text/html' }), mkEnv(), ctx, { fetchImpl: f, now: () => NOW })
+    expect(res.status).toBe(201)
+    const html = await res.text()
+    expect(html).not.toContain('2502503979')
+    expect(html).not.toContain('Techcombank')
+    expect(html).not.toContain('Nội dung chuyển khoản')
+    await flush()
+  })
+
+  // CA GIỮ TIỀN. Khi trùng, handler trả mã đơn CŨ nhưng `v.quoted.total` là tổng lần nộp MỚI.
+  // In số tiền mới cạnh mã cũ đã sai; đưa nó vào khối chuyển khoản là khách CHUYỂN SAI SỐ TIỀN.
+  // Danh sách đóng: chỉ mã đơn và câu đã ghi nhận. Không tiền, không tài khoản, không tour.
+  it('ĐƠN TRÙNG + HTML → chỉ mã đơn, KHÔNG một dòng tiền nào, KHÔNG tài khoản', async () => {
+    const { f } = fakeFetch(); const { ctx, flush } = mkCtx()
+    const r1 = await handleBooking(req(CK({ phone: '0905 222 333' }), { Accept: 'text/html' }), mkEnv(), ctx, { fetchImpl: f, now: () => NOW })
+    const code1 = (await r1.text()).match(/TD-260901-[A-Z2-9]{4}/)![0]
+    await flush()
+
+    // Lần nộp thứ hai: CÙNG phone+tour+ngày nhưng TỔNG KHÁC (2.000.000 thay vì 1.450.000).
+    // Nếu luật danh sách đóng hỏng, con số 2.000.000 sẽ hiện ngay dưới mã đơn cũ.
+    const r2 = await handleBooking(req(CK({
+      phone: '0905 222 333',
+      quoted: { perPax: { adult: 1000000 }, total: 2000000, quotedAt: '2026-08-21T02:00:00Z', prepay: { percent: 10, totalGoc: 2200000 } },
+      pax: { adult: 2, child: 0, senior: 0, infant: 0 },
+    }), { Accept: 'text/html' }), mkEnv(), ctx, { fetchImpl: f, now: () => new Date(NOW.getTime() + 60_000) })
+    expect(r2.status).toBe(200)
+    const html = await r2.text()
+
+    expect(html).toContain(code1)
+    expect(html).toContain('đã được ghi nhận')
+    // Không một con số tiền nào — cả tổng cũ lẫn tổng mới.
+    expect(html).not.toContain('2.000.000')
+    expect(html).not.toContain('1.450.000')
+    expect(html).not.toContain('Tạm tính')
+    // Không khối tài khoản, không nội dung chuyển khoản.
+    expect(html).not.toContain('2502503979')
+    expect(html).not.toContain('Techcombank')
+    expect(html).not.toContain(code1.replace(/-/g, ''))
+    // Không tên tour, không ngày khởi hành (cả hai dựng từ lần nộp mới).
+    expect(html).not.toContain('Ngày khởi hành')
+    await flush()
+  })
 })

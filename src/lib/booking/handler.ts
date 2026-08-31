@@ -4,9 +4,10 @@
 // báo tin trong waitUntil.
 // BK1: không import prices.ts / sanity.ts / resolver.ts. BK2: chỉ ghi D1. BK3: không log PII.
 import type { D1Database } from '@cloudflare/workers-types'
-import { brand, site } from '../../site.config'
+import { banking, brand, site } from '../../site.config'
 import { generateBookingCode } from './code'
 import { renderBookingPage } from './html'
+import { buildPaymentQr } from './payment-qr'
 import { notifyAll, type Notifier } from './notify/index'
 import { createSesNotifier } from './notify/ses'
 import { createZaloNotifier } from './notify/zalo'
@@ -103,14 +104,47 @@ async function readBody(request: Request): Promise<{ data: unknown } | { error: 
   }
 }
 
-function summaryLines(v: BookingValid, code: string): string[] {
-  return [
+/**
+ * Dòng tóm tắt cho đường KHÔNG-JavaScript (SPEC §4.5).
+ *
+ * Đơn trùng đi theo DANH SÁCH ĐÓNG: chỉ mã đơn và câu đã ghi nhận. Không tour, không ngày,
+ * KHÔNG DÒNG TIỀN NÀO. Lý do là tiền thật: khi trùng, `code` là đơn CŨ còn `v.quoted.total`
+ * là tổng của lần nộp MỚI. Đường này lộ trực tiếp hơn cả JSON — nó in "Tạm tính: <tổng mới>"
+ * ngay dưới mã cũ. Khoản nợ gốc đã ghi ở ADR-0031:191–202; đợt này TRÁNH, không sửa gốc.
+ */
+function summaryLines(v: BookingValid, code: string, duplicate: boolean): string[] {
+  if (duplicate) {
+    return [
+      `Mã đơn: ${code}`,
+      'Yêu cầu này đã được ghi nhận trước đó.',
+      `${brand.name} sẽ gọi lại xác nhận trong giờ làm việc.`,
+    ]
+  }
+
+  const lines = [
     `Mã đơn: ${code}`,
     `Tour: ${v.tourTitle}`,
     `Ngày khởi hành: ${formatDateVN(v.departDate)}`,
     `Tạm tính: ${formatPrice(v.quoted.total, 'vi')}`,
-    `${brand.name} sẽ gọi lại xác nhận trong giờ làm việc.`,
   ]
+
+  // Khối chữ tài khoản. CỐ Ý không nhúng ảnh QR ở đường này: html.ts đang mang nợ sáu mã màu
+  // viết cứng (SPEC §9) và thêm ảnh là bồi nợ vào một file sắp phải dọn. Khối chữ tự nó đã đủ
+  // để khách chuyển tay — đó cũng là lý do nó bắt buộc có mặt ở MỌI bề mặt (SPEC §4.3).
+  const qr = buildPaymentQr(banking, code, v.quoted.total, v.paymentMethod)
+  if (qr) {
+    lines.push(
+      `— Chuyển khoản —`,
+      `Ngân hàng: ${qr.bankName}`,
+      `Số tài khoản: ${qr.accountNumber}`,
+      `Chủ tài khoản: ${qr.accountName}`,
+      `Số tiền: ${formatPrice(qr.amount, 'vi')}`,
+      `Nội dung chuyển khoản: ${qr.addInfo}`,
+    )
+  }
+
+  lines.push(`${brand.name} sẽ gọi lại xác nhận trong giờ làm việc.`)
+  return lines
 }
 
 function defaultNotifiers(env: BookingEnv, deps: HandlerDeps): Notifier[] {
@@ -210,7 +244,7 @@ export async function handleBooking(request: Request, env: BookingEnv, ctx: Wait
 
     const dup = await findRecentDuplicate(env.BOOKING_DB, v.phone, v.tourSlug, v.departDate, new Date(t.getTime() - DUP_WINDOW_MS).toISOString())
     if (dup) {
-      return reply(request, { status: 200, body: { ok: true, code: dup, duplicate: true, summary: { tourTitle: v.tourTitle, departDate: v.departDate, pax: v.pax, total: v.quoted.total } }, heading: 'Yêu cầu này đã được ghi nhận', lines: summaryLines(v, dup), ok: true }, tourSlug)
+      return reply(request, { status: 200, body: { ok: true, code: dup, duplicate: true, summary: { tourTitle: v.tourTitle, departDate: v.departDate, pax: v.pax, total: v.quoted.total } }, heading: 'Yêu cầu này đã được ghi nhận', lines: summaryLines(v, dup, true), ok: true }, tourSlug)
     }
 
     const record: NewBooking = {
@@ -248,7 +282,7 @@ export async function handleBooking(request: Request, env: BookingEnv, ctx: Wait
       }
     })())
 
-    return reply(request, { status: 201, body: { ok: true, code: record.code, summary: { tourTitle: v.tourTitle, departDate: v.departDate, pax: v.pax, total: v.quoted.total } }, heading: 'Đã nhận yêu cầu đặt tour', lines: summaryLines(v, record.code), ok: true }, tourSlug)
+    return reply(request, { status: 201, body: { ok: true, code: record.code, summary: { tourTitle: v.tourTitle, departDate: v.departDate, pax: v.pax, total: v.quoted.total } }, heading: 'Đã nhận yêu cầu đặt tour', lines: summaryLines(v, record.code, false), ok: true }, tourSlug)
   } catch (e) {
     // Chỉ log thông điệp lỗi, không log body (BK3).
     console.error('[dat-tour] lỗi:', e instanceof Error ? e.message : String(e))

@@ -2568,3 +2568,68 @@ cuộn, trước đó khuất 156px ở mọi điểm) nhưng hỏng ở hai ch�
 
 Bài học: cái nút bị khuất chỉ là triệu chứng dễ thấy nhất. Bệnh là `position: sticky` áp cho khối
 **cao hơn vùng nhìn** — thêm một lớp dính nữa chỉ chồng thêm vùng chết.
+
+---
+
+## DR-105 — `npm run gate` KHÔNG dựng lại; chạy nó trên `dist/` cũ sinh ra đỏ ảo, và con số "baseline 4 đỏ" trong SPEC không khớp phép đo nào
+
+**Trạng thái:** **mở** 2026-08-31. Phát hiện khi ghim baseline trước đợt QR.
+
+**Đo được gì.** Ngày 31/08, nhánh `docs/ra-soat-dat-tour-2026-08-31`, hai phép đo cách nhau
+20 phút, **không sửa một dòng mã nào giữa hai lần**:
+
+| Lần | Lệnh | Kết quả |
+|---|---|---|
+| 1 | `npm run gate` (dùng `dist/` sẵn có trên đĩa) | **1/11 đỏ** — `geo-knowledge-post.ts` |
+| 2 | `npm run build` rồi `npm run gate` | **12/12 xanh** (đã gồm validator mới `banking-shape`) |
+
+**Vì sao khác nhau — đây mới là phần đáng ghi.** `scripts/validators/geo-knowledge-post.ts:5`
+`import { fetchAllDocs } from '../lib/sanity-client.js'`: nó đối chiếu **Sanity ĐANG SỐNG** với
+**`dist/` trên đĩa**. `npm run gate` = `astro check && gate:all` — **không có `astro build`**.
+Nên chạy `npm run gate` mà không dựng lại là đem nội dung Sanity hôm nay so với bản dựng hôm qua.
+
+Bằng chứng con số: `scripts/reports/geo-knowledge-status.json` ở HEAD ghi
+`generatedAt: 2026-08-30T23:45`, `totalEntities: 90`, `status: pass`. Sau khi dựng lại ngày
+31/08: `totalEntities: 91`, `article` từ **6 lên 7**. Một bài viết được publish trong Studio
+giữa hai thời điểm — không ai chạm mã — và thế là cổng đỏ.
+
+**Hệ quả.** Mọi con số "baseline N đỏ" chép lại từ một lần chạy `gate` không kèm build đều là
+số rác: nó đo độ cũ của `dist/`, không đo sức khoẻ của mã. Đỏ kiểu này tự khỏi sau lần dựng kế
+tiếp, nên nó cũng dạy người ta thói quen bỏ qua đỏ — đúng thứ làm cổng mất giá trị.
+
+**SPEC nói gì.** `SPEC-2026-08-31-qr-thanh-toan-va-zns.md` §7: *"`npm run gate` — baseline là 4
+đỏ đã biết, không thêm cái thứ 5."* Không phép đo nào ngày 31/08 ra 4. Câu đó còn làm tiêu chí
+nghiệm thu lỏng hẳn ra: *"không thêm cái thứ 5"* cho phép một đợt đẩy từ 0 lên 4 đỏ mà vẫn
+tuyên bố đạt cổng. Con số này cũng đã lan sang bản ghi nhớ phiên làm việc, nên sửa một chỗ
+không đủ.
+
+**Cách làm đúng, đã dùng cho đợt QR 31/08.**
+
+1. `npm run build` **trước**, rồi mới `npm run gate`. Không có bước dựng thì không có phép đo.
+2. So bảng tổng kết **từng dòng** trước và sau, không đếm tổng số đỏ. Dòng nào đổi trạng thái
+   thì giải trình dòng đó.
+
+**Chưa sửa ở đợt này:** câu §7 của spec giữ nguyên để còn đối chiếu được với phiếu này. Ai mở
+§4.4/§4.7 thì sửa luôn.
+
+---
+
+## DR-106 — Khối chữ tài khoản vào `handler.ts` chứ không vào `html.ts` như bản đồ file của SPEC
+
+**Trạng thái:** **đóng** 2026-08-31. Lệch có ý thức, ghi lại để bản đồ file không bị đọc là sai.
+
+**Lệch gì.** `SPEC-2026-08-31` §4.8 xếp `src/lib/booking/html.ts` vào bản đồ file với việc
+*"khối chữ tài khoản + liên kết; luật đơn trùng"*. Thi công đặt cả hai vào
+`src/lib/booking/handler.ts` (`summaryLines()`), và **không chạm `html.ts`**.
+
+**Vì sao.** `renderBookingPage()` nhận `lines: string[]` và dựng mỗi phần tử thành một `<p>`.
+Khối chữ tài khoản *là* mấy dòng chữ — nó vào `lines` được nguyên vẹn, giữ đúng yêu cầu
+"chọn-copy được" của §4.3. Đưa vào `html.ts` thì phải mở rộng chữ ký hàm và thêm mã dựng khối,
+tức **bồi thêm mã vào đúng file đang mang nợ sáu mã màu viết cứng** (`B-001`) — trong khi §3 của
+chính spec cấm *"không dọn nợ màu… chỉ không bồi thêm"*.
+
+Kết quả đo được: `html.ts` **không đổi một ký tự** trong đợt này.
+
+**Phần chưa làm, không phải phần làm khác.** Liên kết `/dat-tour/{mã}/` không có mặt vì trang
+đó thuộc §4.4, ngoài phạm vi đợt QR (SPEC §11.1). Khi §4.4 lên, liên kết thêm vào cùng
+`summaryLines()`.

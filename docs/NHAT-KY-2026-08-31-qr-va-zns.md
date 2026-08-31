@@ -46,3 +46,86 @@ Turnstile chạy thật. Nghiệm thu tay §7 của đợt trước **chưa th�
 
 Có ba số tài khoản → `writing-plans`. Chưa có → nộp mẫu ZNS trước, rồi lập kế hoạch cho §4.4–§4.7
 (trang, khối thành công, tách nội dung, kênh báo tin) vì bốn phần đó không phụ thuộc số tài khoản.
+
+---
+
+# Phiên chiều 31/08 — thi công nửa QR
+
+**Vai:** Code · **Nhánh:** `docs/ra-soat-dat-tour-2026-08-31` · **Kết quả:** QR chạy được, chưa push.
+
+Chủ dự án cấp ba giá trị tài khoản (Techcombank · 250 250 3979 · CÔNG TY TNHH TOUR ĐẢO) và ra
+chỉ thị làm QR trong Module Booking, kèm **một yêu cầu mới không có trong bản 2: tải QR xuống**.
+Ba giá trị đó chính là thứ chặn §4.2/§4.3, nên nửa QR mở. Nửa ZNS vẫn chặn ở ba thủ tục Zalo.
+
+## Đã làm
+
+| File | Việc |
+|---|---|
+| `src/site.config.ts` | khối `banking` (4 trường, thêm `bankName`); sửa 3 chỗ chú thích đầu file |
+| `src/lib/booking/payment-qr.ts` | **mới** — `buildPaymentQr()`, hàm thuần |
+| `src/components/BookingForm.astro` | khối QR + nút tải + nút chép; `showDone()` chữ ký mới; luật đơn trùng |
+| `src/lib/booking/handler.ts` | khối chữ tài khoản + luật đơn trùng cho đường không-JS |
+| `src/lib/uiCopy.ts` | 12 nhãn × 5 ngôn ngữ |
+| `scripts/validators/banking-shape.ts` | **mới** — cổng hình dạng, đã đăng ký vào `gate:all` |
+| `test/booking/payment-qr.test.ts` | **mới** — 8 ca |
+| `test/booking/handler.test.ts` | +3 ca cho bề mặt tiền đường không-JS |
+
+`src/lib/booking/html.ts` **không đổi một ký tự** — xem `DR-106` để biết vì sao lệch bản đồ file.
+
+## Bằng chứng cổng
+
+- `npx vitest run` → **12 file, 159 ca xanh** trước khi thêm; **162 ca** sau khi thêm 3 ca đơn trùng.
+- `npm run build` → xanh, exit 0.
+- `npm run gate` sau khi dựng → **12/12 xanh**, gồm `banking-shape` mới. Một `[gap]` khai báo (g2, nợ ND-001).
+- `dist/_routes.json` **không đổi**: 3 include + 30 exclude = 33. Đợt này không thêm route.
+- Khối QR có mặt trong **28/28** trang tour có form; `.bf__qr[data-astro-cid-…][hidden]` có
+  trong CSS đã dựng (thiếu luật này là khối hiện thường trực — đúng cơ chế `DR-102`).
+- Bundle script khách **11,2 KB**; tree-shaking loại sạch phần còn lại của `site.config`
+  (`primaryDestinationSlug`, `studioHost`, `foundedYear`, nav, hubs đều **0** lần xuất hiện).
+- Công tắc `prepayPercent` đang **bật 5%** trên cả 28 trang — không có nó thì không đơn nào có QR.
+
+**Hai cổng đã chứng minh là biết đỏ, không chỉ biết in `[pass]`:**
+
+- `banking-shape.ts`: thử 7 giá trị sai (bin 5 số, bin có chữ O, số TK có khoảng trắng, số TK 20
+  ký tự, tên có dấu, tên viết thường, `bankName` rỗng) → **đỏ cả 7**, xanh với giá trị thật.
+- Ca "đơn trùng": tạm gỡ luật trong `handler.ts` → test **đỏ** đúng chỗ,
+  `expected … not to contain '2.000.000'` — tức nó thật sự canh con số tiền của lần nộp mới
+  đứng cạnh mã đơn cũ.
+- Ràng buộc **cặp `bin` ↔ `bankName`**: đổi `bin` sang `970436` mà quên sửa nhãn → **đỏ**; đổi
+  sang một BIN chưa khai (`970422`) → **đỏ** kèm hướng dẫn; sửa cả hai cho khớp → **xanh**.
+
+## Hai điểm review bắt được, đã sửa
+
+1. **`bankName` từng chỉ được canh bằng chú thích.** Ban đầu tôi viết *"đổi `bin` thì đổi luôn
+   dòng này"* rồi để validator chỉ kiểm "không rỗng". Đó đúng thứ `CLAUDE.md` cấm — *"ranh giới
+   bảo đảm bằng cấu trúc, không bằng lời nhắc"*. Ca hỏng thật: đổi sang Vietcombank, quên nhãn →
+   **ảnh QR in logo Vietcombank** (VietQR suy từ `bin`) trong khi **khối chữ in "Techcombank"**;
+   khách thấy hai ngân hàng và dừng. Nay `banking-shape.ts` giữ bảng `BIN_DA_DUNG` và bắt cặp;
+   BIN lạ cũng đỏ, buộc người đổi ngân hàng phải sửa validator một cách có chủ ý.
+2. **`loading="lazy"` trên ảnh QR là cho `npm run audit:seo`, KHÔNG phải cho `npm run gate`** —
+   `seo-auditor` không nằm trong `gate:all`, nên thuộc tính này không mua được gì trong chuỗi
+   cổng đang chạy. Giữ vì nó vô hại (ảnh không có `src` trong HTML tĩnh nên không phát yêu cầu
+   nào; lúc `showDone` chạy thì khối đã được `done.focus()` kéo vào vùng nhìn, nên tải ngay).
+   Chống giật khung đã do `width`/`height` nội tại và `decoding="async"` lo, không phải do nó.
+
+## Ba chỗ bản 2 nói chưa đúng, đã đo lại
+
+1. `compact2` **không** in nội dung chuyển khoản lên ảnh (chỉ tên/số TK/số tiền). Khối chữ cạnh
+   ảnh vì thế là bắt buộc, không phải tuỳ chọn.
+2. Baseline cổng **không phải 4 đỏ** — xem `DR-105`, và quan trọng hơn: `npm run gate` không tự
+   dựng lại, chạy nó trên `dist/` cũ sinh đỏ ảo.
+3. BIN trong khuôn là Vietcombank; Techcombank là `970407` (tra `api.vietqr.io/v2/banks`).
+
+## CÒN CHẶN — việc của chủ dự án, không phải của code
+
+> **Số tài khoản CHƯA được xác minh, và không cổng nào trong repo xác minh được.**
+> `banking-shape` chỉ kiểm hình dạng: `2502503979` đúng 10 chữ số nên nó cho qua, kể cả khi một
+> chữ số bị chép sai. Ảnh QR dựng được **cũng không phải bằng chứng** — VietQR vẽ lại đúng tham
+> số ta đưa vào. Cách duy nhất: **quét mã bằng app ngân hàng thật và đọc TÊN THỤ HƯỞNG app hiện
+> ra.** Chưa làm bước này thì đừng cho QR sống với khách thật. (`SPEC` §11.2)
+
+## Chưa làm (nửa ZNS, vẫn chặn)
+
+§4.1 mẫu ZNS · §4.4 trang `/dat-tour/{mã}/` · §4.6 tách nội dung khách/nhân viên · §4.7 kênh
+báo tin + token + migration `0003`. Hệ quả thấy được ngay: ca **đơn trùng** hiện chỉ có mã đơn
+và câu "đã ghi nhận trước đó", chưa có liên kết "xem số tiền đã lưu" vì trang §4.4 chưa có.

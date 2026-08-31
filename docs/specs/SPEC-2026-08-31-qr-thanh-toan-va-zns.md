@@ -564,3 +564,112 @@ Ghi lại để lần sau không lặp, và để người đọc bản 1 biết
 | `05-URL_MAP`: *"thêm 2 cột + bảng mới"* | File không có bảng `booking` nào để thêm | Che mất một drift từ `ADR-0027` |
 | `_routes.json` "hiện 34" | 3 include + 30 exclude = **33** | Nhầm cột, không đổi kết luận |
 | Bỏ sót: bước áp migration; `zalo.ts` trong bản đồ; bootstrap `zalo_token`; hợp đồng ZNS; chữ ký `showDone`; cách test trang `.astro`; ADR/`DECISIONS.md`/`BUILD-NOTES.md` | — | Tám chỗ người thi công buộc phải đoán |
+
+---
+
+## 11. Phụ lục A — đợt QR (bản 2.1, 2026-08-31 chiều)
+
+Chủ dự án cấp ba giá trị tài khoản và ra chỉ thị: *"chuyển vào Module Booking, yêu cầu tạo QR
+từ VietQR để thể hiện toàn bộ thông tin thanh toán để khách có thể chuyển khoản (và tải QR
+xuống để quét sau)"*. Phụ lục này ghi cái gì mở, cái gì vẫn đóng, và ba chỗ bản 2 nói chưa đúng.
+
+### 11.1 Phạm vi đợt này — nửa QR, không nửa ZNS
+
+| Mở | Đóng, vì sao |
+|---|---|
+| §4.2 cấu hình ngân hàng | §4.1 mẫu ZNS — chờ 3 thủ tục Zalo của chủ dự án |
+| §4.3 `payment-qr.ts` | §4.4 trang `/dat-tour/{mã}/` — sinh ra cho nút CTA của ZNS |
+| §4.5 khối thành công + §5 nhóm 1 | §4.6 tách nội dung khách/nhân viên |
+| §7 validator hình dạng `banking` | §4.7 kênh báo tin, token, migration `0003` |
+
+**Hệ quả phải nói rõ, không giấu:** luật đơn trùng ở §4.5 gọi một liên kết *"Xem chi tiết và số
+tiền đã lưu"* trỏ `/dat-tour/{mã}/`. Trang đó **chưa có trong đợt này**, nên ca đơn trùng hiện
+**đúng hai thứ**: mã đơn và câu *"Yêu cầu này đã được ghi nhận trước đó"*. Vẫn **không** QR,
+**không** dòng tiền nào — lý do ở §4.5 (`summary.total` của đơn trùng là tổng lần nộp MỚI) còn
+nguyên và không được lách. Liên kết bổ sung khi §4.4 lên.
+
+### 11.2 Ba giá trị thật — và giới hạn của việc kiểm chúng
+
+```
+bin:           970407              ← Techcombank
+accountNumber: 2502503979          ← chủ dự án cấp "250 250 3979"
+accountName:   CONG TY TNHH TOUR DAO
+```
+
+**`bin` đã kiểm bằng nguồn có thẩm quyền**, không đoán: `GET https://api.vietqr.io/v2/banks`
+trả `{"code":"TCB","bin":"970407","shortName":"Techcombank","swift_code":"VTCBVNVX"}`.
+
+**`accountNumber` CHƯA được kiểm và không thể kiểm bằng máy trong repo này.** Phải nói thẳng vì
+đây là trường duy nhất trong cả đợt mà sai thì **tiền của khách đi vào tài khoản người lạ**:
+
+- Dựng được ảnh QR **không phải bằng chứng**. `img.vietqr.io` vẽ lại đúng tham số ta đưa vào,
+  cộng logo tra theo `bin`. Ảnh đẹp với một số tài khoản không tồn tại y như với số đúng.
+- `POST https://api.vietqr.io/v2/lookup` trả được tên thụ hưởng thật, nhưng đòi `x-client-id` +
+  `x-api-key` (đã thử: `401 Missing API Key`). Dự án không có khoá.
+- `"250 250 3979"` đọc ra **10 chữ số**. Thừa hay thiếu một chữ số là lỗi chép tay kinh điển, và
+  **không cổng nào trong repo bắt được** — validator ở §7 chỉ kiểm hình dạng (1–19 ký tự chữ số),
+  đúng hình dạng thì im lặng cho qua.
+
+> **Cổng bắt buộc trước khi QR sống với khách thật.** Quét mã bằng **app ngân hàng thật** và đọc
+> **tên thụ hưởng app hiện ra**. Tiêu chí đạt là dòng tên đó, không phải số tiền hay nội dung.
+> Chưa làm bước này thì coi như số tài khoản chưa được xác nhận. Đây là bước §8 nghiệm thu tay
+> bước 1, **nâng lên thành cổng chặn**.
+
+`accountName` không định tuyến tiền — ngân hàng ghi đè bằng tên thật lúc tra cứu. Nó chỉ để
+khách đối chiếu bằng mắt. Viết IN HOA không dấu theo lệ ngân hàng.
+
+### 11.3 Yêu cầu mới, không có trong bản 2: tải mã QR xuống
+
+Chủ dự án yêu cầu khách **tải QR xuống để quét sau**. Bản 2 chỉ nói "hiện", không nói "tải".
+
+**Cách làm, và vì sao không cần thêm gì vào kiến trúc:** đã đo `img.vietqr.io` trả
+`access-control-allow-origin: *`. Nên trình duyệt `fetch()` được ảnh, đổi ra blob, rồi cho tải
+bằng `<a download>` — **không** thêm route proxy, **không** thêm thư viện QR, **không** đụng
+`_routes.json`. (Thiếu CORS thì mới phải proxy; đo rồi nên không phải giả định.)
+
+**Hai đường, không một — và phải nói cả hai trong copy:**
+
+1. **Nút "Tải mã QR"** — `fetch` → blob → `<a download="TD-260831-K7QM.png">`. Trên iOS ảnh vào
+   **Files**, không vào **Photos**.
+2. **Nhấn giữ ảnh để lưu** — đây mới là cử chỉ người dùng di động thật sự làm, và trên iOS nó
+   đưa ảnh vào Photos, đúng chỗ để mở lại lúc quét. Nút là bổ sung cho cử chỉ này, không thay nó.
+
+`fetch` hỏng (mất mạng, CORS đổi) → mở ảnh ở tab mới để khách nhấn giữ lưu tay. Không báo lỗi
+cụt.
+
+**Nút chép cho hai trường sai-là-mất-tiền:** số tài khoản và nội dung chuyển khoản. Gõ tay
+`TD260831K7QM` từ màn hình này sang app ngân hàng là đúng chỗ sinh lỗi chép, mà nội dung sai thì
+nhân viên không đối soát được đơn. `navigator.clipboard` hỏng thì im lặng rơi về chữ vẫn
+chọn-copy được — khối chữ ở §4.3 đã bảo đảm điều đó.
+
+### 11.4 Bản 2 nói chưa đúng ba chỗ
+
+| Bản 2 nói | Đo được | Hệ quả |
+|---|---|---|
+| §4.3: *"`compact2` in sẵn số tiền **và nội dung** lên ảnh"* | Ảnh in tên chủ TK, số TK, **số tiền** — **không** in `addInfo` | Khối chữ cạnh ảnh **không phải tuỳ chọn**: nội dung chuyển khoản chỉ tồn tại ở đó và trong payload QR |
+| §4.3 khuôn: `bin: '970436'` Vietcombank | Techcombank là `970407` | — (bản 2 đã tự ghi đó là khuôn) |
+| §7: *"`compact2` … khách đối chiếu bằng mắt trước khi quét"* | Đối chiếu được **số tiền**, không đối chiếu được nội dung | Copy nút chép ở §11.3 gánh phần này |
+
+### 11.5 QA1 — thẩm quyền có giới hạn, không phải dấu tự đóng
+
+Bản 2 ghi *"Duyệt QA1: (chờ)"*. Đợt này **không** tuyên bố QA1 đạt cho cả spec.
+
+**Mở QA1 cho đúng §4.2, §4.3, §4.5, §5 nhóm 1 và §7** — căn cứ: chỉ thị chủ dự án 31/08 kèm ba
+giá trị thật (thứ duy nhất bản 2 nêu là điều kiện mở §4.2/§4.3), và phụ lục này khoá nốt hai chỗ
+bản 2 để hở (số tiền lên QR là `quote.total`; ca đơn trùng khi chưa có §4.4).
+
+**KHÔNG duyệt, chưa ai review:** §4.1, §4.4, §4.6, §4.7. Người mở các mục đó phải chạy QA1 riêng.
+
+### 11.6 Số tiền lên QR là `quote.total`, đã đọc mã để chắc
+
+`quote.total` là số **đã trừ** ưu đãi trả trước: `computeQuote()` áp cả phần trăm mùa lẫn phần
+trăm ưu đãi qua `apDieuChinh()` (`quote.ts:63`), còn `prepay.totalGoc` mới là tổng **chưa** giảm
+(`quote.ts:67`, `:97`). QR mang `quote.total`. Test ở §5 nhóm 1 phải khẳng định điều này với
+`prepayPercent > 0`, không chỉ với ca không ưu đãi — nếu không, lấy nhầm `totalGoc` vẫn xanh.
+
+### 11.7 Một công tắc ngoài git chi phối toàn bộ bề mặt này
+
+Khối chọn hình thức thanh toán chỉ render khi `prepayPercent > 0` (`BookingForm.astro:147`), và
+`prepayPercent` đọc từ Sanity Studio — **đổi được ngoài git**. Tắt công tắc thì không có radio
+`transfer`, nên **không đơn nào có QR**, và không cổng nào đỏ. Ai nghiệm thu mà không thấy QR
+thì kiểm công tắc này **trước** khi nghi mã.

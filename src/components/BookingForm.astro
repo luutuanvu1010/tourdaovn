@@ -11,6 +11,9 @@ import { availablePaxCodes, computeQuote, emptyPax, type PaxCode, type PriceTabl
 import type { Season } from '../lib/booking/season'
 import { addDaysISO, formatDateVN, todayVN } from '../lib/booking/vn-date'
 import { LIMITS, MSG } from '../lib/booking/schema'
+// Tài khoản nhận chuyển khoản là HẰNG SỐ BIÊN DỊCH — vào bằng import, không qua
+// Astro.props/data-* như priceTable (thứ đọc từ Sanity lúc dựng). SPEC §4.5.
+import { banking } from '../site.config'
 
 export interface Props {
   lang: Lang
@@ -94,6 +97,8 @@ if (!turnstileSiteKey) {
   data-subtotal-label={t('bookingSubtotal')}
   data-pay-required-text={t('bookingPayRequired')}
   data-pay-note-text={t('bookingPayNote')}
+  data-qr-alt-text={t('bookingQrAlt')}
+  data-qr-copied-text={t('bookingQrCopied')}
 >
   <input type="hidden" name="tourSlug" value={tourSlug} />
   <input type="hidden" name="tourTitle" value={tourTitle} />
@@ -220,6 +225,53 @@ if (!turnstileSiteKey) {
     <p class="bf__done-code">{t('bookingCode')}: <strong data-done-code></strong></p>
     <p class="bf__done-dup" data-done-dup hidden>{t('bookingDuplicate')}</p>
     <div class="bf__quote" data-done-summary></div>
+
+    {/* Khối QR — chỉ hiện khi khách chọn chuyển khoản, và KHÔNG BAO GIỜ hiện với đơn trùng
+        (SPEC §4.5: mọi con số ở đây dựng từ `quote` của lần nộp MỚI, không phải từ đơn đã lưu).
+        Tên ngân hàng / số TK / chủ TK render sẵn từ site.config: chúng là hằng số biên dịch,
+        nên có mặt trong HTML tĩnh và chọn-copy được kể cả trước khi script chạy.
+        Ảnh QR không bao giờ là đường duy nhất — khối chữ bên cạnh phải đủ để chuyển tay,
+        vì img.vietqr.io là bên thứ ba và compact2 KHÔNG in nội dung chuyển khoản (SPEC §11.4). */}
+    <div class="bf__qr" data-qr hidden>
+      <h4 class="bf__qr-title">{t('bookingQrTitle')}</h4>
+      <div class="bf__qr-body">
+        <div class="bf__qr-visual">
+          <img class="bf__qr-img" data-qr-img alt={t('bookingQrTitle')} width="540" height="640" loading="lazy" decoding="async" />
+          <button type="button" class="bf__secondary bf__qr-dl" data-qr-download>{t('bookingQrDownload')}</button>
+          <p class="bf__qr-hint">{t('bookingQrSaveHint')}</p>
+        </div>
+        <dl class="bf__qr-facts">
+          <div class="bf__qr-row">
+            <dt>{t('bookingQrBank')}</dt>
+            <dd>{banking.bankName}</dd>
+          </div>
+          <div class="bf__qr-row">
+            <dt>{t('bookingQrAccount')}</dt>
+            <dd>
+              <span class="bf__qr-mono">{banking.accountNumber}</span>
+              <button type="button" class="bf__qr-copy" data-copy={banking.accountNumber}>{t('bookingQrCopy')}</button>
+            </dd>
+          </div>
+          <div class="bf__qr-row">
+            <dt>{t('bookingQrHolder')}</dt>
+            <dd>{banking.accountName}</dd>
+          </div>
+          <div class="bf__qr-row">
+            <dt>{t('bookingQrAmount')}</dt>
+            <dd><strong class="bf__qr-amount" data-qr-amount></strong></dd>
+          </div>
+          <div class="bf__qr-row">
+            <dt>{t('bookingQrContent')}</dt>
+            <dd>
+              <span class="bf__qr-mono" data-qr-content></span>
+              <button type="button" class="bf__qr-copy" data-qr-copy-content>{t('bookingQrCopy')}</button>
+            </dd>
+          </div>
+        </dl>
+      </div>
+      <p class="bf__qr-note">{t('bookingQrContentNote')}</p>
+    </div>
+
     <p class="bf__note">{t('bookingSuccessBody')}</p>
     {zaloUrl && <a class="bf__primary bf__primary--link" href={zaloUrl} target="_blank" rel="noopener">{t('contactZalo')}</a>}
   </section>
@@ -232,7 +284,9 @@ if (!turnstileSiteKey) {
   import type { Season } from '../lib/booking/season'
   import { formatPrice } from '../lib/renderer'
   import { addDaysISO, formatDateVN, todayVN } from '../lib/booking/vn-date'
-  import { LIMITS, MSG, buildQuotedPayload } from '../lib/booking/schema'
+  import { LIMITS, MSG, buildQuotedPayload, type PaymentMethod } from '../lib/booking/schema'
+  import { buildPaymentQr } from '../lib/booking/payment-qr'
+  import { banking } from '../site.config'
 
   declare global {
     interface Window {
@@ -276,6 +330,16 @@ if (!turnstileSiteKey) {
     const paxErrEl = q<HTMLElement>('[data-err="pax"]')!
     const totalInput = q<HTMLInputElement>('[data-quoted-total]')!
     const tokenInput = q<HTMLInputElement>('[data-turnstile-token]')!
+    const qrBox = q<HTMLElement>('[data-qr]')!
+    const dlBtn = q<HTMLButtonElement>('[data-qr-download]')!
+    const copyNoiDungBtn = q<HTMLButtonElement>('[data-qr-copy-content]')!
+
+    // Nút chép cho giá trị TĨNH (số tài khoản): nội dung nằm sẵn trong data-copy từ lúc dựng,
+    // nên gắn một lần ở đây. Nút chép nội dung chuyển khoản gắn trong hienQr() vì mã đơn chỉ
+    // có sau khi server trả lời.
+    for (const btn of Array.from(form.querySelectorAll<HTMLButtonElement>('[data-copy]'))) {
+      btn.addEventListener('click', () => { void chep(btn, btn.dataset.copy || '') })
+    }
     const widgetEl = q<HTMLElement>('[data-turnstile]')!
 
     // Tăng cường dần: không JS thì bước 2 hiện sẵn; có JS thì gấp lại.
@@ -508,6 +572,12 @@ if (!turnstileSiteKey) {
         return
       }
       if (!quote) return
+      // Chốt hai giá trị này NGAY BÂY GIỜ, không đọc lại sau `await`. Khách bấm đổi hạng khách
+      // hay đổi hình thức thanh toán trong lúc fetch đang chạy là `quote` bị `update()` gán
+      // lại — khối thành công sẽ in một số tiền KHÁC số vừa gửi lên server, và số đó đi thẳng
+      // lên mã QR. Đây đúng loại lỗi "bẫy tiền thật" mà SPEC §4.5 cảnh báo cho ca đơn trùng.
+      const pmDaGui: PaymentMethod = chonChuyenKhoan() ? 'transfer' : 'onboard'
+      const tongDaGui = quote.total
       const fd = new FormData(form)
       const val = (k: string) => String(fd.get(k) ?? '').trim()
       const payload = {
@@ -516,7 +586,7 @@ if (!turnstileSiteKey) {
         quoted: buildQuotedPayload(quote, quotedAt),
         name: val('name'), phone: val('phone'), email: val('email'), pickup: val('pickup'), note: val('note'),
         turnstileToken: tokenInput.value, website: val('website'),
-        paymentMethod: chonChuyenKhoan() ? 'transfer' : 'onboard',
+        paymentMethod: pmDaGui,
       }
       submitBtn.disabled = true
       const submitText = form.dataset.submitText || submitBtn.textContent || ''
@@ -525,7 +595,7 @@ if (!turnstileSiteKey) {
         const res = await fetch(form.action, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(payload) })
         const data = await res.json().catch(() => null) as null | { ok?: boolean; code?: string; duplicate?: boolean; message?: string; fields?: Record<string, string>; summary?: { tourTitle: string; departDate: string; total: number } }
         if (res.ok && data?.ok && data.code) {
-          showDone(data.code, !!data.duplicate)
+          showDone(data.code, !!data.duplicate, tongDaGui, pmDaGui)
         } else if (res.status === 400 && data?.fields) {
           for (const [k, m] of Object.entries(data.fields)) showErr(k, m)
           showErr('form', data.message || form.dataset.errorText || '')
@@ -542,27 +612,92 @@ if (!turnstileSiteKey) {
       }
     })
 
-    function showDone(code: string, duplicate: boolean) {
+    function showDone(code: string, duplicate: boolean, total: number, paymentMethod: PaymentMethod) {
       step1.hidden = true
       step2.hidden = true
       q<HTMLElement>('[data-done-code]')!.textContent = code
       q<HTMLElement>('[data-done-dup]')!.hidden = !duplicate
       const summary = q<HTMLElement>('[data-done-summary]')!
       summary.replaceChildren()
-      // dateEl.labels không dùng được ổn định trong kiểu lib.dom qua astro check — lấy
-      // trực tiếp nhãn <label for="bf-date"> theo id, giữ đúng ngữ nghĩa mà không đụng kiểu.
-      const dateLabel = form.querySelector('label[for="bf-date"]')?.textContent || form.dataset.dateLabel || ''
-      const lines: [string, string][] = [[form.querySelector<HTMLInputElement>('[name="tourTitle"]')!.value, ''], [dateLabel, dateEl.value.split('-').reverse().join('/')]]
-      if (quote) for (const l of quote.lines) lines.push([`${rows.get(l.code)?.label ?? l.code} × ${l.count}`, formatPrice(l.subtotal, 'vi')])
-      if (quote) lines.push([totalEl.closest('.bf__total')?.querySelector('span')?.textContent || form.dataset.subtotalLabel || '', formatPrice(quote.total, 'vi')])
-      for (const [a, b] of lines) {
-        const div = document.createElement('div'); div.className = 'bf__line'
-        const s1 = document.createElement('span'); s1.textContent = a
-        const s2 = document.createElement('strong'); s2.textContent = b
-        div.append(s1, s2); summary.append(div)
+      qrBox.hidden = true
+
+      // ĐƠN TRÙNG — DANH SÁCH ĐÓNG (SPEC §4.5). Hiện đúng hai thứ: mã đơn và câu "đã ghi nhận
+      // trước đó". KHÔNG tóm tắt, KHÔNG dòng tiền, KHÔNG QR.
+      // Lý do là tiền thật, không phải gọn gàng: khi trùng, handler.ts:211–213 trả mã đơn CŨ
+      // nhưng mọi con số quanh đây dựng từ `quote` của lần nộp MỚI. In số tiền mới cạnh mã cũ
+      // đã là hiển thị lệch; đưa nó lên mã QR thì thành khách CHUYỂN SAI SỐ TIỀN.
+      // (Liên kết "xem chi tiết và số tiền đã lưu" bổ sung khi trang /dat-tour/{mã}/ ở SPEC
+      // §4.4 lên — trang đó đọc D1 nên in đúng. Đợt này chưa có, SPEC §11.1.)
+      if (!duplicate) {
+        // dateEl.labels không dùng được ổn định trong kiểu lib.dom qua astro check — lấy
+        // trực tiếp nhãn <label for="bf-date"> theo id, giữ đúng ngữ nghĩa mà không đụng kiểu.
+        const dateLabel = form.querySelector('label[for="bf-date"]')?.textContent || form.dataset.dateLabel || ''
+        const lines: [string, string][] = [[form.querySelector<HTMLInputElement>('[name="tourTitle"]')!.value, ''], [dateLabel, dateEl.value.split('-').reverse().join('/')]]
+        if (quote) for (const l of quote.lines) lines.push([`${rows.get(l.code)?.label ?? l.code} × ${l.count}`, formatPrice(l.subtotal, 'vi')])
+        lines.push([totalEl.closest('.bf__total')?.querySelector('span')?.textContent || form.dataset.subtotalLabel || '', formatPrice(total, 'vi')])
+        for (const [a, b] of lines) {
+          const div = document.createElement('div'); div.className = 'bf__line'
+          const s1 = document.createElement('span'); s1.textContent = a
+          const s2 = document.createElement('strong'); s2.textContent = b
+          div.append(s1, s2); summary.append(div)
+        }
+        hienQr(code, total, paymentMethod)
       }
+
       done.hidden = false
       done.focus()
+    }
+
+    /** Dựng khối QR. `buildPaymentQr` tự trả null khi không phải chuyển khoản. */
+    function hienQr(code: string, total: number, paymentMethod: PaymentMethod) {
+      const qr = buildPaymentQr(banking, code, total, paymentMethod)
+      if (!qr) return
+      const img = q<HTMLImageElement>('[data-qr-img]')!
+      img.src = qr.imageUrl
+      img.alt = (form.dataset.qrAltText || '').replace('{code}', code)
+      q<HTMLElement>('[data-qr-amount]')!.textContent = formatPrice(qr.amount, 'vi')
+      q<HTMLElement>('[data-qr-content]')!.textContent = qr.addInfo
+      dlBtn.onclick = () => { void taiAnh(qr.imageUrl, code + '.png') }
+      copyNoiDungBtn.onclick = () => { void chep(copyNoiDungBtn, qr.addInfo) }
+      qrBox.hidden = false
+    }
+
+    /**
+     * Tải ảnh QR về máy. PHẢI đi qua blob: thuộc tính `download` bị trình duyệt BỎ QUA với URL
+     * khác gốc, nên `<a href="https://img.vietqr.io/…" download>` chỉ mở ảnh chứ không tải.
+     * Fetch được là vì đã đo img.vietqr.io trả `access-control-allow-origin: *` (31/08) —
+     * không phải giả định. Mất CORS thì rơi xuống nhánh catch, không cụt.
+     */
+    async function taiAnh(url: string, ten: string) {
+      try {
+        const res = await fetch(url)
+        if (!res.ok) throw new Error(String(res.status))
+        const blobUrl = URL.createObjectURL(await res.blob())
+        const a = document.createElement('a')
+        a.href = blobUrl
+        a.download = ten
+        document.body.append(a)
+        a.click()
+        a.remove()
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 10_000)
+      } catch {
+        // Mất mạng, hoặc VietQR bỏ CORS: mở ảnh ở tab mới để khách nhấn giữ lưu tay.
+        window.open(url, '_blank', 'noopener')
+      }
+    }
+
+    /** Chép một trường. Hỏng thì im — chữ trong khối vẫn chọn-copy được bằng tay. */
+    async function chep(btn: HTMLButtonElement, text: string) {
+      if (!text) return
+      try {
+        await navigator.clipboard.writeText(text)
+      } catch {
+        return
+      }
+      const cu = btn.textContent
+      btn.textContent = form.dataset.qrCopiedText || cu
+      btn.classList.add('is-copied')
+      setTimeout(() => { btn.textContent = cu; btn.classList.remove('is-copied') }, 1600)
     }
   }
 </script>
@@ -635,6 +770,29 @@ if (!turnstileSiteKey) {
   .bf__done-dup { font-size: var(--fs-sm); color: var(--c-text-muted); margin: 0; }
   .bf__hotline a { color: var(--c-primary); font-weight: var(--fw-600); }
 
+  /* Khối QR chuyển khoản. Mọi giá trị lấy từ tokens.css — không mã màu, không cỡ chữ viết
+     cứng (luật cứng 1 của CLAUDE.md, ADR-0030 §4). */
+  .bf__qr { display: flex; flex-direction: column; gap: var(--s3); padding: var(--s4); background: var(--c-surface-alt); border: 1px solid var(--c-border); border-radius: var(--radius-md); }
+  .bf__qr-title { font-family: var(--font-display); font-size: var(--fs-h5); font-weight: var(--fw-700); color: var(--c-primary-strong); margin: 0; }
+  .bf__qr-body { display: flex; flex-direction: column; gap: var(--s4); }
+  .bf__qr-visual { display: flex; flex-direction: column; align-items: center; gap: var(--s2); }
+  /* width/height trong HTML là cỡ nội tại 540×640 của ảnh VietQR — giữ để trình duyệt chừa
+     đúng chỗ, không giật khung lúc ảnh về (CLS). Ở đây co theo bề ngang thẻ sidebar. */
+  .bf__qr-img { width: 100%; max-width: 16rem; height: auto; background: var(--c-card); border: 1px solid var(--c-border); border-radius: var(--radius-sm); }
+  .bf__qr-hint { font-size: var(--fs-sm); color: var(--c-text-muted); margin: 0; text-align: center; }
+  .bf__qr-facts { display: flex; flex-direction: column; gap: var(--s2); margin: 0; }
+  .bf__qr-row { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--s2); }
+  .bf__qr-row dt { font-size: var(--fs-sm); color: var(--c-text-muted); margin: 0; }
+  .bf__qr-row dd { display: inline-flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: var(--s2); font-size: var(--fs-base); font-weight: var(--fw-600); color: var(--c-text); margin: 0; }
+  /* `user-select: all` — một chạm chọn trọn giá trị. Đây là đường dự phòng khi nút chép hỏng
+     (navigator.clipboard cần secure context và vẫn có thể bị từ chối), nên nó không phải trang trí. */
+  .bf__qr-mono { font-variant-numeric: tabular-nums; letter-spacing: 0.02em; user-select: all; overflow-wrap: anywhere; }
+  .bf__qr-amount { font-family: var(--font-display); color: var(--c-accent-strong); }
+  .bf__qr-copy { font-family: var(--font-ui); font-size: var(--fs-label); font-weight: var(--fw-600); color: var(--c-primary); background: var(--c-card); border: 1px solid var(--c-border); border-radius: var(--radius-pill); padding: var(--s1) var(--s3); cursor: pointer; transition: background var(--m-fast) var(--m-ease), color var(--m-fast) var(--m-ease); }
+  .bf__qr-copy:hover { background: var(--c-primary-soft); }
+  .bf__qr-copy.is-copied { color: var(--c-green-text); border-color: var(--c-green-text); background: var(--c-green-soft); }
+  .bf__qr-note { font-size: var(--fs-sm); color: var(--c-text-muted); margin: 0; }
+
   /* Thuộc tính `hidden` phải thắng mọi khai báo `display` của chính component này.
      Vì sao cần một luật riêng: Astro gắn thuộc tính scoped vào selector, nên `.bf__step`
      thành `.bf__step[data-astro-cid-…]` (đặc hiệu 0,2,0) và đè luôn `[hidden]{display:none}`
@@ -645,5 +803,6 @@ if (!turnstileSiteKey) {
      thuộc tính scoped (thành 0,3,0 — thắng 0,2,0 mà không cần `!important`), còn `[hidden]`
      trần sẽ bị để nguyên và rò thành luật toàn site. */
   .bf__step[hidden], .bf__primary[hidden], .bf__done[hidden],
-  .bf__hint[hidden], .bf__done-dup[hidden], .bf__season[hidden], .bf__prepay[hidden] { display: none; }
+  .bf__hint[hidden], .bf__done-dup[hidden], .bf__season[hidden], .bf__prepay[hidden],
+  .bf__qr[hidden] { display: none; }
 </style>

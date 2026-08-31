@@ -17,14 +17,20 @@
  *   Bật/tắt một hub             FILE NÀY                 sau khi build lại
  *   Ngôn ngữ của site           FILE NÀY                 sau khi build lại
  *   Tên miền                    FILE NÀY                 sau khi build lại
+ *   Số tài khoản nhận CK        FILE NÀY                 sau khi build lại
  *   ─────────────────────────   ──────────────────────   ──────────────────
  *   Tên site, mô tả site        Sanity Studio            ~2 phút, tự động
  *   Điện thoại, email, Zalo     Sanity Studio            ~2 phút, tự động
  *   Nội dung mọi trang          Sanity Studio            ~2 phút, tự động
  *
- *  Nguyên tắc phân chia: thứ gì đổi thì URL đổi theo (phải build lại) thì nằm
- *  ở file này. Thứ gì chỉ là chữ nghĩa hiển thị thì nằm trong Sanity để người
- *  quản trị tự sửa, không cần lập trình viên.
+ *  Nguyên tắc phân chia: thứ gì đổi thì URL đổi theo (phải build lại), HOẶC
+ *  thứ biên tập viên không được phép chạm, thì nằm ở file này. Thứ gì chỉ là
+ *  chữ nghĩa hiển thị thì nằm trong Sanity để người quản trị tự sửa, không
+ *  cần lập trình viên.
+ *
+ *  Vế thứ hai vào đây cùng khối `banking` (SPEC 2026-08-31 §4.2): số tài khoản
+ *  không đổi URL, nhưng biên tập viên không được có quyền đổi hướng dòng tiền
+ *  của khách. Ranh giới đó phải là ranh giới cấu trúc, không phải lời nhắc.
  *
  *  ─────────────────────────────────────────────────────────────────────────
  *  AI ĐƯỢC SỬA GÌ  (chủ dự án chốt 2026-07-27)
@@ -32,6 +38,7 @@
  *
  *   CHỦ DỰ ÁN — và chỉ chủ dự án:
  *     • File này: bật/tắt danh mục, thêm/bớt ngôn ngữ, đổi tên miền
+ *     • Số tài khoản nhận chuyển khoản (khối `banking` mục 1b)
  *
  *   BIÊN TẬP VIÊN (được mời vào Sanity Studio):
  *     • Nhập và sửa nội dung mọi danh mục
@@ -113,6 +120,41 @@ export const site = {
 
   /** Tên Sanity Studio (phần đầu của <ten>.sanity.studio) */
   studioHost: 'tourdaovn',
+} as const
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  1b. TÀI KHOẢN NHẬN CHUYỂN KHOẢN
+// ═══════════════════════════════════════════════════════════════════════════
+//
+//  Ba giá trị này định tuyến TIỀN THẬT của khách. Sai một chữ số là tiền đi
+//  vào tài khoản người lạ, và KHÔNG cổng nào trong repo bắt được:
+//  `scripts/validators/banking-shape.ts` chỉ kiểm HÌNH DẠNG (bin 6 chữ số,
+//  số TK 1–19 ký tự chữ/số) — đúng hình dạng thì nó im lặng cho qua.
+//
+//  Cách kiểm duy nhất có giá trị: quét mã QR bằng APP NGÂN HÀNG THẬT và đọc
+//  TÊN THỤ HƯỞNG app hiện ra. Không phải xem ảnh QR có dựng được không —
+//  img.vietqr.io vẽ lại đúng tham số ta đưa vào, kể cả số tài khoản không tồn
+//  tại. Xem SPEC 2026-08-31 §11.2.
+//
+//  Cố ý KHÔNG để trong Sanity (chủ dự án chốt 31/08, SPEC §2 câu 3): biên tập
+//  viên không được có quyền đổi hướng dòng tiền.
+
+export const banking = {
+  /** BIN NAPAS — đúng 6 chữ số. 970407 = Techcombank, tra từ api.vietqr.io/v2/banks. */
+  bin: '970407',
+
+  /** Tên ngân hàng cho KHỐI CHỮ cạnh ảnh QR. Phải khai tay: `bin` là con số,
+   *  không đọc ra tên được nếu không có bảng tra — mà bảng tra thứ hai trong
+   *  repo là nguồn sự thật thứ hai (P6/N7). Đổi `bin` thì đổi luôn dòng này. */
+  bankName: 'Techcombank',
+
+  /** Số tài khoản, 1–19 ký tự chữ/số, KHÔNG khoảng trắng. */
+  accountNumber: '2502503979',
+
+  /** Tên chủ tài khoản: IN HOA, KHÔNG DẤU theo lệ ngân hàng. Chỉ để khách đối
+   *  chiếu bằng mắt — ngân hàng ghi đè bằng tên thật lúc tra cứu, nên trường
+   *  này không định tuyến tiền. */
+  accountName: 'CONG TY TNHH TOUR DAO',
 } as const
 
 // ═══════════════════════════════════════════════════════════════════════════
