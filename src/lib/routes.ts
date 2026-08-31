@@ -72,7 +72,7 @@ const ROUTE_TABLE: RouteEntry[] = [
   { entity: 'tour',             segments: { vi:'tour',             en:'tours',           zh:'旅行团',     ko:'투어',       ru:'туры' },                   labels: { vi:'Tour',           en:'Tours',           zh:'旅行团',     ko:'투어',       ru:'Туры' },                   hasIndex: true,  hasTerm: true },
   { entity: 'article',          segments: { vi:'cam-nang',         en:'guides',          zh:'攻略',       ko:'가이드',     ru:'гайды' },                  labels: { vi:'Cẩm nang',       en:'Guides',          zh:'攻略',       ko:'가이드',     ru:'Гайды' },                  hasIndex: true,  hasTerm: false },
   { entity: 'person',           segments: { vi:'tac-gia',          en:'authors',         zh:'作者',       ko:'작가',       ru:'авторы' },                 labels: { vi:'Tác giả',        en:'Authors',         zh:'作者',       ko:'작가',       ru:'Авторы' },                 hasIndex: false, hasTerm: false },
-  { entity: 'organization',     segments: { vi:'cong-ty',          en:'companies',       zh:'公司',       ko:'회사',       ru:'компании' },               labels: { vi:'Công ty',        en:'Companies',       zh:'公司',       ko:'회사',       ru:'Компании' },               hasIndex: false, hasTerm: false },
+  { entity: 'organization',     segments: { vi:'cong-ty',          en:'companies',       zh:'公司',       ko:'회사',       ru:'компании' },               labels: { vi:'Công ty',        en:'Companies',       zh:'公司',       ko:'회사',       ru:'Компании' },               hasIndex: true,  hasTerm: false },
   { entity: 'hub-kham-pha',     segments: { vi:'kham-pha',         en:'things-to-do',    zh:'玩乐',       ko:'즐길거리',   ru:'развлечения' },            labels: { vi:'Khám phá',       en:'Things to do',    zh:'玩乐',       ko:'즐길거리',   ru:'Развлечения' },            hasIndex: false, hasTerm: false },
   { entity: 'hub-luu-tru',      segments: { vi:'luu-tru',          en:'where-to-stay',   zh:'住宿',       ko:'숙소',       ru:'проживание' },             labels: { vi:'Lưu trú',        en:'Where to stay',   zh:'住宿',       ko:'숙소',       ru:'Проживание' },             hasIndex: false, hasTerm: false },
   { entity: 'hub-di-lai',       segments: { vi:'di-lai',           en:'getting-around',  zh:'交通',       ko:'교통',       ru:'транспорт' },              labels: { vi:'Đi lại',         en:'Getting around',  zh:'交通',       ko:'교통',       ru:'Транспорт' },              hasIndex: false, hasTerm: false },
@@ -238,8 +238,8 @@ export interface AutoRouteLink {
  * Không cần cổng canh: hàm này và `getStaticPaths` cùng lọc một `ROUTE_MAP` theo cùng
  * điều kiện, nên không lệch được.
  *
- * `person` và `organization` không lên vì khai `hasIndex: false` — không có trang danh
- * sách để trỏ tới.
+ * `person` không lên vì khai `hasIndex: false` — không có trang danh sách để trỏ tới.
+ * (`organization` đã có `/cong-ty/` từ `QĐ-2026-08-31`.)
  */
 export function autoRouteLinks(lang: Lang): AutoRouteLink[] {
   return ROUTE_MAP

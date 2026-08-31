@@ -2426,3 +2426,200 @@ Triệu chứng là **im lặng**: Studio báo Publish thành công, tài liệu
 **Nợ mở kèm theo.** Bản dựng đọc Sanity qua **CDN** (`useCdn: true`, `src/lib/sanity.ts:147`, chọn vì chi phí ở `QĐ-2026-08-25-06`). CDN nhất quán *trễ*, nên một lần dựng chạy **ngay** sau Publish vẫn có thể đọc giá trị cũ rồi nướng vào trang tĩnh — build xanh, số sai, không cổng nào đỏ. Vá hook không dẹp được rủi ro này. Cách kiểm ghi ở `SPEC-2026-08-30-uu-dai-thanh-toan-truoc` §7 bước 4: đối chiếu số trang đang nướng với số CDN đang trả.
 
 **Tài liệu.** `docs/specs/SPEC-2026-08-21-dat-tour.md` §4.3 §4.4 (con số +90, viện dẫn mục này), `docs/specs/SPEC-2026-08-30-uu-dai-thanh-toan-truoc.md` §7.
+
+---
+
+## QĐ-2026-08-31-02 — Site tự khẳng định tiền đã về: đảo `ADR-0030` §5, giữ nguyên `ADR-0031` §2
+
+> **Trạng thái: ĐÃ PHÊ CHUẨN 2026-08-31.** Sáu câu dưới đây chủ dự án chốt lần lượt trong phiên
+> brainstorm cùng ngày; ba mục thiết kế duyệt lần lượt; `ADR-0032` toàn văn được duyệt sau khi
+> chủ dự án đọc lại. Chủ dự án đồng thời **cho phép dựng phần lõi trước** khi chốt nhà cung cấp.
+
+**Bối cảnh.** Chủ dự án yêu cầu: *khách tạo đơn và chuyển khoản thì hệ tự ghi nhận và biết giao
+dịch nào đã hoàn tất*. Yêu cầu này rơi đúng vào chỗ `ADR-0030` §5 (phê chuẩn hôm trước) đã gọi
+tên trước: *"Nếu sau này muốn QR mang nghĩa giữ chỗ thì đó là **ADR khác**, vì nó kéo theo
+trạng thái đơn mới, quy tắc hết hạn, và người đối soát tiền."* Ba thứ đó không bị lờ đi — quyết
+định 4, 5, 6 của `ADR-0032` là ba câu trả lời cho đúng ba thứ ấy.
+
+**Năm câu chốt trong phiên:**
+
+| # | Câu hỏi | Chốt |
+|---|---|---|
+| 1 | Mức tự động | **Hệ tự khẳng định đã thanh toán** — không phải chỉ giảm công đối soát cho nhân viên |
+| 2 | Số tiền | **Đủ 100% `quote.total`.** Không cọc một phần → mã QR đang chạy **không phải đổi một dòng** |
+| 3 | Tài khoản | **Giữ Techcombank `2502503979`.** Phạm vi thu hẹp đúng vào *"nhận webhook bắn tin có biến động số dư"* |
+| 4 | Hết hạn giữ chỗ | **24 giờ, hoặc trước giờ khởi hành** — cái nào đến trước |
+| 5 | Báo khách | **Làm luôn trang tra đơn `/dat-tour/<mã>/`** (đang nợ ở spec QR §4.4) + thư SES nếu có email |
+| 6 | Độc lập ngân hàng | **Lõi phải chạy được khi thêm hoặc đổi ngân hàng.** Chủ dự án thêm câu này *sau khi đọc bản đề xuất*: *"phần lõi nên độc lập với việc chọn ngân hàng gì, vì có thể chúng ta sẽ thêm / đổi ngân hàng"* |
+
+**Đã tra ngày 31/08, không lấy từ trí nhớ — và đây là phát hiện quan trọng nhất của phiên.**
+Tài liệu **lập trình** của SePay (`developer.sepay.vn`, tải nguyên trang về đọc) liệt kê mười
+ngân hàng hỗ trợ webhook và kết bằng *"Ngân hàng không có trong bảng thì chưa hỗ trợ webhook"* —
+**Techcombank không có trong bảng**. Trang blog "API Techcombank" của cùng site là bài SEO,
+không phải danh sách hỗ trợ; phân biệt hai thứ đó là toàn bộ giá trị của lần tra này. payOS
+không hỗ trợ tài khoản **doanh nghiệp** Techcombank (MB, KienlongBank, OCB, BIDV, Shinhan).
+Casso và Pay2S có liệt kê TCB nhưng không công bố điều kiện; Casso liên kết bằng **thông tin
+đăng nhập internet banking có quyền ra lệnh**. Techcombank không có sản phẩm API công khai —
+đường chính thức là gói **BusinessOne Connect**, phải qua ngân hàng.
+
+**Phán quyết kiến trúc kèm theo, để câu hỏi nhà cung cấp không chặn thi công.** Ba nhà cung cấp
+bắn về ba hình dạng JSON khác nhau nhưng cùng **sáu dữ kiện**. Nên hợp đồng bên trong hệ là
+`BankTxn` **của riêng mình**, mỗi nhà cung cấp chỉ là một hàm chuyển đổi thuần khoảng 30 dòng.
+Đổi nhà cung cấp là thêm một file. Nếu để nhà cung cấp quyết định hình dạng dữ liệu bên trong
+hệ thì đổi nhà cung cấp thành viết lại.
+
+**Ba luật cứng của thiết kế:**
+
+- **Sự thật tiền ở sổ cái chỉ-thêm**, `UNIQUE (provider, provider_txn_id)` — chống ghi trùng
+  phải là **cấu trúc**, không phải một câu `if`; mọi webhook đều bắn lại khi không nhận `200`.
+  Trạng thái thanh toán **không lưu ở đâu cả**, nó là `SUM` tính lúc đọc. Nhờ vậy không tồn tại
+  đường nào để một đơn nói "đã trả" trong khi sổ không có đồng nào.
+- **Khớp theo mã đơn, không bao giờ theo số tiền.** Ưu đãi 5% kéo rất nhiều đơn về cùng một
+  tổng; một lần đoán đúng chín lần sẽ dạy người vận hành tin vào lần thứ mười. Và đối chiếu với
+  `quoted_json` **trong D1**, không phải con số form vừa hiện — vì luật đơn trùng khiến một mã
+  có thể ứng với hai tổng (điểm mù đã ghi ở `ADR-0031`; spec này **tránh** chứ không vá).
+- **Hết hạn suy ra lúc đọc, không thêm Cron Trigger.** `min(created_at + 24h, ngày khởi hành
+  00:00 giờ VN)` là hàm thuần của dữ liệu đã có, nên không phải đảo thêm câu *"không thêm Cron
+  Trigger trong đợt này"* của spec QR §3.
+
+**Câu 6 không phải dự phòng cho tương lai xa — nó là điều kiện để đổi ngân hàng an toàn.** Đơn
+đã tạo mang mã QR trỏ **tài khoản cũ**; khách quét sau ngày công ty chuyển sang tài khoản mới
+thì tiền vẫn về tài khoản cũ. Hệ chỉ nhận đúng một số tài khoản là mất dấu cả một lứa tiền đang
+trên đường về, đúng vào ngày chuyển đổi. Thi hành: `banking.alsoAccept` (tài khoản vẫn nhận
+tiền nhưng không còn in lên QR); đường vào là `/api/bank-webhook/<nhà cung cấp>` với **một bí
+mật cho mỗi nhà cung cấp**; và sổ cái vốn đã khoá theo cặp `(provider, provider_txn_id)` nên
+**không phải migration lần hai** — quyết định đó ra trước câu 6 và hoá ra đã đủ.
+
+**Ranh giới giữ nguyên.** `payment_method` vẫn là **ý định** (`ADR-0031` §2 không nới một chữ);
+site vẫn **không nhận tiền** (brief §5 phần "thanh toán trực tuyến" còn nguyên); và **hệ không
+bao giờ tự huỷ đơn, không bao giờ tự hoàn tiền** — tự động hoá dừng ở *ghi nhận và khẳng định*.
+
+**Nợ mở, DRI chủ dự án — chặn bước xác minh:** chưa chốt nhà cung cấp, và **chưa ai xác nhận**
+có nhà cung cấp nào đọc được tài khoản doanh nghiệp Techcombank. Năm câu phải hỏi họ ghi ở spec
+§10. Nếu đường khả thi duy nhất là **giao thông tin đăng nhập internet banking của tài khoản
+công ty** cho bên thứ ba thì đó là quyết định về rủi ro tài chính, không phải quyết định kỹ
+thuật — đọc điều khoản của Techcombank trước khi làm.
+
+**Thi công: HOÃN, cùng ngày.** Chủ dự án ghi nợ toàn bộ kế hoạch ngay sau khi duyệt
+(2026-08-31). Quyết định vẫn đứng, spec vẫn đúng, **nhưng không ai được mở việc cho Code** cho
+tới khi có người mở lại. Theo dõi ở `docs/BACKLOG.md` `B-022`, kèm điều kiện mở lại.
+
+**Tài liệu.** `docs/adr/ADR-0032-tu-khang-dinh-tien-ve.md` (toàn văn),
+`docs/specs/SPEC-2026-08-31-tu-dong-doi-soat-chuyen-khoan.md` (hợp đồng thi công, gắn bảng HOÃN).
+
+---
+
+## QĐ-2026-08-31-03 — Nới Luật 3: chấp nhận thanh dính mang giá rơi khỏi màn đầu ở 1366
+
+> **Ghi chú đánh số.** Việc này ban đầu được gọi mã `QĐ-2026-08-31-01`. Khi soạn phiếu, mã đó đã
+> bị chiếm — `QĐ-2026-08-31-01` (ở trên, "Cửa sổ đặt trước rút từ 365 xuống 90 ngày…") đã
+> **commit** tại HEAD của nhánh này, và `QĐ-2026-08-31-02` ("Site tự khẳng định tiền đã về") cũng
+> đã có mặt trong cây làm việc dù chưa commit. Cả hai không liên quan gì tới hero hay thanh dính.
+> Mã còn trống đầu tiên trong ngày là **`QĐ-2026-08-31-03`** — dùng xuyên suốt phiếu này,
+> `06-BINDING_MAP` (§3 hàng Hero, nhật ký phiên bản), và thông điệp commit. Bất kỳ tài liệu nào
+> khác còn viện dẫn "`QĐ-2026-08-31-01`" cho quyết định về hero/Luật 3 (kể cả brief của Task 9)
+> phải sửa lại thành `-03` trước khi dùng.
+
+**Bối cảnh.** `QĐ-2026-08-28-03` chấp nhận chiều cao hero 430px là **ngoại lệ Luật 3 có ghi
+phiếu**, kèm đúng một điều kiện: *"Chưa thành vi phạm sống vì `sticky-bar__price` render trên
+**0 trang**. Điều kiện bắt buộc: phải xét lại TRƯỚC khi vùng giá render trên bất kỳ trang nào."*
+
+**Điều kiện đã bị kích hoạt, và chưa ai thi hành việc xét lại.** Đo 2026-08-31 trên production:
+`.sticky-bar__price` render thật trên trang tour 3 đảo Hòn Mun
+(`tour-3-dao-hon-mun-hon-mun-lang-chai-hon-tam`), `data-region="sticky-bar" data-field="gia"`,
+giá trị `850.000₫/người`. Không phiếu nào giữa `QĐ-2026-08-28-03` và hôm nay chạm hàng Hero của
+`06-BINDING_MAP` — kiểm bằng nhật ký phiên bản `06:17` (v2.10.0 → v2.13.0 đều là mục khác) và
+`grep "Luật 3"` toàn bộ `DECISIONS.md` / `DRIFT_LOG.md` / `core-specs/` / `adr/`.
+
+**Số đo TRƯỚC — đo được ở 1710×985, KHÔNG đo được ở 1366 trong phiên này.** Ngày 2026-08-31, ở
+viewport **1710×985**: `.sticky-bar` `getBoundingClientRect().top + scrollY` = **724px**;
+`.hero-shell` = **430px**; `h1` một dòng. Không đo được ở **1366×768** trong phiên này — công cụ
+resize cửa sổ báo thành công nhưng vô hiệu (`outerWidth` trả 0, `innerWidth` kẹt ở 1710). Con số
+**668px ở 1366** dẫn trong hàng Hero của `06-BINDING_MAP` là **kế thừa từ `QĐ-2026-08-28-03`
+(28/08) và đã cũ** — không dùng làm bằng chứng mới cho phiếu này. Nguyên nhân khả dĩ khiến nó
+lệch với số đo hôm nay ở 1710: `--fs-base` 17→19px (`QĐ-2026-08-28-02`) và/hoặc việc giá nay
+render trong thanh dính (trước đó thanh chỉ mang CTA, không mang giá).
+
+**Vì sao độ dịch +50px vẫn chắc chắn ở cả 1366 lẫn 1710, dù không đo trực tiếp ở 1366 — lập luận
+clamp.** Hero dùng `clamp(sàn, calc(30vw + Xpx), trần)`. Ở **cả hai** khổ, hero bị **trần** trói
+cả trước lẫn sau khi đổi: trước, `30vw + 50` = **459,8px** ở 1366 và **563px** ở 1710, cả hai đều
+vượt trần cũ **430px**; sau, `30vw + 100` = **509,8px** ở 1366 và **613px** ở 1710, cả hai đều
+vượt trần mới **480px**. Vì `30vw` luôn vượt trần ở cả hai khổ này, trước lẫn sau, hero luôn bị
+kẹp đúng ở giá trị trần chứ không kẹp ở `30vw` — nghĩa là chiều cao hero **luôn bằng trần** bất kể
+khổ, và trần đi từ 430px lên 480px. Vậy hero đóng góp **đúng +50px** ở cả 1366 lẫn 1710, không
+cần đo trực tiếp ở 1366 để biết điều đó. Số đo thật ở 1710 hôm nay (hero = 430px, đúng bằng trần
+cũ) xác nhận độc lập rằng trần đang trói đúng như lập luận, không phải `30vw`.
+
+**Chốt (chủ dự án, 2026-08-31): nới Luật 3.** Hero trang chi tiết entity cao thêm 50px ở mọi khổ
+(`SPEC-2026-08-31-hero-entity-cao-them-50px.md`). Chấp nhận thanh dính mang giá **không** còn
+trên màn đầu ở viewport 1366.
+
+**Hệ quả nhận rõ, không giấu.** Ở **1710×985**: thanh dính từ **724px** (TRƯỚC, đo 2026-08-31)
+lên **774px** (SAU) — *Task 9, đo 2026-08-31, `npm run dev` cổng 4321 + Chrome, đúng trang
+`tour-3-dao-hon-mun-hon-mun-lang-chai-hon-tam` (trang đã dùng làm mốc TRƯỚC, xác nhận qua
+`h1`/`[data-region="sticky-bar"][data-field="gia"]` trùng khớp), `.sticky-bar`
+`getBoundingClientRect().top + scrollY`. Đúng +50px so với TRƯỚC, khớp lập luận clamp; không phải
+số suy ra*. Ở **1366**, con số TRƯỚC còn lưu trong
+tài liệu là **668px**, nhưng đó là số **kế thừa, đã cũ** (xem đoạn trên) — không phải bằng chứng
+đo mới của phiếu này; mốc màn đầu ở khổ này là **657px** (chiều cao viewport thật của trình duyệt
+trên màn 768, sau khi trừ chrome). Vì 1366 **không đo lại được** trong đợt này — công cụ resize
+vô hiệu trong môi trường này, và Task 9 nhiều khả năng cũng chỉ đo được ở 1710 — số SAU của 1366
+**không để trống chờ đo**: nó chốt là số **suy ra**, **≈718px** (668px kế thừa + 50px theo lập
+luận clamp ở trên), ghi thẳng ở `06-BINDING_MAP:74` chứ không phải một placeholder. Đây là số
+**dẫn xuất**, không phải phép đo; nếu sau này ai đo lại được 1366 bằng trình duyệt thật thì số đo
+thật thắng số suy ra này, và phải sửa lại `06-BINDING_MAP:74` khi đó. **Task 9 vì vậy chỉ điền
+đúng một chỗ** — số đo SAU ở đoạn "Hệ quả nhận rõ" trên (đã điền: 774px); chỗ 1366 ở
+`06-BINDING_MAP:74` đã chốt số suy ra, không còn gì để Task 9 điền ở đó. Áp cho **mọi** tiêu đề,
+không riêng tiêu đề hai dòng. Đây là **vi phạm Luật 3 được chấp nhận có chủ ý**, không còn là
+"chưa thành vi phạm".
+
+**Điều kiện "0 trang" của `QĐ-2026-08-28-03` XOÁ HẲN.** Nó đã hết hiệu lực; giữ lại trong `06` là
+bẫy cho người đọc sau.
+
+**Cái gì đỡ cho quyết định này.** Giá vẫn có mặt hai chỗ: thanh dính (dính lại sau khi cuộn tới)
+và `.bf__pax-price` — đơn giá từng hạng khách trong form đặt tour. Không trang nào mất giá.
+
+**Nợ kèm theo.** `SPEC-2026-08-31-form-dat-tour-gon-va-chi-tiet-gia.md` §4.2 ghi một rủi ro ngủ:
+với bảng giá dạng bậc (`kind: 'tiers'`) thì `.bf__pax-price` không render, nên tour giá bậc sẽ
+chỉ còn thanh dính. Hôm nay `data/prices.yaml` có **0/29** khoá dùng `tiers` (kiểm lại 2026-08-31:
+29 khoá cấp cao nhất trong file, không khoá nào có trường `tiers`). Vào `docs/BACKLOG.md` là
+**B-020** (chưa ghi trong đợt này — `BACKLOG.md` ngoài phạm vi hai file Task 1 được phép chạm).
+
+---
+
+## Bổ sung cho `QĐ-2026-08-31-03` — ẩn nốt `.bf__pax-price`, đoạn "cái gì đỡ" ở trên đã cũ
+
+**Ngày:** 2026-08-31, **sau** khi phiếu gốc ở trên được chốt. Phần này viết thêm, không sửa đoạn
+gốc — người đọc sau cần thấy lý lẽ đã đổi ra sao, không chỉ thấy kết luận mới.
+
+**Việc đổi.** Chủ dự án yêu cầu ẩn luôn `.bf__pax-price` — đơn giá từng hạng khách (Người lớn,
+Trẻ em, Người cao tuổi, Em bé) — trong form đặt tour, ở **mọi** bảng giá, không riêng `kind:
+'tiers'`. Thi hành ở Task 5 (`SPEC-2026-08-31-form-dat-tour-gon-va-chi-tiet-gia.md`).
+
+**Câu bị đè.** Đoạn *"Cái gì đỡ cho quyết định này"* ở trên viết: *"Giá vẫn có mặt hai chỗ: thanh
+dính (dính lại sau khi cuộn tới) và `.bf__pax-price` — đơn giá từng hạng khách trong form đặt
+tour. Không trang nào mất giá."* Vế `.bf__pax-price` trong câu đó **nay sai** — sau Task 5,
+`.bf__pax-price` không còn render ở bất kỳ hạng khách nào, trên bất kỳ tour nào.
+
+**"Cái gì đỡ" nay là gì.** Hai chỗ, không phải một: (1) **thanh dính** — vẫn mang giá, không đổi
+so với phiếu gốc; (2) **Tạm tính** (đã có, render ngay khi mở form) và **bảng "Chi tiết giá"**
+(Task 8 dựng, `<details>` đóng mặc định, mở ra thì thấy **thành tiền từng hạng khách**, mốc tạm
+tính trước ưu đãi, số tiền giảm, và tổng cộng — theo yêu cầu ẩn hết đơn giá, bảng chi tiết **cũng
+không in đơn giá**) trong chính form đặt tour — cả hai cập nhật theo số khách vừa chọn. Giá không
+mất khỏi form; nó chỉ không còn hiện **thường trực** ở mỗi hạng khách trước khi khách bấm chọn số
+người.
+
+**Hệ quả nhận rõ, không giấu.** Ở viewport **1366**, màn đầu (trên mốc 657px) **không còn con số
+giá nào**: thanh dính đã ở **≈718px** (số suy ra, xem đoạn gốc ở trên) — dưới mốc màn đầu, đúng
+như phiếu gốc đã chấp nhận; và trong form, giá chỉ hiện sau khi khách chọn số người (Tạm tính)
+hoặc chủ động mở "Chi tiết giá". Đây là **đánh đổi được chấp nhận có chủ ý**, chồng thêm lên
+đánh đổi mà phiếu gốc đã chấp nhận cho thanh dính — không phải một vi phạm mới phát sinh ngoài ý
+muốn.
+
+**Số phận rủi ro `.bf__pax-price`/`tiers` nêu ở "Nợ kèm theo".** Rủi ro đó giả định `flat` còn
+đơn giá còn `tiers` thì mất, nên hai loại bảng giá lệch nhau. Giả định không còn đúng: sau Task 5
+**không loại bảng giá nào** hiển thị đơn giá trong form nữa, nên không còn gì để lệch. `B-020`
+ghi lại đúng việc khoản nợ này đóng ngay lúc mở — xem `docs/BACKLOG.md`.
+
+**Tài liệu.** `docs/specs/SPEC-2026-08-31-form-dat-tour-gon-va-chi-tiet-gia.md` (hợp đồng thi
+công Task 5–8), `docs/BACKLOG.md` `B-020` và `B-023`.

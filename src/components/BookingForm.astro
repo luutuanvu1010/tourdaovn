@@ -42,14 +42,6 @@ function paxLabel(code: PaxCode): string {
 function paxNote(code: PaxCode): string {
   return priceTable.kind === 'flat' ? (priceTable.notes?.[code] ?? '') : ''
 }
-function paxAmountLabel(code: PaxCode): string {
-  if (priceTable.kind === 'flat') {
-    const a = priceTable.perPax[code]
-    if (typeof a !== 'number') return ''
-    return a === 0 ? t('free') : formatPrice(a, lang)
-  }
-  return ''
-}
 
 // Tạm tính ban đầu (1 người lớn) render sẵn ở server để không JS vẫn thấy số.
 const initialPax = emptyPax()
@@ -96,7 +88,10 @@ if (!turnstileSiteKey) {
   data-date-label={t('bookingDepartDate')}
   data-subtotal-label={t('bookingSubtotal')}
   data-pay-required-text={t('bookingPayRequired')}
-  data-pay-note-text={t('bookingPayNote')}
+  data-before-discount-text={t('bookingBeforeDiscount')}
+  data-discount-line-text={t('bookingDiscountLine')}
+  data-grand-total-text={t('bookingGrandTotal')}
+  data-season-note-tpl={t('bookingSeasonNote')}
   data-qr-alt-text={t('bookingQrAlt')}
   data-qr-copied-text={t('bookingQrCopied')}
 >
@@ -109,15 +104,25 @@ if (!turnstileSiteKey) {
     <input type="hidden" name={`quoted.perPax.${code}`} value={String(initialQuote?.perPax[code] ?? '')} data-quoted-per-pax={code} />
   ))}
 
-  <div class="bf__head">
-    <span class="bf__eyebrow">{t('priceFrom')}</span>
-    <strong class="bf__price">{priceLabel}</strong>
-  </div>
-
   <section class="bf__step" data-step="1">
-    <label class="bf__label" for="bf-date">{t('bookingDepartDate')}</label>
+    <div class="bf__label-row">
+      <label class="bf__label" for="bf-date">{t('bookingDepartDate')}</label>
+      <details class="bf__tip">
+        <summary class="bf__tip-mark" aria-label={t('info')}>i</summary>
+        {/* `<details>` khong phai phrasing content nen khong duoc long trong <label> (vi
+            pham content model HTML5) — vi vay tach ra thanh khoi rieng, boc chung trong
+            .bf__label-row de giu cung dong. Ban nhin thay nay la BAN SAO, gan
+            aria-hidden de trinh doc man hinh khong doc trung voi span an ben duoi — no
+            van phai cap nhat chu khi script tinh lai pham vi ngay (xem script ~L392). */}
+        <p class="bf__tip-body" aria-hidden="true" data-date-range-text>{dateRangeText}</p>
+      </details>
+    </div>
+    {/* Ban DUY NHAT ma trinh doc man hinh dua vao — nam NGOAI <details>, luon co mat
+        trong cay truy cap du hop thoai dang dong hay mo. aria-describedby cua o ngay
+        tro vao day, khong tro vao ban nhin thay ben trong <details> nua (co the khong
+        duoc AT doc khi dong, tuy engine — xem task-4-report.md §1). */}
+    <span id="bf-date-range" class="bf__sr-only" data-date-range-text>{dateRangeText}</span>
     <input id="bf-date" class="bf__input" type="date" name="departDate" required min={minDate} max={maxDate} aria-describedby="bf-date-range" />
-    <p class="bf__note" id="bf-date-range" data-date-range-text>{dateRangeText}</p>
     <p class="bf__err" data-err="departDate" aria-live="polite"></p>
 
     <p class="bf__label" id="bf-pax-label">{t('bookingPax')}</p>
@@ -125,9 +130,19 @@ if (!turnstileSiteKey) {
       {codes.map(code => (
         <div class="bf__pax" data-code={code} data-label={paxLabel(code)}>
           <div class="bf__pax-info">
-            <span class="bf__pax-name">{paxLabel(code)}</span>
-            {paxNote(code) && <span class="bf__pax-note">{paxNote(code)}</span>}
-            {paxAmountLabel(code) && <span class="bf__pax-price">{paxAmountLabel(code)}</span>}
+            {/* <div> chu khong phai <span>: <details> la flow content, khong phai phrasing
+                content, nen khong duoc long trong <span> (vi pham content model HTML5,
+                cung loai loi nhu nhan ngay o tren). Doi tag khong doi layout — .bf__pax-info
+                la flex column nen phan tu nay da bi "blockify" thanh khoi du khai tag gi. */}
+            <div class="bf__pax-name">
+              {paxLabel(code)}
+              {paxNote(code) && (
+                <details class="bf__tip">
+                  <summary class="bf__tip-mark" aria-label={t('info')}>i</summary>
+                  <p class="bf__tip-body">{paxNote(code)}</p>
+                </details>
+              )}
+            </div>
           </div>
           <div class="bf__stepper">
             <button type="button" class="bf__btn" data-dec aria-label={`${t('paxDecrease')} ${paxLabel(code)}`}>−</button>
@@ -151,7 +166,12 @@ if (!turnstileSiteKey) {
 
     {prepayPercent > 0 && (
       <>
-        <p class="bf__label" id="bf-pay-label">{t('bookingPayLabel')}</p>
+        {/* Task 6: nhãn ẩn thị giác nhưng còn tên cho trợ năng — đổi lớp sang
+            `.bf__sr-only` (đã dựng ở Task 4, dùng lại, không dựng lớp thứ hai),
+            giữ nguyên id + `aria-labelledby` bên dưới nên nhóm radio không mất
+            tên trong cây trợ năng. KHÔNG dùng display:none/visibility:hidden —
+            hai cái đó ẩn luôn với trình đọc màn hình. */}
+        <p class="bf__sr-only" id="bf-pay-label">{t('bookingPayLabel')}</p>
         <div class="bf__pay" role="radiogroup" aria-labelledby="bf-pay-label">
           <label class="bf__pay-opt">
             <input type="radio" name="paymentMethod" value="transfer" />
@@ -172,11 +192,33 @@ if (!turnstileSiteKey) {
           <div class="bf__line"><span>{paxLabel(l.code)} × {l.count}</span><span>{formatPrice(l.subtotal, lang)}</span></div>
         ))}
       </div>
-      <div class="bf__total"><span>{t('bookingSubtotal')}</span><strong data-total>{initialQuote ? formatPrice(initialQuote.total, lang) : '—'}</strong></div>
+      <div class="bf__total">
+        {/* <div> chu khong phai <span>: cung ly do o hai cho tren — <details> khong phai
+            phrasing content. .bf__total la flex row 2 phan tu (nhan + so tien), doi tag
+            khong doi layout vi day van la mot flex item duy nhat, khong tach hang moi. */}
+        <div class="bf__total-label">
+          {t('bookingSubtotal')}
+          <details class="bf__tip">
+            <summary class="bf__tip-mark" aria-label={t('info')}>i</summary>
+            <p class="bf__tip-body">{t('bookingSubtotalNote')}</p>
+          </details>
+        </div>
+        <strong data-total>{initialQuote ? formatPrice(initialQuote.total, lang) : '—'}</strong>
+      </div>
     </div>
-    <p class="bf__season" data-season hidden></p>
-    <p class="bf__prepay" data-prepay hidden></p>
-    <p class="bf__note">{t('bookingSubtotalNote')}</p>
+    {/* Task 8 (SPEC-2026-08-31-form-dat-tour-gon-va-chi-tiet-gia.md §4.5): bảng chi tiết giá.
+        Gộp nội dung của .bf__season/.bf__prepay cũ (đã xoá — §4.5.3, hai node đó in TRÙNG
+        con số với bảng này). Đặt NGOÀI .bf__quote (đóng ở trên) vì .bf__quote mang
+        aria-live="polite" và bị replaceChildren() mỗi lần bấm +/− — lồng bảng chi tiết vào
+        trong đó là mỗi lần đổi số khách trình đọc màn hình đọc lại toàn bộ bảng (§4.5.4 luật 3).
+        Mặc định ĐÓNG (không đặt `open` — <details> tự quản trạng thái mở/đóng của nó); server
+        dựng kèm `hidden` (2026-08-31: thân bảng chỉ có sau khi JS chạy, không hidden thì
+        khách tắt JS thấy nút mở ra rỗng) — script gỡ `hidden` trong update() khi có quote (luật
+        render 2), không phải qua CSS display. */}
+    <details class="bf__detail" data-quote-detail hidden>
+      <summary class="bf__detail-sum">{t('bookingPriceDetail')}</summary>
+      <div class="bf__detail-body" data-detail-lines></div>
+    </details>
 
     <button type="button" class="bf__primary" data-open>{t('bookingBookNow')}</button>
     {zaloUrl && <a class="bf__secondary" href={zaloUrl} target="_blank" rel="noopener">{t('bookingFreeConsult')}</a>}
@@ -280,7 +322,7 @@ if (!turnstileSiteKey) {
 </form>
 
 <script>
-  import { PAX_ORDER, apDieuChinh, computeQuote, type PaxCode, type PaxCounts, type PriceTable, type Quote } from '../lib/booking/quote'
+  import { PAX_ORDER, computeQuote, type PaxCode, type PaxCounts, type PriceTable, type Quote } from '../lib/booking/quote'
   import type { Season } from '../lib/booking/season'
   import { formatPrice } from '../lib/renderer'
   import { addDaysISO, formatDateVN, todayVN } from '../lib/booking/vn-date'
@@ -300,6 +342,20 @@ if (!turnstileSiteKey) {
   const form = document.getElementById('dat-tour') as HTMLFormElement | null
   if (form) init(form)
 
+  // Nhãn kèm dấu ⓘ (`.bf__tip`) lồng một `<details>` con ngay trong node nhãn (Task 4), nên
+  // `.textContent` trần của node đó giờ dính cả chữ "i" lẫn nội dung ghi chú phía trong —
+  // KỂ CẢ khi `<details>` đang đóng, vì đóng chỉ ẩn hiển thị chứ không rút node khỏi DOM.
+  // Hàm này chỉ lấy các text node con TRỰC TIẾP (bỏ qua phần tử con như `<details>`), để hai
+  // chỗ dưới đây tiếp tục lấy đúng nhãn gốc, không dính chữ ghi chú.
+  function directText(el: Element | null | undefined): string {
+    if (!el) return ''
+    return Array.from(el.childNodes)
+      .filter(n => n.nodeType === Node.TEXT_NODE)
+      .map(n => n.textContent || '')
+      .join(' ')
+      .trim()
+  }
+
   function init(form: HTMLFormElement) {
     const q = <T extends Element>(sel: string) => form.querySelector<T>(sel)
     const table = JSON.parse(form.dataset.priceTable || 'null') as PriceTable | null
@@ -307,7 +363,12 @@ if (!turnstileSiteKey) {
     const seasons = JSON.parse(form.dataset.seasons || '[]') as Season[]
     const prepayPercent = Number(form.dataset.prepayPercent) || 0
     const payRequiredText = form.dataset.payRequiredText || ''
-    const payNoteText = form.dataset.payNoteText || ''
+    // Task 8 — bảng chi tiết giá. Script KHÔNG gọi được t() (module riêng, không thấy frontmatter),
+    // nên bốn chuỗi này phải đi qua data-* nướng sẵn ở markup (xem data-*-text trên <form>).
+    const beforeDiscountText = form.dataset.beforeDiscountText || ''
+    const discountLineText = form.dataset.discountLineText || ''
+    const grandTotalText = form.dataset.grandTotalText || ''
+    const seasonNoteTpl = form.dataset.seasonNoteTpl || ''
     const payEls = Array.from(form.querySelectorAll<HTMLInputElement>('input[name="paymentMethod"]'))
     const chonChuyenKhoan = () => payEls.some(el => el.checked && el.value === 'transfer')
     payEls.forEach(el => el.addEventListener('change', update))
@@ -325,7 +386,8 @@ if (!turnstileSiteKey) {
     const dateEl = q<HTMLInputElement>('[name="departDate"]')!
     const linesEl = q<HTMLElement>('[data-quote-lines]')!
     const totalEl = q<HTMLElement>('[data-total]')!
-    const seasonEl = q<HTMLElement>('[data-season]')!
+    const detailBox = q<HTMLElement>('[data-detail-lines]')!
+    const detailWrap = q<HTMLDetailsElement>('[data-quote-detail]')!
     const hintEl = q<HTMLElement>('[data-large-group]')!
     const paxErrEl = q<HTMLElement>('[data-err="pax"]')!
     const totalInput = q<HTMLInputElement>('[data-quoted-total]')!
@@ -356,22 +418,22 @@ if (!turnstileSiteKey) {
     const dateRangeMsg = () => dateRangeTpl
       ? dateRangeTpl.replace('{min}', formatDateVN(dateEl.min)).replace('{max}', formatDateVN(dateEl.max))
       : ''
-    const rangeTextEl = q<HTMLElement>('[data-date-range-text]')
-    if (rangeTextEl) rangeTextEl.textContent = dateRangeMsg()
+    // HAI node mang [data-date-range-text] từ vòng sửa 1/5 (bản cho trình đọc màn hình —
+    // .bf__sr-only, luôn trong cây truy cập — và bản nhìn thấy bên trong <details>, mang
+    // aria-hidden). `q()` chỉ lấy node ĐẦU TIÊN — phải querySelectorAll và cập nhật cả hai,
+    // nếu không bản cho trình đọc màn hình đứng yên ở chuỗi lúc dựng server.
+    form.querySelectorAll<HTMLElement>('[data-date-range-text]').forEach(el => { el.textContent = dateRangeMsg() })
     // Đổi ngày khởi hành có thể đổi mùa áp dụng, nên phải tính lại tạm tính ngay (Task 5).
     dateEl.addEventListener('change', update)
 
     // Bộ đếm
-    const rows = new Map<PaxCode, { input: HTMLInputElement; label: string; inc: HTMLButtonElement; dec: HTMLButtonElement; priceEl: HTMLElement | null }>()
+    const rows = new Map<PaxCode, { input: HTMLInputElement; label: string; inc: HTMLButtonElement; dec: HTMLButtonElement }>()
     form.querySelectorAll<HTMLElement>('.bf__pax').forEach(row => {
       const code = row.dataset.code as PaxCode
       const input = row.querySelector<HTMLInputElement>('input')!
       const inc = row.querySelector<HTMLButtonElement>('[data-inc]')!
       const dec = row.querySelector<HTMLButtonElement>('[data-dec]')!
-      // Bảng giá kiểu 'tiers' không dựng span này (paxAmountLabel trả về rỗng) — null-check
-      // khi dùng, đừng giả định nó luôn có mặt.
-      const priceEl = row.querySelector<HTMLElement>('.bf__pax-price')
-      rows.set(code, { input, label: row.dataset.label || code, inc, dec, priceEl })
+      rows.set(code, { input, label: row.dataset.label || code, inc, dec })
       dec.addEventListener('click', () => { input.value = String(Math.max(Number(input.min) || 0, (parseInt(input.value, 10) || 0) - 1)); update() })
       inc.addEventListener('click', () => { input.value = String(Math.min(perTypeMax, (parseInt(input.value, 10) || 0) + 1)); update() })
       input.addEventListener('change', update)
@@ -406,31 +468,7 @@ if (!turnstileSiteKey) {
       const pax = readPax()
       const total = PAX_ORDER.reduce((n, c) => n + pax[c], 0)
       const chon = chonChuyenKhoan()
-      const uuDai = chon ? prepayPercent : 0
       quote = computeQuote(table!, pax, { seasons, departDate: dateEl.value, prepayPercent, prepay: chon })
-
-      // Đơn giá trong ô chọn số khách phải khớp mùa với dòng tính tiền ngay bên dưới —
-      // cùng hạng khách không được hiện hai giá khác nhau trên một màn hình (chủ dự án
-      // chốt 2026-08-30). `quote.perPax[code]` đã áp mùa và làm tròn sẵn, không tính lại.
-      // Hạng chưa có khách (count 0) không nằm trong quote.perPax — nhưng đơn giá của nó
-      // vẫn phải đổi theo mùa y như hạng có khách, nếu không khách thấy giá cũ rồi giá
-      // nhảy ngay khi bấm "+" (đúng thứ bản vá này sinh ra để dẹp). Lấy giá gốc từ bảng
-      // giá nướng lúc build rồi áp CÙNG hàm apDieuChinh mà computeQuote dùng — không tính
-      // lại bằng công thức riêng. Giá gốc 0đ ("Miễn phí") luôn ra 0 dù áp mùa, nên không
-      // cần — và không được — đổi nhãn đó thành "0 ₫": bỏ qua, giữ nguyên nhãn đang hiện.
-      rows.forEach((r, code) => {
-        if (!r.priceEl) return
-        const amount = quote?.perPax[code]
-        if (typeof amount === 'number') {
-          if (amount > 0) r.priceEl.textContent = formatPrice(amount, 'vi')
-          return
-        }
-        if (table!.kind !== 'flat') return
-        const goc = table!.perPax[code]
-        if (typeof goc !== 'number') return
-        const adjusted = apDieuChinh(goc, quote?.season?.percent ?? 0, uuDai)
-        if (adjusted > 0) r.priceEl.textContent = formatPrice(adjusted, 'vi')
-      })
 
       linesEl.replaceChildren()
       if (quote) {
@@ -443,14 +481,59 @@ if (!turnstileSiteKey) {
         }
       }
       totalEl.textContent = quote ? formatPrice(quote.total, 'vi') : '—'
-      if (quote?.season) {
-        const dau = quote.season.percent > 0 ? '+' : ''
-        seasonEl.textContent = `${quote.season.name} · ${dau}${quote.season.percent}%`
-        seasonEl.hidden = false
+
+      // Bảng chi tiết giá (Task 8). Dòng do JS dựng qua createElement KHÔNG mang
+      // data-astro-cid-*, nên CSS phải nhắm qua :global() (xem [data-detail-lines] trong
+      // <style>) — bỏ qua là tái hiện lỗi "Người lớn × 1019.550.000₫" (DR-102, 2026-08-29).
+      detailBox.replaceChildren()
+      if (quote) {
+        // Luật render 2: quote null (vượt bậc / hạng không có giá) → KHÔNG dựng bảng rỗng —
+        // ẩn cả khối kể cả dòng tóm tắt "Xem chi tiết giá".
+        detailWrap.hidden = false
+
+        // Bốn mốc chính xác (SPEC §4.5.1): mọi số tiền lấy NGUYÊN từ quote, không tự nhân —
+        // apDieuChinh() áp cả hai phần trăm rồi mới làm tròn lên nghìn, nên totalGoc − total
+        // đúng nhưng KHÔNG bằng percent% của totalGoc.
+        const detailRows: [string, string][] = quote.lines.map(l =>
+          [`${rows.get(l.code)?.label ?? l.code} × ${l.count}`, formatPrice(l.subtotal, 'vi')])
+        // Luật render 3: KHÔNG ưu đãi → quote.prepay VẮNG → không có totalGoc. Hai dòng giữa
+        // biến mất — đây là luật render, TUYỆT ĐỐI không tính bù bằng nhân ngược (làm tròn
+        // lên nghìn không có phép nghịch đảo).
+        if (quote.prepay) {
+          detailRows.push([beforeDiscountText, formatPrice(quote.prepay.totalGoc, 'vi')])
+          detailRows.push([
+            `${discountLineText} (−${quote.prepay.percent}%)`,
+            `−${formatPrice(quote.prepay.totalGoc - quote.total, 'vi')}`,
+          ])
+        }
+        detailRows.push([grandTotalText, formatPrice(quote.total, 'vi')])
+
+        detailRows.forEach(([label, amount], i) => {
+          const div = document.createElement('div')
+          div.className = i === detailRows.length - 1 ? 'bf__line bf__line--total' : 'bf__line'
+          const a = document.createElement('span'); a.textContent = label
+          const b = document.createElement('span'); b.textContent = amount
+          div.append(a, b); detailBox.append(div)
+        })
+
+        // Luật render 1: không có mùa → không render ghi chú, không in "+0%".
+        if (quote.season) {
+          const note = document.createElement('p')
+          note.className = 'bf__tip-body'
+          // Vòng sửa 1/5: Studio cho phanTram ÂM (bangGiaMuaVu.ts:47, min(-90)) — mùa thấp
+          // điểm GIẢM giá là tính năng đã thiết kế, không phải dữ liệu sai. Dấu + chỉ chèn
+          // khi dương, đúng khuôn đã có ở bangGiaMuaVu.ts:63 (Studio preview.prepare) và ở
+          // .bf__season cũ (đã xoá ở Task 8) — thiếu guard này in ra "+-15%" cho mùa giảm giá.
+          const dau = quote.season.percent > 0 ? '+' : ''
+          note.textContent = seasonNoteTpl
+            .replace('{name}', quote.season.name)
+            .replace('{p}', dau + String(quote.season.percent))
+          detailBox.append(note)
+        }
       } else {
-        seasonEl.textContent = ''
-        seasonEl.hidden = true
+        detailWrap.hidden = true
       }
+
       totalInput.value = String(quote?.total ?? 0)
       form.querySelectorAll<HTMLInputElement>('[data-quoted-per-pax]').forEach(el => {
         const code = el.dataset.quotedPerPax as PaxCode
@@ -475,17 +558,6 @@ if (!turnstileSiteKey) {
       // MSG.totalMax đã chứa sẵn lời mời nhắn Zalo y như hintEl, nên chỉ hiện một trong hai.
       hintEl.hidden = !!paxMsg || !!quote
       openBtn.disabled = !quote
-
-      const prepayEl = q<HTMLElement>('[data-prepay]')!
-      if (quote?.prepay) {
-        prepayEl.textContent = payNoteText
-          .replace('{p}', String(quote.prepay.percent))
-          .replace('{price}', formatPrice(quote.prepay.totalGoc, 'vi'))
-        prepayEl.hidden = false
-      } else {
-        prepayEl.textContent = ''
-        prepayEl.hidden = true
-      }
     }
     update()
 
@@ -631,10 +703,11 @@ if (!turnstileSiteKey) {
       if (!duplicate) {
         // dateEl.labels không dùng được ổn định trong kiểu lib.dom qua astro check — lấy
         // trực tiếp nhãn <label for="bf-date"> theo id, giữ đúng ngữ nghĩa mà không đụng kiểu.
-        const dateLabel = form.querySelector('label[for="bf-date"]')?.textContent || form.dataset.dateLabel || ''
+        // `directText` (Task 4): nhãn này giờ lồng `.bf__tip`, textContent trần dính cả chữ ghi chú.
+        const dateLabel = directText(form.querySelector('label[for="bf-date"]')) || form.dataset.dateLabel || ''
         const lines: [string, string][] = [[form.querySelector<HTMLInputElement>('[name="tourTitle"]')!.value, ''], [dateLabel, dateEl.value.split('-').reverse().join('/')]]
         if (quote) for (const l of quote.lines) lines.push([`${rows.get(l.code)?.label ?? l.code} × ${l.count}`, formatPrice(l.subtotal, 'vi')])
-        lines.push([totalEl.closest('.bf__total')?.querySelector('span')?.textContent || form.dataset.subtotalLabel || '', formatPrice(total, 'vi')])
+        lines.push([directText(totalEl.closest('.bf__total')?.querySelector('.bf__total-label')) || form.dataset.subtotalLabel || '', formatPrice(total, 'vi')])
         for (const [a, b] of lines) {
           const div = document.createElement('div'); div.className = 'bf__line'
           const s1 = document.createElement('span'); s1.textContent = a
@@ -703,12 +776,73 @@ if (!turnstileSiteKey) {
 </script>
 
 <style>
-  .bf { display: flex; flex-direction: column; gap: var(--s4); }
-  .bf__head { display: flex; flex-direction: column; gap: var(--s1); padding-bottom: var(--s4); border-bottom: 1px solid var(--c-border); }
-  .bf__eyebrow { font-family: var(--font-ui); font-size: var(--fs-label); font-weight: var(--fw-600); color: var(--c-text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
-  .bf__price { font-family: var(--font-display); font-size: var(--fs-h4); font-weight: var(--fw-700); color: var(--c-accent-strong); }
+  /* Nen xam cho form dat tour, dung cong thuc .inc-ex-card (TourDetail.astro:259-264) —
+     giong module "Bao gom / Chua bao gom". Vong sua 1/5 (chu du an, sau khi do +75px o
+     --s5): .inc-ex-card song trong vung noi dung chinh ~800px, con .bf song trong cot
+     phai 340px (DetailLayout.astro:314) — dem 24px moi ben hop o the rong 800px nhung
+     KHONG tu dong hop o cot 306px long, ep nhan nut ".bf__pay-opt" (Task 6) xuong 3 dong.
+     Cai lam mat nhan ra "giong module Bao gom/Chua bao gom" la nen + vien + bo goc,
+     khong phai con so dem — nen giu ca ba, chi ha dem ve --s4 (16px, dung nhu brief cu,
+     nhung KHONG bo vien/bo goc nhu brief cu). .bf nam long trong .sidebar-card (da co
+     nen trang --c-card, vien, dem --s4 rieng — xem Sidebar.astro) nen day la the trong
+     the co chu dinh, khong sua Sidebar.astro vi no dung chung cho 12 loai trang chi tiet. */
+  .bf { display: flex; flex-direction: column; gap: var(--s4); background: var(--c-surface-alt); border: 1px solid var(--c-border); border-radius: var(--radius-md); padding: var(--s4); }
   .bf__step { display: flex; flex-direction: column; gap: var(--s3); }
   .bf__label { font-family: var(--font-ui); font-size: var(--fs-label); font-weight: var(--fw-600); color: var(--c-text); margin: 0; }
+  /* `<details>` là phần tử KHỐI. Để dấu ⓘ nằm cùng dòng với nhãn mà không đẩy
+     chiều cao hàng, cả `<details>` lẫn `<summary>` phải khai inline-* rõ ràng
+     (Task 4 — thu ba khối ghi chú của form thành dấu ⓘ mở được). */
+  .bf__tip { display: inline; }
+  .bf__tip-mark {
+    /* MỘT khai báo duy nhất — đừng tách `position` ra rule thứ hai, ::before
+       cần khối chứa được lập ngay tại đây */
+    position: relative;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 1.25rem; height: 1.25rem; margin-inline-start: var(--s1);
+    border: 1px solid var(--c-border); border-radius: var(--radius-pill);
+    font-size: var(--fs-sm); font-weight: var(--fw-600);
+    color: var(--c-text-muted); cursor: pointer; vertical-align: middle;
+    list-style: none;
+  }
+  .bf__tip-mark::-webkit-details-marker { display: none; }
+  .bf__tip-mark::before {
+    /* vùng chạm 44px KHÔNG ăn vào chiều cao dòng — nếu không, −150px của
+       ghi chú tuổi bị chính nút ⓘ ăn lại */
+    content: ''; position: absolute; width: 2.75rem; height: 2.75rem;
+    left: 50%; top: 50%; transform: translate(-50%, -50%);
+  }
+  .bf__tip-mark:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 2px; }
+  /* KHÔNG khai `display` ở đây — phòng ngừa, không phải sửa lỗi đã đo được trên Chrome.
+     Astro gắn thuộc tính scoped vào rule này (thành `.bf__tip-body[data-astro-cid-…]`,
+     đặc hiệu 0,2,0). Ở engine nào còn ẩn nội dung đóng của `<details>` bằng luật UA
+     `details:not([open]) > *:not(summary) { display: none }` (0,1,2) — cùng dạng lỗi
+     DR-102, khác rule cho thuộc tính hidden — thì một khai báo `display: block` ở đây SẼ thắng và
+     ghim ghi chú hiện thường trực. `<p>` vốn đã block theo mặc định UA nên bỏ khai báo là
+     đủ, không mất gì. ĐO THẬT trên Chrome (31/08, dev server, xem task-4-report.md §6c):
+     Chrome bản đang chạy máy này ẩn nội dung đóng qua giả phần tử `::details-content` với
+     content-visibility, KHÔNG qua `display:none` — nên có khai `display: block` hay không
+     đều KHÔNG đổi số đo `offsetHeight`/`formH` ở đây (đã thử cả hai, số giống hệt nhau);
+     một `<details>` trần không style cũng cho `offsetHeight` khác 0 dù đóng. Giữ luật này
+     lại vì lý do phòng ngừa cho engine khác (kể cả Chrome tương lai), không phải vì đã bắt
+     được lỗi hiện hình ở đây — `checkVisibility()` mới là bằng chứng đóng đúng trên Chrome. */
+  .bf__tip-body {
+    margin: var(--s2) 0 0;
+    font-size: var(--fs-sm); color: var(--c-text-muted);
+  }
+  /* Khuôn "chỉ trình đọc màn hình" chuẩn — vòng sửa 1/5, xem task-4-report.md §1. KHÔNG
+     dùng `display:none` hay `visibility:hidden`: cả hai ẩn luôn với trình đọc màn hình,
+     mất tác dụng của node này. `position:absolute` đưa nó ra khỏi luồng — không cộng
+     thêm khoảng cách `gap` nào của `.bf__step` (flex container cha), nên không đẩy cao
+     form. Đây là bản DUY NHẤT mang `id="bf-date-range"` mà `aria-describedby` của ô ngày
+     trỏ tới; bản nhìn thấy bên trong `.bf__tip` mang `aria-hidden="true"` để không đọc
+     trùng khi `<details>` đang mở. */
+  .bf__sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  /* Không khai `font-size` ở đây từng đẩy form cao thêm 8px, đo được (vòng sửa 1/5):
+     `.bf__label-row` không có font-size riêng nên kế thừa cỡ chữ NGOÀI (--fs-base 19px,
+     dùng cho input/nút) thay vì cỡ chữ của `<label>` con bên trong (--fs-label 14px) —
+     line-height "khung" dựng theo cỡ chữ 19px của CHÍNH div này (dù nội dung nhìn thấy
+     nhỏ hơn) làm hàng cao hơn cần thiết. Khớp cỡ chữ với `.bf__label` xoá khung dư đó. */
+  .bf__label-row { font-size: var(--fs-label); }
   .bf__input { width: 100%; font: inherit; font-size: var(--fs-base); padding: var(--s3) var(--s4); border: 1px solid var(--c-border); border-radius: var(--radius-md); background: var(--c-card); color: var(--c-text); }
   .bf__input:focus { outline: 2px solid var(--c-primary); outline-offset: 1px; }
   .bf__input[aria-invalid="true"] { border-color: var(--c-accent); }
@@ -728,15 +862,23 @@ if (!turnstileSiteKey) {
   .bf__pax { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); padding: var(--s2) 0; }
   .bf__pax-info { display: flex; flex-direction: column; gap: 2px; }
   .bf__pax-name { font-size: var(--fs-base); font-weight: var(--fw-600); color: var(--c-text); }
-  .bf__pax-note { font-size: var(--fs-sm); color: var(--c-text-muted); }
-  .bf__pax-price { font-size: var(--fs-sm); font-weight: var(--fw-600); color: var(--c-primary); }
   .bf__stepper { display: inline-flex; align-items: center; gap: var(--s2); }
   .bf__btn { width: 2.75rem; height: 2.75rem; border-radius: var(--radius-pill); border: 1px solid var(--c-border); background: var(--c-card); color: var(--c-primary); font-size: var(--fs-h5); font-weight: var(--fw-600); cursor: pointer; transition: background var(--m-fast) var(--m-ease), border-color var(--m-fast) var(--m-ease); }
-  .bf__btn:hover:not(:disabled) { background: var(--c-surface-alt); border-color: var(--c-primary); }
+  /* --c-card la nen THUONG cua .bf__btn (dong tren), nen --c-surface-alt tung dung cho
+     hover se trung voi nen moi cua .bf sau khi form chuyen xam — xoa mat phan hoi hover
+     thay vi sua. Dung token hover that, cung mau voi .bf__secondary:hover ben duoi. */
+  .bf__btn:hover:not(:disabled) { background: var(--c-primary-soft); border-color: var(--c-primary); }
   .bf__btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .bf__count { width: 2.75rem; text-align: center; font: inherit; font-size: var(--fs-base); font-weight: var(--fw-700); border: 0; background: transparent; color: var(--c-text); -moz-appearance: textfield; }
+  /* Truoc la transparent: an theo nen cha. Tren form xam moi, transparent lo ra thanh
+     mot o xam kep giua hai nut tron trang (.bf__btn) — quyet ro sang --c-card de dong
+     bo voi hai nut hai ben; border-radius theo de khong con goc vuong lac giua hai nut
+     bo tron pill. */
+  .bf__count { width: 2.75rem; text-align: center; font: inherit; font-size: var(--fs-base); font-weight: var(--fw-700); border: 0; border-radius: var(--radius-md); background: var(--c-card); color: var(--c-text); -moz-appearance: textfield; }
   .bf__count::-webkit-outer-spin-button, .bf__count::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  .bf__quote { background: var(--c-surface-alt); border-radius: var(--radius-md); padding: var(--s4); display: flex; flex-direction: column; gap: var(--s2); }
+  /* Lat nguoc: --c-surface-alt tung dung khi .bf trong suot, nay trung mau voi nen
+     xam moi cua .bf, bang tam tinh tan vao form. Lat sang --c-card de bang gia noi
+     trang tren form xam. */
+  .bf__quote { background: var(--c-card); border-radius: var(--radius-md); padding: var(--s4); display: flex; flex-direction: column; gap: var(--s2); }
   /* `:global()` là bắt buộc ở đây, không phải tuỳ chọn. Hai vùng này được JS dựng lại bằng
      `document.createElement` mỗi lần đổi số người (và khi hiện tóm tắt lúc gửi xong), nên node
      mới KHÔNG mang thuộc tính `data-astro-cid-*` mà CSS scoped của Astro nhắm tới. Viết
@@ -744,13 +886,57 @@ if (!turnstileSiteKey) {
      liền thành tiền, kiểu "Người lớn × 1019.550.000₫" (lỗi thật, chủ dự án báo 2026-08-29).
      Phạm vi vẫn được giữ: phần tử cha còn scoped, `:global` chỉ mở cho lớp con. */
   [data-quote-lines] :global(.bf__line),
-  [data-done-summary] :global(.bf__line) { display: flex; justify-content: space-between; gap: var(--s3); font-size: var(--fs-sm); color: var(--c-text-muted); }
+  [data-done-summary] :global(.bf__line),
+  [data-detail-lines] :global(.bf__line) { display: flex; justify-content: space-between; gap: var(--s3); font-size: var(--fs-sm); color: var(--c-text-muted); }
   .bf__total { display: flex; justify-content: space-between; gap: var(--s3); padding-top: var(--s2); border-top: 1px solid var(--c-border); font-size: var(--fs-base); font-weight: var(--fw-700); color: var(--c-text); }
   .bf__total strong { color: var(--c-accent-strong); }
-  .bf__season { font-size: var(--fs-sm); color: var(--c-accent-strong); margin: 0; }
+  /* Task 8 — bảng chi tiết giá (SPEC §4.5). `.bf__detail` là <details> gốc, giữ marker mặc
+     định của trình duyệt (▸/▾ theo SPEC mockup) — KHÔNG ẩn như `.bf__tip-mark` (đó là dấu ⓘ
+     riêng, mục đích khác). `.bf__detail-body` là vùng do JS dựng lại mỗi lần đổi số khách. */
+  .bf__detail-sum { font-size: var(--fs-sm); color: var(--c-primary); cursor: pointer; }
+  .bf__detail-body { display: flex; flex-direction: column; gap: var(--s2); margin-top: var(--s2); }
+  /* Dòng cuối (Tổng cộng) và ghi chú mùa cũng do JS `createElement` dựng (cùng lý do :global
+     ở trên) — DR-102 áp cho MỌI lớp gắn vào node JS dựng, không riêng `.bf__line`. */
+  [data-detail-lines] :global(.bf__line--total) {
+    padding-top: var(--s2); border-top: 1px solid var(--c-border);
+    font-weight: var(--fw-700); color: var(--c-text);
+  }
+  /* margin: 0, KHÔNG phải var(--s2) 0 0 như .bf__tip-body gốc: .bf__detail-body đã là flex
+     column với gap: var(--s2) riêng, nên margin-top ở đây CỘNG THÊM vào gap (flexbox không
+     gộp margin dọc như block layout) — đo được 16px giữa dòng Tổng cộng và ghi chú mùa, gấp
+     đôi 8px giữa các dòng khác. Để container `.bf__detail-body` một mình lo khoảng cách. */
+  [data-detail-lines] :global(.bf__tip-body) { margin: 0; font-size: var(--fs-sm); color: var(--c-text-muted); }
+  /* Task 6: hai lựa chọn thanh toán. `<input type="radio">` thật vẫn còn — chỉ tạo dáng
+     `<label>`, không thay bằng `<button>`. KHÔNG đoạn nào mang `checked` sẵn (chủ dự án
+     chốt) nên cả hai phải nhìn "nghỉ" như nhau lúc tải trang — border 1px đều nhau ở
+     trạng thái chưa chọn là bằng chứng đó.
+     Vòng sửa 2/5 (Task 7, chạm đúng vùng này vì chính đệm mới của .bf gây hồi quy — xem
+     ghi chú ở `.bf` phía trên): đổi từ hàng ngang hai cột sang xếp DỌC full-width. Số đo
+     cho thấy khoản tiết kiệm chiều cao của bố cục hai cột trong cột 306px chỉ ~2,4px so
+     với xếp dọc — đổi lại ba dòng chữ chen chúc thành một món hời tệ. `flex-direction:
+     column` đủ để full-width: `.bf__pay` là flex item của `.bf` (flex column), và
+     `align-items` mặc định `stretch` đã kéo `.bf__pay-opt` full-width mà không cần khai
+     thêm. Bỏ `flex: 1` (chỉ có tác dụng khi container có dư chiều cao để chia — ở đây
+     `.bf__pay` cao theo nội dung, không dư) để tránh đọc nhầm là còn chia đều theo trục
+     ngang. */
   .bf__pay { display: flex; flex-direction: column; gap: var(--s2); }
-  .bf__pay-opt { display: flex; align-items: center; gap: var(--s2); min-height: 2.75rem; font-size: var(--fs-sm); }
-  .bf__prepay { font-size: var(--fs-sm); color: var(--c-accent-strong); margin: 0; }
+  .bf__pay-opt {
+    display: flex; align-items: center; justify-content: center; gap: var(--s2);
+    min-height: 2.75rem; font-size: var(--fs-sm);
+    border: 1px solid var(--c-border); border-radius: var(--radius-md);
+    padding: var(--s2) var(--s3); cursor: pointer;
+  }
+  /* Dấu hiệu NGOÀI màu cho trạng thái chọn (người mù màu vẫn phân biệt được): thêm
+     `box-shadow` viền trong 1px chồng lên border 1px sẵn có — đọc như viền dày 2px
+     nhưng KHÔNG đổi kích thước hộp (border-width giữ nguyên 1px), nên hai đoạn không
+     lệch cao khi một đoạn được chọn. Nút radio thật bên trong cũng tự có chấm đặc khi
+     checked — một lớp dấu hiệu ngoài màu thứ hai, độc lập với CSS này. */
+  .bf__pay-opt:has(:checked) {
+    border-color: var(--c-primary);
+    box-shadow: inset 0 0 0 1px var(--c-primary);
+    background: var(--c-primary-soft);
+  }
+  .bf__pay-opt:has(:focus-visible) { outline: 2px solid var(--c-primary); outline-offset: 2px; }
   .bf__note, .bf__hint, .bf__noscript, .bf__hotline { font-size: var(--fs-sm); color: var(--c-text-muted); margin: 0; }
   .bf__hint { color: var(--c-accent-strong); }
   .bf__err { font-size: var(--fs-sm); color: var(--c-accent-strong); margin: 0; min-height: 0; }
@@ -771,8 +957,10 @@ if (!turnstileSiteKey) {
   .bf__hotline a { color: var(--c-primary); font-weight: var(--fw-600); }
 
   /* Khối QR chuyển khoản. Mọi giá trị lấy từ tokens.css — không mã màu, không cỡ chữ viết
-     cứng (luật cứng 1 của CLAUDE.md, ADR-0030 §4). */
-  .bf__qr { display: flex; flex-direction: column; gap: var(--s3); padding: var(--s4); background: var(--c-surface-alt); border: 1px solid var(--c-border); border-radius: var(--radius-md); }
+     cứng (luật cứng 1 của CLAUDE.md, ADR-0030 §4).
+     Lật ngược: --c-surface-alt tung trung mau voi nen xam moi cua .bf, tan bien mat dung
+     bo mat khach quet de TRA TIEN. Lat sang --c-card de khoi QR noi trang tren form xam. */
+  .bf__qr { display: flex; flex-direction: column; gap: var(--s3); padding: var(--s4); background: var(--c-card); border: 1px solid var(--c-border); border-radius: var(--radius-md); }
   .bf__qr-title { font-family: var(--font-display); font-size: var(--fs-h5); font-weight: var(--fw-700); color: var(--c-primary-strong); margin: 0; }
   .bf__qr-body { display: flex; flex-direction: column; gap: var(--s4); }
   .bf__qr-visual { display: flex; flex-direction: column; align-items: center; gap: var(--s2); }
@@ -803,6 +991,6 @@ if (!turnstileSiteKey) {
      thuộc tính scoped (thành 0,3,0 — thắng 0,2,0 mà không cần `!important`), còn `[hidden]`
      trần sẽ bị để nguyên và rò thành luật toàn site. */
   .bf__step[hidden], .bf__primary[hidden], .bf__done[hidden],
-  .bf__hint[hidden], .bf__done-dup[hidden], .bf__season[hidden], .bf__prepay[hidden],
+  .bf__hint[hidden], .bf__done-dup[hidden], .bf__detail[hidden],
   .bf__qr[hidden] { display: none; }
 </style>

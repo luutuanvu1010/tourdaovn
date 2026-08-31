@@ -86,6 +86,39 @@ và cả `B-006` lẫn `B-003` đều lấy bảng này làm nơi quan sát.
 
 ---
 
+### B-022 — Tự động đối soát chuyển khoản: ADR đã duyệt, spec đã xong, **hoãn thi công** · `mở`
+
+Chủ dự án **ghi nợ toàn bộ kế hoạch ngày 2026-08-31**, ngay sau khi duyệt. Không mở việc cho Code.
+
+> Đây là **ngoại lệ có chủ ý** với luật của sổ này (*"mục nào lên spec thì xoá khỏi đây và trỏ
+> sang spec"*). Giữ lại đúng vì nó **đã có spec mà vẫn không ai làm** — loại việc dễ rơi mất
+> nhất, vì nhìn từ `docs/specs/` thì tưởng đang chạy.
+
+**Đã có, không phải làm lại:** `docs/adr/ADR-0032-tu-khang-dinh-tien-ve.md` (ĐÃ PHÊ CHUẨN,
+`QĐ-2026-08-31-02`) · `docs/specs/SPEC-2026-08-31-tu-dong-doi-soat-chuyen-khoan.md` (sáu câu
+chốt, ba mục thiết kế đã duyệt, QA1 §11 chỉ còn một mục chưa tick).
+
+**Phạm vi đã đặc tả, mở được ngay khi có người:** migration `0004_bank_txn.sql` (sổ cái chỉ-thêm,
+khoá `(provider, provider_txn_id)`) · luật khớp theo mã đơn trong nội dung chuyển khoản ·
+endpoint `/api/bank-webhook/<nhà cung cấp>` · trang tra đơn `/dat-tour/<mã>/` · báo tin nhân
+viên và khách. Năm phần này **không phụ thuộc ngân hàng lẫn nhà cung cấp** (`ADR-0032` quyết
+định 2 và 2b) — đó là lý do chúng làm được trước, và cũng là lý do hoãn không làm hỏng gì.
+
+**Chặn thật, không phải thiếu người:** chưa ai xác nhận nhà cung cấp nào đọc được tài khoản
+**doanh nghiệp** Techcombank. Bằng chứng tra 31/08: `developer.sepay.vn/vi/sepay-webhooks/tai-khoan-ngan-hang`
+liệt kê **10 ngân hàng** (ACB, BIDV, MBBank, MSB, KienlongBank, OCB, Sacombank, TPBank,
+VietinBank, VPBank) và kết bằng *"Ngân hàng không có trong bảng thì chưa hỗ trợ webhook"* —
+**không có Techcombank**; payOS cho tài khoản doanh nghiệp là MB/KienlongBank/OCB/BIDV/Shinhan,
+cũng không có. Năm câu phải hỏi nhà cung cấp: spec §10.
+
+**Mở lại khi** (a) có câu trả lời của Casso/Pay2S/Techcombank, **hoặc** (b) công ty thêm/đổi
+sang một ngân hàng trong danh sách được hỗ trợ — spec đã mở sẵn đường đó bằng
+`banking.alsoAccept` (§4.2b), nên đổi ngân hàng **không** làm hỏng đơn đã phát QR cũ.
+
+**Đừng làm mất:** `payment-qr.ts` đã đặt nội dung chuyển khoản là mã đơn bỏ gạch nối
+(`TD260831K7QM`) và đang chạy thật. Cái móc để nối tiền về với đơn **đã nằm trong sản phẩm**;
+ai mở lại việc này thì không phải dựng nó.
+
 ## Cần xác nhận, không phải làm
 
 ### B-009 — Nghiệm thu tay ưu đãi thanh toán trước · `mở`
@@ -261,3 +294,39 @@ form hợp lệ, chuỗi mùa+ưu đãi khớp từ client tới máy chủ.
   `DRIFT_LOG` nếu khác giả định. `grep` trong `DRIFT_LOG.md` → 0 kết quả. Chưa ai làm.
 - Tải và đồng thời: chưa đo hành vi khi hai đơn cùng SĐT tới cùng lúc (đường `findRecentDuplicate`
   không có khoá).
+
+### B-020 — Rủi ro `.bf__pax-price` mất ở bảng giá dạng bậc: đóng ngay lúc mở · `đã đóng`
+
+Số hiệu đặt trước bởi `QĐ-2026-08-31-03` (`docs/DECISIONS.md`, đoạn "Nợ kèm theo"): với bảng
+giá `kind: 'tiers'`, `.bf__pax-price` không render, nên tour dùng bảng giá bậc sẽ chỉ còn giá ở
+thanh dính, không còn đơn giá trong form — trong khi tour `kind: 'flat'` vẫn còn. Lúc đặt số,
+`data/prices.yaml` có **0/29** khoá dùng `tiers` nên rủi ro còn ngủ, chưa ai chạm.
+
+Task 5 (cùng ngày 2026-08-31, xem "Bổ sung cho `QĐ-2026-08-31-03`" trong `DECISIONS.md`) bỏ
+`.bf__pax-price` khỏi **mọi** hạng khách — không riêng `tiers` — vì chủ dự án chốt ẩn hết đơn
+giá từng hạng trong form, bất kể loại bảng giá. Giả định làm nền cho rủi ro này ("`flat` còn
+đơn giá, `tiers` thì không, nên hai loại lệch nhau") không còn đúng: sau Task 5 **không loại
+bảng giá nào** hiển thị đơn giá trong form nữa, nên không còn gì để lệch. Đóng lại đúng lúc mở,
+không phải bỏ quên — kiểm bằng `grep -c 'class="bf__pax-price"' dist/tour/*/index.html` (mọi
+tour, không riêng tour giá bậc) ra 0.
+
+### B-023 — prop `priceLabel` của `BookingForm` thành thừa · `mở`
+
+Task 5 bỏ khối `.bf__head` — nơi duy nhất `priceLabel` được render trong `BookingForm.astro`.
+Prop vẫn khai ở `Props` (`:23`) và vẫn được destructure (`:31`), nhưng từ đây không còn nơi
+dùng trong file. `TourDetail.astro:213` vẫn truyền `priceLabel={priceView!.label}` xuống. Cố ý
+giữ nguyên prop và lời gọi — xoá là chạm thêm một file ngoài phạm vi Task 5. Dọn khi có dịp chạm
+`TourDetail.astro`.
+
+Cùng gốc: khoá `priceFrom` trong `src/lib/uiCopy.ts` (5 ngôn ngữ) chỉ được `t('priceFrom')` gọi
+ở đúng chỗ `.bf__head` vừa xoá, nay cũng mồ côi. Dọn cùng lúc với prop `priceLabel` — cả hai đều
+cần chạm `TourDetail.astro` (hoặc chỗ gọi `BookingForm` với `priceLabel`) để xác nhận không còn
+nơi nào khác cần nhãn "Giá từ" trước khi xoá khoá dịch.
+
+### B-021 — `/tac-gia/` trỏ breadcrumb vào 404 · `mở`
+
+`Breadcrumb.astro:43-52` đẩy crumb nhánh **không kiểm `hasIndex`**, nên mọi trang
+`/tac-gia/{slug}/` mang liên kết tới `/tac-gia/` (404) và đẩy URL đó vào JSON-LD
+`BreadcrumbList`. Y hệt ca `organization` đã chữa ngày 31/08 bằng
+`SPEC-2026-08-31-trang-danh-sach-cong-ty.md`. Chữa bằng cách mở `/tac-gia/` (bật `hasIndex`)
+hoặc cho `Breadcrumb` kiểm `hasIndex`. Cố ý KHÔNG gộp vào đợt 31/08 để giữ phạm vi.

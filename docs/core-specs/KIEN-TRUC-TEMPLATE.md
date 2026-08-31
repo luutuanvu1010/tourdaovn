@@ -111,19 +111,19 @@ Mỗi file chỉ khai bốn thứ: **facts** (ô Thông tin nhanh), **jumpLinks*
 **Chiều cao khai ở `tokens.css`, KHÔNG khai trong `Hero.astro`.** File component không giữ con số nào; nó chỉ đọc biến.
 
 ```css
---hero-entity-h-min:    330px   /* sàn */
---hero-entity-h-max:    430px   /* trần — đổi ở đây */
---hero-entity-h-tablet: 390px   /* 769–1023px */
---hero-entity-h-mobile: 290px   /* ≤768px */
---hero-entity-h: clamp(min, calc(30vw + 50px), max)
+--hero-entity-h-min:    380px   /* sàn */
+--hero-entity-h-max:    480px   /* trần — đổi ở đây */
+--hero-entity-h-tablet: 440px   /* 769–1023px */
+--hero-entity-h-mobile: 340px   /* ≤768px */
+--hero-entity-h: clamp(min, calc(30vw + 100px), max)
 ```
 
-Đổi một dòng là **13 loại trang chi tiết cộng trang điểm đến** đổi theo, phủ cả ba biến thể hero. Đã đo, xem `QĐ-2026-08-29-01`.
+Đổi một dòng là **13 loại trang chi tiết cộng trang điểm đến** đổi theo, phủ cả ba biến thể hero. Đã đo, xem `QĐ-2026-08-31-03`.
 
 **⚠ Hai bẫy có thật:**
 
 1. **`--hero-min-h` và `--hero-min-h-mobile` KHÔNG phải hero này.** Chúng của `HomeHero.astro` — hero **trang chủ**, component khác, chiều cao khác. Tên chỉ khác thứ tự từ.
-2. **Nâng riêng trần không cho thêm đúng ngần ấy px.** Ở phần lớn khổ màn, số đang trói là `calc(30vw + 50px)` chứ không phải trần. Nâng trần 380→430 chỉ cho **+4px ở 1280** và **+30px ở 1366**. Muốn cao thêm ở mọi khổ thì sửa **số giữa**.
+2. **Nâng riêng một số không cho thêm đều ở mọi khổ.** Điểm giao ở `30vw + 100 = 480` ⇒ vw = 1266,67: dải **1024–1266px** thì **số giữa** trói (số giữa < trần, `--hero-entity-h` bằng đúng số giữa); dải **≥1267px** thì **trần** trói (số giữa vượt trần, bị cắt về trần) — **1280 và 1366 đều nằm trong dải trần-trói này**, không phải dải số-giữa-trói. Nâng riêng **trần** (giữ nguyên số giữa) chỉ cho **+4px ở 1280** và **+30px ở 1366**, vì số giữa ở hai khổ đó (484px và 509,8px) đã vượt trần sẵn — nới trần chỉ thả `--hero-entity-h` lên tới đúng mức số giữa cho phép, không lên hết mức trần mới. Ngược lại, nâng riêng **số giữa** (giữ nguyên trần) thì dải ≥1267px **đứng yên**, vì trần vẫn cắt y nguyên. Muốn cao thêm ở **mọi** khổ thì phải dịch **cả năm giá trị** cùng lúc — đúng như `QĐ-2026-08-31-03` đã làm.
 
 ---
 

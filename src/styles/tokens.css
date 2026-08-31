@@ -179,14 +179,15 @@
      ⚠ ĐỪNG NHẦM với `--hero-min-h` / `--hero-min-h-mobile` ngay bên dưới. Hai
      token đó là của `HomeHero.astro` — hero TRANG CHỦ, một component khác, một
      chiều cao khác. Tên gần giống nhau là bẫy có thật; đọc kỹ trước khi sửa. */
-  --hero-entity-h-min:    330px;
-  --hero-entity-h-max:    430px;
-  --hero-entity-h-tablet: 390px;
-  --hero-entity-h-mobile: 290px;
-  /* Số giữa phải là `calc(30vw + 50px)`, KHÔNG phải `30vw`: nâng riêng trần
-     380→430 chỉ cho +4px ở 1280 và +30px ở 1366, vì 30vw mới là số đang trói.
-     Đã đo, xem QĐ-2026-08-28-02. */
-  --hero-entity-h: clamp(var(--hero-entity-h-min), calc(30vw + 50px), var(--hero-entity-h-max));
+  --hero-entity-h-min:    380px;
+  --hero-entity-h-max:    480px;
+  --hero-entity-h-tablet: 440px;
+  --hero-entity-h-mobile: 340px;
+  /* Số giữa phải là `calc(30vw + 100px)`, KHÔNG phải `30vw`: nâng riêng trần
+     480 lên cao hơn chỉ cho +4px ở 1280 và +30px ở 1366, vì ở dải ≥1267px thì
+     TRẦN mới là số đang trói (điểm giao: 30vw + 100 = 480 ⇒ vw = 1266,67).
+     Đã đo, xem QĐ-2026-08-31-03. */
+  --hero-entity-h: clamp(var(--hero-entity-h-min), calc(30vw + 100px), var(--hero-entity-h-max));
 
   --hero-min-h: 480px;          /* HomeHero — hero TRANG CHỦ, không phải hero entity */
   --hero-min-h-mobile: 360px;   /* HomeHero — nt */
