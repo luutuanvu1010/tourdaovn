@@ -126,13 +126,16 @@ export const site = {
 //  1b. TÀI KHOẢN NHẬN CHUYỂN KHOẢN
 // ═══════════════════════════════════════════════════════════════════════════
 //
-//  Ba giá trị này định tuyến TIỀN THẬT của khách. Sai một chữ số là tiền đi
-//  vào tài khoản người lạ, và KHÔNG cổng nào trong repo bắt được:
+//  Ba giá trị này định tuyến TIỀN THẬT của khách. Chủ dự án cấp và XÁC NHẬN
+//  ngày 2026-08-31.
+//
+//  Trước khi sửa bất kỳ giá trị nào ở đây, biết điều này: sai một chữ số là
+//  tiền đi vào tài khoản người lạ, và KHÔNG cổng nào trong repo bắt được:
 //  `scripts/validators/banking-shape.ts` chỉ kiểm HÌNH DẠNG (bin 6 chữ số,
 //  số TK 1–19 ký tự chữ/số) — đúng hình dạng thì nó im lặng cho qua.
 //
-//  Cách kiểm duy nhất có giá trị: quét mã QR bằng APP NGÂN HÀNG THẬT và đọc
-//  TÊN THỤ HƯỞNG app hiện ra. Không phải xem ảnh QR có dựng được không —
+//  Cách kiểm duy nhất có giá trị sau khi sửa: quét mã QR bằng APP NGÂN HÀNG
+//  THẬT và đọc TÊN THỤ HƯỞNG app hiện ra. Không phải xem ảnh QR dựng được —
 //  img.vietqr.io vẽ lại đúng tham số ta đưa vào, kể cả số tài khoản không tồn
 //  tại. Xem SPEC 2026-08-31 §11.2.
 //

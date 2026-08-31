@@ -116,13 +116,16 @@ Ba giá trị đó chính là thứ chặn §4.2/§4.3, nên nửa QR mở. Nử
    dựng lại, chạy nó trên `dist/` cũ sinh đỏ ảo.
 3. BIN trong khuôn là Vietcombank; Techcombank là `970407` (tra `api.vietqr.io/v2/banks`).
 
-## CÒN CHẶN — việc của chủ dự án, không phải của code
+## Số tài khoản — chủ dự án đã xác nhận 31/08
 
-> **Số tài khoản CHƯA được xác minh, và không cổng nào trong repo xác minh được.**
+> **`2502503979` đúng, chủ dự án xác nhận.** Không còn là cổng chặn. Phần dưới giữ lại để nói
+> rõ **biên của cổng**, không phải để nghi ngờ con số.
+>
+> Cổng chỉ kiểm được HÌNH DẠNG, không kiểm được danh tính tài khoản.
 > `banking-shape` chỉ kiểm hình dạng: `2502503979` đúng 10 chữ số nên nó cho qua, kể cả khi một
 > chữ số bị chép sai. Ảnh QR dựng được **cũng không phải bằng chứng** — VietQR vẽ lại đúng tham
 > số ta đưa vào. Cách duy nhất: **quét mã bằng app ngân hàng thật và đọc TÊN THỤ HƯỞNG app hiện
-> ra.** Chưa làm bước này thì đừng cho QR sống với khách thật. (`SPEC` §11.2)
+> ra.** Làm cùng đơn nghiệm thu đầu tiên (§8 bước 1). (`SPEC` §11.2)
 
 ## Chưa làm (nửa ZNS, vẫn chặn)
 

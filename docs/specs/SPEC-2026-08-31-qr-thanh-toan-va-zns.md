@@ -599,8 +599,10 @@ accountName:   CONG TY TNHH TOUR DAO
 **`bin` đã kiểm bằng nguồn có thẩm quyền**, không đoán: `GET https://api.vietqr.io/v2/banks`
 trả `{"code":"TCB","bin":"970407","shortName":"Techcombank","swift_code":"VTCBVNVX"}`.
 
-**`accountNumber` CHƯA được kiểm và không thể kiểm bằng máy trong repo này.** Phải nói thẳng vì
-đây là trường duy nhất trong cả đợt mà sai thì **tiền của khách đi vào tài khoản người lạ**:
+**`accountNumber` — chủ dự án XÁC NHẬN 2026-08-31: `2502503979` là đúng.** Chép từ `250 250 3979`
+không rơi chữ số nào. Chủ tài khoản là nguồn có thẩm quyền cho chính số tài khoản của mình; phần
+dưới đây giữ lại **không phải để nghi ngờ con số**, mà để người đọc sau biết đúng **cổng kiểm
+được tới đâu** — đừng ai trích `[pass]` của `banking-shape` như bằng chứng về danh tính tài khoản:
 
 - Dựng được ảnh QR **không phải bằng chứng**. `img.vietqr.io` vẽ lại đúng tham số ta đưa vào,
   cộng logo tra theo `bin`. Ảnh đẹp với một số tài khoản không tồn tại y như với số đúng.
@@ -610,10 +612,10 @@ trả `{"code":"TCB","bin":"970407","shortName":"Techcombank","swift_code":"VTCB
   **không cổng nào trong repo bắt được** — validator ở §7 chỉ kiểm hình dạng (1–19 ký tự chữ số),
   đúng hình dạng thì im lặng cho qua.
 
-> **Cổng bắt buộc trước khi QR sống với khách thật.** Quét mã bằng **app ngân hàng thật** và đọc
-> **tên thụ hưởng app hiện ra**. Tiêu chí đạt là dòng tên đó, không phải số tiền hay nội dung.
-> Chưa làm bước này thì coi như số tài khoản chưa được xác nhận. Đây là bước §8 nghiệm thu tay
-> bước 1, **nâng lên thành cổng chặn**.
+> **Không còn là cổng chặn.** Chủ dự án đã xác nhận số tài khoản, nên bước quét bằng app ngân
+> hàng trở về đúng vị trí ban đầu của nó: **bước 1 của nghiệm thu tay ở §8**, làm cùng đơn
+> nghiệm thu đầu tiên. Khi làm, đọc luôn **tên thụ hưởng** app hiện ra — đó là thứ duy nhất
+> xác nhận được cả BIN lẫn số tài khoản trong một lần nhìn.
 
 `accountName` không định tuyến tiền — ngân hàng ghi đè bằng tên thật lúc tra cứu. Nó chỉ để
 khách đối chiếu bằng mắt. Viết IN HOA không dấu theo lệ ngân hàng.
