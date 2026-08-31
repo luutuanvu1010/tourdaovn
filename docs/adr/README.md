@@ -84,6 +84,17 @@ Nhóm cần tổng quát hóa (có GHI CHÚ CORE — nguyên tắc engine, hằn
   cứng màu từ ngày đầu vì chưa có luật nào chặn; (b) dựng quản trị trên CMS đã có thì thừa
   hưởng luôn hệ người dùng của nó và tránh được cửa một chiều "site thôi thuần tĩnh".
 
+- [ADR-0033](ADR-0033-vung-dang-nhap-doi-tac.md) — **Vùng đăng nhập đối tác**: giá kín theo
+  vai, đơn nhiều dịch vụ, mặt phẳng danh tính thứ hai. **Đề xuất 2026-08-31, chờ phê chuẩn.**
+  Nới điều cấm 2.3 và `BK1` ở phạm vi hẹp (chỉ `/doi-tac/*`), gỡ "không giỏ hàng" của brief §5
+  trong vùng đăng nhập, và bước qua cửa một chiều mà ADR-0030 §2 từng mừng vì tránh được —
+  site thôi là "tĩnh cộng đúng một đường động". KHÔNG đảo ADR-0007 hay ADR-0030 §3: `prices.yaml`
+  vẫn là nguồn giá duy nhất, chiết khấu là *quy tắc* chứ không phải *giá*. Khuôn tái dùng:
+  (a) dữ liệu kín quyết định kiến trúc render, nên phải nới ràng buộc CÓ MÃ chứ không lách bằng
+  tên file; (b) CMS có dataset đọc công khai thì bỏ gì vào đó cũng là xuất bản — nơi ở của dữ
+  liệu phải ĐO chứ không suy; (c) danh tính đối tác ngoài tổ chức khác danh tính người vận hành,
+  gộp lại là cấp sai quyền.
+
 ## ADR gốc KHÔNG mang vào Core (và vì sao)
 
 - **ADR-0005** (Specialty đặc sản) — entity gắn ẩm thực Nha Trang; trong Core là *module

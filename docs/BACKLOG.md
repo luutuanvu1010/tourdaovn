@@ -86,6 +86,68 @@ và cả `B-006` lẫn `B-003` đều lấy bảng này làm nơi quan sát.
 
 ---
 
+### B-024 — Module tài khoản đối tác: brainstorm xong, spec xong, **chặn ở phê chuẩn** · `mở`
+
+Phiên 2026-08-31. Chủ dự án yêu cầu đăng nhập / đăng ký / phân quyền, và đơn nhiều dịch vụ với
+giá khác nhau theo vai (đại lý · hướng dẫn viên · nhân viên kinh doanh · khách).
+
+> **Ngoại lệ có chủ ý** với luật của sổ này: giữ lại đúng vì đã có spec mà **chưa ai cam kết**
+> **làm** — loại việc dễ rơi mất nhất. `B-022` (nhánh đối soát) giữ lại vì cùng lý do.
+
+**Đã có, không phải làm lại:** `docs/adr/ADR-0033-vung-dang-nhap-doi-tac.md` (đề xuất, chờ phê
+chuẩn) và `docs/specs/SPEC-2026-08-31-tai-khoan-doi-tac.md` — bảy điểm chủ
+dự án chốt, 13 mục thiết kế, migration, bộ test, cổng nghiệm thu, và §7 liệt kê nợ luật.
+
+**Bảy điểm đã chốt** (đừng hỏi lại): giá theo vai **kín** với khách lẻ · khai bằng **% riêng từng
+dịch vụ** nên `prices.yaml` giữ nguyên vai trò nguồn giá duy nhất · **một hệ tài khoản mới** cho
+cả ba vai, không dính Sanity · đối tác **tự chốt đơn**, trả từng đơn, **không công nợ** · kiến
+trúc **PA-1** (cây `/doi-tac/*` render giá ở máy chủ, trang công khai không sửa dòng nào) ·
+**một bảng đơn duy nhất** `sale_order` + `sale_order_item`, chuyển cả luồng đặt tour công khai
+sang · **SĐT khách cuối bắt buộc**.
+
+**Chặn thật, không phải thiếu người** — ba khoản **nới** ràng buộc cần chủ dự án phê chuẩn kèm
+lý do ghi `DECISIONS.md` (`04-CONSTRAINTS` §5), cộng một ADR chờ phê chuẩn:
+
+| # | Khoản | Hiện trạng |
+|---|---|---|
+| 1 | `ADR-0033` — vùng đăng nhập đối tác, **bổ sung** `ADR-0027` và `ADR-0030` (điều cấm 2.5: không sửa ADR đã duyệt) | **đã soạn** 31/08, chờ phê chuẩn |
+| 2 | Nới **điều cấm 2.3** — vùng `/doi-tac/*` được render giá ở máy chủ; trang công khai vẫn không gọi API giá | chờ phê chuẩn |
+| 3 | Nới **`BK1`** — `/doi-tac/*` đọc bảng giá gốc sinh lúc dựng **và** đọc `role_rate` từ D1 lúc chạy | chờ phê chuẩn |
+| 4 | Gỡ *"không giỏ hàng"* ở `00-PROJECT_BRIEF` §5, chỉ trong phạm vi vùng đăng nhập | chờ phê chuẩn |
+
+**Một câu hỏi CÒN MỞ, phải chốt ở QA1:** ưu đãi trả trước loại theo **dòng** hay theo **người**?
+Spec §7b trình bày cả hai cùng hệ quả lên `quoted_json` và lên khâu đối soát của `ADR-0032`;
+khuyến nghị của Cowork là **theo người**. Không tự chọn.
+
+**Phát hiện phụ, có giá trị độc lập với module này** — dataset Sanity `production` là
+`aclMode: public`, đọc được **không cần token**:
+
+```
+curl "https://pgedy374.api.sanity.io/v2022-03-07/data/query/production?query=*%5B_id%3D%3D%22bangGiaMuaVu%22%5D%5B0%5D"
+→ 200  {"result":{"_id":"bangGiaMuaVu","batUuDai":true,"phanTramUuDai":5,…}}
+```
+
+`projectId` in sẵn trong mọi URL ảnh `cdn.sanity.io/images/pgedy374/production/…`, nên **ai đọc
+một trang tour cũng đọc được cả dataset**, gồm cả bản `draft`. Đây là lý do bảng % chiết khấu
+theo vai **đã bị chuyển khỏi Sanity sang bảng `role_rate` trong D1** giữa lúc soạn spec — bản
+đầu để trong Studio và đã sai. Cần lập phiếu `DR-` riêng (cấp số lúc ghi; `B-018` đã xếp
+`DR-107`–`DR-109`, cao nhất đã lập phiếu là `DR-106`). Có siết ACL hay không là quyết định
+tầng ADR, ngoài phạm vi spec này.
+
+**Thứ tự thi công khi mở lại** (spec §5, đừng đảo): migration `0003` + chuyển luồng đặt tour
+công khai sang bảng mới **trước tiên**, lúc 170 test đang xanh làm lưới → lớp nghiệp vụ tài
+khoản → `role_rate` + bước sinh giá gốc → cây `/doi-tac/*` → tab duyệt trong Studio →
+validator `AU1`–`AU6`.
+
+**Đừng làm mất ba thứ đã kiểm ngày 2026-08-31:** `dist/.assetsignore` chứa đúng `_worker.js` và
+`_routes.json` nên bundle Worker không phục vụ công khai (toàn bộ §4.4 đứng trên dòng đó) ·
+`data/prices.yaml` có 29 dòng, **tất cả** `unit: perPax`, nên vòng đầu không cần engine giá mới ·
+`npm test` = 170 test / 13 file xanh, là lưới nghiệm thu cho bước chuyển bảng.
+
+**Rủi ro nếu để lâu:** spec neo vào `handler.ts`, `quote.ts`, `store.ts` và bảng `booking` ở
+trạng thái hôm nay. `B-003`, `B-012`, `B-013` đều nằm đúng những file đó — ai chữa mấy mục ấy
+trước thì phải rà lại §4.6 và §4.8 của spec.
+
 ## Cần xác nhận, không phải làm
 
 ### B-009 — Nghiệm thu tay ưu đãi thanh toán trước · `mở`
