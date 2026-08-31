@@ -2426,3 +2426,68 @@ Triệu chứng là **im lặng**: Studio báo Publish thành công, tài liệu
 **Nợ mở kèm theo.** Bản dựng đọc Sanity qua **CDN** (`useCdn: true`, `src/lib/sanity.ts:147`, chọn vì chi phí ở `QĐ-2026-08-25-06`). CDN nhất quán *trễ*, nên một lần dựng chạy **ngay** sau Publish vẫn có thể đọc giá trị cũ rồi nướng vào trang tĩnh — build xanh, số sai, không cổng nào đỏ. Vá hook không dẹp được rủi ro này. Cách kiểm ghi ở `SPEC-2026-08-30-uu-dai-thanh-toan-truoc` §7 bước 4: đối chiếu số trang đang nướng với số CDN đang trả.
 
 **Tài liệu.** `docs/specs/SPEC-2026-08-21-dat-tour.md` §4.3 §4.4 (con số +90, viện dẫn mục này), `docs/specs/SPEC-2026-08-30-uu-dai-thanh-toan-truoc.md` §7.
+## QĐ-2026-08-31-03 — Nới Luật 3: chấp nhận thanh dính mang giá rơi khỏi màn đầu ở 1366
+
+> **Ghi chú đánh số.** Việc này ban đầu được gọi mã `QĐ-2026-08-31-01`. Khi soạn phiếu, mã đó đã
+> bị chiếm — `QĐ-2026-08-31-01` (ở trên, "Cửa sổ đặt trước rút từ 365 xuống 90 ngày…") đã
+> **commit** tại HEAD của nhánh này, và `QĐ-2026-08-31-02` ("Site tự khẳng định tiền đã về") cũng
+> đã có mặt trong cây làm việc dù chưa commit. Cả hai không liên quan gì tới hero hay thanh dính.
+> Mã còn trống đầu tiên trong ngày là **`QĐ-2026-08-31-03`** — dùng xuyên suốt phiếu này,
+> `06-BINDING_MAP` (§3 hàng Hero, nhật ký phiên bản), và thông điệp commit. Bất kỳ tài liệu nào
+> khác còn viện dẫn "`QĐ-2026-08-31-01`" cho quyết định về hero/Luật 3 (kể cả brief của Task 9)
+> phải sửa lại thành `-03` trước khi dùng.
+
+**Bối cảnh.** `QĐ-2026-08-28-03` chấp nhận chiều cao hero 430px là **ngoại lệ Luật 3 có ghi
+phiếu**, kèm đúng một điều kiện: *"Chưa thành vi phạm sống vì `sticky-bar__price` render trên
+**0 trang**. Điều kiện bắt buộc: phải xét lại TRƯỚC khi vùng giá render trên bất kỳ trang nào."*
+
+**Điều kiện đã bị kích hoạt, và chưa ai thi hành việc xét lại.** Đo 2026-08-31 trên production:
+`.sticky-bar__price` render thật trên trang tour 3 đảo Hòn Mun
+(`tour-3-dao-hon-mun-hon-mun-lang-chai-hon-tam`), `data-region="sticky-bar" data-field="gia"`,
+giá trị `850.000₫/người`. Không phiếu nào giữa `QĐ-2026-08-28-03` và hôm nay chạm hàng Hero của
+`06-BINDING_MAP` — kiểm bằng nhật ký phiên bản `06:17` (v2.10.0 → v2.13.0 đều là mục khác) và
+`grep "Luật 3"` toàn bộ `DECISIONS.md` / `DRIFT_LOG.md` / `core-specs/` / `adr/`.
+
+**Số đo TRƯỚC — đo được ở 1710×985, KHÔNG đo được ở 1366 trong phiên này.** Ngày 2026-08-31, ở
+viewport **1710×985**: `.sticky-bar` `getBoundingClientRect().top + scrollY` = **724px**;
+`.hero-shell` = **430px**; `h1` một dòng. Không đo được ở **1366×768** trong phiên này — công cụ
+resize cửa sổ báo thành công nhưng vô hiệu (`outerWidth` trả 0, `innerWidth` kẹt ở 1710). Con số
+**668px ở 1366** dẫn trong hàng Hero của `06-BINDING_MAP` là **kế thừa từ `QĐ-2026-08-28-03`
+(28/08) và đã cũ** — không dùng làm bằng chứng mới cho phiếu này. Nguyên nhân khả dĩ khiến nó
+lệch với số đo hôm nay ở 1710: `--fs-base` 17→19px (`QĐ-2026-08-28-02`) và/hoặc việc giá nay
+render trong thanh dính (trước đó thanh chỉ mang CTA, không mang giá).
+
+**Vì sao độ dịch +50px vẫn chắc chắn ở cả 1366 lẫn 1710, dù không đo trực tiếp ở 1366 — lập luận
+clamp.** Hero dùng `clamp(sàn, calc(30vw + Xpx), trần)`. Ở **cả hai** khổ, hero bị **trần** trói
+cả trước lẫn sau khi đổi: trước, `30vw + 50` = **459,8px** ở 1366 và **563px** ở 1710, cả hai đều
+vượt trần cũ **430px**; sau, `30vw + 100` = **509,8px** ở 1366 và **613px** ở 1710, cả hai đều
+vượt trần mới **480px**. Vì `30vw` luôn vượt trần ở cả hai khổ này, trước lẫn sau, hero luôn bị
+kẹp đúng ở giá trị trần chứ không kẹp ở `30vw` — nghĩa là chiều cao hero **luôn bằng trần** bất kể
+khổ, và trần đi từ 430px lên 480px. Vậy hero đóng góp **đúng +50px** ở cả 1366 lẫn 1710, không
+cần đo trực tiếp ở 1366 để biết điều đó. Số đo thật ở 1710 hôm nay (hero = 430px, đúng bằng trần
+cũ) xác nhận độc lập rằng trần đang trói đúng như lập luận, không phải `30vw`.
+
+**Chốt (chủ dự án, 2026-08-31): nới Luật 3.** Hero trang chi tiết entity cao thêm 50px ở mọi khổ
+(`SPEC-2026-08-31-hero-entity-cao-them-50px.md`). Chấp nhận thanh dính mang giá **không** còn
+trên màn đầu ở viewport 1366.
+
+**Hệ quả nhận rõ, không giấu.** Ở **1710×985**: thanh dính từ **724px** (TRƯỚC, đo 2026-08-31)
+lên **<SỐ ĐO SAU>px** — *số SAU điền sau khi thi hành, xem Task 9; không suy ra từ lập luận
+clamp, phải đo lại bằng trình duyệt thật*. Ở **1366**, con số TRƯỚC còn lưu trong tài liệu là
+**668px**, nhưng đó là số **kế thừa, đã cũ** (xem đoạn trên) — không phải bằng chứng đo mới của
+phiếu này; mốc màn đầu ở khổ này là **657px** (chiều cao viewport thật của trình duyệt trên màn
+768, sau khi trừ chrome). Lập luận clamp ở trên đảm bảo cùng +50px áp cho 1366 như ở 1710. Áp cho
+**mọi** tiêu đề, không riêng tiêu đề hai dòng. Đây là **vi phạm Luật 3 được chấp nhận có chủ ý**,
+không còn là "chưa thành vi phạm".
+
+**Điều kiện "0 trang" của `QĐ-2026-08-28-03` XOÁ HẲN.** Nó đã hết hiệu lực; giữ lại trong `06` là
+bẫy cho người đọc sau.
+
+**Cái gì đỡ cho quyết định này.** Giá vẫn có mặt hai chỗ: thanh dính (dính lại sau khi cuộn tới)
+và `.bf__pax-price` — đơn giá từng hạng khách trong form đặt tour. Không trang nào mất giá.
+
+**Nợ kèm theo.** `SPEC-2026-08-31-form-dat-tour-gon-va-chi-tiet-gia.md` §4.2 ghi một rủi ro ngủ:
+với bảng giá dạng bậc (`kind: 'tiers'`) thì `.bf__pax-price` không render, nên tour giá bậc sẽ
+chỉ còn thanh dính. Hôm nay `data/prices.yaml` có **0/29** khoá dùng `tiers` (kiểm lại 2026-08-31:
+29 khoá cấp cao nhất trong file, không khoá nào có trường `tiers`). Vào `docs/BACKLOG.md` là
+**B-020** (chưa ghi trong đợt này — `BACKLOG.md` ngoài phạm vi hai file Task 1 được phép chạm).
