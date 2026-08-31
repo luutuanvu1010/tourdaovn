@@ -132,3 +132,33 @@ Ba giá trị đó chính là thứ chặn §4.2/§4.3, nên nửa QR mở. Nử
 §4.1 mẫu ZNS · §4.4 trang `/dat-tour/{mã}/` · §4.6 tách nội dung khách/nhân viên · §4.7 kênh
 báo tin + token + migration `0003`. Hệ quả thấy được ngay: ca **đơn trùng** hiện chỉ có mã đơn
 và câu "đã ghi nhận trước đó", chưa có liên kết "xem số tiền đã lưu" vì trang §4.4 chưa có.
+
+---
+
+## Đóng phiên 31/08
+
+**Nửa QR đã chạy thật và đã nghiệm thu.** Merge `main` fast-forward `db4d067..4118209`, Workers
+Builds lên trang sau **140 giây**; đo trên production 5/5 trang tour có khối QR và radio chuyển
+khoản, bundle phục vụ thật có đủ logic. **Chủ dự án quét thử bằng app ngân hàng: thành công** —
+đó là cổng cuối cùng, và là bằng chứng duy nhất xác nhận được cả `bin` lẫn số tài khoản.
+
+**Còn nợ: ZNS — module quan trọng, chưa một dòng mã.** §4.1, §4.4, §4.6, §4.7 của
+`SPEC-2026-08-31`. Trạng thái ghi ở đầu spec để người mở tiếp thấy ngay.
+
+Ba việc chặn, **chỉ chủ dự án làm được**, không phải việc của code:
+
+1. Liên kết OA với ZBS Account
+2. Nạp tiền
+3. **Nộp mẫu tin** — đường găng, duyệt 2 ngày làm việc, nối tiếp. Nội dung mẫu và sáu tham số
+   (hạn độ dài đã đối chiếu với giá trị dài nhất thật sinh ra được) soạn sẵn ở §4.1.
+
+Ba cái bẫy đã tra sẵn cho phiên sau, đừng tra lại:
+
+- Ảnh trong mẫu ZNS là **tĩnh** (đóng băng lúc đăng ký) → QR riêng từng đơn **phải** đi qua nút
+  CTA, nên trang `/dat-tour/{mã}/` (§4.4) là bắt buộc, không phải tuỳ chọn.
+- `refresh_token` Zalo sống 3 tháng nhưng **dùng được đúng một lần** → phải lưu D1 và ghi
+  so-rồi-đổi, không để trong `wrangler secret` (secret bất biến lúc chạy, và đêm 29/08 từng có
+  lần build xoá sạch secrets).
+- `wrangler d1 migrations apply --remote` **trước** khi merge. Bỏ bước này thì hỏng **câm**:
+  `INSERT` không đụng cột mới nên đơn vẫn vào D1, nhưng `updateNotifyStatus` ném và cú ném rơi
+  đúng vào `try/catch` M6 — mất toàn bộ trạng thái báo tin, **không cổng nào đỏ**.

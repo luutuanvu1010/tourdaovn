@@ -1,5 +1,21 @@
 # SPEC — Mã QR chuyển khoản và kênh báo tin thẳng tới khách
 
+> ## Trạng thái (cập nhật 2026-08-31 tối)
+>
+> | Nửa | Mục | Trạng thái |
+> |---|---|---|
+> | **QR chuyển khoản** | §4.2, §4.3, §4.5, §7 | ✅ **ĐANG CHẠY THẬT** trên tourdao.vn. Merge `main` `db4d067..4118209`. Chủ dự án đã **quét thử bằng app ngân hàng và thành công** → số tài khoản xác nhận đầu-cuối, cổng cuối cùng đã đóng. |
+> | **ZNS + trang tra đơn** | §4.1, §4.4, §4.6, §4.7 | ⛔ **CÒN NỢ.** Chưa qua QA1, chưa một dòng mã. Chặn ở ba thủ tục Zalo — **việc của chủ dự án, không phải của code.** |
+>
+> **Đường găng của nửa còn lại là §4.1 — nộp mẫu tin ZNS.** Duyệt mất 2 ngày làm việc, là chờ
+> bên ngoài và **nối tiếp**: mọi thứ sau nó phải xếp hàng. Nội dung mẫu và sáu tham số (kèm hạn
+> độ dài đã đối chiếu với giá trị dài nhất thật) đã soạn sẵn ở §4.1 — chép vào bảng quản trị OA.
+> Hai thủ tục còn lại: liên kết OA với ZBS Account, và **nạp tiền**.
+>
+> **Ai mở nửa còn lại: chạy QA1 riêng cho §4.1/§4.4/§4.6/§4.7** — §11.5 chỉ mở QA1 cho nửa QR.
+> Và đọc §8: `wrangler d1 migrations apply` **trước** khi merge, vì migration `0003` thêm cột mà
+> `updateNotifyStatus` sẽ ghi — bỏ bước đó thì hỏng **câm**, không cổng nào đỏ.
+
 - **Ngày:** 2026-08-31   **Soạn:** Claude (qua Cowork)   **Duyệt QA1:** *(chờ)*
 - **Quyết định chi phối:** `ADR-0030` §5 (QR là tiện ích, không ràng buộc) và §4 (một nguồn
   token, tách nội dung khỏi trình bày), `ADR-0031` §2, `ADR-0027` quyết định 3 và 7,
@@ -612,10 +628,14 @@ dưới đây giữ lại **không phải để nghi ngờ con số**, mà để
   **không cổng nào trong repo bắt được** — validator ở §7 chỉ kiểm hình dạng (1–19 ký tự chữ số),
   đúng hình dạng thì im lặng cho qua.
 
-> **Không còn là cổng chặn.** Chủ dự án đã xác nhận số tài khoản, nên bước quét bằng app ngân
-> hàng trở về đúng vị trí ban đầu của nó: **bước 1 của nghiệm thu tay ở §8**, làm cùng đơn
-> nghiệm thu đầu tiên. Khi làm, đọc luôn **tên thụ hưởng** app hiện ra — đó là thứ duy nhất
-> xác nhận được cả BIN lẫn số tài khoản trong một lần nhìn.
+> **✅ ĐÃ ĐÓNG — chủ dự án quét thử bằng app ngân hàng ngày 2026-08-31 và thành công.**
+>
+> Đây là bằng chứng đầu-cuối, và là thứ **duy nhất** xác nhận được cả `bin` lẫn `accountNumber`
+> trong một lần nhìn — không cổng nào trong repo làm được việc đó. Cặp `970407` + `2502503979`
+> nay coi như đã xác minh.
+>
+> Giữ nguyên phần mô tả biên của cổng ở trên: nó nói `banking-shape` kiểm được tới đâu, để
+> **lần sau ai đổi tài khoản thì biết phải quét lại**, chứ không phải để nghi ngờ giá trị hiện tại.
 
 `accountName` không định tuyến tiền — ngân hàng ghi đè bằng tên thật lúc tra cứu. Nó chỉ để
 khách đối chiếu bằng mắt. Viết IN HOA không dấu theo lệ ngân hàng.
