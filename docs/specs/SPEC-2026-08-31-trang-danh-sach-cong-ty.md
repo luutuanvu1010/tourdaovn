@@ -146,7 +146,12 @@ Astro chèn `data-astro-cid-*` vào thẻ, nên `grep '<p class="card-summary"><
 khi mọi thẻ đều rỗng. Phải bóc bằng biểu thức có chỗ cho thuộc tính:
 
 ```bash
-curl -s <url> | grep -oE '<p class="card-summary"[^>]*>[^<]+</p>' | wc -l
+# grep KHONG dung duoc o day: no lam viec theo DONG, ma 2/3 tom tat cua Organization
+# co xuong dong that trong du lieu Sanity => `<p>` trai qua nhieu dong va grep bo sot.
+# Do thuc te 2026-08-31 tren dist/cong-ty/index.html: grep ra 1, su that la 3.
+perl -0777 -ne 'print scalar(() = /<p class="card-summary"[^>]*>\s*\S.*?<\/p>/gs), "\n"' <file>
+# doi chieu voi tong so the:
+grep -o '<p class="card-summary"' <file> | wc -l
 ```
 
 So số đó với tổng số thẻ. Đây đúng dạng lỗi mà tiêu chí 1b sinh ra để bắt — viết sai lệnh kiểm

@@ -217,7 +217,7 @@ git commit -m "docs(quyet-dinh): QD-2026-08-31-01 noi Luat 3 cho hero cao them 5
 ```bash
 for u in /khach-san/ /resort/ /tour/; do
   tong=$(curl -s "https://tourdao.vn$u" | grep -o '<p class="card-summary"' | wc -l)
-  co=$(curl -s "https://tourdao.vn$u" | grep -oE '<p class="card-summary"[^>]*>[^<]+</p>' | wc -l)
+  co=$(curl -s "https://tourdao.vn$u" | perl -0777 -ne 'print scalar(() = /<p class="card-summary"[^>]*>\s*\S.*?<\/p>/gs)')
   echo "$u  tong=$tong  co-chu=$co"
 done
 ```
@@ -303,7 +303,7 @@ Kỳ vọng: **PASS** 8/8.
 npm run build
 for u in khach-san resort; do
   tong=$(grep -o '<p class="card-summary"' "dist/$u/index.html" | wc -l)
-  co=$(grep -oE '<p class="card-summary"[^>]*>[^<]+</p>' "dist/$u/index.html" | wc -l)
+  co=$(perl -0777 -ne 'print scalar(() = /<p class="card-summary"[^>]*>\s*\S.*?<\/p>/gs)' "dist/$u/index.html")
   echo "$u  tong=$tong  co-chu=$co"
 done
 ```
@@ -361,7 +361,7 @@ Sửa thành:
 ```bash
 npm run build
 test -f dist/cong-ty/index.html && echo "OK trang ton tai"
-grep -oE '<p class="card-summary"[^>]*>[^<]+</p>' dist/cong-ty/index.html | wc -l   # ky vong 3
+perl -0777 -ne 'print scalar(() = /<p class="card-summary"[^>]*>\s*\S.*?<\/p>/gs), "\n"' dist/cong-ty/index.html   # ky vong 3
 grep -c 'href="/cong-ty/' dist/cong-ty/index.html                                    # the tro ve chi tiet
 grep -c '<loc>https://tourdao.vn/cong-ty/</loc>' dist/sitemap-vi.xml                 # ky vong 1
 grep -c 'href="/cong-ty/"' dist/cong-ty/cong-ty-tnhh-tour-dao/index.html             # breadcrumb, ky vong >=1
