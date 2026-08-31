@@ -15,7 +15,7 @@
 - **Anh em cùng đợt:** `SPEC-2026-08-31-hero-entity-cao-them-50px.md`,
   `SPEC-2026-08-31-trang-danh-sach-cong-ty.md`. Ba mảnh **gần độc lập**: không chia sẻ file, nhưng §4.2 của mảnh form bị ràng buộc bởi
   quyết định Luật 3 của mảnh hero — chủ dự án đã chốt **lối A** ngày 31/08, nên ràng buộc này đã gỡ.
-  Thứ tự đúng: `QĐ-2026-08-31-01` → mảnh công ty → mảnh form → mảnh hero.
+  Thứ tự đúng: `QĐ-2026-08-31-03` → mảnh công ty → mảnh form → mảnh hero.
 
 ---
 
@@ -159,7 +159,7 @@ cuộn tới nó thì nó ở lại; trong khi giá trong form trôi mất hẳn
 thông tin.
 
 > ⚠ **Sửa một câu của bản nháp đầu.** Bản đầu viết thanh dính *"luôn trên màn hình"*. Sau khi
-> chủ dự án chọn **lối A** (`QĐ-2026-08-31-01`), câu đó **sai**: ở viewport 1366 thanh dính nằm ở
+> chủ dự án chọn **lối A** (`QĐ-2026-08-31-03`), câu đó **sai**: ở viewport 1366 thanh dính nằm ở
 > **≈718px** so với mốc màn đầu **657px**, tức **không** trên màn đầu. Nó dính *sau khi* khách
 > cuộn tới, không phải hiện sẵn. Đây chính là đánh đổi mà lối A chấp nhận công khai — spec không
 > được mô tả nó êm hơn thực tế.
@@ -208,7 +208,7 @@ hạng khách vẫn nằm trong khối hành động, nên khối hành động 
 > Nên §4.2 **giữ nguyên: vẫn bỏ `.bf__head`**. Nhánh "nếu chọn lối C thì cân nhắc giữ lại" không
 > còn áp dụng.
 >
-> Ràng buộc còn lại: mảnh (1) phải viết `QĐ-2026-08-31-01` và sửa `06-BINDING_MAP` §3 hàng Hero
+> Ràng buộc còn lại: mảnh (1) phải viết `QĐ-2026-08-31-03` và sửa `06-BINDING_MAP` §3 hàng Hero
 > **trước** khi sửa token. Mảnh (3) **không chờ việc đó** — nó không đụng chiều cao hero, và
 > `.bf__price` bị bỏ vốn đã nằm ngoài màn đầu (y = 1151 so với mốc 657).
 

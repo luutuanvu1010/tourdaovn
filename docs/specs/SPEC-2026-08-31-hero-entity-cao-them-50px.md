@@ -3,7 +3,7 @@
 - **Trạng thái:** **ĐÃ GỠ CHẶN — chủ dự án chọn lối A** (nới Luật 3) trong phiên 2026-08-31.
   Spec này từng CHẶN vì `06-BINDING_MAP` §3 hàng Hero đặt một điều kiện bắt buộc chưa ai thi
   hành (xem §0, giữ nguyên làm bản ghi). **Còn một việc phải xong TRƯỚC khi sửa dòng token đầu
-  tiên: viết phiếu `QĐ-2026-08-31-01` và sửa `06-BINDING_MAP` §3 hàng Hero — xem §0.7.**
+  tiên: viết phiếu `QĐ-2026-08-31-03` và sửa `06-BINDING_MAP` §3 hàng Hero — xem §0.7.**
 - **Ngày soạn:** 2026-08-31   **Người soạn:** Cowork   **Người duyệt:** Lưu Tuấn Vũ
 - **Loại quyết định:** cửa **hai chiều**. Đổi năm giá trị token, lùi lại bằng một lần sửa ngược.
 - **Đầu vào đã đọc:** `CLAUDE.md` §8 (ba luật cứng tầng giao diện),
@@ -14,7 +14,7 @@
   `SPEC-2026-08-31-form-dat-tour-gon-va-chi-tiet-gia.md`. Ba mảnh **gần độc lập** — chúng không
   chia sẻ file nào, nhưng có **một phụ thuộc quyết định**: nếu chủ dự án chọn **lối C** ở §0.6,
   thì §4.2 của mảnh (3) phải mở lại — **chủ dự án đã chọn lối A ngày 31/08, nên ràng buộc này đã
-  gỡ.** **Thứ tự đúng: `QĐ-2026-08-31-01` → mảnh (2) →
+  gỡ.** **Thứ tự đúng: `QĐ-2026-08-31-03` → mảnh (2) →
   mảnh (3) → mảnh này.** Mảnh này đi SAU CÙNG vì nó đang bị chặn, không phải đi trước.
 
 ---
@@ -78,7 +78,7 @@ bằng suy đoán, đúng thứ §2 cấm.
 
 ### 0.6 Cần quyết định gì — ba lối, chủ dự án chọn
 
-Cả ba đều hợp lệ. Quyết định này thuộc chủ dự án, và **phải được ghi thành `QĐ-2026-08-31-01` +
+Cả ba đều hợp lệ. Quyết định này thuộc chủ dự án, và **phải được ghi thành `QĐ-2026-08-31-03` +
 sửa `06-BINDING_MAP` §3 hàng Hero**, không phải một câu trong chat — vì ngoại lệ hiện tại cũng
 đã được ghi thành phiếu, và gỡ nó bằng lời nói sẽ để lại một tài liệu nói dối.
 
@@ -99,7 +99,7 @@ sửa `06-BINDING_MAP` §3 hàng Hero**, không phải một câu trong chat —
 tại đã được ghi thành phiếu, nên gỡ nó bằng một câu trong chat sẽ để lại một tài liệu nói dối —
 và người đọc `06` sau này vẫn thấy điều kiện "0 trang" như thể nó còn hiệu lực.
 
-**a. Viết `QĐ-2026-08-31-01` vào `docs/DECISIONS.md`**, tối thiểu phải ghi:
+**a. Viết `QĐ-2026-08-31-03` vào `docs/DECISIONS.md`**, tối thiểu phải ghi:
 
 - Điều kiện bắt buộc của `QĐ-2026-08-28-03` (*"phải xét lại TRƯỚC khi vùng giá render"*) **đã bị
   kích hoạt và chưa ai thi hành** — giá render thật trên production, đo 2026-08-31.
@@ -111,7 +111,7 @@ và người đọc `06` sau này vẫn thấy điều kiện "0 trang" như th�
 
 **b. Sửa `06-BINDING_MAP.md` §3 hàng Hero (dòng 74)** cho khớp phiếu mới: thay đoạn *"Chưa thành
 vi phạm sống vì `sticky-bar__price` render trên 0 trang… Điều kiện bắt buộc: phải xét lại
-TRƯỚC…"* bằng bản ghi ngoại lệ mới viện `QĐ-2026-08-31-01`, kèm giá trị mới (480/440/340,
+TRƯỚC…"* bằng bản ghi ngoại lệ mới viện `QĐ-2026-08-31-03`, kèm giá trị mới (480/440/340,
 `calc(30vw + 100px)`) và số đo 718px. Nâng phiên bản `06` và ghi vào nhật ký phiên bản ở dòng 17.
 
 > **Vì sao Luật 3 nới được mà không phải bịa lý do:** `.bf__pax-price` (đơn giá từng hạng khách)
@@ -324,7 +324,7 @@ chiều cao.
 
 Mặc định của cổng là **không đạt** nếu không có bằng chứng (`CLAUDE.md` §6).
 
-**0. Tiền đề — §0.7 đã xong:** phiếu `QĐ-2026-08-31-01` đã vào `docs/DECISIONS.md`, và
+**0. Tiền đề — §0.7 đã xong:** phiếu `QĐ-2026-08-31-03` đã vào `docs/DECISIONS.md`, và
 `06-BINDING_MAP` §3 hàng Hero đã sửa theo — điều kiện "0 trang" **đã xoá**. Không có phiếu thì
 mọi mục dưới đây vô nghĩa, và tệ hơn: sửa token sẽ làm sâu thêm một ngoại lệ chưa ai xét lại.
 
@@ -335,7 +335,7 @@ mọi mục dưới đây vô nghĩa, và tệ hơn: sửa token sẽ làm sâu 
    "+4px/+30px" (§4.3) đứng trên đúng hai khổ đó, mà bản nháp đầu không đo cái nào.
    **1b. Đo vị trí thanh dính ở 1366×768, TRƯỚC và SAU** — `.sticky-bar`
    `getBoundingClientRect().top` cộng `scrollY` ở đỉnh trang. Dự kiến 668 → **≈718**. Ghi cả hai
-   số vào `QĐ-2026-08-31-01`. Đây là con số trung tâm của cả spec; không đo nó là nghiệm thu
+   số vào `QĐ-2026-08-31-03`. Đây là con số trung tâm của cả spec; không đo nó là nghiệm thu
    nửa dễ rồi bỏ ngỏ đúng nửa đang tranh chấp.
 2. Đo trên **ít nhất hai loại entity khác nhau** (ví dụ `tour` và `attraction`) cộng
    **trang điểm đến**, để chứng minh token phủ hết chứ không phải trùng hợp một trang.

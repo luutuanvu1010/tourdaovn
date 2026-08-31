@@ -14,7 +14,7 @@
 - **Anh em cùng đợt:** `SPEC-2026-08-31-hero-entity-cao-them-50px.md`,
   `SPEC-2026-08-31-form-dat-tour-gon-va-chi-tiet-gia.md`. Ba mảnh **gần độc lập**: không chia sẻ file, nhưng §4.2 của mảnh form bị ràng buộc bởi
   quyết định Luật 3 của mảnh hero — chủ dự án đã chốt **lối A** ngày 31/08, nên ràng buộc này đã gỡ.
-  Thứ tự đúng: `QĐ-2026-08-31-01` → mảnh công ty → mảnh form → mảnh hero.
+  Thứ tự đúng: `QĐ-2026-08-31-03` → mảnh công ty → mảnh form → mảnh hero.
 
 ---
 

@@ -26,7 +26,7 @@ Vitest (`@cloudflare/vitest-pool-workers`, chạy trong miniflare).
 
 Mọi Task đều ngầm mang các ràng buộc này. Đọc một lần, áp cho tất cả.
 
-1. **Thứ tự bắt buộc, không đảo:** Task 1 (phiếu `QĐ-2026-08-31-01`) → Task 2–3 (`/cong-ty/`) →
+1. **Thứ tự bắt buộc, không đảo:** Task 1 (phiếu `QĐ-2026-08-31-03`) → Task 2–3 (`/cong-ty/`) →
    Task 4–8 (form) → Task 9 (hero). **Task 9 không được chạy trước Task 1.**
 
 2. **Giá trị giao diện đi vào `src/styles/tokens.css`, KHÔNG viết cứng trong component.**
@@ -63,7 +63,7 @@ Mọi Task đều ngầm mang các ràng buộc này. Đọc một lần, áp ch
 
 | File | Trách nhiệm | Task |
 |---|---|---|
-| `docs/DECISIONS.md` | phiếu `QĐ-2026-08-31-01` | 1 |
+| `docs/DECISIONS.md` | phiếu `QĐ-2026-08-31-03` | 1 |
 | `docs/core-specs/06-BINDING_MAP.md` | §3 hàng Hero — ngoại lệ Luật 3 mới | 1 |
 | `src/lib/queries/organization.ts` · `hotel.ts` · `resort.ts` | thêm `summary` vào truy vấn danh sách | 2 |
 | `test/queries/listing-summary.test.ts` | **tạo mới** — canh hợp đồng "truy vấn danh sách phải lấy summary" | 2 |
@@ -78,7 +78,7 @@ Mọi Task đều ngầm mang các ràng buộc này. Đọc một lần, áp ch
 
 ---
 
-## Task 1 — Phiếu `QĐ-2026-08-31-01` và sửa `06-BINDING_MAP`
+## Task 1 — Phiếu `QĐ-2026-08-31-03` và sửa `06-BINDING_MAP`
 
 **Vì sao đi trước mọi thứ:** `06-BINDING_MAP` §3 hàng Hero đặt điều kiện *"phải xét lại TRƯỚC khi
 vùng giá render trên bất kỳ trang nào"*, tiền đề là `sticky-bar__price` render trên **0 trang**.
@@ -89,7 +89,7 @@ Giá đang render thật. Sửa token trước khi ghi phiếu là làm sâu th�
 - Modify: `docs/core-specs/06-BINDING_MAP.md:17` (nhật ký phiên bản) và `:74` (hàng Hero)
 
 **Interfaces:**
-- Produces: mã phiếu `QĐ-2026-08-31-01` — Task 9 viện dẫn nó ở tiêu chí tiền đề.
+- Produces: mã phiếu `QĐ-2026-08-31-03` — Task 9 viện dẫn nó ở tiêu chí tiền đề.
 
 - [ ] **Bước 1: Xác nhận điều kiện thật sự đã bị kích hoạt (đừng tin kế hoạch, tự đo)**
 
@@ -122,7 +122,7 @@ trả số khác — con số của phiếu phải là số đo, không phải s
 Thêm vào cuối file, theo đúng khuôn các phiếu khác:
 
 ```markdown
-## QĐ-2026-08-31-01 — Nới Luật 3: chấp nhận thanh dính mang giá rơi khỏi màn đầu ở 1366
+## QĐ-2026-08-31-03 — Nới Luật 3: chấp nhận thanh dính mang giá rơi khỏi màn đầu ở 1366
 
 **Bối cảnh.** `QĐ-2026-08-28-03` chấp nhận chiều cao hero 430px là **ngoại lệ Luật 3 có ghi
 phiếu**, kèm đúng một điều kiện: *"Chưa thành vi phạm sống vì `sticky-bar__price` render trên
@@ -167,7 +167,7 @@ Trong ô mô tả của hàng `Hero`, tìm đoạn:
 
 Thay bằng:
 
-> ⚠ **NGOẠI LỆ LUẬT 3 CÓ GHI PHIẾU — `QĐ-2026-08-31-01` (2026-08-31).** Điều kiện "0 trang" của
+> ⚠ **NGOẠI LỆ LUẬT 3 CÓ GHI PHIẾU — `QĐ-2026-08-31-03` (2026-08-31).** Điều kiện "0 trang" của
 > `QĐ-2026-08-28-03` **đã hết hiệu lực và bị xoá**: giá render thật trên thanh dính từ 2026-08-31.
 > Chủ dự án đã xét lại và **chấp nhận** thanh dính mang giá không còn trên màn đầu ở 1366 (đo
 > **<SỐ ĐO SAU>px** so với mốc **657px**), đổi lấy hero cao thêm 50px. Đây là vi phạm Luật 3
@@ -177,7 +177,7 @@ Thay bằng:
 
 - [ ] **Bước 5: Ghi nhật ký phiên bản `06-BINDING_MAP.md:17`**
 
-Nối vào cuối chuỗi nhật ký: `; **v2.14.0 duyệt 2026-08-31, QĐ-2026-08-31-01** — nới Luật 3, xoá
+Nối vào cuối chuỗi nhật ký: `; **v2.14.0 duyệt 2026-08-31, QĐ-2026-08-31-03** — nới Luật 3, xoá
 điều kiện "0 trang" của ngoại lệ hero (§3 hàng Hero)`. Sửa số phiên bản ở đầu dòng 17 thành
 `v2.14.0`.
 
@@ -1017,7 +1017,7 @@ git commit -m "feat(dat-tour): bang chi tiet gia dung tu engine, go hai dong tru
 
 ## Task 9 — Hero +50px
 
-**Tiền đề:** Task 1 đã xong. Không có `QĐ-2026-08-31-01` thì **dừng** — sửa token trước phiếu là
+**Tiền đề:** Task 1 đã xong. Không có `QĐ-2026-08-31-03` thì **dừng** — sửa token trước phiếu là
 làm sâu thêm một ngoại lệ chưa ai xét lại.
 
 **Files:**
@@ -1028,7 +1028,7 @@ làm sâu thêm một ngoại lệ chưa ai xét lại.
 - Modify: `docs/DECISIONS.md` (điền số đo SAU vào phiếu Task 1)
 
 **Interfaces:**
-- Consumes: `QĐ-2026-08-31-01` từ Task 1
+- Consumes: `QĐ-2026-08-31-03` từ Task 1
 - Produces: không có API; một dòng token đổi là **12 loại trang chi tiết** cộng trang điểm đến.
 
 - [ ] **Bước 1: Sửa năm giá trị — cả năm, không riêng cái nào**
@@ -1059,7 +1059,7 @@ dòng ngay trên nó khẳng định số giữa *"phải là"* `calc(30vw + 50p
   /* Số giữa phải là `calc(30vw + 100px)`, KHÔNG phải `30vw`: nâng riêng trần
      480 lên cao hơn chỉ cho +4px ở 1280 và +30px ở 1366, vì ở dải ≥1267px thì
      TRẦN mới là số đang trói (điểm giao: 30vw + 100 = 480 ⇒ vw = 1266,67).
-     Đã đo, xem QĐ-2026-08-31-01. */
+     Đã đo, xem QĐ-2026-08-31-03. */
 ```
 
 - [ ] **Bước 3: `07-DESIGN_TOKENS.md` — bốn hàng, không phải một**
@@ -1128,7 +1128,7 @@ const s = document.querySelector('.sticky-bar');
 Math.round(s.getBoundingClientRect().top + scrollY)
 ```
 
-Kỳ vọng ≈ **718**. **Điền số thật đo được** vào chỗ `<SỐ ĐO SAU>` ở `QĐ-2026-08-31-01` và ở
+Kỳ vọng ≈ **718**. **Điền số thật đo được** vào chỗ `<SỐ ĐO SAU>` ở `QĐ-2026-08-31-03` và ở
 `06-BINDING_MAP:74`. Đây là con số trung tâm của cả đợt — không đo nó là nghiệm thu nửa dễ rồi
 bỏ ngỏ đúng nửa đang tranh chấp.
 
