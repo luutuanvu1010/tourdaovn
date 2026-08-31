@@ -115,13 +115,23 @@ if (!turnstileSiteKey) {
   </div>
 
   <section class="bf__step" data-step="1">
-    <label class="bf__label" for="bf-date">
-      {t('bookingDepartDate')}
+    <div class="bf__label-row">
+      <label class="bf__label" for="bf-date">{t('bookingDepartDate')}</label>
       <details class="bf__tip">
         <summary class="bf__tip-mark" aria-label={t('info')}>i</summary>
-        <p class="bf__tip-body" id="bf-date-range" data-date-range-text>{dateRangeText}</p>
+        {/* `<details>` khong phai phrasing content nen khong duoc long trong <label> (vi
+            pham content model HTML5) — vi vay tach ra thanh khoi rieng, boc chung trong
+            .bf__label-row de giu cung dong. Ban nhin thay nay la BAN SAO, gan
+            aria-hidden de trinh doc man hinh khong doc trung voi span an ben duoi — no
+            van phai cap nhat chu khi script tinh lai pham vi ngay (xem script ~L392). */}
+        <p class="bf__tip-body" aria-hidden="true" data-date-range-text>{dateRangeText}</p>
       </details>
-    </label>
+    </div>
+    {/* Ban DUY NHAT ma trinh doc man hinh dua vao — nam NGOAI <details>, luon co mat
+        trong cay truy cap du hop thoai dang dong hay mo. aria-describedby cua o ngay
+        tro vao day, khong tro vao ban nhin thay ben trong <details> nua (co the khong
+        duoc AT doc khi dong, tuy engine — xem task-4-report.md §1). */}
+    <span id="bf-date-range" class="bf__sr-only" data-date-range-text>{dateRangeText}</span>
     <input id="bf-date" class="bf__input" type="date" name="departDate" required min={minDate} max={maxDate} aria-describedby="bf-date-range" />
     <p class="bf__err" data-err="departDate" aria-live="polite"></p>
 
@@ -130,7 +140,11 @@ if (!turnstileSiteKey) {
       {codes.map(code => (
         <div class="bf__pax" data-code={code} data-label={paxLabel(code)}>
           <div class="bf__pax-info">
-            <span class="bf__pax-name">
+            {/* <div> chu khong phai <span>: <details> la flow content, khong phai phrasing
+                content, nen khong duoc long trong <span> (vi pham content model HTML5,
+                cung loai loi nhu nhan ngay o tren). Doi tag khong doi layout — .bf__pax-info
+                la flex column nen phan tu nay da bi "blockify" thanh khoi du khai tag gi. */}
+            <div class="bf__pax-name">
               {paxLabel(code)}
               {paxNote(code) && (
                 <details class="bf__tip">
@@ -138,7 +152,7 @@ if (!turnstileSiteKey) {
                   <p class="bf__tip-body">{paxNote(code)}</p>
                 </details>
               )}
-            </span>
+            </div>
             {paxAmountLabel(code) && <span class="bf__pax-price">{paxAmountLabel(code)}</span>}
           </div>
           <div class="bf__stepper">
@@ -185,13 +199,16 @@ if (!turnstileSiteKey) {
         ))}
       </div>
       <div class="bf__total">
-        <span class="bf__total-label">
+        {/* <div> chu khong phai <span>: cung ly do o hai cho tren — <details> khong phai
+            phrasing content. .bf__total la flex row 2 phan tu (nhan + so tien), doi tag
+            khong doi layout vi day van la mot flex item duy nhat, khong tach hang moi. */}
+        <div class="bf__total-label">
           {t('bookingSubtotal')}
           <details class="bf__tip">
             <summary class="bf__tip-mark" aria-label={t('info')}>i</summary>
             <p class="bf__tip-body">{t('bookingSubtotalNote')}</p>
           </details>
-        </span>
+        </div>
         <strong data-total>{initialQuote ? formatPrice(initialQuote.total, lang) : '—'}</strong>
       </div>
     </div>
@@ -390,8 +407,11 @@ if (!turnstileSiteKey) {
     const dateRangeMsg = () => dateRangeTpl
       ? dateRangeTpl.replace('{min}', formatDateVN(dateEl.min)).replace('{max}', formatDateVN(dateEl.max))
       : ''
-    const rangeTextEl = q<HTMLElement>('[data-date-range-text]')
-    if (rangeTextEl) rangeTextEl.textContent = dateRangeMsg()
+    // HAI node mang [data-date-range-text] từ vòng sửa 1/5 (bản cho trình đọc màn hình —
+    // .bf__sr-only, luôn trong cây truy cập — và bản nhìn thấy bên trong <details>, mang
+    // aria-hidden). `q()` chỉ lấy node ĐẦU TIÊN — phải querySelectorAll và cập nhật cả hai,
+    // nếu không bản cho trình đọc màn hình đứng yên ở chuỗi lúc dựng server.
+    form.querySelectorAll<HTMLElement>('[data-date-range-text]').forEach(el => { el.textContent = dateRangeMsg() })
     // Đổi ngày khởi hành có thể đổi mùa áp dụng, nên phải tính lại tạm tính ngay (Task 5).
     dateEl.addEventListener('change', update)
 
@@ -784,6 +804,20 @@ if (!turnstileSiteKey) {
     margin: var(--s2) 0 0;
     font-size: var(--fs-sm); color: var(--c-text-muted);
   }
+  /* Khuôn "chỉ trình đọc màn hình" chuẩn — vòng sửa 1/5, xem task-4-report.md §1. KHÔNG
+     dùng `display:none` hay `visibility:hidden`: cả hai ẩn luôn với trình đọc màn hình,
+     mất tác dụng của node này. `position:absolute` đưa nó ra khỏi luồng — không cộng
+     thêm khoảng cách `gap` nào của `.bf__step` (flex container cha), nên không đẩy cao
+     form. Đây là bản DUY NHẤT mang `id="bf-date-range"` mà `aria-describedby` của ô ngày
+     trỏ tới; bản nhìn thấy bên trong `.bf__tip` mang `aria-hidden="true"` để không đọc
+     trùng khi `<details>` đang mở. */
+  .bf__sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  /* Không khai `font-size` ở đây từng đẩy form cao thêm 8px, đo được (vòng sửa 1/5):
+     `.bf__label-row` không có font-size riêng nên kế thừa cỡ chữ NGOÀI (--fs-base 19px,
+     dùng cho input/nút) thay vì cỡ chữ của `<label>` con bên trong (--fs-label 14px) —
+     line-height "khung" dựng theo cỡ chữ 19px của CHÍNH div này (dù nội dung nhìn thấy
+     nhỏ hơn) làm hàng cao hơn cần thiết. Khớp cỡ chữ với `.bf__label` xoá khung dư đó. */
+  .bf__label-row { font-size: var(--fs-label); }
   .bf__input { width: 100%; font: inherit; font-size: var(--fs-base); padding: var(--s3) var(--s4); border: 1px solid var(--c-border); border-radius: var(--radius-md); background: var(--c-card); color: var(--c-text); }
   .bf__input:focus { outline: 2px solid var(--c-primary); outline-offset: 1px; }
   .bf__input[aria-invalid="true"] { border-color: var(--c-accent); }
