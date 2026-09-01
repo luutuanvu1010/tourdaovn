@@ -9,7 +9,7 @@ import { uiCopy } from '../lib/uiCopy'
 import { formatPrice } from '../lib/renderer'
 import { availablePaxCodes, computeQuote, emptyPax, type PaxCode, type PriceTable } from '../lib/booking/quote'
 import type { Season } from '../lib/booking/season'
-import { addDaysISO, formatDateVN, todayVN } from '../lib/booking/vn-date'
+import { addDaysISO, formatDateFullVN, formatDateVN, todayVN } from '../lib/booking/vn-date'
 import { LIMITS, MSG } from '../lib/booking/schema'
 // Tài khoản nhận chuyển khoản là HẰNG SỐ BIÊN DỊCH — vào bằng import, không qua
 // Astro.props/data-* như priceTable (thứ đọc từ Sanity lúc dựng). SPEC §4.5.
@@ -43,14 +43,26 @@ function paxNote(code: PaxCode): string {
   return priceTable.kind === 'flat' ? (priceTable.notes?.[code] ?? '') : ''
 }
 
-// Tạm tính ban đầu (1 người lớn) render sẵn ở server để không JS vẫn thấy số.
-const initialPax = emptyPax()
-const initialQuote = computeQuote(priceTable, initialPax)
 // Thời điểm build = vintage bảng giá mà khách nhìn thấy (SPEC §4.4).
 const quotedAt = new Date().toISOString()
 const today = todayVN()
-const minDate = addDaysISO(today, 1)
+// Mốc dưới là CHÍNH HÔM NAY (QĐ-2026-09-01-01: nhận đặt tour đi trong ngày). Phải khớp
+// từng chữ với `schema.ts` — bên đó chặn `departDate < today`. Lệch một ngày là ô chọn cho
+// bấm một ngày mà máy chủ trả lỗi, hoặc ngược lại.
+const minDate = today
 const maxDate = addDaysISO(today, LIMITS.MAX_DAYS_AHEAD)
+
+// Tạm tính ban đầu (1 người lớn) render sẵn ở server để không JS vẫn thấy số.
+// Ba tham số dưới phải khớp ĐÚNG trạng thái mở màn của markup — ngày đã điền sẵn `minDate`
+// và ô "Chuyển khoản" đã tick sẵn — vì `update()` chạy ngay lúc script khởi động và tính lại
+// bằng cùng `computeQuote`. Lệch một tham số là số tiền NHẢY một nhịp ngay khi trang tải xong
+// (đúng loại lỗi tiền thật mà DR-102 đã ghi). Không có ưu đãi (prepayPercent = 0) thì hai
+// tham số cuối vô hại: `apDieuChinh` bỏ qua phần trăm 0.
+const initialPax = emptyPax()
+const initialPrepay = prepayPercent > 0
+const initialQuote = computeQuote(priceTable, initialPax, {
+  seasons, departDate: minDate, prepayPercent, prepay: initialPrepay,
+})
 // Câu chỉ phạm vi ngày, giữ dạng KHUÔN có {min}/{max} chứ không nướng sẵn hai mốc: script
 // tính lại min/max theo giờ Việt Nam lúc khách mở trang, nên chuỗi cố định lúc build sẽ lệch
 // mốc ngay hôm sau. Server dựng sẵn một bản để không JS vẫn đọc được phạm vi.
@@ -122,10 +134,28 @@ if (!turnstileSiteKey) {
         tro vao day, khong tro vao ban nhin thay ben trong <details> nua (co the khong
         duoc AT doc khi dong, tuy engine — xem task-4-report.md §1). */}
     <span id="bf-date-range" class="bf__sr-only" data-date-range-text>{dateRangeText}</span>
-    <input id="bf-date" class="bf__input" type="date" name="departDate" required min={minDate} max={maxDate} aria-describedby="bf-date-range" />
+    {/* `value` dien san NGAY HIEN TAI de o ngay khong con trong. Ngay nay NUONG LUC DUNG
+        nen se cu di sau nua dem — script keo lai ve `min` vua tinh theo gio Viet Nam (xem
+        ~L410), giong het ly do `dateRangeTpl` o tren giu dang khuon thay vi nuong san hai
+        moc. Khong co doan keo do thi hom sau khach bam nut la an loi pham vi tren mot ngay
+        ho chua he go. */}
+    <input id="bf-date" class="bf__input" type="date" name="departDate" required value={minDate} min={minDate} max={maxDate} aria-describedby="bf-date-range" />
+    {/* Doc lai ngay dang chon BANG TIENG VIET. O `<input type="date">` la dieu khien goc cua
+        trinh duyet: dinh dang va ten thang trong lich do NGON NGU GIAO DIEN trinh duyet quyet
+        dinh, khong phai `lang` cua trang — do duoc tren may chu du an: `documentElement.lang`
+        da la 'vi' ma lich van hien tieng Anh. Vay nen khong ep duoc o do; dong nay la ban
+        tieng Viet chac chan co, dung chung `formatDateFullVN` voi phia may chu.
+        `aria-hidden`: o ngay da tu doc gia tri cua no cho trinh doc man hinh, them node nay
+        vao cay truy cap la doc ngay hai lan. */}
+    <p class="bf__note bf__date-echo" aria-hidden="true" data-date-echo>{formatDateFullVN(minDate)}</p>
     <p class="bf__err" data-err="departDate" aria-live="polite"></p>
 
-    <p class="bf__label" id="bf-pax-label">{t('bookingPax')}</p>
+    {/* Nhan "So nguoi" AN THI GIAC, khong xoa node: `aria-labelledby` cua nhom ben duoi
+        tro vao id nay, xoa la nhom dem so mat ten trong cay truy cap. Dung lai lop
+        `.bf__sr-only` — dung tien le da co o nhan hinh thuc thanh toan ngay duoi (L174),
+        khong dung display:none/visibility:hidden (hai cai do an luon voi trinh doc man hinh).
+        Doi lop chu khong them: `.bf__label` con mang margin, giu lai se de mot khoang trong. */}
+    <p class="bf__sr-only" id="bf-pax-label">{t('bookingPax')}</p>
     <div role="group" aria-labelledby="bf-pax-label">
       {codes.map(code => (
         <div class="bf__pax" data-code={code} data-label={paxLabel(code)}>
@@ -173,8 +203,11 @@ if (!turnstileSiteKey) {
             hai cái đó ẩn luôn với trình đọc màn hình. */}
         <p class="bf__sr-only" id="bf-pay-label">{t('bookingPayLabel')}</p>
         <div class="bf__pay" role="radiogroup" aria-labelledby="bf-pay-label">
+          {/* Tick san "Chuyen khoan": day la hinh thuc duoc uu dai, va de o trong thi buoc 1
+              chan lai bang loi `bookingPayRequired` o mot o khach chua he cham toi. Tam tinh
+              dung san o tren (`initialQuote`) da tinh kem uu dai de khop trang thai nay. */}
           <label class="bf__pay-opt">
-            <input type="radio" name="paymentMethod" value="transfer" />
+            <input type="radio" name="paymentMethod" value="transfer" checked />
             <span>{t('bookingPayTransfer').replace('{x}', String(prepayPercent))}</span>
           </label>
           <label class="bf__pay-opt">
@@ -325,7 +358,7 @@ if (!turnstileSiteKey) {
   import { PAX_ORDER, computeQuote, type PaxCode, type PaxCounts, type PriceTable, type Quote } from '../lib/booking/quote'
   import type { Season } from '../lib/booking/season'
   import { formatPrice } from '../lib/renderer'
-  import { addDaysISO, formatDateVN, todayVN } from '../lib/booking/vn-date'
+  import { addDaysISO, formatDateFullVN, formatDateVN, todayVN } from '../lib/booking/vn-date'
   import { LIMITS, MSG, buildQuotedPayload, type PaymentMethod } from '../lib/booking/schema'
   import { buildPaymentQr } from '../lib/booking/payment-qr'
   import { banking } from '../site.config'
@@ -407,11 +440,24 @@ if (!turnstileSiteKey) {
     // Tăng cường dần: không JS thì bước 2 hiện sẵn; có JS thì gấp lại.
     step2.hidden = true
 
-    // Ngày: từ ngày mai tới +MAX_DAYS_AHEAD theo giờ Việt Nam, tính lại ở client để không lệ
+    // Ngày: từ HÔM NAY tới +MAX_DAYS_AHEAD theo giờ Việt Nam, tính lại ở client để không lệ
     // thuộc giờ build. Không viết con số vào đây — hằng ở schema.ts là nguồn duy nhất.
+    // Mốc dưới = `today` trần, khớp `schema.ts` (QĐ-2026-09-01-01, nhận đặt đi trong ngày).
     const today = todayVN()
-    dateEl.min = addDaysISO(today, 1)
+    dateEl.min = today
     dateEl.max = addDaysISO(today, LIMITS.MAX_DAYS_AHEAD)
+    // Ngày điền sẵn ở markup được NƯỚNG LÚC DỰNG. Qua nửa đêm là nó tụt xuống dưới `min` vừa
+    // tính lại ở trên, và khách bấm "Đặt tour ngay" ăn ngay lỗi phạm vi trên một giá trị họ
+    // không hề gõ. Kéo lại về hôm nay; ngày khách đã tự chọn về sau thì không đụng.
+    // Phải nằm TRƯỚC `update()` (~L570) để tạm tính mở màn ăn đúng mùa của ngày này.
+    if (!dateEl.value || dateEl.value < dateEl.min) dateEl.value = dateEl.min
+
+    // Dòng đọc lại ngày bằng tiếng Việt. Phải vẽ lại sau khi kéo ngày ở trên, nếu không nó
+    // đứng nguyên ở ngày nướng lúc dựng trong khi ô ngày đã nhảy sang ngày khác.
+    const dateEchoEl = q<HTMLElement>('[data-date-echo]')
+    const veLaiNgay = () => { if (dateEchoEl) dateEchoEl.textContent = formatDateFullVN(dateEl.value) }
+    veLaiNgay()
+    dateEl.addEventListener('change', veLaiNgay)
 
     // Câu phạm vi ngày dựng lại từ min/max VỪA tính, không dùng bản server nướng lúc build.
     const dateRangeTpl = form.dataset.dateRange || ''
@@ -938,6 +984,13 @@ if (!turnstileSiteKey) {
   }
   .bf__pay-opt:has(:focus-visible) { outline: 2px solid var(--c-primary); outline-offset: 2px; }
   .bf__note, .bf__hint, .bf__noscript, .bf__hotline { font-size: var(--fs-sm); color: var(--c-text-muted); margin: 0; }
+  /* Dòng đọc lại ngày phải DÍNH vào ô ngày, không trôi thành một dòng rời giữa hai trường:
+     `.bf__step` là flex column `gap: var(--s3)`, nên kéo ngược lên để khoảng cách thực còn
+     `var(--s1)`. Hai giá trị đều là token, không có con số trần (luật cứng 1 ở CLAUDE.md §8). */
+  .bf__date-echo { margin-top: calc(var(--s1) - var(--s3)); }
+  /* Ô ngày xoá trắng được → `formatDateFullVN('')` trả chuỗi rỗng → thẻ <p> rỗng vẫn chiếm
+     một dòng cộng cả cái margin âm ở trên. Cùng lối xử lý với `.bf__err:empty` ngay dưới. */
+  .bf__date-echo:empty { display: none; }
   .bf__hint { color: var(--c-accent-strong); }
   .bf__err { font-size: var(--fs-sm); color: var(--c-accent-strong); margin: 0; min-height: 0; }
   .bf__err:empty { display: none; }

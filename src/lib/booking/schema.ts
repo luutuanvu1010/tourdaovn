@@ -19,7 +19,7 @@ export const MSG = {
   tourInvalid: 'Thông tin tour không hợp lệ, hãy tải lại trang.',
   dateRequired: 'Chọn ngày khởi hành.',
   dateInvalid: 'Ngày khởi hành không hợp lệ.',
-  dateTooEarly: 'Ngày khởi hành phải từ ngày mai trở đi.',
+  dateTooEarly: 'Ngày khởi hành không được là ngày đã qua.',
   dateTooFar: 'Chỉ nhận đặt trước tối đa 90 ngày.',
   paxInvalid: 'Số người không hợp lệ.',
   adultMin: 'Cần ít nhất 1 người lớn.',
@@ -206,7 +206,11 @@ export function validateBooking(input: BookingInput, today: string): ValidationR
 
   if (!input.departDate) fields.departDate = MSG.dateRequired
   else if (!isISODate(input.departDate)) fields.departDate = MSG.dateInvalid
-  else if (input.departDate < addDaysISO(today, 1)) fields.departDate = MSG.dateTooEarly
+  // Mốc dưới là CHÍNH HÔM NAY, không phải ngày mai — QĐ-2026-09-01-01 (chủ dự án chốt
+  // 2026-09-01): nhận đặt tour đi trong ngày. Chỉ chặn ngày đã qua. Hệ quả đã nhận rõ khi
+  // chốt: đơn đặt lúc 14h cho chuyến 08h sáng cùng ngày vẫn qua được cổng kiểm, nhân viên
+  // gọi từ chối bằng tay. Muốn chặn theo GIỜ thì phải có luật mới, không sửa lén ở đây.
+  else if (input.departDate < today) fields.departDate = MSG.dateTooEarly
   else if (input.departDate > addDaysISO(today, LIMITS.MAX_DAYS_AHEAD)) fields.departDate = MSG.dateTooFar
 
   let total = 0

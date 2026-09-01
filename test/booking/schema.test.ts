@@ -63,14 +63,24 @@ describe('validateBooking', () => {
   // Biên của cửa sổ đặt trước, TODAY = '2026-09-01': +90 = 2026-11-30 (hợp lệ),
   // +91 = 2026-12-01 (lỗi). Hai mốc này phải đi cùng `LIMITS.MAX_DAYS_AHEAD` — đổi hằng đó
   // mà quên ca này thì cửa sổ đổi trong im lặng, không cổng nào đỏ (QĐ-2026-08-31-01).
-  it('ngày hôm nay → lỗi departDate; +91 → lỗi; ngày ảo → lỗi', () => {
-    for (const d of ['2026-09-01', '2026-12-01', '2026-02-30']) {
+  it('ngày hôm qua → lỗi; +91 → lỗi; ngày ảo → lỗi', () => {
+    for (const d of ['2026-08-31', '2026-12-01', '2026-02-30']) {
       const r = validateBooking(good({ departDate: d }), TODAY)
       expect(r.ok).toBe(false)
       if (!r.ok) expect(r.fields.departDate).toBeTruthy()
     }
     expect(validateBooking(good({ departDate: '2026-09-02' }), TODAY).ok).toBe(true)
     expect(validateBooking(good({ departDate: '2026-11-30', quoted: { perPax: { adult: 550000, child: 350000 }, total: 1450000, quotedAt: 'x' } }), TODAY).ok).toBe(true)
+  })
+
+  // QĐ-2026-09-01-01 đảo mốc dưới từ "ngày mai" sang "chính hôm nay". Ca này khoá cả HAI phía
+  // của mốc — hôm nay PHẢI qua, hôm qua PHẢI trượt — để lần sau ai đó lặng lẽ đưa `addDaysISO
+  // (today, 1)` trở lại thì test đỏ, chứ không đổi luật kinh doanh trong im lặng.
+  it('nhận đặt tour đi TRONG NGÀY: đúng hôm nay hợp lệ, hôm qua trượt với dateTooEarly', () => {
+    expect(validateBooking(good({ departDate: TODAY }), TODAY).ok).toBe(true)
+    const r = validateBooking(good({ departDate: addDaysISO(TODAY, -1) }), TODAY)
+    expect(r.ok).toBe(false)
+    if (!r.ok) expect(r.fields.departDate).toBe(MSG.dateTooEarly)
   })
 
   it('biên cửa sổ bám đúng LIMITS.MAX_DAYS_AHEAD, không phải một con số chép tay', () => {

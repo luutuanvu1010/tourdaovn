@@ -2659,3 +2659,24 @@ Kết quả đo được: `html.ts` **không đổi một ký tự** trong đợ
 **Phần chưa làm, không phải phần làm khác.** Liên kết `/dat-tour/{mã}/` không có mặt vì trang
 đó thuộc §4.4, ngoài phạm vi đợt QR (SPEC §11.1). Khi §4.4 lên, liên kết thêm vào cùng
 `summaryLines()`.
+
+---
+
+## DR-107 — Phiếu kế hoạch `2026-08-22-dat-tour.md` còn chép luật ngày cũ "từ ngày mai" sau QĐ-2026-09-01-01
+
+**Đo được.** `docs/plans/2026-08-22-dat-tour.md` bốn chỗ còn giữ luật cũ:
+- dòng 965 — `dateTooEarly: 'Ngày khởi hành phải từ ngày mai trở đi.'`
+- dòng 1066 — `else if (input.departDate < addDaysISO(today, 1)) fields.departDate = MSG.dateTooEarly`
+- dòng 2475 — `const minDate = addDaysISO(today, 1)`
+- dòng 2661 — `dateEl.min = addDaysISO(today, 1)`
+
+Mã đang chạy nay là `< today` / `minDate = today` (`QĐ-2026-09-01-01`, chủ dự án chốt 2026-09-01:
+nhận đặt tour đi trong ngày).
+
+**Chọn bên nào.** Giữ **mã**. Phiếu đó là hợp đồng thi công của đợt tháng 8, một bản ghi lịch sử
+đã đóng — không phải spec đang chi phối module đặt tour. Sửa ngược vào phiếu đã đóng là viết lại
+lịch sử và làm mất dấu vì sao luật từng là "ngày mai".
+
+**Rủi ro để lại.** Ai đọc phiếu kế hoạch mà không đọc `DECISIONS` sẽ tưởng luật vẫn là "từ ngày
+mai" và có thể "sửa cho khớp phiếu". Chốt chặn thật nằm ở `test/booking/schema.test.ts`, ca
+`nhận đặt tour đi TRONG NGÀY` — nó khoá cả hai phía của mốc nên thao tác đó làm test đỏ ngay.

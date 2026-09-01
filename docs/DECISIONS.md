@@ -2623,3 +2623,41 @@ ghi lại đúng việc khoản nợ này đóng ngay lúc mở — xem `docs/BA
 
 **Tài liệu.** `docs/specs/SPEC-2026-08-31-form-dat-tour-gon-va-chi-tiet-gia.md` (hợp đồng thi
 công Task 5–8), `docs/BACKLOG.md` `B-020` và `B-023`.
+
+---
+
+## QĐ-2026-09-01-01 — Nhận đặt tour đi TRONG NGÀY: mốc dưới của `departDate` đảo từ "ngày mai" sang "chính hôm nay"
+
+**Bối cảnh.** Chủ dự án yêu cầu ô "Ngày khởi hành" trong form đặt tour điền sẵn **ngày hiện
+tại**. Nhưng `src/lib/booking/schema.ts` khi đó chặn `departDate < addDaysISO(today, 1)` và trả
+câu riêng *"Ngày khởi hành phải từ ngày mai trở đi."* — nghĩa là điền sẵn hôm nay là điền một
+giá trị mà chính máy chủ từ chối, và nút "Đặt tour ngay" chặn lại ngay tại bước 1.
+
+**Câu hỏi.** Điền sẵn ngày đặt được sớm nhất (hôm nay + 1) cho khớp luật đang có, hay đổi luật
+để nhận đơn đi trong ngày?
+
+**Chốt.** **Nhận đơn đi trong ngày.** Mốc dưới của `departDate` nay là **chính hôm nay** theo giờ
+Việt Nam; chỉ ngày **đã qua** bị chặn. Cửa sổ trên giữ nguyên `LIMITS.MAX_DAYS_AHEAD = 90`
+(`QĐ-2026-08-31-01` không bị đụng tới).
+
+**Ai chốt.** Chủ dự án, 2026-09-01, sau khi được nêu rõ hệ quả dưới đây.
+
+**Hệ quả nhận rõ, không giấu.** Luật mới chỉ so **ngày**, không so **giờ**. Một đơn đặt lúc 14h
+cho chuyến khởi hành 08h sáng **cùng ngày** vẫn qua được cổng kiểm và vào D1 như đơn hợp lệ;
+nhân viên phải gọi lại từ chối bằng tay. Đây là đánh đổi được chấp nhận có chủ ý, không phải lỗ
+hổng ngoài ý muốn. Muốn chặn theo giờ thì phải viết luật mới (mốc giờ cắt, áp ở cả máy chủ lẫn
+script) — **không** vá lén vào chỗ so ngày này.
+
+**Thi hành.**
+- `src/lib/booking/schema.ts` — `input.departDate < today`; `MSG.dateTooEarly` đổi thành
+  *"Ngày khởi hành không được là ngày đã qua."*
+- `src/components/BookingForm.astro` — `minDate = today` ở frontmatter và `dateEl.min = today`
+  trong script. Hai chỗ phải khớp từng chữ với máy chủ; lệch một ngày là ô chọn cho bấm một
+  ngày mà máy chủ trả lỗi.
+- `test/booking/schema.test.ts` — ca `nhận đặt tour đi TRONG NGÀY` khoá **cả hai phía** của mốc
+  (hôm nay phải qua, hôm qua phải trượt), để lần sau ai đó lặng lẽ đưa `addDaysISO(today, 1)`
+  trở lại thì test đỏ chứ không đổi luật kinh doanh trong im lặng.
+
+**Drift kèm theo.** `docs/plans/2026-08-22-dat-tour.md` (dòng 965, 1066, 2475, 2661) còn chép
+luật cũ "từ ngày mai". Phiếu kế hoạch đó là bản ghi lịch sử của đợt thi công tháng 8, không phải
+spec đang chi phối — ghi vào `DRIFT_LOG` chứ không sửa ngược.

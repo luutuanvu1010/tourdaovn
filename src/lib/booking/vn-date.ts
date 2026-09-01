@@ -1,6 +1,6 @@
 // vn-date.ts — ngày theo giờ Việt Nam cho module đặt tour.
-// Mọi luật "từ ngày mai", mã đơn theo ngày, đều tính theo Asia/Ho_Chi_Minh, không theo
-// giờ máy chủ (Worker chạy UTC) hay giờ trình duyệt khách.
+// Mọi luật theo ngày — mốc "không nhận ngày đã qua", mã đơn theo ngày — đều tính theo
+// Asia/Ho_Chi_Minh, không theo giờ máy chủ (Worker chạy UTC) hay giờ trình duyệt khách.
 export const VN_TZ = 'Asia/Ho_Chi_Minh'
 
 const ymd = new Intl.DateTimeFormat('en-CA', { timeZone: VN_TZ, year: 'numeric', month: '2-digit', day: '2-digit' })
@@ -29,6 +29,27 @@ export function isISODate(s: string): boolean {
 export function formatDateVN(iso: string): string {
   const [y, m, d] = iso.split('-')
   return `${d}/${m}/${y}`
+}
+
+// Thứ trong tuần, viết theo lối Việt. Chép cứng bảy chuỗi chứ KHÔNG gọi Intl với 'vi': lịch
+// gốc của <input type="date"> đi theo ngôn ngữ GIAO DIỆN trình duyệt (đo được: máy có
+// navigator.language = 'vi' nhưng Intl phân giải ra 'en-US'), nên Intl ở đây cũng có thể trả
+// tiếng Anh trên chính máy khách. Bảy chuỗi này là thứ duy nhất chắc chắn ra tiếng Việt.
+const THU_VN = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'] as const
+
+/**
+ * '2026-09-01' → 'Thứ Ba, 01/09/2026'. Dùng cho dòng đọc lại ngày khởi hành đặt cạnh ô chọn
+ * ngày: ô đó là điều khiển gốc của trình duyệt nên không ép được ngôn ngữ, còn dòng này thì
+ * luôn tiếng Việt và luôn đúng quy ước dd/mm của site.
+ *
+ * Tính thứ bằng `Date.UTC` chứ không `new Date(iso)` — giống `addDaysISO` ở trên, để không
+ * dính lệch một ngày theo múi giờ máy khách.
+ */
+export function formatDateFullVN(iso: string): string {
+  if (!isISODate(iso)) return ''
+  const [y, m, d] = iso.split('-').map(Number)
+  const thu = THU_VN[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]
+  return `${thu}, ${formatDateVN(iso)}`
 }
 
 const hhmm = new Intl.DateTimeFormat('en-GB', { timeZone: VN_TZ, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
