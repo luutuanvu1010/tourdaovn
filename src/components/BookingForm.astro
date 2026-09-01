@@ -9,7 +9,7 @@ import { uiCopy } from '../lib/uiCopy'
 import { formatPrice } from '../lib/renderer'
 import { availablePaxCodes, computeQuote, emptyPax, type PaxCode, type PriceTable } from '../lib/booking/quote'
 import type { Season } from '../lib/booking/season'
-import { addDaysISO, formatDateVN, todayVN } from '../lib/booking/vn-date'
+import { addDaysISO, formatDateVN, THU_NGAN_VN, todayVN } from '../lib/booking/vn-date'
 import { LIMITS, MSG } from '../lib/booking/schema'
 // Tài khoản nhận chuyển khoản là HẰNG SỐ BIÊN DỊCH — vào bằng import, không qua
 // Astro.props/data-* như priceTable (thứ đọc từ Sanity lúc dựng). SPEC §4.5.
@@ -142,6 +142,39 @@ if (!turnstileSiteKey) {
     <div class="bf__date-wrap">
       <input id="bf-date" class="bf__input bf__input--date" type="date" name="departDate" required value={minDate} min={minDate} max={maxDate} />
       <span class="bf__date-face" aria-hidden="true" data-date-face>{formatDateVN(minDate)}</span>
+      {/* Nut mo lich, TRONG SUOT va phu kin mat o. Phai dung SAU `.bf__date-face` trong DOM
+          de nam tren no. Bam bat cu dau tren o cung mo lich tieng Viet — o ngay ben duoi da
+          bi `pointer-events: none` nen khong con mo duoc lich goc cua trinh duyet nua. */}
+      <button type="button" class="bf__date-trigger" data-cal-open aria-haspopup="dialog"
+              aria-expanded="false" aria-label={t('bookingDepartDatePlaceholder')}>
+        {/* Nut lich GOC cua trinh duyet da an (`::-webkit-calendar-picker-indicator`), nen o
+            ngay se khong con dau hieu nao cho biet bam duoc. Ve lai mot cai o dung cho cu —
+            `aria-hidden` vi nut boc ngoai da co `aria-label` roi, khong doc hai lan. */}
+        <svg class="bf__date-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"
+             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <rect x="3" y="5" width="18" height="16" rx="2" />
+          <path d="M3 10h18M8 3v4M16 3v4" />
+        </svg>
+      </button>
+      {/* LICH TU VE. Ly do ton tai: lich goc cua `<input type="date">` in ten thang theo NGON
+          NGU GIAO DIEN trinh duyet, khong theo `lang` cua trang, va khong ep duoc — do duoc
+          tren may chu du an: trang `lang="vi"` ma `Intl` phan giai ra 'en-US'. Chu du an yeu
+          cau thang phai la tieng Viet (01/09), nen phai tu ve.
+          O `<input type="date">` VAN O LAI va van la nguon su that cua gia tri: `value`,
+          `min`, `max`, `checkValidity()`, va ten truong luc gui form deu giu nguyen, nen moi
+          thu dang chay ben tren no — keo ngay ve `min`, tinh lai gia theo mua, ba cau bao loi
+          — khong phai viet lai. Lich nay chi la mot loi CHON ngay khac. */}
+      <div class="bf__cal" data-cal hidden role="dialog" aria-label={t('bookingDepartDatePlaceholder')}>
+        <div class="bf__cal-head">
+          <button type="button" class="bf__cal-nav" data-cal-prev aria-label={t('bookingCalPrev')}>‹</button>
+          <span class="bf__cal-title" data-cal-title aria-live="polite"></span>
+          <button type="button" class="bf__cal-nav" data-cal-next aria-label={t('bookingCalNext')}>›</button>
+        </div>
+        <div class="bf__cal-dow" aria-hidden="true">
+          {THU_NGAN_VN.map(d => <span>{d}</span>)}
+        </div>
+        <div class="bf__cal-grid" data-cal-grid></div>
+      </div>
     </div>
     <p class="bf__err" data-err="departDate" aria-live="polite"></p>
 
@@ -353,7 +386,7 @@ if (!turnstileSiteKey) {
   import { PAX_ORDER, computeQuote, type PaxCode, type PaxCounts, type PriceTable, type Quote } from '../lib/booking/quote'
   import type { Season } from '../lib/booking/season'
   import { formatPrice } from '../lib/renderer'
-  import { addDaysISO, formatDateVN, todayVN } from '../lib/booking/vn-date'
+  import { addDaysISO, formatDateVN, thangNamVN, todayVN } from '../lib/booking/vn-date'
   import { LIMITS, MSG, buildQuotedPayload, type PaymentMethod } from '../lib/booking/schema'
   import { buildPaymentQr } from '../lib/booking/payment-qr'
   import { banking } from '../site.config'
@@ -462,6 +495,124 @@ if (!turnstileSiteKey) {
     dateEl.addEventListener('change', veLaiMatNgay)
     dateEl.addEventListener('input', veLaiMatNgay)
 
+    /* ── Lich tieng Viet tu ve ────────────────────────────────────────────────────────
+       Xem comment o markup (~L150) cho ly do ton tai. O `<input type="date">` van la nguon
+       su that; lich nay chi ghi vao `dateEl.value` roi BAN 'change' — bat buoc phai ban tay,
+       vi gan `.value` bang script KHONG tu sinh su kien, va ca lop phu mat o lan doan tinh
+       lai gia theo mua deu dang nghe 'change'. */
+    const calEl = q<HTMLElement>('[data-cal]')
+    const calOpenBtn = q<HTMLButtonElement>('[data-cal-open]')
+    const calTitleEl = q<HTMLElement>('[data-cal-title]')
+    const calGridEl = q<HTMLElement>('[data-cal-grid]')
+    const calPrevBtn = q<HTMLButtonElement>('[data-cal-prev]')
+    const calNextBtn = q<HTMLButtonElement>('[data-cal-next]')
+
+    if (calEl && calOpenBtn && calTitleEl && calGridEl && calPrevBtn && calNextBtn) {
+      // Thang dang xem, doc lap voi ngay dang chon: khach lat qua thang khac ma chua chon gi
+      // thi ngay chon van nguyen.
+      let thangXem = { y: 0, m: 0 }
+
+      const tachISO = (iso: string) => {
+        const [y, m, d] = iso.split('-').map(Number)
+        return { y, m: m - 1, d }
+      }
+      const ghepISO = (y: number, m: number, d: number) =>
+        `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+
+      const veLich = () => {
+        const { y, m } = thangXem
+        calTitleEl.textContent = thangNamVN(y, m)
+        // `Date.UTC` chu khong `new Date(y, m, ...)`: cung ly do voi `addDaysISO` — gio may
+        // khach lech mui co the day sang ngay khac.
+        const dauThang = new Date(Date.UTC(y, m, 1))
+        const oTrong = dauThang.getUTCDay()               // CN = 0, khop THU_NGAN_VN
+        const soNgay = new Date(Date.UTC(y, m + 1, 0)).getUTCDate()
+        const min = dateEl.min, max = dateEl.max, dangChon = dateEl.value
+
+        calGridEl.textContent = ''
+        // O trong dau thang: <span> chu khong <button>, de ban phim khong dung vao o rong.
+        for (let i = 0; i < oTrong; i++) calGridEl.appendChild(document.createElement('span'))
+        for (let d = 1; d <= soNgay; d++) {
+          const iso = ghepISO(y, m, d)
+          const b = document.createElement('button')
+          b.type = 'button'
+          b.className = 'bf__cal-day'
+          b.textContent = String(d)
+          b.dataset.iso = iso
+          // Ngoai pham vi thi KHONG bam duoc ngay tu trong luoi, chu khong de bam roi bao loi.
+          if ((min && iso < min) || (max && iso > max)) b.disabled = true
+          if (iso === dangChon) { b.classList.add('is-chon'); b.setAttribute('aria-current', 'date') }
+          calGridEl.appendChild(b)
+        }
+        // Het pham vi thi khoa luon nut lat thang, khong cho lat vao vung trong tron.
+        calPrevBtn.disabled = !!min && ghepISO(y, m, 1) <= min
+        calNextBtn.disabled = !!max && ghepISO(y, m, soNgay) >= max
+      }
+
+      const moLich = () => {
+        const goc = tachISO(dateEl.value || dateEl.min || todayVN())
+        thangXem = { y: goc.y, m: goc.m }
+        veLich()
+        calEl.hidden = false
+        calOpenBtn.setAttribute('aria-expanded', 'true')
+        ;(calGridEl.querySelector<HTMLButtonElement>('.is-chon')
+          || calGridEl.querySelector<HTMLButtonElement>('.bf__cal-day:not([disabled])'))?.focus()
+      }
+      const dongLich = (traFocus = true) => {
+        if (calEl.hidden) return
+        calEl.hidden = true
+        calOpenBtn.setAttribute('aria-expanded', 'false')
+        if (traFocus) calOpenBtn.focus()
+      }
+
+      calOpenBtn.addEventListener('click', () => { calEl.hidden ? moLich() : dongLich() })
+      calPrevBtn.addEventListener('click', () => {
+        thangXem = thangXem.m === 0 ? { y: thangXem.y - 1, m: 11 } : { y: thangXem.y, m: thangXem.m - 1 }
+        veLich()
+      })
+      calNextBtn.addEventListener('click', () => {
+        thangXem = thangXem.m === 11 ? { y: thangXem.y + 1, m: 0 } : { y: thangXem.y, m: thangXem.m + 1 }
+        veLich()
+      })
+      calGridEl.addEventListener('click', e => {
+        const b = (e.target as HTMLElement).closest<HTMLButtonElement>('.bf__cal-day')
+        if (!b || b.disabled) return
+        dateEl.value = b.dataset.iso!
+        // BAN TAY: gan `.value` bang script khong tu sinh su kien nao.
+        dateEl.dispatchEvent(new Event('input', { bubbles: true }))
+        dateEl.dispatchEvent(new Event('change', { bubbles: true }))
+        dongLich()
+      })
+
+      // Ban phim: Esc dong lich, mui ten lat ngay, Tab ra ngoai thi dong.
+      calEl.addEventListener('keydown', e => {
+        if (e.key === 'Escape') { e.preventDefault(); dongLich(); return }
+        const b = (e.target as HTMLElement).closest<HTMLButtonElement>('.bf__cal-day')
+        if (!b) return
+        const buoc = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1
+          : e.key === 'ArrowDown' ? 7 : e.key === 'ArrowUp' ? -7 : 0
+        if (!buoc) return
+        e.preventDefault()
+        const dich = addDaysISO(b.dataset.iso!, buoc)
+        if ((dateEl.min && dich < dateEl.min) || (dateEl.max && dich > dateEl.max)) return
+        const t = tachISO(dich)
+        if (t.y !== thangXem.y || t.m !== thangXem.m) { thangXem = { y: t.y, m: t.m }; veLich() }
+        calGridEl.querySelector<HTMLButtonElement>(`[data-iso="${dich}"]`)?.focus()
+      })
+      calEl.addEventListener('focusout', e => {
+        if (!calEl.contains(e.relatedTarget as Node) && e.relatedTarget !== calOpenBtn) dongLich(false)
+      })
+      document.addEventListener('click', e => {
+        if (!calEl.hidden && !calEl.contains(e.target as Node) && e.target !== calOpenBtn) dongLich(false)
+      })
+      // `pointer-events: none` chan duoc CHUOT tren o ngay, KHONG chan duoc ban phim: Chrome
+      // van mo lich goc bang Alt+Mui-ten-xuong hoac F4 khi o dang duoc focus. Chan hai phim
+      // do va mo lich cua minh, neu khong ban phim van gap ten thang tieng Anh.
+      dateEl.addEventListener('keydown', e => {
+        if (e.key === 'F4' || (e.altKey && e.key === 'ArrowDown')) { e.preventDefault(); moLich() }
+      })
+    }
+
     // Ngày ngoài phạm vi: nói THẲNG sai ở đâu thay vì đọc lại phạm vi. Câu "Chọn ngày từ …
     // đến …" đã gỡ hoàn toàn (chủ dự án chốt 01/09), nên chỗ này không còn nguồn nào để
     // dựng lại nó. Dùng đúng ba câu MSG mà PHÍA MÁY CHỦ trả về cho cùng ba tình huống
@@ -469,7 +620,7 @@ if (!turnstileSiteKey) {
     // KHÔNG rơi về `dateEl.validationMessage`: đó là câu của trình duyệt, đi theo ngôn ngữ
     // giao diện trình duyệt nên ra tiếng Anh giữa một form tiếng Việt (đo được trên máy chủ
     // dự án: Intl phân giải en-US dù trang lang="vi").
-    const dateRangeMsg = () => {
+    const cauLoiNgay = () => {
       const v = dateEl.value
       if (v && dateEl.min && v < dateEl.min) return MSG.dateTooEarly
       if (v && dateEl.max && v > dateEl.max) return MSG.dateTooFar
@@ -665,7 +816,7 @@ if (!turnstileSiteKey) {
       // `min`/`max` của ô ngày chỉ chặn được mũi tên lịch, không chặn ngày gõ tay. Không chốt
       // ở đây thì ngày ngoài phạm vi lọt hết bước 1 và khách chỉ biết sau khi server trả về.
       if (!dateEl.checkValidity()) {
-        showErr('departDate', dateRangeMsg() || dateEl.validationMessage || '')
+        showErr('departDate', cauLoiNgay() || dateEl.validationMessage || '')
         dateEl.focus({ preventScroll: true })
         dateEl.scrollIntoView({ block: 'center' })
         return
@@ -908,16 +1059,30 @@ if (!turnstileSiteKey) {
      tren dieu khien goc nen phai them `-webkit-text-fill-color`. Nut mo lich la anh nen,
      khong an theo mau chu, nen van bam duoc. */
   .bf__date-wrap { position: relative; }
-  .bf__input--date { color: transparent; -webkit-text-fill-color: transparent; }
-  .bf__input--date::-webkit-calendar-picker-indicator { opacity: 1; }
+  /* `pointer-events: none`: moi cu bam roi xuong `.bf__date-trigger` phu ben tren, nen lich
+     GOC cua trinh duyet khong con mo duoc bang chuot. O ngay VAN tab toi va go tay duoc —
+     co y giu, de ban phim khong mat duong nhap nhanh. Nut mo lich goc an han: de lai thi no
+     thanh mot diem chet, bam khong ra gi. */
+  .bf__input--date { color: transparent; -webkit-text-fill-color: transparent; pointer-events: none; }
+  .bf__input--date::-webkit-calendar-picker-indicator { display: none; }
+  /* Nut mo lich: trong suot, phu kin mat o. Vien focus ve tren chinh no de ban phim con thay
+     dang dung o dau. */
+  .bf__date-trigger {
+    position: absolute; inset: 0;
+    width: 100%; padding: 0 var(--s4) 0 0;
+    display: flex; align-items: center; justify-content: flex-end;
+    background: none; border: 0; border-radius: var(--radius-md);
+    color: var(--c-text-muted); cursor: pointer;
+  }
+  .bf__date-trigger:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 1px; }
   /* Dat de LEN o ngay, khop tung padding/border/co chu voi `.bf__input` de chu khong xe dich.
      `pointer-events: none` de moi cu bam van roi xuong o ngay that ben duoi (bam vao lop phu
      ma khong mo duoc lich la loi hay gap nhat cua loi nay). Gia tri deu la token. */
   .bf__date-face {
     position: absolute; inset: 0;
     display: flex; align-items: center;
-    /* Chua rieng ben phai cho nut mo lich goc cua trinh duyet (--s7 = 48px, du cho nut cua
-       ca Chrome lan Safari): thieu cho nay thi chuoi ngay chay de len nut. */
+    /* Chua rieng ben phai cho bieu tuong lich cua `.bf__date-trigger` (--s7 = 48px: bieu
+       tuong 20px cong le phai --s4, con du): thieu cho nay thi chuoi ngay chay de len no. */
     padding: var(--s3) var(--s7) var(--s3) var(--s4);
     font-size: var(--fs-base); color: var(--c-text);
     pointer-events: none;
@@ -927,6 +1092,51 @@ if (!turnstileSiteKey) {
      chu noi ra 208px, du cho "Chon ngay khoi hanh" o --fs-base (can 181px). Truoc do phai
      ep xuong --fs-sm vi chi con 160px — rang buoc do khong con. */
   .bf__date-face--empty { color: var(--c-text-muted); }
+  /* ── Lich tieng Viet tu ve ──
+     Khoi chua la `.bf__date-wrap` (rong bang o ngay), KHONG phai nut mo — dung bai hoc cua
+     bang ghi chu dau ⓘ truoc do: cho `<details>` lam khoi chua thi bang bi ep vao be rong
+     20px cua no. `top: 100%` de lich do XUONG DUOI o, khong lam o cao them. */
+  .bf__cal {
+    position: absolute; top: 100%; left: 0; right: 0; z-index: 2;
+    margin-top: var(--s1);
+    padding: var(--s3);
+    background: var(--c-card);
+    border: 1px solid var(--c-border); border-radius: var(--radius-md);
+    box-shadow: var(--shadow-overlay);
+  }
+  .bf__cal-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); }
+  .bf__cal-title { font-size: var(--fs-label); font-weight: var(--fw-600); color: var(--c-text); }
+  .bf__cal-nav {
+    display: flex; align-items: center; justify-content: center;
+    width: var(--s5); height: var(--s5); padding: 0;
+    background: none; border: 1px solid var(--c-border); border-radius: var(--radius-sm);
+    font-size: var(--fs-label); color: var(--c-text); cursor: pointer;
+  }
+  .bf__cal-nav:disabled { opacity: .4; cursor: default; }
+  .bf__cal-nav:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 2px; }
+  /* Bay cot bang nhau cho ca hang dau cot lan luoi ngay — khai mot lan, hai noi dung chung,
+     khong the lech cot. */
+  .bf__cal-dow, .bf__cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: var(--s1); }
+  .bf__cal-dow { margin-top: var(--s2); }
+  .bf__cal-dow span { text-align: center; font-size: var(--fs-xs); color: var(--c-text-muted); }
+  /* `:global()` BAT BUOC o day, khong phai cho tien: cac o ngay do SCRIPT tao ra nen chung
+     khong mang thuoc tinh scoped cua Astro, ma Astro lai gan thuoc tinh do vao moi bo chon
+     (`.bf__cal-day` thanh `.bf__cal-day[data-astro-cid-…]`) — viet tran thi luat khong khop
+     mot o nao. Do duoc luc chua bo `:global`: `aspect-ratio` ra 'auto', `display` ra 'block',
+     o ngay thanh 32x20 thay vi vuong. Cung bay da dinh o `.bf__tip-body` dung bang chi tiet
+     gia (~L588). Bo chon cha `.bf__cal-grid` VAN mang scope nen luat khong ro ri ra ngoai. */
+  .bf__cal-grid :global(.bf__cal-day) {
+    /* `aspect-ratio` chu khong chieu cao chep cung: o vuong theo be rong cot, nen lich tu vua
+       trong o ngay o moi kho man hinh ma khong can con so nao. */
+    aspect-ratio: 1; padding: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: none; border: 0; border-radius: var(--radius-sm);
+    font-size: var(--fs-label); color: var(--c-text); cursor: pointer;
+  }
+  .bf__cal-grid :global(.bf__cal-day:hover:not(:disabled)) { background: var(--c-primary-soft); }
+  .bf__cal-grid :global(.bf__cal-day:disabled) { color: var(--c-text-muted); opacity: .35; cursor: default; }
+  .bf__cal-grid :global(.bf__cal-day.is-chon) { background: var(--c-primary); color: var(--c-text-inverse); font-weight: var(--fw-600); }
+  .bf__cal-grid :global(.bf__cal-day:focus-visible) { outline: 2px solid var(--c-primary); outline-offset: -2px; }
   .bf__pax { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); padding: var(--s2) 0; }
   .bf__pax-info { display: flex; flex-direction: column; gap: 2px; }
   .bf__pax-name { font-size: var(--fs-base); font-weight: var(--fw-600); color: var(--c-text); }

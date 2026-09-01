@@ -38,6 +38,29 @@ export function formatDateVN(iso: string): string {
 const THU_VN = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'] as const
 
 /**
+ * Đầu cột của lịch tự vẽ. Bản ngắn của `THU_VN` ở trên, cùng thứ tự bắt đầu từ Chủ nhật để
+ * dùng thẳng được `getUTCDay()`.
+ */
+export const THU_NGAN_VN = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'] as const
+
+/**
+ * Tên tháng cho tiêu đề lịch tự vẽ. CHÉP CỨNG mười hai chuỗi, cùng đúng một lý do với
+ * `THU_VN` ngay trên: `Intl` với 'vi' có thể phân giải ra tiếng Anh trên chính máy khách
+ * (đo được trên máy chủ dự án: trang `lang="vi"` mà `Intl` ra 'en-US'). Cả cái lịch tự vẽ
+ * này sinh ra chỉ vì lịch gốc của trình duyệt in tháng tiếng Anh — gọi `Intl` ở đây là dẫm
+ * lại đúng cái bẫy vừa thoát ra.
+ */
+export const THANG_VN = [
+  'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+  'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12',
+] as const
+
+/** 2026, 8 (0-based) → 'Tháng 9, 2026'. Tiêu đề đầu lịch. */
+export function thangNamVN(year: number, monthIndex: number): string {
+  return `${THANG_VN[monthIndex]}, ${year}`
+}
+
+/**
  * '2026-09-01' → 'Thứ Ba, 01/09/2026'. Dùng cho dòng đọc lại ngày khởi hành đặt cạnh ô chọn
  * ngày: ô đó là điều khiển gốc của trình duyệt nên không ép được ngôn ngữ, còn dòng này thì
  * luôn tiếng Việt và luôn đúng quy ước dd/mm của site.
