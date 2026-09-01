@@ -66,8 +66,6 @@ const initialQuote = computeQuote(priceTable, initialPax, {
 // Câu chỉ phạm vi ngày, giữ dạng KHUÔN có {min}/{max} chứ không nướng sẵn hai mốc: script
 // tính lại min/max theo giờ Việt Nam lúc khách mở trang, nên chuỗi cố định lúc build sẽ lệch
 // mốc ngay hôm sau. Server dựng sẵn một bản để không JS vẫn đọc được phạm vi.
-const dateRangeTpl = 'Chọn ngày từ {min} đến {max}'
-const dateRangeText = dateRangeTpl.replace('{min}', formatDateVN(minDate)).replace('{max}', formatDateVN(maxDate))
 
 const zaloUrl = contact?.zaloUrl || ''
 const hotline = contact?.hotline || ''
@@ -96,7 +94,6 @@ if (!turnstileSiteKey) {
   data-total-max={String(LIMITS.TOTAL_MAX)}
   data-per-type-max={String(LIMITS.PER_TYPE_MAX)}
   data-date-required={MSG.dateRequired}
-  data-date-range={dateRangeTpl}
   data-date-label={t('bookingDepartDate')}
   data-date-hint={t('bookingDepartDatePlaceholder')}
   data-subtotal-label={t('bookingSubtotal')}
@@ -123,20 +120,14 @@ if (!turnstileSiteKey) {
         Xoa la mat ca hai. Chu nhin thay da chuyen thanh lop phu tren mat o ngay
         (`.bf__date-face` ben duoi). Dung lai `.bf__sr-only` — cung tien le voi nhan "So nguoi"
         va nhan hinh thuc thanh toan ben duoi, khong dung display:none.
-        `.bf__label-row` da bi go: no ton tai de giu nhan va dau ⓘ CUNG MOT DONG; nhan an di
-        roi thi hang do chi con mot dau ⓘ treo lo lung tren mot dai trong. Dau ⓘ chuyen xuong
-        neo vao chinh o ngay (`.bf__date-tip`). */}
+        `.bf__label-row` da bi go cung voi dau ⓘ cua o ngay: hang do ton tai de giu nhan va
+        dau ⓘ CUNG MOT DONG, ma nay khong con ca hai. Dau ⓘ do chi chua cau "Chon ngay tu …
+        den …", thu chu du an yeu cau go HOAN TOAN ngay 01/09. */}
     <label class="bf__sr-only" for="bf-date">{t('bookingDepartDate')}</label>
-    {/* Ban DUY NHAT ma trinh doc man hinh dua vao — nam NGOAI <details>, luon co mat
-        trong cay truy cap du hop thoai dang dong hay mo. aria-describedby cua o ngay
-        tro vao day, khong tro vao ban nhin thay ben trong <details> nua (co the khong
-        duoc AT doc khi dong, tuy engine — xem task-4-report.md §1). */}
-    <span id="bf-date-range" class="bf__sr-only" data-date-range-text>{dateRangeText}</span>
     {/* `value` dien san NGAY HIEN TAI de o ngay khong con trong. Ngay nay NUONG LUC DUNG
         nen se cu di sau nua dem — script keo lai ve `min` vua tinh theo gio Viet Nam (xem
-        ~L410), giong het ly do `dateRangeTpl` o tren giu dang khuon thay vi nuong san hai
-        moc. Khong co doan keo do thi hom sau khach bam nut la an loi pham vi tren mot ngay
-        ho chua he go. */}
+        ~L410). Khong co doan keo do thi hom sau khach bam nut la an loi pham vi tren mot
+        ngay ho chua he go. */}
     {/* LOP PHU TIENG VIET tren mat o ngay. `<input type="date">` la dieu khien goc cua trinh
         duyet: no khong nhan `placeholder`, va dinh dang chu trong o di theo NGON NGU GIAO DIEN
         trinh duyet chu khong theo `lang` cua trang — do duoc tren may chu du an: Chrome giao
@@ -149,16 +140,8 @@ if (!turnstileSiteKey) {
         kien truc rieng (phien 01/09: chu du an chon huong lop phu, khong tu viet lich).
         `aria-hidden`: o ngay da tu doc gia tri cua no cho trinh doc man hinh. */}
     <div class="bf__date-wrap">
-      <input id="bf-date" class="bf__input bf__input--date" type="date" name="departDate" required value={minDate} min={minDate} max={maxDate} aria-describedby="bf-date-range" />
+      <input id="bf-date" class="bf__input bf__input--date" type="date" name="departDate" required value={minDate} min={minDate} max={maxDate} />
       <span class="bf__date-face" aria-hidden="true" data-date-face>{formatDateVN(minDate)}</span>
-      {/* `<details>` khong phai phrasing content nen khong duoc long trong <label> (vi pham
-          content model HTML5) — no luon la khoi rieng. Ban nhin thay nay la BAN SAO, gan
-          aria-hidden de trinh doc man hinh khong doc trung voi span an ben tren — no van
-          phai cap nhat chu khi script tinh lai pham vi ngay (xem script ~L392). */}
-      <details class="bf__tip bf__date-tip">
-        <summary class="bf__tip-mark" aria-label={t('info')}>i</summary>
-        <p class="bf__tip-body" aria-hidden="true" data-date-range-text>{dateRangeText}</p>
-      </details>
     </div>
     <p class="bf__err" data-err="departDate" aria-live="polite"></p>
 
@@ -479,16 +462,19 @@ if (!turnstileSiteKey) {
     dateEl.addEventListener('change', veLaiMatNgay)
     dateEl.addEventListener('input', veLaiMatNgay)
 
-    // Câu phạm vi ngày dựng lại từ min/max VỪA tính, không dùng bản server nướng lúc build.
-    const dateRangeTpl = form.dataset.dateRange || ''
-    const dateRangeMsg = () => dateRangeTpl
-      ? dateRangeTpl.replace('{min}', formatDateVN(dateEl.min)).replace('{max}', formatDateVN(dateEl.max))
-      : ''
-    // HAI node mang [data-date-range-text] từ vòng sửa 1/5 (bản cho trình đọc màn hình —
-    // .bf__sr-only, luôn trong cây truy cập — và bản nhìn thấy bên trong <details>, mang
-    // aria-hidden). `q()` chỉ lấy node ĐẦU TIÊN — phải querySelectorAll và cập nhật cả hai,
-    // nếu không bản cho trình đọc màn hình đứng yên ở chuỗi lúc dựng server.
-    form.querySelectorAll<HTMLElement>('[data-date-range-text]').forEach(el => { el.textContent = dateRangeMsg() })
+    // Ngày ngoài phạm vi: nói THẲNG sai ở đâu thay vì đọc lại phạm vi. Câu "Chọn ngày từ …
+    // đến …" đã gỡ hoàn toàn (chủ dự án chốt 01/09), nên chỗ này không còn nguồn nào để
+    // dựng lại nó. Dùng đúng ba câu MSG mà PHÍA MÁY CHỦ trả về cho cùng ba tình huống
+    // (schema.ts) — một nguồn sự thật, khách không thấy hai lối diễn đạt cho một lỗi.
+    // KHÔNG rơi về `dateEl.validationMessage`: đó là câu của trình duyệt, đi theo ngôn ngữ
+    // giao diện trình duyệt nên ra tiếng Anh giữa một form tiếng Việt (đo được trên máy chủ
+    // dự án: Intl phân giải en-US dù trang lang="vi").
+    const dateRangeMsg = () => {
+      const v = dateEl.value
+      if (v && dateEl.min && v < dateEl.min) return MSG.dateTooEarly
+      if (v && dateEl.max && v > dateEl.max) return MSG.dateTooFar
+      return MSG.dateInvalid
+    }
     // Đổi ngày khởi hành có thể đổi mùa áp dụng, nên phải tính lại tạm tính ngay (Task 5).
     dateEl.addEventListener('change', update)
 
@@ -899,9 +885,7 @@ if (!turnstileSiteKey) {
      dùng `display:none` hay `visibility:hidden`: cả hai ẩn luôn với trình đọc màn hình,
      mất tác dụng của node này. `position:absolute` đưa nó ra khỏi luồng — không cộng
      thêm khoảng cách `gap` nào của `.bf__step` (flex container cha), nên không đẩy cao
-     form. Đây là bản DUY NHẤT mang `id="bf-date-range"` mà `aria-describedby` của ô ngày
-     trỏ tới; bản nhìn thấy bên trong `.bf__tip` mang `aria-hidden="true"` để không đọc
-     trùng khi `<details>` đang mở. */
+     form. */
   .bf__sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .bf__input { width: 100%; font: inherit; font-size: var(--fs-base); padding: var(--s3) var(--s4); border: 1px solid var(--c-border); border-radius: var(--radius-md); background: var(--c-card); color: var(--c-text); }
   .bf__input:focus { outline: 2px solid var(--c-primary); outline-offset: 1px; }
@@ -932,36 +916,17 @@ if (!turnstileSiteKey) {
   .bf__date-face {
     position: absolute; inset: 0;
     display: flex; align-items: center;
-    /* Chua rieng ben phai cho HAI nut chong len o: dau ⓘ (`.bf__date-tip`, dat tai
-       right: --s7) va nut mo lich goc cua trinh duyet o sat bien. --s9 phu ca hai; thieu
-       cho nay thi chuoi ngay chay de len chung. */
-    padding: var(--s3) var(--s9) var(--s3) var(--s4);
+    /* Chua rieng ben phai cho nut mo lich goc cua trinh duyet (--s7 = 48px, du cho nut cua
+       ca Chrome lan Safari): thieu cho nay thi chuoi ngay chay de len nut. */
+    padding: var(--s3) var(--s7) var(--s3) var(--s4);
     font-size: var(--fs-base); color: var(--c-text);
     pointer-events: none;
     overflow: hidden; white-space: nowrap;
   }
-  /* Trang thai rong dung co chu NHO hon (loi placeholder quen thuoc) va do la bat buoc chu
-     khong phai trang tri: o ngay rong 272px, tru le trai --s4 va le phai --s9 (chua cho dau
-     ⓘ + nut mo lich) chi con 160px, trong khi "Chon ngay khoi hanh" o --fs-base 19px can
-     181px — do duoc, se bi cat. O --fs-sm chuoi nay can ~133px, con du 27px. */
-  .bf__date-face--empty { color: var(--c-text-muted); font-size: var(--fs-sm); }
-  /* Dau ⓘ cua o ngay. Nhan da an thi giac nen khong con chu de dau ⓘ bam vao — neo thang
-     vao o ngay, dat trong bien phai va chua cho nut mo lich goc (--s7).
-     `<details>` GIU position: static co chu dich: khoi chua cua ca dau ⓘ lan bang ghi chu
-     phai la `.bf__date-wrap` (rong bang o ngay). Cho `<details>` position: absolute thi
-     CHINH no thanh khoi chua, va bang ghi chu bi ep vao be rong 20px cua dau ⓘ — do duoc:
-     hop 20x151px, chu xuong dong tung ki tu. */
-  .bf__date-tip { position: static; }
-  /* Doi `position` cua `.bf__tip-mark` tu relative sang absolute: van la khoi chua duoc lap
-     ngay tai day nen vung cham 44px o `::before` khong doi. `margin-inline-start: var(--s1)`
-     cua ban goc la de dung SAU mot chu nhan; o day khong con chu nao di truoc nen go di. */
-  .bf__date-tip .bf__tip-mark {
-    position: absolute; right: var(--s7); top: 50%; transform: translateY(-50%);
-    margin-inline-start: 0;
-  }
-  /* Bang ghi chu bung ra phai RA KHOI o ngay, neu khong `<details>` mo ra lam o cao them va
-     day ca cot xuong. Neo duoi day o, trai het be rong o. */
-  .bf__date-tip .bf__tip-body { position: absolute; top: 100%; left: 0; right: 0; }
+  /* Chi doi MAU, KHONG doi co chu: go dau ⓘ roi thi le phai tut tu --s9 xuong --s7, cho
+     chu noi ra 208px, du cho "Chon ngay khoi hanh" o --fs-base (can 181px). Truoc do phai
+     ep xuong --fs-sm vi chi con 160px — rang buoc do khong con. */
+  .bf__date-face--empty { color: var(--c-text-muted); }
   .bf__pax { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); padding: var(--s2) 0; }
   .bf__pax-info { display: flex; flex-direction: column; gap: 2px; }
   .bf__pax-name { font-size: var(--fs-base); font-weight: var(--fw-600); color: var(--c-text); }
