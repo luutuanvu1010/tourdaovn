@@ -568,8 +568,10 @@ if (!turnstileSiteKey) {
         // Lat roi van co the con thieu cho (man hinh thap, bang cao). Keo not vao tam nhin.
         const sau = calEl.getBoundingClientRect()
         if (sau.top < 0 || sau.bottom > innerHeight) calEl.scrollIntoView({ block: 'nearest' })
+        // `preventScroll`: tren iOS `focus()` keo trang giat mot cai, ma o tren vua canh vi tri
+        // bang lich xong — de no cuon lai la hong cong do.
         ;(calGridEl.querySelector<HTMLButtonElement>('.is-chon')
-          || calGridEl.querySelector<HTMLButtonElement>('.bf__cal-day:not([disabled])'))?.focus()
+          || calGridEl.querySelector<HTMLButtonElement>('.bf__cal-day:not([disabled])'))?.focus({ preventScroll: true })
       }
       const dongLich = (traFocus = true) => {
         if (calEl.hidden) return
@@ -600,6 +602,9 @@ if (!turnstileSiteKey) {
       // Ban phim: Esc dong lich, mui ten lat ngay, Tab ra ngoai thi dong.
       calEl.addEventListener('keydown', e => {
         if (e.key === 'Escape') { e.preventDefault(); dongLich(); return }
+        // Tab ra khoi lich thi dong, nhung KHONG chan phim: de tieu diem di tiep binh thuong.
+        // Day la phan thay cho `focusout` da bo (xem khoi giai thich ben duoi).
+        if (e.key === 'Tab') { dongLich(false); return }
         const b = (e.target as HTMLElement).closest<HTMLButtonElement>('.bf__cal-day')
         if (!b) return
         const buoc = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1
@@ -617,14 +622,24 @@ if (!turnstileSiteKey) {
       // `!==` thi cu bam do bi coi la "bam ra ngoai" va dong sap lich ngay sau khi vua mo —
       // do duoc bang chuot that tren production: bam giua o thi mo, bam dung bieu tuong thi
       // khong. `element.click()` trong script KHONG lo ra loi nay vi no dat target la cai nut.
-      calEl.addEventListener('focusout', e => {
-        const t = e.relatedTarget as Node | null
-        if (!calEl.contains(t) && !calOpenBtn.contains(t)) dongLich(false)
-      })
-      document.addEventListener('click', e => {
-        const t = e.target as Node
+      // KHONG dung `focusout` de dong lich. Hai ly do, ly do dau la cai lam hong iPhone:
+      //  1. iOS Safari khong chuyen focus khi CHAM vao mot `<button>` — focus roi ra "khong
+      //     dau" nen `relatedTarget` la null. Dong theo tin hieu do thi vua cham mot o ngay la
+      //     lich dong ngay; dong roi thi node `hidden`, `click` khong con cho ma roi xuong, va
+      //     tren iPhone lich mo ra nhung khong chon duoc ngay nao — dung trieu chung chu du an
+      //     bao. May tinh khong dinh vi bam chuot vao <button> CO chuyen focus.
+      //  2. Duong dong nay khong quan sat duoc bang cong cu do dang co, ma mot duong dong
+      //     khong kiem duoc thi khong nen giu.
+      // Thay bang ba tin hieu TAT DINH, deu kiem duoc: chon mot ngay, Esc, bam ra ngoai, va
+      // Tab ra khoi lich (bat o `keydown` ngay duoi).
+      const bamRaNgoai = (t: Node) => {
         if (!calEl.hidden && !calEl.contains(t) && !calOpenBtn.contains(t)) dongLich(false)
-      })
+      }
+      // Nghe CA `pointerdown` lan `click`: tren iOS, `click` o tang `document` khong ban ra
+      // voi cham len phan tu khong tuong tac duoc, nen chi nghe `click` thi tren iPhone lich
+      // khong dong lai duoc khi cham ra ngoai.
+      document.addEventListener('click', e => bamRaNgoai(e.target as Node))
+      document.addEventListener('pointerdown', e => bamRaNgoai(e.target as Node))
       // `pointer-events: none` chan duoc CHUOT tren o ngay, KHONG chan duoc ban phim: Chrome
       // van mo lich goc bang Alt+Mui-ten-xuong hoac F4 khi o dang duoc focus. Chan hai phim
       // do va mo lich cua minh, neu khong ban phim van gap ten thang tieng Anh.
@@ -1099,6 +1114,9 @@ if (!turnstileSiteKey) {
      — bo doi su kien o tren da xu ly dung roi — nhung giu cho `e.target` chi co MOT gia tri,
      de bay "target la <svg> chu khong phai nut" khong quay lai duoi dang khac. */
   .bf__date-icon { pointer-events: none; }
+  /* `touch-action: manipulation`: bo cu zoom hai-cham cua iOS tren hai thu nay, nho vay Safari
+     khong con cho ~300ms xem co phai cham doi khong truoc khi ban `click`. */
+  .bf__date-trigger { touch-action: manipulation; }
   /* Dat de LEN o ngay, khop tung padding/border/co chu voi `.bf__input` de chu khong xe dich.
      `pointer-events: none` de moi cu bam van roi xuong o ngay that ben duoi (bam vao lop phu
      ma khong mo duoc lich la loi hay gap nhat cua loi nay). Gia tri deu la token. */
@@ -1159,6 +1177,7 @@ if (!turnstileSiteKey) {
     display: flex; align-items: center; justify-content: center;
     background: none; border: 0; border-radius: var(--radius-sm);
     font-size: var(--fs-label); color: var(--c-text); cursor: pointer;
+    touch-action: manipulation;
   }
   .bf__cal-grid :global(.bf__cal-day:hover:not(:disabled)) { background: var(--c-primary-soft); }
   .bf__cal-grid :global(.bf__cal-day:disabled) { color: var(--c-text-muted); opacity: .35; cursor: default; }

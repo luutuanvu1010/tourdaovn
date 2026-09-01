@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-09-01T04:15:34.938Z",
+  "generatedAt": "2026-09-01T04:40:07.502Z",
   "status": "pass",
   "summary": {
     "files": {
@@ -11,9 +11,9 @@
       "/ai/graph.json": "present",
       "/ai/reading-guide.json": "present"
     },
-    "totalEntities": 112,
+    "totalEntities": 113,
     "entityTypes": {
-      "article": 17,
+      "article": 18,
       "attraction": 33,
       "experience": 8,
       "hotel": 10,
@@ -24,19 +24,19 @@
       "touristDestination": 5
     },
     "urlsByLanguage": {
-      "vi": 112
+      "vi": 113
     },
     "aiCoverageRatio": 1,
     "sitemapCoverageRatio": 1,
     "graph": {
-      "nodes": 112,
-      "edges": 267,
+      "nodes": 113,
+      "edges": 276,
       "danglingEdges": 0,
       "orphanNodes": 12,
       "relations": {
-        "author": 16,
-        "about": 31,
-        "mentions": 94,
+        "author": 17,
+        "about": 33,
+        "mentions": 100,
         "containedInPlace": 36,
         "venue": 8,
         "operator": 24,
@@ -44,8 +44,8 @@
       }
     },
     "readiness": {
-      "missingSource": 78,
-      "missingSameAs": 66,
+      "missingSource": 79,
+      "missingSameAs": 67,
       "commercialMissingBookingOrFreeFlag": 43,
       "missingLanguages": 0,
       "staleFiles": []
@@ -252,6 +252,22 @@
       "hasSameAs": false,
       "hasBookingOrFreeFlag": true,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/article;7c483d51-7f52-4dec-8eb3-3a179382e357"
+    },
+    {
+      "id": "f8a13f4e-5843-4120-869b-b7e152b1ee2b",
+      "type": "article",
+      "title": "Thuê cano đi Hòn Mun: Kinh nghiệm đi riêng và cách chọn lịch trình",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/thue-cano-di-hon-mun/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;f8a13f4e-5843-4120-869b-b7e152b1ee2b"
     },
     {
       "id": "feacb7ff-f052-49c5-92b5-41d3375de940",
