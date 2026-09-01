@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-09-01T03:57:14.745Z",
+  "generatedAt": "2026-09-01T04:15:34.938Z",
   "status": "pass",
   "summary": {
     "files": {
@@ -11,9 +11,9 @@
       "/ai/graph.json": "present",
       "/ai/reading-guide.json": "present"
     },
-    "totalEntities": 111,
+    "totalEntities": 112,
     "entityTypes": {
-      "article": 16,
+      "article": 17,
       "attraction": 33,
       "experience": 8,
       "hotel": 10,
@@ -24,19 +24,19 @@
       "touristDestination": 5
     },
     "urlsByLanguage": {
-      "vi": 111
+      "vi": 112
     },
     "aiCoverageRatio": 1,
     "sitemapCoverageRatio": 1,
     "graph": {
-      "nodes": 111,
-      "edges": 258,
+      "nodes": 112,
+      "edges": 267,
       "danglingEdges": 0,
       "orphanNodes": 12,
       "relations": {
-        "author": 15,
-        "about": 29,
-        "mentions": 88,
+        "author": 16,
+        "about": 31,
+        "mentions": 94,
         "containedInPlace": 36,
         "venue": 8,
         "operator": 24,
@@ -44,8 +44,8 @@
       }
     },
     "readiness": {
-      "missingSource": 77,
-      "missingSameAs": 65,
+      "missingSource": 78,
+      "missingSameAs": 66,
       "commercialMissingBookingOrFreeFlag": 43,
       "missingLanguages": 0,
       "staleFiles": []
@@ -268,6 +268,22 @@
       "hasSameAs": false,
       "hasBookingOrFreeFlag": true,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/article;feacb7ff-f052-49c5-92b5-41d3375de940"
+    },
+    {
+      "id": "d46832d2-7e96-4ec7-8baf-3b8b457c7d07",
+      "type": "article",
+      "title": "Thuê Cano Đi Mini Beach Nha Trang: Đi Riêng Thoải Mái, Chủ Động Lịch Trình",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/thue-cano-di-mini-beach/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;d46832d2-7e96-4ec7-8baf-3b8b457c7d07"
     },
     {
       "id": "af9a0f5b-1a45-41d0-9d35-e55bee716d3e",

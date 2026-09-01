@@ -553,8 +553,21 @@ if (!turnstileSiteKey) {
         const goc = tachISO(dateEl.value || dateEl.min || todayVN())
         thangXem = { y: goc.y, m: goc.m }
         veLich()
+        calEl.classList.remove('bf__cal--tren')
         calEl.hidden = false
         calOpenBtn.setAttribute('aria-expanded', 'true')
+        // Lich luon xo XUONG thi khi o ngay nam gan day man hinh, ca bang roi khoi tam nhin va
+        // khach khong bam duoc gi — do duoc tren production: bang o y=1134 trong khi man hinh
+        // cao 929. Khong du cho duoi ma tren rong hon thi lat len. Do SAU khi bo `hidden`, vi
+        // node dang an khong co kich thuoc de do.
+        const oHop = dateEl.getBoundingClientRect()
+        const cao = calEl.getBoundingClientRect().height
+        if (innerHeight - oHop.bottom < cao && oHop.top > innerHeight - oHop.bottom) {
+          calEl.classList.add('bf__cal--tren')
+        }
+        // Lat roi van co the con thieu cho (man hinh thap, bang cao). Keo not vao tam nhin.
+        const sau = calEl.getBoundingClientRect()
+        if (sau.top < 0 || sau.bottom > innerHeight) calEl.scrollIntoView({ block: 'nearest' })
         ;(calGridEl.querySelector<HTMLButtonElement>('.is-chon')
           || calGridEl.querySelector<HTMLButtonElement>('.bf__cal-day:not([disabled])'))?.focus()
       }
@@ -599,11 +612,18 @@ if (!turnstileSiteKey) {
         if (t.y !== thangXem.y || t.m !== thangXem.m) { thangXem = { y: t.y, m: t.m }; veLich() }
         calGridEl.querySelector<HTMLButtonElement>(`[data-iso="${dich}"]`)?.focus()
       })
+      // `contains()` chu KHONG so sanh dong nhat `!== calOpenBtn`: nut mo boc mot <svg>, nen
+      // cu bam len bieu tuong co `e.target` la chinh the <svg> chu khong phai cai nut. So bang
+      // `!==` thi cu bam do bi coi la "bam ra ngoai" va dong sap lich ngay sau khi vua mo —
+      // do duoc bang chuot that tren production: bam giua o thi mo, bam dung bieu tuong thi
+      // khong. `element.click()` trong script KHONG lo ra loi nay vi no dat target la cai nut.
       calEl.addEventListener('focusout', e => {
-        if (!calEl.contains(e.relatedTarget as Node) && e.relatedTarget !== calOpenBtn) dongLich(false)
+        const t = e.relatedTarget as Node | null
+        if (!calEl.contains(t) && !calOpenBtn.contains(t)) dongLich(false)
       })
       document.addEventListener('click', e => {
-        if (!calEl.hidden && !calEl.contains(e.target as Node) && e.target !== calOpenBtn) dongLich(false)
+        const t = e.target as Node
+        if (!calEl.hidden && !calEl.contains(t) && !calOpenBtn.contains(t)) dongLich(false)
       })
       // `pointer-events: none` chan duoc CHUOT tren o ngay, KHONG chan duoc ban phim: Chrome
       // van mo lich goc bang Alt+Mui-ten-xuong hoac F4 khi o dang duoc focus. Chan hai phim
@@ -1075,6 +1095,10 @@ if (!turnstileSiteKey) {
     color: var(--c-text-muted); cursor: pointer;
   }
   .bf__date-trigger:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 1px; }
+  /* Bieu tuong khong nhan chuot: moi cu bam deu rot ve chinh cai nut. Doi day la lop thu hai
+     — bo doi su kien o tren da xu ly dung roi — nhung giu cho `e.target` chi co MOT gia tri,
+     de bay "target la <svg> chu khong phai nut" khong quay lai duoi dang khac. */
+  .bf__date-icon { pointer-events: none; }
   /* Dat de LEN o ngay, khop tung padding/border/co chu voi `.bf__input` de chu khong xe dich.
      `pointer-events: none` de moi cu bam van roi xuong o ngay that ben duoi (bam vao lop phu
      ma khong mo duoc lich la loi hay gap nhat cua loi nay). Gia tri deu la token. */
@@ -1104,6 +1128,9 @@ if (!turnstileSiteKey) {
     border: 1px solid var(--c-border); border-radius: var(--radius-md);
     box-shadow: var(--shadow-overlay);
   }
+  /* Bien the lat LEN, dung khi duoi o ngay khong con cho. Doi ca le: le cach o phai theo ve
+     phia doi dien, neu khong bang dinh sat mat o. */
+  .bf__cal--tren { top: auto; bottom: 100%; margin-top: 0; margin-bottom: var(--s1); }
   .bf__cal-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); }
   .bf__cal-title { font-size: var(--fs-label); font-weight: var(--fw-600); color: var(--c-text); }
   .bf__cal-nav {
