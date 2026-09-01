@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-08-31T15:04:49.501Z",
+  "generatedAt": "2026-08-31T23:54:10.606Z",
   "status": "pass",
   "summary": {
     "files": {
@@ -11,9 +11,9 @@
       "/ai/graph.json": "present",
       "/ai/reading-guide.json": "present"
     },
-    "totalEntities": 104,
+    "totalEntities": 106,
     "entityTypes": {
-      "article": 9,
+      "article": 11,
       "attraction": 33,
       "experience": 8,
       "hotel": 10,
@@ -24,19 +24,19 @@
       "touristDestination": 5
     },
     "urlsByLanguage": {
-      "vi": 104
+      "vi": 106
     },
     "aiCoverageRatio": 1,
     "sitemapCoverageRatio": 1,
     "graph": {
-      "nodes": 104,
-      "edges": 204,
+      "nodes": 106,
+      "edges": 222,
       "danglingEdges": 0,
       "orphanNodes": 14,
       "relations": {
-        "author": 9,
-        "about": 17,
-        "mentions": 52,
+        "author": 11,
+        "about": 21,
+        "mentions": 64,
         "containedInPlace": 36,
         "venue": 8,
         "operator": 24,
@@ -44,8 +44,8 @@
       }
     },
     "readiness": {
-      "missingSource": 70,
-      "missingSameAs": 58,
+      "missingSource": 72,
+      "missingSameAs": 60,
       "commercialMissingBookingOrFreeFlag": 43,
       "missingLanguages": 0,
       "staleFiles": []
@@ -92,6 +92,22 @@
       "hasSameAs": false,
       "hasBookingOrFreeFlag": true,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/article;108895ac-b7e8-4543-b42f-cc30463d8016"
+    },
+    {
+      "id": "6732028d-d8ea-494c-9eb0-053eb10d69e6",
+      "type": "article",
+      "title": "Hòn Tằm hay Mini Beach? Nên chọn điểm nào khi du lịch Nha Trang?",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/hon-tam-hay-mini-beach/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;6732028d-d8ea-494c-9eb0-053eb10d69e6"
     },
     {
       "id": "09eef765-f1d7-4622-ac3d-3f1fbac50e31",
@@ -188,6 +204,22 @@
       "hasSameAs": false,
       "hasBookingOrFreeFlag": true,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/article;7c483d51-7f52-4dec-8eb3-3a179382e357"
+    },
+    {
+      "id": "af9a0f5b-1a45-41d0-9d35-e55bee716d3e",
+      "type": "article",
+      "title": "Tour 3 đảo Nha Trang nên chọn tour nào?",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/tour-3-dao-nha-trang-nen-chon-tour-nao/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;af9a0f5b-1a45-41d0-9d35-e55bee716d3e"
     },
     {
       "id": "4f0c3519-b54f-458e-a3b0-6853f7d816b5",
