@@ -65,6 +65,7 @@ const vi = {
   // Form đặt tour (SPEC-2026-08-21-dat-tour §4.3). Thông điệp lỗi API ở booking/schema.ts.
   bookingTitle: 'Đặt tour',
   bookingDepartDate: 'Ngày khởi hành',
+  bookingDepartDatePlaceholder: 'Chọn ngày khởi hành',
   bookingPax: 'Số người',
   paxAdult: 'Người lớn',
   paxChild: 'Trẻ em',
@@ -275,6 +276,7 @@ const en: Record<UIKey, string> = {
   // Tour booking form (SPEC-2026-08-21-dat-tour §4.3)
   bookingTitle: 'Book this tour',
   bookingDepartDate: 'Departure date',
+  bookingDepartDatePlaceholder: 'Select departure date',
   bookingPax: 'Travellers',
   paxAdult: 'Adults',
   paxChild: 'Children',
@@ -473,6 +475,7 @@ const zh: Record<UIKey, string> = {
   // Form đặt tour — site chạy một ngôn ngữ (langs = ['vi']); bản dịch để sau (SPEC-2026-08-21-dat-tour §8)
   bookingTitle: 'Book this tour',
   bookingDepartDate: 'Departure date',
+  bookingDepartDatePlaceholder: 'Select departure date',
   bookingPax: 'Travellers',
   paxAdult: 'Adults',
   paxChild: 'Children',
@@ -671,6 +674,7 @@ const ko: Record<UIKey, string> = {
   // Form đặt tour — site chạy một ngôn ngữ (langs = ['vi']); bản dịch để sau (SPEC-2026-08-21-dat-tour §8)
   bookingTitle: 'Book this tour',
   bookingDepartDate: 'Departure date',
+  bookingDepartDatePlaceholder: 'Select departure date',
   bookingPax: 'Travellers',
   paxAdult: 'Adults',
   paxChild: 'Children',
@@ -869,6 +873,7 @@ const ru: Record<UIKey, string> = {
   // Form đặt tour — site chạy một ngôn ngữ (langs = ['vi']); bản dịch để sau (SPEC-2026-08-21-dat-tour §8)
   bookingTitle: 'Book this tour',
   bookingDepartDate: 'Departure date',
+  bookingDepartDatePlaceholder: 'Select departure date',
   bookingPax: 'Travellers',
   paxAdult: 'Adults',
   paxChild: 'Children',
