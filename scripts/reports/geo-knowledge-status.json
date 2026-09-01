@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-08-31T23:54:10.606Z",
+  "generatedAt": "2026-09-01T02:55:30.506Z",
   "status": "pass",
   "summary": {
     "files": {
@@ -11,9 +11,9 @@
       "/ai/graph.json": "present",
       "/ai/reading-guide.json": "present"
     },
-    "totalEntities": 106,
+    "totalEntities": 110,
     "entityTypes": {
-      "article": 11,
+      "article": 15,
       "attraction": 33,
       "experience": 8,
       "hotel": 10,
@@ -24,19 +24,19 @@
       "touristDestination": 5
     },
     "urlsByLanguage": {
-      "vi": 106
+      "vi": 110
     },
     "aiCoverageRatio": 1,
     "sitemapCoverageRatio": 1,
     "graph": {
-      "nodes": 106,
-      "edges": 222,
+      "nodes": 110,
+      "edges": 249,
       "danglingEdges": 0,
-      "orphanNodes": 14,
+      "orphanNodes": 12,
       "relations": {
-        "author": 11,
-        "about": 21,
-        "mentions": 64,
+        "author": 14,
+        "about": 27,
+        "mentions": 82,
         "containedInPlace": 36,
         "venue": 8,
         "operator": 24,
@@ -44,8 +44,8 @@
       }
     },
     "readiness": {
-      "missingSource": 72,
-      "missingSameAs": 60,
+      "missingSource": 76,
+      "missingSameAs": 64,
       "commercialMissingBookingOrFreeFlag": 43,
       "missingLanguages": 0,
       "staleFiles": []
@@ -92,6 +92,22 @@
       "hasSameAs": false,
       "hasBookingOrFreeFlag": true,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/article;108895ac-b7e8-4543-b42f-cc30463d8016"
+    },
+    {
+      "id": "b3f88e33-b15b-4c3c-b287-4230ec1f2645",
+      "type": "article",
+      "title": "Hòn Mun hay Vịnh San Hô? Nên chọn điểm nào khi đi tour đảo Nha Trang?",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/hon-mun-hay-vinh-san-ho/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;b3f88e33-b15b-4c3c-b287-4230ec1f2645"
     },
     {
       "id": "6732028d-d8ea-494c-9eb0-053eb10d69e6",
@@ -190,6 +206,38 @@
       "studioUrl": "https://tourdaovn.sanity.studio/desk/article;f88dffad-79e6-4790-b959-226dfb138889"
     },
     {
+      "id": "c39ab1dc-b872-4e80-a3a7-9a695796fcac",
+      "type": "article",
+      "title": "Lần đầu đi tour đảo Nha Trang: Kinh nghiệm A–Z cho người mới",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/lan-dau-di-tour-dao-nha-trang/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;c39ab1dc-b872-4e80-a3a7-9a695796fcac"
+    },
+    {
+      "id": "b40370a6-2f62-4ffa-90a9-85a2243ffdbe",
+      "type": "article",
+      "title": "Mini Beach Nha Trang có gì? Kinh nghiệm vui chơi và khám phá từ A–Z",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/mini-beach-nha-trang-co-gi/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;b40370a6-2f62-4ffa-90a9-85a2243ffdbe"
+    },
+    {
       "id": "7c483d51-7f52-4dec-8eb3-3a179382e357",
       "type": "article",
       "title": "Mua vé Hòn Tằm Nha Trang ở đâu?",
@@ -220,6 +268,22 @@
       "hasSameAs": false,
       "hasBookingOrFreeFlag": true,
       "studioUrl": "https://tourdaovn.sanity.studio/desk/article;af9a0f5b-1a45-41d0-9d35-e55bee716d3e"
+    },
+    {
+      "id": "0e5492ab-3de5-4ec6-b846-fa96d0b44669",
+      "type": "article",
+      "title": "Tour đảo Nha Trang cho gia đình có trẻ nhỏ: Chọn lịch trình nào?",
+      "canonicalUrl": "https://tourdao.vn/cam-nang/tour-dao-nha-trang-cho-gia-dinh-co-tre-nho/",
+      "languages": [
+        "vi"
+      ],
+      "inAiLayer": true,
+      "inSitemap": true,
+      "inGraph": true,
+      "hasOfficialSource": false,
+      "hasSameAs": false,
+      "hasBookingOrFreeFlag": true,
+      "studioUrl": "https://tourdaovn.sanity.studio/desk/article;0e5492ab-3de5-4ec6-b846-fa96d0b44669"
     },
     {
       "id": "4f0c3519-b54f-458e-a3b0-6853f7d816b5",
