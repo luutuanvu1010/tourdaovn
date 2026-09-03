@@ -2661,3 +2661,66 @@ script) — **không** vá lén vào chỗ so ngày này.
 **Drift kèm theo.** `docs/plans/2026-08-22-dat-tour.md` (dòng 965, 1066, 2475, 2661) còn chép
 luật cũ "từ ngày mai". Phiếu kế hoạch đó là bản ghi lịch sử của đợt thi công tháng 8, không phải
 spec đang chi phối — ghi vào `DRIFT_LOG` chứ không sửa ngược.
+
+---
+
+## QĐ-2026-09-04-01 — Phê chuẩn ADR-0033: form đặt chỗ mở sang trang Trải nghiệm, mở đơn vị giá `perGroup`, và Sheet là nguồn giá của **mọi** entity thương mại
+
+**Đây là một bản ghi OVERRIDE.** `CLAUDE.md` §5 xếp "phạm vi task nở ra ngoài spec đã duyệt" vào
+**điểm dừng cứng**. `ADR-0027` quyết định 8 chốt phạm vi module đặt chỗ là **"chỉ trang chi tiết
+Tour"**, và `06-BINDING_MAP` §3 khai form thuộc riêng Tour. Nới phạm vi đó là việc chỉ người có
+quyền mới làm được, không phải việc Claude tự hoà giải. Phiếu này là bản ghi ấy — không có nó thì
+lần sau không ai truy được vì sao phạm vi nở.
+
+**Người override.** Lưu Tuấn Vũ (chủ dự án), 2026-09-04. Xác nhận hai lần: một lần qua phiên duyệt
+chéo `tourdaovn-bc`, một lần trực tiếp trong phiên thi hành — phiên thi hành **không ghi phiếu chỉ
+dựa trên tin nhắn trung gian**, vì phiếu này mang tên chủ dự án như người override một điểm dừng cứng.
+
+**Bối cảnh.** Chủ dự án yêu cầu (2026-09-03) đưa chức năng đặt chỗ sang các hoạt động trải nghiệm,
+dẫn `/trai-nghiem/du-bay-parasailing-keo-bang-cano/` làm ví dụ. Đo lúc soạn: 8 trang trải nghiệm đã
+xuất bản, **0 trang có `bookingRef.key`**, 0 dòng giá `TTB` chảy được vào `prices.yaml` (hai lỗi
+chặn cứng `prices:pull`). Cả 28 dòng giá đang chạy đều gắn vào document `tour` — kể cả vé VinWonders
+và du thuyền — nên quy ước *thực tế* của site đã thành "bán được thì làm `tour`".
+
+**Chốt.**
+
+1. **Nới phạm vi `ADR-0027` quyết định 8** sang `/trai-nghiem/{slug}`. Mọi phần khác của `ADR-0027`
+   — ba lớp dữ liệu, D1 là bản ghi gốc, notifier cắm thêm, BK1–BK5, chống lạm dụng ba lớp — giữ
+   nguyên hiệu lực và áp y nguyên. Đã đối chiếu `04-CONSTRAINTS:92-96`: không bất biến nào nhắc chữ
+   "tour", nên chúng che thêm loại trang mới mà không phải sửa chữ nào.
+2. **Mở đơn vị giá thứ tư `perGroup`** `{ unit, amount, maxPax }` — cửa một chiều thứ hai.
+3. **Thêm cột `product_type`** vào bảng `booking` đang nhận đơn thật (migration `0003`) — cửa một
+   chiều thứ nhất.
+4. **Google Sheet tab `gia` là nguồn giá của MỌI entity thương mại**, không riêng Tour. Không đảo
+   `ADR-0003`/`ADR-0007`: đường đi vẫn là Sheet → `prices:pull` → `data/prices.yaml` → build. Câu
+   này chỉ đóng một khoảng mở — trước đây không tài liệu nào trả lời "giá của một trải nghiệm nhập
+   ở đâu". Mã Sheet **không vào repo** (repo công khai; `PRICES_SHEET_ID` ở `.env`).
+
+**Một quyết định bị ĐẢO trong cùng ngày, ghi lại cả hai phía.** Bản đầu của `ADR-0033` chốt *không*
+mở đơn vị giá nhóm, để Phao chuối giữ kênh Zalo, cân theo YAGNI: một cửa một chiều không đáng cho
+1/8 sản phẩm. Chủ dự án bác cùng ngày: *"nếu giữ Zalo thì khách không đặt được, nên phải cho phép
+đặt giống như toàn dịch vụ khác."* Lập luận cũ bỏ sót đúng một điểm — **"giữ Zalo" không phải là
+giữ nguyên hiện trạng, nó nghĩa là khách không đặt được**, chính thứ đợt này sinh ra để sửa. Phạm vi
+đi từ 6 trang lên **cả 8 trang**, và đợt thi công từ 6 tệp lên 13 tệp. Không xoá vết bản cũ
+(`04-CONSTRAINTS` §2.5).
+
+**Hệ quả nhận rõ, không giấu.**
+
+- **Hai cửa một chiều**, không phải một. Cột `product_type` chạm bảng đơn hàng đang chạy thật;
+  `perGroup` chạm lược đồ giá mà `05-URL_MAP` §4 khai là cửa một chiều.
+- **`06-BINDING_MAP` phải sửa** ở §3 (hai hàng), §3.1 (ô cột Trải nghiệm) và §4.4. Bản vá đề xuất
+  nằm trong spec §5; **file luật chưa sửa**, cần một phiếu riêng khi thi hành.
+- **Hai trang bán cùng một sản phẩm nay đều nhận đơn được** (`phao-chuoi` và
+  `phao-bay-flying-banana-boat` cùng trỏ khoá `phao-chuoi`). Nợ trùng trang vì vậy nặng thêm — thôi
+  là chuyện thẩm mỹ. Không chặn đợt này; DRI chủ dự án.
+- **PY4 — cổng duy nhất bắt khoá giá gắn sai — không chạy trên đường tự động nào**
+  (`run-gates.mjs:33-58` không có `py1-py8`; Cloudflare chạy `build:ci`). Registry khai `live`. Đây
+  là **nợ riêng**, không gộp vào đợt này; bù lại kế hoạch thi công có một bước gọi
+  `npm --prefix scripts run validate` và một bước kiểm tay đọc **con số giá thật** trên từng trang.
+
+**Thi hành.** `docs/adr/ADR-0033-dat-cho-cho-trai-nghiem.md` (accepted 2026-09-04),
+`docs/specs/SPEC-2026-09-04-dat-cho-trai-nghiem.md`. Nhánh `feat/dat-cho-trai-nghiem`.
+Duyệt chéo bởi phiên `tourdaovn-bc`: **không chặn, 5 sửa bắt buộc — đã áp hết** (commit `146fd68`),
+trong đó ba sửa là lỗi thật của bản đầu: câu cảnh báo `06`/`luat1-post` sai theo chiều nguy hiểm,
+`d1 migrations apply` thiếu `--remote`, và bước kiểm đơn thử mâu thuẫn với việc **không có cơ sở D1
+preview**.

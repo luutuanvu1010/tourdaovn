@@ -1,17 +1,17 @@
 # SPEC — Form đặt chỗ trên trang Trải nghiệm
 
-- **Trạng thái:** **chờ duyệt** — thiết kế chốt trong phiên 2026-09-03/04 qua tám lượt hỏi-đáp
-  với chủ dự án; spec này chờ chủ dự án duyệt toàn văn trước khi lập kế hoạch thi công.
+- **Trạng thái:** **đã duyệt** — chủ dự án phê chuẩn toàn văn 2026-09-04 (`QĐ-2026-09-04-01`).
+  Thiết kế chốt qua chín lượt hỏi-đáp; duyệt chéo bởi phiên `tourdaovn-bc` (không chặn, 5 sửa bắt
+  buộc, đã áp hết ở commit `146fd68`). Bước kế tiếp: kế hoạch thi công.
 - **Ngày soạn:** 2026-09-04   **Người soạn:** Cowork   **Người duyệt:** Lưu Tuấn Vũ
 - **Loại quyết định:** cửa **một chiều** ở **hai** chỗ — (1) cột `product_type` thêm vào bảng
   `booking` đang nhận đơn thật (migration `0003`); (2) **đơn vị giá thứ tư `perGroup`** trong lược
   đồ `prices.yaml` (§4.7). Phần còn lại là cửa hai chiều.
 - **Sửa trong ngày 2026-09-04:** bản đầu để Phao chuối ngoài phạm vi (giữ Zalo); chủ dự án bác vì
   giữ Zalo nghĩa là khách không đặt được. Xem khung ghi chú cuối §3.2 — **không xoá vết bản cũ**.
-- **Bản ghi:** `docs/adr/ADR-0033-dat-cho-cho-trai-nghiem.md` (chờ phê chuẩn). Phiếu
-  `QĐ-2026-09-04-01` trong `docs/DECISIONS.md` **chưa viết** — nó được viết khi chủ dự án phê
-  chuẩn, không phải bây giờ. Mọi ADR trong repo này đều đi cặp với một phiếu (`ADR-0031` ↔
-  `QĐ-2026-08-30-01`); thiếu cặp là thiếu ở QA2, nên ghi ra đây để không phát hiện muộn.
+- **Bản ghi:** `docs/adr/ADR-0033-dat-cho-cho-trai-nghiem.md` (**accepted** 2026-09-04) và phiếu
+  `QĐ-2026-09-04-01` trong `docs/DECISIONS.md` — phiếu này **là một bản ghi override** điểm dừng
+  cứng `CLAUDE.md` §5.
 - **Đầu vào đã đọc:** `CLAUDE.md`, `playbook/CONSTITUTION.md`, `ADR-0027`, `ADR-0030`,
   `ADR-0031`, `06-BINDING_MAP` §0 §3 §3.1 §4.8, `04-CONSTRAINTS` §1d, `docs/gia/README.md`,
   `src/components/{TourDetail,ExperienceDetail,BookingForm,DetailLayout}.astro`,

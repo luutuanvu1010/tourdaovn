@@ -8,8 +8,11 @@ giá một chiều được khai là nguồn cho MỌI entity thương mại, kh
 Ba loại trang, tên khoá giá và con số là của site này.
 ═══════════════════════════════════════════════════ -->
 
-- **Trạng thái:** **proposed** — chờ chủ dự án phê chuẩn toàn văn
-- **Ngày:** soạn 2026-09-04   **Người soạn:** Cowork   **Người phê chuẩn:** Lưu Tuấn Vũ (chủ dự án)
+- **Trạng thái:** **accepted** — chủ dự án phê chuẩn toàn văn 2026-09-04 (`QĐ-2026-09-04-01`), sau
+  vòng duyệt chéo của phiên `tourdaovn-bc` (không chặn, 5 sửa bắt buộc, đã áp hết)
+- **Ngày:** soạn và phê chuẩn 2026-09-04   **Người soạn:** Cowork   **Người phê chuẩn:** Lưu Tuấn Vũ (chủ dự án)
+- **Bản ghi:** `QĐ-2026-09-04-01` trong `docs/DECISIONS.md` — **là một bản ghi override** điểm dừng
+  cứng `CLAUDE.md` §5 (nới phạm vi đã phê chuẩn ở `ADR-0027` quyết định 8)
 - **Loại quyết định:** cửa **một chiều** ở **hai** điểm — (1) thêm cột `product_type` vào bảng
   `booking` đang nhận đơn thật (migration `0003`); (2) **mở đơn vị giá thứ tư `perGroup`** trong
   lược đồ `prices.yaml`, đúng loại cửa mà `05-URL_MAP` §4 đòi ADR. Cửa **hai chiều** ở phần còn
@@ -64,7 +67,8 @@ Bốn sự thật đo được lúc soạn, quyết định hình dạng của A
 
 1. **Nới phạm vi `ADR-0027` sang trang Trải nghiệm.** `BookingForm` render trên
    `/trai-nghiem/{slug}` theo **đúng điều kiện đang áp cho Tour**: có `bookingRef.key`, khoá tra
-   được một dòng `perPax` trong `prices.yaml`, và `priceTableFromEntry()` trả về bảng giá. Không
+   được một dòng `perPax` **hoặc `perGroup`** trong `prices.yaml`, và `priceTableFromEntry()` trả
+   về bảng giá. Không
    giá thì không form, giữ `ContactChannels` — quyết định nền 3 của `06-BINDING_MAP` áp y nguyên.
 
 2. **Mở đơn vị giá thứ tư: `perGroup`.** Hình dạng:
