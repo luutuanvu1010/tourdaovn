@@ -1,0 +1,149 @@
+{
+  "agent": "ra-soat-tu-dong-hoa",
+  "vai": "Cowork",
+  "ranAt": "2026-09-04T06:45:00+07:00",
+  "snapshotCommit": "5e68837",
+  "nhanh": "feat/dat-cho-trai-nghiem",
+  "aheadOfOriginMain": 4,
+  "branchTouchesCodeFiles": false,
+  "summary": {
+    "quyTrinhTuDong": "dat-co-luu-y",
+    "phoiHopSubagent": "chua-dat-ve-bang-chung",
+    "congReview": "khong-dat-vi-khong-kin",
+    "ciCd": "chay-dung-thiet-ke"
+  },
+
+  "phatHienChinh": {
+    "id": "CONG-KHONG-KIN",
+    "moTa": "npm run gate khong build truoc, nhung nhom post la validator hau build doc dist/. Ket qua cong la ham cua dist/ tinh co nam tren may, khong phai ham cua ma dang push.",
+    "bangChung": "chay gate 2 lan, khong doi mot dong ma nao, chi chen npm run build vao giua — tap validator do DOI HOAN TOAN",
+    "run1_distCu": { "fail": ["r3-r4-post", "geo-knowledge-post", "control-registry-gate"], "jsonldPost": "pass" },
+    "run2_distMoi": { "fail": ["jsonld-post", "control-registry-gate", "deferred-gate"], "r3": "pass", "geoKnowledge": "pass" },
+    "haiChieu": {
+      "doGia": "R3 + geo-knowledge bao 65 loi khong co that",
+      "xanhGia": "jsonld-post in [pass] trong khi co loi that dang ton tai tren production — NGUY HIEM HON"
+    },
+    "lienHe": "cung ho DR-001, mot tang khac: khong phai 'bao cao cu noi pass' ma 'dist/ cu lam validator noi pass'"
+  },
+
+  "dinhChinh": {
+    "banNhapDau": "ket luan 33 URL dang gay redirect va 'mat SEO that moi ngay'",
+    "thucTe": "SAI — production du 172 URL, 5/5 trang kiem thu deu tra 200",
+    "nguyenNhanThatSu": "dist/ cuc bo cu, thieu 31 trang vi noi dung lay tu Sanity luc build",
+    "soLieu": { "productionSitemapVi": 172, "distCu": 141, "distSauKhiDungLai": 172 },
+    "ketLuanVeR3": "R3 lam DUNG viec cua no — canh bao fail-closed: neu phat hanh dist/ nay, 33 URL dang song se bi xoa cam"
+  },
+
+  "loiThatDuyNhat": {
+    "id": "I6-double-slash-id",
+    "mucDo": "that, dang song tren production",
+    "trang": "cam-nang/tour-ghep-hay-thue-cano-rieng-nha-trang/",
+    "moTa": "FAQPage @id thua mot dau '/': .../tour-ghep-hay-thue-cano-rieng-nha-trang//#faq",
+    "xacNhanTrenProduction": true,
+    "lenhXacNhan": "curl -s https://tourdao.vn/cam-nang/tour-ghep-hay-thue-cano-rieng-nha-trang/ | grep '@id.*#faq'",
+    "anhHuong": "@id schema.org sai — anh huong kha nang nhan rich result cho FAQ",
+    "bịCheBoi": "dist/ cu — jsonld-post in [pass] o run 1",
+    "cauHoiMo": "4 trang trong dist/ co '//' trong mot @id (di-lai, cam-nang, cam-nang/tour-ghep-..., tat-ca) nhung I6 chi bat 1 (trang co FAQPage); 3 trang con lai nam NGOAI pham vi kiem",
+    "phaiSinh": ["control-registry-gate", "deferred-gate"],
+    "ghiChu": "toan bo cong hien chi con MOT loi goc duy nhat"
+  },
+
+  "duongPhatHanh": {
+    "nguon": "README.md:70 + package.json + wrangler.toml",
+    "buildCi": "npm run build = astro check && astro build",
+    "soNhomKiemTonTai": 11,
+    "soNhomKiemTrenDuongPhatHanh": 1,
+    "nhomDuyNhat": "astro check",
+    "quyetDinh": "ADR-0022 (2026-08-04) — co y, khong phai troi dat",
+    "caiGiaCuThe": "loi @id o muc loiThatDuyNhat len production ma khong cong nao chan",
+    "deXuat": "neu chi dua MOT cong len duong phat hanh, jsonld-post (I6) la ung vien re nhat — 0.2s, doc dist/ vua dung nen luon kin",
+    "chuaXacMinh": "lenh build that tren dashboard Workers Builds"
+  },
+
+  "test": {
+    "vitestRoot": { "files": 13, "tests": 171, "pass": 171, "trenDuongTuDong": false },
+    "scriptsTest": { "tests": 226, "pass": 226, "trenDuongTuDong": false },
+    "tongTest": 397,
+    "ghiChu": "toan bo xanh, toan bo khong nam tren duong tu dong nao"
+  },
+
+  "prePush": {
+    "hookPath": ".githooks/pre-push",
+    "coreHooksPath": ".githooks",
+    "gitHooksDirEmpty": true,
+    "lenh": "npm run gate",
+    "dangChanPush": true,
+    "vanDe": [
+      "khong kin — xem phatHienChinh",
+      "dang do nen duong thoat duy nhat la --no-verify, dung luc no bao dung (loi I6 la that)",
+      "chay cong ghi de 5 file JSON da track trong scripts/reports/ — nguy co commit bang chung cu (ho DR-001)"
+    ]
+  },
+
+  "hooks": [
+    { "ten": "block-git-add-all.sh", "ketQua": "dat", "soCaThu": 6, "duongTinhGia": 0, "ghiChu": "chan dung -A/./--all/-am va bien the nhieu khoang trang; cho qua dung git add <file> va echo \"git add -A\"" },
+    { "ten": "guard-deploy.sh", "ketQua": "dat-co-luu-y", "duongTinhGia": 2, "loHong": "chi so dist/ voi src/; noi dung den tu Sanity nen dist/ co the 'moi' theo hook ma van thieu 31 trang — cung ho DR-041", "ghiChu": "thieu ghi chu gioi han khop-chuoi (guard-data-mutation co ghi)" },
+    { "ten": "guard-data-mutation.sh", "ketQua": "dat", "duongTinhGia": 1, "ghiChu": "danh sach cho-phep cho MCP Sanity la thiet ke tot; gioi han khop chuoi da ghi ro la CO Y fail-closed" },
+    { "ten": "post-edit-lint.sh", "ketQua": "dat", "ghiChu": "khong chan, chong doi 60s, chi soi src/" }
+  ],
+  "hookDuongTinhGiaTrongPhienNay": [
+    "vong for thu nghiem guard-data-mutation bi chinh no chan",
+    "vong for thu nghiem guard-deploy bi chinh no chan",
+    "lenh ghi chinh bao cao nay bi guard-deploy chan — hook chan ca viec VIET TAI LIEU NOI VE phat hanh"
+  ],
+
+  "phamViCongHepHonVeNgoai": {
+    "g1": { "exit": 0, "nhungCo": "25 diem lech muc warn", "quyTac": "chi fail khi field co trong schema ma thieu trong CONTENT_MODEL (P4); chieu nguoc lai chi warn", "viDu": ["bangGiaMuaVu 3/14", "category 17/19", "place 28/29"] },
+    "g4": { "exit": 0, "quyTac": "moi phat hien 'GROQ goi field khong co trong CONTENT_MODEL' deu la warn, khong bao gio lam do" },
+    "ketLuan": "[pass] cua G1/G4 KHONG doc la 'khong co lech'; trich lam bang chung QA2 la lap lai DR-021"
+  },
+
+  "subagent": {
+    "tongAgent": 10,
+    "dinhTuyen": "khong-xung-dot",
+    "capRanhGioiDaCoLuatGo": ["astro-auditor|code-reviewer (moc 3 file)", "deploy-verifier|debugger", "contract-checker|gate-auditor"],
+    "danhGia": "phan lam tot nhat cua he, khong can sua",
+    "bangChungTheoAgent": {
+      "gate-auditor": 4, "doc-reality-auditor": 2, "deploy-verifier": 1, "seo-auditor": 1,
+      "astro-auditor": 0, "ui-auditor": 0, "contract-checker": 0
+    },
+    "agentChuaTungSinhBangChung": ["astro-auditor", "ui-auditor", "contract-checker"],
+    "thuMucBangChungKhongNamTrongGit": [
+      "docs/evidence/2026-08-24-deploy-verifier",
+      "docs/evidence/2026-08-24-doc-reality-auditor",
+      "docs/evidence/2026-08-24-gate-auditor",
+      "docs/evidence/2026-08-24-seo-auditor",
+      "docs/evidence/2026-08-29-gate-auditor",
+      "docs/evidence/2026-08-31-doc-reality-auditor"
+    ],
+    "hauQua": "bang chung duy nhat duoc nhan theo CLAUDE.md §6 chi ton tai tren mot may",
+    "tuChieu": "bao cao NAY cung dang untracked — mac dung loi no vua neu"
+  },
+
+  "noDaBiet": [
+    { "id": "GA6", "moTa": "27 control khai gap nhung thuc te dang chay", "nguon": "docs/evidence/2026-08-29-gate-auditor/report.md", "treoTu": "2026-08-24" },
+    { "id": "ND-001", "moTa": "g2 khong chay o dau ca" },
+    { "id": "ND-004", "moTa": "thieu docs/governance/CONTROL_GATES.md; control-registry-gate in [skip]" }
+  ],
+  "diemSang": "run-gates.mjs chay het moi validator thay vi dung o loi dau, va in [gap]/[skip] ra cung bang tong ket — nho no ma do duoc phatHienChinh",
+
+  "taiLieuSai": [
+    { "file": "README.md", "dong": 46, "moTa": "noi build:ci co validator toi thieu 3 kiem — mau thuan voi dong 70; dong 70 dung" },
+    { "file": "README.md", "dong": [66, 81], "moTa": "goi la Cloudflare Pages; thuc te la Workers Builds" }
+  ],
+
+  "diemCanChuDuAnDuyet": [
+    "Loi @id thua dau / dang song tren production — gap nhat; kem cau hoi ve 3 trang con lai",
+    "npm run gate co nen tu build khong?",
+    "Bo sung kiem dist/ cu theo noi dung Sanity vao guard-deploy?",
+    "Commit docs/evidence/ — gom ca bao cao nay",
+    "27 control gap->live? (treo tu 2026-08-24)",
+    "Xac nhan lenh build tren dashboard Workers Builds",
+    "Sua README.md:46 va ten Pages->Workers Builds",
+    "Bo track scripts/reports/*.json?",
+    "Dua rieng jsonld-post len duong phat hanh?"
+  ],
+
+  "khongLam": "khong sua ma, du lieu, hook, hay tai lieu nao",
+  "thayDoiDaXayRa": "dist/ da duoc dung lai (141 -> 172 trang) de lam phep do; day la thu muc san pham dung ra, ban moi khop production. 5 file scripts/reports/ bi validator ghi de nhu moi lan chay cong."
+}

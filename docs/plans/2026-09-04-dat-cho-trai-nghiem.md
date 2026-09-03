@@ -891,8 +891,13 @@ Mot con so tran trui tren trang phao chuoi trong y het mot gia dau nguoi dat."
 - Tiêu thụ: nhánh `perGroup` của `PriceEntry` (Task 4)
 - Sản xuất: `prices.yaml` có khối `perGroup` hợp lệ
 
-> **Hai bẫy trong task này đều là LỖI IM LẶNG, và bẫy thứ hai nổ SAU khi đợt này nghiệm thu xong.**
-> Đọc kỹ bước 5.
+> **BA bẫy trong task này, tất cả đều là lỗi im lặng.** Bẫy 1 (bước 2b) làm `npm test` **ghi đè
+> `data/prices.yaml`**; bẫy 2 (bước 5) làm giá nhóm **đóng băng** sau khi nghiệm thu xong; bẫy 3
+> (bước 8) làm một lệnh "chạy thử" **kéo giá một tour lùi 200.000đ**. Đọc cả ba trước khi gõ dòng
+> nào.
+>
+> **Phát hiện ở vòng rà 2026-09-04** (`docs/evidence/2026-09-04-ra-soat-task7-prices-pull/`) — bản
+> đầu của Task 7 dính cả ba.
 
 - [ ] **Bước 1: Viết test thất bại**
 
@@ -901,7 +906,7 @@ Tệp `scripts/validators/__tests__/prices-pull-pergroup.test.ts`:
 ```ts
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { docDonVi, NGOAI_TAM_SHEET } from '../../prices-pull.mjs'
+import { docDonVi, DON_VI_TU_SHEET } from '../../prices-pull.mjs'
 
 test('per5pax đọc thành perGroup maxPax 5', () => {
   assert.deepEqual(docDonVi('per5pax'), { unit: 'perGroup', maxPax: 5 })
@@ -915,18 +920,56 @@ test('đơn vị thật sự lạ → null (gọi bên ngoài sẽ cảnh báo v
   assert.equal(docDonVi('per0pax'), null)   // maxPax 0 vô nghĩa
 })
 test('giuNguyen KHÔNG được nuốt perGroup', () => {
-  // perGroup SINH RA TỪ Sheet, nên nó KHÔNG phải "ngoài tầm Sheet".
-  assert.equal(NGOAI_TAM_SHEET.has('perGroup'), false)
-  assert.equal(NGOAI_TAM_SHEET.has('perRoomNight'), true)
-  assert.equal(NGOAI_TAM_SHEET.has('perTicket'), true)
+  // perGroup SINH RA TỪ Sheet, nên nó phải nằm TRONG tập "Sheet sinh ra được".
+  assert.equal(DON_VI_TU_SHEET.has('perGroup'), true)
+  assert.equal(DON_VI_TU_SHEET.has('perPax'), true)
+  assert.equal(DON_VI_TU_SHEET.has('perRoomNight'), false)
+})
+test('mặc-định-an-toàn: đơn vị lạ chưa ai nghĩ ra vẫn được GIỮ NGUYÊN', () => {
+  // Đây là tính chất luật cũ (`unit !== perPax`) có mà một danh sách liệt kê sẽ đánh mất.
+  assert.equal(DON_VI_TU_SHEET.has('perNight'), false)
 })
 ```
 
-- [ ] **Bước 2: Chạy test, xác nhận ĐỎ**
+- [ ] **Bước 2: Chạy test, xác nhận ĐỎ — VÀ ĐỎ ĐÚNG LÝ DO**
 
 ```bash
 npm --prefix scripts run test 2>&1 | grep -A3 'prices-pull-pergroup'
 ```
+
+Kỳ vọng: đỏ vì **`docDonVi is not a function`** hoặc lỗi import. **Phải grep đúng chuỗi đó.**
+Thấy `Thiếu PRICES_SHEET_ID`, thấy lỗi CSV, hoặc thấy tiến trình chết mà **không có kết quả test
+nào** → đó là một loại hỏng KHÁC, xem bước 2b. Đừng coi "nó đỏ" là đã xong bước này.
+
+- [ ] **Bước 2b: LỖI CHẶN — `import` tệp này CHẠY nguyên đường đồng bộ giá**
+
+`chay()` được gọi ở **tầng module** (`:872`), không hàng rào. Nên `import '../../prices-pull.mjs'`
+từ một tệp test sẽ: đọc `.env`, **gọi Google Sheet thật**, và `renameSync` **đè
+`data/prices.yaml`** — từ trong `npm test`. Ba kết cục, kết cục thứ ba là kết cục sau Task 8:
+
+| Khi nào | Chuyện gì xảy ra |
+|---|---|
+| Hôm nay (Sheet còn 2 lỗi) | `exit(1)` ở `:695` — tiến trình chết **trước khi test nào chạy** |
+| Yaml tình cờ khớp Sheet | `return` sớm → tệp test **XANH** sau khi vừa gọi mạng ra Google |
+| **Sau Task 8** (Sheet sạch) | **`data/prices.yaml` bị ghi đè từ trong `npm test`** |
+
+Nghiệm thu ở Task 7 **không thể** lộ ra kết cục thứ ba. Đúng loại lỗi nổ sau nghiệm thu.
+
+**Sửa — MỘT thay đổi, ba mẩu, làm cùng lúc:**
+
+```js
+// Chỉ chạy đường CLI khi tệp này được gọi thẳng. Import từ test thì chỉ nạp hàm.
+const LA_CLI = process.argv[1] != null && resolve(process.argv[1]) === import.meta.filename
+```
+
+1. Thêm hằng trên (Node ở repo này là v22, `import.meta.filename` dùng được).
+2. **Dời NGUYÊN khối `if (!MA_SHEET) { … process.exit(1) }` từ `:75-80` xuống dòng đầu `chay()`**,
+   giữ y từng chữ. Không dời thì máy không có `.env` (CI, clone mới) vẫn `exit(1)` ngay lúc import.
+3. Cuối tệp: `if (LA_CLI) { chay().catch((e) => { … }) }` — bọc khối đang có, không đổi thân nó.
+
+> ⚠️ **Đừng làm hàng rào VÀ tách `docDonVi` sang tệp riêng cùng lúc.** Hai chỗ ở cho cùng một hàm
+> là nguồn sự thật thứ hai — `CLAUDE.md` §5 cấm thẳng. Tách tệp là phương án hợp lệ *thay cho* hàng
+> rào, nhưng nó để nguyên quả mìn "tệp này không import an toàn được" cho người import kế tiếp.
 
 - [ ] **Bước 3: Tách hàm đọc đơn vị và export để test được**
 
@@ -952,11 +995,14 @@ export function docDonVi(s) {
 }
 
 /**
- * Đơn vị mà bảng 13 cột của Sheet KHÔNG chở được — chép nguyên văn từ yaml cũ.
- * `perGroup` KHÔNG nằm ở đây: nó sinh ra TỪ Sheet. Xếp nhầm nó vào đây là làm đóng băng giá —
- * chủ dự án sửa số trong Sheet, chạy pull, không có gì xảy ra và không ai báo (ADR-0033 §5).
+ * Đơn vị mà Sheet SINH RA ĐƯỢC. Tập ĐÓNG, đối chiếu được với `docDonVi` ngay trên.
+ *
+ * Vì sao khai theo chiều này chứ không liệt kê "thứ Sheet không chở được": luật cũ
+ * `unit !== 'perPax'` bảo vệ được cả những đơn vị CHƯA AI NGHĨ RA. Liệt kê thứ-không-chở-được là
+ * một tập MỞ phải nuôi mãi mãi — quên một cái thì dòng đó thành "của Sheet", vắng mặt trong Sheet,
+ * và rơi vào đường xoá. Khai theo chiều "Sheet sinh ra được" giữ lại tính chất mặc-định-an-toàn.
  */
-export const NGOAI_TAM_SHEET = new Set(['perRoomNight', 'perTicket'])
+export const DON_VI_TU_SHEET = new Set(['perPax', 'perGroup'])
 ```
 
 - [ ] **Bước 4: Dùng hàm mới ở vòng đọc hàng (`:416`)**
@@ -983,6 +1029,17 @@ Và ở chỗ dựng `entry` (`:476`):
       : { unit: DON_VI_BAT_BUOC, amount: soTien }
 ```
 
+> **Hỏi ở vòng rà: "khoá MỚI có đơn vị lạ thì chỉ còn một dòng `⚠` trên stdout — cố ý hay sót?"**
+> **Cố ý, và hỏng theo chiều đóng.** Khoá *đã có* trong yaml mà rơi khỏi Sheet thì vẫn vào đường
+> xoá và dừng ồn ào như cũ. Khoá *mới* bị bỏ qua thì hậu quả là: entity trỏ vào một khoá không tồn
+> tại → `resolvePrice` trả `null` → **trang không mọc form**. Không có tiền sai, chỉ có tính năng
+> vắng mặt — nhìn ra được ở kiểm tay Task 12 bước 1. Đổi lại là 34 dòng đúng không chết theo một ô
+> sai, đúng `ADR-0033` §4.
+>
+> **Nhưng phải làm cảnh báo to hơn một dòng lẫn trong stdout:** dòng bỏ qua phải xuất hiện trong
+> **khối tổng kết cuối** của `prices:pull` (chỗ script liệt kê những thứ cần chú ý), không chỉ ở
+> chỗ nó xảy ra. Người chạy đọc phần cuối, không đọc giữa.
+
 Với `perGroup`, **bốn cột giá theo hạng phải TRỐNG** — giá nhóm không có hạng khách. Ngay sau đó:
 
 ```js
@@ -1003,7 +1060,7 @@ Với `perGroup`, **bốn cột giá theo hạng phải TRỐNG** — giá nhóm
     khoiCu.map((k) => k.khoa).filter((k) => {
       const e = giaCu[k]
       if (!e) return false
-      if (NGOAI_TAM_SHEET.has(e.unit)) return true
+      if (!DON_VI_TU_SHEET.has(e.unit)) return true   // Sheet không sinh ra được → giữ nguyên
       return e.unit === 'perPax' && Array.isArray(e.tiers) && e.tiers.length > 0
     })
   )
@@ -1020,21 +1077,37 @@ function dungKhoi(khoa, entry) {
   ...
 ```
 
-- [ ] **Bước 7: Chạy test, xác nhận XANH**
+- [ ] **Bước 7: Chạy test, xác nhận XANH — và xác nhận test KHÔNG ghi vào nguồn sự thật**
 
 ```bash
 npm --prefix scripts run test
+git diff --quiet data/prices.yaml || echo "✖ TEST VỪA GHI VÀO NGUỒN SỰ THẬT VỀ GIÁ"
 ```
 
-- [ ] **Bước 8: Chạy thử khô hai lần, xác nhận TẤT ĐỊNH**
+Dòng thứ hai là thứ **duy nhất** bắt được kết cục thứ ba của bước 2b trước khi nó lọt. Nó phải im.
+
+- [ ] **Bước 8: Đo TẤT ĐỊNH — và trả lại ngay, vì lệnh này GHI THẬT**
+
+> ⚠️ **`--tu-tep` KHÔNG phải chạy khô.** Nó chỉ đổi nguồn đọc; đường ghi (`renameSync`, `:849`)
+> vẫn chạy. `--giup` in đúng ba cờ, **không có cờ chạy khô nào**.
+>
+> ⚠️ **Và CSV hạt giống đã LỆCH so với giá thật:** `docs/gia/mau-nhap-gia.csv:8` ghi
+> `tour-hon-tam-tron-goi` là **540.000**, còn `data/prices.yaml:27` là **740.000**. Chạy lệnh dưới
+> mà quên bước trả lại là **lặng lẽ kéo giá một tour lùi 200.000đ**, rồi Bước 9 commit nó.
 
 ```bash
-cp data/prices.yaml /tmp/prices-truoc.yaml
-npm run prices:pull -- --tu-tep docs/gia/mau-nhap-gia.csv 2>&1 | tail -20
+npm run prices:pull -- --tu-tep docs/gia/mau-nhap-gia.csv > /tmp/lan1.txt 2>&1
+cp data/prices.yaml /tmp/lan1.yaml
+git checkout -- data/prices.yaml                       # TRẢ LẠI NGAY
+
+npm run prices:pull -- --tu-tep docs/gia/mau-nhap-gia.csv > /tmp/lan2.txt 2>&1
+diff /tmp/lan1.yaml data/prices.yaml && echo "✓ tất định"
+git checkout -- data/prices.yaml                       # TRẢ LẠI LẦN HAI
+git diff --quiet data/prices.yaml && echo "✓ cây sạch, không kéo lùi giá tour nào"
 ```
 
-> Đọc `docs/gia/README.md` để biết cờ chạy khô đúng tên là gì; nếu cờ khác `--tu-tep` thì dùng
-> tên đang có, **đừng thêm cờ mới**.
+> Diff của lần 1 **không phải sự thật về giá** — nó chỉ để đo tính tất định của `dungKhoi()`.
+> Đừng đọc nó như một bảng giá, và đừng commit nó.
 
 - [ ] **Bước 9: Commit**
 
