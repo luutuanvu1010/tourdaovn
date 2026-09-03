@@ -965,6 +965,8 @@ const LA_CLI = process.argv[1] != null && resolve(process.argv[1]) === import.me
 1. Thêm hằng trên (Node ở repo này là v22, `import.meta.filename` dùng được).
 2. **Dời NGUYÊN khối `if (!MA_SHEET) { … process.exit(1) }` từ `:75-80` xuống dòng đầu `chay()`**,
    giữ y từng chữ. Không dời thì máy không có `.env` (CI, clone mới) vẫn `exit(1)` ngay lúc import.
+   ⚠️ Đặt nó **TRƯỚC** phép kiểm `existsSync(DUONG_YAML)` — `MA_SHEET` còn được nội suy vào thông
+   báo lỗi ở `:665`, đặt sau là in ra `undefined` trong câu hướng dẫn.
 3. Cuối tệp: `if (LA_CLI) { chay().catch((e) => { … }) }` — bọc khối đang có, không đổi thân nó.
 
 > ⚠️ **Đừng làm hàng rào VÀ tách `docDonVi` sang tệp riêng cùng lúc.** Hai chỗ ở cho cùng một hàm
@@ -996,6 +998,10 @@ export function docDonVi(s) {
 
 /**
  * Đơn vị mà Sheet SINH RA ĐƯỢC. Tập ĐÓNG, đối chiếu được với `docDonVi` ngay trên.
+ *
+ * Đo 2026-09-04: `data/prices.yaml` chỉ có ba khoá con `unit`/`amount`/`paxRates` trên cả 29 mục —
+ * không `tiers`, không `perRoomNight`, không `perTicket`. Nên hôm nay CẢ HAI luật đều cho `giuNguyen`
+ * tập rỗng; rủi ro dưới đây hoàn toàn là rủi ro TƯƠNG LAI, không phải lỗi đang xảy ra.
  *
  * Vì sao khai theo chiều này chứ không liệt kê "thứ Sheet không chở được": luật cũ
  * `unit !== 'perPax'` bảo vệ được cả những đơn vị CHƯA AI NGHĨ RA. Liệt kê thứ-không-chở-được là
@@ -1086,28 +1092,53 @@ git diff --quiet data/prices.yaml || echo "✖ TEST VỪA GHI VÀO NGUỒN SỰ 
 
 Dòng thứ hai là thứ **duy nhất** bắt được kết cục thứ ba của bước 2b trước khi nó lọt. Nó phải im.
 
-- [ ] **Bước 8: Đo TẤT ĐỊNH — và trả lại ngay, vì lệnh này GHI THẬT**
+- [ ] **Bước 8: Đo TẤT ĐỊNH — KHÔNG dùng CSV hạt giống**
 
-> ⚠️ **`--tu-tep` KHÔNG phải chạy khô.** Nó chỉ đổi nguồn đọc; đường ghi (`renameSync`, `:849`)
-> vẫn chạy. `--giup` in đúng ba cờ, **không có cờ chạy khô nào**.
+> ⚠️ **`docs/gia/mau-nhap-gia.csv` là bản HẠT GIỐNG, không phải bảng giá.** Đo 2026-09-04: **21
+> trong 29 hàng để TRỐNG cột "Giá người lớn"**. Hàng trống giá bị `:408` xếp vào `khoaChuaGia` rồi
+> `continue` — **không tính là lỗi** — nên 21 khoá đó không vào `tapMoi`, và tới `:717` rơi thẳng
+> vào `seXoa`.
 >
-> ⚠️ **Và CSV hạt giống đã LỆCH so với giá thật:** `docs/gia/mau-nhap-gia.csv:8` ghi
-> `tour-hon-tam-tron-goi` là **540.000**, còn `data/prices.yaml:27` là **740.000**. Chạy lệnh dưới
-> mà quên bước trả lại là **lặng lẽ kéo giá một tour lùi 200.000đ**, rồi Bước 9 commit nó.
+> Hệ quả: chạy `--tu-tep docs/gia/mau-nhap-gia.csv` **dừng ở Cổng 2 (`:770`), không ghi gì**. Phép
+> đo tất định không bao giờ chạy tới.
+>
+> ### ⛔ Và đây là chỗ nguy hiểm thật sự
+>
+> Thông báo của Cổng 2 **tự in sẵn lối thoát** ở `:796`:
+> ```
+> Nếu thật sự muốn bỏ những dòng trên:
+>   npm --prefix scripts run prices:pull -- --cho-phep-xoa
+> ```
+> Bấm đúng cờ đó với hạt giống trong tay là **xoá 21 trong 29 dòng giá đang chạy** — **21 tour mất
+> form đặt**.
+>
+> **Nếu bước này dừng ở Cổng 2 thì TỆP ĐẦU VÀO SAI, KHÔNG PHẢI SCRIPT SAI.**
+> **TUYỆT ĐỐI không gỡ cổng bằng `--cho-phep-xoa`.** Cổng 2 đang làm đúng việc của nó.
+
+Dùng CSV **tươi kéo từ chính Sheet**, không dùng hạt giống:
 
 ```bash
-npm run prices:pull -- --tu-tep docs/gia/mau-nhap-gia.csv > /tmp/lan1.txt 2>&1
-cp data/prices.yaml /tmp/lan1.yaml
-git checkout -- data/prices.yaml                       # TRẢ LẠI NGAY
+set -a; . .env; set +a          # nạp PRICES_SHEET_ID; KHÔNG in nó ra, KHÔNG commit nó
+curl -sL "https://docs.google.com/spreadsheets/d/${PRICES_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=gia" \
+  -o /tmp/gia-tuoi.csv
+wc -l /tmp/gia-tuoi.csv         # phải ~36 dòng, không phải 1
 
-npm run prices:pull -- --tu-tep docs/gia/mau-nhap-gia.csv > /tmp/lan2.txt 2>&1
-diff /tmp/lan1.yaml data/prices.yaml && echo "✓ tất định"
-git checkout -- data/prices.yaml                       # TRẢ LẠI LẦN HAI
-git diff --quiet data/prices.yaml && echo "✓ cây sạch, không kéo lùi giá tour nào"
+npm run prices:pull -- --tu-tep /tmp/gia-tuoi.csv > /tmp/lan1.txt 2>&1
+cp data/prices.yaml /tmp/lan1.yaml
+git checkout -- data/prices.yaml
+
+npm run prices:pull -- --tu-tep /tmp/gia-tuoi.csv > /tmp/lan2.txt 2>&1
+diff /tmp/lan1.yaml data/prices.yaml && echo "✓ dungKhoi() tất định"
+git checkout -- data/prices.yaml
+git diff --quiet data/prices.yaml && echo "✓ cây sạch"
 ```
 
-> Diff của lần 1 **không phải sự thật về giá** — nó chỉ để đo tính tất định của `dungKhoi()`.
-> Đừng đọc nó như một bảng giá, và đừng commit nó.
+> `--tu-tep` **vẫn GHI** (`renameSync`, `:849`) — nó chỉ đổi nguồn đọc. `--giup` in đúng ba cờ,
+> **không có cờ chạy khô nào**. Vì vậy hai lệnh `git checkout --` ở trên là bắt buộc, không phải
+> cẩn thận thừa.
+>
+> Diff của lần 1 **không phải sự thật về giá** — nó chỉ để đo tính tất định của `dungKhoi()`. Sự
+> thật về giá là kết quả của Task 8, chạy `prices:pull` trần trên Sheet thật.
 
 - [ ] **Bước 9: Commit**
 
