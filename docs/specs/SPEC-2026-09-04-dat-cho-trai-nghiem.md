@@ -5,7 +5,10 @@
 - **Ngày soạn:** 2026-09-04   **Người soạn:** Cowork   **Người duyệt:** Lưu Tuấn Vũ
 - **Loại quyết định:** cửa **một chiều** ở đúng một chỗ — cột `product_type` thêm vào bảng
   `booking` đang nhận đơn thật (migration `0003`). Phần còn lại là cửa hai chiều.
-- **Bản ghi:** `docs/adr/ADR-0033-dat-cho-cho-trai-nghiem.md` (chờ phê chuẩn)
+- **Bản ghi:** `docs/adr/ADR-0033-dat-cho-cho-trai-nghiem.md` (chờ phê chuẩn). Phiếu
+  `QĐ-2026-09-04-01` trong `docs/DECISIONS.md` **chưa viết** — nó được viết khi chủ dự án phê
+  chuẩn, không phải bây giờ. Mọi ADR trong repo này đều đi cặp với một phiếu (`ADR-0031` ↔
+  `QĐ-2026-08-30-01`); thiếu cặp là thiếu ở QA2, nên ghi ra đây để không phát hiện muộn.
 - **Đầu vào đã đọc:** `CLAUDE.md`, `playbook/CONSTITUTION.md`, `ADR-0027`, `ADR-0030`,
   `ADR-0031`, `06-BINDING_MAP` §0 §3 §3.1 §4.8, `04-CONSTRAINTS` §1d, `docs/gia/README.md`,
   `src/components/{TourDetail,ExperienceDetail,BookingForm,DetailLayout}.astro`,
@@ -241,15 +244,26 @@ lỗi 500. Ghi vào runbook, không để trong đầu ai.
 
 ## 7. Thứ tự thi công
 
+0. **Chụp mốc cổng trước khi sửa gì:** `npm run build && npm run gate` trên nhánh sạch, lưu kết
+   quả. Đợt này thêm một vùng mới vào trang có ma trận vùng-theo-field bị máy kiểm canh
+   (`06` §3.1, tầng B của `luat1-post`), nên phải phân biệt được cổng đỏ **mới** với cổng đỏ **có
+   sẵn**. Rẻ bây giờ, đắt về sau.
 1. Migration `0003` + `store.ts` + `schema.ts` + test (2, 4) — **đường ghi trước, giao diện sau**.
 2. `handler.ts` + `notify/format.ts` + test (3).
 3. `prices-pull.mjs` + test (6). Chủ dự án sửa Sheet (§4.1) → `prices:pull` → duyệt
    `git diff data/prices.yaml`.
 4. Chủ dự án gắn `bookingRef.key` trong Studio.
 5. `BookingForm.astro` + `ExperienceDetail.astro` + test (1, 5).
-6. Kiểm tay (7–12) → QA2 → chủ dự án duyệt gộp → gộp `main` (auto-deploy) →
-   `wrangler d1 migrations apply` → kiểm (13).
+6. Kiểm tay (7–12) → QA2 → chủ dự án duyệt gộp.
+7. **`wrangler d1 migrations apply` lên D1 production — TRƯỚC khi gộp `main`.**
+8. Gộp `main` (auto-deploy, lên thật ngay) → kiểm (13).
 
+> ⚠️ **Bước 7 phải đứng trước bước 8, không được đảo.** Gộp `main` là phát hành thật ngay
+> (Workers Builds). Gộp trước rồi mới chạy migration là mở một cửa sổ mà máy chủ đã hỏi cột
+> `product_type` trong khi cột chưa tồn tại — **mọi đơn trong cửa sổ đó lỗi 500, cả tour lẫn trải
+> nghiệm**, đúng rủi ro §9 hàng 1. Thêm cột là thao tác **bồi**, có `DEFAULT 'tour'`, nên chạy sớm
+> **không** ảnh hưởng bản đang chạy: mã cũ không đọc cột đó.
+>
 > Bước 3 và 4 là **việc của chủ dự án**. Bước 5 chạy trước hai bước đó vẫn build được, chỉ là chưa
 > trang nào đổi gì — hữu ích để tách lỗi mã khỏi lỗi dữ liệu.
 
@@ -267,7 +281,7 @@ lỗi 500. Ghi vào runbook, không để trong đầu ai.
 
 | Rủi ro | Vì sao thật | Chặn bằng |
 |---|---|---|
-| Quên `d1 migrations apply` | cột thiếu → mọi đơn mới lỗi 500, **cả tour lẫn trải nghiệm** | bước ép buộc trong §7.6; kiểm (12) |
+| Quên `d1 migrations apply`, **hoặc chạy nó sau khi gộp `main`** | cột thiếu → mọi đơn mới lỗi 500, **cả tour lẫn trải nghiệm**; gộp `main` là phát hành thật ngay nên cửa sổ này mở ra tức thì | §7 bước 7 đứng **trước** bước 8; kiểm (12) |
 | `DR-102` số tiền nhảy một nhịp | đã xảy ra thật một lần | test (5) |
 | Kiểm bằng `.click()` | đã để lọt **ba** lỗi tương tác | kiểm (11), hit-test thật |
 | Sửa `06-BINDING_MAP` rồi tưởng cổng đã canh | `g3` không đọc file đó (`DR-027`) | cảnh báo cuối §5 |
