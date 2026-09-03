@@ -3,8 +3,11 @@
 - **Trạng thái:** **chờ duyệt** — thiết kế chốt trong phiên 2026-09-03/04 qua tám lượt hỏi-đáp
   với chủ dự án; spec này chờ chủ dự án duyệt toàn văn trước khi lập kế hoạch thi công.
 - **Ngày soạn:** 2026-09-04   **Người soạn:** Cowork   **Người duyệt:** Lưu Tuấn Vũ
-- **Loại quyết định:** cửa **một chiều** ở đúng một chỗ — cột `product_type` thêm vào bảng
-  `booking` đang nhận đơn thật (migration `0003`). Phần còn lại là cửa hai chiều.
+- **Loại quyết định:** cửa **một chiều** ở **hai** chỗ — (1) cột `product_type` thêm vào bảng
+  `booking` đang nhận đơn thật (migration `0003`); (2) **đơn vị giá thứ tư `perGroup`** trong lược
+  đồ `prices.yaml` (§4.7). Phần còn lại là cửa hai chiều.
+- **Sửa trong ngày 2026-09-04:** bản đầu để Phao chuối ngoài phạm vi (giữ Zalo); chủ dự án bác vì
+  giữ Zalo nghĩa là khách không đặt được. Xem khung ghi chú cuối §3.2 — **không xoá vết bản cũ**.
 - **Bản ghi:** `docs/adr/ADR-0033-dat-cho-cho-trai-nghiem.md` (chờ phê chuẩn). Phiếu
   `QĐ-2026-09-04-01` trong `docs/DECISIONS.md` **chưa viết** — nó được viết khi chủ dự án phê
   chuẩn, không phải bây giờ. Mọi ADR trong repo này đều đi cặp với một phiếu (`ADR-0031` ↔
@@ -43,7 +46,8 @@ giá, không có nút đặt** — chỉ 5 liên kết Zalo (đo bằng `curl`, 
 
 1. Hàng TTB05, `Khoá giá = Fly-board-nha-trang` — chữ **F hoa**. `DANG_KHOA = /^[a-z0-9-]+$/`
    (`prices-pull.mjs:113`) chỉ nhận chữ thường → lỗi ở `:403`.
-2. Hàng TTB03 Phao chuối, `Đơn vị = per5pax` — script chỉ nhận `perPax` → lỗi ở `:416`.
+2. Hàng TTB03 Phao chuối, `Đơn vị = per5pax` — script chỉ nhận `perPax` → lỗi ở `:416`. **Đây không
+   phải lỗi gõ**: đó là giá nhóm thật, và §4.7 dạy máy đọc ký hiệu này.
 
 **Một dòng thừa:** TTB01 `lan-bien-hon-tam` (1.300.000). Chủ dự án xác nhận "Lặn biển Hòn Tằm" là
 **một khái niệm gom ba trải nghiệm** (bình khí, sea walking, snorkeling), không phải một sản phẩm
@@ -51,30 +55,50 @@ bán riêng. Dòng này bị xoá khỏi Sheet.
 
 ## 3. Phạm vi
 
-### 3.1 Trong phạm vi — sáu trang mọc form
+### 3.1 Trong phạm vi — **cả tám trang** mọc form
+
+**Nhóm A — sáu trang `perPax`, một hạng giá** (không cần mở lược đồ gì):
 
 | Trang | Khoá giá | Giá |
 |---|---|---|
-| `/trai-nghiem/snorkeling-nha-trang/` | `snorkeling-nha-trang` | 400.000 |
-| `/trai-nghiem/du-bay-parasailing-keo-bang-cano/` | `du-bay-parasailing-keo-bang-cano` | 600.000 |
-| `/trai-nghiem/motor-nuoc-nha-trang-jetski/` | `motor-nuoc-nha-trang-jetski` | 800.000 |
-| `/trai-nghiem/di-bo-duoi-day-bien-sea-walker/` | `di-bo-duoi-day-bien-sea-walker` | 1.300.000 |
-| `/trai-nghiem/lan-bien-scuba-diving/` | `lan-bien-scuba-diving` | 1.300.000 |
-| `/trai-nghiem/fly-board-nha-trang/` | `fly-board-nha-trang` | 1.300.000 |
+| `/trai-nghiem/snorkeling-nha-trang/` | `snorkeling-nha-trang` | 400.000 / khách |
+| `/trai-nghiem/du-bay-parasailing-keo-bang-cano/` | `du-bay-parasailing-keo-bang-cano` | 600.000 / khách |
+| `/trai-nghiem/motor-nuoc-nha-trang-jetski/` | `motor-nuoc-nha-trang-jetski` | 800.000 / khách |
+| `/trai-nghiem/di-bo-duoi-day-bien-sea-walker/` | `di-bo-duoi-day-bien-sea-walker` | 1.300.000 / khách |
+| `/trai-nghiem/lan-bien-scuba-diving/` | `lan-bien-scuba-diving` | 1.300.000 / khách |
+| `/trai-nghiem/fly-board-nha-trang/` | `fly-board-nha-trang` | 1.300.000 / khách |
 
-Cả sáu là `perPax` **chỉ có giá người lớn** — không `paxRates`, không `tiers`. `priceTableFromEntry()`
-trả `{ kind: 'flat', perPax: { adult } }`, `availablePaxCodes()` trả `['adult']` → form hiện **đúng
-một ô đếm**.
+`priceTableFromEntry()` trả `{ kind: 'flat', perPax: { adult } }`, `availablePaxCodes()` trả
+`['adult']` → form hiện **đúng một ô đếm**, nhãn "Số khách".
+
+**Nhóm B — hai trang, MỘT sản phẩm, giá nhóm** (cần đơn vị `perGroup` mới, §4.7):
+
+| Trang | Khoá giá | Giá |
+|---|---|---|
+| `/trai-nghiem/phao-chuoi/` | `phao-chuoi` | 1.000.000 / lượt, tối đa 5 khách |
+| `/trai-nghiem/phao-bay-flying-banana-boat/` | `phao-chuoi` *(cùng khoá)* | 1.000.000 / lượt, tối đa 5 khách |
+
+Chủ dự án xác nhận 2026-09-04 hai trang này là **cùng một hoạt động**. Không có luật nào cấm hai
+entity dùng chung một khoá giá (đã kiểm PY3/PY4/PY6), nên trước mắt cả hai trỏ `phao-chuoi`.
+
+> ⚠️ **Hệ quả phải nói ra:** hai URL bán cùng một thứ nay **đều nhận đơn được**. Đơn về sẽ mang hai
+> `tour_slug` khác nhau cho cùng một hoạt động, thống kê không cộng được, và khách đặt ở trang nào
+> cũng đúng nên không ai phát hiện. Nợ trùng trang (§8 mục 1) vì vậy **nặng thêm** — nó thôi là
+> chuyện thẩm mỹ. Không chặn đợt này, nhưng chủ dự án nên gộp sớm.
 
 ### 3.2 Ngoài phạm vi, có chủ ý
 
-- **`phao-chuoi`** — giá nhóm `per5pax`, `prices.yaml` không có đơn vị nào chở được (`ADR-0033` §2).
-  Giữ Zalo.
-- **`phao-bay-flying-banana-boat`** — chưa có dòng giá trong Sheet. Giữ Zalo.
-- **Đơn vị giá nhóm** — không mở đợt này.
 - **Ô chọn giờ / khung giờ** — không thêm. Khách dặn giờ qua ô Ghi chú.
 - **Đổi tên endpoint** `/api/dat-tour` — giữ nguyên.
-- **Gộp hai trang trùng** `phao-chuoi` / `phao-bay-flying-banana-boat` — nợ tồn §8.
+- **Gộp hai trang trùng** `phao-chuoi` / `phao-bay-flying-banana-boat` — nợ tồn §8 mục 1.
+- **Sửa việc PY1–PY8 vắng mặt khỏi `npm run gate`** — nợ tồn §8 mục 6.
+- **Giá sàn cộng phụ thu theo đầu người** — chủ dự án xác nhận không phải cách bán của mình.
+
+> **Đổi phạm vi trong ngày 2026-09-04.** Bản đầu của spec này để `phao-chuoi` và
+> `phao-bay-flying-banana-boat` **ngoài** phạm vi, giữ Zalo, theo quyết định 2 bản đầu của
+> `ADR-0033`. Chủ dự án bác: *"nếu giữ Zalo thì khách không đặt được, nên phải cho phép đặt giống
+> như toàn dịch vụ khác."* Đợt này vì vậy **to hơn bản đầu** — thêm §4.7. Ghi lại để người đọc sau
+> hiểu vì sao một spec "mở form cho trang có sẵn" lại đụng tới lược đồ giá.
 
 ## 4. Đặc tả
 
@@ -85,7 +109,7 @@ Ba sửa trong tab `gia`:
 | # | Hàng | Sửa | Không sửa thì |
 |---|---|---|---|
 | 1 | TTB05 | `Fly-board-nha-trang` → `fly-board-nha-trang` | `prices:pull` **chặn cứng** |
-| 2 | TTB03 | *(giữ nguyên `per5pax`)* — mã sẽ bỏ qua kèm cảnh báo, xem §4.2 | trước §4.2: **chặn cứng** |
+| 2 | TTB03 | **giữ nguyên `per5pax`** — nay là ký hiệu hợp lệ, máy đọc thành `perGroup` (§4.7) | trước §4.7: **chặn cứng** |
 | 3 | TTB01 | **xoá hàng** `lan-bien-hon-tam` | dòng mồ côi **im lặng hoàn toàn** — xem §4.1b |
 
 ### 4.1b PY4 **không chạy** trên đường tự động nào — sự thật phải biết trước khi tin vào cổng
@@ -120,12 +144,16 @@ khai PY4 `status: live`.
 khoá. Đó là cách duy nhất để PY4 thật sự nhìn thấy sáu khoá mới. Sửa việc PY4 vắng mặt khỏi
 `npm run gate` là **nợ riêng, không phải việc của đợt này** — đụng vào đó là mở phạm vi.
 
-Một việc trong Studio: gắn `bookingRef.key` cho **6 document** `experience` theo bảng §3.1.
+Một việc trong Studio: gắn `bookingRef.key` cho **8 document** `experience` theo hai bảng §3.1 —
+lưu ý hai document Phao chuối / Phao bay **cùng trỏ một khoá `phao-chuoi`**.
 
 > **Đây là công tắc thật.** Mã đúng hết mà chưa gắn khoá thì **không trang nào đổi gì** —
 > `showBookingForm` đòi cả `priceView?.label` lẫn `priceTable`.
 
-### 4.2 `scripts/prices-pull.mjs` — bỏ qua dòng đơn vị lạ, không chặn cả lượt
+### 4.2 `scripts/prices-pull.mjs` — bỏ qua dòng đơn vị **thật sự lạ**, không chặn cả lượt
+
+> **Đọc §4.7 trước.** Sau §4.7, `per5pax` **không còn là đơn vị lạ** — nó được đọc thành `perGroup`.
+> Mục này nói về đơn vị nào đó *khác nữa* mà site chưa hỗ trợ, ví dụ ai đó gõ `perNight`.
 
 Hôm nay `:416` đẩy một dòng vào `loi[]`, và `loi[]` không rỗng thì dừng toàn bộ — 34 dòng đúng
 chết theo một ô sai.
@@ -238,6 +266,54 @@ ALTER TABLE booking ADD COLUMN product_type TEXT NOT NULL DEFAULT 'tour';
 `wrangler d1 migrations apply` phải chạy TRƯỚC lần deploy đầu của đợt này** — quên là mọi đơn mới
 lỗi 500. Ghi vào runbook, không để trong đầu ai.
 
+### 4.7 Đơn vị giá `perGroup` — cửa một chiều thứ hai của đợt
+
+**Hình dạng trong `prices.yaml`:**
+
+```yaml
+phao-chuoi:
+  unit: perGroup
+  amount: 1000000     # giá MỘT LƯỢT
+  maxPax: 5           # số khách tối đa một lượt
+```
+
+**Phép tính** (`quote.ts`, dùng chung client/server theo BK5):
+
+```
+soLuot = Math.ceil(soKhach / maxPax)
+total  = apDieuChinh(amount, mua%, uuDai%) × soLuot
+```
+
+Khách **đếm người**, máy quy ra lượt. 3 khách → 1 lượt → 1.000.000. 8 khách → 2 lượt → 2.000.000.
+
+**Bảy tệp phải sửa cùng nhau. Sót một là lệch:**
+
+| Tệp | Sửa | Bẫy |
+|---|---|---|
+| `scripts/validators/py1-py8.ts` | PY1 `VALID_UNITS` thêm `perGroup`; PY2 đòi `amount` + `maxPax`; PY7 kiểm cả hai là **số nguyên dương**; `ALLOWED_TOP_KEYS.perGroup = {unit, amount, maxPax}` | `maxPax` ≤ 0 phải **fail**, không phải warn — chia cho 0 là `Infinity` lượt |
+| `src/lib/types.ts` **và** `scripts/lib/price-loader.ts` | thêm nhánh `{ unit: 'perGroup'; amount: number; maxPax: number }` vào `PriceEntry`, và `perGroup` vào `PriceUnit` | **hai bản chép tay của cùng một kiểu** — `ADR-0027` §Hệ quả đã ghi rõ lệch là lỗi. Sửa cùng lúc, cùng commit |
+| `src/lib/resolver.ts` + `src/lib/uiCopy.ts` | `case 'perGroup'` → nhãn mới `perGroupFrom`, **5 ngôn ngữ** | Nhãn **phải nói rõ "một lượt"**. Viết "từ 1.000.000đ" trống không là khách đọc thành giá mỗi người. Gợi ý vi: `1.000.000đ/lượt (tối đa {n} khách)` |
+| `src/lib/booking/quote.ts` | `PriceTable` thêm `{ kind: 'group'; amount; maxPax }`; `priceTableFromEntry` nhận `unit === 'perGroup'`; `computeQuote` nhánh mới; `availablePaxCodes` trả `['adult']` | **`perPax` trong `Quote` phải để RỖNG** (`{}`) cho nhánh group. Trả một con số "mỗi người" là dựng lại đúng lỗi đã loại `tiers` vì nó (`ADR-0033` §2). `QuoteLine` cho group mô tả **lượt**, không mô tả hạng khách |
+| `src/components/BookingForm.astro` | ô đếm vẫn đếm **người**; dòng tạm tính hiện **số lượt**: `3 khách → 1 lượt × 1.000.000đ` | Tổng **nhảy bậc** khi qua mốc (5 → 6 khách là 1 → 2 lượt, tiền gấp đôi). Phải hiện số lượt **trước** khi khách bấm gửi, không để họ ngạc nhiên. Và `initialQuote` phải khớp trạng thái mở màn — `DR-102` |
+| `src/lib/booking/notify/format.ts` | đơn group ghi `Số khách: 3 · 1 lượt × 1.000.000đ` thay vì liệt kê theo hạng | `paxLines()` đọc `quoted.perPax[c]`, mà group để rỗng → nhánh riêng, đừng để nó in dòng cụt |
+| `scripts/prices-pull.mjs` | đọc `^per(\d+)pax$` → `perGroup`; `dungKhoi()` dựng thêm `maxPax`; **`giuNguyen` khai lại** | xem hai ô dưới |
+
+**Hai bẫy trong `prices-pull.mjs`, cả hai đều là lỗi im lặng:**
+
+1. **`giuNguyen` (`:646-648`)** hiện khai "ngoài tầm Sheet" = `unit !== 'perPax'`. Để nguyên thì
+   dòng `perGroup` vừa sinh ra bị đánh dấu ngoài tầm ở **lần pull kế tiếp** và **chép nguyên văn
+   mãi mãi** — chủ dự án sửa giá trong Sheet, chạy pull, **không có gì xảy ra, không ai báo**. Và
+   nó nổ **sau** khi đợt này đã nghiệm thu xong, nên không cổng nào của đợt này bắt được.
+   **Khai lại:** ngoài tầm Sheet = `perRoomNight` ∪ `perTicket` ∪ (`perPax` có `tiers[]`).
+2. **`dungKhoi()` (`:562-579`)** chỉ biết dựng `unit`/`amount`/`paxRates`. Thêm `maxPax` nhưng
+   **giữ thứ tự khoá cố định** — hàm này phải tất định, cùng đầu vào ra cùng byte, kẻo mỗi lần pull
+   đẻ một diff giả.
+
+**Giới hạn:** `LIMITS.TOTAL_MAX = 30` khách → tối đa 6 lượt. Không thêm giới hạn mới.
+
+**Mùa và ưu đãi 5%:** áp lên **giá một lượt** rồi mới nhân số lượt, đúng thứ tự trong công thức
+trên. Chủ dự án xác nhận ưu đãi áp bình thường cho hoạt động trải nghiệm.
+
 ## 5. Bản vá đề xuất cho `06-BINDING_MAP` — **không tự sửa, chờ phiếu**
 
 `06-BINDING_MAP` là tài liệu luật; spec này chỉ **đề xuất**.
@@ -289,6 +365,14 @@ lỗi 500. Ghi vào runbook, không để trong đầu ai.
 4. `store.ts` — `insertBooking` ghi đúng `product_type`, và `findRecentDuplicate` **giữ nguyên hành
    vi cũ** (khoá theo `phone` + `tour_slug` + `departDate`, không xét loại sản phẩm) — canh để lần
    sau không ai âm thầm nới cửa chống trùng đã đặc tả ở `SPEC-2026-08-21-dat-tour.md:224`.
+4b. **`perGroup` — nhóm test riêng, đây là chỗ dễ sai tiền nhất:**
+   `computeQuote` với `maxPax=5`: 1 khách → 1 lượt → 1.000.000; 5 khách → **vẫn** 1 lượt →
+   1.000.000; 6 khách → 2 lượt → 2.000.000; 30 khách → 6 lượt. `quoted.perPax` phải **RỖNG**
+   (canh để không ai lén trả một con số "mỗi người" bịa ra). Ưu đãi 5% và mùa áp lên **giá một
+   lượt** rồi mới nhân — khoá thứ tự này lại. `maxPax` ≤ 0 phải bị PY7 chặn.
+4c. `prices-pull` — `per5pax` đọc ra `{unit:'perGroup', amount, maxPax:5}`; `dungKhoi` dựng lại
+   đúng byte cũ khi chạy hai lần; và **`giuNguyen` KHÔNG được nuốt khoá `perGroup`** — đổi giá
+   trong Sheet phải chảy vào `prices.yaml` (canh đúng cái bẫy §4.7).
 5. **Canh `DR-102`:** dựng `initialQuote` ở máy chủ và chạy `computeQuote` với trạng thái mở màn ở
    client cho **cùng một con số**, trên bảng giá một hạng.
 6. `prices-pull` — dòng `per5pax` bị bỏ qua **kèm cảnh báo nêu tên khoá**, và 34 dòng còn lại vẫn
@@ -325,6 +409,10 @@ lỗi 500. Ghi vào runbook, không để trong đầu ai.
    (`06` §3.1, tầng B của `luat1-post`), nên phải phân biệt được cổng đỏ **mới** với cổng đỏ **có
    sẵn**. Rẻ bây giờ, đắt về sau.
 1. Migration `0003` + `store.ts` + `schema.ts` + test (2, 4) — **đường ghi trước, giao diện sau**.
+1b. **`perGroup` (§4.7) — bảy tệp, làm TRONG MỘT commit**: `py1-py8.ts`, `types.ts` **và**
+   `price-loader.ts` (hai bản chép tay), `resolver.ts` + `uiCopy.ts`, `quote.ts`,
+   `notify/format.ts`, `prices-pull.mjs`. Test (4b, 4c). Tách commit là mở cửa cho hai bản kiểu
+   lệch nhau — đúng thứ `ADR-0027` đã cảnh báo.
 2. `handler.ts` + `notify/format.ts` + test (3).
 3. `prices-pull.mjs` + test (6). Chủ dự án sửa Sheet (§4.1) → `prices:pull` → duyệt
    `git diff data/prices.yaml`.
@@ -391,4 +479,7 @@ lỗi 500. Ghi vào runbook, không để trong đầu ai.
 | Sửa `06-BINDING_MAP` rồi tưởng cổng đã canh | `g3` không đọc file đó (`DR-027`) | cảnh báo cuối §5 |
 | Gắn nhầm `bookingRef.key` trong Studio | khoá không bắt buộc trùng slug (`DR-097`) — gắn nhầm sang **một dòng có thật** thì mọi cổng xanh mà trang hiện **giá của tour** (`prices.yaml:121` có `tour-snorkeling-nha-trang` cạnh `snorkeling-nha-trang`). **Máy duy nhất bắt được là PY4, mà PY4 không chạy** (§4.1b). `git diff data/prices.yaml` **không** bắt được — diff không cho biết Studio trỏ vào đâu | §7 bước 5 (`scripts run validate`) là lần duy nhất PY4 nhìn thấy khoá mới; **kiểm (8) đọc con số giá thật trên từng trang** là cổng cuối |
 | Chạy `d1 migrations apply` **thiếu `--remote`** | wrangler áp lên D1 giả lập cục bộ và vẫn in "success" → tưởng xong, gộp `main`, thủng đúng cửa sổ 500 vừa đóng | §7 bước 7 chép nguyên lệnh từ `SPEC-2026-08-30:276`; bước 8 đòi `PRAGMA table_info` làm bằng chứng |
+| `giuNguyen` nuốt khoá `perGroup` | sau đợt này, chủ dự án sửa giá Phao chuối trong Sheet → `prices:pull` chép nguyên văn dòng cũ, **không ai báo**. Nổ SAU nghiệm thu nên không cổng nào của đợt này bắt | §4.7 bẫy 1 + test (4c) |
+| Hai bản chép tay `PriceEntry` lệch nhau | `src/lib/types.ts` và `scripts/lib/price-loader.ts` là hai tệp riêng cùng khai một kiểu; `ADR-0027` đã ghi lệch là lỗi | §7 bước 1b buộc sửa cùng một commit |
+| Khách đọc giá `perGroup` thành giá mỗi người | 1.000.000 trần trụi trên trang phao chuối trông y hệt một giá đầu người đắt | nhãn `perGroupFrom` phải mang chữ "lượt" + số khách tối đa; kiểm (8) và (8b) |
 | Đơn thử của kiểm (12) nằm lẫn trong số liệu thật | không có D1 preview; đơn thử ghi thẳng production | quy tắc đánh dấu + xoá theo `code` ở §6 kiểm (12) |

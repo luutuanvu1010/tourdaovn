@@ -10,9 +10,13 @@ Ba loại trang, tên khoá giá và con số là của site này.
 
 - **Trạng thái:** **proposed** — chờ chủ dự án phê chuẩn toàn văn
 - **Ngày:** soạn 2026-09-04   **Người soạn:** Cowork   **Người phê chuẩn:** Lưu Tuấn Vũ (chủ dự án)
-- **Loại quyết định:** cửa **một chiều** ở đúng một điểm — thêm cột `product_type` vào bảng
-  `booking` đang nhận đơn thật (migration `0003`). Cửa **hai chiều** ở phần còn lại: giao diện
-  form trên trang Trải nghiệm, nhãn báo tin, nhãn ô đếm.
+- **Loại quyết định:** cửa **một chiều** ở **hai** điểm — (1) thêm cột `product_type` vào bảng
+  `booking` đang nhận đơn thật (migration `0003`); (2) **mở đơn vị giá thứ tư `perGroup`** trong
+  lược đồ `prices.yaml`, đúng loại cửa mà `05-URL_MAP` §4 đòi ADR. Cửa **hai chiều** ở phần còn
+  lại: giao diện form trên trang Trải nghiệm, nhãn báo tin, nhãn ô đếm.
+- **Sửa trong ngày 2026-09-04:** bản đầu chốt *không* mở đơn vị giá nhóm (quyết định 2); chủ dự án
+  bác cùng ngày. Lý do và cả hai phía của lập luận ghi nguyên văn trong quyết định 2 — **không xoá
+  vết bản cũ**, theo luật sổ chỉ-thêm (`04-CONSTRAINTS` §2.5).
 - **Supersedes:** `ADR-0027` **quyết định 8, phần phạm vi** ("form là kênh đặt thêm trên trang
   Tour"). Mọi phần khác của `ADR-0027` — ba lớp dữ liệu, D1 là bản ghi gốc, notifier cắm thêm,
   hình dạng `paxRates`, bốn bất biến BK1–BK5, chống lạm dụng ba lớp — **giữ nguyên hiệu lực và
@@ -36,17 +40,20 @@ Chủ dự án yêu cầu (2026-09-03) đưa chức năng đặt chỗ sang các
 Bốn sự thật đo được lúc soạn, quyết định hình dạng của ADR này:
 
 1. **Bảng giá đã có sẵn.** Tab `gia` của Google Sheet đã chứa tám dòng `TTB01–TTB08` cho các
-   hoạt động trải nghiệm. Bảy trong tám là `perPax` chỉ có giá người lớn — **đúng hình dạng
-   `priceTableFromEntry()` đang đọc**. Không phải mở lược đồ giá.
+   hoạt động trải nghiệm. **Bảy trong tám** là `perPax` chỉ có giá người lớn — **đúng hình dạng
+   `priceTableFromEntry()` đang đọc**, không phải mở lược đồ. Dòng thứ tám (Phao chuối) mới là
+   dòng buộc phải mở, xem điểm 3.
 2. **Không dòng nào chảy tới nơi.** `prices.yaml` không có khoá `TTB` nào, và **không entity
    `experience` nào có `bookingRef.key`** (đo 2026-09-04, GROQ trên dataset `production`). Hai
    lỗi trong Sheet chặn cứng `prices:pull`: khoá `Fly-board-nha-trang` có chữ hoa (`DANG_KHOA`
    chỉ nhận chữ thường, `prices-pull.mjs:403`), và dòng Phao chuối để `Đơn vị = per5pax` trong
    khi script chỉ nhận `perPax` (`:416`).
-3. **Một sản phẩm không diễn tả được.** Phao chuối bán **một giá cho nhóm tối đa 5 người**
-   (`per5pax`). `prices.yaml` không có đơn vị nào chở được hình này: `perPax` + `tiers[]` **vẫn
-   nhân với số người** — `computeQuote` tính `total = amount * n` (`quote.ts:76-84`), tức tiers
-   là "giá mỗi người theo cỡ nhóm", không phải "một giá cho cả nhóm".
+3. **Một sản phẩm không diễn tả được bằng lược đồ hiện hành.** Phao chuối bán **một giá cho nhóm
+   tối đa 5 người** (`per5pax`), và chủ dự án xác nhận 2026-09-04: **nhóm 3 người vẫn trả trọn
+   1.000.000** — cano chạy một chuyến là một chuyến. Đó là giá nhóm thật, không phải giá đầu người
+   trá hình. `prices.yaml` không có đơn vị nào chở được: `perPax` + `tiers[]` **vẫn nhân với số
+   người** — `computeQuote` tính `total = amount * n` (`quote.ts:76-84`), tức tiers là "giá mỗi
+   người theo cỡ nhóm", không phải "một giá cho cả nhóm".
 4. **Bốn chỗ trong đường ghi viết cứng chữ "tour".** `backHref` dựng `/tour/${slug}/`
    (`handler.ts:62`) — khách trải nghiệm không bật JavaScript sẽ rơi vào 404; tiêu đề thư SES
    `[Đặt tour]` và dòng `Tour: …` (`notify/format.ts:17,34`); câu khách nhìn thấy *"Đã nhận yêu
@@ -60,26 +67,62 @@ Bốn sự thật đo được lúc soạn, quyết định hình dạng của A
    được một dòng `perPax` trong `prices.yaml`, và `priceTableFromEntry()` trả về bảng giá. Không
    giá thì không form, giữ `ContactChannels` — quyết định nền 3 của `06-BINDING_MAP` áp y nguyên.
 
-2. **KHÔNG mở đơn vị giá nhóm.** `per5pax` không vào `prices.yaml` đợt này. Phao chuối giữ kênh
-   Zalo như hiện nay. Mở một đơn vị giá mới là cửa một chiều: PY1 hiện có enum **ba** đơn vị
-   (`perPax`, `perRoomNight`, `perTicket` — `py1-py8.ts:4,25`), thêm cái **thứ tư** kéo theo
-   PY2/PY7, `quote.ts`, `BookingForm`, và cả `prices-pull.mjs` (bảng 13 cột của Sheet không chở
-   nổi đơn vị nào khác `perPax`) — không đáng cho đúng một trong tám sản phẩm. Muốn mở là
-   **quyết định mới**, không phải mở rộng ADR này.
+2. **Mở đơn vị giá thứ tư: `perGroup`.** Hình dạng:
 
-   *Nói cho chính xác:* `tiers[]` **ép được** để trông như giá nhóm — khai `amount` = giá nhóm
-   chia cho `maxPax` của từng bậc. Loại vì nó hỏng ở **hai** chỗ, và đây mới là bằng chứng thật
-   sự mạnh: (a) phép chia thường lẻ — 500.000 chia 3 ra 166.667, nhân lại thành **500.001 đ**,
-   sai tiền; (b) `quote.ts:82` trả `perPax: { adult: amount }`, nên form **hiện cho khách một con
-   số "mỗi người" bịa ra** không có trong bảng giá nào. Sai tiền *và* sai nhãn.
+   ```yaml
+   phao-chuoi:
+     unit: perGroup
+     amount: 1000000     # giá MỘT LƯỢT, không phải giá mỗi người
+     maxPax: 5           # số khách tối đa một lượt chở được
+   ```
 
-3. **`prices-pull.mjs` bỏ qua dòng có đơn vị lạ, kèm cảnh báo, thay vì chặn cả lượt pull.** Hôm
-   nay một ô `Đơn vị` sai làm hỏng toàn bộ lần đồng bộ, kể cả 34 dòng còn lại đang đúng. Đổi
-   thành cảnh báo-và-bỏ-qua để chủ dự án **giữ được con số trong Sheet cho việc kinh doanh** mà
-   không kẹt đường phát hành. Khoá sai dạng (`DANG_KHOA`) vẫn **chặn cứng như cũ**: đó là lỗi gõ,
-   không phải một hình giá site chưa hỗ trợ.
+   Khách vẫn **đếm người** — thứ khách biết. Máy quy ra lượt: `soLuot = ceil(soKhach / maxPax)`,
+   `tong = amount × soLuot`. Ba người đi một lượt trả trọn 1.000.000; tám người thành hai lượt.
 
-4. **Đường ghi runtime học `productType`, không đoán từ slug.** Thêm trường
+   > **Mục này ĐẢO bản đầu của ADR, và nói rõ vì sao.** Bản 2026-09-04 đầu tiên chốt *"KHÔNG mở đơn
+   > vị giá nhóm, Phao chuối giữ Zalo"*, cân theo YAGNI: một cửa một chiều không đáng cho 1/8 sản
+   > phẩm. Chủ dự án bác cùng ngày, bằng một lý lẽ mà lập luận cũ đã bỏ sót: **"giữ Zalo" không phải
+   > là giữ nguyên hiện trạng — nó nghĩa là khách không đặt được**, đúng thứ đợt này sinh ra để sửa.
+   > Yêu cầu đổi thì phép cân đổi theo. Ghi lại nguyên văn cả hai phía để lần sau không ai đọc mục
+   > này như một quyết định tuỳ hứng.
+
+   Cái giá nhận rõ: PY1 hiện có enum **ba** đơn vị (`perPax`, `perRoomNight`, `perTicket` —
+   `py1-py8.ts:4,25`); thêm cái **thứ tư** kéo theo PY2/PY7 và tập khoá đóng, **hai bản chép tay**
+   của `PriceEntry` (`src/lib/types.ts:10-13` và `scripts/lib/price-loader.ts:10-13` — `ADR-0027`
+   đã ghi rõ lệch hai bản là lỗi), `resolver.ts` cộng một nhãn giá mới cho 5 ngôn ngữ, `quote.ts`,
+   `BookingForm`, `notify/format.ts`, và `prices-pull.mjs`.
+
+   *Ba hình dạng bị loại, ghi lại để không ai thử lại:*
+
+   - **`tiers[]` ép thành giá nhóm** (khai `amount` = giá nhóm chia `maxPax`): hỏng hai chỗ.
+     (a) phép chia thường lẻ — 500.000 chia 3 ra 166.667, nhân lại thành **500.001 đ**; (b)
+     `quote.ts:82` trả `perPax: { adult: amount }`, nên form **hiện cho khách một con số "mỗi
+     người" bịa ra** không có trong bảng giá nào. Sai tiền *và* sai nhãn.
+   - **`perPax` rồi bảo khách đếm *lượt* thay vì đếm người**: số học ra đúng, nhưng nhãn ô đếm là
+     "Số khách" và **không có chỗ nào trong `prices.yaml` để sửa nhãn đó** (tập khoá đóng). Một
+     nhóm 5 người gõ `5` sẽ bị tính **5.000.000 đ — gấp năm lần giá thật**. Loại thẳng.
+   - **Giá sàn cộng phụ thu theo đầu người** (dưới 5 thu trọn, từ người thứ 6 cộng thêm): chủ dự án
+     xác nhận **không phải** cách bán của mình. Không thiết kế cho tình huống không tồn tại.
+
+3. **`per5pax` trong cột `Đơn vị` của Sheet là ký hiệu HỢP LỆ**, đọc bằng `^per(\d+)pax$` →
+   `{ unit: 'perGroup', amount, maxPax: N }`. Không thêm cột nào vào bảng 13 cột. Lý do chọn ký
+   hiệu này thay vì một cột "Số khách mỗi lượt": **chủ dự án đã tự viết đúng như vậy** trước khi có
+   ai đặc tả gì — ký hiệu khớp sẵn với cách người kinh doanh nghĩ. Chuỗi đó **không rời khỏi biên
+   Sheet**: trong `prices.yaml` nó thành hai khoá tường minh `unit` + `maxPax`.
+
+4. **`prices-pull.mjs` bỏ qua dòng có đơn vị **thật sự lạ**, kèm cảnh báo, thay vì chặn cả lượt
+   pull.** Hôm nay một ô `Đơn vị` sai làm hỏng toàn bộ lần đồng bộ, kể cả 34 dòng còn lại đang
+   đúng. Đổi thành cảnh báo-và-bỏ-qua. Khoá sai dạng (`DANG_KHOA`) vẫn **chặn cứng như cũ**: đó là
+   lỗi gõ, không phải một hình giá site chưa hỗ trợ.
+
+5. **`giuNguyen` phải khai theo *Sheet chở được gì*, không theo *có phải `perPax` không*.**
+   `prices-pull.mjs:646-648` hiện định nghĩa "ngoài tầm Sheet" là mọi khoá có `unit !== 'perPax'`.
+   Để nguyên thì dòng `perGroup` vừa sinh ra sẽ bị đánh dấu ngoài tầm ở **lần pull kế tiếp** và
+   **chép nguyên văn mãi mãi** — chủ dự án sửa giá trong Sheet, chạy pull, **không có gì xảy ra và
+   không ai báo**. Đúng loại lỗi im lặng tệ nhất, và nó sẽ nổ ra *sau* khi đợt này đã nghiệm thu
+   xong. Định nghĩa mới: ngoài tầm Sheet = `perRoomNight`, `perTicket`, và `perPax` có `tiers[]`.
+
+6. **Đường ghi runtime học `productType`, không đoán từ slug.** Thêm trường
    `productType: 'tour' | 'experience'` vào payload `/api/dat-tour`, và cột `product_type` vào
    bảng `booking` (migration `0003`, mặc định `'tour'` cho mọi dòng đã có). `backHref` và nhãn
    báo tin đọc từ trường này. Ba lý do không suy từ slug: slug không mang loại; hai nhánh URL **có
@@ -87,11 +130,11 @@ Bốn sự thật đo được lúc soạn, quyết định hình dạng của A
    chưa có tên chung**, nên đây là hiểm hoạ tương lai chứ không phải chuyện đang xảy ra; và nhân
    viên đọc đơn cần biết đơn thuộc sản phẩm gì mà không phải tra ngược.
 
-5. **Tên endpoint `/api/dat-tour` giữ nguyên.** Tên nay hơi hẹp so với việc nó làm, nhưng đổi
+7. **Tên endpoint `/api/dat-tour` giữ nguyên.** Tên nay hơi hẹp so với việc nó làm, nhưng đổi
    đường dẫn của một endpoint đang nhận đơn thật đổi lấy một cái tên đẹp hơn là đánh đổi sai. Ghi
    ở đây để lần sau không ai tưởng là sót.
 
-6. **Nhãn ô đếm theo *số hạng giá*, không theo loại trang.** Bảng giá chỉ có một hạng thì ô đếm
+8. **Nhãn ô đếm theo *số hạng giá*, không theo loại trang.** Bảng giá chỉ có một hạng thì ô đếm
    ghi **"Số khách"** thay vì "Người lớn". Luật áp chung cho mọi trang, nên tour nào sau này chỉ
    có một hạng cũng hưởng. Lý do: "Người lớn" đứng một mình, không có hạng nào bên cạnh để đối
    chiếu, đọc lạc nghĩa trên trang jetski hay fly board.
@@ -103,15 +146,15 @@ Bốn sự thật đo được lúc soạn, quyết định hình dạng của A
    có đủ 5 thứ tiếng, còn `paxAdult`, `paxGuests`, `bookingPickup`, `bookingSubtotalNote` thì không.
    Ghi vào nợ tồn, không gộp vào đợt này.
 
-7. **Ô "Điểm đón" ẩn trên trang Trải nghiệm.** Chủ dự án chốt: khách tự ra bãi, không có đón.
+9. **Ô "Điểm đón" ẩn trên trang Trải nghiệm.** Chủ dự án chốt: khách tự ra bãi, không có đón.
    Trường `pickup` trong payload và D1 **giữ nguyên** (gửi rỗng) — không đụng hợp đồng dữ liệu chỉ
    vì một ô không hiện.
 
-8. **Không thêm trường giờ.** Khách chọn **ngày**, như tour. Muốn dặn giờ thì ghi vào ô Ghi chú,
+10. **Không thêm trường giờ.** Khách chọn **ngày**, như tour. Muốn dặn giờ thì ghi vào ô Ghi chú,
    nhân viên gọi lại xếp. Khung giờ cố định là **dữ liệu lịch**, thứ `01-CONTENT_MODEL` §2.8 và
    `ADR-0027` cố ý để ngoài phạm vi; đưa vào là quyết định mới.
 
-9. **Google Sheet tab `gia` là nguồn giá của MỌI entity thương mại**, không riêng Tour. Đây là
+11. **Google Sheet tab `gia` là nguồn giá của MỌI entity thương mại**, không riêng Tour. Đây là
    phần chủ dự án yêu cầu ghi thành luật (2026-09-03). Không đảo `ADR-0003`/`ADR-0007` — đường đi
    vẫn là **Sheet → `prices:pull` → `data/prices.yaml` → build**, `prices.yaml` vẫn là thứ mã
    nguồn đọc. Câu này chỉ đóng một khoảng mở: trước đây cả tài liệu lẫn thực tế đều chỉ nói về
@@ -145,8 +188,10 @@ Bốn sự thật đo được lúc soạn, quyết định hình dạng của A
 | Phương án | Vì sao loại |
 |---|---|
 | **Chuyển 8 trang trải nghiệm thành document `tour`** | khớp quy ước thực tế của site và **không phải sửa dòng mã nào**. Loại vì đổi URL của tám trang đang chạy và đang có thứ hạng — chính trang chủ dự án dẫn ra làm ví dụ (`/trai-nghiem/du-bay-parasailing-keo-bang-cano/`) sẽ chết. R4 cấm link trang không tồn tại; chuyển trang thì phải kèm redirect, mà `_redirects` là nơi duy nhất chuyển hướng chạy được (Worker vô hiệu hoá Page Rules) |
-| **Mở đơn vị `perGroup` / `perTurn` ngay đợt này** | cửa một chiều chạm PY1/PY2/PY7 + `quote.ts` + form + `prices-pull`; phục vụ 1/8 sản phẩm. Để lại làm quyết định riêng khi có ≥ 2 sản phẩm cần |
+| **Hoãn `perGroup` sang đợt sau, Phao chuối giữ Zalo** | đây là **quyết định 2 của bản đầu**, chủ dự án bác 2026-09-04. Giữ Zalo nghe như "không mất gì", nhưng nó nghĩa là **khách không đặt được** — chính thứ đợt này sinh ra để sửa. Ghi lại ở đây, không xoá |
 | **Dùng `tiers[]` cho giá nhóm** | không diễn tả được: `computeQuote` nhân `amount × số người` (`quote.ts:76-84`). Ép dùng là **báo sai số tiền cho khách** |
+| **`perPax` + bảo khách đếm lượt** | số học đúng nhưng nhãn ô đếm là "Số khách" và không sửa được từ `prices.yaml`; nhóm 5 người gõ `5` bị tính **gấp năm lần** |
+| **Thêm một cột "Số khách mỗi lượt" vào Sheet** | đổi hợp đồng bảng 13 cột, trong khi ký hiệu `per5pax` chủ dự án **đã tự dùng sẵn** chở đủ thông tin |
 | **Suy `productType` từ tiền tố URL của `Referer`** | không thêm cột, không migration — nhưng `Referer` khách gửi lên là thứ sửa được, và đơn không JavaScript thì không có. Loại: dữ liệu đơn hàng không dựa vào header khách kiểm soát |
 | **Dùng lại cột `source` đã có** — gửi `source='web-experience'` thay vì `'web'` | **rẻ hơn thật**: `0001_booking.sql:19` đã có `source TEXT NOT NULL DEFAULT 'web'`, nên **không migration, không cửa một chiều, không cửa sổ 500** của §7. Vẫn loại: `source` nói về **kênh đơn tới từ đâu**, không phải **sản phẩm là loại gì**; chồng hai nghĩa lên một cột là thứ trang quản trị đơn sẽ phải gỡ ra sau. Kể tên ở đây để người đọc biết cửa sổ 500 là thứ **mua có ý thức**, không phải chỗ chưa nghĩ tới |
 | **Nhét `productType` vào `quoted_json`** | `quoted` là bản ghi *vì sao ra con số tạm tính này*, không phải chỗ chứa thuộc tính sản phẩm — `ADR-0031` §4 đã chốt vai của nó. Cột truy vấn được cũng là thứ trang quản trị cần |
@@ -160,10 +205,20 @@ Bốn sự thật đo được lúc soạn, quyết định hình dạng của A
 - **Bảng `booking` đổi hình.** Migration `0003` thêm `product_type`; runbook phát hành có thêm
   bước `wrangler d1 migrations apply` **trước** lần deploy đầu của đợt này. Quên bước đó thì mọi
   đơn mới đều lỗi 500 — đây là bước ép buộc, không phải tuỳ chọn.
-- **Sáu trang mọc form, hai trang không.** `snorkeling-nha-trang`, `du-bay-parasailing-keo-bang-cano`,
-  `motor-nuoc-nha-trang-jetski`, `di-bo-duoi-day-bien-sea-walker`, `lan-bien-scuba-diving`,
-  `fly-board-nha-trang` có form. `phao-chuoi` (giá nhóm) và `phao-bay-flying-banana-boat` (chưa có
-  dòng giá) giữ Zalo.
+- **Cả tám trang mọc form.** Sáu trang `perPax` (`snorkeling-nha-trang`,
+  `du-bay-parasailing-keo-bang-cano`, `motor-nuoc-nha-trang-jetski`,
+  `di-bo-duoi-day-bien-sea-walker`, `lan-bien-scuba-diving`, `fly-board-nha-trang`) cộng
+  **`phao-chuoi` và `phao-bay-flying-banana-boat`** — hai trang này là **một sản phẩm** (chủ dự án
+  xác nhận 2026-09-04), nên **cùng trỏ một khoá `phao-chuoi`**, `unit: perGroup`.
+- **Hai trang bán cùng một thứ nay đều đặt được** — nợ trùng trang ở §Nợ mở **nặng thêm**: hai đơn
+  từ hai URL cho cùng một hoạt động, thống kê không cộng được. Chưa chặn đợt này, nhưng không còn
+  là chuyện thẩm mỹ.
+- **`perGroup` là đơn vị đầu tiên `resolver.ts` phải sinh nhãn mà chưa có khuôn chữ.** Cần một khoá
+  `uiCopy` mới cho 5 ngôn ngữ. Nhãn phải nói rõ **giá một lượt**, không được để khách đọc nhầm
+  thành giá mỗi người — đây là chỗ dễ hỏng nhất về mặt chữ nghĩa của cả đợt.
+- **`prices-pull.mjs` lần đầu phải dựng khối yaml không phải `perPax`.** `dungKhoi()` hiện chỉ biết
+  `unit`/`amount`/`paxRates` (`:562-579`); thêm `maxPax`. Kèm quyết định 5 (`giuNguyen`) — thiếu một
+  trong hai là giá Phao chuối đóng băng im lặng.
 - **Form chỉ mọc sau khi chủ dự án gắn `bookingRef.key` trong Studio.** Mã đúng mà chưa gắn khoá
   thì **không trang nào đổi gì** — đây là công tắc thật, không phải bước phụ.
 - **`06-BINDING_MAP` phải sửa** ở §3 (hàng "Khối hành động" đang khai form thuộc riêng Tour) và
