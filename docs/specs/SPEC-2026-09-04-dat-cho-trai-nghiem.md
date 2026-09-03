@@ -309,6 +309,39 @@ Khách **đếm người**, máy quy ra lượt. 3 khách → 1 lượt → 1.00
    **giữ thứ tự khoá cố định** — hàm này phải tất định, cùng đầu vào ra cùng byte, kẻo mỗi lần pull
    đẻ một diff giả.
 
+#### 4.7b Máy chủ phải kiểm được đơn nhóm — nếu không, MỌI đơn Phao chuối bị từ chối
+
+**Đây là lỗi chặn, phát hiện 2026-09-04 khi đối chiếu BK5.** `schema.ts:230-235` kiểm nhất quán
+bằng cách **dựng lại một bảng `{ kind: 'flat', perPax: quotedPerPax }`** từ payload rồi chạy
+`computeQuote` và đòi `q.total === input.quoted.total`. Với `perGroup`, `quoted.perPax` **rỗng có
+chủ ý** (§4.7) → `typeof input.quoted.perPax.adult === 'number'` là `false` → `quotedOk` là `false`
+→ **mọi đơn nhóm bị chặn bằng `MSG.quotedMismatch`**. Form dựng đẹp, khách bấm gửi, máy chủ từ chối.
+
+**Sửa:** `Quoted` thêm khoá tuỳ chọn — đúng vai của `Quoted` là *bản ghi vì sao ra con số này*:
+
+```ts
+/** Có mặt ⇔ đơn dùng bảng giá nhóm. Server dựng lại bảng từ đây để kiểm nhất quán (BK5). */
+group?: { amount: number; maxPax: number }
+```
+
+`buildQuotedPayload` thêm `group` khi `PriceTable.kind === 'group'`. Trong `parseBookingPayload` /
+luật kiểm:
+
+```ts
+const bang: PriceTable = input.quoted.group
+  ? { kind: 'group', amount: input.quoted.group.amount, maxPax: input.quoted.group.maxPax }
+  : { kind: 'flat', perPax: quotedPerPax }
+const q = computeQuote(bang, input.pax)
+```
+
+và nhánh `quotedOk` cho đơn nhóm kiểm `amount`/`maxPax` là số nguyên dương thay vì kiểm
+`perPax.adult`.
+
+> **Đừng đọc BK5 rộng hơn nghĩa của nó.** Máy chủ kiểm các con số khách gửi lên có **tự nhất quán**
+> hay không — nó **không** kiểm chúng khớp `prices.yaml`, vì BK1 cấm nó đọc `prices.yaml` lúc
+> runtime. Đúng giá là việc của nhân viên khi gọi xác nhận. Thiết kế này có sẵn từ `ADR-0027`, đợt
+> này **không đổi** — chỉ mở rộng cho một hình bảng giá thứ ba.
+
 **Giới hạn:** `LIMITS.TOTAL_MAX = 30` khách → tối đa 6 lượt. Không thêm giới hạn mới.
 
 **Mùa và ưu đãi 5%:** áp lên **giá một lượt** rồi mới nhân số lượt, đúng thứ tự trong công thức
@@ -377,6 +410,30 @@ trên. Chủ dự án xác nhận ưu đãi áp bình thường cho hoạt độ
    client cho **cùng một con số**, trên bảng giá một hạng.
 6. `prices-pull` — dòng `per5pax` bị bỏ qua **kèm cảnh báo nêu tên khoá**, và 34 dòng còn lại vẫn
    vào `prices.yaml` bình thường.
+
+> **Ai chạy sáu test trên?** `npm test` — **chạy tay**. Nó **không** nằm trong `npm run gate` và
+> **không** nằm trong `.githooks/pre-push` (đã kiểm: cả hai chỉ chạy `run-gates.mjs`). Test cho
+> validator thì `npm --prefix scripts run test`. Ghi ra vì §6 gọi chúng là "bắt buộc" mà không nói
+> ai bấm nút.
+
+**Bằng chứng cho BK1–BK5 — bốn dòng dưới đây thay chỗ cho câu "đã review":**
+
+- **BK1:** `grep -rn "lib/prices\|lib/sanity\|lib/resolver" src/pages/api/dat-tour.ts src/lib/booking/`
+  phải trả **0**. ⚠️ **Cạm bẫy có thật của đợt này:** thi công `backHref` bằng cách tra loại entity
+  qua `resolver.ts`/`prices.ts` thay vì đọc `productType` trong payload là **phá BK1**. `ADR-0033`
+  §6 đã chọn đường payload nên thiết kế sạch — câu grep này là để người thi công không tự tiện.
+- **BK2:** đọc diff, xác nhận không thêm đích ghi nào ngoài cột D1.
+- **BK3:** ô "Điểm đón" là PII theo `04-CONSTRAINTS:94`; ẩn ô mà vẫn gửi rỗng là **thu ít hơn**,
+  không phải nhiều hơn. Không `console.log` PII nào mới.
+- **BK4:** không chạm bí mật. Mã Google Sheet không vào repo.
+- **BK5:** test (5) và (4b) là runner thật, chạy trong miniflare với D1 thật.
+
+> **Vì sao BK1–BK5 áp sang trang Trải nghiệm mà không phải sửa một chữ** — và vì sao `06` thì phải
+> vá: `04-CONSTRAINTS` §1d neo vào **endpoint và module** (`:88` mở bằng *"Endpoint `/api/dat-tour`
+> là đường ghi duy nhất lúc runtime"*; BK1 gọi tên `src/pages/api/dat-tour.ts` và
+> `src/lib/booking/*`), **không câu nào chứa chữ "trang Tour"**. `06-BINDING_MAP` §3 thì diễn đạt
+> **theo từng loại trang**, nên nó phải vá. Hai file, hai cách neo, hai kết luận khác nhau — đó là
+> lý do, không phải trùng hợp.
 
 **Kiểm tay trên bản dựng (không thay được bằng test):**
 
