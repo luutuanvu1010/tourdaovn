@@ -61,10 +61,17 @@ Bốn sự thật đo được lúc soạn, quyết định hình dạng của A
    giá thì không form, giữ `ContactChannels` — quyết định nền 3 của `06-BINDING_MAP` áp y nguyên.
 
 2. **KHÔNG mở đơn vị giá nhóm.** `per5pax` không vào `prices.yaml` đợt này. Phao chuối giữ kênh
-   Zalo như hiện nay. Mở một đơn vị giá mới là cửa một chiều chạm PY1/PY2/PY7, `quote.ts`,
-   `BookingForm`, và cả `prices-pull.mjs` (bảng 13 cột của Sheet không chở nổi đơn vị nào khác
-   `perPax`) — không đáng cho đúng một trong tám sản phẩm. Muốn mở là **quyết định mới**, không
-   phải mở rộng ADR này.
+   Zalo như hiện nay. Mở một đơn vị giá mới là cửa một chiều: PY1 hiện có enum **ba** đơn vị
+   (`perPax`, `perRoomNight`, `perTicket` — `py1-py8.ts:4,25`), thêm cái **thứ tư** kéo theo
+   PY2/PY7, `quote.ts`, `BookingForm`, và cả `prices-pull.mjs` (bảng 13 cột của Sheet không chở
+   nổi đơn vị nào khác `perPax`) — không đáng cho đúng một trong tám sản phẩm. Muốn mở là
+   **quyết định mới**, không phải mở rộng ADR này.
+
+   *Nói cho chính xác:* `tiers[]` **ép được** để trông như giá nhóm — khai `amount` = giá nhóm
+   chia cho `maxPax` của từng bậc. Loại vì nó hỏng ở **hai** chỗ, và đây mới là bằng chứng thật
+   sự mạnh: (a) phép chia thường lẻ — 500.000 chia 3 ra 166.667, nhân lại thành **500.001 đ**,
+   sai tiền; (b) `quote.ts:82` trả `perPax: { adult: amount }`, nên form **hiện cho khách một con
+   số "mỗi người" bịa ra** không có trong bảng giá nào. Sai tiền *và* sai nhãn.
 
 3. **`prices-pull.mjs` bỏ qua dòng có đơn vị lạ, kèm cảnh báo, thay vì chặn cả lượt pull.** Hôm
    nay một ô `Đơn vị` sai làm hỏng toàn bộ lần đồng bộ, kể cả 34 dòng còn lại đang đúng. Đổi
@@ -75,8 +82,10 @@ Bốn sự thật đo được lúc soạn, quyết định hình dạng của A
 4. **Đường ghi runtime học `productType`, không đoán từ slug.** Thêm trường
    `productType: 'tour' | 'experience'` vào payload `/api/dat-tour`, và cột `product_type` vào
    bảng `booking` (migration `0003`, mặc định `'tour'` cho mọi dòng đã có). `backHref` và nhãn
-   báo tin đọc từ trường này. Ba lý do không suy từ slug: slug không mang loại; hai loại trang có
-   thể trùng slug; và nhân viên đọc đơn cần biết đơn thuộc sản phẩm gì mà không phải tra ngược.
+   báo tin đọc từ trường này. Ba lý do không suy từ slug: slug không mang loại; hai nhánh URL **có
+   thể** đẻ ra slug trùng nhau về sau — đo 2026-09-04, `dist/tour/` và `dist/trai-nghiem/` **hôm nay
+   chưa có tên chung**, nên đây là hiểm hoạ tương lai chứ không phải chuyện đang xảy ra; và nhân
+   viên đọc đơn cần biết đơn thuộc sản phẩm gì mà không phải tra ngược.
 
 5. **Tên endpoint `/api/dat-tour` giữ nguyên.** Tên nay hơi hẹp so với việc nó làm, nhưng đổi
    đường dẫn của một endpoint đang nhận đơn thật đổi lấy một cái tên đẹp hơn là đánh đổi sai. Ghi
@@ -86,6 +95,13 @@ Bốn sự thật đo được lúc soạn, quyết định hình dạng của A
    ghi **"Số khách"** thay vì "Người lớn". Luật áp chung cho mọi trang, nên tour nào sau này chỉ
    có một hạng cũng hưởng. Lý do: "Người lớn" đứng một mình, không có hạng nào bên cạnh để đối
    chiếu, đọc lạc nghĩa trên trang jetski hay fly board.
+
+   *Phạm vi thật của lập luận này:* nó đúng với **tiếng Việt** (`Người lớn` → `Số khách`) và
+   **tiếng Anh** (`Adults` → `Guests`). Với **zh/ko/ru thì trung tính**, vì cả hai khoá ở ba thứ
+   tiếng đó đang là **chuỗi tiếng Anh chưa dịch** (`uiCopy.ts:486-490,687-691,888-892`). Đây là
+   **nợ dịch có sẵn**, không phải thứ đợt này gây ra — form đặt chỗ dịch loang lổ: `bookingPayTransfer`
+   có đủ 5 thứ tiếng, còn `paxAdult`, `paxGuests`, `bookingPickup`, `bookingSubtotalNote` thì không.
+   Ghi vào nợ tồn, không gộp vào đợt này.
 
 7. **Ô "Điểm đón" ẩn trên trang Trải nghiệm.** Chủ dự án chốt: khách tự ra bãi, không có đón.
    Trường `pickup` trong payload và D1 **giữ nguyên** (gửi rỗng) — không đụng hợp đồng dữ liệu chỉ
@@ -132,6 +148,8 @@ Bốn sự thật đo được lúc soạn, quyết định hình dạng của A
 | **Mở đơn vị `perGroup` / `perTurn` ngay đợt này** | cửa một chiều chạm PY1/PY2/PY7 + `quote.ts` + form + `prices-pull`; phục vụ 1/8 sản phẩm. Để lại làm quyết định riêng khi có ≥ 2 sản phẩm cần |
 | **Dùng `tiers[]` cho giá nhóm** | không diễn tả được: `computeQuote` nhân `amount × số người` (`quote.ts:76-84`). Ép dùng là **báo sai số tiền cho khách** |
 | **Suy `productType` từ tiền tố URL của `Referer`** | không thêm cột, không migration — nhưng `Referer` khách gửi lên là thứ sửa được, và đơn không JavaScript thì không có. Loại: dữ liệu đơn hàng không dựa vào header khách kiểm soát |
+| **Dùng lại cột `source` đã có** — gửi `source='web-experience'` thay vì `'web'` | **rẻ hơn thật**: `0001_booking.sql:19` đã có `source TEXT NOT NULL DEFAULT 'web'`, nên **không migration, không cửa một chiều, không cửa sổ 500** của §7. Vẫn loại: `source` nói về **kênh đơn tới từ đâu**, không phải **sản phẩm là loại gì**; chồng hai nghĩa lên một cột là thứ trang quản trị đơn sẽ phải gỡ ra sau. Kể tên ở đây để người đọc biết cửa sổ 500 là thứ **mua có ý thức**, không phải chỗ chưa nghĩ tới |
+| **Nhét `productType` vào `quoted_json`** | `quoted` là bản ghi *vì sao ra con số tạm tính này*, không phải chỗ chứa thuộc tính sản phẩm — `ADR-0031` §4 đã chốt vai của nó. Cột truy vấn được cũng là thứ trang quản trị cần |
 | **Chép `BookingForm` thành bản riêng cho Trải nghiệm** | hai bản chép tay của cùng một phép tính tiền; lệch là lệch bằng tiền khách |
 | **Đổi tên endpoint thành `/api/dat-cho`** | tên đúng hơn, nhưng đổi đường dẫn endpoint đang nhận đơn thật không đổi lấy giá trị nào cho khách |
 | **Thêm ô chọn giờ cho hoạt động trải nghiệm** | khung giờ cố định là dữ liệu lịch — `01-CONTENT_MODEL` §2.8 và `ADR-0027` cố ý để ngoài. Ô Ghi chú đã chở được lời dặn giờ |
@@ -151,8 +169,10 @@ Bốn sự thật đo được lúc soạn, quyết định hình dạng của A
 - **`06-BINDING_MAP` phải sửa** ở §3 (hàng "Khối hành động" đang khai form thuộc riêng Tour) và
   thêm hàng cho `/trai-nghiem/{slug}`. Bản vá đề xuất kèm trong spec; **file luật không tự sửa**,
   chờ phiếu quyết định.
-- **`04-CONSTRAINTS` §1d BK1–BK5 không đổi một chữ** và nay che thêm một loại trang. BK5 (client
-  và server dùng chung `computeQuote`) là bất biến quan trọng nhất của đợt này.
+- **`04-CONSTRAINTS` §1d BK1–BK5 không đổi một chữ** và nay che thêm một loại trang. Đã đối chiếu
+  `04-CONSTRAINTS.md:92-96`: cả năm bất biến nói về *endpoint, form, PII, bí mật, hàm tính tiền* —
+  **không bất biến nào nhắc tới "tour"**, nên chúng áp sang trang Trải nghiệm không cần sửa chữ nào.
+  BK5 (client và server dùng chung `computeQuote`) là bất biến quan trọng nhất của đợt này.
 - **Nợ mở, DRI chủ dự án:** dọn hai trang trùng `phao-chuoi` / `phao-bay-flying-banana-boat` (một
   sản phẩm, hai trang đã xuất bản); quyết có mở đơn vị giá nhóm hay không; thêm dòng giá cho Phao
   bay nếu muốn bán; trang gom "Lặn biển Hòn Tằm" nếu muốn (việc nội dung, không phải việc giá).
