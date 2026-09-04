@@ -99,8 +99,13 @@ export function articleToJsonLd(
   // inLanguage
   ld['inLanguage'] = article.language
 
-  // articleSection = articleType
-  ld['articleSection'] = article.articleType
+  // articleSection = articleType. Gán CÓ ĐIỀU KIỆN như mọi field tuỳ chọn khác trong
+  // hàm này: bài thiếu articleType mà gán thẳng thì JSON-LD xuất ra `"articleSection":null`,
+  // và null trong JSON-LD là dữ liệu hỏng chứ không phải giá trị rỗng — cổng I6 bắt đúng.
+  // Đã có một bài như vậy lên tới production ngày 2026-09-04.
+  // Nợ "bài thiếu articleType" không bị giấu: nó có cổng publish riêng (I12/I4/I7,
+  // 01-CONTENT_MODEL §493). Việc của serializer chỉ là đừng xuất JSON hỏng.
+  if (article.articleType) ld['articleSection'] = article.articleType
 
   // speakable
   const speakable = speakableToLd(article.summary, article.faq)
