@@ -2724,3 +2724,36 @@ Duyệt chéo bởi phiên `tourdaovn-bc`: **không chặn, 5 sửa bắt buộc
 trong đó ba sửa là lỗi thật của bản đầu: câu cảnh báo `06`/`luat1-post` sai theo chiều nguy hiểm,
 `d1 migrations apply` thiếu `--remote`, và bước kiểm đơn thử mâu thuẫn với việc **không có cơ sở D1
 preview**.
+
+## QĐ-2026-09-05-01 — Phê chuẩn ADR-0034: form đặt chỗ ba phần, thẻ Chi tiết ba dòng, nút "Chi tiết" theo giá gốc, `QuoteLine` mang `goc`/`subtotalGoc`
+
+**Bối cảnh.** 04/09 chủ dự án chỉ ra hai điểm chưa hợp lý ở bước 1 của form: bảng "Chi tiết giá"
+in lại số người mà bộ đếm đã nói, và "Tạm tính" nên bỏ; yêu cầu bố cục ba phần Số lượng → Phương
+thức thanh toán → Chi tiết. Đo production cùng ngày xác nhận số người in ba lần và một con số mang
+hai tên (chi tiết ở `SPEC-2026-09-04-form-dat-cho-ba-phan.md` §2).
+
+**Chốt, qua ba lượt.**
+1. 04/09 — *"ok chọn theo khuyến nghị"*: bỏ dòng thành tiền từng hạng khỏi form, giữ ẩn tên ba
+   phần. Thi hành ở commit `c665334`.
+2. 05/09 sáng, sau khi xem trang xem trước — *"bổ sung lại nút chi tiết giá, thay 'Cần thanh toán'
+   bằng 'Tổng tiền', và thay 'Tổng số tiền' thành 'Tạm tính'"*.
+3. 05/09, sau lần xem trước thứ hai — *"có vẻ ổn đấy, chỉ sửa chi tiết nhỏ: thay 'Xem chi tiết giá'
+   thành 'Chi tiết'; đồng thời phần giá người lớn, trẻ em, người cao tuổi ở đây là giá gốc (trước
+   khuyến mại); hiển thị kiểu: 5 x người lớn …"* — rồi *"ok commit và ghi ADR nhé, chưa PUSH"*.
+
+**Ai chốt.** Chủ dự án, 2026-09-04 và 2026-09-05, sau khi được nêu rõ đánh đổi ở mỗi lượt (bỏ
+dòng theo hạng → khách mất chỗ so giá; thân nút theo giá gốc → phải thêm trường vào bộ tính giá
+vì giao diện không được nhân).
+
+**Hệ quả nhận rõ.** `src/lib/booking/quote.ts` — module dùng chung client/server (BK5) — nhận hai
+trường **thuần bổ sung** `goc`/`subtotalGoc` trên từng `QuoteLine`. Payload gửi máy chủ và cách máy
+chủ kiểm không đổi. Đây là ngoại lệ có ghi của điều "không chạm `src/lib/booking/`" trong SPEC
+04/09 §4, và là chính đường SPEC 31/08 §4.5.2 đã dự tính.
+
+**Thi hành.** `docs/adr/ADR-0034-the-chi-tiet-form-dat-cho.md` (accepted 2026-09-05);
+`docs/specs/SPEC-2026-09-04-form-dat-cho-ba-phan.md` §1–§9 kèm số đo; mã ở `BookingForm.astro`,
+`quote.ts`, `uiCopy.ts`, `test/booking/quote.test.ts`. Nhánh `feat/dat-cho-trai-nghiem`, **chưa
+push** theo yêu cầu. Nghiệm thu: vitest 208/208, astro check 0 lỗi, build + gate 47 pass / 0 fail.
+Chưa đo sống: biên nhận sau khi gửi đơn thật, khổ điện thoại.
+
+---

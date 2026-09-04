@@ -15,8 +15,14 @@ export type PriceTable =
   // ADR-0033 §2: một giá cho cả nhóm. `amount` là giá MỘT LƯỢT.
   | { kind: 'group'; amount: number; maxPax: number }
 
-/** `unit: 'luot'` → `count` đếm LƯỢT, không đếm người. Chỉ nhánh group dùng. */
-export type QuoteLine = { code: PaxCode; count: number; amount: number; subtotal: number; unit?: 'luot' }
+/**
+ * `unit: 'luot'` → `count` đếm LƯỢT, không đếm người. Chỉ nhánh group dùng.
+ * `goc` / `subtotalGoc` (05/09): đơn giá và thành tiền TRƯỚC ưu đãi thanh toán trước, ĐÃ áp mùa —
+ * cùng phép với `prepay.totalGoc`, chỉ là tách theo dòng; cộng mọi `subtotalGoc` ra đúng `totalGoc`.
+ * Tồn tại vì nút "Chi tiết" trên form in thành tiền từng hạng theo giá gốc, mà giao diện thì không
+ * được tự nhân (SPEC-2026-09-04 §3.2 luật 1). Không ưu đãi thì `goc === amount`.
+ */
+export type QuoteLine = { code: PaxCode; count: number; amount: number; subtotal: number; goc: number; subtotalGoc: number; unit?: 'luot' }
 export type QuoteOptions = {
   seasons?: Season[]
   departDate?: string
@@ -89,13 +95,14 @@ export function computeQuote(table: PriceTable, pax: PaxCounts, opts: QuoteOptio
     if (!Number.isInteger(table.maxPax) || table.maxPax <= 0) return null
     const soLuot = Math.ceil(n / table.maxPax)
     const amount = nhan(table.amount)
+    const goc = khongUuDai(table.amount)
     const q = kem({
-      lines: [{ code: 'adult', count: soLuot, amount, subtotal: amount * soLuot, unit: 'luot' }],
+      lines: [{ code: 'adult', count: soLuot, amount, subtotal: amount * soLuot, goc, subtotalGoc: goc * soLuot, unit: 'luot' }],
       total: amount * soLuot,
       // RỖNG có chủ ý: không có "giá mỗi người" nào tồn tại cho dòng giá này. Trả một con số
       // ở đây là dựng lại đúng lỗi đã khiến `tiers` bị loại khỏi vai giá nhóm (ADR-0033 §2).
       perPax: {},
-    }, khongUuDai(table.amount) * soLuot)
+    }, goc * soLuot)
     // amount đã áp mùa/ưu đãi — cùng giá trị với lines[0].amount (xem ghi chú ở kiểu Quote).
     q.group = { amount, maxPax: table.maxPax }
     return q
@@ -105,11 +112,12 @@ export function computeQuote(table: PriceTable, pax: PaxCounts, opts: QuoteOptio
     const tier = [...table.tiers].sort((a, b) => a.maxPax - b.maxPax).find(t => t.maxPax >= n)
     if (!tier) return null
     const amount = nhan(tier.amount)
+    const goc = khongUuDai(tier.amount)
     return kem({
-      lines: [{ code: 'adult', count: n, amount, subtotal: amount * n }],
+      lines: [{ code: 'adult', count: n, amount, subtotal: amount * n, goc, subtotalGoc: goc * n }],
       total: amount * n,
       perPax: { adult: amount },
-    }, khongUuDai(tier.amount) * n)
+    }, goc * n)
   }
 
   const lines: QuoteLine[] = []
@@ -121,9 +129,10 @@ export function computeQuote(table: PriceTable, pax: PaxCounts, opts: QuoteOptio
     const goc = table.perPax[code]
     if (typeof goc !== 'number') return null
     const amount = nhan(goc)
-    lines.push({ code, count, amount, subtotal: amount * count })
+    const gocDong = khongUuDai(goc)
+    lines.push({ code, count, amount, subtotal: amount * count, goc: gocDong, subtotalGoc: gocDong * count })
     perPax[code] = amount
-    totalGoc += khongUuDai(goc) * count
+    totalGoc += gocDong * count
   }
   return kem({ lines, total: lines.reduce((s, l) => s + l.subtotal, 0), perPax }, totalGoc)
 }

@@ -153,3 +153,122 @@ toán**. Đây là luật render đã có, **không** tính bù bằng nhân ng�
 Bằng chứng phụ: `dist/tour/tour-3-dao-hon-mun-hon-mun-lang-chai-hon-tam/index.html` sau build không còn chuỗi
 "Tạm tính" hay "Xem chi tiết giá". Server HTML xác nhận Astro **giữ nguyên text node trắng** giữa các thẻ
 (`<div class="bf__sum-total" …> <span>`), nên lối `:empty` bị loại là đúng — hai lớp trạng thái là lối tất định.
+
+## 8. Bổ sung 2026-09-05 — chủ dự án chốt sau khi xem trước
+
+Ba yêu cầu, nguyên văn: *"bổ sung lại nút chi tiết giá, thay văn bản 'Cần thanh toán' bằng 'Tổng
+tiền', và thay 'Tổng số tiền' thành 'Tạm tính'"*.
+
+### 8.1 Nhãn
+
+| Khoá | 04/09 | **05/09 (vi)** | en/zh/ko/ru |
+|---|---|---|---|
+| `bookingBeforeDiscount` | Tổng số tiền | **Tạm tính** | Subtotal |
+| `bookingGrandTotal` | Cần thanh toán | **Tổng tiền** | Total |
+| `bookingPriceDetail` | (đã gỡ) | **Xem chi tiết giá** — khôi phục | Price breakdown |
+
+`bookingSubtotal` và `bookingSubtotalNote` (chữ "Tạm tính" cũ kèm ⓘ) **vẫn gỡ**: "Tạm tính" nay là
+nhãn của dòng trước ưu đãi, không phải tên của tổng.
+
+### 8.2 Nút "Xem chi tiết giá" — nằm TRONG thẻ, cuối thẻ
+
+```
+  Tạm tính                     1.445.000₫
+  Ưu đãi trả trước (−5%)         −71.000₫
+  ──────────────────────────────────────
+  Tổng tiền                    1.374.000₫
+  ▸ Xem chi tiết giá                       ← <details>, mặc định đóng
+    Người lớn × 1                 808.000₫
+    Trẻ em × 1                    566.000₫
+    (ghi chú mùa, chỉ khi có mùa)
+```
+
+Thân bảng là **đúng phần không có ở ba dòng trên**: thành tiền từng hạng khách (hoặc dòng lượt
+"{n} khách → {m} lượt × {giá}" với bảng giá nhóm) và ghi chú mùa. **Không** lặp Tạm tính / Ưu đãi /
+Tổng tiền vào thân — đó là cái trùng lặp đã gỡ 04/09.
+
+Hệ quả cho bảng giá nhóm: ghi chú lượt từng đứng dưới dòng tổng (§3.2) nay **chuyển vào thân
+chi tiết** dưới dạng dòng có thành tiền ("6 khách → 2 lượt × 950.000₫ · 1.900.000₫"), không in hai
+nơi. Khách muốn biết vì sao tiền nhân đôi thì mở nút — cùng khoảng cách một cú bấm với mọi hạng
+khách khác.
+
+Kỹ thuật: `<details>` gốc, đặt trong `.bf__sum` được vì `aria-live` chỉ nằm ở dòng Tổng tiền (§3.6).
+`hidden` khi `quote === null` (không mở ra bảng rỗng), liệt kê `.bf__detail[hidden]` theo class —
+bẫy 1 DR-102. Lớp `bf__sum--co-ghi-chu` và vùng `.bf__sum-notes` bị gỡ vì không còn gì đứng dưới
+dòng tổng ngoài nút.
+
+### 8.3 Cỡ chữ nhãn Tổng tiền trở về `--fs-base`
+
+Lý do hạ xuống `--fs-sm` ở §3.2 là nhãn "Cần thanh toán" dài 136px. "Tổng tiền" đo **84px** ở
+`--fs-base`/700; cộng gap 12 và số xấu nhất "30.000.000₫" 112px là **208px < 240px**. Bỏ luật
+`.bf__sum-total span`; nhãn và số cùng cỡ như dòng tổng cũ. Đổi nhãn dòng này lần sau phải đo lại.
+
+### 8.4 Nghiệm thu 05/09 (dev 1688×1066, JS đo DOM)
+
+| Ca | Đo được | Kết quả |
+|---|---|---|
+| Tour 3 đảo, 1 NL, chuyển khoản | Tạm tính 850.000₫ · Ưu đãi −42.000₫ · Tổng tiền 808.000₫ · nút đóng. Thẻ 173px. Mở nút: "Người lớn × 1 808.000₫", thẻ 206px | đạt |
+| 1 NL + 1 TE, mở nút | Tạm tính 1.445.000₫ · −71.000₫ · Tổng tiền 1.374.000₫ · thân: Người lớn × 1 808.000₫, Trẻ em × 1 566.000₫. Thẻ 239px | đạt |
+| Khởi hành | Chỉ Tổng tiền 850.000₫ + nút. Thẻ 97px, không kẻ | đạt |
+| Phao chuối 6 khách | Tạm tính 2.000.000₫ · −100.000₫ · Tổng tiền 1.900.000₫; mở nút: "6 khách → 2 lượt × 950.000₫ 1.900.000₫". Khởi hành: Tổng tiền 2.000.000₫; thân "… × 1.000.000₫ 2.000.000₫" | đạt |
+| Chiều cao so với 04/09 | +34px khi đóng (139 → 173) vì thêm dòng nút; so với production 155px (gập) thì cao hơn 18px | ghi nhận |
+| `npx astro check` · `npm test` · `npm run build && npm run gate` | 0 lỗi · 204/204 · lần 1 đổ vì Sanity API ngắt kết nối giữa lúc dựng trang (không phải mã), lần 2 build xong, gate 47 `[pass]` / 0 `[fail]` | đạt |
+
+## 9. Bổ sung 2026-09-05 (lần 2) — nhãn "Chi tiết", thân theo giá gốc
+
+Chủ dự án chốt sau khi xem trước §8, nguyên văn: *"Thay 'Xem chi tiết giá' thành 'Chi tiết'. Đồng thời
+phần giá người lớn, trẻ em, người cao tuổi ở đây là giá gốc (trước khuyến mại); hiển thị kiểu: 5 x
+người lớn …"*.
+
+### 9.1 Ba thay đổi bề mặt
+
+| Chỗ | Trước | Sau |
+|---|---|---|
+| `bookingPriceDetail` | Xem chi tiết giá | **Chi tiết** (en/zh/ko/ru: Details) |
+| Dòng trong thân | "Người lớn × 2 · thành tiền ĐÃ trừ ưu đãi" | **"2 × Người lớn · thành tiền TRƯỚC ưu đãi, đã áp mùa"** |
+| Dòng lượt (giá nhóm) | "6 khách → 2 lượt × 950.000₫ · 1.900.000₫" | **"6 khách → 2 lượt × 1.000.000₫ · 2.000.000₫"** |
+
+Hệ quả đọc: các dòng trong thân **cộng lại đúng bằng Tạm tính**; Ưu đãi trừ ở mức tổng; Tổng tiền là
+số cuối. Chọn "Thanh toán khi khởi hành" thì thân vẫn là giá gốc và bằng Tổng tiền.
+
+### 9.2 Chạm bộ tính giá — vì sao và chạm đến đâu
+
+`Quote.lines[]` chỉ mang `amount`/`subtotal` **đã trừ ưu đãi**; tổng trước ưu đãi chỉ có ở mức tổng
+(`prepay.totalGoc`). Muốn in thành tiền gốc từng dòng mà **không cho giao diện tự nhân** (§3.2 luật 1,
+spec 31/08 §4.5.1 luật 1) thì bộ tính giá phải trả sẵn — đúng đường spec 31/08 §4.5.2 đã dự tính
+("khi cần mới thêm field vào QuoteLine").
+
+Thêm vào `QuoteLine` ở `src/lib/booking/quote.ts` hai trường **thuần bổ sung**:
+
+| Trường | Nghĩa | Nguồn |
+|---|---|---|
+| `goc` | đơn giá **trước** ưu đãi, **đã** áp mùa | `apDieuChinh(gốc, mùa, 0)` — cùng hàm đang cộng dồn `totalGoc` |
+| `subtotalGoc` | `goc × count` (count = số người, hoặc số lượt với bảng nhóm) | cùng phép, tách theo dòng |
+
+Bất biến: `Σ subtotalGoc === prepay.totalGoc`; không ưu đãi thì `goc === amount`. Cả ba nhánh
+`flat` / `tiers` / `group` cùng nhận. **Không đổi** `total`, `perPax`, `season`, `prepay`, `group`;
+`buildQuotedPayload` vẫn chỉ lấy bốn khoá cũ nên **payload gửi máy chủ giữ nguyên từng byte**, và
+`validateBooking` không đọc `lines`. §4 "Không chạm `src/lib/booking/`" của spec này nay có **một ngoại
+lệ được ghi rõ**: `quote.ts`, thuần thêm trường, có test.
+
+Test `test/booking/quote.test.ts`: bốn `toEqual` về hình dạng dòng cập nhật thêm hai trường; thêm
+bốn test mới (flat + ưu đãi, mùa + ưu đãi, không ưu đãi, perGroup + ưu đãi). Viết đỏ trước, xanh sau:
+8 đỏ → 208/208 xanh.
+
+### 9.3 Biên nhận sau khi gửi soi gương thẻ
+
+`showDone` nay in: từng hạng theo giá gốc → Tạm tính → Ưu đãi → Tổng tiền (không ưu đãi thì vắng hai
+dòng giữa), để dòng "2 × Người lớn" không mang hai con số ở hai nơi. Kèm một sửa nhỏ cùng tinh thần
+với chốt `tongDaGui`: **chốt luôn `quote` trước `await fetch`** và truyền vào `showDone`, thay vì đọc
+lại biến ngoài sau khi máy chủ trả lời.
+
+### 9.4 Nghiệm thu 05/09 lần 2 (dev 1688×1066, JS đo DOM)
+
+| Ca | Đo được | Kết quả |
+|---|---|---|
+| Tour 3 đảo, 1 NL, nút mở | nhãn nút "Chi tiết"; thân "1 × Người lớn 850.000₫"; Tạm tính 850.000₫ · −42.000₫ · Tổng tiền 808.000₫; thẻ 206px | đạt |
+| 2 NL + 1 TE, nút mở | thân "2 × Người lớn 1.700.000₫", "1 × Trẻ em 595.000₫" — cộng 2.295.000₫ **= Tạm tính** 2.295.000₫; Ưu đãi −113.000₫; Tổng tiền 2.182.000₫; thẻ 239px | đạt |
+| 2 NL + 1 TE, khởi hành | thân giữ giá gốc, Tổng tiền 2.295.000₫; thẻ 164px | đạt |
+| Phao chuối 6 khách, nút mở | thân "6 khách → 2 lượt × 1.000.000₫ 2.000.000₫" = Tạm tính 2.000.000₫; Ưu đãi −100.000₫; Tổng tiền 1.900.000₫; thẻ 231px. Khởi hành: Tổng tiền 2.000.000₫, thẻ 156px | đạt |
+| `npx astro check` · `npm test` | 0 lỗi · 208/208 | đạt |
+| `npm run build && npm run gate` | build xong, gate 47 `[pass]` / 0 `[fail]`; `dist/` trang tour có nhãn "Chi tiết" và dòng "1 × Người lớn" | đạt |
