@@ -138,6 +138,64 @@ describe('validateBooking', () => {
   })
 })
 
+// Task 5 (LỖI CHẶN — brief bước 4b): với perGroup, quoted.perPax để RỖNG có chủ ý (ADR-0033
+// §2), nên nếu máy chủ vẫn dựng lại { kind: 'flat', perPax } để kiểm BK5 thì MỌI đơn giá nhóm
+// bị từ chối bằng quotedMismatch dù form và giá đều đúng. validateBooking phải dựng lại
+// { kind: 'group', ... } từ quoted.group khi có mặt.
+describe('validateBooking — perGroup (ADR-0033 §2)', () => {
+  function groupBooking(overQuoted: Partial<BookingInput['quoted']> = {}) {
+    return good({
+      pax: { adult: 6, child: 0, senior: 0, infant: 0 },
+      quoted: {
+        perPax: {}, total: 2000000, quotedAt: 'x',
+        group: { amount: 1000000, maxPax: 5 },
+        ...overQuoted,
+      },
+    })
+  }
+  it('đơn nhóm KHÔNG bị quotedMismatch — server dựng lại bảng group để kiểm', () => {
+    const r = validateBooking(groupBooking(), TODAY)
+    expect(r.ok).toBe(true)
+  })
+  it('đơn nhóm khai tổng sai vẫn bị chặn', () => {
+    const r = validateBooking(groupBooking({ total: 1000000 }), TODAY)
+    expect(r.ok).toBe(false)
+    if (!r.ok) expect(r.fields.quoted).toBe(MSG.quotedMismatch)
+  })
+  it('maxPax <= 0 hoặc không nguyên trong quoted.group → chặn (không chia cho 0)', () => {
+    const r1 = validateBooking(groupBooking({ group: { amount: 1000000, maxPax: 0 } }), TODAY)
+    expect(r1.ok).toBe(false)
+    if (!r1.ok) expect(r1.fields.quoted).toBe(MSG.quotedMismatch)
+    const r2 = validateBooking(groupBooking({ group: { amount: 1000000, maxPax: 2.5 } }), TODAY)
+    expect(r2.ok).toBe(false)
+    if (!r2.ok) expect(r2.fields.quoted).toBe(MSG.quotedMismatch)
+  })
+  it('buildQuotedPayload mang theo group khi Quote.group có mặt', () => {
+    const q = computeQuote({ kind: 'group', amount: 1000000, maxPax: 5 }, { adult: 6, child: 0, senior: 0, infant: 0 })
+    expect(buildQuotedPayload(q!, 'x').group).toEqual({ amount: 1000000, maxPax: 5 })
+  })
+  it('buildQuotedPayload không có khoá group khi bảng giá không phải group', () => {
+    const q = computeQuote({ kind: 'flat', perPax: { adult: 550000 } }, { adult: 1, child: 0, senior: 0, infant: 0 })
+    expect(buildQuotedPayload(q!, 'x')).not.toHaveProperty('group')
+  })
+  it('vòng đủ: computeQuote → buildQuotedPayload → JSON như fetch thật → parseBookingPayload → validateBooking, ok', () => {
+    const quote = computeQuote({ kind: 'group', amount: 1000000, maxPax: 5 }, { adult: 6, child: 0, senior: 0, infant: 0 })
+    expect(quote?.group).toEqual({ amount: 1000000, maxPax: 5 })
+    const quoted = buildQuotedPayload(quote!, '2026-08-21T02:00:00Z')
+    const wire = JSON.parse(JSON.stringify({
+      tourSlug: 'phao-chuoi', tourTitle: 'Phao chuối', bookingRef: 'phao-chuoi',
+      departDate: '2026-09-05', productType: 'experience',
+      pax: { adult: 6, child: 0, senior: 0, infant: 0 }, quoted,
+      paymentMethod: 'onboard', name: 'Nguyễn Văn A', phone: '0905123456',
+      email: '', pickup: '', note: '', turnstileToken: 't', website: '',
+    }))
+    const input = parseBookingPayload(wire)
+    expect(input.quoted.group).toEqual({ amount: 1000000, maxPax: 5 })
+    const r = validateBooking(input, TODAY)
+    expect(r.ok).toBe(true)
+  })
+})
+
 describe('parseBookingPayload', () => {
   it('đọc object phẳng từ form (pax.adult, quoted.total) thành BookingInput', () => {
     const p = parseBookingPayload({

@@ -12,8 +12,11 @@ export type PaxCounts = Record<PaxCode, number>
 export type PriceTable =
   | { kind: 'flat'; perPax: Partial<Record<PaxCode, number>> & { adult: number }; notes?: Partial<Record<PaxCode, string>> }
   | { kind: 'tiers'; tiers: { maxPax: number; amount: number }[] }
+  // ADR-0033 §2: một giá cho cả nhóm. `amount` là giá MỘT LƯỢT.
+  | { kind: 'group'; amount: number; maxPax: number }
 
-export type QuoteLine = { code: PaxCode; count: number; amount: number; subtotal: number }
+/** `unit: 'luot'` → `count` đếm LƯỢT, không đếm người. Chỉ nhánh group dùng. */
+export type QuoteLine = { code: PaxCode; count: number; amount: number; subtotal: number; unit?: 'luot' }
 export type QuoteOptions = {
   seasons?: Season[]
   departDate?: string
@@ -30,6 +33,15 @@ export type Quote = {
   season?: { name: string; percent: number }
   /** Ưu đãi đã áp + tổng NẾU KHÔNG chọn ưu đãi (đã gồm mùa) — ADR-0031 §4. */
   prepay?: { percent: number; totalGoc: number }
+  /**
+   * Có mặt ⇔ bảng giá dùng là `group` (ADR-0033 §2). `amount` ở đây là giá MỘT LƯỢT ĐÃ ÁP
+   * mùa/ưu đãi (cùng giá trị với `lines[0].amount`) — không phải giá gốc trong `PriceTable`.
+   * `maxPax` không đổi theo mùa/ưu đãi, chỉ chép lại nguyên trạng. Lý do trường này tồn tại:
+   * nhánh group để `perPax` RỖNG có chủ ý (không có "giá mỗi người"), nên đây là chỗ DUY NHẤT
+   * mang amount/maxPax đi tiếp cho `buildQuotedPayload` (schema.ts) dựng lại `Quoted.group` và
+   * cho máy chủ dựng lại bảng giá khi kiểm nhất quán (BK5).
+   */
+  group?: { amount: number; maxPax: number }
 }
 
 export function emptyPax(): PaxCounts {
@@ -72,6 +84,23 @@ export function computeQuote(table: PriceTable, pax: PaxCounts, opts: QuoteOptio
     return out
   }
 
+  if (table.kind === 'group') {
+    // maxPax <= 0 thì ceil(n/0) = Infinity — chặn ở đây, đừng để nó thành số tiền.
+    if (!Number.isInteger(table.maxPax) || table.maxPax <= 0) return null
+    const soLuot = Math.ceil(n / table.maxPax)
+    const amount = nhan(table.amount)
+    const q = kem({
+      lines: [{ code: 'adult', count: soLuot, amount, subtotal: amount * soLuot, unit: 'luot' }],
+      total: amount * soLuot,
+      // RỖNG có chủ ý: không có "giá mỗi người" nào tồn tại cho dòng giá này. Trả một con số
+      // ở đây là dựng lại đúng lỗi đã khiến `tiers` bị loại khỏi vai giá nhóm (ADR-0033 §2).
+      perPax: {},
+    }, khongUuDai(table.amount) * soLuot)
+    // amount đã áp mùa/ưu đãi — cùng giá trị với lines[0].amount (xem ghi chú ở kiểu Quote).
+    q.group = { amount, maxPax: table.maxPax }
+    return q
+  }
+
   if (table.kind === 'tiers') {
     const tier = [...table.tiers].sort((a, b) => a.maxPax - b.maxPax).find(t => t.maxPax >= n)
     if (!tier) return null
@@ -101,7 +130,7 @@ export function computeQuote(table: PriceTable, pax: PaxCounts, opts: QuoteOptio
 
 /** Hạng nào được hiện bộ đếm: flat → adult + mọi khoá có giá; tiers → chỉ "số khách" (adult). */
 export function availablePaxCodes(table: PriceTable): PaxCode[] {
-  if (table.kind === 'tiers') return ['adult']
+  if (table.kind === 'tiers' || table.kind === 'group') return ['adult']
   return PAX_ORDER.filter(c => typeof table.perPax[c] === 'number')
 }
 
@@ -113,6 +142,12 @@ export function availablePaxCodes(table: PriceTable): PaxCode[] {
 export function priceTableFromEntry(entry: unknown): PriceTable | null {
   if (!entry || typeof entry !== 'object') return null
   const e = entry as Record<string, unknown>
+  if (e.unit === 'perGroup') {
+    const amount = e.amount, maxPax = e.maxPax
+    if (typeof amount !== 'number') return null
+    if (typeof maxPax !== 'number' || !Number.isInteger(maxPax) || maxPax <= 0) return null
+    return { kind: 'group', amount, maxPax }
+  }
   if (e.unit !== 'perPax') return null
 
   if (Array.isArray(e.tiers) && e.tiers.length > 0) {

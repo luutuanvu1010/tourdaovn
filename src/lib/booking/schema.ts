@@ -1,7 +1,7 @@
 // schema.ts — hợp đồng payload của POST /api/dat-tour và luật kiểm (SPEC §4.4).
 // Thuần TypeScript, không Astro, không D1. Thông điệp tiếng Việt ở đây là nguồn duy nhất
 // cho lỗi API; nhãn giao diện thì ở uiCopy.ts.
-import { PAX_ORDER, computeQuote, type PaxCode, type PaxCounts, type Quote } from './quote'
+import { PAX_ORDER, computeQuote, type PaxCode, type PaxCounts, type PriceTable, type Quote } from './quote'
 import { addDaysISO, isISODate } from './vn-date'
 
 export const LIMITS = {
@@ -64,6 +64,12 @@ export type Quoted = {
   season?: { name: string; percent: number }
   /** Ưu đãi đã áp + tổng nếu KHÔNG chọn. Ghi lại, server không tính lại (BK1) — ADR-0031 §4. */
   prepay?: { percent: number; totalGoc: number }
+  /**
+   * Có mặt ⇔ đơn dùng bảng giá nhóm (ADR-0033 §2) — nhánh này để `perPax` RỖNG có chủ ý, nên
+   * đây là nơi DUY NHẤT mang amount/maxPax. Server dựng lại bảng `{ kind: 'group', ... }` từ
+   * đây để kiểm nhất quán (BK5) — xem `validateBooking`.
+   */
+  group?: { amount: number; maxPax: number }
 }
 
 /**
@@ -75,7 +81,7 @@ export type Quoted = {
  * trên `quote`, để đơn không mùa / không ưu đãi giữ nguyên hình dạng payload cũ.
  */
 export function buildQuotedPayload(
-  quote: Pick<Quote, 'perPax' | 'total' | 'season' | 'prepay'>,
+  quote: Pick<Quote, 'perPax' | 'total' | 'season' | 'prepay' | 'group'>,
   quotedAt: string,
 ): Quoted {
   return {
@@ -84,6 +90,9 @@ export function buildQuotedPayload(
     quotedAt,
     ...(quote.season ? { season: quote.season } : {}),
     ...(quote.prepay ? { prepay: quote.prepay } : {}),
+    // Nhánh group (ADR-0033 §2, Task 5): quote.perPax rỗng có chủ ý, quote.group mang
+    // amount/maxPax thay thế — xem ghi chú tại kiểu `Quote.group`.
+    ...(quote.group ? { group: quote.group } : {}),
   }
 }
 
@@ -170,6 +179,20 @@ export function parseBookingPayload(raw: unknown): BookingInput {
       prepay = { percent, totalGoc }
     }
   }
+  // group chỉ để ĐƠN GHI LẠI vì sao ra con số này (giống season/prepay) — server dựng lại bảng
+  // từ đây để kiểm nhất quán ở validateBooking (BK5), không tin số này là đúng giá (BK1). Sai
+  // hình dạng thì BỎ khoá, không ném: một `group` bị bỏ khiến quotedOk rơi về nhánh `perPax`
+  // (rỗng với đơn nhóm) và tự nhiên thành quotedMismatch — không cần luật riêng.
+  const rawGroup = pick(r, 'quoted.group')
+  let group: { amount: number; maxPax: number } | undefined
+  if (rawGroup && typeof rawGroup === 'object' && !Array.isArray(rawGroup)) {
+    const o = rawGroup as Record<string, unknown>
+    const amount = int(o.amount)
+    const maxPax = int(o.maxPax)
+    if (amount >= 0 && Number.isInteger(maxPax) && maxPax > 0) {
+      group = { amount, maxPax }
+    }
+  }
   const productType = docProductType(pick(r, 'productType'))
   return {
     tourSlug: str(r.tourSlug).trim(),
@@ -180,7 +203,7 @@ export function parseBookingPayload(raw: unknown): BookingInput {
     // `quotedAt` là trường DUY NHẤT trong toàn payload trước đây không có chặn trên: chỉ qua
     // `str()`, không kiểm định dạng, không giới hạn độ dài — một chuỗi ~15 KB ghi thẳng vào cột
     // `quoted_json`. Cắt 40 ký tự (dư cho một dấu thời gian ISO 8601 đầy đủ).
-    quoted: { perPax, total: int(pick(r, 'quoted.total')), quotedAt: str(pick(r, 'quoted.quotedAt')).slice(0, 40), ...(season ? { season } : {}), ...(prepay ? { prepay } : {}) },
+    quoted: { perPax, total: int(pick(r, 'quoted.total')), quotedAt: str(pick(r, 'quoted.quotedAt')).slice(0, 40), ...(season ? { season } : {}), ...(prepay ? { prepay } : {}), ...(group ? { group } : {}) },
     paymentMethod: str(r.paymentMethod).trim() === 'transfer' ? 'transfer' : 'onboard',
     productType,
     name: clean(str(r.name)),
@@ -239,10 +262,20 @@ export function validateBooking(input: BookingInput, today: string): ValidationR
   // KHÔNG tự vá 'adult' bằng 0 khi client bỏ khoá này khỏi perPax: để nguyên (có thể
   // undefined lúc chạy dù kiểu ép là number) thì computeQuote tự trả null cho pax.adult > 0
   // thiếu giá — giống hệt cách nó xử mọi hạng khác thiếu giá, không cần nhánh riêng cho adult.
+  //
+  // Đơn giá NHÓM (ADR-0033 §2, Task 5): quoted.perPax rỗng có chủ ý ở nhánh này, nên dựng lại
+  // bảng { kind: 'group', ... } từ quoted.group thay vì { kind: 'flat', perPax }. Vẫn cùng một
+  // hàm computeQuote (BK5) — chỉ khác bảng giá dựng lại trước khi truyền vào.
   const quotedPerPax = input.quoted.perPax as Partial<Record<PaxCode, number>> & { adult: number }
-  const q = computeQuote({ kind: 'flat', perPax: quotedPerPax }, input.pax)
-  const quotedOk = typeof input.quoted.perPax.adult === 'number'
-    && Object.values(input.quoted.perPax).every(v => Number.isInteger(v) && (v as number) >= 0)
+  const g = input.quoted.group
+  const bang: PriceTable = g
+    ? { kind: 'group', amount: g.amount, maxPax: g.maxPax }
+    : { kind: 'flat', perPax: quotedPerPax }
+  const q = computeQuote(bang, input.pax)
+  const quotedOk = (g
+    ? Number.isInteger(g.amount) && g.amount >= 0 && Number.isInteger(g.maxPax) && g.maxPax > 0
+    : typeof input.quoted.perPax.adult === 'number'
+      && Object.values(input.quoted.perPax).every(v => Number.isInteger(v) && (v as number) >= 0))
     && Number.isInteger(input.quoted.total) && input.quoted.total >= 0 && input.quoted.total <= LIMITS.TOTAL_MAX_VND
   if (!quotedOk || !q || q.total !== input.quoted.total) fields.quoted = MSG.quotedMismatch
 

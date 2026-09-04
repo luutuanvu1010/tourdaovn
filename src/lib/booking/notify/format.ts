@@ -33,12 +33,26 @@ function paxLines(b: NewBooking): string[] {
   return out
 }
 
+// Đơn giá nhóm (ADR-0033 §2, Task 5): quoted.perPax rỗng có chủ ý, nên paxLines() ở trên
+// không in được gì cho hạng nào — nhân viên cần thấy CẢ số khách lẫn số lượt. Số lượt tính lại
+// từ maxPax + tổng số khách, KHÔNG suy từ quoted.total / soLuot: sau khi áp mùa/ưu đãi phép
+// chia đó ra số lẻ và bịa ra một "giá một lượt" không có thật — đúng lỗi đã khiến `tiers` bị
+// loại khỏi vai giá nhóm. quoted.group.amount đã là giá một lượt ĐÃ áp mùa/ưu đãi rồi
+// (xem `Quote.group`), nên in thẳng, không tính lại.
+function groupLine(b: NewBooking): string | null {
+  const g = b.quoted.group
+  if (!g) return null
+  const soLuot = Math.ceil(totalGuests(b) / g.maxPax)
+  return `Số khách: ${totalGuests(b)} · ${soLuot} lượt × ${formatPrice(g.amount, 'vi')} · tổng ${formatPrice(b.quoted.total, 'vi')}`
+}
+
 export function formatText(b: NewBooking): string {
+  const gLine = groupLine(b)
   const lines = [
     `Đơn đặt ${NHAN_LOAI[b.productType]} mới — ${b.code}`,
     `${NHAN_DONG[b.productType]}: ${b.tourTitle}`,
     `Ngày khởi hành: ${formatDateVN(b.departDate)}`,
-    ...paxLines(b),
+    ...(gLine ? [gLine] : paxLines(b)),
     `Tạm tính: ${formatPrice(b.quoted.total, 'vi')}`,
   ]
   // Mùa đã áp (nếu có) — ghi lại vì sao ra con số tạm tính ở trên. Đây là nội dung thư/tin gửi

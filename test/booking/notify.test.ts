@@ -81,6 +81,44 @@ describe('format', () => {
     const h = formatHtml({ ...b, paymentMethod: 'transfer', quoted: { ...b.quoted, prepay: { percent: 5, totalGoc: 495000 } } })
     expect(h).toContain('đã giảm 5%')
   })
+
+  // Task 5 (ADR-0033 §2, Ruling sổ tiến độ) — đơn giá NHÓM để quoted.perPax rỗng có chủ ý, nên
+  // paxLines() không in được dòng nào theo hạng. Thư phải thay bằng số khách + số lượt, tính
+  // lại từ maxPax — KHÔNG suy từ quoted.total / soLuot (sau mùa/ưu đãi phép chia đó ra số lẻ).
+  describe('đơn giá nhóm (perGroup)', () => {
+    const gBooking: NewBooking = {
+      ...b,
+      pax: { adult: 6, child: 0, senior: 0, infant: 0 },
+      quoted: { perPax: {}, total: 2000000, quotedAt: '2026-08-21T02:00:00Z', group: { amount: 1000000, maxPax: 5 } },
+    }
+    it('6 khách, maxPax 5 → 2 lượt; in số khách, số lượt và tổng, không in dòng theo hạng', () => {
+      const t = formatText(gBooking)
+      expect(t).toContain('Số khách: 6 · 2 lượt × 1.000.000₫ · tổng 2.000.000₫')
+      expect(t).not.toContain('Người lớn ×')
+    })
+    it('5 khách VẪN 1 lượt (giá nhóm, không nhân đầu người)', () => {
+      const t = formatText({ ...gBooking, pax: { adult: 5, child: 0, senior: 0, infant: 0 }, quoted: { ...gBooking.quoted, total: 1000000 } })
+      expect(t).toContain('Số khách: 5 · 1 lượt × 1.000.000₫ · tổng 1.000.000₫')
+    })
+    it('không phải đơn nhóm (không có quoted.group) → vẫn in dòng theo hạng như cũ', () => {
+      const t = formatText(b)
+      expect(t).toContain('Người lớn × 2')
+      expect(t).not.toContain('lượt ×')
+    })
+    it('đọc thẳng quoted.group.amount — KHÔNG suy giá một lượt bằng total/soLuot', () => {
+      // Cố tình đặt total KHÔNG chia hết cho soLuot (2.851.000 / 3 = 950.333,33...). Nếu
+      // groupLine() lỡ tính lại `giá một lượt = total / soLuot` thay vì đọc quoted.group.amount,
+      // dòng in ra sẽ mang số lẻ 950.333,33₫ hoặc một số bị làm tròn khác — không phải 950.000₫.
+      // Đây chính là con số "bịa ra" mà Ruling cấm.
+      const uneven: NewBooking = {
+        ...gBooking,
+        pax: { adult: 11, child: 0, senior: 0, infant: 0 }, // maxPax 5 → 3 lượt
+        quoted: { perPax: {}, total: 2851000, quotedAt: 'x', group: { amount: 950000, maxPax: 5 } },
+      }
+      const t = formatText(uneven)
+      expect(t).toContain('Số khách: 11 · 3 lượt × 950.000₫ · tổng 2.851.000₫')
+    })
+  })
 })
 
 describe('ses', () => {

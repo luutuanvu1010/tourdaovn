@@ -215,3 +215,56 @@ describe('ưu đãi thanh toán trước', () => {
     expect(apDieuChinh(730500, 0, 0)).toBe(730500)
   })
 })
+
+const group: PriceTable = { kind: 'group', amount: 1000000, maxPax: 5 }
+
+describe('computeQuote — perGroup', () => {
+  it('1 khách = 1 lượt = 1.000.000', () => {
+    expect(computeQuote(group, { adult: 1, child: 0, senior: 0, infant: 0 })?.total).toBe(1000000)
+  })
+  it('5 khách VẪN 1 lượt = 1.000.000 (giá nhóm, không nhân đầu người)', () => {
+    expect(computeQuote(group, { adult: 5, child: 0, senior: 0, infant: 0 })?.total).toBe(1000000)
+  })
+  it('6 khách = 2 lượt = 2.000.000 (tiền nhảy bậc)', () => {
+    expect(computeQuote(group, { adult: 6, child: 0, senior: 0, infant: 0 })?.total).toBe(2000000)
+  })
+  it('30 khách = 6 lượt', () => {
+    const q = computeQuote(group, { adult: 30, child: 0, senior: 0, infant: 0 })
+    expect(q?.total).toBe(6000000)
+    expect(q?.lines[0]).toEqual({ code: 'adult', count: 6, amount: 1000000, subtotal: 6000000, unit: 'luot' })
+  })
+  it('perPax phải RỖNG — không bịa ra một con số "mỗi người"', () => {
+    // Đây chính là lỗi đã loại `tiers` vì nó (quote.ts:82 trả perPax:{adult}).
+    expect(computeQuote(group, { adult: 3, child: 0, senior: 0, infant: 0 })?.perPax).toEqual({})
+  })
+  it('0 khách → null', () => {
+    expect(computeQuote(group, { adult: 0, child: 0, senior: 0, infant: 0 })).toBeNull()
+  })
+  it('maxPax <= 0 → null, không chia cho 0', () => {
+    expect(computeQuote({ kind: 'group', amount: 1000000, maxPax: 0 }, { adult: 3, child: 0, senior: 0, infant: 0 })).toBeNull()
+  })
+  it('ưu đãi 5% áp lên GIÁ MỘT LƯỢT rồi mới nhân số lượt', () => {
+    // 1.000.000 − 5% = 950.000; 2 lượt = 1.900.000. KHÔNG phải 2.000.000 − 5%.
+    const q = computeQuote(group, { adult: 6, child: 0, senior: 0, infant: 0 }, { prepayPercent: 5, prepay: true })
+    expect(q?.total).toBe(1900000)
+    expect(q?.prepay).toEqual({ percent: 5, totalGoc: 2000000 })
+  })
+  it('Quote.group mang amount ĐÃ áp ưu đãi + maxPax nguyên trạng, cho buildQuotedPayload dùng lại', () => {
+    const q = computeQuote(group, { adult: 6, child: 0, senior: 0, infant: 0 }, { prepayPercent: 5, prepay: true })
+    expect(q?.group).toEqual({ amount: 950000, maxPax: 5 })
+  })
+})
+
+describe('priceTableFromEntry — perGroup', () => {
+  it('đọc được dòng perGroup', () => {
+    expect(priceTableFromEntry({ unit: 'perGroup', amount: 1000000, maxPax: 5 }))
+      .toEqual({ kind: 'group', amount: 1000000, maxPax: 5 })
+  })
+  it('thiếu maxPax hoặc maxPax <= 0 → null (không đoán)', () => {
+    expect(priceTableFromEntry({ unit: 'perGroup', amount: 1000000 })).toBeNull()
+    expect(priceTableFromEntry({ unit: 'perGroup', amount: 1000000, maxPax: 0 })).toBeNull()
+  })
+  it('availablePaxCodes: chỉ một ô đếm', () => {
+    expect(availablePaxCodes(group)).toEqual(['adult'])
+  })
+})
