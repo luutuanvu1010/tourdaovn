@@ -97,7 +97,12 @@ describe('store', () => {
     // Canh để lần sau không ai âm thầm nới cửa chống trùng đã đặc tả ở
     // SPEC-2026-08-21-dat-tour.md:224. Cùng slug + SĐT + ngày là trùng, bất kể loại.
     const chung = { tourSlug: 'trung-slug', departDate: '2026-09-09', phone: '0900000102' }
-    await insertBooking(env.BOOKING_DB, nb({ ...chung, code: 'TD-260905-PT02', ipHash: 'pt2', productType: 'tour' }))
+    // productType: 'experience' — KHÁC mặc định 'tour' của nb() một cách cố ý (Ruling 3,
+    // vòng sửa 1/5). Nếu để 'tour' — trùng mặc định — thì một filter `AND product_type =
+    // 'tour'` viết cứng lỡ được thêm vào WHERE của findRecentDuplicate sẽ vẫn khớp dòng này
+    // và test tiếp tục xanh dù đúng cái regression nó tuyên bố canh. Để 'experience' thì
+    // filter đó làm dòng biến mất khỏi kết quả và test đỏ đúng lúc cần đỏ.
+    await insertBooking(env.BOOKING_DB, nb({ ...chung, code: 'TD-260905-PT02', ipHash: 'pt2', productType: 'experience' }))
     const dup = await findRecentDuplicate(env.BOOKING_DB, chung.phone, chung.tourSlug, chung.departDate, '2000-01-01T00:00:00Z')
     expect(dup).toBe('TD-260905-PT02')
   })
