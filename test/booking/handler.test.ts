@@ -322,4 +322,48 @@ describe('handleBooking', () => {
     expect(html).not.toContain('Ngày khởi hành')
     await flush()
   })
+
+  // ── backHref theo loại sản phẩm (Task 2, ADR-0033 §6) ────────────────────────────────────
+  // Lệch so với brief (ghi rõ, không im lặng sửa): brief gọi tên helper `postForm`, nhưng tệp
+  // này KHÔNG có helper đó — helper đang có là `req()` (dựng Request) + `payload()` (dựng thân
+  // JSON) đi cùng `handleBooking(...)`. Dùng lại đúng cặp helper đang có, không tạo helper thứ
+  // hai (đúng chỉ dẫn "nếu tên khác thì theo tên đang có").
+  describe('backHref theo loại sản phẩm', () => {
+    it('experience → /trai-nghiem/{slug}/, KHÔNG phải 404', async () => {
+      const { f } = fakeFetch(); const { ctx, flush } = mkCtx()
+      const res = await handleBooking(
+        req(payload({ productType: 'experience', tourSlug: 'du-bay-parasailing-keo-bang-cano', tourTitle: 'Dù bay Parasailing kéo bằng canô', phone: '0905 111 222' }), { Accept: 'text/html' }),
+        mkEnv(), ctx, { fetchImpl: f, now: () => NOW },
+      )
+      expect(res.status).toBe(201)
+      const html = await res.text()
+      expect(html).toContain('/trai-nghiem/du-bay-parasailing-keo-bang-cano/')
+      expect(html).not.toContain('/tour/du-bay-parasailing-keo-bang-cano/')
+      await flush()
+    })
+
+    it('tour → /tour/{slug}/ như cũ', async () => {
+      const { f } = fakeFetch(); const { ctx, flush } = mkCtx()
+      const res = await handleBooking(
+        req(payload({ productType: 'tour', tourSlug: 'tour-hon-tam-tron-goi', tourTitle: 'Tour Hòn Tằm trọn gói', bookingRef: 'tour-hon-tam', phone: '0905 333 444' }), { Accept: 'text/html' }),
+        mkEnv(), ctx, { fetchImpl: f, now: () => NOW },
+      )
+      expect(res.status).toBe(201)
+      expect(await res.text()).toContain('/tour/tour-hon-tam-tron-goi/')
+      await flush()
+    })
+
+    it('slug sai dạng → "/" bất kể loại', async () => {
+      const { f } = fakeFetch(); const { ctx } = mkCtx()
+      const res = await handleBooking(
+        req(payload({ productType: 'experience', tourSlug: 'CÓ DẤU CÁCH', phone: '0905 555 666' }), { Accept: 'text/html' }),
+        mkEnv(), ctx, { fetchImpl: f, now: () => NOW },
+      )
+      // Cố ý neo cả status: slug sai dạng thất bại validateBooking (fields.tour) → 400.
+      // Thiếu dòng này ca sẽ xanh cả trước lẫn sau sửa (nhánh regex-fail vốn đã trả '/'),
+      // không phân biệt được backHref MỚI với hành vi CŨ (advisor review, xem báo cáo).
+      expect(res.status).toBe(400)
+      expect(await res.text()).toContain('href="/"')
+    })
+  })
 })

@@ -11,7 +11,7 @@ import { buildPaymentQr } from './payment-qr'
 import { notifyAll, type Notifier } from './notify/index'
 import { createSesNotifier } from './notify/ses'
 import { createZaloNotifier } from './notify/zalo'
-import { LIMITS, MSG, parseBookingPayload, validateBooking, type BookingValid } from './schema'
+import { LIMITS, MSG, parseBookingPayload, validateBooking, type BookingValid, type ProductType } from './schema'
 import { countRecentByIp, findRecentDuplicate, insertBooking, isUniqueViolation, updateNotifyStatus, type NewBooking } from './store'
 import { verifyTurnstile } from './turnstile'
 import { formatDateVN, todayVN } from './vn-date'
@@ -59,13 +59,17 @@ function wantsHtml(request: Request): boolean {
   return !(request.headers.get('accept') ?? '').includes('application/json')
 }
 
-function backHref(tourSlug: string): string {
-  return /^[a-z0-9-]{1,120}$/.test(tourSlug) ? `/tour/${tourSlug}/` : '/'
+// Tiền tố đường dẫn theo loại sản phẩm (ADR-0033 §6). KHÔNG suy từ slug: slug không mang
+// loại, và hai nhánh URL có thể đẻ ra slug trùng nhau về sau.
+const TIEN_TO: Record<ProductType, string> = { tour: '/tour/', experience: '/trai-nghiem/' }
+
+function backHref(slug: string, pt: ProductType): string {
+  return /^[a-z0-9-]{1,120}$/.test(slug) ? `${TIEN_TO[pt]}${slug}/` : '/'
 }
 
-function reply(request: Request, r: Reply, tourSlug: string): Response {
+function reply(request: Request, r: Reply, tourSlug: string, pt: ProductType): Response {
   if (wantsHtml(request)) {
-    const html = renderBookingPage({ title: `${r.heading} — ${brand.name}`, heading: r.heading, lines: r.lines, backHref: backHref(tourSlug), ok: r.ok })
+    const html = renderBookingPage({ title: `${r.heading} — ${brand.name}`, heading: r.heading, lines: r.lines, backHref: backHref(tourSlug, pt), ok: r.ok })
     return new Response(html, { status: r.status, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } })
   }
   return new Response(JSON.stringify(r.body), { status: r.status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } })
@@ -123,7 +127,7 @@ function summaryLines(v: BookingValid, code: string, duplicate: boolean): string
 
   const lines = [
     `Mã đơn: ${code}`,
-    `Tour: ${v.tourTitle}`,
+    `${v.productType === 'tour' ? 'Tour' : 'Trải nghiệm'}: ${v.tourTitle}`,
     `Ngày khởi hành: ${formatDateVN(v.departDate)}`,
     `Tạm tính: ${formatPrice(v.quoted.total, 'vi')}`,
   ]
@@ -158,9 +162,10 @@ function defaultNotifiers(env: BookingEnv, deps: HandlerDeps): Notifier[] {
 export async function handleBooking(request: Request, env: BookingEnv, ctx: WaitUntilCtx, deps: HandlerDeps = {}): Promise<Response> {
   const now = deps.now ?? (() => new Date())
   let tourSlug = ''
+  let productType: ProductType = 'tour'
   try {
     if (request.method !== 'POST') {
-      const r = reply(request, errorReply(405, MSG.methodNotAllowed), '')
+      const r = reply(request, errorReply(405, MSG.methodNotAllowed), '', productType)
       r.headers.set('Allow', 'POST')
       return r
     }
@@ -172,7 +177,7 @@ export async function handleBooking(request: Request, env: BookingEnv, ctx: Wait
       // M10 (review Task 8): host không phân biệt hoa/thường (RFC 3986 §3.2.2); so nguyên văn
       // trước đây khiến Host viết hoa (vd. "TourDao.vn") bị chặn 403 nhầm.
       if (originHost.toLowerCase() !== host.toLowerCase()) {
-        return reply(request, errorReply(403, MSG.forbiddenOrigin), '')
+        return reply(request, errorReply(403, MSG.forbiddenOrigin), '', productType)
       }
     }
 
@@ -196,30 +201,31 @@ export async function handleBooking(request: Request, env: BookingEnv, ctx: Wait
         warnedNoTurnstile = true
         console.error('[dat-tour] TURNSTILE_SECRET_KEY chưa đặt và không có BOOKING_ALLOW_NO_TURNSTILE=1 — TỪ CHỐI nhận đơn')
       }
-      return reply(request, errorReply(503, MSG.serverError), '')
+      return reply(request, errorReply(503, MSG.serverError), '', productType)
     }
 
     const body = await readBody(request)
-    if ('error' in body) return reply(request, body.error, '')
+    if ('error' in body) return reply(request, body.error, '', productType)
     const input = parseBookingPayload(body.data)
     tourSlug = input.tourSlug
+    productType = input.productType
 
     // Honeypot: trả lời như thật, không lưu, không báo, không mách bot (SPEC §4.4).
     if (input.website) {
       const fake = generateBookingCode(now(), deps.rand)
-      return reply(request, { status: 200, body: { ok: true, code: fake }, heading: 'Đã nhận yêu cầu đặt tour', lines: [`Mã đơn: ${fake}`], ok: true }, tourSlug)
+      return reply(request, { status: 200, body: { ok: true, code: fake }, heading: 'Đã nhận yêu cầu đặt chỗ', lines: [`Mã đơn: ${fake}`], ok: true }, tourSlug, productType)
     }
 
     const t = now()
     const valid = validateBooking(input, todayVN(t))
     if (!valid.ok) {
-      return reply(request, { status: 400, body: { ok: false, error: 'validation', fields: valid.fields, message: valid.message }, heading: 'Chưa gửi được yêu cầu', lines: [valid.message, ...Object.values(valid.fields)], ok: false }, tourSlug)
+      return reply(request, { status: 400, body: { ok: false, error: 'validation', fields: valid.fields, message: valid.message }, heading: 'Chưa gửi được yêu cầu', lines: [valid.message, ...Object.values(valid.fields)], ok: false }, tourSlug, productType)
     }
     const v = valid.value
 
     const ip = request.headers.get('cf-connecting-ip')
     const ts = await verifyTurnstile({ secret: env.TURNSTILE_SECRET_KEY, token: input.turnstileToken, ip, fetchImpl: deps.fetchImpl })
-    if (!ts.ok) return reply(request, errorReply(400, MSG.turnstileFailed, { error: 'turnstile' }), tourSlug)
+    if (!ts.ok) return reply(request, errorReply(400, MSG.turnstileFailed, { error: 'turnstile' }), tourSlug, productType)
 
     // F4 (review Task 8): muối RIÊNG cho ip_hash, không dùng chung TURNSTILE_SECRET_KEY — xoay
     // khoá Turnstile không được kéo theo việc mọi ip_hash đã lưu bỗng vô nghĩa (hai vòng đời bí
@@ -239,19 +245,19 @@ export async function handleBooking(request: Request, env: BookingEnv, ctx: Wait
     // §4.10 và runbook Task 13 bước 7 — không thuộc phạm vi endpoint này.
     if (ipHash) {
       const recent = await countRecentByIp(env.BOOKING_DB, ipHash, new Date(t.getTime() - RATE_WINDOW_MS).toISOString())
-      if (recent >= RATE_MAX) return reply(request, errorReply(429, MSG.rateLimited), tourSlug)
+      if (recent >= RATE_MAX) return reply(request, errorReply(429, MSG.rateLimited), tourSlug, productType)
     }
 
     const dup = await findRecentDuplicate(env.BOOKING_DB, v.phone, v.tourSlug, v.departDate, new Date(t.getTime() - DUP_WINDOW_MS).toISOString())
     if (dup) {
-      return reply(request, { status: 200, body: { ok: true, code: dup, duplicate: true, summary: { tourTitle: v.tourTitle, departDate: v.departDate, pax: v.pax, total: v.quoted.total } }, heading: 'Yêu cầu này đã được ghi nhận', lines: summaryLines(v, dup, true), ok: true }, tourSlug)
+      return reply(request, { status: 200, body: { ok: true, code: dup, duplicate: true, summary: { tourTitle: v.tourTitle, departDate: v.departDate, pax: v.pax, total: v.quoted.total } }, heading: 'Yêu cầu này đã được ghi nhận', lines: summaryLines(v, dup, true), ok: true }, tourSlug, productType)
     }
 
     const record: NewBooking = {
       code: '', createdAt: t.toISOString(), tourSlug: v.tourSlug, tourTitle: v.tourTitle, bookingRef: v.bookingRef,
       departDate: v.departDate, pax: v.pax, quoted: v.quoted,
       customerName: v.name, phone: v.phone, email: v.email, pickup: v.pickup || null, note: v.note || null,
-      lang: 'vi', source: 'web', paymentMethod: v.paymentMethod, ipHash, userAgent: (request.headers.get('user-agent') ?? '').slice(0, 200) || null,
+      lang: 'vi', source: 'web', paymentMethod: v.paymentMethod, productType: v.productType, ipHash, userAgent: (request.headers.get('user-agent') ?? '').slice(0, 200) || null,
     }
     let inserted = false
     for (let i = 0; i < CODE_RETRIES && !inserted; i++) {
@@ -282,10 +288,10 @@ export async function handleBooking(request: Request, env: BookingEnv, ctx: Wait
       }
     })())
 
-    return reply(request, { status: 201, body: { ok: true, code: record.code, summary: { tourTitle: v.tourTitle, departDate: v.departDate, pax: v.pax, total: v.quoted.total } }, heading: 'Đã nhận yêu cầu đặt tour', lines: summaryLines(v, record.code, false), ok: true }, tourSlug)
+    return reply(request, { status: 201, body: { ok: true, code: record.code, summary: { tourTitle: v.tourTitle, departDate: v.departDate, pax: v.pax, total: v.quoted.total } }, heading: 'Đã nhận yêu cầu đặt chỗ', lines: summaryLines(v, record.code, false), ok: true }, tourSlug, productType)
   } catch (e) {
     // Chỉ log thông điệp lỗi, không log body (BK3).
     console.error('[dat-tour] lỗi:', e instanceof Error ? e.message : String(e))
-    return reply(request, errorReply(500, MSG.serverError), tourSlug)
+    return reply(request, errorReply(500, MSG.serverError), tourSlug, productType)
   }
 }

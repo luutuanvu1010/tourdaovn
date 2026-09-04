@@ -16,7 +16,7 @@ export const LIMITS = {
 
 export const MSG = {
   formInvalid: 'Vui lòng kiểm tra lại các ô được đánh dấu.',
-  tourInvalid: 'Thông tin tour không hợp lệ, hãy tải lại trang.',
+  tourInvalid: 'Thông tin sản phẩm không hợp lệ, hãy tải lại trang.',
   dateRequired: 'Chọn ngày khởi hành.',
   dateInvalid: 'Ngày khởi hành không hợp lệ.',
   dateTooEarly: 'Ngày khởi hành không được là ngày đã qua.',
