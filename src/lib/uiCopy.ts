@@ -1131,6 +1131,11 @@ export interface PriceLabelTemplates {
   perPaxFrom: (price: string) => string
   perNightFrom: (price: string, asOf: string) => string
   perTicketFrom: (price: string) => string
+  // ADR-0033 §2 — `perGroup`: giá MỘT LƯỢT cho cả nhóm, không phải giá đầu người.
+  // Nhãn phải nói rõ "một lượt" và số khách tối đa (`maxPax`) — một con số trần
+  // trụi trông y hệt một giá đầu người đắt đỏ. Đừng nướng cứng số khách trong
+  // câu chữ; nhận qua tham số vì sản phẩm khác có thể có maxPax khác 5.
+  perGroup: (price: string, maxPax: number) => string
 }
 
 export const PRICE_LABEL_TEMPLATES: Record<Lang, PriceLabelTemplates> = {
@@ -1139,30 +1144,35 @@ export const PRICE_LABEL_TEMPLATES: Record<Lang, PriceLabelTemplates> = {
     perPaxFrom: (p) => `từ ${p}/người`,
     perNightFrom: (p, asOf) => asOf ? `từ ${p}/đêm · cập nhật ${asOf}` : `từ ${p}/đêm`,
     perTicketFrom: (p) => `từ ${p}/vé`,
+    perGroup: (p, n) => `${p}/lượt · tối đa ${n} khách`,
   },
   en: {
     perPax: (p) => `${p}/person`,
     perPaxFrom: (p) => `from ${p}/person`,
     perNightFrom: (p, asOf) => asOf ? `from ${p}/night · updated ${asOf}` : `from ${p}/night`,
     perTicketFrom: (p) => `from ${p}/ticket`,
+    perGroup: (p, n) => `${p}/ride · up to ${n} guests`,
   },
   zh: {
     perPax: (p) => `每人${p}`,
     perPaxFrom: (p) => `每人${p}起`,
     perNightFrom: (p, asOf) => asOf ? `每晚${p}起 · 更新于${asOf}` : `每晚${p}起`,
     perTicketFrom: (p) => `每张${p}起`,
+    perGroup: (p, n) => `${p}/次 · 最多 ${n} 人`,
   },
   ko: {
     perPax: (p) => `1인 ${p}`,
     perPaxFrom: (p) => `1인 ${p}부터`,
     perNightFrom: (p, asOf) => asOf ? `1박 ${p}부터 · ${asOf} 업데이트` : `1박 ${p}부터`,
     perTicketFrom: (p) => `티켓 ${p}부터`,
+    perGroup: (p, n) => `${p}/회 · 최대 ${n}명`,
   },
   ru: {
     perPax: (p) => `${p}/чел.`,
     perPaxFrom: (p) => `от ${p}/чел.`,
     perNightFrom: (p, asOf) => asOf ? `от ${p}/ночь · обновлено ${asOf}` : `от ${p}/ночь`,
     perTicketFrom: (p) => `от ${p}/билет`,
+    perGroup: (p, n) => `${p}/заезд · до ${n} гостей`,
   },
 }
 

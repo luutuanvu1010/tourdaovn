@@ -80,6 +80,17 @@ export function resolvePrice(
       }
     }
 
+    case 'perGroup': {
+      // ADR-0033 §2: `entry.amount` là giá MỘT LƯỢT cho cả nhóm, không phải giá
+      // đầu người — KHÔNG nhân với số khách. Nhãn phải nói rõ "một lượt"/tương
+      // đương và `maxPax`, xem PRICE_LABEL_TEMPLATES.perGroup.
+      return {
+        label: tpl.perGroup(formatPrice(entry.amount, lang), entry.maxPax),
+        offers: [{ price: entry.amount, priceCurrency: 'VND' }],
+        isFree: false,
+      }
+    }
+
     default:
       return null
   }
