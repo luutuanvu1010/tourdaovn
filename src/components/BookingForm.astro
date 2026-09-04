@@ -1,6 +1,6 @@
 ---
 // BookingForm.astro — thẻ đặt tour trong sidebar trang Tour (SPEC-2026-08-21-dat-tour §4.3).
-// Một <form> hai bước: (1) ngày + số người + tạm tính, (2) thông tin khách + Turnstile.
+// Một <form> hai bước: (1) ngày + số người + thanh toán + thẻ Chi tiết, (2) thông tin khách + Turnstile.
 // Giá NƯỚNG lúc build vào data-price-table; script client chỉ tính lại bằng computeQuote()
 // (cùng hàm server kiểm — BK5). Không fetch giá (BK1). Không có nút nào không hoạt động:
 // Zalo/hotline chỉ render khi siteSettings.contact có dữ liệu.
@@ -55,7 +55,7 @@ function paxNote(code: PaxCode): string {
 // Nợ 2 (đợt Trải nghiệm): dòng tạm tính KHÔNG được in "Người lớn × 2" cho bảng giá nhóm —
 // `count` ở đây là SỐ LƯỢT, không phải số người, và in vậy vừa sai chữ vừa gây hiểu nhầm về
 // tiền (5 khách → 1 lượt; 6 khách → 2 lượt, tiền gấp đôi). Dùng ở mọi nơi render dòng
-// `QuoteLine` có `unit === 'luot'`: khối tạm tính, bảng chi tiết giá, và tóm tắt sau khi gửi.
+// `QuoteLine` có `unit === 'luot'`: ghi chú lượt trong thẻ Chi tiết, và tóm tắt sau khi gửi.
 function luotLabel(n: number, count: number, amount: number): string {
   return t('bookingGroupNote')
     .replace('{n}', String(n))
@@ -72,7 +72,7 @@ const today = todayVN()
 const minDate = today
 const maxDate = addDaysISO(today, LIMITS.MAX_DAYS_AHEAD)
 
-// Tạm tính ban đầu (1 người lớn) render sẵn ở server để không JS vẫn thấy số.
+// Thẻ Chi tiết mở màn (1 người lớn) render sẵn ở server để không JS vẫn thấy số.
 // Ba tham số dưới phải khớp ĐÚNG trạng thái mở màn của markup — ngày đã điền sẵn `minDate`
 // và ô "Chuyển khoản" đã tick sẵn — vì `update()` chạy ngay lúc script khởi động và tính lại
 // bằng cùng `computeQuote`. Lệch một tham số là số tiền NHẢY một nhịp ngay khi trang tải xong
@@ -83,6 +83,17 @@ const initialPrepay = prepayPercent > 0
 const initialQuote = computeQuote(priceTable, initialPax, {
   seasons, departDate: minDate, prepayPercent, prepay: initialPrepay,
 })
+// Ba mảnh server dựng sẵn cho thẻ Chi tiết (SPEC-2026-09-04-form-dat-cho-ba-phan.md §3.2). Tính ở
+// đây chứ không lồng biểu thức vào markup, để hai lớp `bf__sum--co-dong` / `bf__sum--co-ghi-chu`
+// khớp đúng những gì sẽ in ra — CSS dựa vào hai lớp đó để kẻ đường và chừa khoảng cách.
+const initialLuot = initialQuote?.lines.find(l => l.unit === 'luot') ?? null
+const initialSeasonNote = initialQuote?.season
+  ? t('bookingSeasonNote')
+      .replace('{name}', initialQuote.season.name)
+      .replace('{p}', (initialQuote.season.percent > 0 ? '+' : '') + String(initialQuote.season.percent))
+  : ''
+const initialCoDong = !!initialQuote?.prepay
+const initialCoGhiChu = !!initialLuot || !!initialSeasonNote
 // Câu chỉ phạm vi ngày, giữ dạng KHUÔN có {min}/{max} chứ không nướng sẵn hai mốc: script
 // tính lại min/max theo giờ Việt Nam lúc khách mở trang, nên chuỗi cố định lúc build sẽ lệch
 // mốc ngay hôm sau. Server dựng sẵn một bản để không JS vẫn đọc được phạm vi.
@@ -116,7 +127,6 @@ if (!turnstileSiteKey) {
   data-date-required={MSG.dateRequired}
   data-date-label={t('bookingDepartDate')}
   data-date-hint={t('bookingDepartDatePlaceholder')}
-  data-subtotal-label={t('bookingSubtotal')}
   data-pay-required-text={t('bookingPayRequired')}
   data-before-discount-text={t('bookingBeforeDiscount')}
   data-discount-line-text={t('bookingDiscountLine')}
@@ -272,42 +282,35 @@ if (!turnstileSiteKey) {
       </>
     )}
 
-    <div class="bf__quote" aria-live="polite">
-      <div data-quote-lines>
-        {initialQuote?.lines.map(l => (
-          <div class="bf__line">
-            <span>{l.unit === 'luot' ? luotLabel(totalPax(initialPax), l.count, l.amount) : `${paxLabel(l.code)} × ${l.count}`}</span>
-            <span>{formatPrice(l.subtotal, lang)}</span>
-          </div>
-        ))}
+    {/* Thẻ Chi tiết (SPEC-2026-09-04-form-dat-cho-ba-phan.md §3): MỘT thẻ, luôn mở. Thay cặp
+        .bf__quote "Tạm tính" + <details> "Xem chi tiết giá" cũ — hai vỏ in cùng một con số dưới
+        hai cái tên, và in lại số người mà bộ đếm ngay trên đã nói (chủ dự án chốt 04/09).
+        Không in dòng "hạng × n" nữa. Hai vùng .bf__sum-lines / .bf__sum-notes do JS dựng lại
+        mỗi lần đổi số khách bằng replaceChildren() — không dùng `hidden` (bẫy 1 DR-102); server
+        dựng sẵn bản mở màn để không JS vẫn thấy số. `aria-live` chỉ đặt ở dòng Cần thanh toán
+        (kèm aria-atomic để đọc cả nhãn lẫn số), không ở cả thẻ — kẻo mỗi lần bấm +/− trình đọc
+        màn hình đọc lại toàn bộ (spec 31/08 §4.5.4 luật 3). */}
+    <div class:list={['bf__sum', { 'bf__sum--co-dong': initialCoDong, 'bf__sum--co-ghi-chu': initialCoGhiChu }]} data-sum>
+      <div class="bf__sum-lines" data-sum-lines>
+        {initialQuote?.prepay && (
+          <>
+            <div class="bf__line"><span>{t('bookingBeforeDiscount')}</span><span>{formatPrice(initialQuote.prepay.totalGoc, lang)}</span></div>
+            <div class="bf__line"><span>{t('bookingDiscountLine')} (−{initialQuote.prepay.percent}%)</span><span>−{formatPrice(initialQuote.prepay.totalGoc - initialQuote.total, lang)}</span></div>
+          </>
+        )}
       </div>
-      <div class="bf__total">
-        {/* <div> chu khong phai <span>: cung ly do o hai cho tren — <details> khong phai
-            phrasing content. .bf__total la flex row 2 phan tu (nhan + so tien), doi tag
-            khong doi layout vi day van la mot flex item duy nhat, khong tach hang moi. */}
-        <div class="bf__total-label">
-          {t('bookingSubtotal')}
-          <details class="bf__tip">
-            <summary class="bf__tip-mark" aria-label={t('info')}>i</summary>
-            <p class="bf__tip-body">{t('bookingSubtotalNote')}</p>
-          </details>
-        </div>
+      <div class="bf__sum-total" aria-live="polite" aria-atomic="true">
+        <span>{t('bookingGrandTotal')}</span>
         <strong data-total>{initialQuote ? formatPrice(initialQuote.total, lang) : '—'}</strong>
       </div>
+      {/* Ghi chú lượt đứng DƯỚI Cần thanh toán, không đứng trên Tổng số tiền: "× giá lượt" trong
+          khuôn là giá ĐÃ ÁP ưu đãi (lines[0].amount), nên 2 lượt × 950.000₫ = 1.900.000₫ khớp
+          Cần thanh toán, KHÔNG khớp Tổng số tiền 2.000.000₫ (giá gốc). Đo trên dev 04/09. */}
+      <div class="bf__sum-notes" data-sum-notes>
+        {initialLuot && <p class="bf__sum-note">{luotLabel(totalPax(initialPax), initialLuot.count, initialLuot.amount)}</p>}
+        {initialSeasonNote && <p class="bf__sum-note">{initialSeasonNote}</p>}
+      </div>
     </div>
-    {/* Task 8 (SPEC-2026-08-31-form-dat-tour-gon-va-chi-tiet-gia.md §4.5): bảng chi tiết giá.
-        Gộp nội dung của .bf__season/.bf__prepay cũ (đã xoá — §4.5.3, hai node đó in TRÙNG
-        con số với bảng này). Đặt NGOÀI .bf__quote (đóng ở trên) vì .bf__quote mang
-        aria-live="polite" và bị replaceChildren() mỗi lần bấm +/− — lồng bảng chi tiết vào
-        trong đó là mỗi lần đổi số khách trình đọc màn hình đọc lại toàn bộ bảng (§4.5.4 luật 3).
-        Mặc định ĐÓNG (không đặt `open` — <details> tự quản trạng thái mở/đóng của nó); server
-        dựng kèm `hidden` (2026-08-31: thân bảng chỉ có sau khi JS chạy, không hidden thì
-        khách tắt JS thấy nút mở ra rỗng) — script gỡ `hidden` trong update() khi có quote (luật
-        render 2), không phải qua CSS display. */}
-    <details class="bf__detail" data-quote-detail hidden>
-      <summary class="bf__detail-sum">{t('bookingPriceDetail')}</summary>
-      <div class="bf__detail-body" data-detail-lines></div>
-    </details>
 
     <button type="button" class="bf__primary" data-open>{t('bookingBookNow')}</button>
     {zaloUrl && <a class="bf__secondary" href={zaloUrl} target="_blank" rel="noopener">{t('bookingFreeConsult')}</a>}
@@ -363,7 +366,7 @@ if (!turnstileSiteKey) {
     <h3 class="bf__done-title">{t('bookingSuccessTitle')}</h3>
     <p class="bf__done-code">{t('bookingCode')}: <strong data-done-code></strong></p>
     <p class="bf__done-dup" data-done-dup hidden>{t('bookingDuplicate')}</p>
-    <div class="bf__quote" data-done-summary></div>
+    <div class="bf__sum bf__sum--bien-nhan" data-done-summary></div>
 
     {/* Khối QR — chỉ hiện khi khách chọn chuyển khoản, và KHÔNG BAO GIỜ hiện với đơn trùng
         (SPEC §4.5: mọi con số ở đây dựng từ `quote` của lần nộp MỚI, không phải từ đơn đã lưu).
@@ -460,7 +463,7 @@ if (!turnstileSiteKey) {
     const seasons = JSON.parse(form.dataset.seasons || '[]') as Season[]
     const prepayPercent = Number(form.dataset.prepayPercent) || 0
     const payRequiredText = form.dataset.payRequiredText || ''
-    // Task 8 — bảng chi tiết giá. Script KHÔNG gọi được t() (module riêng, không thấy frontmatter),
+    // Thẻ Chi tiết (SPEC 2026-09-04 §3.2). Script KHÔNG gọi được t() (module riêng, không thấy frontmatter),
     // nên bốn chuỗi này phải đi qua data-* nướng sẵn ở markup (xem data-*-text trên <form>).
     const beforeDiscountText = form.dataset.beforeDiscountText || ''
     const discountLineText = form.dataset.discountLineText || ''
@@ -484,10 +487,10 @@ if (!turnstileSiteKey) {
     const backBtn = q<HTMLButtonElement>('[data-back]')!
     const submitBtn = q<HTMLButtonElement>('[data-submit]')!
     const dateEl = q<HTMLInputElement>('[name="departDate"]')!
-    const linesEl = q<HTMLElement>('[data-quote-lines]')!
+    const sumEl = q<HTMLElement>('[data-sum]')!
+    const sumLinesEl = q<HTMLElement>('[data-sum-lines]')!
+    const sumNotesEl = q<HTMLElement>('[data-sum-notes]')!
     const totalEl = q<HTMLElement>('[data-total]')!
-    const detailBox = q<HTMLElement>('[data-detail-lines]')!
-    const detailWrap = q<HTMLDetailsElement>('[data-quote-detail]')!
     const hintEl = q<HTMLElement>('[data-large-group]')!
     const paxErrEl = q<HTMLElement>('[data-err="pax"]')!
     const totalInput = q<HTMLInputElement>('[data-quoted-total]')!
@@ -743,7 +746,7 @@ if (!turnstileSiteKey) {
     // Nợ 2: một dòng QuoteLine có `unit === 'luot'` (bảng giá nhóm) thì `count` là SỐ LƯỢT,
     // không phải số người — "${nhãn} × ${count}" đọc thành "Người lớn × 2" là sai chữ VÀ gây
     // hiểu nhầm về tiền. Dùng khuôn `bookingGroupNote` thay cho nhãn thường ở mọi nơi dòng
-    // này được vẽ lại (khối tạm tính + bảng chi tiết giá).
+    // này được vẽ lại (ghi chú lượt trong thẻ Chi tiết + tóm tắt sau khi gửi).
     function lineLabel(l: Quote['lines'][number], soKhach: number): string {
       return l.unit === 'luot'
         ? groupNoteTpl.replace('{n}', String(soKhach)).replace('{m}', String(l.count)).replace('{price}', formatPrice(l.amount, 'vi'))
@@ -757,69 +760,59 @@ if (!turnstileSiteKey) {
       const chon = chonChuyenKhoan()
       quote = computeQuote(table!, pax, { seasons, departDate: dateEl.value, prepayPercent, prepay: chon })
 
-      linesEl.replaceChildren()
+      // Thẻ Chi tiết (SPEC-2026-09-04-form-dat-cho-ba-phan.md §3.2). Dòng do JS dựng qua
+      // createElement KHÔNG mang data-astro-cid-*, nên CSS phải nhắm qua :global() (xem
+      // .bf__sum-lines trong <style>) — bỏ qua là tái hiện lỗi "Người lớn × 1019.550.000₫"
+      // (DR-102, 2026-08-29). KHÔNG in dòng "hạng × n": bộ đếm ngay trên đã nói số người.
+      sumLinesEl.replaceChildren()
+      sumNotesEl.replaceChildren()
       if (quote) {
-        for (const l of quote.lines) {
-          const div = document.createElement('div')
-          div.className = 'bf__line'
-          const a = document.createElement('span'); a.textContent = lineLabel(l, total)
-          const b = document.createElement('span'); b.textContent = formatPrice(l.subtotal, 'vi')
-          div.append(a, b); linesEl.append(div)
-        }
-      }
-      totalEl.textContent = quote ? formatPrice(quote.total, 'vi') : '—'
-
-      // Bảng chi tiết giá (Task 8). Dòng do JS dựng qua createElement KHÔNG mang
-      // data-astro-cid-*, nên CSS phải nhắm qua :global() (xem [data-detail-lines] trong
-      // <style>) — bỏ qua là tái hiện lỗi "Người lớn × 1019.550.000₫" (DR-102, 2026-08-29).
-      detailBox.replaceChildren()
-      if (quote) {
-        // Luật render 2: quote null (vượt bậc / hạng không có giá) → KHÔNG dựng bảng rỗng —
-        // ẩn cả khối kể cả dòng tóm tắt "Xem chi tiết giá".
-        detailWrap.hidden = false
-
-        // Bốn mốc chính xác (SPEC §4.5.1): mọi số tiền lấy NGUYÊN từ quote, không tự nhân —
+        // Hai mốc chính xác (spec 31/08 §4.5.1): số tiền lấy NGUYÊN từ quote, không tự nhân —
         // apDieuChinh() áp cả hai phần trăm rồi mới làm tròn lên nghìn, nên totalGoc − total
-        // đúng nhưng KHÔNG bằng percent% của totalGoc.
-        const detailRows: [string, string][] = quote.lines.map(l =>
-          [lineLabel(l, total), formatPrice(l.subtotal, 'vi')])
-        // Luật render 3: KHÔNG ưu đãi → quote.prepay VẮNG → không có totalGoc. Hai dòng giữa
-        // biến mất — đây là luật render, TUYỆT ĐỐI không tính bù bằng nhân ngược (làm tròn
-        // lên nghìn không có phép nghịch đảo).
+        // đúng nhưng KHÔNG bằng percent% của totalGoc. KHÔNG ưu đãi → quote.prepay VẮNG → hai
+        // dòng này biến mất, chỉ còn Cần thanh toán. Đây là luật render, TUYỆT ĐỐI không tính
+        // bù bằng nhân ngược (làm tròn lên nghìn không có phép nghịch đảo).
         if (quote.prepay) {
-          detailRows.push([beforeDiscountText, formatPrice(quote.prepay.totalGoc, 'vi')])
-          detailRows.push([
-            `${discountLineText} (−${quote.prepay.percent}%)`,
-            `−${formatPrice(quote.prepay.totalGoc - quote.total, 'vi')}`,
-          ])
+          const rows: [string, string][] = [
+            [beforeDiscountText, formatPrice(quote.prepay.totalGoc, 'vi')],
+            [`${discountLineText} (−${quote.prepay.percent}%)`, `−${formatPrice(quote.prepay.totalGoc - quote.total, 'vi')}`],
+          ]
+          for (const [label, amount] of rows) {
+            const div = document.createElement('div')
+            div.className = 'bf__line'
+            const a = document.createElement('span'); a.textContent = label
+            const b = document.createElement('span'); b.textContent = amount
+            div.append(a, b); sumLinesEl.append(div)
+          }
         }
-        detailRows.push([grandTotalText, formatPrice(quote.total, 'vi')])
-
-        detailRows.forEach(([label, amount], i) => {
-          const div = document.createElement('div')
-          div.className = i === detailRows.length - 1 ? 'bf__line bf__line--total' : 'bf__line'
-          const a = document.createElement('span'); a.textContent = label
-          const b = document.createElement('span'); b.textContent = amount
-          div.append(a, b); detailBox.append(div)
-        })
-
-        // Luật render 1: không có mùa → không render ghi chú, không in "+0%".
+        // Ghi chú lượt cho bảng giá nhóm — không trùng bộ đếm: nó giải thích vì sao tiền nhân
+        // đôi ở khách thứ maxPax + 1 (5 khách → 1 lượt, 6 khách → 2 lượt). Đứng DƯỚI Cần thanh
+        // toán vì "× giá lượt" là giá đã áp ưu đãi — khớp Cần thanh toán, không khớp Tổng số tiền.
+        const luot = quote.lines.find(l => l.unit === 'luot')
+        if (luot) {
+          const p = document.createElement('p')
+          p.className = 'bf__sum-note'
+          p.textContent = lineLabel(luot, total)
+          sumNotesEl.append(p)
+        }
+        // Không có mùa → không render ghi chú, không in "+0%". Dấu + chỉ chèn khi dương: Studio
+        // cho phanTram ÂM (bangGiaMuaVu.ts:47, mùa thấp điểm giảm giá là tính năng) — thiếu
+        // guard này in ra "+-15%".
         if (quote.season) {
           const note = document.createElement('p')
-          note.className = 'bf__tip-body'
-          // Vòng sửa 1/5: Studio cho phanTram ÂM (bangGiaMuaVu.ts:47, min(-90)) — mùa thấp
-          // điểm GIẢM giá là tính năng đã thiết kế, không phải dữ liệu sai. Dấu + chỉ chèn
-          // khi dương, đúng khuôn đã có ở bangGiaMuaVu.ts:63 (Studio preview.prepare) và ở
-          // .bf__season cũ (đã xoá ở Task 8) — thiếu guard này in ra "+-15%" cho mùa giảm giá.
+          note.className = 'bf__sum-note'
           const dau = quote.season.percent > 0 ? '+' : ''
           note.textContent = seasonNoteTpl
             .replace('{name}', quote.season.name)
             .replace('{p}', dau + String(quote.season.percent))
-          detailBox.append(note)
+          sumNotesEl.append(note)
         }
-      } else {
-        detailWrap.hidden = true
       }
+      totalEl.textContent = quote ? formatPrice(quote.total, 'vi') : '—'
+      // Hai lớp này quyết định đường kẻ và khoảng cách trong thẻ (xem <style>). Lật theo đúng số
+      // con VỪA dựng, không theo `quote` — để CSS và DOM không bao giờ lệch nhau.
+      sumEl.classList.toggle('bf__sum--co-dong', sumLinesEl.childElementCount > 0)
+      sumEl.classList.toggle('bf__sum--co-ghi-chu', sumNotesEl.childElementCount > 0)
 
       totalInput.value = String(quote?.total ?? 0)
       form.querySelectorAll<HTMLInputElement>('[data-quoted-per-pax]').forEach(el => {
@@ -998,7 +991,9 @@ if (!turnstileSiteKey) {
         const dateLabel = directText(form.querySelector('label[for="bf-date"]')) || form.dataset.dateLabel || ''
         const lines: [string, string][] = [[form.querySelector<HTMLInputElement>('[name="tourTitle"]')!.value, ''], [dateLabel, dateEl.value.split('-').reverse().join('/')]]
         if (quote) for (const l of quote.lines) lines.push([lineLabel(l, soKhach), formatPrice(l.subtotal, 'vi')])
-        lines.push([directText(totalEl.closest('.bf__total')?.querySelector('.bf__total-label')) || form.dataset.subtotalLabel || '', formatPrice(total, 'vi')])
+        // Nhãn dòng tổng đọc từ dữ liệu (data-grand-total-text), không đọc từ DOM của thẻ Chi
+        // tiết — spec 31/08 §4.5.5 đã cảnh báo lối đọc DOM hỏng lặng lẽ khi tái cấu trúc thẻ.
+        lines.push([grandTotalText, formatPrice(total, 'vi')])
         for (const [a, b] of lines) {
           const div = document.createElement('div'); div.className = 'bf__line'
           const s1 = document.createElement('span'); s1.textContent = a
@@ -1252,37 +1247,41 @@ if (!turnstileSiteKey) {
      bo tron pill. */
   .bf__count { width: 2.75rem; text-align: center; font: inherit; font-size: var(--fs-base); font-weight: var(--fw-700); border: 0; border-radius: var(--radius-md); background: var(--c-card); color: var(--c-text); -moz-appearance: textfield; }
   .bf__count::-webkit-outer-spin-button, .bf__count::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  /* Lat nguoc: --c-surface-alt tung dung khi .bf trong suot, nay trung mau voi nen
-     xam moi cua .bf, bang tam tinh tan vao form. Lat sang --c-card de bang gia noi
-     trang tren form xam. */
-  .bf__quote { background: var(--c-card); border-radius: var(--radius-md); padding: var(--s4); display: flex; flex-direction: column; gap: var(--s2); }
+  /* Thẻ Chi tiết (SPEC-2026-09-04-form-dat-cho-ba-phan.md §3) — thay cặp .bf__quote + .bf__detail
+     cũ. Nền --c-card để nổi trắng trên form xám (lý do ở spec 31/08 §4.4: cùng màu thì tan vào
+     nền). KHÔNG khai `gap` trên .bf__sum: hai vùng con .bf__sum-lines / .bf__sum-notes có lúc
+     RỖNG (chọn "Thanh toán khi khởi hành" → không dòng ưu đãi; không mùa → không ghi chú), mà
+     flex vẫn cộng gap cho item rỗng — ra 8px thừa kẹp quanh dòng Cần thanh toán. Khoảng cách
+     và đường kẻ đi theo hai lớp `--co-dong` / `--co-ghi-chu`, do server đặt lúc dựng và JS lật
+     lại trong update() theo đúng số con vừa dựng. Không dùng :empty hay :has(): cả hai phụ
+     thuộc vào text node trắng server để lại và vào cách Astro gắn scope — hai lớp là lối tất
+     định, đo được. */
+  .bf__sum { background: var(--c-card); border-radius: var(--radius-md); padding: var(--s4); display: flex; flex-direction: column; }
+  /* Biên nhận sau khi gửi dựng thẳng các .bf__line vào .bf__sum, không qua vùng con — cần gap riêng. */
+  .bf__sum--bien-nhan { gap: var(--s2); }
+  .bf__sum-lines, .bf__sum-notes { display: flex; flex-direction: column; gap: var(--s2); }
   /* `:global()` là bắt buộc ở đây, không phải tuỳ chọn. Hai vùng này được JS dựng lại bằng
      `document.createElement` mỗi lần đổi số người (và khi hiện tóm tắt lúc gửi xong), nên node
      mới KHÔNG mang thuộc tính `data-astro-cid-*` mà CSS scoped của Astro nhắm tới. Viết
      `.bf__line { … }` trần thì dòng server dựng đẹp còn dòng JS dựng mất `flex` — số lượng dán
      liền thành tiền, kiểu "Người lớn × 1019.550.000₫" (lỗi thật, chủ dự án báo 2026-08-29).
      Phạm vi vẫn được giữ: phần tử cha còn scoped, `:global` chỉ mở cho lớp con. */
-  [data-quote-lines] :global(.bf__line),
-  [data-done-summary] :global(.bf__line),
-  [data-detail-lines] :global(.bf__line) { display: flex; justify-content: space-between; gap: var(--s3); font-size: var(--fs-sm); color: var(--c-text-muted); }
-  .bf__total { display: flex; justify-content: space-between; gap: var(--s3); padding-top: var(--s2); border-top: 1px solid var(--c-border); font-size: var(--fs-base); font-weight: var(--fw-700); color: var(--c-text); }
-  .bf__total strong { color: var(--c-accent-strong); }
-  /* Task 8 — bảng chi tiết giá (SPEC §4.5). `.bf__detail` là <details> gốc, giữ marker mặc
-     định của trình duyệt (▸/▾ theo SPEC mockup) — KHÔNG ẩn như `.bf__tip-mark` (đó là dấu ⓘ
-     riêng, mục đích khác). `.bf__detail-body` là vùng do JS dựng lại mỗi lần đổi số khách. */
-  .bf__detail-sum { font-size: var(--fs-sm); color: var(--c-primary); cursor: pointer; }
-  .bf__detail-body { display: flex; flex-direction: column; gap: var(--s2); margin-top: var(--s2); }
-  /* Dòng cuối (Tổng cộng) và ghi chú mùa cũng do JS `createElement` dựng (cùng lý do :global
-     ở trên) — DR-102 áp cho MỌI lớp gắn vào node JS dựng, không riêng `.bf__line`. */
-  [data-detail-lines] :global(.bf__line--total) {
-    padding-top: var(--s2); border-top: 1px solid var(--c-border);
-    font-weight: var(--fw-700); color: var(--c-text);
-  }
-  /* margin: 0, KHÔNG phải var(--s2) 0 0 như .bf__tip-body gốc: .bf__detail-body đã là flex
-     column với gap: var(--s2) riêng, nên margin-top ở đây CỘNG THÊM vào gap (flexbox không
-     gộp margin dọc như block layout) — đo được 16px giữa dòng Tổng cộng và ghi chú mùa, gấp
-     đôi 8px giữa các dòng khác. Để container `.bf__detail-body` một mình lo khoảng cách. */
-  [data-detail-lines] :global(.bf__tip-body) { margin: 0; font-size: var(--fs-sm); color: var(--c-text-muted); }
+  .bf__sum-lines :global(.bf__line),
+  [data-done-summary] :global(.bf__line) { display: flex; justify-content: space-between; gap: var(--s3); font-size: var(--fs-sm); color: var(--c-text-muted); }
+  /* Ghi chú lượt (bảng giá nhóm) và ghi chú mùa: chữ mờ, không viền. margin: 0 vì vùng cha đã
+     là flex column có gap — margin ở đây CỘNG THÊM vào gap (flexbox không gộp margin dọc). */
+  .bf__sum :global(.bf__sum-note) { margin: 0; font-size: var(--fs-sm); color: var(--c-text-muted); }
+  /* Nhãn ở --fs-sm, số ở --fs-base: đo trên dev 04/09, lòng thẻ 240px — nhãn "Cần thanh toán"
+     ở --fs-base/700 rộng 136px, cộng gap 12 và số "1.374.000₫" 101px là 249px, VỠ DÒNG (nhãn
+     gãy thành hai dòng, hàng cao 73px). Ở --fs-sm/600 nhãn còn 105px; ca xấu nhất "30.000.000₫"
+     (112px) vẫn vừa: 105 + 12 + 112 = 229. `baseline` để hai cỡ chữ đứng cùng chân. */
+  .bf__sum-total { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s3); font-size: var(--fs-base); font-weight: var(--fw-700); color: var(--c-text); }
+  .bf__sum-total span { font-size: var(--fs-sm); font-weight: var(--fw-600); }
+  .bf__sum-total strong { color: var(--c-accent-strong); }
+  /* Đường kẻ trên "Cần thanh toán" chỉ khi có dòng phía trên nó. Một dòng đứng một mình thì
+     không kẻ — kẻ là vẽ một ranh giới không có gì ở bên kia. */
+  .bf__sum--co-dong .bf__sum-total { margin-top: var(--s2); padding-top: var(--s2); border-top: 1px solid var(--c-border); }
+  .bf__sum--co-ghi-chu .bf__sum-notes { margin-top: var(--s2); }
   /* Task 6: hai lựa chọn thanh toán. `<input type="radio">` thật vẫn còn — chỉ tạo dáng
      `<label>`, không thay bằng `<button>`. KHÔNG đoạn nào mang `checked` sẵn (chủ dự án
      chốt) nên cả hai phải nhìn "nghỉ" như nhau lúc tải trang — border 1px đều nhau ở
@@ -1368,6 +1367,6 @@ if (!turnstileSiteKey) {
      thuộc tính scoped (thành 0,3,0 — thắng 0,2,0 mà không cần `!important`), còn `[hidden]`
      trần sẽ bị để nguyên và rò thành luật toàn site. */
   .bf__step[hidden], .bf__primary[hidden], .bf__done[hidden],
-  .bf__hint[hidden], .bf__done-dup[hidden], .bf__detail[hidden],
+  .bf__hint[hidden], .bf__done-dup[hidden],
   .bf__qr[hidden] { display: none; }
 </style>
