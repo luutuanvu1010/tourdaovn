@@ -69,6 +69,27 @@ function runOne(relPath) {
   return { relPath, code, ms: Date.now() - started }
 }
 
+/**
+ * Tiền điều kiện, chạy TRƯỚC mọi nhóm: dist/ có phải bản dựng của mã hiện tại không.
+ *
+ * Vì sao chặn cả lượt thay vì thêm một validator nữa vào GROUPS.post: runner này cố ý
+ * chạy hết rồi mới kết luận (xem đầu file). Nhưng dist/ cũ không phải "một lỗi trong số
+ * nhiều" — nó làm MỌI kết quả phía sau mất nghĩa, cả đỏ lẫn xanh. In một bảng lẫn lộn
+ * trong tình huống đó chính là cách sinh ra hiểu nhầm ở §1 của
+ * docs/evidence/2026-09-04-ra-soat-tu-dong-hoa.
+ *
+ * Mã thoát 3 (khác 1 của "có validator đỏ") để phân biệt "chưa kiểm được" với "đã kiểm và đỏ".
+ */
+function tienDieuKien() {
+  const r = runOne('validators/dist-freshness.ts')
+  if (r.code !== 0) {
+    console.log('\n########## Cổng KHÔNG chạy ##########\n')
+    console.log('dist/ không phải bản dựng của mã hiện tại, nên kết quả cổng hậu build')
+    console.log('sẽ không nói gì về mã đang push. Không chạy validator nào.')
+    process.exit(3)
+  }
+}
+
 function main() {
   const requested = process.argv.slice(2)
   const names = requested.length > 0 ? requested : Object.keys(GROUPS)
@@ -79,6 +100,9 @@ function main() {
       process.exit(2)
     }
   }
+
+  // Chỉ nhóm `post` đọc dist/. `spec` so đặc tả với mã nguồn nên không phụ thuộc bản dựng.
+  if (names.includes('post')) tienDieuKien()
 
   const results = []
   const gaps = []

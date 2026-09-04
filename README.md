@@ -71,7 +71,12 @@ Theo runbook [`SETUP-NEW-SITE.md`](SETUP-NEW-SITE.md) trong lõi. Tóm tắt: Gi
 
 Validator vẫn còn nguyên, chỉ là gọi tay:
 
-- `npm run gate` — astro check + `validate:post` + `audit:spec`
+- `npm run gate` — astro check + `validate:post` + `audit:spec`. **Không tự build.** Trước khi
+  chạy nhóm hậu build, nó kiểm `dist/` có phải bản dựng của mã hiện tại không (so với `src/`,
+  `data/`, `public/` và với mốc cập nhật mới nhất bên Sanity). `dist/` cũ thì **chặn cả lượt**,
+  thoát mã `3`, và không chạy validator nào — vì kết quả trên bản dựng cũ, đỏ hay xanh, đều
+  không nói gì về mã đang push. Gặp thông báo đó thì chạy `npm run build` rồi chạy lại.
+  Lý do và bằng chứng: `docs/evidence/2026-09-04-ra-soat-tu-dong-hoa/report.md` §1.
 - `npm run build:strict` — chuỗi đầy đủ: `check:cwd` → `validate` → build → `validate:post`
 - `npm --prefix scripts run validate:min` — V2 reference + V3 governance (đọc Sanity, cần `SANITY_STUDIO_PROJECT_ID`)
 - `npm --prefix scripts run validate:jsonld` — V1 JSON-LD, quét `dist/` sau build
