@@ -7,10 +7,10 @@
 import type { Lang, SiteContact } from '../lib/types'
 import { uiCopy } from '../lib/uiCopy'
 import { formatPrice } from '../lib/renderer'
-import { availablePaxCodes, computeQuote, emptyPax, type PaxCode, type PriceTable } from '../lib/booking/quote'
+import { availablePaxCodes, computeQuote, emptyPax, totalPax, type PaxCode, type PriceTable } from '../lib/booking/quote'
 import type { Season } from '../lib/booking/season'
 import { addDaysISO, formatDateVN, THU_NGAN_VN, todayVN } from '../lib/booking/vn-date'
-import { LIMITS, MSG } from '../lib/booking/schema'
+import { LIMITS, MSG, type ProductType } from '../lib/booking/schema'
 // Tài khoản nhận chuyển khoản là HẰNG SỐ BIÊN DỊCH — vào bằng import, không qua
 // Astro.props/data-* như priceTable (thứ đọc từ Sanity lúc dựng). SPEC §4.5.
 import { banking } from '../site.config'
@@ -26,9 +26,16 @@ export interface Props {
   contact?: SiteContact | null
   turnstileSiteKey?: string
   prepayPercent?: number
+  /** Quyết định đường quay lại và nhãn tin báo (ADR-0033 §6). */
+  productType?: ProductType
+  /** Trang Trải nghiệm ẩn ô Điểm đón: khách tự ra bãi, không có đón (ADR-0033 §9). */
+  showPickup?: boolean
 }
 
-const { lang, tourSlug, tourTitle, bookingRef, priceLabel, priceTable, seasons, contact = null, turnstileSiteKey = '', prepayPercent = 0 } = Astro.props
+const {
+  lang, tourSlug, tourTitle, bookingRef, priceLabel, priceTable, seasons, contact = null,
+  turnstileSiteKey = '', prepayPercent = 0, productType = 'tour', showPickup = true,
+} = Astro.props
 const t = uiCopy(lang)
 
 const PAX_KEY: Record<PaxCode, 'paxAdult' | 'paxChild' | 'paxSenior' | 'paxInfant'> = {
@@ -36,11 +43,24 @@ const PAX_KEY: Record<PaxCode, 'paxAdult' | 'paxChild' | 'paxSenior' | 'paxInfan
 }
 const codes = availablePaxCodes(priceTable)
 const isTiers = priceTable.kind === 'tiers'
+// Bảng giá một hạng thì "Người lớn" đứng một mình, không có hạng nào bên cạnh để đối chiếu,
+// đọc lạc nghĩa trên trang jetski hay fly board. Luật neo vào SỐ HẠNG GIÁ, không vào loại
+// trang — nên tour nào sau này chỉ có một hạng cũng hưởng (ADR-0033 §8).
 function paxLabel(code: PaxCode): string {
-  return isTiers ? t('paxGuests') : t(PAX_KEY[code])
+  return (isTiers || codes.length === 1) ? t('paxGuests') : t(PAX_KEY[code])
 }
 function paxNote(code: PaxCode): string {
   return priceTable.kind === 'flat' ? (priceTable.notes?.[code] ?? '') : ''
+}
+// Nợ 2 (đợt Trải nghiệm): dòng tạm tính KHÔNG được in "Người lớn × 2" cho bảng giá nhóm —
+// `count` ở đây là SỐ LƯỢT, không phải số người, và in vậy vừa sai chữ vừa gây hiểu nhầm về
+// tiền (5 khách → 1 lượt; 6 khách → 2 lượt, tiền gấp đôi). Dùng ở mọi nơi render dòng
+// `QuoteLine` có `unit === 'luot'`: khối tạm tính, bảng chi tiết giá, và tóm tắt sau khi gửi.
+function luotLabel(n: number, count: number, amount: number): string {
+  return t('bookingGroupNote')
+    .replace('{n}', String(n))
+    .replace('{m}', String(count))
+    .replace('{price}', formatPrice(amount, lang))
 }
 
 // Thời điểm build = vintage bảng giá mà khách nhìn thấy (SPEC §4.4).
@@ -102,12 +122,17 @@ if (!turnstileSiteKey) {
   data-discount-line-text={t('bookingDiscountLine')}
   data-grand-total-text={t('bookingGrandTotal')}
   data-season-note-tpl={t('bookingSeasonNote')}
+  data-group-note-tpl={t('bookingGroupNote')}
   data-qr-alt-text={t('bookingQrAlt')}
   data-qr-copied-text={t('bookingQrCopied')}
 >
   <input type="hidden" name="tourSlug" value={tourSlug} />
   <input type="hidden" name="tourTitle" value={tourTitle} />
   <input type="hidden" name="bookingRef" value={bookingRef} />
+  {/* ADR-0033 §6: quyết định đường quay lại và nhãn tin báo ở máy chủ. Đọc từ chính input
+      ẩn này trong script (form.productType.value) — không nướng lại giá trị vào script, để
+      một nguồn duy nhất. Có mặt ngay cả khi không JS: chịu được đường form action thẳng. */}
+  <input type="hidden" name="productType" value={productType} />
   <input type="hidden" name="quoted.quotedAt" value={quotedAt} />
   <input type="hidden" name="quoted.total" value={String(initialQuote?.total ?? 0)} data-quoted-total />
   {codes.map(code => (
@@ -250,7 +275,10 @@ if (!turnstileSiteKey) {
     <div class="bf__quote" aria-live="polite">
       <div data-quote-lines>
         {initialQuote?.lines.map(l => (
-          <div class="bf__line"><span>{paxLabel(l.code)} × {l.count}</span><span>{formatPrice(l.subtotal, lang)}</span></div>
+          <div class="bf__line">
+            <span>{l.unit === 'luot' ? luotLabel(totalPax(initialPax), l.count, l.amount) : `${paxLabel(l.code)} × ${l.count}`}</span>
+            <span>{formatPrice(l.subtotal, lang)}</span>
+          </div>
         ))}
       </div>
       <div class="bf__total">
@@ -299,9 +327,17 @@ if (!turnstileSiteKey) {
     <input id="bf-email" class="bf__input" type="email" name="email" autocomplete="email" maxlength={LIMITS.EMAIL_MAX} />
     <p class="bf__err" data-err="email" aria-live="polite"></p>
 
-    <label class="bf__label" for="bf-pickup">{t('bookingPickup')}</label>
-    <input id="bf-pickup" class="bf__input" type="text" name="pickup" maxlength={LIMITS.PICKUP_MAX} />
-    <p class="bf__err" data-err="pickup" aria-live="polite"></p>
+    {/* BK3: ô Điểm đón là PII (04-CONSTRAINTS:94). Trang Trải nghiệm không đón khách (khách tự
+        ra bãi) nên KHÔNG render ô này — ẩn mà vẫn gửi rỗng là thu ít hơn thật, không phải thu
+        đủ rồi giấu đi. `val('pickup')` ở script đọc qua FormData(form): ô vắng mặt tự trả '',
+        không cần sửa hàm đó. */}
+    {showPickup && (
+      <>
+        <label class="bf__label" for="bf-pickup">{t('bookingPickup')}</label>
+        <input id="bf-pickup" class="bf__input" type="text" name="pickup" maxlength={LIMITS.PICKUP_MAX} />
+        <p class="bf__err" data-err="pickup" aria-live="polite"></p>
+      </>
+    )}
 
     <label class="bf__label" for="bf-note">{t('bookingNote')}</label>
     <textarea id="bf-note" class="bf__input" name="note" rows="3" maxlength={LIMITS.NOTE_MAX}></textarea>
@@ -383,7 +419,7 @@ if (!turnstileSiteKey) {
 </form>
 
 <script>
-  import { PAX_ORDER, computeQuote, type PaxCode, type PaxCounts, type PriceTable, type Quote } from '../lib/booking/quote'
+  import { PAX_ORDER, computeQuote, totalPax, type PaxCode, type PaxCounts, type PriceTable, type Quote } from '../lib/booking/quote'
   import type { Season } from '../lib/booking/season'
   import { formatPrice } from '../lib/renderer'
   import { addDaysISO, formatDateVN, thangNamVN, todayVN } from '../lib/booking/vn-date'
@@ -430,6 +466,9 @@ if (!turnstileSiteKey) {
     const discountLineText = form.dataset.discountLineText || ''
     const grandTotalText = form.dataset.grandTotalText || ''
     const seasonNoteTpl = form.dataset.seasonNoteTpl || ''
+    // Nợ 2 (đợt Trải nghiệm): khuôn "{n} khách → {m} lượt × {price}" — thay cho dòng
+    // "${nhãn} × ${count}" sai nghĩa khi QuoteLine.unit === 'luot' (count khi đó là số LƯỢT).
+    const groupNoteTpl = form.dataset.groupNoteTpl || ''
     const payEls = Array.from(form.querySelectorAll<HTMLInputElement>('input[name="paymentMethod"]'))
     const chonChuyenKhoan = () => payEls.some(el => el.checked && el.value === 'transfer')
     payEls.forEach(el => el.addEventListener('change', update))
@@ -701,6 +740,16 @@ if (!turnstileSiteKey) {
       btn.disabled = off
     }
 
+    // Nợ 2: một dòng QuoteLine có `unit === 'luot'` (bảng giá nhóm) thì `count` là SỐ LƯỢT,
+    // không phải số người — "${nhãn} × ${count}" đọc thành "Người lớn × 2" là sai chữ VÀ gây
+    // hiểu nhầm về tiền. Dùng khuôn `bookingGroupNote` thay cho nhãn thường ở mọi nơi dòng
+    // này được vẽ lại (khối tạm tính + bảng chi tiết giá).
+    function lineLabel(l: Quote['lines'][number], soKhach: number): string {
+      return l.unit === 'luot'
+        ? groupNoteTpl.replace('{n}', String(soKhach)).replace('{m}', String(l.count)).replace('{price}', formatPrice(l.amount, 'vi'))
+        : `${rows.get(l.code)?.label ?? l.code} × ${l.count}`
+    }
+
     let quote: Quote | null = null
     function update() {
       const pax = readPax()
@@ -713,7 +762,7 @@ if (!turnstileSiteKey) {
         for (const l of quote.lines) {
           const div = document.createElement('div')
           div.className = 'bf__line'
-          const a = document.createElement('span'); a.textContent = `${rows.get(l.code)?.label ?? l.code} × ${l.count}`
+          const a = document.createElement('span'); a.textContent = lineLabel(l, total)
           const b = document.createElement('span'); b.textContent = formatPrice(l.subtotal, 'vi')
           div.append(a, b); linesEl.append(div)
         }
@@ -733,7 +782,7 @@ if (!turnstileSiteKey) {
         // apDieuChinh() áp cả hai phần trăm rồi mới làm tròn lên nghìn, nên totalGoc − total
         // đúng nhưng KHÔNG bằng percent% của totalGoc.
         const detailRows: [string, string][] = quote.lines.map(l =>
-          [`${rows.get(l.code)?.label ?? l.code} × ${l.count}`, formatPrice(l.subtotal, 'vi')])
+          [lineLabel(l, total), formatPrice(l.subtotal, 'vi')])
         // Luật render 3: KHÔNG ưu đãi → quote.prepay VẮNG → không có totalGoc. Hai dòng giữa
         // biến mất — đây là luật render, TUYỆT ĐỐI không tính bù bằng nhân ngược (làm tròn
         // lên nghìn không có phép nghịch đảo).
@@ -888,11 +937,15 @@ if (!turnstileSiteKey) {
       // lên mã QR. Đây đúng loại lỗi "bẫy tiền thật" mà SPEC §4.5 cảnh báo cho ca đơn trùng.
       const pmDaGui: PaymentMethod = chonChuyenKhoan() ? 'transfer' : 'onboard'
       const tongDaGui = quote.total
+      const paxDaGui = readPax()
       const fd = new FormData(form)
       const val = (k: string) => String(fd.get(k) ?? '').trim()
       const payload = {
         tourSlug: val('tourSlug'), tourTitle: val('tourTitle'), bookingRef: val('bookingRef'),
-        departDate: val('departDate'), pax: readPax(),
+        // Đọc qua chính input ẩn `productType` (nướng từ Astro.props ở server) — một nguồn
+        // duy nhất, không nướng lại giá trị vào script (ADR-0033 §6).
+        productType: val('productType'),
+        departDate: val('departDate'), pax: paxDaGui,
         quoted: buildQuotedPayload(quote, quotedAt),
         name: val('name'), phone: val('phone'), email: val('email'), pickup: val('pickup'), note: val('note'),
         turnstileToken: tokenInput.value, website: val('website'),
@@ -905,7 +958,7 @@ if (!turnstileSiteKey) {
         const res = await fetch(form.action, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(payload) })
         const data = await res.json().catch(() => null) as null | { ok?: boolean; code?: string; duplicate?: boolean; message?: string; fields?: Record<string, string>; summary?: { tourTitle: string; departDate: string; total: number } }
         if (res.ok && data?.ok && data.code) {
-          showDone(data.code, !!data.duplicate, tongDaGui, pmDaGui)
+          showDone(data.code, !!data.duplicate, tongDaGui, pmDaGui, totalPax(paxDaGui))
         } else if (res.status === 400 && data?.fields) {
           for (const [k, m] of Object.entries(data.fields)) showErr(k, m)
           showErr('form', data.message || form.dataset.errorText || '')
@@ -922,7 +975,7 @@ if (!turnstileSiteKey) {
       }
     })
 
-    function showDone(code: string, duplicate: boolean, total: number, paymentMethod: PaymentMethod) {
+    function showDone(code: string, duplicate: boolean, total: number, paymentMethod: PaymentMethod, soKhach: number) {
       step1.hidden = true
       step2.hidden = true
       q<HTMLElement>('[data-done-code]')!.textContent = code
@@ -944,7 +997,7 @@ if (!turnstileSiteKey) {
         // `directText` (Task 4): nhãn này giờ lồng `.bf__tip`, textContent trần dính cả chữ ghi chú.
         const dateLabel = directText(form.querySelector('label[for="bf-date"]')) || form.dataset.dateLabel || ''
         const lines: [string, string][] = [[form.querySelector<HTMLInputElement>('[name="tourTitle"]')!.value, ''], [dateLabel, dateEl.value.split('-').reverse().join('/')]]
-        if (quote) for (const l of quote.lines) lines.push([`${rows.get(l.code)?.label ?? l.code} × ${l.count}`, formatPrice(l.subtotal, 'vi')])
+        if (quote) for (const l of quote.lines) lines.push([lineLabel(l, soKhach), formatPrice(l.subtotal, 'vi')])
         lines.push([directText(totalEl.closest('.bf__total')?.querySelector('.bf__total-label')) || form.dataset.subtotalLabel || '', formatPrice(total, 'vi')])
         for (const [a, b] of lines) {
           const div = document.createElement('div'); div.className = 'bf__line'

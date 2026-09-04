@@ -79,7 +79,9 @@ const vi = {
   bookingSubtotal: 'Tạm tính',
   bookingSubtotalNote: 'Giá tạm tính theo bảng giá công bố; nhân viên xác nhận trước khi thanh toán.',
   bookingLargeGroupHint: 'Đoàn lớn? Nhắn Zalo để báo giá riêng.',
-  bookingBookNow: 'Đặt tour ngay',
+  // Nhãn trung tính (Task 10, ADR-0033 §6): form này còn phục vụ cả trang Trải nghiệm — cùng
+  // lý do đã ghi ở `bookingSuccessTitle` bên dưới, chỉ là hai nhãn này bị bỏ sót ở vòng đó.
+  bookingBookNow: 'Đặt chỗ ngay',
   bookingFreeConsult: 'Tư vấn miễn phí',
   bookingHotline: 'Hotline',
   bookingName: 'Họ và tên',
@@ -87,7 +89,7 @@ const vi = {
   bookingEmail: 'Email (không bắt buộc)',
   bookingPickup: 'Điểm đón: khách sạn hoặc địa chỉ',
   bookingNote: 'Ghi chú (giờ đón, yêu cầu ăn uống…)',
-  bookingSubmit: 'Gửi yêu cầu đặt tour',
+  bookingSubmit: 'Gửi yêu cầu đặt chỗ',
   bookingSending: 'Đang gửi…',
   bookingBack: 'Quay lại',
   // Không gọi "tour": form này (qua BookingForm.astro) sẽ còn phục vụ cả đơn trải nghiệm —
@@ -110,6 +112,9 @@ const vi = {
   bookingDiscountLine: 'Ưu đãi trả trước',
   bookingGrandTotal: 'Tổng cộng',
   bookingSeasonNote: 'Đơn giá đã gồm điều chỉnh mùa {name} {p}%, làm tròn lên nghìn.',
+  // Bảng giá nhóm (ADR-0033 §2, Task 10): nói rõ số lượt TRƯỚC khi khách bấm gửi — tiền nhảy
+  // bậc ở mốc maxPax (5 khách → 1 lượt, 6 khách → 2 lượt, tiền gấp đôi).
+  bookingGroupNote: '{n} khách → {m} lượt × {price}',
   // Khối QR chuyển khoản (SPEC 2026-08-31 §4.5 + §11.3)
   bookingQrTitle: 'Quét mã để chuyển khoản',
   bookingQrAlt: 'Mã QR chuyển khoản cho đơn {code}',
@@ -322,6 +327,7 @@ const en: Record<UIKey, string> = {
   bookingDiscountLine: 'Prepay discount',
   bookingGrandTotal: 'Total',
   bookingSeasonNote: 'Unit price includes {name} season adjustment {p}%, rounded up to the nearest thousand.',
+  bookingGroupNote: '{n} guests → {m} trip(s) × {price}',
   bookingQrTitle: 'Scan to transfer',
   bookingQrAlt: 'Bank transfer QR code for booking {code}',
   bookingQrBank: 'Bank',
@@ -523,6 +529,7 @@ const zh: Record<UIKey, string> = {
   bookingDiscountLine: 'Prepay discount',
   bookingGrandTotal: 'Total',
   bookingSeasonNote: 'Unit price includes {name} season adjustment {p}%, rounded up to the nearest thousand.',
+  bookingGroupNote: '{n} guests → {m} trip(s) × {price}',
   bookingQrTitle: '扫码转账',
   bookingQrAlt: '订单 {code} 的转账二维码',
   bookingQrBank: '银行',
@@ -724,6 +731,7 @@ const ko: Record<UIKey, string> = {
   bookingDiscountLine: 'Prepay discount',
   bookingGrandTotal: 'Total',
   bookingSeasonNote: 'Unit price includes {name} season adjustment {p}%, rounded up to the nearest thousand.',
+  bookingGroupNote: '{n} guests → {m} trip(s) × {price}',
   bookingQrTitle: '스캔하여 송금',
   bookingQrAlt: '{code} 예약 송금 QR 코드',
   bookingQrBank: '은행',
@@ -925,6 +933,7 @@ const ru: Record<UIKey, string> = {
   bookingDiscountLine: 'Prepay discount',
   bookingGrandTotal: 'Total',
   bookingSeasonNote: 'Unit price includes {name} season adjustment {p}%, rounded up to the nearest thousand.',
+  bookingGroupNote: '{n} guests → {m} trip(s) × {price}',
   bookingQrTitle: 'Отсканируйте для перевода',
   bookingQrAlt: 'QR-код для перевода по заявке {code}',
   bookingQrBank: 'Банк',
