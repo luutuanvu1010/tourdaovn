@@ -2,6 +2,7 @@
 // Đây là nơi DUY NHẤT PII rời D1 (BK3): chỉ vào thư/tin gửi cho nhân viên.
 import { formatPrice } from '../../renderer'
 import { PAX_ORDER, type PaxCode } from '../quote'
+import type { ProductType } from '../schema'
 import { formatDateTimeVN, formatDateVN } from '../vn-date'
 import type { NewBooking } from '../store'
 
@@ -9,12 +10,16 @@ export const PAX_LABEL_VI: Record<PaxCode, string> = {
   adult: 'Người lớn', child: 'Trẻ em', senior: 'Người cao tuổi', infant: 'Em bé',
 }
 
+// Nhân viên đọc thư phải biết ngay đơn thuộc loại sản phẩm gì (ADR-0033 §6).
+const NHAN_LOAI: Record<ProductType, string> = { tour: 'tour', experience: 'trải nghiệm' }
+const NHAN_DONG: Record<ProductType, string> = { tour: 'Tour', experience: 'Trải nghiệm' }
+
 function totalGuests(b: NewBooking): number {
   return PAX_ORDER.reduce((n, c) => n + (b.pax[c] || 0), 0)
 }
 
 export function formatSubject(b: NewBooking): string {
-  return `[Đặt tour] ${b.code} · ${b.tourTitle} · ${formatDateVN(b.departDate)} · ${totalGuests(b)} khách`
+  return `[Đặt ${NHAN_LOAI[b.productType]}] ${b.code} · ${b.tourTitle} · ${formatDateVN(b.departDate)} · ${totalGuests(b)} khách`
 }
 
 function paxLines(b: NewBooking): string[] {
@@ -30,8 +35,8 @@ function paxLines(b: NewBooking): string[] {
 
 export function formatText(b: NewBooking): string {
   const lines = [
-    `Đơn đặt tour mới — ${b.code}`,
-    `Tour: ${b.tourTitle}`,
+    `Đơn đặt ${NHAN_LOAI[b.productType]} mới — ${b.code}`,
+    `${NHAN_DONG[b.productType]}: ${b.tourTitle}`,
     `Ngày khởi hành: ${formatDateVN(b.departDate)}`,
     ...paxLines(b),
     `Tạm tính: ${formatPrice(b.quoted.total, 'vi')}`,

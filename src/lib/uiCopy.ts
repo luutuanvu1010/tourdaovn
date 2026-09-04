@@ -90,7 +90,9 @@ const vi = {
   bookingSubmit: 'Gửi yêu cầu đặt tour',
   bookingSending: 'Đang gửi…',
   bookingBack: 'Quay lại',
-  bookingSuccessTitle: 'Đã nhận yêu cầu đặt tour',
+  // Không gọi "tour": form này (qua BookingForm.astro) sẽ còn phục vụ cả đơn trải nghiệm —
+  // dùng nhãn trung tính "đặt chỗ", khớp với heading của handler.ts (ADR-0033 §6).
+  bookingSuccessTitle: 'Đã nhận yêu cầu đặt chỗ',
   bookingCode: 'Mã đơn',
   bookingSuccessBody: `${brand.name} sẽ gọi lại xác nhận trong giờ làm việc. Cần gấp, nhắn Zalo.`,
   bookingDuplicate: 'Yêu cầu này đã được ghi nhận trước đó.',

@@ -62,6 +62,9 @@ function wantsHtml(request: Request): boolean {
 // Tiền tố đường dẫn theo loại sản phẩm (ADR-0033 §6). KHÔNG suy từ slug: slug không mang
 // loại, và hai nhánh URL có thể đẻ ra slug trùng nhau về sau.
 const TIEN_TO: Record<ProductType, string> = { tour: '/tour/', experience: '/trai-nghiem/' }
+// Nhãn chữ neo "← Về trang …" (Task 3 review): trang phản hồi không-JS phải gọi đúng tên
+// loại sản phẩm, không mặc định "tour" cho cả đơn trải nghiệm.
+const NHAN_TRANG: Record<ProductType, string> = { tour: 'tour', experience: 'trải nghiệm' }
 
 function backHref(slug: string, pt: ProductType): string {
   return /^[a-z0-9-]{1,120}$/.test(slug) ? `${TIEN_TO[pt]}${slug}/` : '/'
@@ -69,7 +72,7 @@ function backHref(slug: string, pt: ProductType): string {
 
 function reply(request: Request, r: Reply, tourSlug: string, pt: ProductType): Response {
   if (wantsHtml(request)) {
-    const html = renderBookingPage({ title: `${r.heading} — ${brand.name}`, heading: r.heading, lines: r.lines, backHref: backHref(tourSlug, pt), ok: r.ok })
+    const html = renderBookingPage({ title: `${r.heading} — ${brand.name}`, heading: r.heading, lines: r.lines, backHref: backHref(tourSlug, pt), backLabel: NHAN_TRANG[pt], ok: r.ok })
     return new Response(html, { status: r.status, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } })
   }
   return new Response(JSON.stringify(r.body), { status: r.status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } })

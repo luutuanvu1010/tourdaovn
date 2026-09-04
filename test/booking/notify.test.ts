@@ -10,7 +10,7 @@ const b: NewBooking = {
   bookingRef: 'tour-3-dao', departDate: '2026-09-05', pax: { adult: 2, child: 1, senior: 0, infant: 0 },
   quoted: { perPax: { adult: 550000, child: 350000 }, total: 1450000, quotedAt: '2026-08-21T02:00:00Z' },
   customerName: 'Nguyễn Văn A', phone: '0905123456', email: 'a@example.com', pickup: 'KS Mường Thanh', note: 'Đón 7h',
-  lang: 'vi', source: 'web', paymentMethod: 'onboard', ipHash: 'h', userAgent: 'ua',
+  lang: 'vi', source: 'web', paymentMethod: 'onboard', productType: 'tour', ipHash: 'h', userAgent: 'ua',
 }
 
 function okFetch(status = 200, body: unknown = { ok: true, id: 'x' }) {
@@ -32,6 +32,20 @@ describe('format', () => {
     const h = formatHtml(b)
     expect(h).toContain('Tour 3 đảo &lt;Nha Trang&gt;')
     expect(h).not.toContain('<Nha Trang>')
+  })
+
+  // Task 3 (review Task 2) — thư/tin nội bộ phải gọi đúng loại sản phẩm, không mặc định
+  // "tour" cho đơn trải nghiệm.
+  it('đơn trải nghiệm: tiêu đề [Đặt trải nghiệm], thân thư ghi "Trải nghiệm:"', () => {
+    const exp: NewBooking = { ...b, productType: 'experience', tourTitle: 'Dù bay parasailing' }
+    expect(formatSubject(exp)).toContain('[Đặt trải nghiệm]')
+    expect(formatText(exp)).toContain('Trải nghiệm: Dù bay parasailing')
+    expect(formatText(exp)).not.toContain('Tour: Dù bay parasailing')
+  })
+  it('đơn tour giữ nguyên nhãn cũ', () => {
+    const tour: NewBooking = { ...b, productType: 'tour', tourTitle: 'Tour 3 đảo' }
+    expect(formatSubject(tour)).toContain('[Đặt tour]')
+    expect(formatText(tour)).toContain('Tour: Tour 3 đảo')
   })
 
   // Task 6 — mùa đã áp (Task 2: computeQuote trả Quote.season) đi vào thư nội bộ để nhân viên
