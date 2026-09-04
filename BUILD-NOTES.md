@@ -108,6 +108,30 @@ site** trong trạng thái hỏng, mỗi thứ hỏng một kiểu:
 Xong hai việc trên mới vào Studio mở *Quy tắc giá*, bật công tắc, đặt phần trăm, Publish
 (`docs/specs/SPEC-2026-08-30-uu-dai-thanh-toan-truoc.md` §7).
 
+### Đặt chỗ mở sang trang Trải nghiệm (ADR-0033) — ba việc, đúng thứ tự, trước khi khách đặt được
+
+1. **Chạy migration `0003` trước khi merge/push nhánh này vào `main`**:
+   `npx wrangler d1 migrations apply tourdao-booking --remote`. Cùng cửa sổ rủi ro với mục
+   ADR-0031 ở trên — merge vào `main` chính là deploy (Workers Builds). `store.ts` đã liệt
+   `product_type` trong câu `INSERT`; nhánh lên `main` mà migration chưa chạy thì **mọi đơn đặt
+   chỗ trả về 500** — cả tour lẫn trải nghiệm, không riêng đơn nào — cho tới khi migration chạy.
+2. **Sửa khoá hoa trong Google Sheet rồi chạy `npm --prefix scripts run prices:pull`**: tab `gia`
+   đang có dòng `Fly-board-nha-trang` viết hoa — `prices-pull.mjs` chỉ nhận khoá chữ thường, một
+   dòng sai hình chặn cứng cả lượt pull (khác lỗi *đơn vị lạ* — cái đó giờ chỉ cảnh báo-và-bỏ-qua,
+   ADR-0033 quyết định 4). Việc của chủ dự án, không phải việc sửa mã. Xong thì xác nhận
+   `data/prices.yaml` có đủ dòng `TTB01–TTB08`, và **`phao-chuoi` với `phao-bay-flying-banana-boat`
+   trỏ cùng một khoá `phao-chuoi`** (một sản phẩm, hai trang — ADR-0033 mục Hệ quả).
+3. **Gắn `bookingRef.key` cho từng document Trải nghiệm trong Studio rồi Publish.** Trường này đã
+   có sẵn trong lược đồ (không phải field mới, không cần `sanity deploy`) — việc còn lại chỉ là
+   điền đúng khoá. Đây là **công tắc thật, không phải bước phụ**: mã đã đúng từ trước, nhưng thiếu
+   khoá này thì `showBookingForm` luôn `false` và không trang Trải nghiệm nào đổi gì. Hook Sanity
+   → Workers Builds đã bật (xem "Bấm Publish trong Sanity KHÔNG còn dựng lại site" — mục đó nói về
+   *trước* 27/8; từ 27/8 Publish tự kéo một bản dựng mới), nên không cần thao tác thủ công nào
+   thêm sau khi Publish.
+
+Thiếu bước 2 hoặc 3 thì site vẫn chạy đúng, chỉ là **không trang Trải nghiệm nào mọc form** —
+đúng như thiết kế (đợi dữ liệu), không phải lỗi. Thiếu bước 1 mới là thứ làm site *hỏng*.
+
 ### Bộ đếm tần suất trong endpoint KHÔNG phải là chặn lượt yêu cầu
 
 Bộ đếm trong `handler.ts` đếm **số đơn đã tạo** (đã qua Turnstile, đã INSERT) trong 10 phút cho
