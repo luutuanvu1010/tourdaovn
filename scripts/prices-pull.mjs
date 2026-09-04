@@ -315,6 +315,13 @@ function docSoTien(tho) {
 
 const dinhDangTien = (n) => n.toLocaleString('vi-VN')
 
+// Nhãn đơn vị đi kèm số tiền khi in cho người đọc — DÙNG CHUNG cho mọi chỗ in giá (khối
+// "Thêm giá mới", khối Cổng xoá…), để không lệch nhau về sau. `perGroup` là giá MỘT NHÓM tối
+// đa N khách, không phải giá đầu người — in "đ/khách" cho nó là sai NGHĨA VỀ TIỀN, không phải
+// lỗi hiển thị: người đọc (chủ dự án) sẽ tưởng giá sai rồi quay lại "sửa" Sheet theo hiểu nhầm.
+const nhanDonVi = (entry) =>
+  entry.unit === 'perGroup' ? `đ/nhóm (tối đa ${entry.maxPax} khách)` : 'đ/khách'
+
 // ── Lấy CSV: từ mạng hoặc từ tệp ──
 
 async function layCsvTuMang() {
@@ -832,7 +839,7 @@ async function chay() {
     console.log(`Thêm giá mới (${themMoi.length}):`)
     for (const k of themMoi) {
       const m = kq.muc.find((x) => x.khoa === k)
-      console.log(`  + ${k}${m.tenTour ? ` — ${m.tenTour}` : ''}: ${dinhDangTien(m.entry.amount)} đ/khách`)
+      console.log(`  + ${k}${m.tenTour ? ` — ${m.tenTour}` : ''}: ${dinhDangTien(m.entry.amount)} ${nhanDonVi(m.entry)}`)
     }
   }
 
@@ -843,6 +850,11 @@ async function chay() {
       console.log(`  ~ ${d.khoa}${d.tenTour ? ` — ${d.tenTour}` : ''}`)
       if (d.cu.amount !== d.moi.amount) {
         console.log(`      người lớn: ${dinhDangTien(d.cu.amount)} → ${dinhDangTien(d.moi.amount)} đ`)
+      }
+      // perGroup đổi maxPax mà amount giữ nguyên vẫn phải có dòng riêng — khoá vẫn vào "Đổi
+      // giá" (dungKhoi() khác byte) nhưng không nói đổi CÁI GÌ nếu bỏ nhánh này.
+      if (d.cu.unit === 'perGroup' && d.moi.unit === 'perGroup' && d.cu.maxPax !== d.moi.maxPax) {
+        console.log(`      tối đa khách/nhóm: ${d.cu.maxPax} → ${d.moi.maxPax}`)
       }
       for (const ma of HANG_PHU) {
         const a = d.cu.paxRates?.[ma]
@@ -873,10 +885,8 @@ async function chay() {
       // giản là khoá đó vắng mặt khỏi Sheet, giống hệt một khoá perPax bị xoá.
       if (cu?.unit && !DON_VI_TU_SHEET.has(cu.unit)) {
         dong(`      dòng này là ${cu.unit}, bảng Sheet không biểu diễn được kiểu giá này`)
-      } else if (cu?.unit === 'perGroup' && typeof cu?.amount === 'number') {
-        dong(`      đang là ${dinhDangTien(cu.amount)} đ/nhóm (tối đa ${cu.maxPax} khách)`)
       } else if (typeof cu?.amount === 'number') {
-        dong(`      đang là ${dinhDangTien(cu.amount)} đ/khách`)
+        dong(`      đang là ${dinhDangTien(cu.amount)} ${nhanDonVi(cu)}`)
       }
       if (kq.khoaChuaGia.has(k)) {
         dong(`      hàng ${kq.khoaChuaGia.get(k).soHang} trong Sheet có khoá này nhưng cột "Giá người lớn" để trống`)
