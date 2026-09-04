@@ -341,3 +341,17 @@ describe('paymentMethod và luật chéo với quoted.prepay', () => {
     expect(buildQuotedPayload({ perPax: { adult: 1 }, total: 1 }, 'x')).not.toHaveProperty('prepay')
   })
 })
+
+describe('productType', () => {
+  it('thiếu productType → mặc định "tour" (client cũ còn cache)', () => {
+    const input = parseBookingPayload({ tourSlug: 'x', pax: { adult: 1 } })
+    expect(input.productType).toBe('tour')
+  })
+  it('giá trị lạ → "tour", không ném lỗi', () => {
+    expect(parseBookingPayload({ productType: 'hotel' }).productType).toBe('tour')
+    expect(parseBookingPayload({ productType: 123 }).productType).toBe('tour')
+  })
+  it('"experience" giữ nguyên', () => {
+    expect(parseBookingPayload({ productType: 'experience' }).productType).toBe('experience')
+  })
+})

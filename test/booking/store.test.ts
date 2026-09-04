@@ -8,7 +8,7 @@ function nb(over: Partial<NewBooking> = {}): NewBooking {
     bookingRef: 'tour-3-dao', departDate: '2026-09-05', pax: { adult: 2, child: 1, senior: 0, infant: 0 },
     quoted: { perPax: { adult: 550000, child: 350000 }, total: 1450000, quotedAt: '2026-08-21T02:00:00Z' },
     customerName: 'Nguyễn Văn A', phone: '0905123456', email: null, pickup: 'KS Mường Thanh', note: null,
-    lang: 'vi', source: 'web', paymentMethod: 'onboard', ipHash: 'h1', userAgent: 'vitest', ...over,
+    lang: 'vi', source: 'web', paymentMethod: 'onboard', productType: 'tour', ipHash: 'h1', userAgent: 'vitest', ...over,
   }
 }
 
@@ -84,5 +84,21 @@ describe('store', () => {
     ).run()
     const row = await getBookingByCode(env.BOOKING_DB, 'TD-260905-PRE1')
     expect(row?.payment_method).toBe('onboard')
+  })
+
+  it('ghi và đọc lại product_type', async () => {
+    const b = nb({ code: 'TD-260905-PT01', phone: '0900000101', ipHash: 'pt1', productType: 'experience' })
+    await insertBooking(env.BOOKING_DB, b)
+    const row = await getBookingByCode(env.BOOKING_DB, 'TD-260905-PT01')
+    expect(row?.product_type).toBe('experience')
+  })
+
+  it('findRecentDuplicate GIỮ NGUYÊN hành vi cũ: KHÔNG xét loại sản phẩm', async () => {
+    // Canh để lần sau không ai âm thầm nới cửa chống trùng đã đặc tả ở
+    // SPEC-2026-08-21-dat-tour.md:224. Cùng slug + SĐT + ngày là trùng, bất kể loại.
+    const chung = { tourSlug: 'trung-slug', departDate: '2026-09-09', phone: '0900000102' }
+    await insertBooking(env.BOOKING_DB, nb({ ...chung, code: 'TD-260905-PT02', ipHash: 'pt2', productType: 'tour' }))
+    const dup = await findRecentDuplicate(env.BOOKING_DB, chung.phone, chung.tourSlug, chung.departDate, '2000-01-01T00:00:00Z')
+    expect(dup).toBe('TD-260905-PT02')
   })
 })

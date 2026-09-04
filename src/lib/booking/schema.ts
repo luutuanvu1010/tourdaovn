@@ -46,6 +46,15 @@ export const MSG = {
 
 export type PaymentMethod = 'transfer' | 'onboard'
 
+/** Loại sản phẩm của đơn (ADR-0033 §6). Quyết định đường quay lại và nhãn tin báo. */
+export type ProductType = 'tour' | 'experience'
+const PRODUCT_TYPES = new Set<string>(['tour', 'experience'])
+/** Không có / lạ → 'tour'. KHÔNG ném lỗi: đơn từ client cũ còn cache phải đi tiếp được. */
+function docProductType(v: unknown): ProductType {
+  const s = str(v)
+  return PRODUCT_TYPES.has(s) ? (s as ProductType) : 'tour'
+}
+
 // `season` chỉ để ĐƠN GHI LẠI vì sao ra con số tạm tính này (ADR-0030 §3, Task 2). Server
 // không tin và không tính lại theo mùa (BK1: server không đọc giá) — xem `parseBookingPayload`.
 export type Quoted = {
@@ -83,6 +92,7 @@ export type BookingInput = {
   pax: PaxCounts
   quoted: Quoted
   paymentMethod: PaymentMethod
+  productType: ProductType
   name: string; phone: string; email: string; pickup: string; note: string
   turnstileToken: string; website: string
 }
@@ -160,6 +170,7 @@ export function parseBookingPayload(raw: unknown): BookingInput {
       prepay = { percent, totalGoc }
     }
   }
+  const productType = docProductType(pick(r, 'productType'))
   return {
     tourSlug: str(r.tourSlug).trim(),
     tourTitle: clean(str(r.tourTitle)),
@@ -171,6 +182,7 @@ export function parseBookingPayload(raw: unknown): BookingInput {
     // `quoted_json`. Cắt 40 ký tự (dư cho một dấu thời gian ISO 8601 đầy đủ).
     quoted: { perPax, total: int(pick(r, 'quoted.total')), quotedAt: str(pick(r, 'quoted.quotedAt')).slice(0, 40), ...(season ? { season } : {}), ...(prepay ? { prepay } : {}) },
     paymentMethod: str(r.paymentMethod).trim() === 'transfer' ? 'transfer' : 'onboard',
+    productType,
     name: clean(str(r.name)),
     phone: str(r.phone).trim(),
     email: str(r.email).trim(),
