@@ -60,6 +60,15 @@ const DUONG_HAT_GIONG = resolve(GOC_REPO, 'docs/gia/mau-nhap-gia.csv')
 // `npm run prices:pull` sẽ chết ngay dòng kiểm bên dưới.
 napEnv({ path: resolve(GOC_REPO, '.env'), quiet: true })
 
+// Tệp này VỪA là CLI vừa là module cho test (`docDonVi`, `DON_VI_TU_SHEET` — xem
+// scripts/validators/__tests__/prices-pull-pergroup.test.ts). Không có hàng rào này thì
+// `import '../../prices-pull.mjs'` từ một tệp test sẽ CHẠY nguyên đường đồng bộ: đọc `.env`,
+// gọi Google Sheet thật, và `renameSync` đè `data/prices.yaml` — từ trong `npm test`. Đã đo
+// 2026-09-04 (docs/evidence/2026-09-04-ra-soat-task7-prices-pull/): trong tiến trình con của
+// `node:test`, `process.argv.slice(2)` là `[]` nên `chay()` đi thẳng nhánh mặc định, không
+// cờ nào chặn lại. Node ở repo này là v22 nên `import.meta.filename` dùng được thẳng.
+const LA_CLI = process.argv[1] != null && resolve(process.argv[1]) === import.meta.filename
+
 // Mã Sheet đọc từ biến môi trường, KHÔNG viết cứng vào kho.
 //
 // Vì sao: kho này là PUBLIC, và Sheet giá bật "Xuất bản lên web" nên `gviz/tq` đọc được
@@ -70,13 +79,11 @@ napEnv({ path: resolve(GOC_REPO, '.env'), quiet: true })
 //
 // Đặt trong `.env` ở gốc repo (file đó không được track):
 //   PRICES_SHEET_ID=<mã sheet>
+//
+// Phép kiểm "thiếu PRICES_SHEET_ID → dừng" nằm TRONG `chay()` (đầu hàm), không ở tầng module
+// nữa — tầng module chạy cả lúc `import` từ test, và một máy không có `.env` (CI, clone mới)
+// import tệp này để lấy `docDonVi` không được phép chết ở đây.
 const MA_SHEET = process.env.PRICES_SHEET_ID
-if (!MA_SHEET) {
-  console.error('Thiếu PRICES_SHEET_ID. Đặt vào .env ở gốc repo:')
-  console.error('  PRICES_SHEET_ID=<mã sheet giá>')
-  console.error('Mã lấy ở URL của Sheet: docs.google.com/spreadsheets/d/<mã>/edit')
-  process.exit(1)
-}
 const TEN_TAB = 'gia'
 // Tìm tab THEO TÊN chứ không theo gid — thêm tab khác vào Sheet không làm hỏng đồng bộ.
 const URL_SHEET =
@@ -92,6 +99,38 @@ const DON_VI_BAT_BUOC = 'perPax'
 if (!VALID_UNITS.has(DON_VI_BAT_BUOC)) {
   throw new Error(`PY1 không còn nhận unit "${DON_VI_BAT_BUOC}" — Sheet 13 cột hết biểu diễn được giá.`)
 }
+
+const DANG_DON_VI_NHOM = /^per(\d+)pax$/
+
+/**
+ * Đọc ô `Đơn vị` của Sheet. Trả null nếu site chưa hỗ trợ đơn vị đó.
+ * `per5pax` là ký hiệu CHỦ DỰ ÁN TỰ DÙNG trước khi có ai đặc tả (ADR-0033 §3) — giữ nguyên
+ * ký hiệu ấy thay vì thêm một cột "Số khách mỗi lượt" vào bảng 13 cột. Chuỗi này không rời
+ * khỏi biên Sheet: trong yaml nó thành hai khoá tường minh `unit` + `maxPax`.
+ */
+export function docDonVi(s) {
+  if (s === DON_VI_BAT_BUOC) return { unit: 'perPax' }
+  const m = DANG_DON_VI_NHOM.exec(s)
+  if (m) {
+    const maxPax = parseInt(m[1], 10)
+    if (Number.isInteger(maxPax) && maxPax > 0) return { unit: 'perGroup', maxPax }
+  }
+  return null
+}
+
+/**
+ * Đơn vị mà Sheet SINH RA ĐƯỢC. Tập ĐÓNG, đối chiếu được với `docDonVi` ngay trên.
+ *
+ * Đo 2026-09-04: `data/prices.yaml` chỉ có ba khoá con `unit`/`amount`/`paxRates` trên cả 29 mục —
+ * không `tiers`, không `perRoomNight`, không `perTicket`. Nên hôm nay CẢ HAI luật đều cho `giuNguyen`
+ * tập rỗng; rủi ro dưới đây hoàn toàn là rủi ro TƯƠNG LAI, không phải lỗi đang xảy ra.
+ *
+ * Vì sao khai theo chiều này chứ không liệt kê "thứ Sheet không chở được": luật cũ
+ * `unit !== 'perPax'` bảo vệ được cả những đơn vị CHƯA AI NGHĨ RA. Liệt kê thứ-không-chở-được là
+ * một tập MỞ phải nuôi mãi mãi — quên một cái thì dòng đó thành "của Sheet", vắng mặt trong Sheet,
+ * và rơi vào đường xoá. Khai theo chiều "Sheet sinh ra được" giữ lại tính chất mặc-định-an-toàn.
+ */
+export const DON_VI_TU_SHEET = new Set(['perPax', 'perGroup'])
 
 // Thứ tự IN ba hạng phụ ghim tại chỗ, vì nó quyết định byte của file sinh ra (chốt 6). Nhưng
 // TẬP hạng phụ lấy từ cổng: thêm hoặc bớt một hạng bên py1-py8.ts là script dừng và bảo sửa,
@@ -373,6 +412,7 @@ function phanTich(hang) {
   const nhacBoQua = []
   const muc = []                  // [{ khoa, entry, soHang, tenTour }] — theo thứ tự hàng Sheet
   const khoaChuaGia = new Map()   // khoa → { soHang, tenTour } cho hàng có khoá mà chưa điền giá
+  const donViLa = []              // { soHang, khoa, donVi } — hàng bị BỎ QUA vì đơn vị site chưa hỗ trợ
 
   const { viTri, canhBao } = ganCot(hang[0])
   const o = (h, ma) => (viTri[ma] !== undefined ? (h[viTri[ma]] ?? '').trim() : '')
@@ -413,8 +453,15 @@ function phanTich(hang) {
     }
 
     const donVi = o(h, 'donVi')
-    if (donVi !== DON_VI_BAT_BUOC) {
-      loi.push(`Hàng ${soHang} (${khoa}): Đơn vị = "${donVi}" — phải là "${DON_VI_BAT_BUOC}".`)
+    const dv = docDonVi(donVi)
+    if (!dv) {
+      // CẢNH BÁO chứ không chặn: một ô Đơn vị lạ không được kéo 34 dòng vô can cùng chết.
+      // `continue` là BẮT BUỘC — mã cũ push vào loi[] mà không continue, hàng lỗi vẫn chạy
+      // tiếp xuống dưới và vào `muc`. Bỏ chặn mà quên continue là ghi một dòng đơn vị lạ vào
+      // prices.yaml NHƯ THỂ nó là perPax.
+      canhBao.push(`Hàng ${soHang} (${khoa}): Đơn vị = "${donVi}" chưa được hỗ trợ — BỎ QUA, dòng này KHÔNG vào prices.yaml.`)
+      donViLa.push({ soHang, khoa, donVi })
+      continue
     }
 
     const dg = docSoTien(giaNguoiLon)
@@ -471,9 +518,17 @@ function phanTich(hang) {
       paxRates[ma] = r
     }
 
+    // perGroup là giá cả nhóm — không có khái niệm "hạng khách" bên trong một nhóm.
+    if (dv.unit === 'perGroup' && Object.keys(paxRates).length > 0) {
+      loi.push(`Hàng ${soHang} (${khoa}): đơn vị nhóm không nhận giá theo hạng khách — xoá các cột giá trẻ em / người cao tuổi / em bé.`)
+      continue
+    }
+
     if (soTien === null) continue               // đã có lỗi ở dòng này, không dựng entry
 
-    const entry = { unit: DON_VI_BAT_BUOC, amount: soTien }
+    const entry = dv.unit === 'perGroup'
+      ? { unit: 'perGroup', amount: soTien, maxPax: dv.maxPax }
+      : { unit: DON_VI_BAT_BUOC, amount: soTien }
     if (KHOA_YAML_CHO_MA_TOUR && maTour !== '') entry[KHOA_YAML_CHO_MA_TOUR] = maTour
     if (Object.keys(paxRates).length > 0) entry.paxRates = paxRates   // cả ba hạng trống → bỏ hẳn khoá
     muc.push({ khoa, entry, soHang, tenTour, maTour })
@@ -489,7 +544,7 @@ function phanTich(hang) {
     }
   }
 
-  return { muc, khoaChuaGia, nhacBoQua, loi, canhBao, soHangDuLieu: hang.length - 1 }
+  return { muc, khoaChuaGia, nhacBoQua, loi, canhBao, donViLa, soHangDuLieu: hang.length - 1 }
 }
 
 // ── Dựng văn bản yaml ──
@@ -561,6 +616,9 @@ function xepKhoiRa(khoiCu, giuNguyen, muc) {
 
 function dungKhoi(khoa, entry) {
   const dong = [`${khoa}:`, `  unit: ${entry.unit}`, `  amount: ${entry.amount}`]
+  // Thứ tự khoá CỐ ĐỊNH — hàm này phải tất định, cùng đầu vào ra cùng byte, kẻo mỗi lần
+  // pull đẻ một diff giả và `git diff data/prices.yaml` mất tác dụng làm bước duyệt.
+  if (entry.unit === 'perGroup') dong.push(`  maxPax: ${entry.maxPax}`)
   if (KHOA_YAML_CHO_MA_TOUR && entry[KHOA_YAML_CHO_MA_TOUR] !== undefined) {
     dong.push(`  ${KHOA_YAML_CHO_MA_TOUR}: ${JSON.stringify(entry[KHOA_YAML_CHO_MA_TOUR])}`)
   }
@@ -611,6 +669,17 @@ function traTenTour(khoaCanTra, muc, khoaChuaGia) {
 // ── Chạy ──
 
 async function chay() {
+  // Dời từ tầng module xuống đây (Bẫy 1, 2026-09-04): tầng module chạy cả lúc `import` từ
+  // test, và một máy không có `.env` (CI, clone mới) import tệp này chỉ để lấy `docDonVi`
+  // không được phép chết ở đây. Đặt TRƯỚC mọi nhánh khác — `MA_SHEET` còn được nội suy vào
+  // thông báo lỗi ở dưới (Cổng "hang.length === 0"), đặt sau sẽ in ra `undefined` trong đó.
+  if (!MA_SHEET) {
+    console.error('Thiếu PRICES_SHEET_ID. Đặt vào .env ở gốc repo:')
+    console.error('  PRICES_SHEET_ID=<mã sheet giá>')
+    console.error('Mã lấy ở URL của Sheet: docs.google.com/spreadsheets/d/<mã>/edit')
+    process.exit(1)
+  }
+
   const ts = docThamSo(process.argv.slice(2))
   if (ts.giup) { inHuongDan(); return }
 
@@ -640,11 +709,21 @@ async function chay() {
     )
   }
 
-  // Dòng giá không phải perPax nằm NGOÀI TẦM của bảng 13 cột — không có cột nào chở được
-  // `tiers[]`, `tickets[]` hay `asOf`. Chúng không phải "bị xoá khỏi Sheet", chúng chưa bao
-  // giờ ở trong Sheet. Chép nguyên văn, đúng chỗ cũ, và nói rõ ra.
+  // Dòng giá không phải thứ Sheet SINH RA ĐƯỢC (`DON_VI_TU_SHEET`) nằm NGOÀI TẦM của bảng 13
+  // cột — không có cột nào chở được `tiers[]`, `tickets[]` hay `asOf`. Chúng không phải "bị
+  // xoá khỏi Sheet", chúng chưa bao giờ ở trong Sheet. Chép nguyên văn, đúng chỗ cũ, và nói rõ ra.
+  //
+  // ĐỌC KỸ: định nghĩa cũ là `unit !== 'perPax'`, và nó SAI kể từ khi có perGroup.
+  // perGroup sinh ra TỪ Sheet; xếp nó vào "ngoài tầm" là chép nguyên văn nó mãi mãi —
+  // chủ dự án sửa giá Phao chuối trong Sheet, chạy pull, KHÔNG CÓ GÌ XẢY RA và KHÔNG AI BÁO.
+  // Lỗi này nổ SAU khi đợt này nghiệm thu xong, nên không cổng nào của đợt bắt được.
   const giuNguyen = new Set(
-    khoiCu.map((k) => k.khoa).filter((k) => giaCu[k] && giaCu[k].unit !== DON_VI_BAT_BUOC)
+    khoiCu.map((k) => k.khoa).filter((k) => {
+      const e = giaCu[k]
+      if (!e) return false
+      if (!DON_VI_TU_SHEET.has(e.unit)) return true   // Sheet không sinh ra được → giữ nguyên
+      return e.unit === 'perPax' && Array.isArray(e.tiers) && e.tiers.length > 0
+    })
   )
 
   console.log('')
@@ -736,6 +815,18 @@ async function chay() {
     }
   }
 
+  // Đơn vị Sheet ghi nhưng site chưa hỗ trợ (docDonVi trả null): hàng KHÔNG vào prices.yaml.
+  // Lặp lại ở đây, trong khối tổng kết cuối — người chạy đọc phần cuối, không đọc dòng ⚠ lẫn
+  // ở giữa stdout. Với khoá MỚI (chưa từng có trong yaml), đây là lý do duy nhất tour đó
+  // không có form đặt: entity trỏ vào khoá không tồn tại → resolvePrice trả null.
+  if (kq.donViLa.length > 0) {
+    console.log('')
+    console.log(`⚠ Đơn vị chưa được hỗ trợ, BỎ QUA — KHÔNG vào prices.yaml (${kq.donViLa.length}):`)
+    for (const d of kq.donViLa) {
+      console.log(`  ⚠ hàng ${d.soHang} (${d.khoa}): Đơn vị = "${d.donVi}"`)
+    }
+  }
+
   if (themMoi.length > 0) {
     console.log('')
     console.log(`Thêm giá mới (${themMoi.length}):`)
@@ -776,8 +867,14 @@ async function chay() {
       const tra = traTenTour(k, kq.muc, kq.khoaChuaGia)
       dong(`  − ${k}${tra ? ` — ${tra.ten} (${tra.nguon})` : ' — không tra được tên tour'}`)
       const cu = giaCu[k]
-      if (cu?.unit && cu.unit !== DON_VI_BAT_BUOC) {
+      // Dùng DON_VI_TU_SHEET (Sheet SINH RA ĐƯỢC gì), không phải "unit !== perPax" — perGroup
+      // giờ Sheet sinh ra được, nên một khoá perGroup bị xoá KHÔNG PHẢI vì "Sheet không biểu
+      // diễn được kiểu giá này" (sai — dẫn người đọc bấm --cho-phep-xoa vì lý do sai), mà đơn
+      // giản là khoá đó vắng mặt khỏi Sheet, giống hệt một khoá perPax bị xoá.
+      if (cu?.unit && !DON_VI_TU_SHEET.has(cu.unit)) {
         dong(`      dòng này là ${cu.unit}, bảng Sheet không biểu diễn được kiểu giá này`)
+      } else if (cu?.unit === 'perGroup' && typeof cu?.amount === 'number') {
+        dong(`      đang là ${dinhDangTien(cu.amount)} đ/nhóm (tối đa ${cu.maxPax} khách)`)
       } else if (typeof cu?.amount === 'number') {
         dong(`      đang là ${dinhDangTien(cu.amount)} đ/khách`)
       }
@@ -870,11 +967,16 @@ async function chay() {
   console.log('')
 }
 
-chay().catch((e) => {
-  console.error('')
-  console.error(`✖ Lỗi ngoài dự tính: ${e?.stack || e?.message || e}`)
-  console.error('')
-  console.error('  data/prices.yaml không bị đụng tới.')
-  console.error('')
-  process.exit(1)
-})
+// Chỉ chạy đường CLI khi tệp này được gọi thẳng (`node`/`tsx prices-pull.mjs ...`, hoặc
+// `npm run prices:pull`). `import` từ một tệp test thì chỉ nạp hàm (`docDonVi`,
+// `DON_VI_TU_SHEET`) — không gọi Sheet, không đụng data/prices.yaml.
+if (LA_CLI) {
+  chay().catch((e) => {
+    console.error('')
+    console.error(`✖ Lỗi ngoài dự tính: ${e?.stack || e?.message || e}`)
+    console.error('')
+    console.error('  data/prices.yaml không bị đụng tới.')
+    console.error('')
+    process.exit(1)
+  })
+}
