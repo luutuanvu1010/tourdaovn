@@ -39,6 +39,7 @@ describe('format', () => {
   it('đơn trải nghiệm: tiêu đề [Đặt trải nghiệm], thân thư ghi "Trải nghiệm:"', () => {
     const exp: NewBooking = { ...b, productType: 'experience', tourTitle: 'Dù bay parasailing' }
     expect(formatSubject(exp)).toContain('[Đặt trải nghiệm]')
+    expect(formatText(exp)).toContain('Đơn đặt trải nghiệm mới')
     expect(formatText(exp)).toContain('Trải nghiệm: Dù bay parasailing')
     expect(formatText(exp)).not.toContain('Tour: Dù bay parasailing')
   })

@@ -339,6 +339,8 @@ describe('handleBooking', () => {
       const html = await res.text()
       expect(html).toContain('/trai-nghiem/du-bay-parasailing-keo-bang-cano/')
       expect(html).not.toContain('/tour/du-bay-parasailing-keo-bang-cano/')
+      // Task 3 (review vòng 1): chữ neo phải khớp loại sản phẩm, không mặc định "tour".
+      expect(html).toContain('Về trang trải nghiệm')
       await flush()
     })
 
@@ -349,7 +351,10 @@ describe('handleBooking', () => {
         mkEnv(), ctx, { fetchImpl: f, now: () => NOW },
       )
       expect(res.status).toBe(201)
-      expect(await res.text()).toContain('/tour/tour-hon-tam-tron-goi/')
+      const html = await res.text()
+      expect(html).toContain('/tour/tour-hon-tam-tron-goi/')
+      // Task 3 (review vòng 1): đối xứng với ca experience — chữ neo giữ nguyên "tour".
+      expect(html).toContain('Về trang tour')
       await flush()
     })
 
