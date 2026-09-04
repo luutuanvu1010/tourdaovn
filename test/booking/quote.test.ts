@@ -253,6 +253,24 @@ describe('computeQuote — perGroup', () => {
     const q = computeQuote(group, { adult: 6, child: 0, senior: 0, infant: 0 }, { prepayPercent: 5, prepay: true })
     expect(q?.group).toEqual({ amount: 950000, maxPax: 5 })
   })
+
+  // CA KHOÁ THỨ TỰ ÁP % — cố ý dùng số LẺ, đừng "dọn" thành số tròn: với số tròn (vd 1.000.000
+  // + 5%, 6 khách), "áp % lên giá một lượt rồi nhân lượt" và "nhân lượt rồi áp % lên tổng" ra
+  // TRÙNG kết quả, nên không phân biệt được đường nào đang chạy. Ca này lệch đúng 1.000đ nhờ
+  // Math.ceil trong apDieuChinh (làm tròn LÊN nghìn) rơi vào hai bậc nghìn khác nhau ở hai
+  // đường tính — đây là ca DUY NHẤT bắt được biến thể tái cấu trúc "suy ngược đơn giá một lượt
+  // từ tổng" (total / soLuot), biến thể vẫn tự nhất quán nên không ồn ào ở đâu khác.
+  it('số lẻ khoá thứ tự áp %: giá 100.001 +1% mùa, 2 lượt → 204.000 (đúng), KHÔNG phải 203.000 (sai)', () => {
+    const bang: PriceTable = { kind: 'group', amount: 100001, maxPax: 5 }
+    const mua: Season[] = [{ name: 'Phụ thu 1%', from: '2027-01-01', to: '2027-12-31', percent: 1 }]
+    const q = computeQuote(bang, { adult: 6, child: 0, senior: 0, infant: 0 }, { seasons: mua, departDate: '2027-06-01' })
+    // ĐÚNG (mã đang đi): áp % lên giá MỘT LƯỢT trước — 100.001 × 1,01 = 101.001,01 → làm tròn
+    // lên nghìn = 102.000 — rồi mới nhân 2 lượt = 204.000.
+    // SAI (đường KHÔNG được chọn): nhân 2 lượt trước = 200.002, rồi mới áp % lên TỔNG —
+    // 200.002 × 1,01 = 202.002,02 → làm tròn lên nghìn = 203.000.
+    expect(q?.total).toBe(204000)
+    expect(q?.group?.amount).toBe(102000)
+  })
 })
 
 describe('priceTableFromEntry — perGroup', () => {
