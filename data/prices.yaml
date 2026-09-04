@@ -46,14 +46,6 @@ ve-hon-tam-seaday-tour-03:
     senior: { amount: 340000, note: "Người cao tuổi >= 60 tuổi" }
     infant: { amount: 0, note: "Luôn miễn phí, chiều cao dưới 1 mét" }
 
-ve-hon-tam-tam-tron-goi:
-  unit: perPax
-  amount: 540000
-  paxRates:
-    child: { amount: 430000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
-    senior: { amount: 430000, note: "Người cao tuổi >= 60 tuổi" }
-    infant: { amount: 0, note: "Luôn miễn phí, chiều cao dưới 1 mét" }
-
 tour-3-dao-nha-trang-mini-beach-hon-tam:
   unit: perPax
   amount: 850000
@@ -184,10 +176,10 @@ ve-vinwonders-tieu-chuan:
 
 ve-vinwonders-tieu-chuan-buffet-350:
   unit: perPax
-  amount: 1330000
+  amount: 1190000
   paxRates:
-    child: { amount: 950000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
-    senior: { amount: 1090000, note: "Người cao tuổi >= 60 tuổi" }
+    child: { amount: 855000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
+    senior: { amount: 1000000, note: "Người cao tuổi >= 60 tuổi" }
     infant: { amount: 0, note: "Luôn miễn phí, chiều cao dưới 1 mét" }
 
 ve-vinwonders-tieu-chuan-buffet-500:
@@ -245,3 +237,32 @@ du-thuyen-vega-sunset-tour:
     child: { amount: 2330000, note: "Trẻ em cao từ 1 m đến 1,4 mét" }
     senior: { amount: 2330000, note: "Người cao tuổi >= 60 tuổi" }
     infant: { amount: 0, note: "Luôn miễn phí, chiều cao dưới 1 mét" }
+
+snorkeling-nha-trang:
+  unit: perPax
+  amount: 400000
+
+phao-chuoi:
+  unit: perGroup
+  amount: 1000000
+  maxPax: 5
+
+du-bay-parasailing-keo-bang-cano:
+  unit: perPax
+  amount: 600000
+
+fly-board-nha-trang:
+  unit: perPax
+  amount: 1300000
+
+motor-nuoc-nha-trang-jetski:
+  unit: perPax
+  amount: 800000
+
+di-bo-duoi-day-bien-sea-walker:
+  unit: perPax
+  amount: 1300000
+
+lan-bien-scuba-diving:
+  unit: perPax
+  amount: 1300000
