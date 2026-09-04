@@ -330,3 +330,54 @@ Chuỗi hỏng nếu gộp mà quên migration:
 Thêm nhánh **D-C** vào `guard-deploy.sh`, và/hoặc một cổng chặn gộp: so `migrations/*.sql` với trạng thái đã áp trên D1, đỏ nếu còn migration chưa chạy mà mã lại đọc/ghi cột mới. Rẻ, và bịt đúng chỗ vừa suýt sập.
 
 **Không tự chạy migration** — đó là thay đổi trên cơ sở dữ liệu thật đang chứa đơn của khách, thuộc quyền chủ dự án. Thứ tự an toàn: chạy `npx wrangler d1 migrations apply tourdao-booking --remote` **trước**, rồi mới gộp. Migration này chỉ bồi thêm cột (`ADD COLUMN ... NOT NULL DEFAULT 'tour'`) nên chạy sớm vô hại: mã đang chạy liệt kê cột theo tên, không đụng tới nó.
+
+---
+
+## 14. Đã trả nợ §1 — cổng nay kín
+
+Chủ dự án duyệt sửa §1 ngay trong phiên. Bản sửa **không** theo đề nghị ban đầu của báo cáo này, vì số đo bác bỏ chính đề nghị đó.
+
+### 14.1 Đề nghị ban đầu sai ở đâu
+
+§1 đề nghị *"để `npm run gate` tự build"*. Đo thật trước khi làm:
+
+| | |
+|---|---|
+| `npm run build` | **251 giây** |
+| validators | **11 giây** |
+
+Bắt mỗi `git push` chờ hơn 4 phút thì người ta sẽ dùng `--no-verify`, và hàng rào mất hẳn — **tệ hơn hiện trạng**. Đề nghị trong §1 được đưa ra khi chưa có con số này.
+
+### 14.2 Cái đã làm: tiền điều kiện, không phải build
+
+`scripts/validators/dist-freshness.ts` chạy **trước** mọi nhóm trong `run-gates.mjs`, mất khoảng một giây, trả lời đúng một câu: *dist/ có phải bản dựng của mã hiện tại không.*
+
+- `dist/index.html` có tồn tại không
+- có file nào trong `src/`, `data/`, `public/`, `astro.config.mjs` mới hơn nó không
+- Sanity có document nào `_updatedAt` sau mốc dựng không — một truy vấn duy nhất
+
+Cũ thì **chặn cả lượt**, thoát mã `3`, **không chạy validator nào**.
+
+Ba quyết định thiết kế:
+
+1. **Chặn cả lượt, không thành validator thứ 13.** `run-gates.mjs` cố ý chạy hết thay vì dừng ở lỗi đầu (DR-019). Nhưng `dist/` cũ không phải "một lỗi trong số nhiều" — nó làm **mọi** kết quả phía sau mất nghĩa. In một bảng đỏ/xanh lẫn lộn trong tình huống đó chính là cách sinh ra hiểu nhầm ở §1 và §2.
+2. **Không dùng file dấu vết.** Mốc dựng lấy từ `mtime` của `dist/index.html` — sinh ra và chết cùng bản dựng, nên không có cảnh "xoá `dist/` mà dấu vết còn nằm đó nói là tươi".
+3. **Mã thoát 3, không phải 1.** Phân biệt *"chưa kiểm được"* với *"đã kiểm và có validator đỏ"*. Người gặp mã 3 không nên đi tìm lỗi trong mã của mình.
+
+**Fail-closed** khi không hỏi được Sanity: nội dung trang lấy từ Sanity lúc build, nên bỏ qua nhánh đó là mở đúng cái cửa đã sinh ra đỏ giả/xanh giả. Cùng triết lý với nhánh D-A của `guard-deploy.sh`.
+
+Kèm **8 test** cho logic thuần. Đã thử **cả hai nhánh thật**: `dist/` tươi → cho qua; `dist/` cũ → chặn, nêu đúng tên file và cả hai mốc thời gian.
+
+### 14.3 Nó bắt được lỗi thật ngay lượt đầu
+
+Vừa bật lên, cổng chặn push vì `jsonld-post` đỏ: một bài vừa publish có `"articleSection":null`. Curl xác nhận **đã sống trên production**.
+
+Thứ tự hoạt động đúng như thiết kế: tiền điều kiện **cho qua** (bản dựng tươi), rồi validator mới bắt lỗi nội dung. Tiền điều kiện không nuốt mất lỗi thật, chỉ chặn khi phép đo vô nghĩa.
+
+Đây là **lỗi thật thứ hai trong cùng một ngày** lọt tới khách qua đúng cơ chế ở §4: Sanity publish → Workers Builds tự dựng → không validator nào trên đường phát hành. Trước khi sửa, đã quét toàn bộ `dist/`: đúng **một field, một trang** — nên sửa đúng chỗ, không quét rộng. Bản sửa gán có điều kiện theo idiom sẵn có của `article.ts`, kèm 6 test trong đó hai test bất biến chung *"không field nào mang null"*.
+
+Nợ dữ liệu **không bị giấu**: `articleType` có cổng publish riêng (I12/I4/I7, `01-CONTENT_MODEL` §493). Việc của serializer chỉ là đừng xuất JSON hỏng.
+
+### 14.4 Còn nguyên
+
+§13 (không cổng nào kiểm migration trước khi gộp) **chưa sửa**. §12.3 (slug bẩn trong Sanity) **chưa sửa** — vẫn chỉ có lớp phòng thủ ở mã. Ba agent ở §8 vẫn chưa từng chạy. 27 control ở §9 vẫn treo.
