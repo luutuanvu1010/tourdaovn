@@ -275,3 +275,58 @@ Tương tự với "Cloudflare Pages": **chỉ sửa dòng 81** — dòng duy nh
 ### 12.5 Không làm
 
 Không push. Không sửa dữ liệu Sanity. Không đụng `scripts/reports/*.json` (validator tự ghi đè mỗi lần chạy cổng — vẫn là điểm duyệt #9).
+
+---
+
+## 13. Khoảng trống chưa ai kiểm: migration D1 so với mã sắp gộp
+
+Phát hiện khi chủ dự án hỏi "gộp nhánh vào `main` thì tác động gì lên production". Đây là **khoảng trống thứ hai cùng họ với §4** — một bất biến thật, được ghi bằng văn xuôi, nhưng không có ai thi hành.
+
+### 13.1 Bất biến đang bị bỏ ngỏ
+
+> Mã ghi vào một cột mới **không được lên `main`** trước khi migration tạo cột đó đã chạy trên D1 thật.
+
+Bất biến này có thật và đã được nhận diện — chính nhánh `feat/dat-cho-trai-nghiem` có một commit tên `a472346 "fix(spec): migration D1 phai chay TRUOC khi gop main, khong phai sau"`, và `BUILD-NOTES.md:95–98` mô tả đúng cơ chế. Nhưng cả hai chỉ là **văn bản**. Không có cổng nào chặn.
+
+### 13.2 Đã đo: không một bộ kiểm nào nhắc tới migration
+
+```
+grep -rln "migration" scripts/validators/ scripts/meta-validators/ \
+  scripts/run-gates.mjs .githooks/ .claude/hooks/ \
+  docs/governance/control-registry.yaml
+→ chỉ scripts/meta-validators/g1-content-model-vs-schema.ts
+```
+
+Và lần khớp duy nhất đó là **chú thích không liên quan** (dòng 323, nói về `cms/_migrate-hero-footer.mjs`).
+
+`guard-deploy.sh` chỉ có hai nhánh: **D-A** (commit chưa push) và **D-B** (`dist/` cũ hơn `src/`). **Không có nhánh nào cho migration.**
+
+### 13.3 Hậu quả cụ thể, đo trên nhánh đang mở
+
+```
+npx wrangler d1 migrations list tourdao-booking --remote
+→ Migrations to be applied:  0003_product_type.sql
+```
+
+`src/lib/booking/store.ts` trên nhánh đã đổi câu ghi đơn thành `INSERT INTO booking (..., payment_method, product_type) VALUES (?1 ... ?19)`. Cột `product_type` **chưa tồn tại trên D1 thật**.
+
+Chuỗi hỏng nếu gộp mà quên migration:
+
+1. Gộp `main` → Workers Builds **tự dựng, tự thay Worker**, không cần ai bấm.
+2. Worker mới ghi kèm `product_type` → SQL lỗi thiếu cột.
+3. `handler.ts:269` — `catch (e) { if (!isUniqueViolation(e) || i === CODE_RETRIES - 1) throw e }` — chỉ nuốt lỗi **trùng mã đơn**; lỗi thiếu cột **ném thẳng**.
+4. `src/pages/api/dat-tour.ts` gọi `handleBooking` **không có `try/catch` bao ngoài** → HTTP 500.
+
+**Kết quả: mọi khách bấm đặt tour đều gặp lỗi, trên toàn bộ tour đang có form.** Hỏng toàn phần ngay khi build xong, không phải hỏng ngầm.
+
+### 13.4 Vì sao đợt rà soát này suýt bỏ lọt
+
+§4 đếm 11 nhóm bộ kiểm và kết luận chỉ `astro check` nằm trên đường phát hành. Bảng đó đếm **những bộ kiểm đang tồn tại**. Bất biến ở §13.1 thì **không có bộ kiểm nào cả**, nên nó không xuất hiện ở bất kỳ ô nào trong bảng — kể cả cột "gọi tay".
+
+Đây là bài học phương pháp: **một bảng nối chỉ soi được thứ đã có người viết ra.** Muốn thấy chỗ trống phải đi từ *danh sách bất biến* xuống mã, không đi từ *danh sách validator* lên. Cùng loại với `[gap]` của `g2` — khác ở chỗ `g2` ít nhất còn được `run-gates.mjs` in ra, còn bất biến này **không ai biết là đang thiếu** cho tới khi có người hỏi đúng câu.
+
+### 13.5 Đề nghị
+
+Thêm nhánh **D-C** vào `guard-deploy.sh`, và/hoặc một cổng chặn gộp: so `migrations/*.sql` với trạng thái đã áp trên D1, đỏ nếu còn migration chưa chạy mà mã lại đọc/ghi cột mới. Rẻ, và bịt đúng chỗ vừa suýt sập.
+
+**Không tự chạy migration** — đó là thay đổi trên cơ sở dữ liệu thật đang chứa đơn của khách, thuộc quyền chủ dự án. Thứ tự an toàn: chạy `npx wrangler d1 migrations apply tourdao-booking --remote` **trước**, rồi mới gộp. Migration này chỉ bồi thêm cột (`ADD COLUMN ... NOT NULL DEFAULT 'tour'`) nên chạy sớm vô hại: mã đang chạy liệt kê cột theo tên, không đụng tới nó.
