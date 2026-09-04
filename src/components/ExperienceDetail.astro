@@ -6,6 +6,9 @@ import DetailLayout from './DetailLayout.astro'
 import FAQ from './FAQ.astro'
 import Section from './Section.astro'
 import BookingCTA from './BookingCTA.astro'
+import BookingForm from './BookingForm.astro'
+import { priceTableFromEntry } from '../lib/booking/quote'
+import { fetchPriceRules, seasonsForKey } from '../lib/queries/seasons'
 import ContactChannels from './ContactChannels.astro'
 import Body from './Body.astro'
 import MapView from './MapView.astro'
@@ -39,6 +42,21 @@ const entityJsonLd = applyPriceToJsonLd(
 const jsonLd = entityPageGraphToLd(entityJsonLd, data, siteBase, lang)
 const hasContactChannel = !!(contact?.zaloUrl || contact?.hotline || contact?.whatsapp)
 
+// Form đặt chỗ (Task 11, ADR-0033 §6): lặp đúng khuôn TourDetail.astro — chỉ khi trải nghiệm
+// có giá perPax/perGroup tra được. Không giá → giữ nguyên như trước: ContactChannels, không
+// form, không CTA giả.
+const bookingKey = data.bookingRef?.key ?? ''
+const priceTable = priceView && !priceView.isFree && bookingKey
+  ? priceTableFromEntry(prices.get(bookingKey)) : null
+// Bảng mùa (ADR-0030 §3): đọc lúc dựng trang, lọc theo đúng trải nghiệm này, nướng vào form.
+const priceRules = await fetchPriceRules()
+const seasons = bookingKey ? seasonsForKey(priceRules.seasons, bookingKey) : []
+// Cờ cho cột phụ thôi dính — KHÔNG phải trang trí (DR-104): form đặt chỗ cao hơn vùng nhìn ở
+// khổ máy tính, mà `position: sticky` chỉ giữ được khối thấp hơn màn hình. Thiếu cờ này thì
+// các ô nhập bước 2 đứng ngoài mép, không cách nào cuộn tới.
+const showBookingForm = !!priceView?.label && !!priceTable
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? ''
+
 // Vùng "Thông tin nhanh" — 06 §3.1 Trải nghiệm: đúng 2 ô (`duration`,
 // `touristType`). Giá không vào đây (thanh dính + khối hành động); `includes`
 // đã có mục "Bao gồm" riêng; `experienceType` đã là huy hiệu hero, chỉ ở đó.
@@ -68,8 +86,11 @@ const jumpLinks = [
 // Nhãn giá dùng chung một quy tắc với InfoBar: miễn phí thì hiện nhãn thay số.
 const stickyPriceLabel = data.isAccessibleForFree ? t('free') : (priceView?.label ?? null)
 
-// CTA trên thanh dính là Zalo — kênh đặt chỗ duy nhất của site (00 §3).
+// CTA trên thanh dính là Zalo khi không có form; có form thì neo tới form (hành động chính) —
+// cùng luật với TourDetail.astro.
 const zaloHref = contact?.zaloUrl || ''
+const stickyHref = showBookingForm ? '#dat-tour' : (zaloHref || null)
+const stickyLabel = showBookingForm ? t('bookNow') : (zaloHref ? t('contactZalo') : null)
 ---
 
 <DetailLayout
@@ -83,11 +104,13 @@ const zaloHref = contact?.zaloUrl || ''
   summary={data.summary}
   jumpLinks={jumpLinks}
   priceLabel={stickyPriceLabel}
-  ctaHref={zaloHref || null}
-  ctaLabel={zaloHref ? t('contactZalo') : null}
+  ctaHref={stickyHref}
+  ctaLabel={stickyLabel}
   facts={facts}
+  sidebarFlow={showBookingForm}
   sidebarSlots={[
-    { name: 'booking', component: 'BookingCTA', visible: !!priceView?.label || hasContactChannel, props: {} },
+    { name: 'booking', component: showBookingForm ? 'BookingForm' : 'BookingCTA',
+      visible: showBookingForm || !!priceView?.label || hasContactChannel, props: {} },
     { name: 'map', component: 'Map', visible: !!(data.geo), props: {} },
   ]}
   nearbyTitle={t('similarExperiences')}
@@ -121,8 +144,25 @@ const zaloHref = contact?.zaloUrl || ''
     {data.faq && data.faq.length > 0 && <FAQ faq={data.faq} lang={lang} contained={false} id="faq" />}
   </div>
 
-  {priceView?.label && <BookingCTA slot="booking" priceText={priceView.label} ctaLabel={t('bookNow')} />}
-  {hasContactChannel && <ContactChannels slot="booking" contact={contact} lang={lang} />}
+  {showBookingForm && priceTable && (
+    <BookingForm
+      slot="booking"
+      lang={lang}
+      tourSlug={data.slug}
+      tourTitle={data.title}
+      bookingRef={bookingKey}
+      priceLabel={priceView!.label}
+      priceTable={priceTable}
+      seasons={seasons}
+      prepayPercent={priceRules.prepayPercent}
+      contact={contact}
+      turnstileSiteKey={turnstileSiteKey}
+      productType="experience"
+      showPickup={false}
+    />
+  )}
+  {!showBookingForm && priceView?.label && <BookingCTA slot="booking" priceText={priceView.label} ctaLabel={t('bookNow')} />}
+  {!showBookingForm && hasContactChannel && <ContactChannels slot="booking" contact={contact} lang={lang} />}
   {data.geo && <MapView slot="map" geo={data.geo} title={data.title} height={240} />}
 </DetailLayout>
 
