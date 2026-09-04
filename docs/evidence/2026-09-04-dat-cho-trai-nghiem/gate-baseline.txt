@@ -1,0 +1,2019 @@
+
+> gate
+> astro check && npm --prefix scripts run gate:all
+
+08:30:00 [@astrojs/cloudflare] Enabling sessions with Cloudflare KV with the "SESSION" KV binding.
+08:30:00 [@astrojs/cloudflare] If you see the error "Invalid binding `SESSION`" in your build output, you need to add the binding to your wrangler config file.
+08:30:00 [content] Syncing content
+08:30:00 [content] Synced content
+08:30:00 [types] Generated 16ms
+08:30:00 [check] Getting diagnostics for Astro files in /Users/tuanbao/Documents/Projects/ctytnhhtourdao/tourdaovn...
+[96msrc/lib/resolver.ts[0m:[93m17[0m:[93m3[0m - [93mwarning[0m[90m ts(6133): [0m'entityType' is declared but its value is never read.
+
+[7m17[0m   entityType: string,
+[7m  [0m [93m  ~~~~~~~~~~[0m
+
+[96msrc/lib/queries/article.ts[0m:[93m8[0m:[93m3[0m - [93mwarning[0m[90m ts(6133): [0m'entityRefFragment' is declared but its value is never read.
+
+[7m8[0m   entityRefFragment, imageProvenanceFragment, bodyDocFragment
+[7m [0m [93m  ~~~~~~~~~~~~~~~~~[0m
+[96msrc/lib/queries/article.ts[0m:[93m7[0m:[93m3[0m - [93mwarning[0m[90m ts(6133): [0m'baseDocFieldsFragment' is declared but its value is never read.
+
+[7m7[0m   baseDocFieldsFragment, mainImageFragment, galleryFragment,
+[7m [0m [93m  ~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/lib/queries/attraction.ts[0m:[93m6[0m:[93m3[0m - [93mwarning[0m[90m ts(6133): [0m'baseFieldsFragment' is declared but its value is never read.
+
+[7m6[0m   baseFieldsFragment, mainImageFragment, galleryFragment,
+[7m [0m [93m  ~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/lib/queries/event.ts[0m:[93m6[0m:[93m3[0m - [93mwarning[0m[90m ts(6133): [0m'baseFieldsFragment' is declared but its value is never read.
+
+[7m6[0m   baseFieldsFragment, mainImageFragment, galleryFragment,
+[7m [0m [93m  ~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/lib/queries/experience.ts[0m:[93m6[0m:[93m3[0m - [93mwarning[0m[90m ts(6133): [0m'baseFieldsFragment' is declared but its value is never read.
+
+[7m6[0m   baseFieldsFragment, mainImageFragment, galleryFragment,
+[7m [0m [93m  ~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/lib/queries/hotel.ts[0m:[93m7[0m:[93m35[0m - [93mwarning[0m[90m ts(6133): [0m'openingHoursFragment' is declared but its value is never read.
+
+[7m7[0m   faqFragment, entityRefFragment, openingHoursFragment,
+[7m [0m [93m                                  ~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/lib/queries/hotel.ts[0m:[93m6[0m:[93m3[0m - [93mwarning[0m[90m ts(6133): [0m'baseFieldsFragment' is declared but its value is never read.
+
+[7m6[0m   baseFieldsFragment, mainImageFragment, galleryFragment,
+[7m [0m [93m  ~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/lib/queries/organization.ts[0m:[93m6[0m:[93m3[0m - [93mwarning[0m[90m ts(6133): [0m'baseFieldsFragment' is declared but its value is never read.
+
+[7m6[0m   baseFieldsFragment, mainImageFragment, imageProvenanceFragment, bodyFragment,
+[7m [0m [93m  ~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/lib/queries/person.ts[0m:[93m5[0m:[93m10[0m - [93mwarning[0m[90m ts(6133): [0m'baseFieldsFragment' is declared but its value is never read.
+
+[7m5[0m import { baseFieldsFragment, mainImageFragment, imageProvenanceFragment } from './fragments'
+[7m [0m [93m         ~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/lib/queries/place.ts[0m:[93m7[0m:[93m16[0m - [93mwarning[0m[90m ts(6133): [0m'entityRefFragment' is declared but its value is never read.
+
+[7m7[0m   faqFragment, entityRefFragment, openingHoursFragment,
+[7m [0m [93m               ~~~~~~~~~~~~~~~~~[0m
+[96msrc/lib/queries/place.ts[0m:[93m6[0m:[93m3[0m - [93mwarning[0m[90m ts(6133): [0m'baseFieldsFragment' is declared but its value is never read.
+
+[7m6[0m   baseFieldsFragment, mainImageFragment, galleryFragment,
+[7m [0m [93m  ~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/lib/queries/resort.ts[0m:[93m6[0m:[93m3[0m - [93mwarning[0m[90m ts(6133): [0m'baseFieldsFragment' is declared but its value is never read.
+
+[7m6[0m   baseFieldsFragment, mainImageFragment, galleryFragment,
+[7m [0m [93m  ~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/lib/queries/restaurant.ts[0m:[93m6[0m:[93m3[0m - [93mwarning[0m[90m ts(6133): [0m'baseFieldsFragment' is declared but its value is never read.
+
+[7m6[0m   baseFieldsFragment, mainImageFragment, galleryFragment,
+[7m [0m [93m  ~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/lib/queries/specialty.ts[0m:[93m6[0m:[93m3[0m - [93mwarning[0m[90m ts(6133): [0m'baseFieldsFragment' is declared but its value is never read.
+
+[7m6[0m   baseFieldsFragment, mainImageFragment, galleryFragment,
+[7m [0m [93m  ~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/lib/queries/tour.ts[0m:[93m6[0m:[93m3[0m - [93mwarning[0m[90m ts(6133): [0m'baseFieldsFragment' is declared but its value is never read.
+
+[7m6[0m   baseFieldsFragment, mainImageFragment, galleryFragment,
+[7m [0m [93m  ~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/lib/queries/touristDestination.ts[0m:[93m6[0m:[93m3[0m - [93mwarning[0m[90m ts(6133): [0m'baseFieldsFragment' is declared but its value is never read.
+
+[7m6[0m   baseFieldsFragment, mainImageFragment, galleryFragment,
+[7m [0m [93m  ~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/ArticleDetail.astro[0m:[93m169[0m:[93m9[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m169[0m <script type="application/ld+json" set:html={jsonLdScriptContent(articleToJsonLd(data, siteBaseUrl(Astro.site)))}></script>
+[7m   [0m [93m        ~~~~[0m
+
+[96msrc/components/AttractionDetail.astro[0m:[93m179[0m:[93m9[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m179[0m <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
+[7m   [0m [93m        ~~~~[0m
+
+[96msrc/components/BookingForm.astro[0m:[93m31[0m:[93m48[0m - [93mwarning[0m[90m ts(6133): [0m'priceLabel' is declared but its value is never read.
+
+[7m31[0m const { lang, tourSlug, tourTitle, bookingRef, priceLabel, priceTable, seasons, contact = null, turnstileSiteKey = '', prepayPercent = 0 } = Astro.props
+[7m  [0m [93m                                               ~~~~~~~~~~[0m
+
+[96msrc/components/Breadcrumb.astro[0m:[93m96[0m:[93m9[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m96[0m <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
+[7m  [0m [93m        ~~~~[0m
+
+[96msrc/components/EntityIndex.astro[0m:[93m186[0m:[93m11[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m186[0m   <script type="application/ld+json" set:html={jsonLdScriptContent(
+[7m   [0m [93m          ~~~~[0m
+
+[96msrc/components/EventDetail.astro[0m:[93m103[0m:[93m9[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m103[0m <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
+[7m   [0m [93m        ~~~~[0m
+
+[96msrc/components/EventIndex.astro[0m:[93m146[0m:[93m13[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m146[0m     <script type="application/ld+json" set:html={jsonLdScriptContent(
+[7m   [0m [93m            ~~~~[0m
+[96msrc/components/EventIndex.astro[0m:[93m139[0m:[93m11[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m139[0m   <script type="application/ld+json" set:html={jsonLdScriptContent(
+[7m   [0m [93m          ~~~~[0m
+
+[96msrc/components/ExperienceDetail.astro[0m:[93m129[0m:[93m9[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m129[0m <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
+[7m   [0m [93m        ~~~~[0m
+
+[96msrc/components/Footer.astro[0m:[93m19[0m:[93m7[0m - [93mwarning[0m[90m ts(6133): [0m'prefix' is declared but its value is never read.
+
+[7m19[0m const prefix = uiLang === 'vi' ? '' : `/${uiLang}`
+[7m  [0m [93m      ~~~~~~[0m
+
+[96msrc/components/HubIndex.astro[0m:[93m161[0m:[93m15[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m161[0m       <script type="application/ld+json" set:html={jsonLdScriptContent(
+[7m   [0m [93m              ~~~~[0m
+
+[96msrc/components/LodgingDetail.astro[0m:[93m183[0m:[93m9[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m183[0m <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
+[7m   [0m [93m        ~~~~[0m
+
+[96msrc/components/MapView.astro[0m:[93m44[0m:[93m9[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m44[0m <script define:vars={{ mapId }}>
+[7m  [0m [93m        ~~~~~~~~~~~[0m
+
+[96msrc/components/OrganizationDetail.astro[0m:[93m3[0m:[93m23[0m - [93mwarning[0m[90m ts(6133): [0m'hostLabel' is declared but its value is never read.
+
+[7m3[0m import { siteBaseUrl, hostLabel } from '../lib/siteUrl'
+[7m [0m [93m                      ~~~~~~~~~[0m
+[96msrc/components/OrganizationDetail.astro[0m:[93m79[0m:[93m9[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m79[0m <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
+[7m  [0m [93m        ~~~~[0m
+
+[96msrc/components/PersonDetail.astro[0m:[93m60[0m:[93m9[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m60[0m <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
+[7m  [0m [93m        ~~~~[0m
+
+[96msrc/components/PlaceDetail.astro[0m:[93m145[0m:[93m9[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m145[0m <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
+[7m   [0m [93m        ~~~~[0m
+
+[96msrc/components/PriceDisplay.astro[0m:[93m6[0m:[93m1[0m - [93mwarning[0m[90m ts(6133): [0m'ROUTE_MAP' is declared but its value is never read.
+
+[7m6[0m import { ROUTE_MAP } from '../lib/routes'
+[7m [0m [93m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/RestaurantDetail.astro[0m:[93m106[0m:[93m9[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m106[0m <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
+[7m   [0m [93m        ~~~~[0m
+
+[96msrc/components/RouteMap.astro[0m:[93m65[0m:[93m9[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m65[0m <script define:vars={{ mapId }}>
+[7m  [0m [93m        ~~~~~~~~~~~[0m
+
+[96msrc/components/SpecialtyDetail.astro[0m:[93m83[0m:[93m9[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m83[0m <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
+[7m  [0m [93m        ~~~~[0m
+
+[96msrc/components/TermIndex.astro[0m:[93m117[0m:[93m11[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m117[0m   <script type="application/ld+json" set:html={jsonLdScriptContent(
+[7m   [0m [93m          ~~~~[0m
+
+[96msrc/components/TourDetail.astro[0m:[93m233[0m:[93m9[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m233[0m <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)}></script>
+[7m   [0m [93m        ~~~~[0m
+
+[96msrc/components/TourIndex.astro[0m:[93m126[0m:[93m11[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m126[0m   <script type="application/ld+json" set:html={jsonLdScriptContent(
+[7m   [0m [93m          ~~~~[0m
+
+[96msrc/pages/[pickupRoutePath].astro[0m:[93m96[0m:[93m11[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m96[0m   <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)} />
+[7m  [0m [93m          ~~~~[0m
+
+[96msrc/pages/ho-tro.astro[0m:[93m85[0m:[93m11[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m85[0m   <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)} />
+[7m  [0m [93m          ~~~~[0m
+
+[96msrc/pages/index.astro[0m:[93m101[0m:[93m22[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m101[0m   {jsonLd && <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)} />}
+[7m   [0m [93m                     ~~~~[0m
+
+[96msrc/pages/lien-he.astro[0m:[93m55[0m:[93m11[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m55[0m   <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)} />
+[7m  [0m [93m          ~~~~[0m
+
+[96msrc/pages/[lang]/index.astro[0m:[93m97[0m:[93m22[0m - [93mwarning[0m[90m astro(4000): [0mThis script will be treated as if it has the `is:inline` directive because it contains an attribute. Therefore, features that require processing (e.g. using TypeScript or npm packages in the script) are unavailable.
+
+See docs for more details: https://docs.astro.build/en/guides/client-side-scripts/#script-processing.
+
+Add the `is:inline` directive explicitly to silence this hint.
+
+[7m97[0m   {jsonLd && <script type="application/ld+json" set:html={jsonLdScriptContent(jsonLd)} />}
+[7m  [0m [93m                     ~~~~[0m
+
+Result (157 files): 
+- 0 errors
+- 0 warnings
+- 46 hints
+
+
+> gate:all
+> node run-gates.mjs post spec
+
+
+########## Post-build validators ##########
+
+--- validators/jsonld-post.ts ---
+=== Post-build validator — I6 JSON-LD + PY8 offers + SEO bindings ===
+
+[FAIL] I6 — 1 lỗi:
+       cam-nang/tour-ghep-hay-thue-cano-rieng-nha-trang/index.html: FAQPage @id="https://tourdao.vn/cam-nang/tour-ghep-hay-thue-cano-rieng-nha-trang//#faq" phải là "https://tourdao.vn/cam-nang/tour-ghep-hay-thue-cano-rieng-nha-trang/#faq"
+[pass] PY8
+[pass] SEO
+[report] Ghi scripts/reports/postbuild-status.json
+
+--- validators/r3-r4-post.ts ---
+=== Post-build validator — R3 + R4 ===
+
+[pass] R3
+[pass] R4
+[report] Ghi scripts/reports/postbuild-status.json
+
+=== Kết quả post-build: ĐẠT ===
+
+--- validators/governance-post.ts ---
+=== Post-build governance gates — rendered artifact ===
+
+[pass] STACK-S23
+[pass] BM-ORPHAN-REGION
+[pass] BM-EMPTY-REGION
+[pass] S24-UPDATED-HTML
+[pass] S24-AUTHORITY-HTML
+
+--- validators/geo-knowledge-post.ts ---
+=== GEO Knowledge post-build validator ===
+[report] /Users/tuanbao/Documents/Projects/ctytnhhtourdao/tourdaovn/scripts/reports/geo-knowledge-status.json
+[status] pass — 0 issue(s)
+
+--- validators/entity-layout-post.ts ---
+=== Entity layout contract ===
+
+[pass] 13 detail rules, 0 legacy exceptions declared
+[pass] FactStrip contract: 10 with, 1 without
+
+--- validators/luat1-post.ts ---
+[pass] Luật 1 — 172 trang, 0 field lặp vùng, 0 field sai vùng
+
+--- validators/banking-shape.ts ---
+[pass] banking hình dạng hợp lệ: bin=970407 (Techcombank), accountNumber 10 ký tự
+[skip] KHÔNG kiểm số tài khoản có thật hay đúng chủ — chỉ app ngân hàng thật kiểm được (SPEC §11.2)
+
+--- validators/control-registry-gate.ts ---
+=== Control registry gate ===
+
+[skip] đối chiếu registry ↔ CONTROL_GATES.md — thiếu docs/governance/CONTROL_GATES.md (ND-004)
+
+[FAIL] Control registry — 1 lỗi:
+       I6: post-build report tồn tại nhưng chưa pass
+
+--- validators/deferred-gate.ts ---
+=== Deferred validator gate ===
+
+[pass] I16 — delegated composite qua registry: PY1, PY2, PY4
+[pass] PY8 — post-build executor đã pass
+[FAIL] Deferred gate — 1 lỗi:
+       I6: deferred nhưng post-build executor chưa pass
+
+########## Meta-validators (spec vs code) ##########
+
+--- meta-validators/g1-content-model-vs-schema.ts ---
+=== Meta-validator G1: CONTENT_MODEL vs Sanity schema ===
+
+[article] schema: 23 fields, CONTENT_MODEL: 23 fields
+  [pass] Khớp hoàn toàn
+[attraction] schema: 29 fields, CONTENT_MODEL: 29 fields
+  [pass] Khớp hoàn toàn
+[bangGiaMuaVu] schema: 3 fields, CONTENT_MODEL: 14 fields
+[category] schema: 17 fields, CONTENT_MODEL: 19 fields
+[event] schema: 25 fields, CONTENT_MODEL: 25 fields
+  [pass] Khớp hoàn toàn
+[experience] schema: 25 fields, CONTENT_MODEL: 25 fields
+  [pass] Khớp hoàn toàn
+[hotel] schema: 31 fields, CONTENT_MODEL: 31 fields
+  [pass] Khớp hoàn toàn
+[organization] schema: 22 fields, CONTENT_MODEL: 22 fields
+  [pass] Khớp hoàn toàn
+[person] schema: 17 fields, CONTENT_MODEL: 17 fields
+  [pass] Khớp hoàn toàn
+[place] schema: 28 fields, CONTENT_MODEL: 29 fields
+[resort] schema: 34 fields, CONTENT_MODEL: 34 fields
+  [pass] Khớp hoàn toàn
+[restaurant] schema: 28 fields, CONTENT_MODEL: 28 fields
+  [pass] Khớp hoàn toàn
+[siteSettings] schema: 13 fields, CONTENT_MODEL: 23 fields
+[specialty] schema: 21 fields, CONTENT_MODEL: 21 fields
+  [pass] Khớp hoàn toàn
+[tour] schema: 28 fields, CONTENT_MODEL: 28 fields
+  [pass] Khớp hoàn toàn
+[touristDestination] schema: 28 fields, CONTENT_MODEL: 29 fields
+
+[DRIFT] 25 điểm không khớp (0 fail, 25 warn):
+
+  ── bangGiaMuaVu ──
+    [WARN] Field "title" có trong CONTENT_MODEL §2 cho bangGiaMuaVu nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "slug" có trong CONTENT_MODEL §2 cho bangGiaMuaVu nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "summary" có trong CONTENT_MODEL §2 cho bangGiaMuaVu nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "mainImage" có trong CONTENT_MODEL §2 cho bangGiaMuaVu nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "seo" có trong CONTENT_MODEL §2 cho bangGiaMuaVu nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "category" có trong CONTENT_MODEL §2 cho bangGiaMuaVu nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "publishedAt" có trong CONTENT_MODEL §2 cho bangGiaMuaVu nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "updatedAt" có trong CONTENT_MODEL §2 cho bangGiaMuaVu nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "reviewStatus" có trong CONTENT_MODEL §2 cho bangGiaMuaVu nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "approvedBy" có trong CONTENT_MODEL §2 cho bangGiaMuaVu nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "contentProvenance" có trong CONTENT_MODEL §2 cho bangGiaMuaVu nhưng KHÔNG có trong schema — có thể chưa implement
+
+  ── category ──
+    [WARN] Field "language" có trong CONTENT_MODEL §2 cho category nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "translationGroup" có trong CONTENT_MODEL §2 cho category nhưng KHÔNG có trong schema — có thể chưa implement
+
+  ── place ──
+    [WARN] Field "containsPlace" có trong CONTENT_MODEL §2 cho place nhưng KHÔNG có trong schema — có thể chưa implement
+
+  ── siteSettings ──
+    [WARN] Field "slug" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "mainImage" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "seo" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "category" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "publishedAt" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "updatedAt" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "reviewStatus" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "approvedBy" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "contentProvenance" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement
+    [WARN] Field "theme" có trong CONTENT_MODEL §2 cho siteSettings nhưng KHÔNG có trong schema — có thể chưa implement
+
+  ── touristDestination ──
+    [WARN] Field "speakable" có trong CONTENT_MODEL §2 cho touristDestination nhưng KHÔNG có trong schema — có thể chưa implement
+
+[report] Ghi scripts/reports/g1-content-model-vs-schema.json
+
+[exit] Không có drift mức fail.
+
+--- meta-validators/g3-binding-map-vs-template.ts ---
+=== Meta-validator G3: BINDING_MAP vs template field access ===
+
+[place] PlaceDetail.astro: 18 field accesses
+[attraction] AttractionDetail.astro: 21 field accesses
+[experience] ExperienceDetail.astro: 16 field accesses
+[restaurant] bỏ qua — đang tắt trong site.config.ts
+[specialty] bỏ qua — đang tắt trong site.config.ts
+[hotel] LodgingDetail.astro: 26 field accesses
+[resort] LodgingDetail.astro: 26 field accesses
+[tour] TourDetail.astro: 20 field accesses
+[event] bỏ qua — đang tắt trong site.config.ts
+[article] ArticleDetail.astro: 13 field accesses
+[person] PersonDetail.astro: 8 field accesses
+[organization] OrganizationDetail.astro: 13 field accesses
+
+[DRIFT] 26 điểm không khớp (0 fail, 26 warn):
+
+  ── place ──
+    [WARN] Zone tùy chọn "Phân loại" (source=[category]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "Dải liên quan (cuối trang)" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+
+  ── attraction ──
+    [WARN] Zone tùy chọn "Phân loại" (source=[category]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "Dải liên quan (cuối trang)" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "Sự kiện tại đây" (source=[location]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+
+  ── experience ──
+    [WARN] Zone tùy chọn "Phân loại" (source=[category]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "Dải liên quan (cuối trang)" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+
+  ── hotel ──
+    [WARN] Zone tùy chọn "Phân loại" (source=[category]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "Dải liên quan (cuối trang)" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+
+  ── resort ──
+    [WARN] Zone tùy chọn "Phân loại" (source=[category]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "Dải liên quan (cuối trang)" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+
+  ── tour ──
+    [WARN] Zone tùy chọn "Phân loại" (source=[category]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "Dải liên quan (cuối trang)" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "giá (`bookingRef`)" (source=[isAccessibleForFree]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+
+  ── article ──
+    [WARN] Zone tùy chọn "Phân loại" (source=[category]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "Dải liên quan (cuối trang)" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "giá (`bookingRef`)" (source=[isAccessibleForFree]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+
+  ── person ──
+    [WARN] Zone tùy chọn "Phân loại" (source=[category]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "Dải liên quan (cuối trang)" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "giá (`bookingRef`)" (source=[isAccessibleForFree]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "Bài đã viết" (source=[author]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+
+  ── organization ──
+    [WARN] Zone tùy chọn "Phân loại" (source=[category]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "Dải liên quan (cuối trang)" (source=[nearby]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "giá (`bookingRef`)" (source=[isAccessibleForFree]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "Tour vận hành" (source=[operator]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+    [WARN] Zone tùy chọn "Sự kiện tổ chức" (source=[organizer]) — KHÔNG field nào được template truy cập. Có thể chưa implement hoặc đang xử lý qua component khác.
+
+[report] Ghi /Users/tuanbao/Documents/Projects/ctytnhhtourdao/tourdaovn/scripts/reports/g3-binding-map-vs-template.json
+
+[exit] Không có drift mức fail.
+
+--- meta-validators/g4-groq-field-validity.ts ---
+=== Meta-validator G4: GROQ field validity ===
+
+  [pass] attraction
+  [pass] restaurant
+  [pass] hotel
+  [pass] resort
+  [pass] category
+
+[DRIFT] 37 field không có trong CONTENT_MODEL:
+
+  ── touristDestination.ts ──
+    [WARN] linkUrl: GROQ query trong touristDestination.ts gọi field "linkUrl" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null
+    [WARN] image: GROQ query trong touristDestination.ts gọi field "image" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null
+    [WARN] hotspot: GROQ query trong touristDestination.ts gọi field "hotspot" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null
+    [WARN] alt: GROQ query trong touristDestination.ts gọi field "alt" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null
+    [WARN] variant: GROQ query trong touristDestination.ts gọi field "variant" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null
+    [WARN] theme: GROQ query trong touristDestination.ts gọi field "theme" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null
+    [WARN] isActive: GROQ query trong touristDestination.ts gọi field "isActive" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null
+    [WARN] priority: GROQ query trong touristDestination.ts gọi field "priority" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null
+    [WARN] placeType: GROQ query trong touristDestination.ts gọi field "placeType" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null
+    [WARN] articleType: GROQ query trong touristDestination.ts gọi field "articleType" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null
+    [WARN] author: GROQ query trong touristDestination.ts gọi field "author" nhưng field này không có trong CONTENT_MODEL cho touristDestination — có thể trả null
+
+  ── place.ts ──
+    [WARN] containedInPlaceRef: GROQ query trong place.ts gọi field "containedInPlaceRef" nhưng field này không có trong CONTENT_MODEL cho place — có thể trả null
+    [WARN] attractionType: GROQ query trong place.ts gọi field "attractionType" nhưng field này không có trong CONTENT_MODEL cho place — có thể trả null
+
+  ── experience.ts ──
+    [WARN] termCode: GROQ query trong experience.ts gọi field "termCode" nhưng field này không có trong CONTENT_MODEL cho experience — có thể trả null
+
+  ── specialty.ts ──
+    [WARN] geo: GROQ query trong specialty.ts gọi field "geo" nhưng field này không có trong CONTENT_MODEL cho specialty — có thể trả null
+
+  ── tour.ts ──
+    [WARN] place: GROQ query trong tour.ts gọi field "place" nhưng field này không có trong CONTENT_MODEL cho tour — có thể trả null
+    [WARN] geo: GROQ query trong tour.ts gọi field "geo" nhưng field này không có trong CONTENT_MODEL cho tour — có thể trả null
+    [WARN] externalStop: GROQ query trong tour.ts gọi field "externalStop" nhưng field này không có trong CONTENT_MODEL cho tour — có thể trả null
+    [WARN] note: GROQ query trong tour.ts gọi field "note" nhưng field này không có trong CONTENT_MODEL cho tour — có thể trả null
+    [WARN] durationAtStop: GROQ query trong tour.ts gọi field "durationAtStop" nhưng field này không có trong CONTENT_MODEL cho tour — có thể trả null
+    [WARN] select: GROQ query trong tour.ts gọi field "select" nhưng field này không có trong CONTENT_MODEL cho tour — có thể trả null
+    [WARN] url: GROQ query trong tour.ts gọi field "url" nhưng field này không có trong CONTENT_MODEL cho tour — có thể trả null
+
+  ── organization.ts ──
+    [WARN] alt: GROQ query trong organization.ts gọi field "alt" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null
+    [WARN] tourFormat: GROQ query trong organization.ts gọi field "tourFormat" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null
+    [WARN] duration: GROQ query trong organization.ts gọi field "duration" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null
+    [WARN] bookingRef: GROQ query trong organization.ts gọi field "bookingRef" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null
+    [WARN] eventType: GROQ query trong organization.ts gọi field "eventType" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null
+    [WARN] startDate: GROQ query trong organization.ts gọi field "startDate" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null
+    [WARN] endDate: GROQ query trong organization.ts gọi field "endDate" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null
+    [WARN] eventStatus: GROQ query trong organization.ts gọi field "eventStatus" nhưng field này không có trong CONTENT_MODEL cho organization — có thể trả null
+
+  ── event.ts ──
+    [WARN] select: GROQ query trong event.ts gọi field "select" nhưng field này không có trong CONTENT_MODEL cho event — có thể trả null
+
+  ── article.ts ──
+    [WARN] sameAs: GROQ query trong article.ts gọi field "sameAs" nhưng field này không có trong CONTENT_MODEL cho article — có thể trả null
+    [WARN] url: GROQ query trong article.ts gọi field "url" nhưng field này không có trong CONTENT_MODEL cho article — có thể trả null
+    [WARN] jobTitle: GROQ query trong article.ts gọi field "jobTitle" nhưng field này không có trong CONTENT_MODEL cho article — có thể trả null
+
+  ── person.ts ──
+    [WARN] name: GROQ query trong person.ts gọi field "name" nhưng field này không có trong CONTENT_MODEL cho person — có thể trả null
+    [WARN] articleType: GROQ query trong person.ts gọi field "articleType" nhưng field này không có trong CONTENT_MODEL cho person — có thể trả null
+    [WARN] author: GROQ query trong person.ts gọi field "author" nhưng field này không có trong CONTENT_MODEL cho person — có thể trả null
+
+[report] Ghi scripts/reports/g4-groq-field-validity.json
+
+########## Tổng kết ##########
+
+[FAIL:1]   validators/jsonld-post.ts                      0.2s
+[pass]     validators/r3-r4-post.ts                       0.7s
+[pass]     validators/governance-post.ts                  0.3s
+[pass]     validators/geo-knowledge-post.ts               6.2s
+[pass]     validators/entity-layout-post.ts               0.1s
+[pass]     validators/luat1-post.ts                       0.1s
+[pass]     validators/banking-shape.ts                    0.1s
+[FAIL:1]   validators/control-registry-gate.ts            0.1s
+[FAIL:1]   validators/deferred-gate.ts                    0.1s
+[pass]     meta-validators/g1-content-model-vs-schema.ts  0.1s
+[pass]     meta-validators/g3-binding-map-vs-template.ts  0.1s
+[pass]     meta-validators/g4-groq-field-validity.ts      0.1s
+
+[gap]      g2 (01-CONTENT_MODEL §2 ↔ enforcement trong gate.config.ts) không chạy — tắt theo QĐ-2026-08-05-03, nợ ND-001. Không có validator nào khác kiểm bất biến "field bắt buộc khai trong content model thì cũng bắt buộc lúc thi hành".
+
+3/12 đỏ: validators/jsonld-post.ts, validators/control-registry-gate.ts, validators/deferred-gate.ts
+
+> test
+> vitest run
+
+
+ RUN  v4.1.11 /Users/tuanbao/Documents/Projects/ctytnhhtourdao/tourdaovn
+
+console warning; message = Called .text() on an HTTP body which does not appear to be text. The body's Content-Type is "application/x-www-form-urlencoded". The result will probably be corrupted. Consider checking the Content-Type header before interpreting entities as text.
+console warning; message = Called .text() on an HTTP body which does not appear to be text. The body's Content-Type is "application/x-www-form-urlencoded". The result will probably be corrupted. Consider checking the Content-Type header before interpreting entities as text.
+
+ Test Files  13 passed (13)
+      Tests  171 passed (171)
+   Start at  08:30:22
+   Duration  1.60s (transform 563ms, setup 258ms, import 1.57s, tests 107ms, environment 0ms)
+
+
+> test
+> tsx --test synthesis/__tests__/*.test.ts audit/__tests__/*.test.ts validators/__tests__/*.test.ts ../src/lib/__tests__/*.test.ts
+
+TAP version 13
+# Subtest: featuredTours rỗng thì rơi về ba tour đầu của kho
+ok 1 - featuredTours rỗng thì rơi về ba tour đầu của kho
+  ---
+  duration_ms: 0.579167
+  type: 'test'
+  ...
+# Subtest: featuredTours vắng hoặc null thì không ném lỗi, vẫn rơi về kho
+ok 2 - featuredTours vắng hoặc null thì không ném lỗi, vẫn rơi về kho
+  ---
+  duration_ms: 0.05025
+  type: 'test'
+  ...
+# Subtest: phần tử null trong featuredTours bị bỏ, không ném lỗi
+ok 3 - phần tử null trong featuredTours bị bỏ, không ném lỗi
+  ---
+  duration_ms: 0.042
+  type: 'test'
+  ...
+# Subtest: giữ đúng thứ tự biên tập xếp, không theo bảng chữ cái
+ok 4 - giữ đúng thứ tự biên tập xếp, không theo bảng chữ cái
+  ---
+  duration_ms: 0.066959
+  type: 'test'
+  ...
+# Subtest: tour biên tập chọn nhưng không có trong kho đã duyệt thì bị loại
+ok 5 - tour biên tập chọn nhưng không có trong kho đã duyệt thì bị loại
+  ---
+  duration_ms: 0.032042
+  type: 'test'
+  ...
+# Subtest: kho rỗng thì trả mảng rỗng, không ném lỗi
+ok 6 - kho rỗng thì trả mảng rỗng, không ném lỗi
+  ---
+  duration_ms: 0.029792
+  type: 'test'
+  ...
+# Subtest: mọi agent mong đợi đều có file
+ok 7 - mọi agent mong đợi đều có file
+  ---
+  duration_ms: 0.327375
+  type: 'test'
+  ...
+# Subtest: frontmatter: name khớp tên file, description đủ dài
+ok 8 - frontmatter: name khớp tên file, description đủ dài
+  ---
+  duration_ms: 10.151666
+  type: 'test'
+  ...
+# Subtest: tools chỉ khai công cụ có thật
+ok 9 - tools chỉ khai công cụ có thật
+  ---
+  duration_ms: 3.833167
+  type: 'test'
+  ...
+# Subtest: đúng 10 agent, không thừa không thiếu
+ok 10 - đúng 10 agent, không thừa không thiếu
+  ---
+  duration_ms: 0.700375
+  type: 'test'
+  ...
+# Subtest: data-reader không được cấp công cụ ghi
+ok 11 - data-reader không được cấp công cụ ghi
+  ---
+  duration_ms: 0.345167
+  type: 'test'
+  ...
+# Subtest: chặn: git add -A
+ok 12 - chặn: git add -A
+  ---
+  duration_ms: 47.224042
+  type: 'test'
+  ...
+# Subtest: chặn: git add --all
+ok 13 - chặn: git add --all
+  ---
+  duration_ms: 37.928708
+  type: 'test'
+  ...
+# Subtest: chặn: git add .
+ok 14 - chặn: git add .
+  ---
+  duration_ms: 55.327083
+  type: 'test'
+  ...
+# Subtest: chặn: git add -A .
+ok 15 - chặn: git add -A .
+  ---
+  duration_ms: 37.91675
+  type: 'test'
+  ...
+# Subtest: chặn: cd /tmp && git add -A
+ok 16 - chặn: cd /tmp && git add -A
+  ---
+  duration_ms: 43.230459
+  type: 'test'
+  ...
+# Subtest: chặn: git commit -am "sửa"
+ok 17 - chặn: git commit -am "sửa"
+  ---
+  duration_ms: 41.292459
+  type: 'test'
+  ...
+# Subtest: chặn: git commit -a -m "sửa"
+ok 18 - chặn: git commit -a -m "sửa"
+  ---
+  duration_ms: 43.281833
+  type: 'test'
+  ...
+# Subtest: chặn: git  add -A
+ok 19 - chặn: git  add -A
+  ---
+  duration_ms: 31.298875
+  type: 'test'
+  ...
+# Subtest: chặn: git\\tadd\\t-A
+ok 20 - chặn: git\\tadd\\t-A
+  ---
+  duration_ms: 35.435458
+  type: 'test'
+  ...
+# Subtest: chặn: git   commit   -am "x"
+ok 21 - chặn: git   commit   -am "x"
+  ---
+  duration_ms: 47.3125
+  type: 'test'
+  ...
+# Subtest: chặn: git add -u
+ok 22 - chặn: git add -u
+  ---
+  duration_ms: 42.308792
+  type: 'test'
+  ...
+# Subtest: chặn: git add --update
+ok 23 - chặn: git add --update
+  ---
+  duration_ms: 29.23325
+  type: 'test'
+  ...
+# Subtest: cho qua: git add src/components/Header.astro
+ok 24 - cho qua: git add src/components/Header.astro
+  ---
+  duration_ms: 27.169416
+  type: 'test'
+  ...
+# Subtest: cho qua: git add docs/plans/2026-08-23-bo-kiem-tu-dong.md scripts/audit/lib/evidence.ts
+ok 25 - cho qua: git add docs/plans/2026-08-23-bo-kiem-tu-dong.md scripts/audit/lib/evidence.ts
+  ---
+  duration_ms: 23.662458
+  type: 'test'
+  ...
+# Subtest: cho qua: git commit -m "sửa Header"
+ok 26 - cho qua: git commit -m "sửa Header"
+  ---
+  duration_ms: 26.184625
+  type: 'test'
+  ...
+# Subtest: cho qua: git status
+ok 27 - cho qua: git status
+  ---
+  duration_ms: 17.55275
+  type: 'test'
+  ...
+# Subtest: cho qua: git diff --stat
+ok 28 - cho qua: git diff --stat
+  ---
+  duration_ms: 16.127583
+  type: 'test'
+  ...
+# Subtest: cho qua: npm run build
+ok 29 - cho qua: npm run build
+  ---
+  duration_ms: 17.568875
+  type: 'test'
+  ...
+# Subtest: cho qua: echo "git add -A là điều cấm"
+ok 30 - cho qua: echo "git add -A là điều cấm"
+  ---
+  duration_ms: 16.814833
+  type: 'test'
+  ...
+# Subtest: cho qua: git  add src/x.astro
+ok 31 - cho qua: git  add src/x.astro
+  ---
+  duration_ms: 18.605334
+  type: 'test'
+  ...
+# Subtest: cho qua: git add -p
+ok 32 - cho qua: git add -p
+  ---
+  duration_ms: 18.379792
+  type: 'test'
+  ...
+# Subtest: công cụ khác Bash thì không đụng tới
+ok 33 - công cụ khác Bash thì không đụng tới
+  ---
+  duration_ms: 8.058375
+  type: 'test'
+  ...
+# Subtest: trichTieuDe lấy nội dung thẻ title
+ok 34 - trichTieuDe lấy nội dung thẻ title
+  ---
+  duration_ms: 0.797375
+  type: 'test'
+  ...
+# Subtest: trichTieuDe với <title></title> rỗng trả chuỗi rỗng, khác null (không có thẻ)
+ok 35 - trichTieuDe với <title></title> rỗng trả chuỗi rỗng, khác null (không có thẻ)
+  ---
+  duration_ms: 0.104334
+  type: 'test'
+  ...
+# Subtest: demUrlSitemap đếm thẻ loc
+ok 36 - demUrlSitemap đếm thẻ loc
+  ---
+  duration_ms: 0.077833
+  type: 'test'
+  ...
+# Subtest: soDauHieu đạt khi hai bên giống nhau
+ok 37 - soDauHieu đạt khi hai bên giống nhau
+  ---
+  duration_ms: 0.118625
+  type: 'test'
+  ...
+# Subtest: soDauHieu trượt và nói rõ bên nào có (DR-041)
+ok 38 - soDauHieu trượt và nói rõ bên nào có (DR-041)
+  ---
+  duration_ms: 0.651291
+  type: 'test'
+  ...
+# Subtest: soDauHieu trượt theo chiều ngược lại
+ok 39 - soDauHieu trượt theo chiều ngược lại
+  ---
+  duration_ms: 0.111542
+  type: 'test'
+  ...
+# Subtest: timChuoiCam bắt được chuỗi và nói rõ file nào dòng nào
+ok 40 - timChuoiCam bắt được chuỗi và nói rõ file nào dòng nào
+  ---
+  duration_ms: 0.634292
+  type: 'test'
+  ...
+# Subtest: timChuoiCam đạt khi không có chuỗi cấm
+ok 41 - timChuoiCam đạt khi không có chuỗi cấm
+  ---
+  duration_ms: 0.147959
+  type: 'test'
+  ...
+# Subtest: trichLuatChuyenHuong bắt cặp nguồn → đích (glyph Unicode)
+ok 42 - trichLuatChuyenHuong bắt cặp nguồn → đích (glyph Unicode)
+  ---
+  duration_ms: 0.152834
+  type: 'test'
+  ...
+# Subtest: trichLuatChuyenHuong bắt cặp nguồn -> đích (ASCII)
+ok 43 - trichLuatChuyenHuong bắt cặp nguồn -> đích (ASCII)
+  ---
+  duration_ms: 0.041
+  type: 'test'
+  ...
+# Subtest: trichLuatChuyenHuong bắt cặp nguồn ⇒ đích (glyph khác)
+ok 44 - trichLuatChuyenHuong bắt cặp nguồn ⇒ đích (glyph khác)
+  ---
+  duration_ms: 0.075583
+  type: 'test'
+  ...
+# Subtest: DOC3 trượt khi BUILD-NOTES mô tả luật mà _redirects không có (DR-043)
+ok 45 - DOC3 trượt khi BUILD-NOTES mô tả luật mà _redirects không có (DR-043)
+  ---
+  duration_ms: 0.076667
+  type: 'test'
+  ...
+# Subtest: DOC3 đạt khi _redirects có luật đó
+ok 46 - DOC3 đạt khi _redirects có luật đó
+  ---
+  duration_ms: 0.132875
+  type: 'test'
+  ...
+# Subtest: DOC3 báo skip (không phải mảng rỗng im lặng — DR-021) khi BUILD-NOTES không mô tả luật nào
+ok 47 - DOC3 báo skip (không phải mảng rỗng im lặng — DR-021) khi BUILD-NOTES không mô tả luật nào
+  ---
+  duration_ms: 0.044875
+  type: 'test'
+  ...
+# Subtest: DOC4 trượt khi DRIFT_LOG trích quyết định mà DECISIONS không có
+ok 48 - DOC4 trượt khi DRIFT_LOG trích quyết định mà DECISIONS không có
+  ---
+  duration_ms: 2.451959
+  type: 'test'
+  ...
+# Subtest: DOC4 đạt khi mọi quyết định được trích đều có trong sổ
+ok 49 - DOC4 đạt khi mọi quyết định được trích đều có trong sổ
+  ---
+  duration_ms: 0.4725
+  type: 'test'
+  ...
+# Subtest: DOC4 báo skip (không phải pass rỗng — DR-021) khi DRIFT_LOG không trích quyết định nào
+ok 50 - DOC4 báo skip (không phải pass rỗng — DR-021) khi DRIFT_LOG không trích quyết định nào
+  ---
+  duration_ms: 0.045625
+  type: 'test'
+  ...
+# Subtest: DOC4 không nhận mã-là-tiền-tố-của-mã-khác làm khớp (ranh giới từ)
+ok 51 - DOC4 không nhận mã-là-tiền-tố-của-mã-khác làm khớp (ranh giới từ)
+  ---
+  duration_ms: 0.033084
+  type: 'test'
+  ...
+# Subtest: kiemTanDuMa (DOC2-code) đạt khi mã/cấu hình sạch
+ok 52 - kiemTanDuMa (DOC2-code) đạt khi mã/cấu hình sạch
+  ---
+  duration_ms: 0.054291
+  type: 'test'
+  ...
+# Subtest: kiemTanDuMa (DOC2-code) trượt khi mã/cấu hình đang chạy còn tàn dư — ca nghiêm trọng DR-006
+ok 53 - kiemTanDuMa (DOC2-code) trượt khi mã/cấu hình đang chạy còn tàn dư — ca nghiêm trọng DR-006
+  ---
+  duration_ms: 0.046208
+  type: 'test'
+  ...
+# Subtest: kiemTanDuTaiLieu (DOC2-docs) trượt nhưng nói rõ là tường thuật, trỏ sang DOC2-code
+ok 54 - kiemTanDuTaiLieu (DOC2-docs) trượt nhưng nói rõ là tường thuật, trỏ sang DOC2-code
+  ---
+  duration_ms: 0.04025
+  type: 'test'
+  ...
+# Subtest: kiemTanDuTaiLieuVoiDanhSachNen đạt khi mọi chỗ khớp đều nằm trong danh sách nền
+ok 55 - kiemTanDuTaiLieuVoiDanhSachNen đạt khi mọi chỗ khớp đều nằm trong danh sách nền
+  ---
+  duration_ms: 0.089042
+  type: 'test'
+  ...
+# Subtest: kiemTanDuTaiLieuVoiDanhSachNen KHÔNG neo vào số dòng — thêm dòng ở đầu file không làm trượt
+ok 56 - kiemTanDuTaiLieuVoiDanhSachNen KHÔNG neo vào số dòng — thêm dòng ở đầu file không làm trượt
+  ---
+  duration_ms: 0.0275
+  type: 'test'
+  ...
+# Subtest: kiemTanDuTaiLieuVoiDanhSachNen trượt khi xuất hiện chỗ khớp MỚI ngoài danh sách nền
+ok 57 - kiemTanDuTaiLieuVoiDanhSachNen trượt khi xuất hiện chỗ khớp MỚI ngoài danh sách nền
+  ---
+  duration_ms: 0.038125
+  type: 'test'
+  ...
+# Subtest: kiemTanDuTaiLieuVoiDanhSachNen trượt khi một vị trí trong danh sách nền đã biến mất (cần dọn)
+ok 58 - kiemTanDuTaiLieuVoiDanhSachNen trượt khi một vị trí trong danh sách nền đã biến mất (cần dọn)
+  ---
+  duration_ms: 0.044334
+  type: 'test'
+  ...
+# Subtest: DANH_SACH_NEN_DOC2_DOCS khớp đúng thực tế README.md và SETUP-NEW-SITE.md hôm nay (6 vị trí)
+ok 59 - DANH_SACH_NEN_DOC2_DOCS khớp đúng thực tế README.md và SETUP-NEW-SITE.md hôm nay (6 vị trí)
+  ---
+  duration_ms: 0.487458
+  type: 'test'
+  ...
+# Subtest: buildReport đếm đúng ba hạng
+ok 60 - buildReport đếm đúng ba hạng
+  ---
+  duration_ms: 2.50175
+  type: 'test'
+  ...
+# Subtest: renderMarkdown nói ra số skip ở dòng kết luận (DR-021)
+ok 61 - renderMarkdown nói ra số skip ở dòng kết luận (DR-021)
+  ---
+  duration_ms: 0.523833
+  type: 'test'
+  ...
+# Subtest: renderMarkdown im về skip khi không có skip
+ok 62 - renderMarkdown im về skip khi không có skip
+  ---
+  duration_ms: 0.111584
+  type: 'test'
+  ...
+# Subtest: renderMarkdown thoát ký tự | để không vỡ bảng
+ok 63 - renderMarkdown thoát ký tự | để không vỡ bảng
+  ---
+  duration_ms: 0.045834
+  type: 'test'
+  ...
+# Subtest: evidenceDir lấy ngày từ ranAt, không từ đồng hồ
+ok 64 - evidenceDir lấy ngày từ ranAt, không từ đồng hồ
+  ---
+  duration_ms: 0.068959
+  type: 'test'
+  ...
+# Subtest: exitCodeFor: skip không làm đỏ, fail làm đỏ
+ok 65 - exitCodeFor: skip không làm đỏ, fail làm đỏ
+  ---
+  duration_ms: 0.037666
+  type: 'test'
+  ...
+# Subtest: duocGoiTrucTiep: true khi url khớp file đang được thực thi trực tiếp
+ok 66 - duocGoiTrucTiep: true khi url khớp file đang được thực thi trực tiếp
+  ---
+  duration_ms: 0.108042
+  type: 'test'
+  ...
+# Subtest: duocGoiTrucTiep: false khi url là của một module khác bị import
+ok 67 - duocGoiTrucTiep: false khi url là của một module khác bị import
+  ---
+  duration_ms: 0.034083
+  type: 'test'
+  ...
+# Subtest: duongDanTuEvidence lấy đường dẫn ở đầu chuỗi
+ok 68 - duongDanTuEvidence lấy đường dẫn ở đầu chuỗi
+  ---
+  duration_ms: 0.601292
+  type: 'test'
+  ...
+# Subtest: duongDanTuEvidence trả null khi evidence là lời hứa chứ không phải đường dẫn
+ok 69 - duongDanTuEvidence trả null khi evidence là lời hứa chứ không phải đường dẫn
+  ---
+  duration_ms: 0.237916
+  type: 'test'
+  ...
+# Subtest: GA1 trượt khi control live dẫn bằng chứng không tồn tại (DR-022)
+ok 70 - GA1 trượt khi control live dẫn bằng chứng không tồn tại (DR-022)
+  ---
+  duration_ms: 0.628375
+  type: 'test'
+  ...
+# Subtest: GA1 đạt khi file bằng chứng tồn tại
+ok 71 - GA1 đạt khi file bằng chứng tồn tại
+  ---
+  duration_ms: 0.081959
+  type: 'test'
+  ...
+# Subtest: GA1 trượt khi control live không dẫn được đường dẫn nào
+ok 72 - GA1 trượt khi control live không dẫn được đường dẫn nào
+  ---
+  duration_ms: 0.07975
+  type: 'test'
+  ...
+# Subtest: GA1 bỏ qua control gap — chúng không khai là đang chạy
+ok 73 - GA1 bỏ qua control gap — chúng không khai là đang chạy
+  ---
+  duration_ms: 0.060125
+  type: 'test'
+  ...
+# Subtest: duongDanBaoCaoTuLoiHua rút được đường dẫn file báo cáo trong câu lời hứa
+ok 74 - duongDanBaoCaoTuLoiHua rút được đường dẫn file báo cáo trong câu lời hứa
+  ---
+  duration_ms: 0.183167
+  type: 'test'
+  ...
+# Subtest: duongDanBaoCaoTuLoiHua trả null khi câu không nhắc file báo cáo nào
+ok 75 - duongDanBaoCaoTuLoiHua trả null khi câu không nhắc file báo cáo nào
+  ---
+  duration_ms: 0.303
+  type: 'test'
+  ...
+# Subtest: GA6 trượt khi control khai gap nhưng file evidence đã có mục mang đúng id — sổ chưa cập nhật
+ok 76 - GA6 trượt khi control khai gap nhưng file evidence đã có mục mang đúng id — sổ chưa cập nhật
+  ---
+  duration_ms: 0.234167
+  type: 'test'
+  ...
+# Subtest: GA6 đạt khi control khai gap và file evidence chưa có mục nào mang id đó — khớp lời khai
+ok 77 - GA6 đạt khi control khai gap và file evidence chưa có mục nào mang id đó — khớp lời khai
+  ---
+  duration_ms: 0.214541
+  type: 'test'
+  ...
+# Subtest: GA6 skip khi evidence không nhắc file báo cáo nào để đối chiếu
+ok 78 - GA6 skip khi evidence không nhắc file báo cáo nào để đối chiếu
+  ---
+  duration_ms: 0.034833
+  type: 'test'
+  ...
+# Subtest: GA6 bỏ qua control live — chúng không khai là gap
+ok 79 - GA6 bỏ qua control live — chúng không khai là gap
+  ---
+  duration_ms: 0.0285
+  type: 'test'
+  ...
+# Subtest: trichImportTuongDoi bắt import tương đối, bỏ qua import gói
+ok 80 - trichImportTuongDoi bắt import tương đối, bỏ qua import gói
+  ---
+  duration_ms: 0.085958
+  type: 'test'
+  ...
+# Subtest: GA4 trượt khi import tương đối không giải được (DR-015)
+ok 81 - GA4 trượt khi import tương đối không giải được (DR-015)
+  ---
+  duration_ms: 0.085333
+  type: 'test'
+  ...
+# Subtest: GA4 đạt khi mọi import giải được
+ok 82 - GA4 đạt khi mọi import giải được
+  ---
+  duration_ms: 0.036375
+  type: 'test'
+  ...
+# Subtest: GA4 dùng vị từ tồn-tại thật: i1-i19.ts nhập shared/gates/index.js — file có thật, phải đạt
+ok 83 - GA4 dùng vị từ tồn-tại thật: i1-i19.ts nhập shared/gates/index.js — file có thật, phải đạt
+  ---
+  duration_ms: 0.251459
+  type: 'test'
+  ...
+# Subtest: GA4 cho kết quả giống hệt nhau bất kể chạy từ thư mục làm việc nào (bẫy tái diễn DR-021 ngay trong gate-auditor)
+ok 84 - GA4 cho kết quả giống hệt nhau bất kể chạy từ thư mục làm việc nào (bẫy tái diễn DR-021 ngay trong gate-auditor)
+  ---
+  duration_ms: 0.1345
+  type: 'test'
+  ...
+# Subtest: GA3 tìm control pre-build trong validator-status.json, không phải postbuild
+ok 85 - GA3 tìm control pre-build trong validator-status.json, không phải postbuild
+  ---
+  duration_ms: 0.07875
+  type: 'test'
+  ...
+# Subtest: GA3 trượt khi control pre-build chưa có mục trong validator-status.json
+ok 86 - GA3 trượt khi control pre-build chưa có mục trong validator-status.json
+  ---
+  duration_ms: 0.036083
+  type: 'test'
+  ...
+# Subtest: GA3 KHÔNG chấp nhận control pre-build chỉ vì nó có mặt trong postbuild-status.json
+ok 87 - GA3 KHÔNG chấp nhận control pre-build chỉ vì nó có mặt trong postbuild-status.json
+  ---
+  duration_ms: 0.02375
+  type: 'test'
+  ...
+# Subtest: GA3 giữ nguyên hành vi cũ cho control post-build
+ok 88 - GA3 giữ nguyên hành vi cũ cho control post-build
+  ---
+  duration_ms: 0.025833
+  type: 'test'
+  ...
+# Subtest: GA3 bỏ qua control live khai stage lạ hoặc thiếu stage, không tự phán đoán
+ok 89 - GA3 bỏ qua control live khai stage lạ hoặc thiếu stage, không tự phán đoán
+  ---
+  duration_ms: 0.083125
+  type: 'test'
+  ...
+# Subtest: GA3 không đụng tới control khai gap
+ok 90 - GA3 không đụng tới control khai gap
+  ---
+  duration_ms: 0.025792
+  type: 'test'
+  ...
+# Subtest: chặn khi không có cờ: npm --prefix scripts run publish:drafts
+ok 91 - chặn khi không có cờ: npm --prefix scripts run publish:drafts
+  ---
+  duration_ms: 38.86125
+  type: 'test'
+  ...
+# Subtest: chặn khi không có cờ: npm --prefix scripts run patch:n5
+ok 92 - chặn khi không có cờ: npm --prefix scripts run patch:n5
+  ---
+  duration_ms: 44.171083
+  type: 'test'
+  ...
+# Subtest: chặn khi không có cờ: npm --prefix scripts run backfill:seo-meta
+ok 93 - chặn khi không có cờ: npm --prefix scripts run backfill:seo-meta
+  ---
+  duration_ms: 37.773792
+  type: 'test'
+  ...
+# Subtest: chặn khi không có cờ: npx sanity documents delete abc123
+ok 94 - chặn khi không có cờ: npx sanity documents delete abc123
+  ---
+  duration_ms: 33.943167
+  type: 'test'
+  ...
+# Subtest: chặn khi không có cờ: npx sanity dataset delete production
+ok 95 - chặn khi không có cờ: npx sanity dataset delete production
+  ---
+  duration_ms: 34.30875
+  type: 'test'
+  ...
+# Subtest: chặn khi không có cờ: node --import ./node_modules/tsx/dist/esm/index.mjs migrate/doi-slug.ts
+ok 96 - chặn khi không có cờ: node --import ./node_modules/tsx/dist/esm/index.mjs migrate/doi-slug.ts
+  ---
+  duration_ms: 33.2595
+  type: 'test'
+  ...
+# Subtest: chặn khi không có cờ: npm --prefix scripts run translate
+ok 97 - chặn khi không có cờ: npm --prefix scripts run translate
+  ---
+  duration_ms: 33.501292
+  type: 'test'
+  ...
+# Subtest: chặn khi không có cờ: npx sanity@latest documents delete abc
+ok 98 - chặn khi không có cờ: npx sanity@latest documents delete abc
+  ---
+  duration_ms: 27.552125
+  type: 'test'
+  ...
+# Subtest: chặn khi không có cờ: node --import ./node_modules/tsx/dist/esm/index.mjs migrate/migrate-highlights-reverse.mjs
+ok 99 - chặn khi không có cờ: node --import ./node_modules/tsx/dist/esm/index.mjs migrate/migrate-highlights-reverse.mjs
+  ---
+  duration_ms: 26.117125
+  type: 'test'
+  ...
+# Subtest: chặn khi không có cờ: node --import ./node_modules/tsx/dist/esm/index.mjs seed/seed-sample.ts
+ok 100 - chặn khi không có cờ: node --import ./node_modules/tsx/dist/esm/index.mjs seed/seed-sample.ts
+  ---
+  duration_ms: 31.3015
+  type: 'test'
+  ...
+# Subtest: cho qua lệnh đọc: npm --prefix scripts run precheck
+ok 101 - cho qua lệnh đọc: npm --prefix scripts run precheck
+  ---
+  duration_ms: 37.863334
+  type: 'test'
+  ...
+# Subtest: cho qua lệnh đọc: npm --prefix scripts run validate:post
+ok 102 - cho qua lệnh đọc: npm --prefix scripts run validate:post
+  ---
+  duration_ms: 25.991042
+  type: 'test'
+  ...
+# Subtest: cho qua lệnh đọc: npx sanity documents get abc123
+ok 103 - cho qua lệnh đọc: npx sanity documents get abc123
+  ---
+  duration_ms: 20.807375
+  type: 'test'
+  ...
+# Subtest: cho qua lệnh đọc: npm run build
+ok 104 - cho qua lệnh đọc: npm run build
+  ---
+  duration_ms: 16.835459
+  type: 'test'
+  ...
+# Subtest: cho qua lệnh đọc: git status
+ok 105 - cho qua lệnh đọc: git status
+  ---
+  duration_ms: 17.409625
+  type: 'test'
+  ...
+# Subtest: cờ mới thì mở khoá
+ok 106 - cờ mới thì mở khoá
+  ---
+  duration_ms: 24.722375
+  type: 'test'
+  ...
+# Subtest: cờ quá 30 phút thì coi như không có
+ok 107 - cờ quá 30 phút thì coi như không có
+  ---
+  duration_ms: 26.836583
+  type: 'test'
+  ...
+# Subtest: cờ 29 phút vẫn còn hiệu lực (ôm sát biên 30 phút)
+ok 108 - cờ 29 phút vẫn còn hiệu lực (ôm sát biên 30 phút)
+  ---
+  duration_ms: 18.526625
+  type: 'test'
+  ...
+# Subtest: cờ 31 phút coi như hết hạn (ôm sát biên 30 phút)
+ok 109 - cờ 31 phút coi như hết hạn (ôm sát biên 30 phút)
+  ---
+  duration_ms: 17.988042
+  type: 'test'
+  ...
+# Subtest: công cụ MCP Sanity ghi cũng bị chặn
+ok 110 - công cụ MCP Sanity ghi cũng bị chặn
+  ---
+  duration_ms: 11.041875
+  type: 'test'
+  ...
+# Subtest: công cụ MCP Sanity không nằm trong danh sách cho phép thì bị chặn: mcp__Sanity__run_sanity_cli
+ok 111 - công cụ MCP Sanity không nằm trong danh sách cho phép thì bị chặn: mcp__Sanity__run_sanity_cli
+  ---
+  duration_ms: 11.657084
+  type: 'test'
+  ...
+# Subtest: công cụ MCP Sanity không nằm trong danh sách cho phép thì bị chặn: mcp__Sanity__add_cors_origin
+ok 112 - công cụ MCP Sanity không nằm trong danh sách cho phép thì bị chặn: mcp__Sanity__add_cors_origin
+  ---
+  duration_ms: 11.172042
+  type: 'test'
+  ...
+# Subtest: công cụ MCP Sanity không nằm trong danh sách cho phép thì bị chặn: mcp__Sanity__generate_image
+ok 113 - công cụ MCP Sanity không nằm trong danh sách cho phép thì bị chặn: mcp__Sanity__generate_image
+  ---
+  duration_ms: 11.400917
+  type: 'test'
+  ...
+# Subtest: công cụ MCP Sanity không nằm trong danh sách cho phép thì bị chặn: mcp__Sanity__mot_cong_cu_bia_ra_chua_tung_ton_tai
+ok 114 - công cụ MCP Sanity không nằm trong danh sách cho phép thì bị chặn: mcp__Sanity__mot_cong_cu_bia_ra_chua_tung_ton_tai
+  ---
+  duration_ms: 10.434791
+  type: 'test'
+  ...
+# Subtest: công cụ MCP Sanity đọc thì cho qua
+ok 115 - công cụ MCP Sanity đọc thì cho qua
+  ---
+  duration_ms: 43.633584
+  type: 'test'
+  ...
+# Subtest: lệnh không phải deploy thì không đụng tới
+ok 116 - lệnh không phải deploy thì không đụng tới
+  ---
+  duration_ms: 474.84525
+  type: 'test'
+  ...
+# Subtest: D-A: có commit chưa push thì chặn mọi lệnh deploy
+ok 117 - D-A: có commit chưa push thì chặn mọi lệnh deploy
+  ---
+  duration_ms: 278.922958
+  type: 'test'
+  ...
+# Subtest: D-A: đã push hết thì cho qua
+ok 118 - D-A: đã push hết thì cho qua
+  ---
+  duration_ms: 99.449291
+  type: 'test'
+  ...
+# Subtest: D-A fail-closed: repo git nhưng không có ref origin/main thì chặn
+ok 119 - D-A fail-closed: repo git nhưng không có ref origin/main thì chặn
+  ---
+  duration_ms: 78.3965
+  type: 'test'
+  ...
+# Subtest: D-A fail-closed: CLAUDE_PROJECT_DIR không phải repo git thì chặn
+ok 120 - D-A fail-closed: CLAUDE_PROJECT_DIR không phải repo git thì chặn
+  ---
+  duration_ms: 22.57075
+  type: 'test'
+  ...
+# Subtest: D-B: wrangler deploy trần với dist cũ hơn src thì chặn
+ok 121 - D-B: wrangler deploy trần với dist cũ hơn src thì chặn
+  ---
+  duration_ms: 100.376917
+  type: 'test'
+  ...
+# Subtest: D-B: npm run deploy tự build nên dist cũ không phải lý do chặn
+ok 122 - D-B: npm run deploy tự build nên dist cũ không phải lý do chặn
+  ---
+  duration_ms: 97.2135
+  type: 'test'
+  ...
+# Subtest: D-B: chuỗi có build trước thì cũng cho qua
+ok 123 - D-B: chuỗi có build trước thì cũng cho qua
+  ---
+  duration_ms: 97.057167
+  type: 'test'
+  ...
+# Subtest: IMG/alt: bắt img thiếu alt, bỏ qua img có alt kể cả alt rỗng
+ok 124 - IMG/alt: bắt img thiếu alt, bỏ qua img có alt kể cả alt rỗng
+  ---
+  duration_ms: 1.188292
+  type: 'test'
+  ...
+# Subtest: IMG/kich-thuoc: bắt img thiếu width hoặc height
+ok 125 - IMG/kich-thuoc: bắt img thiếu width hoặc height
+  ---
+  duration_ms: 0.180542
+  type: 'test'
+  ...
+# Subtest: IMG/lazy: ảnh đầu tiên được miễn, từ ảnh thứ hai bắt buộc lazy
+ok 126 - IMG/lazy: ảnh đầu tiên được miễn, từ ảnh thứ hai bắt buộc lazy
+  ---
+  duration_ms: 0.053916
+  type: 'test'
+  ...
+# Subtest: IMG/kich-co-sanity: ảnh cdn.sanity.io phải có tham số w=
+ok 127 - IMG/kich-co-sanity: ảnh cdn.sanity.io phải có tham số w=
+  ---
+  duration_ms: 0.095833
+  type: 'test'
+  ...
+# Subtest: trang sạch thì không sinh vi phạm nào
+ok 128 - trang sạch thì không sinh vi phạm nào
+  ---
+  duration_ms: 0.228125
+  type: 'test'
+  ...
+# Subtest: gomViPham gộp theo luật, một Check cho mỗi luật
+ok 129 - gomViPham gộp theo luật, một Check cho mỗi luật
+  ---
+  duration_ms: 0.102083
+  type: 'test'
+  ...
+# Subtest: gomViPham cắt danh sách dài nhưng nói ra đã cắt bao nhiêu
+ok 130 - gomViPham cắt danh sách dài nhưng nói ra đã cắt bao nhiêu
+  ---
+  duration_ms: 0.374625
+  type: 'test'
+  ...
+# Subtest: gomViPham: tongTrang bằng 0 thì mọi luật là skip, không được pass ảo
+ok 131 - gomViPham: tongTrang bằng 0 thì mọi luật là skip, không được pass ảo
+  ---
+  duration_ms: 0.226209
+  type: 'test'
+  ...
+# Subtest: bullet liền nhau gộp thành MỘT <ul>, mỗi khối một <li>
+ok 132 - bullet liền nhau gộp thành MỘT <ul>, mỗi khối một <li>
+  ---
+  duration_ms: 0.572708
+  type: 'test'
+  ...
+# Subtest: listItem number ra <ol>
+ok 133 - listItem number ra <ol>
+  ---
+  duration_ms: 0.093792
+  type: 'test'
+  ...
+# Subtest: level 2 nằm TRONG <li> của mục cha, không thành list anh em
+ok 134 - level 2 nằm TRONG <li> của mục cha, không thành list anh em
+  ---
+  duration_ms: 0.094916
+  type: 'test'
+  ...
+# Subtest: đoạn văn xen giữa cắt thành hai list riêng
+ok 135 - đoạn văn xen giữa cắt thành hai list riêng
+  ---
+  duration_ms: 0.30325
+  type: 'test'
+  ...
+# Subtest: bullet rồi number cùng cấp là hai list khác loại
+ok 136 - bullet rồi number cùng cấp là hai list khác loại
+  ---
+  duration_ms: 0.079167
+  type: 'test'
+  ...
+# Subtest: mục danh sách giữ được mark và link như đoạn văn
+ok 137 - mục danh sách giữ được mark và link như đoạn văn
+  ---
+  duration_ms: 0.120042
+  type: 'test'
+  ...
+# Subtest: blockquote ra <blockquote>, không rơi về <p>
+ok 138 - blockquote ra <blockquote>, không rơi về <p>
+  ---
+  duration_ms: 0.154792
+  type: 'test'
+  ...
+# Subtest: h1 trong thân bài KHÔNG bao giờ ra <h1> — trang đã có h1 tiêu đề
+ok 139 - h1 trong thân bài KHÔNG bao giờ ra <h1> — trang đã có h1 tiêu đề
+  ---
+  duration_ms: 0.178791
+  type: 'test'
+  ...
+# Subtest: hạ cấp tiêu đề cũ giữ nguyên: h2→h3, h4→h5, kẹp ở h5
+ok 140 - hạ cấp tiêu đề cũ giữ nguyên: h2→h3, h4→h5, kẹp ở h5
+  ---
+  duration_ms: 0.409791
+  type: 'test'
+  ...
+# Subtest: mark code ra <code>
+ok 141 - mark code ra <code>
+  ---
+  duration_ms: 0.241958
+  type: 'test'
+  ...
+# Subtest: giữ nguyên hành vi cũ: escape, gỡ rác cite, bỏ khối rỗng, ảnh
+ok 142 - giữ nguyên hành vi cũ: escape, gỡ rác cite, bỏ khối rỗng, ảnh
+  ---
+  duration_ms: 0.259833
+  type: 'test'
+  ...
+# Subtest: mục danh sách rỗng không sinh <li> rỗng
+ok 143 - mục danh sách rỗng không sinh <li> rỗng
+  ---
+  duration_ms: 0.048542
+  type: 'test'
+  ...
+# Subtest: file .astro hợp lệ trong src/, không dấu chống dội: hook chạy thật tới npm run check
+ok 144 - file .astro hợp lệ trong src/, không dấu chống dội: hook chạy thật tới npm run check
+  ---
+  duration_ms: 166.803792
+  type: 'test'
+  ...
+# Subtest: dấu chống dội còn mới: hook không chạy lại npm run check
+ok 145 - dấu chống dội còn mới: hook không chạy lại npm run check
+  ---
+  duration_ms: 25.398583
+  type: 'test'
+  ...
+# Subtest: file ngoài src/ thì không chạy gì
+ok 146 - file ngoài src/ thì không chạy gì
+  ---
+  duration_ms: 69.005625
+  type: 'test'
+  ...
+# Subtest: file trong src/ nhưng đuôi không liên quan thì không chạy gì
+ok 147 - file trong src/ nhưng đuôi không liên quan thì không chạy gì
+  ---
+  duration_ms: 24.570417
+  type: 'test'
+  ...
+# Subtest: tool_name không phải Edit/Write/MultiEdit thì không chạy gì
+ok 148 - tool_name không phải Edit/Write/MultiEdit thì không chạy gì
+  ---
+  duration_ms: 16.2715
+  type: 'test'
+  ...
+# Subtest: hook không bao giờ chặn
+ok 149 - hook không bao giờ chặn
+  ---
+  duration_ms: 104.92175
+  type: 'test'
+  ...
+# Subtest: file_path tương đối (không tuyệt đối) thì không chạy gì
+ok 150 - file_path tương đối (không tuyệt đối) thì không chạy gì
+  ---
+  duration_ms: 12.606042
+  type: 'test'
+  ...
+# Subtest: file_path chứa /src/ nhưng nằm ngoài CLAUDE_PROJECT_DIR thì không chạy gì
+ok 151 - file_path chứa /src/ nhưng nằm ngoài CLAUDE_PROJECT_DIR thì không chạy gì
+  ---
+  duration_ms: 12.029167
+  type: 'test'
+  ...
+# Subtest: file_path có tiền tố giả mạo kiểu <project>-evil/src/... thì không chạy gì
+ok 152 - file_path có tiền tố giả mạo kiểu <project>-evil/src/... thì không chạy gì
+  ---
+  duration_ms: 12.558625
+  type: 'test'
+  ...
+# Subtest: tool_input không có file_path thì không chạy gì
+ok 153 - tool_input không có file_path thì không chạy gì
+  ---
+  duration_ms: 11.731417
+  type: 'test'
+  ...
+# Subtest: CLAUDE_PROJECT_DIR không được đặt thì không chạy gì
+ok 154 - CLAUDE_PROJECT_DIR không được đặt thì không chạy gì
+  ---
+  duration_ms: 11.606292
+  type: 'test'
+  ...
+# Subtest: adversarial (a) — price/offers bị mapper loại khỏi whitelist
+ok 155 - adversarial (a) — price/offers bị mapper loại khỏi whitelist
+  ---
+  duration_ms: 1.327708
+  type: 'test'
+  ...
+# Subtest: adversarial (b) — content-guard chuẩn hoá "thành phố Nha Trang"
+ok 156 - adversarial (b) — content-guard chuẩn hoá "thành phố Nha Trang"
+  ---
+  duration_ms: 0.178375
+  type: 'test'
+  ...
+# Subtest: adversarial (c) — validator từ chối sameAs không phải Wikidata/Wikipedia
+ok 157 - adversarial (c) — validator từ chối sameAs không phải Wikidata/Wikipedia
+  ---
+  duration_ms: 0.493
+  type: 'test'
+  ...
+# Subtest: adversarial (d) — ảnh ngoài Wikimedia bị image-handler bỏ
+ok 158 - adversarial (d) — ảnh ngoài Wikimedia bị image-handler bỏ
+  ---
+  duration_ms: 0.093792
+  type: 'test'
+  ...
+# Subtest: adversarial (e) — bộ upload HTML bỏ logo/card và dedupe rendition
+ok 159 - adversarial (e) — bộ upload HTML bỏ logo/card và dedupe rendition
+  ---
+  duration_ms: 0.228791
+  type: 'test'
+  ...
+# Subtest: classify (a) — placeType hợp lệ map đúng
+ok 160 - classify (a) — placeType hợp lệ map đúng
+  ---
+  duration_ms: 1.429209
+  type: 'test'
+  ...
+# Subtest: classify (a) — placeType chữ HOA + khoảng trắng được chuẩn hoá về enum
+ok 161 - classify (a) — placeType chữ HOA + khoảng trắng được chuẩn hoá về enum
+  ---
+  duration_ms: 2.666375
+  type: 'test'
+  ...
+# Subtest: classify (a) — attractionType hợp lệ map đúng
+ok 162 - classify (a) — attractionType hợp lệ map đúng
+  ---
+  duration_ms: 0.239
+  type: 'test'
+  ...
+# Subtest: classify (a) — specialtyType hợp lệ map đúng
+ok 163 - classify (a) — specialtyType hợp lệ map đúng
+  ---
+  duration_ms: 0.075042
+  type: 'test'
+  ...
+# Subtest: classify (b) — placeType ngoài enum → bỏ + cảnh báo, KHÔNG ghi rác
+ok 164 - classify (b) — placeType ngoài enum → bỏ + cảnh báo, KHÔNG ghi rác
+  ---
+  duration_ms: 0.135208
+  type: 'test'
+  ...
+# Subtest: classify (b) — attractionType ngoài enum → bỏ + cảnh báo
+ok 165 - classify (b) — attractionType ngoài enum → bỏ + cảnh báo
+  ---
+  duration_ms: 0.156458
+  type: 'test'
+  ...
+# Subtest: classify (b) — specialtyType ngoài enum → bỏ + cảnh báo
+ok 166 - classify (b) — specialtyType ngoài enum → bỏ + cảnh báo
+  ---
+  duration_ms: 0.220917
+  type: 'test'
+  ...
+# Subtest: classify — placeType thuộc whitelist place, KHÔNG thuộc attraction
+ok 167 - classify — placeType thuộc whitelist place, KHÔNG thuộc attraction
+  ---
+  duration_ms: 0.104125
+  type: 'test'
+  ...
+# Subtest: classify (c) — place thiếu placeType → cảnh báo I12, KHÔNG error
+ok 168 - classify (c) — place thiếu placeType → cảnh báo I12, KHÔNG error
+  ---
+  duration_ms: 0.46675
+  type: 'test'
+  ...
+# Subtest: classify (c) — place có placeType hợp lệ → KHÔNG cảnh báo placeType
+ok 169 - classify (c) — place có placeType hợp lệ → KHÔNG cảnh báo placeType
+  ---
+  duration_ms: 0.607209
+  type: 'test'
+  ...
+# Subtest: classify (c) — specialty thiếu specialtyType → cảnh báo I12
+ok 170 - classify (c) — specialty thiếu specialtyType → cảnh báo I12
+  ---
+  duration_ms: 0.166625
+  type: 'test'
+  ...
+# Subtest: classify — placeType ngoài enum lọt thẳng vào mapped → validator FAIL
+ok 171 - classify — placeType ngoài enum lọt thẳng vào mapped → validator FAIL
+  ---
+  duration_ms: 0.111667
+  type: 'test'
+  ...
+# Subtest: classify (R3) — attraction venue (theme-park) cảnh báo cần officialSource
+ok 172 - classify (R3) — attraction venue (theme-park) cảnh báo cần officialSource
+  ---
+  duration_ms: 0.132208
+  type: 'test'
+  ...
+# Subtest: classify (v1.0.19) — năm giá trị mới đều thuộc enum đóng
+ok 173 - classify (v1.0.19) — năm giá trị mới đều thuộc enum đóng
+  ---
+  duration_ms: 0.05325
+  type: 'test'
+  ...
+# Subtest: classify (v1.0.19) — hợp ba tập gate PHỦ ĐÚNG enum attractionType
+ok 174 - classify (v1.0.19) — hợp ba tập gate PHỦ ĐÚNG enum attractionType
+  ---
+  duration_ms: 0.039375
+  type: 'test'
+  ...
+# Subtest: classify (v1.0.19) — aquarium thuộc nhóm venue, không còn bách khoa
+ok 175 - classify (v1.0.19) — aquarium thuộc nhóm venue, không còn bách khoa
+  ---
+  duration_ms: 0.037291
+  type: 'test'
+  ...
+# Subtest: classify (v1.0.19) — general thiếu CẢ HAI nguồn → cảnh báo một-trong-hai
+ok 176 - classify (v1.0.19) — general thiếu CẢ HAI nguồn → cảnh báo một-trong-hai
+  ---
+  duration_ms: 0.164459
+  type: 'test'
+  ...
+# Subtest: classify (v1.0.19) — craft-village có officialSource thì KHÔNG cảnh báo
+ok 177 - classify (v1.0.19) — craft-village có officialSource thì KHÔNG cảnh báo
+  ---
+  duration_ms: 0.231958
+  type: 'test'
+  ...
+# Subtest: classify (v1.0.19) — beach thuộc nhánh một-trong-hai, officialSource là đủ
+ok 178 - classify (v1.0.19) — beach thuộc nhánh một-trong-hai, officialSource là đủ
+  ---
+  duration_ms: 0.069375
+  type: 'test'
+  ...
+# Subtest: classify (v1.0.19) — beach trống CẢ HAI nguồn thì vẫn bị cảnh báo
+ok 179 - classify (v1.0.19) — beach trống CẢ HAI nguồn thì vẫn bị cảnh báo
+  ---
+  duration_ms: 0.133833
+  type: 'test'
+  ...
+# Subtest: golden restaurant — field mới + cũ map đúng, field cấm bị chặn
+ok 180 - golden restaurant — field mới + cũ map đúng, field cấm bị chặn
+  ---
+  duration_ms: 3.230916
+  type: 'test'
+  ...
+# Subtest: golden hotel — amenityFeature/starRating map đúng, telephone+giá bị bỏ
+ok 181 - golden hotel — amenityFeature/starRating map đúng, telephone+giá bị bỏ
+  ---
+  duration_ms: 0.202542
+  type: 'test'
+  ...
+# Subtest: golden hotel — numberOfRooms bằng 0 bị bỏ để tránh ghi dữ liệu rỗng
+ok 182 - golden hotel — numberOfRooms bằng 0 bị bỏ để tránh ghi dữ liệu rỗng
+  ---
+  duration_ms: 0.0735
+  type: 'test'
+  ...
+# Subtest: golden specialty — originNote/season localized, highlights bị bỏ, gate I17
+ok 183 - golden specialty — originNote/season localized, highlights bị bỏ, gate I17
+  ---
+  duration_ms: 0.1515
+  type: 'test'
+  ...
+# Subtest: golden specialty — thiếu sameAs → error gate I17
+ok 184 - golden specialty — thiếu sameAs → error gate I17
+  ---
+  duration_ms: 0.052166
+  type: 'test'
+  ...
+# Subtest: golden tour — includes/excludes/departureNote localized, itinerary/operator chỉ cảnh báo
+ok 185 - golden tour — includes/excludes/departureNote localized, itinerary/operator chỉ cảnh báo
+  ---
+  duration_ms: 0.167542
+  type: 'test'
+  ...
+# Subtest: golden tour minimal — thiếu itinerary/operator/tourFormat → cảnh báo gate I14
+ok 186 - golden tour minimal — thiếu itinerary/operator/tourFormat → cảnh báo gate I14
+  ---
+  duration_ms: 0.088375
+  type: 'test'
+  ...
+# Subtest: harvester — JSON-LD đầy đủ: geo + address + officialSource từ HTML
+ok 187 - harvester — JSON-LD đầy đủ: geo + address + officialSource từ HTML
+  ---
+  duration_ms: 0.78675
+  type: 'test'
+  ...
+# Subtest: harvester — chỉ OG: geo từ og:lat/lng, officialSource từ og:url, không address
+ok 188 - harvester — chỉ OG: geo từ og:lat/lng, officialSource từ og:url, không address
+  ---
+  duration_ms: 0.393833
+  type: 'test'
+  ...
+# Subtest: harvester — không có structured: geo/address rỗng + cảnh báo
+ok 189 - harvester — không có structured: geo/address rỗng + cảnh báo
+  ---
+  duration_ms: 0.430333
+  type: 'test'
+  ...
+# Subtest: harvester — officialSource fallback về pageUrl khi không có url khai báo
+ok 190 - harvester — officialSource fallback về pageUrl khi không có url khai báo
+  ---
+  duration_ms: 0.216834
+  type: 'test'
+  ...
+# Subtest: harvester — geo ngoài khung VN [8,24]×[102,110] bị bỏ + cảnh báo (R4)
+ok 191 - harvester — geo ngoài khung VN [8,24]×[102,110] bị bỏ + cảnh báo (R4)
+  ---
+  duration_ms: 0.268041
+  type: 'test'
+  ...
+# Subtest: harvester — microdata itemprop: geo + address từ thẻ itemprop
+ok 192 - harvester — microdata itemprop: geo + address từ thẻ itemprop
+  ---
+  duration_ms: 0.050625
+  type: 'test'
+  ...
+# Subtest: harvester — resolve({html}) dùng html sẵn, conform StructuredResult, không fetch
+ok 193 - harvester — resolve({html}) dùng html sẵn, conform StructuredResult, không fetch
+  ---
+  duration_ms: 0.12325
+  type: 'test'
+  ...
+# Subtest: harvester — trang rỗng + name: geocode-by-name (mock) gán geo trong khung VN + log nguồn
+ok 194 - harvester — trang rỗng + name: geocode-by-name (mock) gán geo trong khung VN + log nguồn
+  ---
+  duration_ms: 23.166417
+  type: 'test'
+  ...
+# Subtest: harvester — geocode-by-name trả geo ngoài khung VN [8,24]×[102,110] → bỏ + cảnh báo (R3)
+ok 195 - harvester — geocode-by-name trả geo ngoài khung VN [8,24]×[102,110] → bỏ + cảnh báo (R3)
+  ---
+  duration_ms: 980.204917
+  type: 'test'
+  ...
+# Subtest: reference resolver — chuẩn hoá container island có ngữ cảnh sau dấu phẩy
+ok 196 - reference resolver — chuẩn hoá container island có ngữ cảnh sau dấu phẩy
+  ---
+  duration_ms: 0.585625
+  type: 'test'
+  ...
+# Subtest: rich harvester — lấy image candidates từ JSON-LD, OG và HTML
+ok 197 - rich harvester — lấy image candidates từ JSON-LD, OG và HTML
+  ---
+  duration_ms: 0.976334
+  type: 'test'
+  ...
+# Subtest: scrapfly — nhận diện shell Akamai mỏng là trang chặn
+ok 198 - scrapfly — nhận diện shell Akamai mỏng là trang chặn
+  ---
+  duration_ms: 1.845458
+  type: 'test'
+  ...
+# Subtest: scrapfly — không coi trang thật dài có chữ Akamai là trang chặn
+ok 199 - scrapfly — không coi trang thật dài có chữ Akamai là trang chặn
+  ---
+  duration_ms: 0.852041
+  type: 'test'
+  ...
+# Subtest: I20: entity trong phạm vi có destination thì pass
+ok 200 - I20: entity trong phạm vi có destination thì pass
+  ---
+  duration_ms: 0.957708
+  type: 'test'
+  ...
+# Subtest: I20: entity trong phạm vi thiếu destination thì báo lỗi, nêu _id và _type
+ok 201 - I20: entity trong phạm vi thiếu destination thì báo lỗi, nêu _id và _type
+  ---
+  duration_ms: 0.194916
+  type: 'test'
+  ...
+# Subtest: I20: type ngoài phạm vi không bị bắt
+ok 202 - I20: type ngoài phạm vi không bị bắt
+  ---
+  duration_ms: 0.069291
+  type: 'test'
+  ...
+# Subtest: I20: chỉ bắt document đã approved
+ok 203 - I20: chỉ bắt document đã approved
+  ---
+  duration_ms: 0.063458
+  type: 'test'
+  ...
+# Subtest: I20: reference rỗng (_ref trống) tính là thiếu
+ok 204 - I20: reference rỗng (_ref trống) tính là thiếu
+  ---
+  duration_ms: 0.156791
+  type: 'test'
+  ...
+# Subtest: I21: mục nổi bật thuộc đúng điểm đến thì pass
+ok 205 - I21: mục nổi bật thuộc đúng điểm đến thì pass
+  ---
+  duration_ms: 0.485459
+  type: 'test'
+  ...
+# Subtest: I21: mục nổi bật thuộc điểm đến KHÁC thì báo lỗi, nêu đủ hai phía
+ok 206 - I21: mục nổi bật thuộc điểm đến KHÁC thì báo lỗi, nêu đủ hai phía
+  ---
+  duration_ms: 0.121666
+  type: 'test'
+  ...
+# Subtest: I21: quét đủ CẢ NĂM ô nổi bật, không chỉ attractions
+ok 207 - I21: quét đủ CẢ NĂM ô nổi bật, không chỉ attractions
+  ---
+  duration_ms: 0.081125
+  type: 'test'
+  ...
+# Subtest: I21: mục nổi bật CHƯA khai destination thì báo lỗi — đó là I20 ở chiều khác
+ok 208 - I21: mục nổi bật CHƯA khai destination thì báo lỗi — đó là I20 ở chiều khác
+  ---
+  duration_ms: 0.03625
+  type: 'test'
+  ...
+# Subtest: I21: ô nổi bật trỏ tới _id không tồn tại thì bỏ qua — V2 của validate-min lo việc đó
+ok 209 - I21: ô nổi bật trỏ tới _id không tồn tại thì bỏ qua — V2 của validate-min lo việc đó
+  ---
+  duration_ms: 0.03125
+  type: 'test'
+  ...
+# Subtest: I21: điểm đến không có ô nổi bật nào thì pass
+ok 210 - I21: điểm đến không có ô nổi bật nào thì pass
+  ---
+  duration_ms: 0.026667
+  type: 'test'
+  ...
+# Subtest: I21: dữ liệu thật đúng thì nhiều điểm đến cùng pass
+ok 211 - I21: dữ liệu thật đúng thì nhiều điểm đến cùng pass
+  ---
+  duration_ms: 0.029709
+  type: 'test'
+  ...
+# Subtest: dữ liệu đúng thì không lỗi
+ok 212 - dữ liệu đúng thì không lỗi
+  ---
+  duration_ms: 0.341167
+  type: 'test'
+  ...
+# Subtest: ngày kết thúc trước ngày bắt đầu là lỗi
+ok 213 - ngày kết thúc trước ngày bắt đầu là lỗi
+  ---
+  duration_ms: 0.072209
+  type: 'test'
+  ...
+# Subtest: phần trăm ngoài khoảng là lỗi
+ok 214 - phần trăm ngoài khoảng là lỗi
+  ---
+  duration_ms: 0.150458
+  type: 'test'
+  ...
+# Subtest: khoá giá không tồn tại là lỗi
+ok 215 - khoá giá không tồn tại là lỗi
+  ---
+  duration_ms: 0.104
+  type: 'test'
+  ...
+# Subtest: hai mùa phủ nhau KHÔNG phải lỗi — thứ tự quyết định
+ok 216 - hai mùa phủ nhau KHÔNG phải lỗi — thứ tự quyết định
+  ---
+  duration_ms: 0.180958
+  type: 'test'
+  ...
+# Subtest: PY2/PY7: paxRates hợp lệ đi cùng amount → xanh
+ok 217 - PY2/PY7: paxRates hợp lệ đi cùng amount → xanh
+  ---
+  duration_ms: 0.546666
+  type: 'test'
+  ...
+# Subtest: PY2: paxRates cùng tiers → fail
+ok 218 - PY2: paxRates cùng tiers → fail
+  ---
+  duration_ms: 0.122042
+  type: 'test'
+  ...
+# Subtest: PY7: khoá con lạ trong paxRates → fail
+ok 219 - PY7: khoá con lạ trong paxRates → fail
+  ---
+  duration_ms: 0.145834
+  type: 'test'
+  ...
+# Subtest: PY7: amount hạng phụ âm → fail; 0 → hợp lệ
+ok 220 - PY7: amount hạng phụ âm → fail; 0 → hợp lệ
+  ---
+  duration_ms: 0.057541
+  type: 'test'
+  ...
+# Subtest: PY7: khoá lạ bên trong một hạng, note quá 40 ký tự → fail
+ok 221 - PY7: khoá lạ bên trong một hạng, note quá 40 ký tự → fail
+  ---
+  duration_ms: 0.051209
+  type: 'test'
+  ...
+# Subtest: PY4: tour trỏ đúng bookingRef.key có dòng giá tương ứng → passed true, không báo mồ côi
+ok 222 - PY4: tour trỏ đúng bookingRef.key có dòng giá tương ứng → passed true, không báo mồ côi
+  ---
+  duration_ms: 0.063708
+  type: 'test'
+  ...
+# Subtest: PY4: tour trỏ bookingRef.key không có dòng giá → passed false, báo trỏ hụt (không phải warn)
+ok 223 - PY4: tour trỏ bookingRef.key không có dòng giá → passed false, báo trỏ hụt (không phải warn)
+  ---
+  duration_ms: 0.092583
+  type: 'test'
+  ...
+# Subtest: PY5: tour có bookingRef.key hợp lệ, không isAccessibleForFree → passed true
+ok 224 - PY5: tour có bookingRef.key hợp lệ, không isAccessibleForFree → passed true
+  ---
+  duration_ms: 0.069375
+  type: 'test'
+  ...
+# Subtest: PY3: tour trỏ dòng giá unit=perRoomNight → passed false, thông điệp chứa perPax
+ok 225 - PY3: tour trỏ dòng giá unit=perRoomNight → passed false, thông điệp chứa perPax
+  ---
+  duration_ms: 0.147583
+  type: 'test'
+  ...
+# Subtest: DR-096: bookingRef object không có key (hoặc key rỗng) → coi như không có bookingRef, không nổ
+ok 226 - DR-096: bookingRef object không có key (hoặc key rỗng) → coi như không có bookingRef, không nổ
+  ---
+  duration_ms: 0.296959
+  type: 'test'
+  ...
+1..226
+# tests 226
+# suites 0
+# pass 226
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1454.685042
