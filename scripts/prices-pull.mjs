@@ -100,16 +100,22 @@ if (!VALID_UNITS.has(DON_VI_BAT_BUOC)) {
   throw new Error(`PY1 không còn nhận unit "${DON_VI_BAT_BUOC}" — Sheet 13 cột hết biểu diễn được giá.`)
 }
 
-const DANG_DON_VI_NHOM = /^per(\d+)pax$/
+const DANG_DON_VI_NHOM = /^per(\d+)pax$/i
 
 /**
  * Đọc ô `Đơn vị` của Sheet. Trả null nếu site chưa hỗ trợ đơn vị đó.
  * `per5pax` là ký hiệu CHỦ DỰ ÁN TỰ DÙNG trước khi có ai đặc tả (ADR-0033 §3) — giữ nguyên
  * ký hiệu ấy thay vì thêm một cột "Số khách mỗi lượt" vào bảng 13 cột. Chuỗi này không rời
  * khỏi biên Sheet: trong yaml nó thành hai khoá tường minh `unit` + `maxPax`.
+ *
+ * Khớp KHÔNG PHÂN BIỆT hoa/thường — người kinh doanh gõ tay, và `per5Pax` (P hoa) đã từng
+ * lọt qua luật cũ rồi bị BỎ QUA IM LẶNG vì so khớp chính xác hoa/thường. Nhưng giá trị TRẢ VỀ
+ * luôn CHUẨN HOÁ (`perPax` / `perGroup`) bất kể người gõ kiểu gì — thứ ghi vào prices.yaml
+ * không được phản ánh cách gõ của người dùng. Chỉ nới CHIỀU HOA/THƯỜNG, không nới hình dạng:
+ * `per5paxx`, `perpaxx` vẫn phải trượt null như trước.
  */
 export function docDonVi(s) {
-  if (s === DON_VI_BAT_BUOC) return { unit: 'perPax' }
+  if (String(s).toLowerCase() === DON_VI_BAT_BUOC.toLowerCase()) return { unit: 'perPax' }
   const m = DANG_DON_VI_NHOM.exec(s)
   if (m) {
     const maxPax = parseInt(m[1], 10)
