@@ -43,7 +43,7 @@ Bộ 5 entity của tourdao được giữ làm ví dụ tham chiếu ở `cms/e
 ## Có gì trong starter
 
 - Cấu hình + hạ tầng deploy: `astro.config.mjs`, `package.json`, `wrangler.toml`, `.nvmrc`, `tsconfig.json`, `.gitignore`, `.env.example`, workflow advisory, git pre-push hook.
-- Cổng `build:ci` với validator tối thiểu 3 kiểm ở `scripts/` (JSON-LD hợp lệ, reference không gãy, reviewStatus approved). Rule cụ thể khai ở `scripts/gate.config.ts`.
+- Cổng `build:ci` với validator tối thiểu 3 kiểm ở `scripts/` (JSON-LD hợp lệ, reference không gãy, reviewStatus approved). Rule cụ thể khai ở `scripts/gate.config.ts`. **Lưu ý — đây là mô tả starter lúc khởi tạo, không còn đúng với tourdaovn hôm nay:** ADR-0022 (2026-08-04) đã gỡ validator khỏi `build:ci`, xem mục [Cổng](#cổng) bên dưới.
 - `src/`: BaseLayout (SEO + JSON-LD head), client Sanity, ROUTE_MAP rỗng, helper JSON-LD guard rỗng, vài component nền (Header, Footer, Breadcrumb, Card, EmptyState), trang chủ/404/sitemap, design token trung lập.
 - `cms/`: Sanity Studio khung một ngôn ngữ, `baseFields` (slug, summary, ảnh, cổng reviewStatus), object `seo`, `schemas/index.ts` rỗng.
 - `data/prices.example.yaml`: seam giá (giá không nhập vào Sanity).
@@ -78,7 +78,9 @@ Validator vẫn còn nguyên, chỉ là gọi tay:
 
 Ba kiểm: V1 JSON-LD (quét `dist/`), V2 reference (deref được, đúng type đích), V3 governance (publish phải `reviewStatus == "approved"`, đủ field bắt buộc theo `scripts/gate.config.ts`).
 
-Muốn bật lại fail-closed: đổi `build:ci` về chuỗi đầy đủ **và** đổi build command trên Cloudflare Pages về `npm run build:ci` — thiếu bước thứ hai thì chuỗi chỉ nằm trên giấy.
+Muốn bật lại fail-closed: đổi `build:ci` về chuỗi đầy đủ **và** đổi build command trên **Cloudflare Workers Builds** về `npm run build:ci` — thiếu bước thứ hai thì chuỗi chỉ nằm trên giấy.
+
+> tourdao.vn phát hành bằng **Workers Builds** (nối git tới nhánh `main`), không phải Cloudflare Pages — `wrangler.toml` khai Worker + `[assets]`, xem `BUILD-NOTES.md` mục "Có đường thứ hai: Cloudflare tự dựng từ GitHub". Dòng 3 và 66 nói "Pages" là mô tả starter/runbook cho site mới, không phải site này.
 
 ## Tài liệu quyết định (ADR)
 

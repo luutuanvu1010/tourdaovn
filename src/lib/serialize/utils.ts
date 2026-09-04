@@ -76,23 +76,27 @@ export function urlForEntity(
   lang?: Lang
 ): string {
   const base = baseUrl.replace(/\/$/, '')
+  // Chuẩn hoá slug đối xứng với base. Slug đến từ Sanity nên có thể mang dấu
+  // "/" thừa; ghép thẳng sẽ sinh "//" và làm hỏng @id của JSON-LD — đã xảy ra
+  // thật với một article và lên tới production (xem test đi kèm).
+  const seg = slug.replace(/^\/+|\/+$/g, '')
   const path = pathForEntity(entityType, lang)
 
   if (entityType === 'touristDestination') {
-    if (lang && lang !== 'vi') return `${base}/${lang}/${slug}/`
-    return `${base}/${slug}/`
+    if (lang && lang !== 'vi') return `${base}/${lang}/${seg}/`
+    return `${base}/${seg}/`
   }
 
   if (entityType === 'category') {
     // Trang listing term
-    if (lang && lang !== 'vi') return `${base}/${lang}/${path}/${slug}/`
-    return `${base}/${path}/${slug}/`
+    if (lang && lang !== 'vi') return `${base}/${lang}/${path}/${seg}/`
+    return `${base}/${path}/${seg}/`
   }
 
   if (lang && lang !== 'vi') {
-    return `${base}/${lang}/${path}/${slug}/`
+    return `${base}/${lang}/${path}/${seg}/`
   }
-  return `${base}/${path}/${slug}/`
+  return `${base}/${path}/${seg}/`
 }
 
 // ---------- JSON-LD root ----------
