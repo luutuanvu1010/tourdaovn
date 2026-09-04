@@ -1,5 +1,5 @@
 // Đơn vị giá — enum đóng khớp SAD §3.1
-export type PriceUnit = 'perPax' | 'perRoomNight' | 'perTicket'
+export type PriceUnit = 'perPax' | 'perRoomNight' | 'perTicket' | 'perGroup'
 
 // Hạng khách cho form đặt tour (SPEC-2026-08-21-dat-tour §4.2, ADR-0027).
 export type PaxCode = 'adult' | 'child' | 'senior' | 'infant'
@@ -11,6 +11,9 @@ export type PriceEntry =
   | { unit: 'perPax'; tiers: { maxPax: number; amount: number }[] }
   | { unit: 'perRoomNight'; from: number; asOf: string }
   | { unit: 'perTicket'; tickets: { name: string; amount: number }[] }
+  // ADR-0033 §2: một giá cho cả nhóm, tối đa maxPax khách. `amount` là giá MỘT LƯỢT,
+  // KHÔNG phải giá mỗi người — đừng nhân với số khách.
+  | { unit: 'perGroup'; amount: number; maxPax: number }
 
 export type Offer = {
   price: number

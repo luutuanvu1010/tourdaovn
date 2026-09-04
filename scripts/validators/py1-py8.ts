@@ -1,12 +1,13 @@
 import type { PriceEntry } from '../lib/price-loader.js'
 import type { ValidatorResult } from './i1-i19.js'
 
-export const VALID_UNITS = new Set(['perPax', 'perRoomNight', 'perTicket'])
+export const VALID_UNITS = new Set(['perPax', 'perRoomNight', 'perTicket', 'perGroup'])
 const COMMERCIAL_TYPES = new Set(['experience', 'tour', 'hotel', 'resort', 'attraction', 'event'])
 const ALLOWED_TOP_KEYS: Record<string, Set<string>> = {
   perPax: new Set(['unit', 'amount', 'tiers', 'paxRates']),   // paxRates — ADR-0027
   perRoomNight: new Set(['unit', 'from', 'asOf']),
   perTicket: new Set(['unit', 'tickets']),
+  perGroup: new Set(['unit', 'amount', 'maxPax']),        // ADR-0033
 }
 const ALLOWED_TIER_KEYS = new Set(['maxPax', 'amount'])
 const ALLOWED_TICKET_KEYS = new Set(['name', 'amount'])
@@ -28,7 +29,7 @@ export function validatePY1(prices: Map<string, PriceEntry>): ValidatorResult {
   const errors: string[] = []
   for (const [key, entry] of prices) {
     if (!VALID_UNITS.has(entry.unit)) {
-      errors.push(`${key}: unit="${entry.unit}" không thuộc enum [perPax, perRoomNight, perTicket] (PY1)`)
+      errors.push(`${key}: unit="${entry.unit}" không thuộc enum [perPax, perRoomNight, perTicket, perGroup] (PY1)`)
     }
   }
   return { passed: errors.length === 0, errors }
@@ -91,6 +92,20 @@ export function validatePY2(prices: Map<string, PriceEntry>): ValidatorResult {
           if (typeof t.amount !== 'number') {
             errors.push(`${key}: tickets[${i}] thiếu amount (PY2)`)
           }
+        }
+      }
+    } else if (entry.unit === 'perGroup') {
+      if (typeof (entry as any).amount !== 'number') {
+        errors.push(`${key}: perGroup thiếu amount (PY2)`)
+      }
+      if (typeof (entry as any).maxPax !== 'number') {
+        errors.push(`${key}: perGroup thiếu maxPax (PY2)`)
+      }
+      // Tập khoá đóng {unit, amount, maxPax} — perGroup không có tiers/paxRates như perPax.
+      const allowedGroupKeys = ALLOWED_TOP_KEYS.perGroup
+      for (const k of Object.keys(entry as any)) {
+        if (!allowedGroupKeys.has(k)) {
+          errors.push(`${key}: perGroup có khóa lạ "${k}" — tập khoá đóng {unit, amount, maxPax} (PY2)`)
         }
       }
     }
@@ -284,6 +299,16 @@ export function validatePY7(prices: Map<string, PriceEntry>): ValidatorResult {
             errors.push(`${key}: tickets[${i}].amount=${a} không phải số nguyên dương VND (PY7)`)
           }
         }
+      }
+    } else if (entry.unit === 'perGroup') {
+      const a = raw.amount
+      if (typeof a === 'number' && (!Number.isInteger(a) || a <= 0)) {
+        errors.push(`${key}: amount=${a} không phải số nguyên dương VND (PY7)`)
+      }
+      // maxPax <= 0 là FAIL, không phải warn: soLuot = ceil(n / maxPax) sẽ ra Infinity.
+      const mp = raw.maxPax
+      if (typeof mp === 'number' && (!Number.isInteger(mp) || mp <= 0)) {
+        errors.push(`${key}: maxPax=${mp} phải là số nguyên dương (PY7)`)
       }
     }
   }
