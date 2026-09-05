@@ -330,3 +330,97 @@ nơi nào khác cần nhãn "Giá từ" trước khi xoá khoá dịch.
 `BreadcrumbList`. Y hệt ca `organization` đã chữa ngày 31/08 bằng
 `SPEC-2026-08-31-trang-danh-sach-cong-ty.md`. Chữa bằng cách mở `/tac-gia/` (bật `hasIndex`)
 hoặc cho `Breadcrumb` kiểm `hasIndex`. Cố ý KHÔNG gộp vào đợt 31/08 để giữ phạm vi.
+
+### B-024 — JSON-LD của giá nhóm phát giá TRẦN, không nói đó là giá cả nhóm · `mở`
+
+`src/lib/resolver.ts:83-92` nhánh `perGroup` phát `offers: [{ price: entry.amount, priceCurrency:
+'VND' }]` — không gì đánh dấu 1.000.000₫ là giá **một lượt tối đa 5 khách**. Máy đọc (Google) có
+thể hiển thị nó như giá đầu người.
+
+**Đã kích hoạt, không còn là rủi ro tương lai:** `phao-chuoi` chạy thật từ 2026-09-04 21:08. Kiểm:
+`curl -s https://tourdao.vn/trai-nghiem/phao-chuoi/ | grep -o '"price":1000000'`.
+
+Nghịch lý đáng ghi: nhãn cho **người** đọc đã nói rõ (`1.000.000₫/lượt · tối đa 5 khách`,
+`uiCopy.ts:1147`) — chỉ bề mặt **máy** đọc là trần. Sửa cần quyết định về schema.org
+(`eligibleQuantity` hay `priceSpecification`), là thiết kế chứ không phải vá cơ giới → cần ADR
+hoặc phiếu. Xem `ADR-0033` §Hệ quả.
+
+### B-025 — `PY1`–`PY8` khai `live` nhưng không chạy trên đường tự động nào · `mở`
+
+Chuỗi đã truy từng mắt: `scripts/validators/py1-py8.ts:318` khai PY4 mức fail ← chỉ
+`scripts/validate-constraints.ts:9,88` nạp `PY_VALIDATORS` ← chỉ `scripts/package.json:6`
+(`validate`) ← chỉ `package.json:12` (`build:strict`).
+
+Mà `npm run gate` = `astro check && run-gates.mjs post spec`, và danh sách ở
+`scripts/run-gates.mjs:33-58` **không có** `py1-py8`. `.githooks/pre-push` chạy đúng `npm run gate`.
+Cloudflare chạy `build:ci` = `astro check && astro build`. Trong khi `control-registry.yaml:348-355`
+khai PY4 `status: live`.
+
+Hậu quả đo được ngày 2026-09-04: gắn `bookingRef.key` **trỏ nhầm sang một dòng giá có thật** thì
+mọi cổng xanh mà trang hiện giá của sản phẩm khác. `data/prices.yaml` đang có
+`tour-snorkeling-nha-trang` nằm cạnh `snorkeling-nha-trang` — đúng cặp dễ nhầm.
+`git diff data/prices.yaml` **không** bắt được: diff không cho biết Studio trỏ vào đâu.
+
+Cùng đường vắng mặt: `npm test` (vitest, 204 ca) cũng không nằm trong `gate` lẫn pre-push.
+
+### B-026 — hai trang bán cùng một sản phẩm, nay CẢ HAI nhận đơn được · `mở`
+
+`/trai-nghiem/phao-chuoi/` và `/trai-nghiem/phao-bay-flying-banana-boat/` là **một hoạt động**
+(chủ dự án xác nhận 2026-09-04), cùng trỏ khoá `phao-chuoi`, và từ 21:08 cả hai đều có form.
+
+Đo: `curl -s https://tourdao.vn/trai-nghiem/phao-bay-flying-banana-boat/ | grep -c 'id="dat-tour"'`
+→ 1. Đơn về mang hai `tour_slug` khác nhau cho cùng một hoạt động → thống kê không cộng được, và
+khách đặt ở trang nào cũng đúng nên không ai phát hiện.
+
+Trước 2026-09-04 đây chỉ là nội dung trùng; nay là **dữ liệu đơn hàng phân mảnh**. Chữa bằng cách
+gộp hai document trong Studio (giữ một, gỡ xuất bản một) — việc nội dung, không phải việc mã.
+
+### B-027 — bản dịch form đặt chỗ thủng loang lổ ở zh/ko/ru · `mở`
+
+`src/lib/uiCopy.ts`: `bookingPayTransfer` dịch đủ 5 thứ tiếng (`:100,313,514,715,916`), nhưng
+`paxAdult`, `paxGuests`, `bookingPickup`, `bookingSubtotalNote` ở zh/ko/ru vẫn là **chuỗi tiếng
+Anh** (`:486-490,687-691,888-892`).
+
+Nợ có sẵn từ trước đợt 2026-09-04; đợt đó chỉ **chạm vào** nhóm thủng (nhãn ô đếm đổi sang
+`paxGuests`), không làm rộng thêm. Khách Trung/Hàn/Nga đọc form thấy nửa tiếng mình nửa tiếng Anh.
+
+### B-028 — `PY7` không tự chặt, phụ thuộc `PY2` chạy cùng · `mở`
+
+`scripts/validators/py1-py8.ts:303-312` nhánh `perGroup` chỉ xét sai kiểu **khi giá trị đã là
+số** (`typeof a === 'number' && …`). Nên `maxPax: "5"` (chuỗi) **lọt PY7**, chỉ bị chặn ở PY2
+(`:98-103`). Cổng tổng vẫn chặn được vì cả hai ở mức fail — nhưng đó là **độ chặt hợp thành**,
+không phải PY7 đứng một mình.
+
+Ba đơn vị giá cũ cũng viết y hệt — không phải khuyết tật riêng của `perGroup`. Rủi ro: ai tách
+chạy riêng PY7 (gỡ lỗi, hoặc một cổng khác chỉ gọi PY7) sẽ tưởng nó đủ. Cùng chỗ: thiếu test cho
+`unit: 'PerGroup'` sai hoa/thường (cơ chế đã chặn đúng qua `Set.has`, chỉ thiếu ca canh).
+
+### B-029 — hai `Record<ProductType,string>` trùng giá trị ở hai module · `mở`
+
+`src/lib/booking/notify/format.ts` (`NHAN_LOAI`) và `src/lib/booking/handler.ts` (`NHAN_TRANG`)
+khai hai bảng tra **giá trị giống hệt nhau** cho cùng một kiểu `ProductType`. Nên gom về
+`schema.ts` — nơi `ProductType` đã sống.
+
+Cùng nhóm dọn tên, đều do brief chép sẵn nên không phải lỗi người thi công:
+- `src/lib/booking/schema.ts:53` `docProductType` — "doc" không tự giải thích, khác quy ước
+  `str`/`int`/`pick`/`clean` cùng file.
+- `src/lib/booking/html.ts:6` tham số `backLabel` chỉ chứa danh từ trần ("tour"/"trải nghiệm"),
+  template ghép `Về trang ${backLabel}` — tên gợi ý sai, dễ khiến người gọi sau truyền cả cụm.
+
+### B-030 — `git commit` gom cả index khi hai phiên dùng chung thư mục · `mở`
+
+`.githooks` có `block-git-add-all.sh` chặn `git add -A`/`--all`/`.`, nhưng **`git commit` vẫn gom
+toàn bộ index** bất kể cờ nào. Xảy ra thật ngày 2026-09-04: commit `7a07fa4` (chỉ định `git add`
+đúng một file) cuốn theo hai file một phiên Claude khác đang stage —
+`docs/evidence/2026-09-04-ra-soat-tu-dong-hoa/report.{json,md}`. Kiểm:
+`git show --stat 7a07fa4` ra 3 file thay vì 1.
+
+Chữa được ở ba mức, chưa quyết mức nào: (a) tài liệu — soi `git status` trước mỗi commit; (b) hook
+`pre-commit` cảnh báo khi index chứa file ngoài phạm vi lệnh `add` gần nhất; (c) đổi quy ước sang
+`git commit -o <path>` (chỉ commit đường dẫn nêu tên, bỏ qua index).
+
+Cùng gốc rủi ro thư mục dùng chung: ngày 2026-09-04 một migration D1 (`0003_product_type`) được áp
+lên **remote production** lúc 09:46 mà phiên điều phối không hề gọi `wrangler` — không truy được
+tác nhân nào chạy. Vô hại lần này (thao tác bồi, `DEFAULT 'tour'`, 7 đơn cũ nguyên vẹn), nhưng cho
+thấy điểm dừng của phiên điều phối **không chặn được tác nhân con**: brief giao subagent cần cấm
+rõ `wrangler … --remote`, `d1 execute`, `deploy`, chứ không chỉ im lặng không nhắc.

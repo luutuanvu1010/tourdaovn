@@ -10,8 +10,8 @@ describe('computeQuote', () => {
     const q = computeQuote(flat, { adult: 2, child: 1, senior: 0, infant: 0 })
     expect(q?.total).toBe(1450000)
     expect(q?.lines).toEqual([
-      { code: 'adult', count: 2, amount: 550000, subtotal: 1100000 },
-      { code: 'child', count: 1, amount: 350000, subtotal: 350000 },
+      { code: 'adult', count: 2, amount: 550000, subtotal: 1100000, goc: 550000, subtotalGoc: 1100000 },
+      { code: 'child', count: 1, amount: 350000, subtotal: 350000, goc: 350000, subtotalGoc: 350000 },
     ])
     expect(q?.perPax).toEqual({ adult: 550000, child: 350000 })
   })
@@ -22,13 +22,13 @@ describe('computeQuote', () => {
     const t: PriceTable = { kind: 'flat', perPax: { adult: 500000, infant: 0 } }
     const q = computeQuote(t, { adult: 1, child: 0, senior: 0, infant: 1 })
     expect(q?.total).toBe(500000)
-    expect(q?.lines[1]).toEqual({ code: 'infant', count: 1, amount: 0, subtotal: 0 })
+    expect(q?.lines[1]).toEqual({ code: 'infant', count: 1, amount: 0, subtotal: 0, goc: 0, subtotalGoc: 0 })
   })
   it('tiers: chọn bậc nhỏ nhất đủ chỗ, nhân tổng khách', () => {
     const q = computeQuote(tiers, { adult: 3, child: 0, senior: 0, infant: 0 })
     expect(q?.total).toBe(2700000)
     expect(q?.perPax).toEqual({ adult: 900000 })
-    expect(q?.lines).toEqual([{ code: 'adult', count: 3, amount: 900000, subtotal: 2700000 }])
+    expect(q?.lines).toEqual([{ code: 'adult', count: 3, amount: 900000, subtotal: 2700000, goc: 900000, subtotalGoc: 2700000 }])
   })
   it('tiers: vượt bậc cao nhất → null', () => {
     expect(computeQuote(tiers, { adult: 7, child: 0, senior: 0, infant: 0 })).toBeNull()
@@ -193,6 +193,22 @@ describe('ưu đãi thanh toán trước', () => {
     expect(q?.total).toBe(409000 * 2 + 323000)
     expect(q?.prepay?.totalGoc).toBe(430000 * 2 + 340000)
   })
+  // 05/09: nút "Chi tiết" in thành tiền từng hạng TRƯỚC ưu đãi (chủ dự án chốt). Giao diện không được
+  // tự nhân, nên từng dòng phải mang sẵn `goc` (đơn giá đã áp mùa, chưa trừ ưu đãi) và `subtotalGoc`.
+  it('từng dòng mang goc/subtotalGoc = giá TRƯỚC ưu đãi; cộng lại đúng bằng totalGoc', () => {
+    const pax: PaxCounts = { adult: 2, child: 1, senior: 0, infant: 0 }
+    const q = computeQuote(FLAT, pax, { prepayPercent: 5, prepay: true })
+    expect(q?.lines.map(l => [l.goc, l.subtotalGoc])).toEqual([[430000, 860000], [340000, 340000]])
+    expect(q?.lines.reduce((s, l) => s + l.subtotalGoc, 0)).toBe(q?.prepay?.totalGoc)
+  })
+  it('goc đã gồm mùa nhưng chưa trừ ưu đãi: 430.000 +15% → goc 495.000, amount 470.000', () => {
+    const q = computeQuote(FLAT, MOT, { seasons: [HE], departDate: '2027-07-01', prepayPercent: 5, prepay: true })
+    expect(q?.lines[0]).toMatchObject({ amount: 470000, subtotal: 470000, goc: 495000, subtotalGoc: 495000 })
+  })
+  it('không ưu đãi → goc trùng amount, subtotalGoc trùng subtotal', () => {
+    const q = computeQuote(FLAT, MOT, { seasons: [HE], departDate: '2027-07-01' })
+    expect(q?.lines[0]).toMatchObject({ amount: 495000, goc: 495000, subtotal: 495000, subtotalGoc: 495000 })
+  })
 
   it('bảng tiers cũng được giảm', () => {
     const T: PriceTable = { kind: 'tiers', tiers: [{ maxPax: 4, amount: 1200000 }] }
@@ -231,7 +247,13 @@ describe('computeQuote — perGroup', () => {
   it('30 khách = 6 lượt', () => {
     const q = computeQuote(group, { adult: 30, child: 0, senior: 0, infant: 0 })
     expect(q?.total).toBe(6000000)
-    expect(q?.lines[0]).toEqual({ code: 'adult', count: 6, amount: 1000000, subtotal: 6000000, unit: 'luot' })
+    expect(q?.lines[0].goc).toBe(1000000); expect(q?.lines[0].subtotalGoc).toBe(6000000)
+    expect(q?.lines[0]).toEqual({ code: 'adult', count: 6, amount: 1000000, subtotal: 6000000, goc: 1000000, subtotalGoc: 6000000, unit: 'luot' })
+  })
+  it('perGroup + ưu đãi 5%: goc giữ 1.000.000/lượt, amount 950.000/lượt; 6 khách → 2 lượt', () => {
+    const q = computeQuote(group, { adult: 6, child: 0, senior: 0, infant: 0 }, { prepayPercent: 5, prepay: true })
+    expect(q?.lines[0]).toMatchObject({ count: 2, amount: 950000, subtotal: 1900000, goc: 1000000, subtotalGoc: 2000000, unit: 'luot' })
+    expect(q?.prepay?.totalGoc).toBe(2000000)
   })
   it('perPax phải RỖNG — không bịa ra một con số "mỗi người"', () => {
     // Đây chính là lỗi đã loại `tiers` vì nó (quote.ts:82 trả perPax:{adult}).

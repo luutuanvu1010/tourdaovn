@@ -90,6 +90,12 @@ Nhóm cần tổng quát hóa (có GHI CHÚ CORE — nguyên tắc engine, hằn
   đảo ADR-0031 §2. Khuôn tái dùng: (a) sự thật tiền sống trong sổ cái chỉ-thêm, không phải một
   cột boolean; (b) nhà cung cấp dữ liệu ngân hàng là chi tiết thay được sau một hợp đồng dữ
   liệu của riêng mình; (c) trạng thái và hết hạn là thứ suy ra lúc đọc, không phải thứ lưu.
+- [ADR-0034](ADR-0034-the-chi-tiet-form-dat-cho.md) — **Thẻ Chi tiết của form đặt chỗ**: ba dòng
+  Tạm tính · Ưu đãi · Tổng tiền, nút "Chi tiết" mở ra thành tiền từng hạng theo giá gốc; `QuoteLine`
+  mang `goc`/`subtotalGoc` để giao diện không phải nhân. Khuôn tái dùng: (a) một con số một tên,
+  phân rã đứng sau nút gập; (b) muốn hiện số mới thì bộ tính giá trả sẵn; (c) trạng thái hiển thị
+  theo dữ liệu đi bằng lớp CSS server đặt + JS lật, không :empty/:has() trên Astro.
+
 
 ## ADR gốc KHÔNG mang vào Core (và vì sao)
 
